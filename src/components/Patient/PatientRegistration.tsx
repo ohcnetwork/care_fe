@@ -75,6 +75,9 @@ export const BLOOD_GROUPS = BLOOD_GROUP_CHOICES.map((bg) => bg.id) as [
 export default function PatientRegistration(
   props: PatientRegistrationPageProps,
 ) {
+  const { enableMinimalPatientRegistration = false } = careConfig as {
+    enableMinimalPatientRegistration?: boolean;
+  };
   const [{ phone_number }] = useQueryParams();
   const { patientId, facilityId } = props;
   const { t } = useTranslation();
@@ -109,20 +112,27 @@ export default function PatientRegistration(
         .min(1, t("age_must_be_positive"))
         .max(120, t("age_must_be_below_120"))
         .optional(),
-      address: z.string().nonempty(t("address_is_required")),
+      address: enableMinimalPatientRegistration
+        ? z.string().optional()
+        : z.string().nonempty(t("address_is_required")),
       same_address: z.boolean(),
-      permanent_address: z.string().nonempty(t("field_required")),
-      pincode: z
-        .number()
-        .int()
-        .positive()
-        .min(100000, t("pincode_must_be_6_digits"))
-        .max(999999, t("pincode_must_be_6_digits")),
+      permanent_address: enableMinimalPatientRegistration
+        ? z.string().optional()
+        : z.string().nonempty(t("field_required")),
+      pincode: enableMinimalPatientRegistration
+        ? z.number().int().positive().optional()
+        : z
+            .number()
+            .int()
+            .positive()
+            .min(100000, t("pincode_must_be_6_digits"))
+            .max(999999, t("pincode_must_be_6_digits")),
       nationality: z.string().nonempty(t("nationality_is_required")),
-      geo_organization: z
-        .string()
-        .uuid({ message: t("geo_organization_is_required") })
-        .optional(),
+      geo_organization: z.string().uuid({
+        message: enableMinimalPatientRegistration
+          ? t("minimal_patient_registration_geo_organization_required")
+          : t("geo_organization_is_required"),
+      }),
       _selected_levels: z.array(z.custom<Organization>()),
       _is_deceased: z.boolean(),
     })
@@ -153,8 +163,17 @@ export default function PatientRegistration(
           path: ["geo_organization"],
         });
       }
-      if (data.deceased_datetime) {
+      if (
+        data.deceased_datetime &&
+        typeof data.deceased_datetime === "string"
+      ) {
         const deathDate = dayjs(data.deceased_datetime);
+
+        const dob =
+          data.date_of_birth && typeof data.date_of_birth === "string"
+            ? dayjs(data.date_of_birth)
+            : dayjs().subtract(data.age || 0, "years");
+
         if (!deathDate.isValid()) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -165,10 +184,6 @@ export default function PatientRegistration(
           });
           return;
         }
-
-        const dob = data.date_of_birth
-          ? dayjs(data.date_of_birth)
-          : dayjs().subtract(data.age || 0, "years");
 
         if (
           data.date_of_birth
@@ -734,7 +749,11 @@ export default function PatientRegistration(
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel aria-required>{t("current_address")}</FormLabel>
+                    <FormLabel
+                      aria-required={!enableMinimalPatientRegistration}
+                    >
+                      {t("current_address")}
+                    </FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
@@ -790,7 +809,9 @@ export default function PatientRegistration(
                 disabled={form.watch("same_address")}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel aria-required>
+                    <FormLabel
+                      aria-required={!enableMinimalPatientRegistration}
+                    >
                       {t("permanent_address")}
                     </FormLabel>
                     <FormControl>
@@ -806,7 +827,11 @@ export default function PatientRegistration(
                 name="pincode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel aria-required>{t("pincode")}</FormLabel>
+                    <FormLabel
+                      aria-required={!enableMinimalPatientRegistration}
+                    >
+                      {t("pincode")}
+                    </FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -863,7 +888,7 @@ export default function PatientRegistration(
                         <FormControl>
                           <GovtOrganizationSelector
                             {...field}
-                            required={true}
+                            required={!enableMinimalPatientRegistration}
                             selected={selectedLevels}
                             value={form.watch("geo_organization")}
                             onChange={(value) =>
