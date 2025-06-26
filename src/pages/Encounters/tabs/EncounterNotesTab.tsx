@@ -474,7 +474,10 @@ export const EncounterNotesTab = ({
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newMessage.trim() && selectedThread) {
+    e.stopPropagation();
+    const canSend =
+      newMessage.trim() && selectedThread && !createMessageMutation.isPending;
+    if (canSend) {
       createMessageMutation.mutate({ message: newMessage.trim() });
     }
   };
@@ -492,7 +495,7 @@ export const EncounterNotesTab = ({
   const totalMessages = messagesData?.pages[0]?.count ?? 0;
 
   return (
-    <div className="flex h-[calc(100vh-12rem)] overflow-hidden">
+    <div className="flex h-[calc(100vh-12rem)] overflow-hidden lg:h-[calc(80vh-12rem)]">
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-gray-200">
         <div className="p-4 border-b border-gray-200">
@@ -714,13 +717,10 @@ export const EncounterNotesTab = ({
                             onChange={(e) => setNewMessage(e.target.value)}
                             onKeyDown={(e) => {
                               if (e.key === "Enter" && e.shiftKey) {
-                                e.preventDefault();
-                                if (newMessage.trim()) {
-                                  handleSendMessage(e);
-                                }
+                                handleSendMessage(e);
                               }
                             }}
-                            className="flex-1 min-h-20 max-h-[50vh]"
+                            className="flex-1 min-h-10 max-h-[50vh]"
                           />
                           <Button
                             data-cy="send-chat-message-button"

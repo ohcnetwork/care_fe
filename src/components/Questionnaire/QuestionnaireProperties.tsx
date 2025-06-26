@@ -1,4 +1,5 @@
 import { Building, Tags, X } from "lucide-react";
+import { UseFormReturn, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -37,7 +38,7 @@ interface OrganizationResponse {
 }
 
 interface QuestionnairePropertiesProps {
-  questionnaire: QuestionnaireDetail;
+  form: UseFormReturn<QuestionnaireDetail>;
   updateQuestionnaireField: <K extends keyof QuestionnaireDetail>(
     field: K,
     value: QuestionnaireDetail[K],
@@ -248,19 +249,20 @@ function OrganizationSelector({
 function TagSelector({
   id,
   selection,
-  questionnaire,
+  form,
 }: {
   id?: string;
   selection: QuestionnairePropertiesProps["tagSelection"];
-  questionnaire: QuestionnaireDetail;
+  form: UseFormReturn<QuestionnaireDetail>;
 }) {
   const { t } = useTranslation();
+  const tags = useWatch({ control: form.control, name: "tags" });
 
   if (id) {
     return (
       <>
         <div className="flex flex-wrap gap-2 mb-2">
-          {questionnaire.tags.map((tag) => (
+          {tags?.map((tag) => (
             <Badge
               key={tag.id}
               variant="secondary"
@@ -270,12 +272,12 @@ function TagSelector({
               {tag.name}
             </Badge>
           ))}
-          {questionnaire.tags.length === 0 && (
+          {tags?.length === 0 && (
             <p className="text-sm text-gray-500">{t("no_tags_selected")}</p>
           )}
         </div>
         <ManageQuestionnaireTagsSheet
-          questionnaire={questionnaire}
+          form={form}
           trigger={
             <Button variant="outline" className="w-full justify-start">
               <Tags className="mr-2 size-4" />
@@ -341,7 +343,7 @@ function TagSelector({
 }
 
 export function QuestionnaireProperties({
-  questionnaire,
+  form,
   updateQuestionnaireField,
   id,
   organizations,
@@ -349,6 +351,8 @@ export function QuestionnaireProperties({
   tagSelection,
 }: QuestionnairePropertiesProps) {
   const { t } = useTranslation();
+  const status = useWatch({ control: form.control, name: "status" });
+  const subjectType = useWatch({ control: form.control, name: "subject_type" });
 
   return (
     <Card className="border-none bg-transparent shadow-none space-y-4 mt-2 ml-2">
@@ -357,12 +361,12 @@ export function QuestionnaireProperties({
       </CardHeader>
       <CardContent className="space-y-6 p-0">
         <StatusSelector
-          value={questionnaire.status}
+          value={status}
           onChange={(val) => updateQuestionnaireField("status", val)}
         />
 
         <SubjectTypeSelector
-          value={questionnaire.subject_type}
+          value={subjectType}
           onChange={(val) => updateQuestionnaireField("subject_type", val)}
         />
 
@@ -378,15 +382,11 @@ export function QuestionnaireProperties({
         </div>
         <div className="space-y-2">
           <Label>{t("tags")}</Label>
-          <TagSelector
-            id={id}
-            selection={tagSelection}
-            questionnaire={questionnaire}
-          />
+          <TagSelector id={id} selection={tagSelection} form={form} />
         </div>
         {id && (
           <CloneQuestionnaireSheet
-            questionnaire={questionnaire}
+            form={form}
             trigger={
               <Button variant="outline" className="w-full justify-start">
                 <CareIcon icon="l-copy" className="mr-2 size-4" />
@@ -400,7 +400,7 @@ export function QuestionnaireProperties({
           <Label htmlFor="version">{t("version")}</Label>
           <Input
             id="version"
-            value={questionnaire.version || "0.0.1"}
+            value={form.getValues("version") || "0.0.1"}
             disabled={true}
             onChange={(e) =>
               updateQuestionnaireField("version", e.target.value)

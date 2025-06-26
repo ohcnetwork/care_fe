@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Building, Check, ChevronsUpDown, Loader2, X } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useState } from "react";
+import { UseFormReturn, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -39,18 +40,17 @@ import type { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 interface Props {
-  questionnaire: QuestionnaireDetail;
+  form: UseFormReturn<QuestionnaireDetail>;
   trigger?: React.ReactNode;
 }
 
-export default function CloneQuestionnaireSheet({
-  questionnaire,
-  trigger,
-}: Props) {
+export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [newSlug, setNewSlug] = useState(questionnaire.slug + "-copy");
+  const slug = useWatch({ control: form.control, name: "slug" });
+  const tags = useWatch({ control: form.control, name: "tags" });
+  const [newSlug, setNewSlug] = useState(slug + "-copy");
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -90,13 +90,13 @@ export default function CloneQuestionnaireSheet({
     }
 
     const clonedQuestionnaire = {
-      ...questionnaire,
+      ...form.getValues(),
       slug: newSlug.trim(),
       id: undefined,
       status: "draft" as const,
-      title: `${questionnaire.title} (Clone)`,
+      title: `${form.getValues("title")} (Clone)`,
       organizations: selectedIds,
-      tags: questionnaire.tags.map((tag) => tag.id),
+      tags: tags.map((tag) => tag.id),
     };
 
     cloneQuestionnaire(clonedQuestionnaire);
@@ -239,7 +239,7 @@ export default function CloneQuestionnaireSheet({
               type="button"
               variant="outline"
               onClick={() => {
-                setNewSlug(questionnaire.slug + "-copy");
+                setNewSlug(slug + "-copy");
                 setSelectedIds([]);
                 setError(null);
                 setOpen(false);

@@ -152,10 +152,7 @@ export class PatientDepartments {
   }
 
   openDepartmentsTeamFirstRandomDetails() {
-    cy.get('[data-cy="department-team-list"]')
-      .first()
-      .contains("See Details")
-      .click();
+    cy.get('[data-cy="department-team-list"]').first().click();
     return this;
   }
 
