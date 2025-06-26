@@ -605,6 +605,21 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     return !hasError;
   };
 
+  const findFirstGroupErrorPath = (
+    errors: any,
+    path: number[] = [],
+  ): number[] | null => {
+    if (!Array.isArray(errors)) return null;
+    for (let i = 0; i < errors.length; i++) {
+      const err = errors[i];
+      if (err?.questions?.message) {
+        return [...path, i];
+      }
+      const subPath = findFirstGroupErrorPath(err?.questions, [...path, i]);
+      if (subPath) return subPath;
+    }
+    return null;
+  };
   const handleSave = async () => {
     let isValid = await form.trigger();
     const hasOrganizations = validateOrganizations();
@@ -615,14 +630,15 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         | any[]
         | undefined;
       if (questionsErrors) {
-        const firstGroupErrorIndex = questionsErrors.findIndex(
-          (q) => q?.questions?.message,
-        );
-        if (firstGroupErrorIndex !== -1) {
-          const errorQuestion = rootQuestions[firstGroupErrorIndex];
-          if (errorQuestion) {
+        const errorPath = findFirstGroupErrorPath(questionsErrors);
+        if (errorPath) {
+          let question: Question | undefined = rootQuestions[errorPath[0]];
+          for (let i = 1; i < errorPath.length; i++) {
+            question = question?.questions?.[errorPath[i]];
+          }
+          if (question) {
             const element = document.getElementById(
-              `question-${errorQuestion.link_id}`,
+              `question-${question.link_id}`,
             );
             if (element) {
               element.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1116,6 +1132,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               key={question.link_id}
                               question={question}
                               form={form}
+                              questionPath={[index]}
                               onChange={(updatedQuestion) => {
                                 const newQuestions = rootQuestions.map(
                                   (q, i) => (i === index ? updatedQuestion : q),
@@ -1429,6 +1446,7 @@ interface QuestionEditorProps {
   >;
   handleEnableWhenDependentClick: (path: string[], targetId: string) => void;
   expandPath?: string[];
+  questionPath?: number[];
 }
 
 function QuestionEditor({
@@ -1450,6 +1468,7 @@ function QuestionEditor({
   enableWhenDependencies,
   handleEnableWhenDependentClick,
   expandPath,
+  questionPath,
 }: QuestionEditorProps): React.ReactElement {
   const { t } = useTranslation();
   const {
@@ -1469,9 +1488,17 @@ function QuestionEditor({
     name: "questions",
   }) as Question[];
 
-  const groupError = (form.formState.errors.questions as any[] | undefined)?.[
-    index
-  ]?.questions;
+  const getGroupError = (errors: any, path: number[]) => {
+    let current = errors;
+    for (const idx of path) {
+      if (!current?.questions || !Array.isArray(current.questions))
+        return undefined;
+      current = current.questions[idx];
+    }
+    return current;
+  };
+
+  const groupError = getGroupError(form.formState.errors, questionPath || []);
   // Memoize answer options to ensure unique IDs to avoid unnecessary re-renders in value field of AnwserOption
 
   const annotatedAnswerOptions = useMemo(() => {
@@ -2570,9 +2597,9 @@ function QuestionEditor({
                   {t("add_sub_question")}
                 </Button>
               </div>
-              {groupError?.message && (
+              {groupError?.questions?.message && (
                 <div className="text-red-500 text-sm mb-2">
-                  {groupError.message}
+                  {groupError?.questions?.message}
                 </div>
               )}
               <div className="space-y-4">
@@ -2591,6 +2618,7 @@ function QuestionEditor({
                       index={idx}
                       key={subQuestion.link_id}
                       question={subQuestion}
+                      questionPath={[...(questionPath || []), idx]}
                       onChange={(updated) => {
                         const newQuestions = [...(questions || [])];
                         newQuestions[idx] = updated;
