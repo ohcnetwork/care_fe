@@ -1,14 +1,13 @@
 import dayjs from "dayjs";
-import DOMPurify from "dompurify";
-import MarkdownIt from "markdown-it";
 import { navigate } from "raviger";
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { Markdown } from "@/components/ui/markdown";
 
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 
@@ -35,63 +34,9 @@ export const Demography = (props: PatientProps) => {
   );
 
   const [activeSection, _setActiveSection] = useState<string | null>(null);
-
   const patientGender = GENDER_TYPES.find(
     (i) => i.id === patientData.gender,
   )?.text;
-
-  // Initialise markdown-it once
-  const md = useMemo(() => {
-    const markdownIt = new MarkdownIt({
-      linkify: true,
-      breaks: true,
-    });
-
-    // Store the original link renderer
-    const defaultRender =
-      markdownIt.renderer.rules.link_open ||
-      function (tokens, idx, options, env, renderer) {
-        return renderer.renderToken(tokens, idx, options);
-      };
-
-    // Override link rendering to add target="_blank"
-    markdownIt.renderer.rules.link_open = function (
-      tokens,
-      idx,
-      options,
-      env,
-      renderer,
-    ) {
-      const token = tokens[idx];
-
-      // Add target="_blank" and security attributes
-      token.attrSet("target", "_blank");
-      token.attrSet("rel", "noopener noreferrer");
-      token.attrSet(
-        "class",
-        "text-blue-600 hover:text-blue-800 underline break-all",
-      );
-
-      // Get the href - don't encode it
-      const href = token.attrGet("href");
-      if (href) {
-        token.attrSet("href", href);
-      }
-
-      return defaultRender(tokens, idx, options, env, renderer);
-    };
-
-    return markdownIt;
-  }, []);
-  // Simple utility function to render text with clickable URLs using markdown-it
-  const renderTextWithLinks = (text: string): React.ReactNode => {
-    if (!text) return null;
-
-    const rendered = DOMPurify.sanitize(md.renderInline(text), {
-      ALLOWED_ATTR: ["href", "target", "rel", "class"],
-    });
-    return <span dangerouslySetInnerHTML={{ __html: rendered }} />;
-  };
 
   const scrollToSection = (sectionId: string) => {
     const section = document.getElementById(sectionId);
@@ -247,11 +192,38 @@ export const Demography = (props: PatientProps) => {
         />,
         {
           label: t("current_address"),
-          value: renderTextWithLinks(patientData.address || ""),
+          value: (
+            <div
+              className="[&_a]:text-sky-600 [&_a]:underline [&_a]:hover:text-sky-300"
+              onClick={(e) => {
+                if (e.target instanceof HTMLAnchorElement && e.target.href) {
+                  e.preventDefault();
+                  window.open(e.target.href, "_blank", "noopener,noreferrer");
+                }
+              }}
+            >
+              <Markdown content={patientData.address || ""} prose={false} />
+            </div>
+          ),
         },
         {
           label: t("permanent_address"),
-          value: renderTextWithLinks(patientData.permanent_address || ""),
+          value: (
+            <div
+              className="[&_a]:text-sky-600 [&_a]:underline [&_a]:hover:text-sky-300"
+              onClick={(e) => {
+                if (e.target instanceof HTMLAnchorElement && e.target.href) {
+                  e.preventDefault();
+                  window.open(e.target.href, "_blank", "noopener,noreferrer");
+                }
+              }}
+            >
+              <Markdown
+                content={patientData.permanent_address || ""}
+                prose={false}
+              />
+            </div>
+          ),
         },
         ...getGeoOrgDetails(patientData.geo_organization),
       ],
