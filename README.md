@@ -52,7 +52,14 @@ Once the development server has started, open [localhost:4000](http://localhost:
 
 First, set up the CARE local backend by following the instructions in the [CARE Backend Documentation](https://care-be-docs.ohc.network/).
 
-Once you have the local backend running and load dummy data, you can use the following credentials to authenticate:
+Create a `.env.local` file in the root directory of the project :
+
+```env
+# Point the frontend to your local backend
+REACT_CARE_API_URL=http://127.0.0.1:8000
+```
+
+Once you have the local backend running and loaded dummy data, you can use the following credentials to authenticate:
 
 ```yaml
 # Default Local Backend Credentials
