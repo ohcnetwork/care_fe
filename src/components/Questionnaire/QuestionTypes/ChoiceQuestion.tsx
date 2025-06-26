@@ -117,7 +117,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
         <ValueSetSelect
           system={question.answer_value_set}
           value={currentCoding}
-          onSelect={handleCodingChange}
+          onSelect={(newValue) => handleCodingChange(newValue, 0)}
         ></ValueSetSelect>
       );
     }
