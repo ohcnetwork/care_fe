@@ -6,11 +6,7 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 
-export function ScrollToTopButton({
-  smRight = "sm:right-20",
-}: {
-  smRight?: string;
-}) {
+export function ScrollToTopButton({ right = 20 }: { right?: number }) {
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
   useEffect(() => {
@@ -24,6 +20,8 @@ export function ScrollToTopButton({
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  const smRight = right ? `sm:right-${right}` : "";
 
   if (!isVisible) return null;
 
