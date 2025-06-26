@@ -43,6 +43,8 @@ import { Code } from "@/types/questionnaire/code";
 import valuesetRoutes from "@/types/valueset/valuesetApi";
 
 interface Props {
+  isOpen?: boolean;
+  setIsOpen?: (isOpen: boolean) => void;
   system: string;
   value?: Code | null;
   onSelect: (value: Code) => void;
@@ -93,6 +95,8 @@ const Item = ({
 );
 
 export default function ValueSetSelect({
+  isOpen,
+  setIsOpen,
   system,
   value,
   onSelect,
@@ -107,7 +111,7 @@ export default function ValueSetSelect({
   asSheet = false,
 }: Props) {
   const { t } = useTranslation();
-  const [internalOpen, setInternalOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(isOpen || false);
   const [search, setSearch] = useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
   const [activeTab, setActiveTab] = useState(0);
@@ -209,6 +213,10 @@ export default function ValueSetSelect({
       return () => clearTimeout(timer);
     }
   }, [internalOpen, isMobile]);
+
+  useEffect(() => {
+    setIsOpen?.(true);
+  }, []);
 
   const content = (
     <Command filter={() => 1} className="rounded-t-3xl">
@@ -396,7 +404,9 @@ export default function ValueSetSelect({
           <Button
             variant="outline"
             role="combobox"
-            onClick={() => setInternalOpen(true)}
+            onClick={() => {
+              setInternalOpen(true);
+            }}
             className={cn(
               "w-full justify-between",
               wrapTextForSmallScreen
@@ -469,20 +479,22 @@ export default function ValueSetSelect({
       >
         {!hideTrigger && (
           <PopoverTrigger asChild disabled={disabled}>
-            <Button
-              variant="outline"
-              role="combobox"
-              className={cn(
-                "w-full justify-between",
-                wrapTextForSmallScreen
-                  ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
-                  : "truncate",
-                !value?.display && "text-gray-400",
-              )}
-            >
-              <span>{value?.display || placeholder}</span>
-              <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-            </Button>
+            <div className={cn(value?.display ? "w-full" : "w-205")}>
+              <Button
+                variant="outline"
+                role="combobox"
+                className={cn(
+                  "justify-between",
+                  wrapTextForSmallScreen
+                    ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
+                    : "truncate",
+                  !value?.display && "text-gray-400",
+                )}
+              >
+                <span>{value?.display || placeholder}</span>
+                <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+              </Button>
+            </div>
           </PopoverTrigger>
         )}
 

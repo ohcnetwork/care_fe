@@ -1,9 +1,13 @@
 import { t } from "i18next";
-import { memo } from "react";
+import { memo, useState } from "react";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import Autocomplete from "@/components/ui/autocomplete";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -47,7 +51,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
       : "radio";
   const currentValue = questionnaireResponse.values[index]?.value?.toString();
   const currentCoding = questionnaireResponse.values[index]?.coding;
-
+  const [isOpen, setIsOpen] = useState(false);
   const handleValueChange = (newValue: string) => {
     clearError();
     const newValues = [...questionnaireResponse.values];
@@ -60,10 +64,16 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
     );
   };
 
-  const handleCodingChange = (newValue: Code) => {
+  const handleCodingChange = (newValue: Code, idx: number) => {
     clearError();
     const newValues = [...questionnaireResponse.values];
-    newValues[index] = {
+
+    if (newValues.some((value) => value.coding?.code === newValue.code)) {
+      toast.error(t("value_already_selected"));
+      return;
+    }
+
+    newValues[idx] = {
       type: "quantity",
       coding: {
         code: newValue.code,
@@ -71,6 +81,10 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
         display: newValue.display,
       },
     };
+
+    if (idx === 0 || idx === questionnaireResponse.values.length - 1) {
+      newValues.push({ type: "string", value: "" });
+    }
 
     updateQuestionnaireResponseCB(
       newValues,
@@ -95,11 +109,53 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
 
   if (question.answer_value_set) {
     return (
-      <ValueSetSelect
-        system={question.answer_value_set}
-        value={currentCoding}
-        onSelect={handleCodingChange}
-      ></ValueSetSelect>
+      <>
+        {question.answer_value_set &&
+          (questionnaireResponse.values.length === 0 ? (
+            <div>
+              <ValueSetSelect
+                isOpen={isOpen}
+                system={question.answer_value_set}
+                value={currentCoding}
+                onSelect={(newValue) => handleCodingChange(newValue, 0)}
+                setIsOpen={setIsOpen}
+              />
+            </div>
+          ) : (
+            questionnaireResponse.values.map((value, idx) => {
+              return (
+                <div key={idx} className="flex items-center gap-2 mb-2">
+                  <div className="flex-1">
+                    <ValueSetSelect
+                      isOpen={isOpen}
+                      system={question.answer_value_set!}
+                      value={value.coding}
+                      onSelect={(newValue) => handleCodingChange(newValue, idx)}
+                      setIsOpen={setIsOpen}
+                    />
+                  </div>
+                  {idx != questionnaireResponse.values.length - 1 && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        const newValues = questionnaireResponse.values.filter(
+                          (_, i) => i !== idx,
+                        );
+                        updateQuestionnaireResponseCB(
+                          newValues,
+                          questionnaireResponse.question_id,
+                        );
+                      }}
+                    >
+                      <CareIcon icon="l-trash" className="size-4" />
+                    </Button>
+                  )}
+                </div>
+              );
+            })
+          ))}
+      </>
     );
   }
 
