@@ -142,20 +142,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     setDragState(initialDragState);
   }, [index, show]);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    const handler = (e: TouchEvent) => {
-      if (dragStateRef.current.isDragging) {
-        handleTouchMove(e as unknown as React.TouchEvent);
-      }
-    };
-    container.addEventListener("touchmove", handler, { passive: false });
-    return () => {
-      container.removeEventListener("touchmove", handler);
-    };
-  }, []);
-
   const handleZoomIn = () => {
     const checkFull = file_state.zoom === zoom_values.length;
     setFileState({
@@ -389,6 +375,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 onMouseLeave={handleMouseUp}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
+                onTouchMove={handleTouchMove}
               >
                 {file_state.isImage ? (
                   <div
