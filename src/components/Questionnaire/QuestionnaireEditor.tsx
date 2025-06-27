@@ -238,7 +238,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     Map<string, Set<{ question: Question; path: string[] }>>
   >(new Map());
   const [expandPath, setExpandPath] = useState<string[]>([]);
-  const isMobile = useBreakpoints({ default: true, sm: false });
+  const isMobile = useBreakpoints({ default: true, md: false });
   const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
     const errorData = (
       error as {
@@ -839,7 +839,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         </TabsList>
         <TabsContent value="edit">
           <div className="flex flex-col md:flex-row gap-2">
-            <div className="space-y-4 hidden sm:block sm:w-60 sticky top-4 self-start h-fit max-h-screen overflow-y-auto">
+            <div className="space-y-4 hidden md:block sm:w-60 sticky top-4 self-start h-fit max-h-screen overflow-y-auto">
               <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
                 <CardHeader className="p-0">
                   <CardTitle>{t("navigation")}</CardTitle>
@@ -1149,7 +1149,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 </form>
               </Form>
             </div>
-            <div className="space-y-4 w-60 hidden sm:block sticky top-4 self-start h-fit">
+            <div className="space-y-4 w-60 hidden md:block sticky top-4 self-start h-fit">
               <QuestionnaireProperties
                 form={form}
                 updateQuestionnaireField={updateQuestionnaireField}
