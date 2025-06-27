@@ -129,7 +129,7 @@ export default function Autocomplete({
       setInputValue("");
     }
 
-    onSearch?.("")
+    onSearch?.("");
 
     setOpen(false);
   };
