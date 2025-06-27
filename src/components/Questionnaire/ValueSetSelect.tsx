@@ -43,8 +43,6 @@ import { Code } from "@/types/questionnaire/code";
 import valuesetRoutes from "@/types/valueset/valuesetApi";
 
 interface Props {
-  isOpen?: boolean;
-  setIsOpen?: (isOpen: boolean) => void;
   system: string;
   value?: Code | null;
   onSelect: (value: Code) => void;
@@ -57,6 +55,7 @@ interface Props {
   controlledOpen?: boolean;
   title?: string;
   asSheet?: boolean;
+  closeOnSelect?: boolean;
 }
 
 const Item = ({
@@ -95,8 +94,6 @@ const Item = ({
 );
 
 export default function ValueSetSelect({
-  isOpen,
-  setIsOpen,
   system,
   value,
   onSelect,
@@ -107,11 +104,12 @@ export default function ValueSetSelect({
   wrapTextForSmallScreen = false,
   hideTrigger = false,
   controlledOpen = false,
+  closeOnSelect = true,
   title,
   asSheet = false,
 }: Props) {
   const { t } = useTranslation();
-  const [internalOpen, setInternalOpen] = useState(isOpen ?? false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
   const [activeTab, setActiveTab] = useState(0);
@@ -214,16 +212,6 @@ export default function ValueSetSelect({
     }
   }, [internalOpen, isMobile]);
 
-  useEffect(() => {
-    if (isOpen != undefined) {
-      setInternalOpen(isOpen);
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    setIsOpen?.(internalOpen);
-  }, [internalOpen]);
-
   const content = (
     <Command filter={() => 1} className="rounded-t-3xl">
       <div
@@ -284,7 +272,11 @@ export default function ValueSetSelect({
                       display: option.display || "",
                       system: option.system || "",
                     });
-                    setInternalOpen(false);
+                    if (closeOnSelect) {
+                      setInternalOpen(false);
+                    } else {
+                      inputRef.current?.focus();
+                    }
                     addRecentMutation.mutate(option);
                   }}
                   onFavourite={() => {
@@ -349,7 +341,11 @@ export default function ValueSetSelect({
                       display: option.display || "",
                       system: option.system || "",
                     });
-                    setInternalOpen(false);
+                    if (closeOnSelect) {
+                      setInternalOpen(false);
+                    } else {
+                      inputRef.current?.focus();
+                    }
                     addRecentMutation.mutate(option);
                   }}
                   onFavourite={() => {

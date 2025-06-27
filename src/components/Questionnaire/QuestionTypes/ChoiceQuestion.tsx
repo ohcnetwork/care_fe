@@ -1,5 +1,5 @@
 import { t } from "i18next";
-import { memo, useState } from "react";
+import { memo } from "react";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -48,7 +48,6 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
       : "radio";
   const currentValue = questionnaireResponse.values[index]?.value?.toString();
   const currentCoding = questionnaireResponse.values[index]?.coding;
-  const [isValueSetOpen, setIsValueSetOpen] = useState(false);
   const handleValueChange = (newValue: string) => {
     clearError();
     const newValues = [...questionnaireResponse.values];
@@ -155,16 +154,10 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
 
         <div>
           <ValueSetSelect
-            isOpen={isValueSetOpen}
-            setIsOpen={setIsValueSetOpen}
+            closeOnSelect={false}
             system={question.answer_value_set}
             value={null}
-            onSelect={(newValue) => {
-              handleCodingChange(newValue);
-              setTimeout(() => {
-                setIsValueSetOpen(true);
-              }, 100);
-            }}
+            onSelect={handleCodingChange}
           />
         </div>
       </>
