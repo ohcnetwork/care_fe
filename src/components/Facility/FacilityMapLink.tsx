@@ -30,7 +30,7 @@ export const FacilityMapsLink = ({
 
   return (
     <Link
-      className="text-primary hover:underline flex items-center gap-1 w-max"
+      className="text-primary hover:underline flex items-center gap-1"
       href={getMapUrl(latitude, longitude)}
       target={target}
       rel="noreferrer"
