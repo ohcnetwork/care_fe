@@ -308,7 +308,7 @@ export function MedicationStatementQuestion({
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-4xl">
       <AlertDialog
         open={medicationToDelete !== null}
         onOpenChange={(open) => !open && setMedicationToDelete(null)}
@@ -653,7 +653,7 @@ export function MedicationStatementQuestion({
       )}
 
       {desktopLayout ? (
-        <div className="max-w-4xl">
+        <div className="w-full">
           <ValueSetSelect
             system="system-medication"
             placeholder={addMedicationPlaceholder}

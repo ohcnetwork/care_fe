@@ -374,7 +374,7 @@ export function MedicationRequestQuestion({
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-4xl">
       <AlertDialog
         open={medicationToDelete !== null}
         onOpenChange={(open) => !open && setMedicationToDelete(null)}
@@ -739,7 +739,7 @@ export function MedicationRequestQuestion({
           {newMedicationSheetContent}
         </EntitySelectionSheet>
       ) : (
-        <div className="max-w-4xl" data-cy="add-medication-request">
+        <div className="w-full" data-cy="add-medication-request">
           <ValueSetSelect
             system="system-medication"
             placeholder={addMedicationPlaceholder}
