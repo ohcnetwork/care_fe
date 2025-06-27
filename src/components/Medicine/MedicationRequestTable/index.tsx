@@ -136,7 +136,6 @@ export default function MedicationRequestTable({ patient, encounter }: Props) {
       );
 
   const isLoading = loadingActive || loadingStopped;
-  const shouldShowAdd = !activeMedications?.results?.length && !showStopped;
 
   return (
     <div className="space-y-2">
@@ -198,12 +197,17 @@ export default function MedicationRequestTable({ patient, encounter }: Props) {
                       data-cy="edit-prescription"
                     >
                       <Link href={`questionnaire/medication_request`}>
-                        {shouldShowAdd ? (
-                          <PlusIcon className="mr-2 size-4" />
+                        {!activeMedications?.results?.length ? (
+                          <>
+                            <PlusIcon className="mr-2 size-4" />
+                            {t("add")}
+                          </>
                         ) : (
-                          <PencilIcon className="mr-2 size-4" />
+                          <>
+                            <PencilIcon className="mr-2 size-4" />
+                            {t("edit")}
+                          </>
                         )}
-                        {shouldShowAdd ? t("add") : t("edit")}
                       </Link>
                     </Button>
                   )}
