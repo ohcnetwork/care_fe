@@ -307,7 +307,33 @@ export default function UserForm({
           />
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 items-start">
+          <FormField
+            control={form.control}
+            name="prefix"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("prefix")}</FormLabel>
+                <Autocomplete
+                  {...field}
+                  options={NAME_PREFIXES.map((prefix) => ({
+                    label: prefix,
+                    value: prefix,
+                  }))}
+                  freeInput
+                  value={field.value || ""}
+                  onChange={field.onChange}
+                  noOptionsMessage=""
+                  className="min-w-0"
+                  placeholder={t("select_or_type")}
+                  inputPlaceholder={t("select_or_type")}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="first_name"

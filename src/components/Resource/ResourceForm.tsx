@@ -228,37 +228,95 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   }
 
   return (
-    <Page
-      title={id ? t("update_resource_request") : t("create_resource_request")}
-    >
-      <div className="container mx-auto max-w-4xl">
-        <Card>
-          <CardContent className="mt-4">
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
-              >
-                {patientData && (
-                  <Alert>
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={`/facility/${facilityId}/patient/${related_patient}/resource_requests`}
-                        className="flex items-center gap-2"
-                      >
-                        <CareIcon
-                          icon="l-user"
-                          className="h-5 w-5 text-blue-700"
-                        />
-                        <AlertDescription className="text-sm text-blue-700">
-                          {t("linked_patient")}:{" "}
-                          <span className="font-medium">
-                            {patientData.name}
-                          </span>
-                        </AlertDescription>
-                      </Link>
-                    </div>
-                  </Alert>
+
+    <div className="container mx-auto max-w-4xl space-y-6 p-4 md:p-6">
+      <PageTitle
+        title={id ? t("update_resource_request") : t("create_resource_request")}
+      />
+      <Separator />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {patientData && (
+            <Alert>
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/facility/${facilityId}/patient/${related_patient}/resource_requests`}
+                  className="flex items-center gap-2"
+                >
+                  <CareIcon icon="l-user" className="size-5 text-blue-700" />
+                  <AlertDescription className="text-sm text-blue-700 whitespace-nowrap">
+                    <span>
+                      {t("linked_patient")}:{" "}
+                      <strong className="font-medium">
+                        {patientData.name}
+                      </strong>
+                    </span>
+                  </AlertDescription>
+                </Link>
+              </div>
+            </Alert>
+          )}
+
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium">{t("basic_information")}</h3>
+              <p className="text-sm text-gray-500">
+                {t("resource_request_basic_info_description")}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 items-start">
+              <FormField
+                control={form.control}
+                name="assigned_facility"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel aria-required>
+                      {t("facility_for_care_support")}
+                    </FormLabel>
+                    <FormControl>
+                      <Autocomplete
+                        {...field}
+                        data-cy="select-facility"
+                        options={mergeAutocompleteOptions(
+                          facilityOptions ?? [],
+                          field.value
+                            ? {
+                                label: field.value.name,
+                                value: field.value.id,
+                              }
+                            : undefined,
+                        )}
+                        value={field.value?.id ?? ""}
+                        placeholder={t("start_typing_to_search")}
+                        onSearch={setFacilitySearch}
+                        onChange={(value) => {
+                          const facility = facilities?.results.find(
+                            (f) => f.id === value,
+                          );
+                          if (facility) {
+                            form.setValue("assigned_facility", facility, {
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            });
+                          } else {
+                            form.resetField("assigned_facility");
+                          }
+
+                          // When the assigned facility changes, we need to clear the assigned to user
+                          form.setValue("assigned_to", undefined, {
+                            shouldDirty: true,
+                          });
+                          setAssignedToUser(undefined);
+                        }}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t("select_facility_description")}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+
                 )}
 
                 <div className="space-y-6">
@@ -431,32 +489,58 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                           </FormItem>
                         )}
                       />
-                    )}
-                  </div>
-                </div>
-                <Separator />
 
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-medium">
-                      {t("request_details")}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      {t("resource_request_details_description")}
-                    </p>
-                  </div>
+                    </FormControl>
+                    <FormDescription>
+                      {t("emergency_description")}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel required>{t("request_title")}</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder={t("request_title_placeholder")}
-                            onChange={(value) => field.onChange(value)}
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel aria-required>{t("status")}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger
+                          data-cy="select-status-dropdown"
+                          ref={field.ref}
+                        >
+                          <SelectValue placeholder={t("select_status")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {RESOURCE_STATUS_CHOICES.map((option, index) => (
+                          <SelectItem key={index} value={option.text}>
+                            {t(`resource_status__${option.text}`)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel aria-required>{t("category")}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger
+                          data-cy="select-category-dropdown"
+                          ref={field.ref}
+                        >
+                          <SelectValue
+
                           />
                         </FormControl>
                         <FormDescription>

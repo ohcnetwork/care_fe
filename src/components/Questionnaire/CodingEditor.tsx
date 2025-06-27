@@ -88,29 +88,44 @@ export function CodingEditor({ code, onChange }: CodingEditorProps) {
 
       <CardContent className="space-y-4">
         <div>
-          <Label>System</Label>
-          <Select
-            value={code.system}
-            onValueChange={(value) => {
-              onChange({
-                ...code,
-                system: value,
-                code: "",
-                display: "",
-              });
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select system" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(TERMINOLOGY_SYSTEMS).map(([key, value]) => (
-                <SelectItem key={key} value={value}>
-                  {key}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+
+          <FormField
+            control={form.control}
+            name={`questions.${questionIndex}.code.system`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("system")}</FormLabel>
+                <FormControl>
+                  <Select
+                    {...field}
+                    value={code.system}
+                    onValueChange={(value) => {
+                      onChange({
+                        system: value,
+                        code: "",
+                        display: "",
+                      });
+                    }}
+                  >
+                    <SelectTrigger ref={field.ref}>
+                      <SelectValue placeholder={t("select_system")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(TERMINOLOGY_SYSTEMS).map(
+                        ([key, value]) => (
+                          <SelectItem key={key} value={value}>
+                            {key}
+                          </SelectItem>
+                        ),
+                      )}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
         </div>
 
         <div className="grid grid-cols-[1fr,1fr,auto] gap-4 items-start">

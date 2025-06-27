@@ -483,6 +483,55 @@ const AppointmentActions = ({
               >
                 {isRescheduling ? t("rescheduling") : t("reschedule")}
               </Button>
+
+            )}
+          </SheetTrigger>
+          <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
+            </SheetHeader>
+
+            <div className="mt-6">
+              <div className="my-4">
+                <Label className="mb-2">{t("select_practitioner")}</Label>
+                <PractitionerSelector
+                  facilityId={facilityId}
+                  selected={selectedPractitioner}
+                  onSelect={(user) => user && setSelectedPractitioner(user)}
+                  clearSelection={t("show_all")}
+                />
+              </div>
+              <AppointmentSlotPicker
+                facilityId={facilityId}
+                resourceId={selectedPractitioner?.id}
+                selectedSlotId={selectedSlotId}
+                onSlotSelect={setSelectedSlotId}
+                currentAppointment={appointment}
+              />
+
+              <div className="flex justify-end gap-2 mt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsRescheduleOpen(false);
+                    setSelectedSlotId(undefined);
+                  }}
+                >
+                  {t("cancel")}
+                </Button>
+                <Button
+                  variant="default"
+                  disabled={!selectedSlotId || isRescheduling}
+                  onClick={() => {
+                    if (selectedSlotId) {
+                      rescheduleAppointment({ new_slot: selectedSlotId });
+                    }
+                  }}
+                >
+                  {isRescheduling ? t("rescheduling") : t("reschedule")}
+                </Button>
+              </div>
+
             </div>
           </div>
         </SheetContent>
@@ -518,7 +567,6 @@ const AppointmentActions = ({
 
       {currentStatus === "in_consultation" && (
         <Button
-          disabled={!isToday}
           variant="outline_primary"
           onClick={() => onChange("fulfilled")}
           size="lg"

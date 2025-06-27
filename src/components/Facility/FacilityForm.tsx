@@ -231,7 +231,14 @@ export default function FacilityForm({
                   <FormLabel required>{t("facility_type")}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger data-cy="facility-type">
+
+
+                      <SelectTrigger
+                        data-cy="facility-type"
+                        className="max-w-full truncate"
+                        ref={field.ref}
+                      >
+
                         <SelectValue placeholder={t("select_facility_type")} />
                       </SelectTrigger>
                     </FormControl>
@@ -358,7 +365,10 @@ export default function FacilityForm({
             <FormField
               name="geo_organization"
               render={({ field }) => (
-                <FormItem className="md:col-span-2 grid-cols-1 grid md:grid-cols-2 gap-5">
+
+
+                <FormItem className="md:col-span-2">
+
                   <FormControl>
                     <GovtOrganizationSelector
                       {...field}

@@ -97,6 +97,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues,
+    mode: "onChange",
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -274,9 +275,15 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("manufacture_date")}</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
+
+                <DatePicker
+                  date={field.value}
+                  onChange={(date) => {
+                    field.onChange(date);
+                    form.trigger("expiration_date");
+                  }}
+                />
+
                 <FormMessage />
               </FormItem>
             )}

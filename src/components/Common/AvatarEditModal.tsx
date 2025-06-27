@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
+import { useMediaStream } from "@/hooks/useMediaStream";
 
 interface Props {
   title: string;
@@ -49,6 +50,9 @@ const VideoConstraints = {
     facingMode: { exact: "environment" },
   },
 } as const;
+
+
+const MAX_FILE_SIZE = careConfig.imageUploadMaxSizeInMB * 1024 * 1024; // 2MB
 
 const isImageFile = (file?: File) => file?.type.split("/")[0] === "image";
 
@@ -78,6 +82,24 @@ const AvatarEditModal = ({
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
 
+  const { startStream, stopStream } = useMediaStream({
+    constraints: { video: { facingMode: constraint.facingMode } },
+  });
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isCameraOpen) {
+      timer = setTimeout(() => {
+        startStream();
+      }, 100);
+    }
+
+    return () => {
+      clearTimeout(timer);
+      stopStream();
+    };
+  }, [isCameraOpen]);
+
   const handleSwitchCamera = useCallback(() => {
     setConstraint(
       constraint.facingMode === "user"
@@ -102,20 +124,7 @@ const AvatarEditModal = ({
       }
     });
   };
-  const stopCamera = useCallback(() => {
-    try {
-      if (webRef.current) {
-        const openCamera = webRef.current?.video?.srcObject as MediaStream;
-        if (openCamera) {
-          openCamera.getTracks().forEach((track) => track.stop());
-        }
-      }
-    } catch {
-      toast.error("Failed to stop camera");
-    } finally {
-      setIsCameraOpen(false);
-    }
-  }, []);
+
   const closeModal = () => {
     setPreview(undefined);
     setIsProcessing(false);
@@ -330,7 +339,7 @@ const AvatarEditModal = ({
                   <Button
                     variant="primary"
                     onClick={() => {
-                      setConstraint(() => VideoConstraints.user);
+
                       setIsCameraOpen(true);
                     }}
                   >
@@ -382,26 +391,32 @@ const AvatarEditModal = ({
             ) : (
               <>
                 <div className="flex flex-1 items-center justify-center">
-                  {!previewImage ? (
-                    <>
-                      <Webcam
-                        audio={false}
-                        height={720}
-                        screenshotFormat="image/jpeg"
-                        width={1280}
-                        ref={webRef}
-                        videoConstraints={constraint}
-                        onUserMediaError={(_e) => {
-                          setIsCameraOpen(false);
-                          toast.warning(t("camera_permission_denied"));
-                        }}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <img src={previewImage} />
-                    </>
-                  )}
+
+                  <Webcam
+                    audio={false}
+                    screenshotFormat="image/jpeg"
+                    ref={webRef}
+                    videoConstraints={{
+                      ...constraint,
+                      width: {
+                        ...constraint.width,
+                        ideal: window.innerWidth,
+                      },
+                      height: {
+                        ...constraint.height,
+                        ideal: window.innerHeight,
+                      },
+                    }}
+                    onUserMediaError={async () => {
+                      const requestValue = await requestPermission({
+                        video: { facingMode: "user" },
+                      });
+                      if (!requestValue.hasPermission) {
+                        setIsCameraOpen(false);
+                      }
+                    }}
+                  />
+
                 </div>
                 {/* buttons for mobile screens */}
                 <div className="flex flex-col gap-2 pt-4 sm:flex-row">
@@ -455,9 +470,12 @@ const AvatarEditModal = ({
                     type="button"
                     variant="outline"
                     onClick={() => {
-                      setPreviewImage(null);
+
+
                       setIsCameraOpen(false);
-                      stopCamera();
+                      setPreview(undefined);
+                      closeModal();
+
                     }}
                     disabled={isProcessing}
                   >

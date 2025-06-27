@@ -405,6 +405,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   <FormItem className="flex flex-col">
                     <FormControl>
                       <GovtOrganizationSelector
+                        {...field}
                         required
                         authToken={tokenData.token}
                         onChange={(value) => {

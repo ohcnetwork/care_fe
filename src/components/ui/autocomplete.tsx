@@ -37,6 +37,10 @@ interface AutocompleteProps {
   align?: "start" | "center" | "end";
   popoverClassName?: string;
   "data-cy"?: string;
+
+  ref?: React.RefCallback<HTMLButtonElement | null>;
+
+  "aria-invalid"?: boolean;
 }
 
 export default function Autocomplete({
@@ -50,6 +54,8 @@ export default function Autocomplete({
   align = "center",
   popoverClassName,
   "data-cy": dataCy,
+  ref,
+  ...props
 }: AutocompleteProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -94,21 +100,41 @@ export default function Autocomplete({
 
   if (isMobile) {
     return (
-      <>
-        <Button
-          title={
-            value
-              ? options.find((option) => option.value === value)?.label
-              : undefined
-          }
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between"
-          disabled={disabled}
-          data-cy={dataCy}
-          type="button"
-          onClick={() => setOpen(true)}
+
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          <Button
+            aria-invalid={props["aria-invalid"]}
+            title={
+              value
+                ? freeInput
+                  ? inputValue || value
+                  : selectedOption?.label
+                : undefined
+            }
+            variant="outline"
+            ref={ref}
+            role="combobox"
+            aria-expanded={open}
+            className={cn("w-full justify-between", className)}
+            disabled={disabled}
+            data-cy={dataCy}
+            type="button"
+          >
+            <span className="overflow-hidden">
+              {value
+                ? freeInput
+                  ? inputValue || value
+                  : selectedOption?.label
+                : placeholder}
+            </span>
+            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent
+          side="bottom"
+          className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
+
         >
           <span className="overflow-hidden">
             {value
@@ -133,11 +159,13 @@ export default function Autocomplete({
           title={selectedOption?.label}
           variant="outline"
           role="combobox"
+          aria-invalid={props["aria-invalid"]}
           aria-expanded={open}
           className="w-full justify-between"
           disabled={disabled}
           data-cy={dataCy}
           onClick={() => setOpen(!open)}
+          ref={ref}
         >
           <span className={cn("truncate", !selectedOption && "text-gray-500")}>
             {selectedOption ? selectedOption.label : placeholder}
