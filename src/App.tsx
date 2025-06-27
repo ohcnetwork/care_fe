@@ -4,6 +4,7 @@ import {
   QueryCache,
   QueryClient,
   defaultShouldDehydrateQuery,
+  onlineManager,
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
@@ -27,6 +28,11 @@ import { createUserPersister } from "./OfflineSupport/createUserPersister";
 import useNetworkStatus from "./Utils/networkstatus";
 import { PubSubProvider } from "./Utils/pubsubContext";
 
+// onlineManager.setOnline(false); // Initialize as offline
+onlineManager.setEventListener(() => {
+  return () => {};
+});
+console.log("netwrk", onlineManager.isOnline());
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -60,6 +66,15 @@ const ScrollToTop = () => {
 
   return null;
 };
+const NetworkManager = () => {
+  const { isOnline, isChecked } = useNetworkStatus();
+
+  useEffect(() => {
+    console.log(" Network Status:", { isOnline, isChecked });
+  }, [isOnline, isChecked]);
+
+  return null;
+};
 const userPersister = createUserPersister();
 
 const App = () => {
@@ -67,9 +82,9 @@ const App = () => {
     displayCareConsoleArt();
   }, []);
 
-  const { isOnline, isChecked } = useNetworkStatus();
-  console.log("Network status:", { isOnline, isChecked });
-  if (!isChecked) return <Loading />;
+  // const { isOnline, isChecked } = useNetworkStatus();
+  // console.log("Network status:", { isOnline, isChecked });
+  // if (!isChecked) return <Loading />;
 
   return (
     <>
@@ -86,6 +101,7 @@ const App = () => {
           },
         }}
       >
+        <NetworkManager />
         <ScrollToTop />
         <Suspense fallback={<Loading />}>
           <PubSubProvider>

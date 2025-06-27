@@ -17,6 +17,7 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 import { LocalStorageKeys } from "@/common/constants";
 
 import { createUserPersister } from "@/OfflineSupport/createUserPersister";
+import useNetworkStatus from "@/Utils/networkstatus";
 import routes, {
   JwtTokenObtainPair,
   LoginResponse,
@@ -59,13 +60,14 @@ export default function AuthUserProvider({
       localStorage.getItem(LocalStorageKeys.patientTokenKey) || "null",
     ),
   );
-
+  const { isChecked } = useNetworkStatus();
   const { data: onlineuser, isLoading } = useQuery({
     queryKey: ["currentUser", accessToken],
     queryFn: query(routes.currentUser, { silent: true }),
     retry: false,
     networkMode: "online",
-    enabled: !!localStorage.getItem(LocalStorageKeys.accessToken),
+    enabled:
+      !!localStorage.getItem(LocalStorageKeys.accessToken) && !!isChecked,
   });
 
   const { data: offlineUser } = useQuery({
@@ -107,7 +109,7 @@ export default function AuthUserProvider({
     networkMode: "online",
     refetchIntervalInBackground: true,
     refetchInterval: careConfig.auth.tokenRefreshInterval,
-    enabled: !!refreshToken && !!onlineuser,
+    enabled: !!refreshToken && !!onlineuser && !!isChecked,
   });
 
   useEffect(() => {
@@ -222,8 +224,17 @@ export default function AuthUserProvider({
       removeEventListener("storage", listener);
     };
   }, [signOut]);
-  console.log(isLoading, isrestoring, onlineManager.isOnline(), accessToken);
-  if (isLoading || isrestoring) {
+
+  console.log(
+    "isloading",
+    isLoading,
+    "isrestoring",
+    isrestoring,
+    "isChecked",
+    isChecked,
+  );
+
+  if (isLoading || isrestoring || !isChecked) {
     return <Loading />;
   }
 

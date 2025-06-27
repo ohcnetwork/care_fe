@@ -40,7 +40,6 @@ import { OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import {
   isOfflineId,
   normalizeOfflineEncounterRecord,
-  normalizeOfflinePatientRecord,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -75,7 +74,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
   >([]);
   const [hasReachedEncounterLimitOffline, sethasReachedEncounterLimitOffline] =
     useState(false);
-
+  setOfflinePatientPayload(null);
   const { data: patientverificationdata } = useQuery<Patient>({
     queryKey: ["PatientVerification", phone_number, year_of_birth, partial_id],
     queryFn: async () => {
@@ -162,11 +161,11 @@ export default function VerifyPatient(props: { facilityId: string }) {
         try {
           const record = await db.OfflineWrites.get(partial_id);
           if (record) {
-            const normalized = normalizeOfflinePatientRecord(
-              record,
-              queryClient,
-            );
-            setOfflinePatientPayload(normalized);
+            // const normalized = normalizeOfflinePatientRecord(
+            //   record,
+            //   queryClient,
+            // );
+            // setOfflinePatientPayload(normalized);
           }
         } catch (error) {
           console.error("Error while fetching patient record", error);

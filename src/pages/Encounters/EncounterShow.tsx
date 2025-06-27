@@ -11,7 +11,6 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import PatientInfoCard from "@/components/Patient/PatientInfoCard";
 
 import useAppHistory from "@/hooks/useAppHistory";
-import useAuthUser from "@/hooks/useAuthUser";
 import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
 
 import { getPermissions } from "@/common/Permissions";
@@ -85,7 +84,6 @@ export const EncounterShow = (props: Props) => {
     ...pluginTabs,
   };
 
-  const user = useAuthUser();
   const { data: onlineEncounterData, isLoading } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(routes.encounter.get, {
@@ -137,21 +135,13 @@ export const EncounterShow = (props: Props) => {
     enabled: !!facilityId,
   });
 
-  const encounterPermissions = onlineManager.isOnline()
-    ? (encounterData?.permissions ?? [])
-    : (user.permissions ?? []);
-
-  const patientPermissions = onlineManager.isOnline()
-    ? (patient?.permissions ?? [])
-    : (user.permissions ?? []);
-
   const { canViewEncounter } = getPermissions(
     hasPermission,
-    encounterPermissions,
+    patient?.permissions ?? [],
   );
   const { canViewClinicalData } = getPermissions(
     hasPermission,
-    patientPermissions,
+    encounterData?.permissions ?? [],
   );
 
   const { canWriteEncounter } = getPermissions(

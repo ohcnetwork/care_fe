@@ -1,9 +1,15 @@
 import { QueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 
+import { FacilityModel } from "@/components/Facility/models";
+import { AuthUserModel } from "@/components/Users/models";
+
 import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/patient";
+import { FacilityData } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
+import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
+import { UserBase } from "@/types/user/user";
 
 import { OfflineWritesEntry } from "./AppcacheDB";
 import { AppCacheDB } from "./AppcacheDB";
@@ -100,23 +106,20 @@ export const getYearOfBirth = (
 };
 
 export const normalizeOfflinePatientRecord = (
-  record: any,
-  queryClient: QueryClient,
+  entry: any,
+  user: AuthUserModel,
+  selectedGeoLocation: Organization | null,
+  permissions?: string[],
 ): Patient => {
-  const payload = record?.payload ?? {};
-  const nowIso = new Date(record.clientTimestamp).toISOString();
-
-  const orgId = payload.geo_organization;
-  const selectedOrg =
-    orgId &&
-    queryClient.getQueryData<Organization>(["selectedGeoLocation", orgId]);
+  const payload = entry?.payload ?? {};
+  const nowIso = new Date(entry.clientTimestamp).toISOString();
 
   const yob = getYearOfBirth(payload.date_of_birth, payload.age);
 
   return {
-    id: record.id,
+    id: entry.id,
     name: payload.name ?? "-",
-    gender: payload.gender ?? "unknown",
+    gender: payload.gender ?? "male",
     phone_number: payload.phone_number ?? "",
     emergency_phone_number: payload.emergency_phone_number ?? "",
     address: payload.address ?? "",
@@ -130,24 +133,48 @@ export const normalizeOfflinePatientRecord = (
     created_date: nowIso,
     modified_date: nowIso,
 
-    geo_organization: selectedOrg ?? {
-      id: orgId ?? "unknown",
+    geo_organization: selectedGeoLocation ?? {
+      id: payload.geo_organization ?? "unknown",
       name: "-",
-      org_type: "-",
-      metadata: { country: "India" },
-      parent: {},
-      active: true,
-      description: null,
+      org_type: "other",
       level_cache: 0,
-      system_generated: false,
       has_children: false,
+      active: true,
+      metadata: null,
+      permissions: [],
+      created_at: "-",
+      updated_at: "-",
     },
 
-    created_by: null,
+    created_by: {
+      id: user.id,
+      first_name: user.first_name,
+      username: user.username,
+      email: user.email,
+      last_name: user.last_name,
+      user_type: user.user_type,
+      last_login: user.last_login ?? "",
+      read_profile_picture_url: user.read_profile_picture_url ?? "",
+      external_id: user.external_id,
+      suffix: user.suffix,
+      prefix: user.prefix,
+    },
 
-    updated_by: null,
+    updated_by: {
+      id: user.id,
+      first_name: user.first_name,
+      username: user.username,
+      email: user.email,
+      last_name: user.last_name,
+      user_type: user.user_type,
+      last_login: user.last_login ?? "",
+      read_profile_picture_url: user.read_profile_picture_url ?? "",
+      external_id: user.external_id,
+      suffix: user.suffix,
+      prefix: user.prefix,
+    },
 
-    permissions: [],
+    permissions: permissions ?? [],
   };
 };
 
@@ -156,7 +183,7 @@ export const normalizeOfflineEncounterRecord = (
   patientData: Patient,
 ): Encounter => {
   const payload = entry.payload as any;
-  console.log("patientdata", patientData);
+
   return {
     id: entry.id,
     patient: patientData,
@@ -188,5 +215,88 @@ export const normalizeOfflineEncounterRecord = (
     location_history: payload.location_history ?? [],
     permissions: payload.permissions ?? [],
     care_team: payload.care_team ?? [],
+  };
+};
+
+export const normaliZedResourcerequestRecord = (
+  entry: any,
+  patientData: Patient | undefined,
+  assigned_facility: FacilityModel | undefined,
+  assignToUser: UserBase | undefined,
+  queryClient: QueryClient,
+  user: AuthUserModel,
+): ResourceRequest => {
+  const payload = entry.payload as any;
+  console.log("datetime", entry.clientTimestamp);
+  const nowIso = new Date(entry.clientTimestamp).toISOString();
+  const originFacilityId = payload.origin_facility;
+  const originfacility =
+    originFacilityId &&
+    queryClient.getQueryData<FacilityData>(["facility", originFacilityId]);
+
+  // const assignFacilityid = payload.assigned_facility;
+  // const assignedFacility =
+  //   assignFacilityid &&
+  //   queryClient.getQueryData<FacilityModel>([
+  //     "assigned_facility",
+  //     assignFacilityid,
+  //   ]);
+
+  // const assignUserId = payload.assigned_to;
+  // const assignedUser =
+  //   assignUserId &&
+  //   queryClient.getQueryData<UserBase>(["assignToUser", assignUserId]);
+  return {
+    approving_facility: payload.approving_facility ?? null,
+    assigned_facility: assigned_facility ?? undefined,
+    category: payload.category ?? "-",
+    emergency: payload.emergency ?? null,
+    id: entry?.id,
+    origin_facility: originfacility,
+    priority: payload.priority ?? null,
+    reason: payload.reason ?? null,
+    referring_facility_contact_name:
+      payload.referring_facility_contact_name ?? "unknown(offline)",
+    referring_facility_contact_number:
+      payload.referring_facility_contact_number ?? "unknown(offline)",
+    requested_quantity: payload.requested_quantity ?? null,
+    status: payload.status ?? "unknown(offline)",
+    title: payload.title ?? "unknown(offline)",
+    assigned_to: assignToUser ?? null,
+    created_by: {
+      id: user.external_id,
+      first_name: user.first_name,
+      username: user.username,
+      email: user.email,
+      last_name: user.last_name,
+      user_type: user.user_type,
+      last_login: user.last_login ?? "",
+      profile_picture_url: user.read_profile_picture_url ?? "",
+      phone_number: user.phone_number ?? "unknown(offline)",
+      gender: user.gender ?? "male",
+      suffix: user.suffix,
+      prefix: user.prefix,
+      mfa_enabled: user.mfa_enabled ?? false,
+      deleted: user.deleted ?? false,
+    },
+    updated_by: {
+      id: user.external_id,
+      first_name: user.first_name,
+      username: user.username,
+      email: user.email,
+      last_name: user.last_name,
+      user_type: user.user_type,
+      last_login: user.last_login ?? "",
+      profile_picture_url: user.read_profile_picture_url ?? "",
+      phone_number: user.phone_number ?? "unknown(offline)",
+      gender: user.gender ?? "male",
+      suffix: user.suffix,
+      prefix: user.prefix,
+      mfa_enabled: user.mfa_enabled ?? false,
+      deleted: user.deleted ?? false,
+    },
+    created_date: nowIso,
+    modified_date: nowIso,
+    related_patient: patientData ?? null,
   };
 };

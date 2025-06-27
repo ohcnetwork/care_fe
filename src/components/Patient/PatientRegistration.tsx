@@ -58,6 +58,7 @@ import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import OfflinePatientWarningDialog from "@/OfflineSupport/OfflinePatientCreateWarning";
 import {
   getYearOfBirth,
+  normalizeOfflinePatientRecord,
   saveOfflineWrite,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -79,7 +80,6 @@ interface PatientRegistrationPageProps {
 export const BLOOD_GROUPS = BLOOD_GROUP_CHOICES.map((bg) => bg.id) as [
   (typeof BLOOD_GROUP_CHOICES)[number]["id"],
 ];
-const isOfflineId = (id: string) => id.startsWith("offline-");
 
 export default function PatientRegistration(
   props: PatientRegistrationPageProps,
@@ -257,83 +257,71 @@ export default function PatientRegistration(
     },
   });
 
-  queryClient.setQueryDefaults(["selectedGeoLocation"], {
-    meta: { persist: true },
-  });
-
-  const updateOfflinePatientEntry = async (
-    db: AppCacheDB,
-    patientId: string,
-    updatePatientData: any,
-  ) => {
-    const entry = await db.OfflineWrites.get(patientId);
-    if (!entry) {
-      toast.error(t("offline_patient_not_found"));
-      return;
-    }
-
-    try {
-      const updatedEntry = {
-        ...entry,
-        payload: {
-          ...(entry.payload as Patient),
-          ...updatePatientData,
-        },
-      };
-      await db.OfflineWrites.update(patientId, updatedEntry);
-      if (selectedOrganization) {
-        queryClient.setQueryData(
-          ["selectedGeoLocation", selectedOrganization.id],
-          selectedOrganization,
-        );
-      }
-      toast.success(t("offline_patient_update_success"));
-      setNavTarget("back");
-    } catch (error) {
-      console.error("Error updating unsynced patient:", error);
-      toast.error(t("offline_patient_update_error"));
-      return;
-    }
-    return;
-  };
-
   const queuePatientUpdateOffline = async (updatePatientData: any) => {
     if (!patientId) {
       toast.error("Patient ID is missing");
       return;
     }
     try {
-      const offlineWrite = {
-        id: patientId,
-        userId: user.external_id,
-        mutationSyncrouteKey: "updatePatient",
-        type: "updatePatient",
-        resourceType: "patient",
-        mutationPathParams: { id: patientId || "" },
-        payload: updatePatientData,
-        serverTimestamp: patientQuery?.data?.modified_date,
-        useQueryrouteKey: "getPatient",
-        useQueryPathParams: { id: patientId || "" },
-      };
-      const saveResult = await saveOfflineWrite(offlineWrite);
+      const entry = await db.OfflineWrites.get(patientId);
+      if (entry) {
+        const updatedEntry = {
+          ...entry,
+          payload: {
+            ...(entry.payload as Patient),
+            ...updatePatientData,
+          },
+        };
+        await db.OfflineWrites.update(patientId, updatedEntry);
+        const normalizePatient = normalizeOfflinePatientRecord(
+          updatedEntry,
+          user,
+          selectedOrganization,
+          [],
+        );
+        queryClient.removeQueries({
+          queryKey: ["patient", patientId],
+          exact: true,
+        });
+        queryClient.setQueryData(["patient", patientId], normalizePatient);
+      } else {
+        const offlineWrite = {
+          id: patientId,
+          userId: user.external_id,
+          mutationSyncrouteKey: "updatePatient",
+          type: "updatePatient",
+          resourceType: "patient",
+          mutationPathParams: { id: patientId || "" },
+          payload: updatePatientData,
+          serverTimestamp: patientQuery?.data?.modified_date,
+          useQueryrouteKey: "getPatient",
+          useQueryPathParams: { id: patientId || "" },
+        };
+        const saveResult = await saveOfflineWrite(offlineWrite);
+        if (!saveResult.success) {
+          toast.error(saveResult.error);
+          return;
+        }
 
-      if (saveResult && saveResult.success) {
         const selectorganization = selectedOrganization
           ? selectedOrganization
           : patientQuery.data?.geo_organization;
 
-        if (selectorganization) {
-          queryClient.setQueryData(
-            ["selectedGeoLocation", selectorganization.id],
-            selectorganization,
-          );
-        }
-        toast.success(t("offline_patient_update_success"));
+        const normalizePatient = normalizeOfflinePatientRecord(
+          saveResult.entry,
+          user,
+          selectorganization ? selectorganization : null,
+          [],
+        );
 
-        setNavTarget("back");
-      } else {
-        toast.error(saveResult.error);
+        queryClient.removeQueries({
+          queryKey: ["patient", patientId],
+          exact: true,
+        });
+        queryClient.setQueryData(["patient", patientId], normalizePatient);
       }
+      toast.success(t("offline_patient_update_success"));
+      setNavTarget("back");
     } catch (error) {
       console.error("Error updating unsynced patient:", error);
       toast.error(t("offline_patient_update_error"));
@@ -359,16 +347,20 @@ export default function PatientRegistration(
         return;
       }
 
-      if (selectedOrganization) {
-        queryClient.setQueryData(
-          ["selectedGeoLocation", selectedOrganization.id],
-          selectedOrganization,
-        );
-      }
+      const normalizePatient = normalizeOfflinePatientRecord(
+        saveResult.entry,
+        user,
+        selectedOrganization,
+        [],
+      );
+
+      queryClient.setQueryData(["patient", generatedId], normalizePatient);
+
       const yob = getYearOfBirth(
         createPatientData.date_of_birth,
         createPatientData.age,
       );
+
       setNavTarget({
         to: `/facility/${facilityId}/patients/verify`,
         options: {
@@ -404,16 +396,7 @@ export default function PatientRegistration(
       };
 
       if (!onlineManager.isOnline()) {
-        if (isOfflineId(patientId)) {
-          await updateOfflinePatientEntry(db, patientId, updatePatientData);
-        } else {
-          const entry = await db.OfflineWrites.get(patientId);
-          if (entry) {
-            await updateOfflinePatientEntry(db, patientId, updatePatientData);
-          } else {
-            await queuePatientUpdateOffline(updatePatientData);
-          }
-        }
+        await queuePatientUpdateOffline(updatePatientData);
       } else updatePatient(updatePatientData);
       return;
     }
@@ -1060,9 +1043,9 @@ export default function PatientRegistration(
                         <FormControl>
                           <GovtOrganizationSelector
                             {...field}
+                            selected={form.watch("_selected_levels")}
                             setSelectedOrganization={setSelectedOrganization}
                             required={!enableMinimalPatientRegistration}
-                            selected={form.watch("_selected_levels")}
                             value={form.watch("geo_organization")}
                             onChange={(value) =>
                               form.setValue("geo_organization", value, {

@@ -1,5 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  onlineManager,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { Link, navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -36,6 +41,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 import UserSelector from "@/components/Common/UserSelector";
+import { FacilityModel } from "@/components/Facility/models";
 import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -44,11 +50,18 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 
+import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import {
+  isOfflineId,
+  normaliZedResourcerequestRecord,
+  saveOfflineWrite,
+} from "@/OfflineSupport/offlineWriteHelpers";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
 import validators from "@/Utils/validators";
+import { FacilityData } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 import { UserBase } from "@/types/user/user";
@@ -64,8 +77,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const { t } = useTranslation();
   const [{ related_patient }] = useQueryParams();
   const [assignedToUser, setAssignedToUser] = useState<UserBase>();
+  const [assignFacility, setAssignFacility] = useState<FacilityModel>();
   const authUser = useAuthUser();
-
+  const queryClient = useQueryClient();
+  const db = new AppCacheDB();
   const resourceFormSchema = z.object({
     status: z.string().min(1, { message: t("field_required") }),
     category: z.string().min(1, { message: t("field_required") }),
@@ -83,7 +98,12 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     priority: z.number().default(1),
     assigned_to: z.string().optional(),
   });
-
+  queryClient.setQueryDefaults(["assigned_facility"], {
+    meta: { persist: true },
+  });
+  queryClient.setQueryDefaults(["assignToUser"], {
+    meta: { persist: true },
+  });
   type ResourceFormValues = z.infer<typeof resourceFormSchema>;
 
   const { data: patientData } = useQuery({
@@ -122,28 +142,42 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     },
   });
 
-  useEffect(() => {
-    if (resourceData) {
-      form.reset({
-        status: resourceData.status,
-        category: resourceData.category,
-        assigned_facility: resourceData.assigned_facility,
-        assigned_to: resourceData.assigned_to?.id,
-        emergency: resourceData.emergency ? "true" : "false",
-        title: resourceData.title,
-        reason: resourceData.reason,
-        referring_facility_contact_name:
-          resourceData.referring_facility_contact_name,
-        referring_facility_contact_number:
-          resourceData.referring_facility_contact_number,
-        priority: resourceData.priority,
-      });
-      if (resourceData.assigned_to) {
-        setAssignedToUser(resourceData.assigned_to);
-      } else {
-        setAssignedToUser(undefined);
-      }
+  const mappedResourceFields = (resourceData: ResourceRequest) => {
+    form.reset({
+      status: resourceData.status,
+      category: resourceData.category,
+      assigned_facility: resourceData.assigned_facility,
+      assigned_to: resourceData.assigned_to?.id,
+      emergency: resourceData.emergency ? "true" : "false",
+      title: resourceData.title,
+      reason: resourceData.reason,
+      referring_facility_contact_name:
+        resourceData.referring_facility_contact_name,
+      referring_facility_contact_number:
+        resourceData.referring_facility_contact_number,
+      priority: resourceData.priority,
+    });
+    if (resourceData.assigned_to) {
+      setAssignedToUser(resourceData.assigned_to);
+    } else {
+      setAssignedToUser(undefined);
     }
+    if (resourceData.assigned_facility) {
+      setAssignFacility(resourceData.assigned_facility);
+    } else {
+      setAssignFacility(undefined);
+    }
+  };
+
+  useEffect(() => {
+    const loadResourcerequest = async () => {
+      if (resourceData) {
+        mappedResourceFields(resourceData);
+        return;
+      }
+    };
+
+    loadResourcerequest();
   }, [resourceData, form]);
 
   const { mutate: createResource, isPending } = useMutation({
@@ -163,6 +197,173 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       navigate(`/facility/${facilityId}/resource/${data.id}`);
     },
   });
+  const toFacilityModel = (facility: FacilityData): FacilityModel => ({
+    id: facility.id,
+    name: facility.name,
+    address: facility.address,
+    description: facility.description,
+    facility_type: facility.facility_type,
+    phone_number: facility.phone_number,
+    read_cover_image_url: facility.read_cover_image_url,
+    latitude: facility.latitude,
+    longitude: facility.longitude,
+    location:
+      facility.latitude !== undefined && facility.longitude !== undefined
+        ? { latitude: facility.latitude, longitude: facility.longitude }
+        : undefined,
+    pincode: facility.pincode?.toString(),
+    geo_organization: facility.geo_organization?.id ?? undefined,
+    is_public: facility.is_public,
+  });
+
+  const queueUpdatedResourceRequest = async (
+    resourcePayload: any,
+    resourceId: string,
+  ) => {
+    if (!resourceId) {
+      toast.error(t("resource_id_missing"));
+      return;
+    }
+    try {
+      const entry = await db.OfflineWrites.get(resourceId);
+
+      if (entry) {
+        const cache_related_patient = (entry.payload as ResourceRequest)
+          .related_patient;
+
+        // only assign if resourcePayload.related_patient is undefined/null,
+        //  it will happen when updating un-synced resource req
+        if (resourcePayload.related_patient == null) {
+          resourcePayload.related_patient = cache_related_patient;
+        }
+
+        const updatedEntry = {
+          ...entry,
+          payload: {
+            ...(entry.payload as ResourceRequest),
+            ...resourcePayload,
+          },
+        };
+
+        await db.OfflineWrites.update(resourceId, updatedEntry);
+        const normalizedResource = normaliZedResourcerequestRecord(
+          updatedEntry,
+          patientData,
+          assignFacility,
+          assignedToUser,
+          queryClient,
+          authUser,
+        );
+
+        queryClient.removeQueries({
+          queryKey: ["resource_request", resourceId],
+          exact: true,
+        });
+
+        queryClient.setQueryData(
+          ["resource_request", resourceId],
+          normalizedResource,
+        );
+      } else {
+        const offlineEntry = {
+          id: resourceId,
+          userId: authUser.external_id,
+          mutationSyncrouteKey: "updateResource",
+          type: "updateResourceRequest",
+          resourceType: "resourceRequest",
+          payload: resourcePayload,
+          serverTimestamp: resourceData?.modified_date,
+          useQueryrouteKey: "getResourceDetails",
+          useQueryPathParams: { id: String(id) },
+        };
+        const saveResult = await saveOfflineWrite(offlineEntry);
+        if (!saveResult.success) {
+          toast.error(saveResult.error);
+          return;
+        }
+
+        const normalizedResource = normaliZedResourcerequestRecord(
+          saveResult.entry,
+          patientData,
+          assignFacility,
+          assignedToUser,
+          queryClient,
+          authUser,
+        );
+
+        queryClient.removeQueries({
+          queryKey: ["resource_request", resourceId],
+          exact: true,
+        });
+
+        queryClient.setQueryData(
+          ["resource_request", resourceId],
+          normalizedResource,
+        );
+      }
+
+      toast.success(t("resource_updated_successfully"));
+      navigate(`/facility/${facilityId}/resource/${resourceId}`);
+    } catch (error) {
+      console.error("Error while queuing resource update:", error);
+      toast.error(t("error_while_queuing_resource_update"));
+      return;
+    }
+  };
+
+  const queueNewResourceRequest = async (resourcePayload: any) => {
+    try {
+      const generatedId = `offline-${crypto.randomUUID()}`;
+      const baseEntry = {
+        id: generatedId,
+        userId: authUser.external_id,
+        mutationSyncrouteKey: "createResource",
+        type: "createResourceRequest",
+        resourceType: "resourceRequest",
+        payload: resourcePayload,
+      };
+
+      const offlineEntry = isOfflineId(related_patient)
+        ? {
+            ...baseEntry,
+            parentMutationIds: [related_patient],
+            dependentFields: [
+              {
+                parentId: related_patient,
+                parentField: "id",
+                childField: "related_patient",
+              },
+            ],
+          }
+        : baseEntry;
+
+      const saveResult = await saveOfflineWrite(offlineEntry);
+      if (!saveResult.success) {
+        toast.error(saveResult.error);
+        return;
+      }
+
+      const normalizedResource = normaliZedResourcerequestRecord(
+        saveResult.entry,
+        patientData,
+        assignFacility,
+        assignedToUser,
+        queryClient,
+        authUser,
+      );
+
+      queryClient.setQueryData(
+        ["resource_request", generatedId],
+        normalizedResource,
+      );
+      toast.success(t("resource_updated_successfully"));
+      navigate(`/facility/${facilityId}/resource/${generatedId}`);
+    } catch (error) {
+      console.error("Error while queuing resource request:", error);
+      toast.error(t("error_while_queuing_resource_request"));
+      return;
+    }
+  };
 
   const onSubmit = (data: ResourceFormValues) => {
     const resourcePayload = {
@@ -182,9 +383,15 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     };
 
     if (id) {
-      updateResource({ ...resourcePayload, id });
+      if (!onlineManager.isOnline()) {
+        queueUpdatedResourceRequest(resourcePayload, id);
+        return;
+      } else updateResource({ ...resourcePayload, id });
     } else {
-      createResource(resourcePayload);
+      if (!onlineManager.isOnline()) {
+        queueNewResourceRequest(resourcePayload);
+        return;
+      } else createResource(resourcePayload);
     }
   };
   const { data: facilities } = useQuery({
@@ -305,8 +512,11 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                               shouldDirty: true,
                               shouldValidate: true,
                             });
+                            const facilityModel = toFacilityModel(facility);
+                            setAssignFacility(facilityModel);
                           } else {
                             form.resetField("assigned_facility");
+                            setAssignFacility(undefined);
                           }
 
                           // When the assigned facility changes, we need to clear the assigned to user
@@ -406,7 +616,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                   </FormItem>
                 )}
               />
-              {id && (
+              {id && !isOfflineId(id) && (
                 <FormField
                   control={form.control}
                   name="assigned_to"

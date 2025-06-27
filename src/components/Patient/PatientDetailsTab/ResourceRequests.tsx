@@ -1,6 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { onlineManager, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -15,8 +17,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 
+import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { normaliZedResourcerequestRecord } from "@/OfflineSupport/offlineWriteHelpers";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
@@ -25,11 +31,21 @@ import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 import { PatientProps } from ".";
 
 export const ResourceRequests = (props: PatientProps) => {
+  const user = useAuthUser();
+  const queryClient = useQueryClient();
   const { patientData, facilityId } = props;
   const patientId = patientData.id;
   const { t } = useTranslation();
 
-  const { data: resourceRequests, isLoading: loading } = useQuery({
+  const [offlineResourceRequest, setOfflineResourceRequest] = useState<
+    ResourceRequest[]
+  >([]);
+
+  const db = new AppCacheDB();
+  queryClient.setQueryDefaults(["resourceAssignedFacility"], {
+    meta: { persist: true },
+  });
+  const { data: onlineResourceRequests, isLoading: loading } = useQuery({
     queryKey: ["resourceRequests", patientId],
     queryFn: query(routes.listResourceRequests, {
       queryParams: {
@@ -40,6 +56,51 @@ export const ResourceRequests = (props: PatientProps) => {
     networkMode: "online",
     enabled: !!patientId,
   });
+
+  useEffect(() => {
+    const loadOfflineResourceRequest = async () => {
+      try {
+        const allWrites = await db.OfflineWrites.where("type")
+          .equals("createResourceRequest")
+          .toArray();
+        console.log("allWrites", allWrites);
+        const resourceRequests = allWrites.filter((entry) => {
+          const payload = entry.payload as any;
+          return payload.related_patient === props.patientId;
+        });
+        console.log("resourceRequests", resourceRequests);
+        const normalized = resourceRequests.map((entry) => {
+          return normaliZedResourcerequestRecord(
+            entry,
+            props.patientData,
+            undefined,
+            undefined,
+            queryClient,
+            user,
+          );
+        });
+
+        setOfflineResourceRequest(normalized);
+      } catch (error) {
+        console.error("Error while fetch resouce req while offline : ", error);
+        toast.error("error_while_fetch_resouce_req_when_offline");
+      }
+    };
+    if (!onlineManager.isOnline()) {
+      loadOfflineResourceRequest();
+    }
+  }, []);
+
+  const FinalOfflinResourceRequest = useMemo(() => {
+    return [
+      ...(onlineResourceRequests?.results ?? []),
+      ...offlineResourceRequest,
+    ];
+  }, [onlineResourceRequests, offlineResourceRequest]);
+
+  const resourceRequests = onlineManager.isOnline()
+    ? onlineResourceRequests?.results
+    : FinalOfflinResourceRequest;
 
   const getStatusBadge = (status: ResourceRequest["status"]) => {
     const statusColors: Record<ResourceRequest["status"], string> = {
@@ -102,8 +163,8 @@ export const ResourceRequests = (props: PatientProps) => {
                   {t("loading")}
                 </TableCell>
               </TableRow>
-            ) : resourceRequests?.results?.length ? (
-              resourceRequests.results.map((request, index) => (
+            ) : resourceRequests?.length ? (
+              resourceRequests?.map((request, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">
                     {RESOURCE_CATEGORY_CHOICES.find(
