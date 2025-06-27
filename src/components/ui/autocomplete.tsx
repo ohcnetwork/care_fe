@@ -119,11 +119,9 @@ export default function Autocomplete({
     }
   };
 
-  const handleClear = (e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+  const handleClear = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
 
     onChange("");
 
