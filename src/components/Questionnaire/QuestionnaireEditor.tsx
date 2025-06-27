@@ -202,7 +202,7 @@ function LayoutOptionCard({
   );
 }
 
-const HIDE_REPEATABLE_QUESTION_TYPES = ["boolean", "group", "display"];
+const HIDE_REPEATABLE_QUESTION_TYPES = ["boolean", "display"];
 
 export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const navigate = useNavigate();
