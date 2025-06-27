@@ -140,8 +140,8 @@ function useRecordSelection<T extends BaseRecord>(
 export function HistoricalRecordSelector<T extends BaseRecord>({
   structuredTypes,
   onAddSelected,
-  buttonLabel = "View History",
-  title = "History",
+  buttonLabel,
+  title,
 }: HistoricalRecordSelectorProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeType, setActiveType] = useState<string>(
@@ -342,27 +342,33 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
           className="border-gray-400 flex ml-auto"
         >
           <Clock className="size-4" />
-          <span className="font-semibold">{buttonLabel}</span>
+          <span className="font-semibold">
+            {buttonLabel || t("view_history")}
+          </span>
         </Button>
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-3xl p-0 overflow-y-auto">
         <div className="flex flex-col gap-2 p-2">
           <SheetHeader className="p-0">
-            <SheetTitle className="text-lg font-medium">{title}</SheetTitle>
+            <SheetTitle className="text-lg font-medium text-center">
+              {title || t("history")}
+            </SheetTitle>
           </SheetHeader>
-          <Tabs
-            value={activeType}
-            onValueChange={handleTabChange}
-            className="w-full"
-          >
-            <TabsList className="w-full">
-              {structuredTypes.map(({ type }) => (
-                <TabsTrigger key={type} value={type} className="flex-1">
-                  {type}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+          {structuredTypes.length > 1 && (
+            <Tabs
+              value={activeType}
+              onValueChange={handleTabChange}
+              className="w-full"
+            >
+              <TabsList className="w-full">
+                {structuredTypes.map(({ type }) => (
+                  <TabsTrigger key={type} value={type} className="flex-1">
+                    {type}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          )}
         </div>
 
         <div className="space-y-0">

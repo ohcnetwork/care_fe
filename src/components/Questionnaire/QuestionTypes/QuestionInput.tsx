@@ -163,7 +163,12 @@ export function QuestionInput({
               </span>
             );
           case "allergy_intolerance":
-            return <AllergyQuestion {...commonProps} />;
+            if (encounterId) {
+              return <AllergyQuestion {...commonProps} />;
+            }
+            return (
+              <span>{t("questionnaire_allergy_intolerance_no_encounter")}</span>
+            );
           case "symptom":
             if (encounterId) {
               return (
@@ -230,7 +235,10 @@ export function QuestionInput({
 
     if (question.type === "choice" && !question.answer_value_set) {
       return (
-        <div className="bg-gray-100 md:bg-transparent px-2 py-1.5">
+        <div
+          className="bg-gray-100 md:bg-transparent px-2 py-1.5"
+          id={"question-" + question.id}
+        >
           <div className="px-2 pt-2 bg-gray-100 md:bg-transparent">
             <QuestionLabel
               question={question}
@@ -283,7 +291,7 @@ export function QuestionInput({
             >
               <div
                 className={cn("space-y-1", { "flex-1": removeButton })}
-                data-question-id={question.id}
+                id={"question-" + question.id}
               >
                 {index === 0 && (
                   <div className="px-2 pt-2 bg-gray-100 md:bg-transparent">

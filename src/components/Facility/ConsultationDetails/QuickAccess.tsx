@@ -109,8 +109,8 @@ export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
                   ? encounter.organizations.map((org) => (
                       <Badge
                         key={org.id}
-                        className="bg-indigo-100 text-indigo-800 font-medium cursor-pointer text-sm "
-                        variant="outline"
+                        className="cursor-pointer"
+                        variant="indigo"
                         title={`Organization: ${org.name}${org.description ? ` - ${org.description}` : ""}`}
                       >
                         {stringifyNestedObject(org)}
