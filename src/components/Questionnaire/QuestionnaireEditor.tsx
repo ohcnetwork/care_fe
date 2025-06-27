@@ -839,8 +839,45 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         </TabsList>
         <TabsContent value="edit">
           <div className="flex flex-col md:flex-row gap-2">
-            <div className="space-y-4 hidden md:block sm:w-60 sticky top-4 self-start h-fit max-h-screen overflow-y-auto">
-              <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
+            {isMobile ? (
+              <div className="space-y-4">
+                <QuestionnaireProperties
+                  form={form}
+                  updateQuestionnaireField={updateQuestionnaireField}
+                  id={id}
+                  organizations={organizations}
+                  organizationSelection={{
+                    selectedOrgs: selectedOrgs,
+                    onToggle: handleToggleOrganization,
+                    searchQuery: orgSearchQuery,
+                    setSearchQuery: setOrgSearchQuery,
+                    available: availableOrganizations,
+                    isLoading: isLoadingAvailableOrganizations,
+                    error: orgError,
+                    setError: setOrgError,
+                  }}
+                  tags={tags}
+                  tagSelection={{
+                    selectedTags: selectedTags,
+                    onToggle: handleToggleTag,
+                    searchQuery: tagSearchQuery,
+                    setSearchQuery: setTagSearchQuery,
+                    available: tagOptions,
+                    isLoading: isLoadingAvailableTags,
+                    onTagCreated: !id ? handleTagCreated : undefined,
+                  }}
+                />
+                <QuestionActions
+                  selectedQuestions={selectedQuestions}
+                  questions={rootQuestions}
+                  updateQuestionnaireField={updateQuestionnaireField}
+                  onQuestionsChange={updateQuestions}
+                  setSelectedQuestions={setSelectedQuestions}
+                  setExpandedQuestions={setExpandedQuestions}
+                />
+              </div>
+            ) : (
+              <Card className="sm:w-60 sticky top-4 self-start h-fit max-h-screen overflow-y-auto rounded-none border-none bg-transparent shadow-none space-y-3 mt-2">
                 <CardHeader className="p-0">
                   <CardTitle>{t("navigation")}</CardTitle>
                 </CardHeader>
@@ -910,45 +947,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   </nav>
                 </CardContent>
               </Card>
-            </div>
-
-            {isMobile && (
-              <div className="space-y-4">
-                <QuestionnaireProperties
-                  form={form}
-                  updateQuestionnaireField={updateQuestionnaireField}
-                  id={id}
-                  organizations={organizations}
-                  organizationSelection={{
-                    selectedOrgs: selectedOrgs,
-                    onToggle: handleToggleOrganization,
-                    searchQuery: orgSearchQuery,
-                    setSearchQuery: setOrgSearchQuery,
-                    available: availableOrganizations,
-                    isLoading: isLoadingAvailableOrganizations,
-                    error: orgError,
-                    setError: setOrgError,
-                  }}
-                  tags={tags}
-                  tagSelection={{
-                    selectedTags: selectedTags,
-                    onToggle: handleToggleTag,
-                    searchQuery: tagSearchQuery,
-                    setSearchQuery: setTagSearchQuery,
-                    available: tagOptions,
-                    isLoading: isLoadingAvailableTags,
-                    onTagCreated: !id ? handleTagCreated : undefined,
-                  }}
-                />
-                <QuestionActions
-                  selectedQuestions={selectedQuestions}
-                  questions={rootQuestions}
-                  updateQuestionnaireField={updateQuestionnaireField}
-                  onQuestionsChange={updateQuestions}
-                  setSelectedQuestions={setSelectedQuestions}
-                  setExpandedQuestions={setExpandedQuestions}
-                />
-              </div>
             )}
 
             <div className="space-y-4 flex-1">
