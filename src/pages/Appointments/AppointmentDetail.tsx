@@ -553,7 +553,6 @@ const AppointmentActions = ({
 
       {currentStatus === "in_consultation" && (
         <Button
-          disabled={!isToday}
           variant="outline_primary"
           onClick={() => onChange("fulfilled")}
           size="lg"
