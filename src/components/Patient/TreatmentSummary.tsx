@@ -516,7 +516,7 @@ export default function TreatmentSummary({
                       const notes = medication.note;
                       return {
                         medicine: medication.medication?.display,
-                        status: t(`medication_status_${medication.status}`),
+                        status: t(`medication_status__${medication.status}`),
                         dosage: dosage,
                         frequency: instruction?.as_needed_boolean
                           ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})` +
@@ -558,7 +558,7 @@ export default function TreatmentSummary({
                         medication.medication.display ??
                         medication.medication.code,
                       dosage: medication.dosage_text,
-                      status: t(`medication_status_${medication.status}`),
+                      status: t(`medication_status__${medication.status}`),
                       medication_taken_between: [
                         medication.effective_period?.start,
                         medication.effective_period?.end,

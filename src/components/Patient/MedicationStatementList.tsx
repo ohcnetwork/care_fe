@@ -58,12 +58,10 @@ function MedicationRow({ statement, isEnteredInError }: MedicationRowProps) {
       <TableCell>{statement.dosage_text}</TableCell>
       <TableCell>
         <Badge
-          variant="outline"
-          className={`whitespace-nowrap capitalize ${
-            MEDICATION_STATEMENT_STATUS_STYLES[statement.status]
-          }`}
+          variant={MEDICATION_STATEMENT_STATUS_STYLES[statement.status]}
+          className="whitespace-nowrap capitalize"
         >
-          {statement.status}
+          {t(`medication_status__${statement.status}`)}
         </Badge>
       </TableCell>
       <TableCell>

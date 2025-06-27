@@ -338,6 +338,7 @@ export function MedicationStatementQuestion({
       </AlertDialog>
 
       <HistoricalRecordSelector<MedicationRequestRead | MedicationStatementRead>
+        title={t("medication_history")}
         structuredTypes={[
           {
             type: t("past_prescriptions"),
@@ -579,7 +580,7 @@ export function MedicationStatementQuestion({
                                   <div className="text-sm mt-1 text-gray-600">
                                     <span>
                                       {t(
-                                        `medication_status_${medication.status}`,
+                                        `medication_status__${medication.status}`,
                                       )}
                                       {" · "}
                                     </span>
@@ -611,7 +612,11 @@ export function MedicationStatementQuestion({
                             <CardContent className="p-2 pt-2 space-y-3 rounded-lg bg-gray-50">
                               <MedicationStatementGridRow
                                 medication={medication}
-                                disabled={disabled}
+                                disabled={
+                                  disabled ||
+                                  patientMedications?.results[index]?.status ===
+                                    "entered_in_error"
+                                }
                                 onUpdate={(updates) =>
                                   handleUpdateMedication(index, updates)
                                 }
@@ -627,7 +632,11 @@ export function MedicationStatementQuestion({
                     ) : (
                       <MedicationStatementGridRow
                         medication={medication}
-                        disabled={disabled}
+                        disabled={
+                          disabled ||
+                          patientMedications?.results[index]?.status ===
+                            "entered_in_error"
+                        }
                         onUpdate={(updates) =>
                           handleUpdateMedication(index, updates)
                         }
@@ -728,8 +737,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       className={cn(
         "grid grid-cols-1 lg:grid-cols-[300px_180px_170px_250px_450px_190px_300px_48px] border-b border-gray-200 hover:bg-gray-50/50 space-y-3 lg:space-y-0",
         {
-          "opacity-40 pointer-events-none":
-            medication.status === "entered_in_error",
+          "opacity-40 pointer-events-none": disabled,
         },
       )}
     >
@@ -802,11 +810,14 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {MEDICATION_STATEMENT_STATUS.map((status) => (
-              <SelectItem key={status} value={status}>
-                {t(`medication_status_${status}`)}
-              </SelectItem>
-            ))}
+            {MEDICATION_STATEMENT_STATUS.map(
+              (status) =>
+                (medication.id || status !== "entered_in_error") && (
+                  <SelectItem key={status} value={status}>
+                    {t(`medication_status__${status}`)}
+                  </SelectItem>
+                ),
+            )}
           </SelectContent>
         </Select>
       </div>
