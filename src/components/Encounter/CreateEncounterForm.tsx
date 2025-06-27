@@ -267,7 +267,10 @@ export default function CreateEncounterForm({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger data-cy="encounter-status">
+                        <SelectTrigger
+                          data-cy="encounter-status"
+                          ref={field.ref}
+                        >
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
@@ -295,7 +298,10 @@ export default function CreateEncounterForm({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger data-cy="encounter-priority">
+                        <SelectTrigger
+                          data-cy="encounter-priority"
+                          ref={field.ref}
+                        >
                           <SelectValue placeholder="Select priority" />
                         </SelectTrigger>
                       </FormControl>

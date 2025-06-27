@@ -214,7 +214,10 @@ export default function FacilityOrganizationFormSheet({
                   <FormLabel>{t(`type`)}</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
-                      <SelectTrigger data-cy="select-type-dropdown">
+                      <SelectTrigger
+                        data-cy="select-type-dropdown"
+                        ref={field.ref}
+                      >
                         <SelectValue
                           placeholder={t("select_organization_type")}
                         />
