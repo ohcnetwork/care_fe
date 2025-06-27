@@ -2,14 +2,14 @@ import { ArrowUpFromDot } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import { Button } from "@/components/ui/button";
 
 export function ScrollToTopButton({
-  rightOffset = 66,
+  rightOffset = 24,
+  bottomOffset = 24,
 }: {
   rightOffset?: number;
+  bottomOffset?: number;
 }) {
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
@@ -30,16 +30,14 @@ export function ScrollToTopButton({
   return (
     <Button
       onClick={scrollToTop}
-      className={cn(
-        "fixed bottom-10 z-50 rounded-full shadow-md hover:border-primary-700 hover:text-primary-700 hover:bg-primary-100",
-      )}
-      style={{ right: rightOffset }}
+      className="fixed z-50 rounded-full shadow-md  hover:border-primary-700 hover:text-primary-700 hover:bg-primary-100"
+      style={{ right: rightOffset, bottom: bottomOffset }}
       variant="outline"
       size="icon"
       aria-label={t("scroll_to_top")}
       title={t("scroll_to_top")}
     >
-      <ArrowUpFromDot className="size-4" />
+      <ArrowUpFromDot className="size-9" />
     </Button>
   );
 }
