@@ -41,6 +41,9 @@ interface QuestionInputProps {
   updateQuestionnaireResponseCB: (
     values: ResponseValue[],
     questionId: string,
+    groupInstanceId?: string,
+    structured_type?: QuestionnaireResponse["structured_type"],
+    link_id?: string,
     note?: string,
   ) => void;
   errors: QuestionValidationError[];
@@ -49,6 +52,7 @@ interface QuestionInputProps {
   facilityId?: string;
   patientId: string;
   isSubQuestion?: boolean;
+  groupInstanceId?: string;
 }
 
 export function QuestionInput({
@@ -62,11 +66,18 @@ export function QuestionInput({
   facilityId,
   patientId,
   isSubQuestion,
+  groupInstanceId,
 }: QuestionInputProps) {
   const { t } = useTranslation();
+  console.log(questionnaireResponses);
   const questionnaireResponse = questionnaireResponses.find(
-    (v) => v.question_id === question.id,
+    (v) =>
+      v.question_id === question.id &&
+      (v.group_instance_id
+        ? v.group_instance_id === groupInstanceId
+        : !v.group_instance_id),
   );
+  console.log("after", questionnaireResponses);
 
   if (!questionnaireResponse) {
     return null;
@@ -81,6 +92,9 @@ export function QuestionInput({
     updateQuestionnaireResponseCB(
       newValues,
       questionnaireResponse.question_id,
+      questionnaireResponse.group_instance_id,
+      questionnaireResponse.structured_type,
+      questionnaireResponse.link_id,
       questionnaireResponse.note,
     );
   };
@@ -92,6 +106,10 @@ export function QuestionInput({
     updateQuestionnaireResponseCB(
       updatedValues,
       questionnaireResponse.question_id,
+      questionnaireResponse.group_instance_id,
+      questionnaireResponse.structured_type,
+      questionnaireResponse.link_id,
+      questionnaireResponse.note,
     );
   };
 
@@ -257,6 +275,9 @@ export function QuestionInput({
                 updateQuestionnaireResponseCB(
                   [...questionnaireResponse.values],
                   questionnaireResponse.question_id,
+                  questionnaireResponse.group_instance_id,
+                  questionnaireResponse.structured_type,
+                  questionnaireResponse.link_id,
                   note,
                 );
               }}
@@ -334,6 +355,9 @@ export function QuestionInput({
                         updateQuestionnaireResponseCB(
                           [...questionnaireResponse.values],
                           questionnaireResponse.question_id,
+                          questionnaireResponse.group_instance_id,
+                          questionnaireResponse.structured_type,
+                          questionnaireResponse.link_id,
                           note,
                         );
                       }}
@@ -364,6 +388,9 @@ export function QuestionInput({
                 updateQuestionnaireResponseCB(
                   [...questionnaireResponse.values],
                   questionnaireResponse.question_id,
+                  questionnaireResponse.group_instance_id,
+                  questionnaireResponse.structured_type,
+                  questionnaireResponse.link_id,
                   note,
                 );
               }}

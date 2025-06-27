@@ -337,7 +337,7 @@ export function QuestionnaireForm({
 
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
-
+  console.log("questionnaireForms", questionnaireForms);
   const {
     data: questionnaireData,
     isLoading: isQuestionnaireLoading,
@@ -483,20 +483,22 @@ export function QuestionnaireForm({
   ): QuestionnaireResponse[] => {
     const responses: QuestionnaireResponse[] = [];
 
-    const processQuestion = (q: Question) => {
+    const processQuestion = (q: Question, groupInstanceId?: string) => {
       if (q.type === "group" && q.questions) {
-        q.questions.forEach(processQuestion);
+        const groupInstanceId = crypto.randomUUID();
+        q.questions.forEach((subQ) => processQuestion(subQ, groupInstanceId));
       } else {
         responses.push({
           question_id: q.id,
           link_id: q.link_id,
           values: [],
           structured_type: q.structured_type ?? null,
+          group_instance_id: groupInstanceId,
         });
       }
     };
 
-    questions.forEach(processQuestion);
+    questions.forEach((q) => processQuestion(q));
     return responses;
   };
 
@@ -721,6 +723,17 @@ export function QuestionnaireForm({
         });
       }
     });
+
+    console.log(
+      formsWithValidation.map((form) =>
+        form.responses.filter(
+          (r) =>
+            r.question_id === "33941c6c-df7f-4d74-950c-5387c4059490" ||
+            r.group_instance_id,
+        ),
+      ),
+    );
+
     submitBatch({ requests });
   };
 
@@ -832,6 +845,9 @@ export function QuestionnaireForm({
               onResponseChange={(
                 values: ResponseValue[],
                 questionId: string,
+                groupInstanceId?: string,
+                structured_type?: QuestionnaireResponse["structured_type"],
+                link_id?: string,
                 note?: string,
               ) => {
                 setQuestionnaireForms((existingForms) =>
@@ -839,11 +855,36 @@ export function QuestionnaireForm({
                     formItem.questionnaire.id === form.questionnaire.id
                       ? {
                           ...formItem,
-                          responses: formItem.responses.map((r) =>
-                            r.question_id === questionId
-                              ? { ...r, values, note: note }
-                              : r,
-                          ),
+                          responses: (() => {
+                            const existingResponses = formItem.responses;
+                            const exists = existingResponses.some(
+                              (r) =>
+                                r.question_id === questionId &&
+                                r.group_instance_id === groupInstanceId,
+                            );
+                            if (!exists) {
+                              console.log("not exists");
+
+                              const newResponse: QuestionnaireResponse = {
+                                question_id: questionId,
+                                group_instance_id: groupInstanceId,
+                                structured_type: structured_type ?? null,
+                                link_id: link_id ?? "",
+                                values: [],
+                                note: note,
+                              };
+                              return [...existingResponses, newResponse];
+                            }
+
+                            return existingResponses.map((r) =>
+                              r.question_id === questionId &&
+                              (groupInstanceId
+                                ? r.group_instance_id === groupInstanceId
+                                : !r.group_instance_id)
+                                ? { ...r, values, note: note }
+                                : r,
+                            );
+                          })(),
                           errors: [],
                         }
                       : formItem,

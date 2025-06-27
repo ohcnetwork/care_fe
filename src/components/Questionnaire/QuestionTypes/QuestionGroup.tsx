@@ -1,6 +1,11 @@
-import { memo } from "react";
+import { t } from "i18next";
+import { memo, useState } from "react";
 
 import { cn } from "@/lib/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Button } from "@/components/ui/button";
 
 import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 
@@ -20,6 +25,9 @@ interface QuestionGroupProps {
   updateQuestionnaireResponseCB: (
     values: ResponseValue[],
     questionId: string,
+    groupInstanceId?: string,
+    structured_type?: QuestionnaireResponse["structured_type"],
+    link_id?: string,
     note?: string,
   ) => void;
   errors: QuestionValidationError[];
@@ -29,6 +37,7 @@ interface QuestionGroupProps {
   facilityId?: string;
   patientId: string;
   isSubQuestion?: boolean;
+  groupInstanceId?: string;
 }
 
 export function isQuestionEnabled(
@@ -111,7 +120,11 @@ export const QuestionGroup = memo(function QuestionGroup({
   facilityId,
   patientId,
   isSubQuestion = false,
+  groupInstanceId,
 }: QuestionGroupProps) {
+  const [groupInstances, setGroupInstances] = useState(() => {
+    return [questionnaireResponses[0].group_instance_id];
+  });
   const isEnabled = isQuestionEnabled(question, questionnaireResponses);
 
   if (!isEnabled) {
@@ -131,8 +144,23 @@ export const QuestionGroup = memo(function QuestionGroup({
         facilityId={facilityId}
         patientId={patientId}
         isSubQuestion={isSubQuestion}
+        groupInstanceId={groupInstanceId}
       />
     );
+  }
+
+  function handleOnClick(): void {
+    const id = crypto.randomUUID();
+    setGroupInstances((prev) => [...prev, id]);
+    question.questions?.forEach((q) => {
+      updateQuestionnaireResponseCB(
+        [],
+        q.id,
+        id,
+        q.structured_type ?? null,
+        q.link_id,
+      );
+    });
   }
 
   const isActive = activeGroupId === question.id;
@@ -166,23 +194,64 @@ export const QuestionGroup = memo(function QuestionGroup({
             question.styling_metadata.containerClasses,
         )}
       >
-        {question.questions?.map((subQuestion) => (
-          <QuestionGroup
-            encounterId={encounterId}
-            facilityId={facilityId}
-            key={subQuestion.id}
-            question={subQuestion}
-            questionnaireResponses={questionnaireResponses}
-            updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
-            errors={errors}
-            clearError={clearError}
-            disabled={disabled}
-            activeGroupId={activeGroupId}
-            patientId={patientId}
-            isSubQuestion={true}
-          />
-        ))}
+        {groupInstances.map((instanceId) => {
+          console.log("questionnaireResponses", questionnaireResponses);
+          const instanceResponses = questionnaireResponses.filter(
+            (res) => res.group_instance_id === instanceId,
+          );
+          console.log("instanceResponses", instanceResponses);
+          return (
+            <div
+              key={instanceId}
+              className="border p-2 mb-2 rounded-md bg-white"
+            >
+              {question.questions?.map((subQuestion) => (
+                <QuestionGroup
+                  key={`${subQuestion.id}-${instanceId}`}
+                  question={subQuestion}
+                  questionnaireResponses={instanceResponses}
+                  updateQuestionnaireResponseCB={(
+                    values: ResponseValue[],
+                    questionId: string,
+                    groupInstanceId?: string,
+                    structured_type?: QuestionnaireResponse["structured_type"],
+                    link_id?: string,
+                    note?: string,
+                  ) =>
+                    updateQuestionnaireResponseCB(
+                      values,
+                      questionId,
+                      instanceId,
+                      structured_type,
+                      link_id,
+                      note,
+                    )
+                  }
+                  groupInstanceId={instanceId}
+                  encounterId={encounterId}
+                  errors={errors}
+                  clearError={clearError}
+                  disabled={disabled}
+                  activeGroupId={activeGroupId}
+                  facilityId={facilityId}
+                  patientId={patientId}
+                  isSubQuestion={true}
+                />
+              ))}
+            </div>
+          );
+        })}
       </div>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleOnClick}
+        className=""
+        disabled={disabled}
+      >
+        <CareIcon icon="l-plus" className="mr-2 size-4" />
+        {t("add_another")}
+      </Button>
     </div>
   );
 });
