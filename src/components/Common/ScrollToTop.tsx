@@ -1,4 +1,4 @@
-import { ArrowUp } from "lucide-react";
+import { ArrowUpFromDot } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 export function ScrollToTopButton({
-  rightOffset = 20,
+  rightOffset = 66,
 }: {
   rightOffset?: number;
 }) {
@@ -25,23 +25,21 @@ export function ScrollToTopButton({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const smRight = rightOffset ? `right-${rightOffset}` : "";
-
   if (!isVisible) return null;
 
   return (
     <Button
       onClick={scrollToTop}
       className={cn(
-        smRight,
-        "fixed bottom-10 max-sm:right-2 z-50 rounded-full shadow-md",
+        "fixed bottom-10 z-50 rounded-full shadow-md hover:border-primary-700 hover:text-primary-700 hover:bg-primary-100",
       )}
-      variant="outline_primary"
+      style={{ right: rightOffset }}
+      variant="outline"
       size="icon"
       aria-label={t("scroll_to_top")}
       title={t("scroll_to_top")}
     >
-      <ArrowUp className="size-4" />
+      <ArrowUpFromDot className="size-4" />
     </Button>
   );
 }
