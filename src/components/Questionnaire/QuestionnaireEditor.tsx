@@ -1124,7 +1124,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
               <Card>
                 <CardContent>
                   <div className="flex justify-between items-center max-w-4xl">
-                    <div className="space-y-5 w-full p-3">
+                    <div className="space-y-5 w-full p-2">
                       <p className="text-sm text-gray-500 font-medium">
                         {t("questionnaire_title_and_description")}
                       </p>

@@ -1,5 +1,5 @@
-import { t } from "i18next";
 import { Building } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,7 @@ export default function QuestionnairePreviewProperties({
 }: {
   questionnaire: QuestionnaireDetail;
 }) {
+  const { t } = useTranslation();
   return (
     <Card className="border-none bg-transparent shadow-none space-y-4 mt-2 ml-2">
       <CardHeader className="p-0">
