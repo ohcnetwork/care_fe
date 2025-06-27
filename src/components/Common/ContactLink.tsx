@@ -7,7 +7,10 @@ type ContactLinkProps =
 export default function ContactLink(props: ContactLinkProps) {
   return (
     <div>
-      <a href={props.tel ? `tel:${props.tel}` : `mailto:${props.mailto}`}>
+      <a
+        href={props.tel ? `tel:${props.tel}` : `mailto:${props.mailto}`}
+        className="text-primary hover:underline"
+      >
         <CareIcon icon={props.tel ? "l-outgoing-call" : "l-envelope-alt"} />
         {props.tel ? props.tel : props.mailto}
       </a>
