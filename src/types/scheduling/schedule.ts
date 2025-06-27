@@ -1,5 +1,7 @@
 import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
 
+import { Badge } from "@/components/ui/badge";
+
 import { Time } from "@/Utils/types";
 import { Patient } from "@/types/emr/patient";
 import { FacilityBareMinimum } from "@/types/facility/facility";
@@ -128,6 +130,24 @@ export const AppointmentFinalStatuses: AppointmentStatus[] = [
   "entered_in_error",
   "rescheduled",
 ];
+
+export const APPOINTMENT_STATUS_COLORS = {
+  proposed: "secondary",
+  pending: "secondary",
+  booked: "blue",
+  arrived: "primary",
+  fulfilled: "primary",
+  noshow: "orange",
+  checked_in: "green",
+  waitlist: "secondary",
+  in_consultation: "primary",
+  cancelled: "destructive",
+  entered_in_error: "destructive",
+  rescheduled: "yellow",
+} as const satisfies Record<
+  AppointmentStatus,
+  React.ComponentProps<typeof Badge>["variant"]
+>;
 
 export type AppointmentNonCancelledStatus =
   (typeof AppointmentNonCancelledStatuses)[number];

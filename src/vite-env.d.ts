@@ -26,13 +26,11 @@ interface ImportMetaEnv {
   readonly REACT_ALLOWED_LOCALES?: string;
   readonly REACT_ENABLED_APPS?: string;
   readonly REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB?: string;
+  readonly REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION?: string;
 
   // Plugins related envs...
   readonly REACT_SENTRY_DSN?: string;
   readonly REACT_SENTRY_ENVIRONMENT?: string;
-  readonly REACT_ENABLE_HCX?: string;
-  readonly REACT_ENABLE_ABDM?: string;
-  readonly REACT_ENABLE_SCRIBE?: string;
   readonly REACT_DEFAULT_COUNTRY?: string;
   readonly REACT_MAPS_FALLBACK_URL_TEMPLATE?: string;
 }
