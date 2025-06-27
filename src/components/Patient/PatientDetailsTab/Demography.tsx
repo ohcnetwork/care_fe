@@ -45,6 +45,20 @@ export const Demography = (props: PatientProps) => {
     }
   };
 
+  const renderClickableAddress = (address: string) => (
+    <div
+      className="[&_a]:text-sky-600 [&_a]:underline [&_a]:hover:text-sky-300"
+      onClick={(e) => {
+        if (e.target instanceof HTMLAnchorElement && e.target.href) {
+          e.preventDefault();
+          window.open(e.target.href, "_blank", "noopener,noreferrer");
+        }
+      }}
+    >
+      <Markdown content={address || ""} prose={false} />
+    </div>
+  );
+
   const handleEditClick = (sectionId: string) => {
     if (facilityId) {
       navigate(
@@ -192,38 +206,11 @@ export const Demography = (props: PatientProps) => {
         />,
         {
           label: t("current_address"),
-          value: (
-            <div
-              className="[&_a]:text-sky-600 [&_a]:underline [&_a]:hover:text-sky-300"
-              onClick={(e) => {
-                if (e.target instanceof HTMLAnchorElement && e.target.href) {
-                  e.preventDefault();
-                  window.open(e.target.href, "_blank", "noopener,noreferrer");
-                }
-              }}
-            >
-              <Markdown content={patientData.address || ""} prose={false} />
-            </div>
-          ),
+          value: renderClickableAddress(patientData.address || ""),
         },
         {
           label: t("permanent_address"),
-          value: (
-            <div
-              className="[&_a]:text-sky-600 [&_a]:underline [&_a]:hover:text-sky-300"
-              onClick={(e) => {
-                if (e.target instanceof HTMLAnchorElement && e.target.href) {
-                  e.preventDefault();
-                  window.open(e.target.href, "_blank", "noopener,noreferrer");
-                }
-              }}
-            >
-              <Markdown
-                content={patientData.permanent_address || ""}
-                prose={false}
-              />
-            </div>
-          ),
+          value: renderClickableAddress(patientData.permanent_address || ""),
         },
         ...getGeoOrgDetails(patientData.geo_organization),
       ],
