@@ -374,7 +374,12 @@ export function MedicationRequestQuestion({
   });
 
   return (
-    <div className="space-y-4">
+    <div
+      className={cn(
+        "space-y-4",
+        medications.length > 0 ? "md:max-w-fit" : "max-w-4xl",
+      )}
+    >
       <AlertDialog
         open={medicationToDelete !== null}
         onOpenChange={(open) => !open && setMedicationToDelete(null)}
