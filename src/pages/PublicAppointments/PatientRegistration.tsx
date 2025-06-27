@@ -318,12 +318,15 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   <FormField
                     control={form.control}
                     name="age"
-                    render={() => (
+                    render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel aria-required>{t("age")}</FormLabel>
                         <FormControl>
                           <Input
-                            {...form.register("age")}
+                            type="number"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            {...field}
                             placeholder={t("type_patient_age")}
                           />
                         </FormControl>
@@ -389,6 +392,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   <FormItem className="flex flex-col">
                     <FormControl>
                       <GovtOrganizationSelector
+                        {...field}
                         required
                         authToken={tokenData.token}
                         onChange={(value) => {

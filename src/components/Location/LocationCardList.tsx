@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader } from "@/components/ui/card";
 
 import {
+  LOCATION_TYPE_BADGE_COLORS,
   LocationList,
-  LocationTypeBadgeColors,
 } from "@/types/location/location";
 
 interface LocationCardListProps {
@@ -35,10 +35,7 @@ export function LocationCardList({
           <CardHeader className="p-4">
             <div className="flex justify-between items-center mb-2">
               <Building2 className="size-5 text-blue-500" />
-              <Badge
-                variant="secondary"
-                className={LocationTypeBadgeColors[location.form]}
-              >
+              <Badge variant={LOCATION_TYPE_BADGE_COLORS[location.form]}>
                 {t(`location_form__${location.form}`)}
               </Badge>
             </div>

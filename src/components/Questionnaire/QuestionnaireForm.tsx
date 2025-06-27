@@ -185,8 +185,8 @@ function ValidationErrorDisplay({
                   size="sm"
                   className="mt-2 h-8 text-xs"
                   onClick={() => {
-                    const element = document.querySelector(
-                      `[data-question-id="${structuredQuestion.questionId}"]`,
+                    const element = document.getElementById(
+                      "question-" + structuredQuestion.questionId,
                     );
                     if (element) {
                       element.scrollIntoView({ block: "center" });
@@ -247,8 +247,8 @@ function ValidationErrorDisplay({
                         size="sm"
                         className="mt-2 h-8 text-xs"
                         onClick={() => {
-                          const element = document.querySelector(
-                            `[data-question-id="${error.question_id}"]`,
+                          const element = document.getElementById(
+                            "question-" + error.question_id,
                           );
                           if (element) {
                             element.scrollIntoView({ block: "center" });
@@ -621,9 +621,7 @@ export function QuestionnaireForm({
 
     if (firstErrorId) {
       setTimeout(() => {
-        const element = document.querySelector(
-          `[data-question-id="${firstErrorId}"]`,
-        );
+        const element = document.getElementById("question-" + firstErrorId);
         element?.scrollIntoView({ block: "center" });
       });
       return;

@@ -1,10 +1,11 @@
 import { Link } from "raviger";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { useMediaStream } from "@/hooks/useMediaStream";
 import { useTimer } from "@/hooks/useTimer";
 
 import useVoiceRecorder from "@/Utils/useVoiceRecorder";
@@ -25,8 +26,8 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
 
   const { show, onHide, onCapture, autoRecord = false } = props;
   const [status, setStatus] = useState<Status | null>(null);
-  const mediaStreamRef = useRef<MediaStream | null>(null);
   const { t } = useTranslation();
+  const timer = useTimer();
 
   const { audioURL, resetRecording, startRecording, stopRecording } =
     useVoiceRecorder((permission: boolean) => {
@@ -37,27 +38,35 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
       }
     });
 
-  const timer = useTimer();
+  const { startStream, stopStream } = useMediaStream({
+    constraints: { audio: true },
+    onError: () => {
+      toast.error(t("audio__permission_message"));
+      setStatus("PERMISSION_DENIED");
+    },
+  });
 
-  const handleStartRecording = () => {
-    navigator.mediaDevices
-      .getUserMedia({ audio: true })
-      .then((stream) => {
-        mediaStreamRef.current = stream;
+  const handleStartRecording = async () => {
+    if (status === "RECORDING") return;
+
+    try {
+      const stream = await startStream();
+      if (stream) {
         setStatus("RECORDING");
         startRecording();
         timer.start();
-      })
-      .catch(() => {
-        toast.error(t("audio__permission_message"));
-        setStatus("PERMISSION_DENIED");
-      });
+      }
+    } catch {
+      toast.error(t("audio__permission_message"));
+      setStatus("PERMISSION_DENIED");
+    }
   };
 
   const handleStopRecording = () => {
     if (status !== "RECORDING") return;
     setStatus("RECORDED");
     stopRecording();
+    stopStream();
     timer.stop();
   };
 
@@ -104,14 +113,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
     if (autoRecord && show && status === "RECORDING") {
       handleStartRecording();
     }
-
-    return () => {
-      if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-        mediaStreamRef.current = null;
-      }
-    };
-  }, [autoRecord, status, show]);
+  }, [autoRecord, show, status]);
 
   return (
     <div

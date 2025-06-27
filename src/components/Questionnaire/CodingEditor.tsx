@@ -129,7 +129,7 @@ export function CodingEditor({
                       });
                     }}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger ref={field.ref}>
                       <SelectValue placeholder={t("select_system")} />
                     </SelectTrigger>
                     <SelectContent>
