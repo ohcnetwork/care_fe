@@ -26,7 +26,11 @@ import {
   groupSlotsByAvailability,
   useAvailabilityHeatmap,
 } from "@/pages/Appointments/utils";
-import { Appointment, TokenSlot } from "@/types/scheduling/schedule";
+import {
+  Appointment,
+  GetSlotsForDayResponse,
+  TokenSlot,
+} from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface AppointmentSlotPickerProps {
@@ -70,16 +74,13 @@ export function AppointmentSlotPicker({
       },
     }),
     enabled: !!resourceId && !!selectedDate,
-    select: (data: SlotsResponse) => {
+    select: (data: GetSlotsForDayResponse) => {
       if (currentAppointment) {
-        return {
-          ...data,
-          results: data.results.filter(
-            (slot: TokenSlot) => slot.id !== currentAppointment.token_slot.id,
-          ),
-        };
+        return data.results.filter(
+          (slot) => slot.id !== currentAppointment.token_slot.id,
+        );
       }
-      return data;
+      return data.results;
     },
   });
 
@@ -110,7 +111,7 @@ export function AppointmentSlotPicker({
   const handleSlotSelect = (slotId: string | undefined) => {
     onSlotSelect(slotId);
     if (slotId && onSlotDetailsChange) {
-      const allSlots = slotsQuery.data?.results || [];
+      const allSlots = slotsQuery.data || [];
       const selectedSlot = allSlots.find((slot) => slot.id === slotId);
 
       if (selectedSlot) {
@@ -258,15 +259,15 @@ export function AppointmentSlotPicker({
                   </p>
                 </div>
               )}
-              {slotsQuery.data?.results.length === 0 && (
+              {slotsQuery.data?.length === 0 && (
                 <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
                   <p className="text-gray-400">
                     {t("no_slots_available_for_this_date")}
                   </p>
                 </div>
               )}
-              {!!slotsQuery.data?.results.length &&
-                groupSlotsByAvailability(slotsQuery.data.results).map(
+              {!!slotsQuery.data?.length &&
+                groupSlotsByAvailability(slotsQuery.data).map(
                   ({ availability, slots }) => (
                     <div key={availability.name}>
                       <h4 className="text-lg font-semibold mb-3">
