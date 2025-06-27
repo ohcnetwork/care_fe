@@ -100,6 +100,7 @@ import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 import { CodingEditor } from "./CodingEditor";
 import { QuestionActions } from "./QuestionActions";
 import { QuestionnaireForm } from "./QuestionnaireForm";
+import { QuestionnaireImportPreview } from "./QuestionnaireImportPreview";
 import { QuestionnaireProperties } from "./QuestionnaireProperties";
 import { SelectOrCreateValueset } from "./SelectOrCreateValueset";
 import ValueSetSelect from "./ValueSetSelect";
@@ -693,6 +694,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       slug: importedData.slug,
     };
 
+    const existingQuestions = form.getValues("questions") || [];
+
     setQuestionnaire({
       ...form.getValues(),
       ...mappedData,
@@ -701,7 +704,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       title: mappedData.title || "",
       slug: mappedData.slug || "",
       description: mappedData.description || "",
-      questions: mappedData.questions || [],
+      status: mappedData.status || "draft",
+      version: mappedData.version || "1.0",
+      subject_type: mappedData.subject_type || "encounter",
+      questions: [...existingQuestions, ...(mappedData.questions || [])],
     });
 
     form.trigger();
@@ -1216,9 +1222,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           }
         }}
       >
-        <DialogContent>
+        <DialogContent
+          className={cn(importedData && "min-w-full md:min-w-3xl")}
+        >
           <DialogHeader>
-            <DialogTitle>{t("import_questionnaire")}</DialogTitle>
+            <div className="flex items-center gap-2">
+              <CareIcon icon="l-import" className="mr-1 size-4" />
+              <DialogTitle>{t("import_questionnaire")}</DialogTitle>
+            </div>
           </DialogHeader>
           <div className="space-y-4">
             {!importedData && (
@@ -1231,22 +1242,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 />
               </div>
             )}
-            {importedData && (
-              <div className="space-y-2">
-                <Label>{t("preview")}</Label>
-                <div className="p-4 border rounded-lg">
-                  <p className="font-medium">{importedData.title}</p>
-                  <p className="text-sm text-gray-500">
-                    {importedData.description}
-                  </p>
-                  <p className="text-sm mt-2">
-                    {t("questions_count")} :{" "}
-                    {importedData.questions?.length || 0}
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
+          {importedData && (
+            <QuestionnaireImportPreview
+              existingData={form.getValues()}
+              newData={importedData}
+            />
+          )}
           <DialogFooter>
             <Button
               variant="outline"
