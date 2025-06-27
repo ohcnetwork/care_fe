@@ -42,10 +42,6 @@ interface AppointmentSlotPickerProps {
   currentAppointment?: Appointment;
 }
 
-interface SlotsResponse {
-  results: TokenSlot[];
-}
-
 export function AppointmentSlotPicker({
   facilityId,
   resourceId,
@@ -94,16 +90,13 @@ export function AppointmentSlotPicker({
       },
     }),
     enabled: !!resourceId,
-    select: (data: SlotsResponse) => {
+    select: (data: GetSlotsForDayResponse) => {
       if (currentAppointment) {
-        return {
-          ...data,
-          results: data.results.filter(
-            (slot: TokenSlot) => slot.id !== currentAppointment.token_slot.id,
-          ),
-        };
+        return data.results.filter(
+          (slot) => slot.id !== currentAppointment.token_slot.id,
+        );
       }
-      return data;
+      return data.results;
     },
   });
 
@@ -130,7 +123,7 @@ export function AppointmentSlotPicker({
       // the availability for the day based on the slots that are currently
       // available
       if (isToday(date) && slotsTodayQuery.data) {
-        const slots = slotsTodayQuery.data.results.filter(
+        const slots = slotsTodayQuery.data.filter(
           (slot) => !isPast(slot.end_datetime),
         );
         return {
