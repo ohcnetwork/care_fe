@@ -7,6 +7,10 @@
     "username": "doctor_2_0",
     "password": "Coronasafe@123"
   },
+  "devnurse": {
+    "username": "devnurse5",
+    "password": "Test@123"
+  },
   "staff": {
     "username": "staff_2_0",
     "password": "Coronasafe@123"

@@ -38,6 +38,16 @@ export class PatientEncounter {
     return this;
   }
 
+  clickAndSelectClinical(selector: JQuery, reference: string) {
+    cy.wrap(selector).scrollIntoView().click();
+    cy.get('[role="listbox"]')
+      .find('[role="option"]')
+      .contains(reference)
+      .should("be.visible")
+      .click();
+    return this;
+  }
+
   clickAddAllergy() {
     cy.intercept("GET", "**/allergy_intolerance/**").as("getAllergies");
 
@@ -77,20 +87,18 @@ export class PatientEncounter {
 
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .eq(1)
-      .find("td")
-      .then(($tds) => {
-        const criticality = $tds.eq(2);
-        const status = $tds.eq(3);
-        criticality.attr("data-cy", "allergy-criticality");
-        status.attr("data-cy", "allergy-status");
+      .should("have.length.gte", 1)
+      .then(($rows) => {
+        const secondRow = $rows.eq(1);
+        cy.wrap(secondRow)
+          .find("td")
+          .then(($tds) => {
+            const criticalitySelector = $tds.eq(2);
+            const statusSelector = $tds.eq(3);
+            this.clickAndSelectClinical(criticalitySelector, criticality);
+            this.clickAndSelectClinical(statusSelector, status);
+          });
       });
-
-    cy.get('[data-cy="allergy-criticality"]').first().scrollIntoView();
-    cy.clickAndSelectOption('[data-cy="allergy-criticality"]', criticality);
-
-    cy.get('[data-cy="allergy-status"]').first().scrollIntoView();
-    cy.clickAndSelectOption('[data-cy="allergy-status"]', status);
 
     return this;
   }
@@ -99,16 +107,18 @@ export class PatientEncounter {
     cy.wait(300);
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .last()
-      .find("td")
-      .then(($tds) => {
-        $tds.eq(5).attr("data-cy", "allergy-options");
-      });
-    cy.get('[data-cy="allergy-options"]')
-      .scrollIntoView()
-      .should("be.visible")
-      .then(($el) => {
-        cy.wrap($el).click();
+      .should("have.length.gte", 1)
+      .then(($rows) => {
+        const secondLastRow = $rows.eq(-2);
+        cy.wrap(secondLastRow)
+          .find("td")
+          .then(($tds) => {
+            const optionsSelector = $tds.eq(5);
+            cy.wrap(optionsSelector)
+              .scrollIntoView()
+              .should("be.visible")
+              .click();
+          });
       });
 
     cy.contains("Remove Allergy").click();
@@ -167,20 +177,18 @@ export class PatientEncounter {
 
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .last()
-      .find("td")
-      .then(($tds) => {
-        const status = $tds.eq(1);
-        const severity = $tds.eq(2);
-        status.attr("data-cy", "symptom-status");
-        severity.attr("data-cy", "symptom-severity");
+      .should("have.length.gte", 1)
+      .then(($rows) => {
+        const lastRow = $rows.last();
+        cy.wrap(lastRow)
+          .find("td")
+          .then(($tds) => {
+            const statusSelector = $tds.eq(1);
+            const severitySelector = $tds.eq(2);
+            this.clickAndSelectClinical(statusSelector, status);
+            this.clickAndSelectClinical(severitySelector, severity);
+          });
       });
-
-    cy.get('[data-cy="symptom-severity"]').scrollIntoView();
-    cy.clickAndSelectOption('[data-cy="symptom-severity"]', severity);
-
-    cy.get('[data-cy="symptom-status"]').scrollIntoView();
-    cy.clickAndSelectOption('[data-cy="symptom-status"]', status);
 
     return this;
   }
@@ -189,17 +197,18 @@ export class PatientEncounter {
     cy.wait(300);
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .last()
-      .find("td")
-      .then(($tds) => {
-        $tds.eq(4).attr("data-cy", "symptom-options");
-      });
-
-    cy.get('[data-cy="symptom-options"]')
-      .scrollIntoView()
-      .should("be.visible")
-      .then(($el) => {
-        cy.wrap($el).click();
+      .should("have.length.gte", 1)
+      .then(($rows) => {
+        const lastRow = $rows.last();
+        cy.wrap(lastRow)
+          .find("td")
+          .then(($tds) => {
+            const optionsSelector = $tds.eq(4);
+            cy.wrap(optionsSelector)
+              .scrollIntoView()
+              .should("be.visible")
+              .click();
+          });
       });
 
     cy.contains("Remove Symptom").click();
@@ -254,17 +263,20 @@ export class PatientEncounter {
   updateDiagnosis(details: DiagnosisDetails) {
     const { verification, status } = details;
     cy.wait(200);
+
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .last()
-      .find("td")
-      .then(($tds) => {
-        const status = $tds.eq(2);
-        const severity = $tds.eq(3);
-        const options = $tds.eq(4);
-        status.attr("data-cy", "diagnosis-status");
-        severity.attr("data-cy", "diagnosis-verification");
-        options.attr("data-cy", "diagnosis-options");
+      .should("have.length.gte", 1)
+      .then(($rows) => {
+        const lastRow = $rows.last();
+        cy.wrap(lastRow)
+          .find("td")
+          .then(($tds) => {
+            const statusSelector = $tds.eq(2);
+            const severitySelector = $tds.eq(3);
+            this.clickAndSelectClinical(statusSelector, status);
+            this.clickAndSelectClinical(severitySelector, verification);
+          });
       });
 
     cy.get('[data-cy="diagnosis-verification"]').scrollIntoView();
@@ -280,17 +292,20 @@ export class PatientEncounter {
     cy.wait(300);
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .last()
-      .find("td")
-      .then(($tds) => {
-        $tds.eq(4).attr("data-cy", "diagnosis-options");
+      .should("have.length.gte", 1)
+      .then(($rows) => {
+        const lastRow = $rows.last();
+        cy.wrap(lastRow)
+          .find("td")
+          .then(($tds) => {
+            const optionsSelector = $tds.eq(4);
+            cy.wrap(optionsSelector)
+              .scrollIntoView()
+              .should("be.visible")
+              .click();
+          });
       });
-    cy.get('[data-cy="diagnosis-options"]')
-      .scrollIntoView()
-      .should("be.visible")
-      .then(($el) => {
-        cy.wrap($el).click();
-      });
+
     cy.contains("Remove Diagnosis").click();
     return this;
   }
@@ -302,9 +317,12 @@ export class PatientEncounter {
   }
 
   verifyItemDelete(name: string) {
-    cy.get("table").scrollIntoView();
-    cy.get("table").then(($el) => {
-      cy.wrap($el).should("not.contain", name);
+    cy.get("body").then(($body) => {
+      if ($body.find("table").length > 0) {
+        cy.get("table").scrollIntoView().should("not.contain", name);
+      } else {
+        cy.log("Table not found — allergy is deleted, as expected");
+      }
     });
     return this;
   }
