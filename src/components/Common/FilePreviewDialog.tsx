@@ -85,13 +85,6 @@ interface DragState {
   dragStart: { x: number; y: number };
 }
 
-interface PinchState {
-  isPinching: boolean;
-  initialDistance: number;
-  initialScale: number;
-  center: { x: number; y: number };
-}
-
 const calculateClampedPosition = (
   e: { clientX: number; clientY: number },
   dragStart: { x: number; y: number },
@@ -108,28 +101,10 @@ const calculateClampedPosition = (
   };
 };
 
-const getDistance = (touch1: Touch, touch2: Touch): number => {
-  const dx = touch1.clientX - touch2.clientX;
-  const dy = touch1.clientY - touch2.clientY;
-  return Math.sqrt(dx * dx + dy * dy);
-};
-
-const getCenter = (touch1: Touch, touch2: Touch) => ({
-  x: (touch1.clientX + touch2.clientX) / 2,
-  y: (touch1.clientY + touch2.clientY) / 2,
-});
-
 const initialDragState: DragState = {
   isDragging: false,
   position: { x: 0, y: 0 },
   dragStart: { x: 0, y: 0 },
-};
-
-const initialPinchState: PinchState = {
-  isPinching: false,
-  initialDistance: 0,
-  initialScale: 1,
-  center: { x: 0, y: 0 },
 };
 
 const FilePreviewDialog = (props: FilePreviewProps) => {
@@ -150,7 +125,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   const [index, setIndex] = useState<number>(currentIndex);
   const [scale, setScale] = useState(0.75);
   const [dragState, setDragState] = useState<DragState>(initialDragState);
-  const [pinchState, setPinchState] = useState<PinchState>(initialPinchState);
   const containerRef = useRef<HTMLDivElement>(null);
   const dragStateRef = useRef(dragState);
 
@@ -166,40 +140,21 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
 
   useEffect(() => {
     setDragState(initialDragState);
-    setPinchState(initialPinchState);
   }, [index, show]);
 
-  // Disable browser default zoom when dialog is open
   useEffect(() => {
-    if (!show) return;
-
-    const handleGlobalWheel = (e: WheelEvent) => {
-      // Prevent default browser zoom when Ctrl+wheel is used
-      if (e.ctrlKey) {
-        e.preventDefault();
+    const container = containerRef.current;
+    if (!container) return;
+    const handler = (e: TouchEvent) => {
+      if (dragStateRef.current.isDragging) {
+        handleTouchMove(e as unknown as React.TouchEvent);
       }
     };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Prevent Ctrl+Plus, Ctrl+Minus, Ctrl+0 zoom shortcuts
-      if (
-        e.ctrlKey &&
-        (e.key === "+" || e.key === "-" || e.key === "=" || e.key === "0")
-      ) {
-        e.preventDefault();
-      }
-    };
-
-    // Add event listeners to document to capture events before they reach browser
-    document.addEventListener("wheel", handleGlobalWheel, { passive: false });
-    document.addEventListener("keydown", handleKeyDown, { passive: false });
-
-    // Cleanup function
+    container.addEventListener("touchmove", handler, { passive: false });
     return () => {
-      document.removeEventListener("wheel", handleGlobalWheel);
-      document.removeEventListener("keydown", handleKeyDown);
+      container.removeEventListener("touchmove", handler);
     };
-  }, [show]);
+  }, []);
 
   const handleZoomIn = () => {
     const checkFull = file_state.zoom === zoom_values.length;
@@ -217,21 +172,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     });
     setScale((prevScale) => Math.max(prevScale - 0.25, 0.5));
   };
-
-  const handlePinchZoom = (newScale: number) => {
-    if (file_state.isImage) {
-      // Convert scale to zoom level (1-8 range)
-      const zoomLevel = Math.max(1, Math.min(8, Math.round(newScale * 4)));
-      setFileState({
-        ...file_state,
-        zoom: zoomLevel,
-      });
-    } else if (file_state.extension === "pdf") {
-      // For PDF, update scale directly
-      setScale(Math.max(0.5, Math.min(2, newScale)));
-    }
-  };
-
   const handleRotate = (angle: number) => {
     setFileState((prev: any) => {
       const newRotation = (prev.rotation + angle + 360) % 360;
@@ -336,135 +276,48 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    e.preventDefault();
-
-    if (e.touches.length === 2) {
-      // Pinch gesture
-      const touch1 = e.touches[0] as unknown as Touch;
-      const touch2 = e.touches[1] as unknown as Touch;
-      const distance = getDistance(touch1, touch2);
-      const center = getCenter(touch1, touch2);
-
-      setPinchState({
-        isPinching: true,
-        initialDistance: distance,
-        initialScale: file_state.isImage ? file_state.zoom / 4 : scale,
-        center,
-      });
-
-      // Stop any ongoing drag
-      setDragState((prev) => ({
-        ...prev,
-        isDragging: false,
-      }));
-    } else if (e.touches.length === 1 && !pinchState.isPinching) {
-      // Single touch - drag gesture
-      if (!file_state.isImage) return;
-      setDragState((prev) => ({
-        ...prev,
-        isDragging: true,
-        dragStart: {
-          x: e.touches[0].clientX - prev.position.x,
-          y: e.touches[0].clientY - prev.position.y,
-        },
-      }));
-    }
+    if (!file_state.isImage) return;
+    setDragState((prev) => ({
+      ...prev,
+      isDragging: true,
+      dragStart: {
+        x: e.touches[0].clientX - prev.position.x,
+        y: e.touches[0].clientY - prev.position.y,
+      },
+    }));
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    if (!dragState.isDragging) return;
     e.preventDefault();
+    const container = e.currentTarget as HTMLDivElement;
+    const image = container.querySelector("img");
+    if (!image) return;
 
-    if (e.touches.length === 2 && pinchState.isPinching) {
-      // Pinch zoom
-      const touch1 = e.touches[0] as unknown as Touch;
-      const touch2 = e.touches[1] as unknown as Touch;
-      const distance = getDistance(touch1, touch2);
+    const containerRect = container.getBoundingClientRect();
+    const imageRect = image.getBoundingClientRect();
 
-      if (pinchState.initialDistance > 0) {
-        const scaleChange = distance / pinchState.initialDistance;
-        const newScale = pinchState.initialScale * scaleChange;
-        handlePinchZoom(newScale);
-      }
-    } else if (
-      e.touches.length === 1 &&
-      dragState.isDragging &&
-      !pinchState.isPinching
-    ) {
-      // Single touch drag
-      const container = e.currentTarget as HTMLDivElement;
-      const image = container.querySelector("img");
-      if (!image) return;
+    const { x, y } = calculateClampedPosition(
+      {
+        clientX: e.touches[0].clientX,
+        clientY: e.touches[0].clientY,
+      },
+      dragState.dragStart,
+      containerRect,
+      imageRect,
+    );
 
-      const containerRect = container.getBoundingClientRect();
-      const imageRect = image.getBoundingClientRect();
-
-      const { x, y } = calculateClampedPosition(
-        {
-          clientX: e.touches[0].clientX,
-          clientY: e.touches[0].clientY,
-        },
-        dragState.dragStart,
-        containerRect,
-        imageRect,
-      );
-
-      setDragState((prev) => ({
-        ...prev,
-        position: { x, y },
-      }));
-    }
+    setDragState((prev) => ({
+      ...prev,
+      position: { x, y },
+    }));
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (e.touches.length < 2) {
-      setPinchState(initialPinchState);
-    }
-
-    if (e.touches.length === 0) {
-      setDragState((prev) => ({
-        ...prev,
-        isDragging: false,
-      }));
-    }
-  };
-
-  const handleWheel = (e: React.WheelEvent) => {
-    if (e.ctrlKey) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const zoomIn = e.deltaY < 0;
-
-      if (file_state.isImage) {
-        const currentZoomLevel = file_state.zoom;
-        let newZoomLevel: number;
-
-        if (zoomIn) {
-          newZoomLevel = Math.min(zoom_values.length, currentZoomLevel + 1);
-        } else {
-          newZoomLevel = Math.max(1, currentZoomLevel - 1);
-        }
-
-        if (newZoomLevel !== currentZoomLevel) {
-          setFileState({
-            ...file_state,
-            zoom: newZoomLevel,
-          });
-        }
-      } else if (file_state.extension === "pdf") {
-        // For PDFs, update scale directly
-        const currentScale = scale;
-        let newScale: number;
-
-        if (zoomIn) {
-          newScale = Math.min(2, currentScale + 0.1);
-        } else {
-          newScale = Math.max(0.5, currentScale - 0.1);
-        }
-
-        setScale(newScale);
-      }
-    }
+  const handleTouchEnd = () => {
+    setDragState((prev) => ({
+      ...prev,
+      isDragging: false,
+    }));
   };
 
   return (
@@ -536,20 +389,16 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 onMouseLeave={handleMouseUp}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
-                onTouchMove={handleTouchMove}
-                onWheel={handleWheel}
               >
                 {file_state.isImage ? (
                   <div
                     className={cn(
                       "flex items-center justify-center w-full h-full transition-transform duration-100",
-                      dragState.isDragging || pinchState.isPinching
-                        ? "duration-0"
-                        : "",
+                      dragState.isDragging ? "duration-0" : "",
                     )}
-                    // style={{
-                    //   transform: `translate(${dragState.position.x}px, ${dragState.position.y}px)`,
-                    // }}
+                    style={{
+                      transform: `translate(${dragState.position.x}px, ${dragState.position.y}px)`,
+                    }}
                   >
                     <img
                       src={fileUrl}
