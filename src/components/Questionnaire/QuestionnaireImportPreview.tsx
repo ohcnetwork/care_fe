@@ -174,7 +174,7 @@ const QuestionnaireQuestions = ({ questions }: { questions: Question[] }) => {
                     </Badge>
                   )}
                   {question.repeats && (
-                    <Badge variant="blue" className="mr-1 rounded-full">
+                    <Badge variant="blue" className="ml-1 rounded-full">
                       {t("repeatable")}
                     </Badge>
                   )}
