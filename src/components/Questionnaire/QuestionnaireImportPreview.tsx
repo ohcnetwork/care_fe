@@ -29,7 +29,7 @@ const PropertyDiffCard = ({
 
   if (currentValue === newValue) {
     return (
-      <Card className="border-l-4 border-l-gray-200 shadow-2xs">
+      <Card className="border-l-4 border-l-gray-200 shadow-none">
         <CardContent className="p-4">
           <div className="space-y-2">
             <Label>{property}</Label>
@@ -41,7 +41,7 @@ const PropertyDiffCard = ({
   }
 
   return (
-    <Card className="border-l-4 border-l-gray-200 shadow-2xs">
+    <Card className="border-l-4 border-l-gray-200 shadow-none">
       <CardContent className="p-4">
         <div className="space-y-2">
           <Label>{property}</Label>
@@ -141,7 +141,7 @@ const QuestionnaireQuestions = ({ questions }: { questions: Question[] }) => {
         {questions.map((question, index) => (
           <Card
             key={question.id}
-            className="border-l-4 border-l-green-500 shadow-2xs"
+            className="border-l-4 border-l-green-500 shadow-none"
           >
             <CardContent className="p-4">
               <div className="flex justify-between">
