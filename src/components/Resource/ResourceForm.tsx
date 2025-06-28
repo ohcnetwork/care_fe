@@ -12,7 +12,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -24,7 +23,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -36,8 +34,9 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 
 import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/Page";
+import PageTitle from "@/components/Common/PageTitle";
 import UserSelector from "@/components/Common/UserSelector";
+import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -70,12 +69,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const resourceFormSchema = z.object({
     status: z.string().min(1, { message: t("field_required") }),
     category: z.string().min(1, { message: t("field_required") }),
-    assigned_facility: z
-      .object({
-        id: z.string(),
-        name: z.string(),
-      })
-      .nullable(),
+    assigned_facility: z.object({
+      id: z.string(),
+      name: z.string(),
+    }),
     emergency: z.enum(["true", "false"]),
     title: z.string().min(1, { message: t("field_required") }),
     reason: z.string().min(1, { message: t("field_required") }),
@@ -84,9 +81,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       .min(1, { message: t("field_required") }),
     referring_facility_contact_number: validators().phoneNumber.required,
     priority: z.number().default(1),
-    assigned_to: id
-      ? z.string().min(1, { message: t("field_required") })
-      : z.string().optional(),
+    assigned_to: z.string().optional(),
   });
 
   type ResourceFormValues = z.infer<typeof resourceFormSchema>;
@@ -107,12 +102,12 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     enabled: !!id,
   });
 
-  const form = useForm<ResourceFormValues>({
+  const form = useForm({
     resolver: zodResolver(resourceFormSchema),
     defaultValues: {
       status: "pending",
       category: "",
-      assigned_facility: null,
+      assigned_facility: undefined,
       assigned_to: "",
       emergency: "false" as const,
       title: "",
@@ -170,7 +165,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       status: data.status,
       category: data.category,
       origin_facility: String(facilityId),
-      assigned_facility: data.assigned_facility?.id || null,
+      assigned_facility: data.assigned_facility?.id,
       assigned_to: assignedToUser?.id || null,
       approving_facility: null,
       emergency: data.emergency === "true",
@@ -192,7 +187,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     queryKey: ["facilities", facilitySearch],
     queryFn: query.debounced(facilityApi.getAllFacilities, {
       queryParams: {
-        search_text: facilitySearch,
+        search_text: facilitySearch ? facilitySearch : undefined,
         limit: 50,
       },
     }),
@@ -212,13 +207,19 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     form.setValue(
       "referring_facility_contact_name",
       `${authUser.first_name} ${authUser.last_name}`.trim(),
-      { shouldDirty: true },
+      {
+        shouldDirty: true,
+        shouldValidate: true,
+      },
     );
     if (authUser.phone_number) {
       form.setValue(
         "referring_facility_contact_number",
         authUser.phone_number,
-        { shouldDirty: true },
+        {
+          shouldDirty: true,
+          shouldValidate: true,
+        },
       );
     }
   };
@@ -228,7 +229,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   }
 
   return (
-
     <div className="container mx-auto max-w-4xl space-y-6 p-4 md:p-6">
       <PageTitle
         title={id ? t("update_resource_request") : t("create_resource_request")}
@@ -316,180 +316,24 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
-
                 )}
+              />
 
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-medium">
-                      {t("basic_information")}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      {t("resource_request_basic_info_description")}
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <FormField
-                      control={form.control}
-                      name="assigned_facility"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            {t("facility_for_care_support")}
-                          </FormLabel>
-                          <FormControl>
-                            <Autocomplete
-                              options={mergeAutocompleteOptions(
-                                facilityOptions ?? [],
-                                field.value
-                                  ? {
-                                      label: field.value.name,
-                                      value: field.value.id,
-                                    }
-                                  : undefined,
-                              )}
-                              value={field.value?.id ?? ""}
-                              placeholder={t("start_typing_to_search")}
-                              onSearch={setFacilitySearch}
-                              onChange={(value) => {
-                                const facility =
-                                  facilities?.results.find(
-                                    (f) => f.id === value,
-                                  ) ?? null;
-                                form.setValue("assigned_facility", facility, {
-                                  shouldDirty: true,
-                                });
-                              }}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            {t("select_facility_description")}
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="emergency"
-                      render={({ field }) => (
-                        <FormItem className="space-y-3">
-                          <FormLabel>{t("is_this_an_emergency")}</FormLabel>
-                          <FormControl>
-                            <RadioGroup
-                              onValueChange={field.onChange}
-                              value={field.value}
-                              className="flex gap-4"
-                            >
-                              <FormItem className="flex items-center space-x-3 space-y-0">
-                                <FormControl>
-                                  <RadioGroupItem value="true" />
-                                </FormControl>
-                                <FormLabel className="font-normal">
-                                  {t("yes")}
-                                </FormLabel>
-                              </FormItem>
-                              <FormItem className="flex items-center space-x-3 space-y-0">
-                                <FormControl>
-                                  <RadioGroupItem value="false" />
-                                </FormControl>
-                                <FormLabel className="font-normal">
-                                  {t("no")}
-                                </FormLabel>
-                              </FormItem>
-                            </RadioGroup>
-                          </FormControl>
-                          <FormDescription>
-                            {t("emergency_description")}
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="status"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel required>{t("status")}</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={t("select_status")} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {RESOURCE_STATUS_CHOICES.map((option, index) => (
-                                <SelectItem key={index} value={option.text}>
-                                  {t(`resource_status__${option.text}`)}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="category"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel required>{t("category")}</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue
-                                  placeholder={t("category_description")}
-                                />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {RESOURCE_CATEGORY_CHOICES.map((category) => (
-                                <SelectItem
-                                  key={category.id}
-                                  value={category.id}
-                                >
-                                  {category.text}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {id && (
-                      <FormField
-                        control={form.control}
-                        name="assigned_to"
-                        render={() => (
-                          <FormItem>
-                            <FormLabel required>{t("assigned_to")}</FormLabel>
-                            <FormControl>
-                              <UserSelector
-                                selected={assignedToUser}
-                                onChange={handleUserChange}
-                                placeholder={t("search_users")}
-                                noOptionsMessage={t("no_users_found")}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+              <FormField
+                control={form.control}
+                name="emergency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("is_this_an_emergency")}</FormLabel>
+                    <FormControl>
+                      <RadioInput
+                        {...field}
+                        onValueChange={field.onChange}
+                        options={[
+                          { value: "true", label: t("yes") },
+                          { value: "false", label: t("no") },
+                        ]}
                       />
-
                     </FormControl>
                     <FormDescription>
                       {t("emergency_description")}
@@ -540,136 +384,192 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                           ref={field.ref}
                         >
                           <SelectValue
-
+                            placeholder={t("category_description")}
                           />
-                        </FormControl>
-                        <FormDescription>
-                          {t("request_title_description")}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {RESOURCE_CATEGORY_CHOICES.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.text}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {id && (
+                <FormField
+                  control={form.control}
+                  name="assigned_to"
+                  render={() => (
+                    <FormItem>
+                      <FormLabel>{t("assigned_to")}</FormLabel>
+                      <FormControl>
+                        <UserSelector
+                          facilityId={form.watch("assigned_facility")?.id}
+                          selected={assignedToUser}
+                          onChange={handleUserChange}
+                          placeholder={t("search_users")}
+                          noOptionsMessage={t("no_users_found")}
+                          popoverClassName="w-full"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
+          </div>
+          <Separator />
 
-                  <FormField
-                    control={form.control}
-                    name="reason"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel required>{t("request_reason")}</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            {...field}
-                            placeholder={t("request_reason_placeholder")}
-                            onChange={(value) => field.onChange(value)}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          {t("request_reason_description")}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium">{t("request_details")}</h3>
+              <p className="text-sm text-gray-500">
+                {t("resource_request_details_description")}
+              </p>
+            </div>
 
-                <Separator />
-
-                <div className="space-y-6">
-                  <div className="flex flex-col lg:flex-row gap-2 lg:items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-medium">
-                        {t("contact_information")}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        {t("contact_information_description")}
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={fillMyDetails}
-                      className="shrink-0"
-                    >
-                      <CareIcon icon="l-user" className="mr-2 h-4 w-4" />
-                      {t("fill_my_details")}
-                    </Button>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <FormField
-                      control={form.control}
-                      name="referring_facility_contact_name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel required>{t("contact_person")}</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              onChange={(value) => field.onChange(value)}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            {t("contact_person_description")}
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel aria-required>{t("request_title")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      data-cy="title-input"
+                      {...field}
+                      placeholder={t("request_title_placeholder")}
+                      onChange={(value) => field.onChange(value)}
                     />
+                  </FormControl>
+                  <FormDescription>
+                    {t("request_title_description")}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                    <FormField
-                      control={form.control}
-                      name="referring_facility_contact_number"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel required>{t("contact_phone")}</FormLabel>
-                          <FormControl>
-                            <PhoneInput
-                              {...field}
-                              onChange={(value) => field.onChange(value)}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            {t("contact_phone_description")}
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+            <FormField
+              control={form.control}
+              name="reason"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel aria-required>{t("request_reason")}</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      data-cy="reason-input"
+                      placeholder={t("request_reason_placeholder")}
+                      onChange={(value) => field.onChange(value)}
                     />
-                  </div>
-                </div>
+                  </FormControl>
+                  <FormDescription>
+                    {t("request_reason_description")}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-                <div className="sticky bottom-0 flex justify-end gap-4 border-t pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => goBack()}
-                  >
-                    {t("cancel")}
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    disabled={
-                      id
-                        ? isUpdatePending || !form.formState.isDirty
-                        : isPending
-                    }
-                  >
-                    {isPending && (
-                      <CareIcon
-                        icon="l-spinner"
-                        className="mr-2 h-4 w-4 animate-spin"
+          <Separator />
+
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium">
+                  {t("contact_information")}
+                </h3>
+                <p className="text-sm text-gray-500">
+                  {t("contact_information_description")}
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={fillMyDetails}
+                className="shrink-0"
+                data-cy="fill_my_details_button"
+              >
+                <CareIcon icon="l-user" className="mr-2 size-4" />
+                {t("fill_my_details")}
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 items-start">
+              <FormField
+                control={form.control}
+                name="referring_facility_contact_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel aria-required>{t("contact_person")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(value) => field.onChange(value)}
+                        data-cy="contact_person"
                       />
-                    )}
-                    {isPending ? t("submitting") : t("submit")}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-      </div>
-    </Page>
+                    </FormControl>
+                    <FormDescription>
+                      {t("contact_person_description")}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="referring_facility_contact_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel aria-required>{t("contact_phone")}</FormLabel>
+                    <FormControl>
+                      <PhoneInput
+                        {...field}
+                        data-cy="contact_person_phone"
+                        onChange={(value) => field.onChange(value)}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t("contact_phone_description")}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-4 border-t border-gray-200 pt-4">
+            <Button type="button" variant="outline" onClick={() => goBack()}>
+              {t("cancel")}
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={
+                id ? isUpdatePending || !form.formState.isDirty : isPending
+              }
+            >
+              {isPending && (
+                <CareIcon
+                  icon="l-spinner"
+                  className="mr-2 size-4 animate-spin"
+                />
+              )}
+              {isPending ? t("submitting") : t("submit")}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 }
