@@ -337,7 +337,6 @@ export function QuestionnaireForm({
 
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
-  console.log("questionnaireForms", questionnaireForms);
   const {
     data: questionnaireData,
     isLoading: isQuestionnaireLoading,
@@ -483,22 +482,20 @@ export function QuestionnaireForm({
   ): QuestionnaireResponse[] => {
     const responses: QuestionnaireResponse[] = [];
 
-    const processQuestion = (q: Question, groupInstanceId?: string) => {
+    const processQuestion = (q: Question) => {
       if (q.type === "group" && q.questions) {
-        const groupInstanceId = crypto.randomUUID();
-        q.questions.forEach((subQ) => processQuestion(subQ, groupInstanceId));
+        q.questions.forEach((subQ) => processQuestion(subQ));
       } else {
         responses.push({
           question_id: q.id,
           link_id: q.link_id,
           values: [],
           structured_type: q.structured_type ?? null,
-          group_instance_id: groupInstanceId,
         });
       }
     };
 
-    questions.forEach((q) => processQuestion(q));
+    questions.forEach(processQuestion);
     return responses;
   };
 
@@ -723,16 +720,6 @@ export function QuestionnaireForm({
         });
       }
     });
-
-    console.log(
-      formsWithValidation.map((form) =>
-        form.responses.filter(
-          (r) =>
-            r.question_id === "33941c6c-df7f-4d74-950c-5387c4059490" ||
-            r.group_instance_id,
-        ),
-      ),
-    );
 
     submitBatch({ requests });
   };

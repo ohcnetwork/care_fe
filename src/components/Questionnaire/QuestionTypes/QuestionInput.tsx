@@ -67,11 +67,10 @@ export function QuestionInput({
   isSubQuestion,
 }: QuestionInputProps) {
   const { t } = useTranslation();
-  console.log(questionnaireResponses);
+
   const questionnaireResponse = questionnaireResponses.find(
     (v) => v.question_id === question.id,
   );
-  console.log("after", questionnaireResponses);
 
   if (!questionnaireResponse) {
     return null;

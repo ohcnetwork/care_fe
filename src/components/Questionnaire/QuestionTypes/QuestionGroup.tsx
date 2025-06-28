@@ -121,7 +121,7 @@ export const QuestionGroup = memo(function QuestionGroup({
   isSubQuestion = false,
 }: QuestionGroupProps) {
   const [groupInstances, setGroupInstances] = useState(() => {
-    return [questionnaireResponses[0].group_instance_id];
+    return [crypto.randomUUID()];
   });
   const isEnabled = isQuestionEnabled(question, questionnaireResponses);
 
@@ -171,7 +171,6 @@ export const QuestionGroup = memo(function QuestionGroup({
       const values = existingValues.filter((v) => v.instance_id != instance_id);
       updateQuestionnaireResponseCB(values, q.id);
     });
-    console.log("after remove", questionnaireResponses);
   }
 
   return (
@@ -204,7 +203,6 @@ export const QuestionGroup = memo(function QuestionGroup({
         )}
       >
         {groupInstances.map((instanceId) => {
-          console.log("questionnaireResponses", questionnaireResponses);
           const instanceResponses: QuestionnaireResponse[] =
             questionnaireResponses.map((res) => ({
               ...res,
@@ -212,7 +210,7 @@ export const QuestionGroup = memo(function QuestionGroup({
                 (val) => val.instance_id === instanceId,
               ),
             }));
-          console.log("instanceResponses", instanceResponses);
+
           return (
             <div
               key={instanceId}
