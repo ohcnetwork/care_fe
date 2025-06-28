@@ -334,7 +334,7 @@ export function QuestionnaireForm({
   >([]);
   const [serverErrors, setServerErrors] = useState<ServerValidationError[]>();
   const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string>();
-
+  const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -724,61 +724,104 @@ export function QuestionnaireForm({
     submitBatch({ requests });
   };
 
-  const scrollToQuestion = (questionnaireId: string, groupId?: string) => {
-    setActiveQuestionnaireId(questionnaireId);
-    setActiveGroupId(groupId);
-
-    let element: Element | null;
-
-    if (groupId) {
-      element = document.querySelector(`[data-group-id="${groupId}"]`);
-    } else {
-      element = document.querySelector(
-        `[data-questionnaire-id="${questionnaireId}"]`,
-      );
-    }
-
-    if (element) {
-      element.scrollIntoView({ block: "start" });
-    }
-  };
-
   return (
     <div className="flex gap-4">
       {/* Left Navigation */}
-      <div className="w-64 border-r border-gray-200 p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
+      <div className="w-64 border-r p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
         {questionnaireForms.map((form) => (
           <div key={form.questionnaire.id} className="space-y-2">
+            {/* Questionnaire Title */}
             <button
               className={cn(
                 "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
                 activeQuestionnaireId === form.questionnaire.id &&
                   "bg-gray-100 text-green-600",
               )}
-              onClick={() => scrollToQuestion(form.questionnaire.id)}
+              onClick={() => setActiveQuestionnaireId(form.questionnaire.id)}
               disabled={isPending}
             >
               {form.questionnaire.title}
             </button>
+
             <div className="pl-4 space-y-1">
-              {form.questionnaire.questions
-                .filter((q) => q.type === "group")
-                .map((group) => (
+              {form.questionnaire.questions.map((question, index) => {
+                if (question.type === "group") {
+                  return (
+                    <div key={question.id}>
+                      {/* Group Title */}
+                      <button
+                        className={cn(
+                          "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
+                          activeGroupId === question.id && "text-green-600",
+                        )}
+                        onClick={() => {
+                          setActiveQuestionnaireId(form.questionnaire.id);
+                          setActiveGroupId(question.id);
+                        }}
+                        disabled={isPending}
+                      >
+                        {`${index + 1}. ${question.text}`}
+                      </button>
+
+                      {/* Sub-Questions */}
+                      {question.questions && question.questions.length > 0 && (
+                        <div className="pl-4 space-y-1">
+                          {question.questions.map((sub, subIndex) => (
+                            <button
+                              key={sub.id}
+                              className={cn(
+                                "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
+                                activeQuestionId === sub.id &&
+                                  "border  text-green-600 bg-white shadow-sm",
+                              )}
+                              onClick={() => {
+                                setActiveQuestionnaireId(form.questionnaire.id);
+                                setActiveGroupId(question.id);
+                                setActiveQuestionId(sub.id);
+                                document
+                                  .getElementById(`question-${sub.id}`)
+                                  ?.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "center",
+                                  });
+                              }}
+                              disabled={isPending}
+                            >
+                              {`${index + 1}.${subIndex + 1} ${sub.text}`}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                // Non-group questions
+                return (
                   <button
-                    key={group.id}
+                    key={question.id}
                     className={cn(
-                      "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
-                      activeGroupId === group.id &&
-                        "bg-gray-100 text-green-600",
+                      "w-full text-left px-2 py-1 rounded hover:bg-gray-100",
+                      activeQuestionId === question.id &&
+                        "border  text-green-600 bg-white shadow-sm",
                     )}
-                    onClick={() =>
-                      scrollToQuestion(form.questionnaire.id, group.id)
-                    }
+                    onClick={() => {
+                      setActiveQuestionnaireId(form.questionnaire.id);
+                      setActiveQuestionId(question.id);
+                      setActiveGroupId(undefined);
+                      document
+                        .getElementById(`question-${question.id}`)
+                        ?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "center",
+                        });
+                    }}
                     disabled={isPending}
                   >
-                    {group.text}
+                    {`${index + 1}. ${question.text}`}
                   </button>
-                ))}
+                );
+              })}
             </div>
           </div>
         ))}

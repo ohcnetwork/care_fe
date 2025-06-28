@@ -19,15 +19,16 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@core/*": ["src/*"],
+      "@core/*": ["./src/*"],
       "@careConfig": ["./care.config.ts"]
     },
-    "typeRoots": ["./node_modules/@types", "./src/remote-modules.d.ts"]
+    "typeRoots": ["./node_modules/@types"]
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.d.ts",
+    "src/remote-modules.d.ts",
     "care.config.ts",
     "scripts/**/*.ts",
     "cypress.config.ts",

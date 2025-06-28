@@ -18,13 +18,15 @@ import { z } from "zod";
 import { careConsoleArt } from "./plugins/careConsoleArt";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
 
-const pdfWorkerPath = path.join(
-  path.dirname(
-    createRequire(import.meta.url).resolve("pdfjs-dist/package.json"),
-  ),
-  "build",
-  "pdf.worker.min.mjs",
-);
+const pdfWorkerPath = path
+  .join(
+    path.dirname(
+      createRequire(import.meta.url).resolve("pdfjs-dist/package.json"),
+    ),
+    "build",
+    "pdf.worker.min.mjs",
+  )
+  .replace(/\\/g, "/");
 
 // Convert goal description markdown to HTML
 function getDescriptionHtml(description: string) {
@@ -300,7 +302,8 @@ export default defineConfig(({ mode }) => {
       host: "0.0.0.0",
       allowedHosts: true,
       headers: {
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "Strict-Transport-Security":
+          "max-age=31536000; includeSubDomains; preload",
         "X-XSS-Protection": "1; mode=block",
         "X-Frame-Options": "SAMEORIGIN",
         "X-Content-Type-Options": "nosniff",
