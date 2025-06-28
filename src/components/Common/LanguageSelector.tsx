@@ -35,7 +35,7 @@ export const LanguageSelector = () => {
   return (
     <div className="relative flex items-center w-full">
       <Select value={i18n.language} onValueChange={handleLanguage}>
-        <SelectTrigger className="focus:border-primary-500 focus:outline-none focus:ring-primary-500">
+        <SelectTrigger>
           <SelectValue placeholder={t("select_language")} />
         </SelectTrigger>
         <SelectContent>
