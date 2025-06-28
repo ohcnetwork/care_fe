@@ -220,6 +220,7 @@ export default function Autocomplete({
                 size="icon"
                 className="size-3 p-0 hover:bg-transparent opacity-50"
                 onClick={handleClear}
+                title={t("clear")}
               >
                 <Cross2Icon className="size-3" />
                 <span className="sr-only">{t("clear")}</span>
@@ -271,6 +272,7 @@ export default function Autocomplete({
               size="icon"
               className="size-3 p-0 hover:bg-transparent opacity-50"
               onClick={handleClear}
+              title={t("clear")}
             >
               <Cross2Icon className="size-3" />
               <span className="sr-only">{t("clear")}</span>
