@@ -118,6 +118,7 @@ const SearchInputFieldRenderer = ({
             value={searchValue}
             onChange={(event) => setSearchValue(event.target.value)}
             className={cn(
+              "outline-none focus:outline-none focus-visible:ring-0 focus:border-primary-400",
               !isSingleOption &&
                 "grow border-none shadow-none focus-visible:ring-0",
               inputClassName,
