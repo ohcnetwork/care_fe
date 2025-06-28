@@ -149,8 +149,6 @@ export default function DateField({
         <Label className="mb-1">{t("day")}</Label>
         <Input
           type="number"
-          inputMode="numeric"
-          pattern="[0-9]*"
           placeholder="DD"
           value={day}
           onChange={handleDayChange}
@@ -167,8 +165,6 @@ export default function DateField({
         <Label className="mb-1">{t("month")}</Label>
         <Input
           type="number"
-          inputMode="numeric"
-          pattern="[0-9]*"
           placeholder="MM"
           value={month}
           onChange={handleMonthChange}
@@ -185,8 +181,6 @@ export default function DateField({
         <Label className="mb-1">{t("year")}</Label>
         <Input
           type="number"
-          inputMode="numeric"
-          pattern="[0-9]*"
           placeholder="YYYY"
           value={year}
           onChange={handleYearChange}

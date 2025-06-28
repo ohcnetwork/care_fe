@@ -1,9 +1,8 @@
 import { CaretDownIcon } from "@radix-ui/react-icons";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { CheckIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,10 +22,8 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import { UserBase } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
 
@@ -36,11 +33,7 @@ interface Props {
   placeholder?: string;
   noOptionsMessage?: string;
   popoverClassName?: string;
-  facilityId?: string;
-  organizationId?: string;
 }
-
-const PAGE_LIMIT = 50;
 
 export default function UserSelector({
   selected,
@@ -48,63 +41,19 @@ export default function UserSelector({
   placeholder,
   noOptionsMessage,
   popoverClassName,
-  facilityId,
-  organizationId,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const { ref, inView } = useInView();
 
-  const getPathParams = () => {
-    if (!facilityId) return undefined;
-    return organizationId
-      ? { facilityId, organizationId }
-      : { facility_id: facilityId };
-  };
-
-  const getQueryParams = (pageParam: number) => ({
-    limit: String(PAGE_LIMIT),
-    offset: String(pageParam),
-    search_text: search,
+  const { data, isFetching } = useQuery({
+    queryKey: ["users", search],
+    queryFn: query.debounced(UserApi.list, {
+      queryParams: { search_text: search },
+    }),
   });
 
-  const {
-    data: usersList,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isFetching,
-  } = useInfiniteQuery({
-    queryKey: ["users", facilityId, search, organizationId],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query.debounced(
-        facilityId
-          ? organizationId
-            ? facilityOrganizationApi.listUsers
-            : routes.facility.getUsers
-          : UserApi.list,
-        {
-          pathParams: getPathParams(),
-          queryParams: getQueryParams(pageParam),
-        },
-      )({ signal });
-      return response;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * PAGE_LIMIT;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
-    select: (data) =>
-      data?.pages.flatMap((p) =>
-        p.results.map((u) => ("user" in u ? u.user : u)),
-      ) || [],
-  });
-
-  useEffect(() => {
-    if (inView && hasNextPage) fetchNextPage();
-  }, [inView, hasNextPage, fetchNextPage]);
+  const users = data?.results || [];
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
@@ -112,14 +61,13 @@ export default function UserSelector({
         <Button
           variant="outline"
           role="combobox"
-          className="min-w-60 w-full justify-start"
-          data-cy="select-assigned-user"
+          className="min-w-60 justify-start"
         >
           {selected ? (
             <div className="flex items-center gap-2">
               <Avatar
                 imageUrl={selected.profile_picture_url}
-                name={formatName(selected, true)}
+                name={formatName(selected)}
                 className="size-6 rounded-full"
               />
               <TooltipComponent content={formatName(selected)} side="bottom">
@@ -139,11 +87,11 @@ export default function UserSelector({
         align="start"
         sideOffset={4}
       >
-        <Command>
+        <Command filter={() => 1}>
           <CommandInput
             placeholder={t("search")}
             onValueChange={setSearch}
-            className="outline-hidden border-none ring-0 shadow-none"
+            className="outline-none border-none ring-0 shadow-none"
           />
           <CommandList>
             <CommandEmpty>
@@ -152,43 +100,32 @@ export default function UserSelector({
                 : noOptionsMessage || t("no_results")}
             </CommandEmpty>
             <CommandGroup>
-              {usersList?.map((user: UserBase, i) => (
+              {users.map((user: UserBase) => (
                 <CommandItem
                   key={user.id}
-                  value={`${formatName(user)} ${user.username ?? ""}`}
+                  value={user.id}
                   onSelect={() => {
                     onChange(user);
                     setOpen(false);
                   }}
-                  className="cursor-pointer w-full"
-                  ref={i === usersList.length - 1 ? ref : undefined}
+                  className="cursor-pointer"
                 >
-                  <div className="flex items-center gap-2 w-full">
+                  <div className="flex items-center gap-2">
                     <Avatar
                       imageUrl={user.profile_picture_url}
-                      name={formatName(user, true)}
+                      name={formatName(user)}
                       className="size-6 rounded-full"
                     />
-                    <div className="flex flex-col min-w-0">
-                      <span
-                        className="truncate text-sm font-medium"
-                        title={formatName(user)}
-                      >
-                        {formatName(user)}
-                      </span>
-                      <span className="text-xs text-gray-500 truncate">
-                        {user.username}
-                      </span>
-                    </div>
-                    {selected?.id === user.id && (
-                      <CheckIcon className="ml-auto" />
-                    )}
+                    <span>{formatName(user)}</span>
+                    <span className="text-xs text-gray-500 font-medium">
+                      {user.username}
+                    </span>
                   </div>
+                  {selected?.id === user.id && (
+                    <CheckIcon className="ml-auto" />
+                  )}
                 </CommandItem>
               ))}
-              {isFetchingNextPage && (
-                <div className="text-center text-sm py-2">{t("loading")}</div>
-              )}
             </CommandGroup>
           </CommandList>
         </Command>

@@ -1,7 +1,5 @@
 import { ReactNode, createContext, useContext, useState } from "react";
 
-import { cn } from "@/lib/utils";
-
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
@@ -51,23 +49,14 @@ export const ZoomTransform = (props: {
   }
 
   return (
-    <>
-      <style>{`
-        @media not print {
-          :root {
-            --print-preview-zoom-scale: ${ctx.scale};
-          }
-        }
-      `}</style>
-      <div
-        className={cn(
-          props.className,
-          "scale-[var(--print-preview-zoom-scale)]",
-        )}
-      >
-        {props.children}
-      </div>
-    </>
+    <div
+      className={props.className}
+      style={{
+        transform: `scale(${ctx.scale})`,
+      }}
+    >
+      {props.children}
+    </div>
   );
 };
 

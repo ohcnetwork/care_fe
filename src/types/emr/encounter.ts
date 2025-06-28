@@ -1,17 +1,4 @@
-import {
-  Ambulance,
-  BedDouble,
-  Building2,
-  Home,
-  LucideIcon,
-  MonitorSmartphone,
-  Stethoscope,
-} from "lucide-react";
-
-import { Badge } from "@/components/ui/badge";
-
-import { CareTeamResponse } from "@/types/careTeam/careTeam";
-import { Patient } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/newPatient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationAssociationStatus } from "@/types/location/association";
 import { LocationList } from "@/types/location/location";
@@ -65,39 +52,20 @@ export const ENCOUNTER_DISCHARGE_DISPOSITION = [
 ] as const;
 
 export const ENCOUNTER_PRIORITY = [
-  "stat",
   "ASAP",
-  "emergency",
-  "urgent",
-  "routine",
-  "elective",
-  "rush_reporting",
-  "timing_critical",
   "callback_results",
   "callback_for_scheduling",
+  "elective",
+  "emergency",
   "preop",
   "as_needed",
+  "routine",
+  "rush_reporting",
+  "stat",
+  "timing_critical",
   "use_as_directed",
+  "urgent",
 ] as const;
-
-export const ENCOUNTER_PRIORITY_COLORS = {
-  stat: "destructive",
-  ASAP: "yellow",
-  emergency: "destructive",
-  urgent: "orange",
-  routine: "blue",
-  elective: "indigo",
-  rush_reporting: "orange",
-  timing_critical: "yellow",
-  callback_results: "green",
-  callback_for_scheduling: "purple",
-  preop: "pink",
-  as_needed: "teal",
-  use_as_directed: "indigo",
-} as const satisfies Record<
-  EncounterPriority,
-  React.ComponentProps<typeof Badge>["variant"]
->;
 
 export const ENCOUNTER_STATUS = [
   "planned",
@@ -110,30 +78,6 @@ export const ENCOUNTER_STATUS = [
   "entered_in_error",
   "unknown",
 ] as const;
-
-export const ENCOUNTER_STATUS_COLORS = {
-  planned: "blue",
-  in_progress: "yellow",
-  on_hold: "orange",
-  discharged: "primary",
-  completed: "green",
-  cancelled: "destructive",
-  discontinued: "destructive",
-  entered_in_error: "destructive",
-  unknown: "secondary",
-} as const satisfies Record<
-  EncounterStatus,
-  React.ComponentProps<typeof Badge>["variant"]
->;
-
-export const ENCOUNTER_CLASSES_ICONS = {
-  imp: BedDouble,
-  amb: Ambulance,
-  obsenc: Stethoscope,
-  emer: Building2,
-  vr: MonitorSmartphone,
-  hh: Home,
-} as const satisfies Record<EncounterClass, LucideIcon>;
 
 export type EncounterAdmitSources = (typeof ENCOUNTER_ADMIT_SOURCE)[number];
 
@@ -204,9 +148,6 @@ export interface Encounter {
   organizations: FacilityOrganization[];
   current_location: LocationList;
   location_history: LocationHistory[];
-  permissions: string[];
-  care_team: CareTeamResponse[];
-  discharge_summary_advice?: string;
 }
 
 export interface EncounterEditRequest {
@@ -219,7 +160,6 @@ export interface EncounterEditRequest {
   priority: EncounterPriority;
   external_identifier?: string;
   facility: string;
-  discharge_summary_advice?: string | null;
 }
 
 export interface EncounterRequest {
@@ -232,11 +172,10 @@ export interface EncounterRequest {
   priority: EncounterPriority;
   external_identifier?: string;
   facility: string;
-  discharge_summary_advice?: string;
 }
 
-export const completedEncounterStatus = ["completed"];
+export const completedEncounterStatus = ["completed", "discharged"];
 export const inactiveEncounterStatus = [
   ...["cancelled", "entered_in_error", "discontinued"],
-  ...completedEncounterStatus,
+  ...(completedEncounterStatus as EncounterStatus[]),
 ] as const;

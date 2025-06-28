@@ -1,20 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 import Loading from "@/components/Common/Loading";
-
-import useAppHistory from "@/hooks/useAppHistory";
+import PageTitle from "@/components/Common/PageTitle";
 
 import query from "@/Utils/request/query";
 import deviceApi from "@/types/device/deviceApi";
 
 import DeviceForm from "./components/DeviceForm";
-import DeviceTypeIcon from "./components/DeviceTypeIcon";
 
 interface Props {
   facilityId: string;
@@ -23,7 +20,6 @@ interface Props {
 
 export default function UpdateDevice({ facilityId, deviceId }: Props) {
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
 
   const { data: device, isLoading } = useQuery({
     queryKey: ["device", facilityId, deviceId],
@@ -34,14 +30,7 @@ export default function UpdateDevice({ facilityId, deviceId }: Props) {
 
   return (
     <div className="max-w-3xl mx-auto space-y-3">
-      <div className="inline-flex items-center">
-        <DeviceTypeIcon type={device?.care_type} className="size-5 mr-2" />
-        <span className="text-2xl font-bold capitalize">
-          {device?.care_type
-            ? t("update_device_with_type", { type: device.care_type })
-            : t("update_device")}
-        </span>
-      </div>
+      <PageTitle title={t("update_device")} />
       <Separator />
       {isLoading ? (
         <Loading />
@@ -51,8 +40,7 @@ export default function UpdateDevice({ facilityId, deviceId }: Props) {
             facilityId={facilityId}
             device={device}
             onSuccess={() => {
-              toast.success(t("device_updated"));
-              goBack(`/facility/${facilityId}/settings/devices/${device.id}`);
+              window.history.back();
             }}
           />
         </div>

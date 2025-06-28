@@ -12,12 +12,14 @@ import { Avatar } from "@/components/Common/Avatar";
 import { LoginHeader } from "@/components/Common/LoginHeader";
 import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
 import { FacilityModel } from "@/components/Facility/models";
+import { UserAssignedModel } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 
 import { FeatureBadge } from "./Utils";
 import { UserCard } from "./components/UserCard";
@@ -40,7 +42,9 @@ export function FacilityDetailsPage({ id }: Props) {
     limit: 18,
   });
 
-  const { data: docResponse, error: docError } = useQuery({
+  const { data: docResponse, error: docError } = useQuery<
+    PaginatedResponse<UserAssignedModel>
+  >({
     queryKey: [routes.getScheduleAbleFacilityUsers, id],
     queryFn: query(routes.getScheduleAbleFacilityUsers, {
       pathParams: { facility_id: id },
@@ -60,7 +64,7 @@ export function FacilityDetailsPage({ id }: Props) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin">
-          <CareIcon icon="l-spinner" className="size-8" />
+          <CareIcon icon="l-spinner" className="h-8 w-8" />
         </div>
       </div>
     );
@@ -93,14 +97,14 @@ export function FacilityDetailsPage({ id }: Props) {
           className="border border-secondary-400"
           onClick={() => goBack("/facilities")}
         >
-          <CareIcon icon="l-arrow-left" className="size-4 mr-1" />
+          <CareIcon icon="l-arrow-left" className="h-4 w-4 mr-1" />
           <span className="text-sm underline">{t("back")}</span>
         </Button>
         <LoginHeader />
       </div>
-      <Card className="overflow-hidden bg-white border border-gray-200">
+      <Card className="overflow-hidden bg-white">
         <div className="flex flex-col sm:flex-row  m-6">
-          <div className="size-64 shrink-0 overflow-hidden rounded-lg">
+          <div className="h-64 w-64 shrink-0 overflow-hidden rounded-lg">
             <Avatar
               imageUrl={facility.read_cover_image_url}
               name={facility.name || ""}
@@ -147,7 +151,7 @@ export function FacilityDetailsPage({ id }: Props) {
           </>
         )}
         {users.length === 0 && (
-          <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow-sm">
+          <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
             <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
               No users Found
             </div>

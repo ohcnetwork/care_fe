@@ -1,7 +1,15 @@
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Stethoscope } from "lucide-react";
+import { t } from "i18next";
+import {
+  Ambulance,
+  BedDouble,
+  Building2,
+  Home,
+  MonitorSmartphone,
+  Stethoscope,
+} from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -11,10 +19,7 @@ import * as z from "zod";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Form,
   FormControl,
@@ -23,12 +28,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -49,13 +48,79 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
-  ENCOUNTER_CLASS,
-  ENCOUNTER_CLASSES_ICONS,
-  ENCOUNTER_PRIORITY,
   Encounter,
   EncounterClass,
   EncounterRequest,
 } from "@/types/emr/encounter";
+
+const encounterFormSchema = z.object({
+  status: z.enum(["planned", "in_progress", "on_hold"] as const),
+  encounter_class: z.enum([
+    "imp",
+    "amb",
+    "obsenc",
+    "emer",
+    "vr",
+    "hh",
+  ] as const),
+  priority: z.enum([
+    "ASAP",
+    "callback_results",
+    "callback_for_scheduling",
+    "elective",
+    "emergency",
+    "preop",
+    "as_needed",
+    "routine",
+    "rush_reporting",
+    "stat",
+    "timing_critical",
+    "use_as_directed",
+    "urgent",
+  ] as const),
+  organizations: z.array(z.string()).min(1, {
+    message: t("at_least_one_department_is_required"),
+  }),
+});
+
+const encounterClasses = [
+  {
+    value: "imp",
+    label: "Inpatient",
+    icon: BedDouble,
+    description: "Patient is admitted to the hospital",
+  },
+  {
+    value: "amb",
+    label: "Ambulatory",
+    icon: Ambulance,
+    description: "Patient visits for outpatient care",
+  },
+  {
+    value: "obsenc",
+    label: "Observation",
+    icon: Stethoscope,
+    description: "Patient is under observation",
+  },
+  {
+    value: "emer",
+    label: "Emergency",
+    icon: Building2,
+    description: "Emergency department visit",
+  },
+  {
+    value: "vr",
+    label: "Virtual",
+    icon: MonitorSmartphone,
+    description: "Virtual/telehealth consultation",
+  },
+  {
+    value: "hh",
+    label: "Home Health",
+    icon: Home,
+    description: "Care provided at patient's home",
+  },
+] as const;
 
 interface Props {
   patientId: string;
@@ -78,31 +143,20 @@ export default function CreateEncounterForm({
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
-  const encounterFormSchema = z.object({
-    status: z.enum(["planned", "in_progress", "on_hold"] as const),
-    encounter_class: z.enum(ENCOUNTER_CLASS),
-    priority: z.enum(ENCOUNTER_PRIORITY),
-    organizations: z.array(z.string()).min(1, {
-      message: t("at_least_one_department_is_required"),
-    }),
-    start_date: z.string(),
-  });
-
-  const form = useForm({
+  const form = useForm<z.infer<typeof encounterFormSchema>>({
     resolver: zodResolver(encounterFormSchema),
     defaultValues: {
       status: "planned",
       encounter_class: encounterClass || careConfig.defaultEncounterType,
       priority: "routine",
       organizations: [],
-      start_date: new Date().toISOString(),
     },
   });
 
   const { mutate: createEncounter, isPending } = useMutation({
     mutationFn: mutate(routes.encounter.create),
     onSuccess: (data: Encounter) => {
-      toast.success(t("encounter_created"));
+      toast.success("Encounter created successfully");
       setIsOpen(false);
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
@@ -119,7 +173,7 @@ export default function CreateEncounterForm({
       patient: patientId,
       facility: facilityId,
       period: {
-        start: data.start_date,
+        start: new Date().toISOString(),
       },
     };
 
@@ -127,7 +181,15 @@ export default function CreateEncounterForm({
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) {
+          form.reset();
+        }
+      }}
+    >
       <SheetTrigger asChild>
         {trigger || (
           <Button
@@ -149,83 +211,19 @@ export default function CreateEncounterForm({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="mt-4 space-y-2"
+            className="mt-4 space-y-6"
           >
-            <FormField
-              control={form.control}
-              name="start_date"
-              render={({ field }) => {
-                const date = field.value ? new Date(field.value) : new Date();
-                return (
-                  <FormItem>
-                    <FormLabel>{t("date_and_time")}</FormLabel>
-                    <div className="flex sm:gap-2 flex-wrap">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "flex-1 justify-start text-left font-normal h-8",
-                              !field.value && "text-gray-500",
-                            )}
-                          >
-                            <CareIcon
-                              icon="l-calender"
-                              className="mr-2 size-4"
-                            />
-                            {date.toLocaleDateString()}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={date}
-                            onSelect={(newDate) => {
-                              if (!newDate) return;
-                              const updatedDate = new Date(newDate);
-                              updatedDate.setHours(date.getHours());
-                              updatedDate.setMinutes(date.getMinutes());
-                              field.onChange(updatedDate.toISOString());
-                            }}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <Input
-                        type="time"
-                        className="sm:w-[150px] border-t-0 sm:border-t text-gray-500 border-gray-200 h-8"
-                        value={date.toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: false,
-                        })}
-                        onChange={(e) => {
-                          const [hours, minutes] = e.target.value
-                            .split(":")
-                            .map(Number);
-                          if (isNaN(hours) || isNaN(minutes)) return;
-                          const updatedDate = new Date(date);
-                          updatedDate.setHours(hours);
-                          updatedDate.setMinutes(minutes);
-                          field.onChange(updatedDate.toISOString());
-                        }}
-                      />
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
-            />
             <FormField
               control={form.control}
               name="encounter_class"
               render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <FormLabel>{t("type_of_encounter")}</FormLabel>
+                  <FormLabel className="text-base">
+                    {t("type_of_encounter")}
+                  </FormLabel>
                   <div className="grid grid-cols-2 gap-3">
-                    {ENCOUNTER_CLASS.map((value) => {
-                      const Icon = ENCOUNTER_CLASSES_ICONS[value];
-                      return (
+                    {encounterClasses.map(
+                      ({ value, label, icon: Icon, description }) => (
                         <Button
                           key={value}
                           type="button"
@@ -240,21 +238,20 @@ export default function CreateEncounterForm({
                         >
                           <div className="flex flex-col items-center text-center">
                             <Icon className="size-6" />
-                            <div className="text-sm font-bold">
-                              {t(`encounter_class__${value}`)}
-                            </div>
+                            <div className="text-sm font-bold">{label}</div>
                             <div className="text-wrap text-center text-xs text-gray-500">
-                              {t(`encounter_class_description__${value}`)}
+                              {description}
                             </div>
                           </div>
                         </Button>
-                      );
-                    })}
+                      ),
+                    )}
                   </div>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <div className="space-y-4">
               <FormField
                 control={form.control}
@@ -275,11 +272,9 @@ export default function CreateEncounterForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="in_progress">
-                          {t("in_progress")}
-                        </SelectItem>
-                        <SelectItem value="planned">{t("planned")}</SelectItem>
-                        <SelectItem value="on_hold">{t("on_hold")}</SelectItem>
+                        <SelectItem value="in_progress">In Progress</SelectItem>
+                        <SelectItem value="planned">Planned</SelectItem>
+                        <SelectItem value="on_hold">On Hold</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -306,11 +301,29 @@ export default function CreateEncounterForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {ENCOUNTER_PRIORITY.map((priority) => (
-                          <SelectItem key={priority} value={priority}>
-                            {t(`encounter_priority__${priority}`)}
-                          </SelectItem>
-                        ))}
+                        <SelectItem value="ASAP">ASAP</SelectItem>
+                        <SelectItem value="callback_results">
+                          Callback Results
+                        </SelectItem>
+                        <SelectItem value="callback_for_scheduling">
+                          Callback for Scheduling
+                        </SelectItem>
+                        <SelectItem value="elective">Elective</SelectItem>
+                        <SelectItem value="emergency">Emergency</SelectItem>
+                        <SelectItem value="preop">Preop</SelectItem>
+                        <SelectItem value="as_needed">As Needed</SelectItem>
+                        <SelectItem value="routine">Routine</SelectItem>
+                        <SelectItem value="rush_reporting">
+                          Rush Reporting
+                        </SelectItem>
+                        <SelectItem value="stat">Stat</SelectItem>
+                        <SelectItem value="timing_critical">
+                          Timing Critical
+                        </SelectItem>
+                        <SelectItem value="use_as_directed">
+                          Use as Directed
+                        </SelectItem>
+                        <SelectItem value="urgent">Urgent</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -325,38 +338,19 @@ export default function CreateEncounterForm({
                 <FormItem>
                   <FacilityOrganizationSelector
                     facilityId={facilityId}
-                    value={field.value}
+                    value={field.value[0]}
                     onChange={(value) => {
-                      if (value === null) {
-                        form.setValue("organizations", []);
-                      } else {
-                        form.setValue("organizations", value);
-                      }
+                      form.setValue("organizations", [value]);
                     }}
                   />
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <div className="flex justify-end mt-6 space-x-2">
-              <Button
-                type="button"
-                onClick={() => {
-                  setIsOpen(false);
-                  form.reset();
-                }}
-                className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
-              >
-                {t("cancel")}
-              </Button>
-              <Button
-                data-cy="create-encounter-button"
-                type="submit"
-                disabled={isPending || !form.watch("organizations").length}
-              >
-                {isPending ? t("creating") : t("create_encounter")}
-              </Button>
-            </div>
+
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? t("creating") : t("create_encounter")}
+            </Button>
           </form>
         </Form>
       </SheetContent>

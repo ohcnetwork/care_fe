@@ -1,3 +1,5 @@
+"use client";
+
 import { Check } from "lucide-react";
 import * as React from "react";
 
@@ -45,20 +47,20 @@ export function ComboboxQuantityInput({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [activeIndex, setActiveIndex] = React.useState<number>(-1);
 
-  const showDropdown = /^\d*\.?\d*$/.test(inputValue) && inputValue !== ".";
+  const showDropdown = /^\d+$/.test(inputValue);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (disabled) return;
     const value = e.target.value;
-    if (value === "" || /^\d*\.?\d*$/.test(value)) {
+    if (value === "" || /^\d+$/.test(value)) {
       setInputValue(value);
       setOpen(true);
       setActiveIndex(0);
-      if (value && selectedUnit && value !== ".") {
-        const parsedValue = parseFloat(value);
-        if (!isNaN(parsedValue)) {
-          onChange({ value: parsedValue, unit: selectedUnit });
-        }
+      if (value && selectedUnit) {
+        onChange({
+          value: parseInt(value, 10),
+          unit: selectedUnit,
+        });
       }
     }
   };
@@ -86,10 +88,7 @@ export function ComboboxQuantityInput({
         setSelectedUnit(unit);
         setOpen(false);
         setActiveIndex(-1);
-        const parsedValue = parseFloat(inputValue);
-        if (!isNaN(parsedValue)) {
-          onChange({ value: parsedValue, unit });
-        }
+        onChange({ value: parseInt(inputValue, 10), unit });
       }
     }
   };
@@ -110,8 +109,8 @@ export function ComboboxQuantityInput({
             <Input
               ref={inputRef}
               type="text"
-              inputMode="decimal"
-              pattern="\d*\.?\d*"
+              inputMode="numeric"
+              pattern="\d*"
               value={inputValue}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
@@ -148,7 +147,7 @@ export function ComboboxQuantityInput({
                       setOpen(false);
                       setActiveIndex(-1);
                       inputRef.current?.focus();
-                      onChange({ value: parseFloat(inputValue), unit });
+                      onChange({ value: parseInt(inputValue, 10), unit });
                     }}
                     className={cn(
                       "flex items-center gap-2",
@@ -160,7 +159,7 @@ export function ComboboxQuantityInput({
                     </div>
                     <Check
                       className={cn(
-                        "ml-auto size-4",
+                        "ml-auto h-4 w-4",
                         selectedUnit?.code === unit.code
                           ? "opacity-100"
                           : "opacity-0",

@@ -8,24 +8,37 @@ import {
   CreateFileResponse,
   FileUploadModel,
 } from "@/components/Patient/models";
-import { AuthUserModel, UpdatePasswordForm } from "@/components/Users/models";
+import {
+  UpdatePasswordForm,
+  UserAssignedModel,
+  UserModel,
+} from "@/components/Users/models";
 
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
-import { MFAAuthenticationToken } from "@/types/auth/otp";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
+import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
 import {
   Observation,
   ObservationAnalyzeResponse,
 } from "@/types/emr/observation";
-import { PartialPatientModel, Patient } from "@/types/emr/patient";
+import { PatientModel } from "@/types/emr/patient";
 import {
   BaseFacility,
   CreateFacility,
   FacilityData,
 } from "@/types/facility/facility";
+import {
+  FacilityOrganization,
+  FacilityOrganizationCreate,
+  FacilityOrganizationResponse,
+} from "@/types/facilityOrganization/facilityOrganization";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
+import {
+  OrganizationUserRole,
+  RoleResponse,
+} from "@/types/organization/organization";
 import { PlugConfig } from "@/types/plugConfig";
 import {
   BatchRequestBody,
@@ -52,8 +65,6 @@ export interface JwtTokenObtainPair {
   access: string;
   refresh: string;
 }
-
-export type LoginResponse = JwtTokenObtainPair | MFAAuthenticationToken;
 
 export interface LoginCredentials {
   username: string;
@@ -86,7 +97,7 @@ const routes = {
     path: "/api/v1/auth/login/",
     method: "POST",
     noAuth: true,
-    TRes: Type<LoginResponse>(),
+    TRes: Type<JwtTokenObtainPair>(),
     TBody: Type<LoginCredentials>(),
   },
 
@@ -143,13 +154,13 @@ const routes = {
   // User Endpoints
   currentUser: {
     path: "/api/v1/users/getcurrentuser/",
-    TRes: Type<AuthUserModel>(),
+    TRes: Type<UserModel>(),
   },
 
   deleteProfilePicture: {
     path: "/api/v1/users/{username}/profile_picture/",
     method: "DELETE",
-    TRes: Type<AuthUserModel>(),
+    TRes: Type<UserModel>(),
     TBody: Type<void>(),
   },
 
@@ -193,7 +204,15 @@ const routes = {
 
   getScheduleAbleFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/",
-    TRes: Type<PaginatedResponse<UserBase>>(),
+    TRes: Type<PaginatedResponse<UserAssignedModel>>(),
+  },
+
+  // Download Api
+  deleteFacility: {
+    path: "/api/v1/facility/{id}/",
+    method: "DELETE",
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<void>(),
   },
 
   // Patient
@@ -207,18 +226,18 @@ const routes = {
   addPatient: {
     path: "/api/v1/patient/",
     method: "POST",
-    TRes: Type<Patient>(),
+    TRes: Type<PatientModel>(),
   },
   getPatient: {
     path: "/api/v1/patient/{id}/",
     method: "GET",
-    TBody: Type<Patient>(),
-    TRes: Type<Patient>(),
+    TBody: Type<PatientModel>(),
+    TRes: Type<PatientModel>(),
   },
   updatePatient: {
     path: "/api/v1/patient/{id}/",
     method: "PUT",
-    TRes: Type<Patient>(),
+    TRes: Type<PatientModel>(),
   },
 
   //Profile
@@ -390,6 +409,55 @@ const routes = {
     path: "/api/v1/patient/{patientId}/observation/analyse/",
     method: "POST",
     TRes: Type<ObservationAnalyzeResponse>(),
+  },
+  facilityOrganization: {
+    list: {
+      path: "/api/v1/facility/{facilityId}/organizations/",
+      method: "GET",
+      TRes: {} as FacilityOrganizationResponse,
+    },
+    get: {
+      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/",
+      method: "GET",
+      TRes: {} as FacilityOrganization,
+    },
+    create: {
+      path: "/api/v1/facility/{facilityId}/organizations/",
+      method: "POST",
+      TRes: {} as FacilityOrganization,
+      TBody: {} as FacilityOrganizationCreate,
+    },
+    listUsers: {
+      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",
+      method: "GET",
+      TRes: {} as PaginatedResponse<OrganizationUserRole>,
+    },
+    assignUser: {
+      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",
+      method: "POST",
+      TRes: {} as OrganizationUserRole,
+      TBody: {} as { user: string; role: string },
+    },
+    updateUserRole: {
+      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/{userRoleId}/",
+      method: "PUT",
+      TRes: {} as OrganizationUserRole,
+      TBody: {} as { user: string; role: string },
+    },
+    removeUserRole: {
+      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/{userRoleId}/",
+      method: "DELETE",
+      TRes: {} as Record<string, never>,
+    },
+  },
+
+  // Role Routes
+  role: {
+    list: {
+      path: "/api/v1/role/",
+      method: "GET",
+      TRes: {} as RoleResponse,
+    },
   },
 
   // Notes Routes

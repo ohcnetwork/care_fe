@@ -28,7 +28,6 @@ import Loading from "@/components/Common/Loading";
 
 import mutate from "@/Utils/request/mutate";
 import { formatTimeShort } from "@/Utils/utils";
-import { useIsUserSchedulableResource } from "@/pages/Scheduling/useIsUserSchedulableResource";
 import { ScheduleException } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
@@ -45,22 +44,8 @@ export default function ScheduleExceptions({
 }: Props) {
   const { t } = useTranslation();
 
-  const { data: isSchedulableResource } = useIsUserSchedulableResource(
-    facilityId,
-    userId,
-  );
-
   if (items == null) {
     return <Loading />;
-  }
-
-  if (!isSchedulableResource) {
-    return (
-      <div className="flex flex-col items-center text-center text-gray-500 py-16">
-        <CareIcon icon="l-calendar-slash" className="size-10 mb-3" />
-        <p>{t("exception_for_non_schedulable_resource_warning")}</p>
-      </div>
-    );
   }
 
   if (items.length === 0) {
@@ -115,7 +100,7 @@ const ScheduleExceptionItem = (
   return (
     <div
       className={cn(
-        "rounded-lg bg-white py-2 shadow-sm",
+        "rounded-lg bg-white py-2 shadow",
         isPending && "opacity-50",
       )}
     >
@@ -178,7 +163,7 @@ const ScheduleExceptionItem = (
                 }}
               >
                 {isPending ? (
-                  <Loader2 className="size-4 animate-spin mr-2" />
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : (
                   t("confirm")
                 )}

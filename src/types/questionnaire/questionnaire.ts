@@ -19,19 +19,11 @@ export interface QuestionnaireDetail {
   tags: QuestionnaireTagModel[];
 }
 
-export interface QuestionnaireCreate
-  extends Omit<QuestionnaireDetail, "id" | "tags"> {
+export interface QuestionnaireCreate extends Omit<QuestionnaireDetail, "id"> {
   organizations: string[];
-  tags: string[];
 }
 
 export interface QuestionnaireForms {
   count: number;
   results: QuestionnaireDetail[];
 }
-
-export const QUESTIONNAIRE_STATUS_COLORS = {
-  active: "primary",
-  draft: "yellow",
-  retired: "destructive",
-} as const;

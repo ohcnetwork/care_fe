@@ -6,18 +6,16 @@
   "ignoreUnimported": [
     "src/Locale/update_locale.js",
     "src/PluginRegistry.ts",
-    "src/pages/Encounters/ReportBuilder/ReportBuilderSheet.tsx",
     "src/pluginTypes.ts",
     "src/service-worker.ts"
   ],
   "ignoreUnused": [
     "@fontsource/figtree",
     "@originjs/vite-plugin-federation",
-    "@tailwindcss/vite",
     "@vitejs/plugin-react",
     "browserslist-useragent-regexp",
     "cross-env",
-    "normalize-wheel"
+    "postcss-loader"
   ],
   "ignoreUnresolved": [
     [
@@ -30,27 +28,6 @@
       "@/supportedBrowsers",
       [
         "src/components/ErrorPages/BrowserWarning.tsx"
-      ]
-    ],
-    [
-      "tailwindcss/colors",
-      [
-        "node_modules/@tailwindcss/forms/src/index.js",
-        "node_modules/@tailwindcss/typography/src/styles.js"
-      ]
-    ],
-    [
-      "tailwindcss/defaultTheme",
-      [
-        "node_modules/@tailwindcss/forms/src/index.js"
-      ]
-    ],
-    [
-      "tailwindcss/plugin",
-      [
-        "node_modules/@tailwindcss/forms/src/index.js",
-        "node_modules/@tailwindcss/typography/src/index.js",
-        "node_modules/@tailwindcss/container-queries/dist/index.js"
       ]
     ],
     [

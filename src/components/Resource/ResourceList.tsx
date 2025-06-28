@@ -1,10 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -14,17 +17,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
-import SearchInput from "@/components/Common/SearchInput";
+import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
@@ -45,12 +46,10 @@ const ACTIVE = RESOURCE_STATUS_CHOICES.map((o) => o.text).filter(
 );
 
 function EmptyState() {
-  const { t } = useTranslation();
-
   return (
     <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
       <div className="rounded-full bg-primary/10 p-3 mb-4">
-        <CareIcon icon="l-folder-open" className="size-6 text-primary" />
+        <CareIcon icon="l-folder-open" className="h-6 w-6 text-primary" />
       </div>
       <h3 className="text-lg font-semibold mb-1">{t("no_resources_found")}</h3>
       <p className="text-sm text-gray-500 mb-4">
@@ -61,13 +60,21 @@ function EmptyState() {
 }
 
 export default function ResourceList({ facilityId }: { facilityId: string }) {
-  const { t } = useTranslation();
-
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     cacheBlacklist: ["title"],
   });
-  const { status, title, incoming } = qParams;
+  const { status, title, outgoing } = qParams;
+
+  const searchOptions = [
+    {
+      key: "title",
+      label: "Title",
+      type: "text" as const,
+      placeholder: t("search_by_resource_title"),
+      value: title || "",
+    },
+  ];
 
   const isActive = !status || !COMPLETED.includes(status);
   const currentStatuses = isActive ? ACTIVE : COMPLETED;
@@ -86,7 +93,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
         title,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
-        ...(!incoming
+        ...(outgoing
           ? { origin_facility: facilityId }
           : { assigned_facility: facilityId }),
       },
@@ -99,7 +106,10 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
     <Page
       title={t("resource")}
       componentRight={
-        <Badge className="bg-purple-50 text-purple-700 ml-2 rounded-xl px-3 py-0.5 m-3 w-max border-gray-200">
+        <Badge
+          className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
+          variant="outline"
+        >
           {isLoading
             ? t("loading")
             : t("entity_count", {
@@ -109,43 +119,88 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
         </Badge>
       }
     >
-      <div className="space-y-4 mt-4">
-        <div className="border border-gray-200 rounded-lg">
+      <div className="space-y-4 mt-2 px-6">
+        <div className="rounded-lg border bg-card shadow-sm">
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                <SearchInput
-                  data-cy="resource-search"
-                  className="w-full sm:w-[12rem]"
-                  options={[
-                    {
-                      key: "title",
-                      type: "text",
-                      placeholder: t("search_by_resource_title"),
-                      value: title || "",
-                    },
-                  ]}
-                  onFieldChange={() => updateQuery({ title: undefined })}
-                  onSearch={(key, value) =>
-                    updateQuery({ [key]: value || undefined })
-                  }
-                />
-                <div className="w-full flex justify-center sm:justify-start sm:w-auto">
-                  <Tabs value={incoming ? "incoming" : "outgoing"}>
-                    <TabsList className="inline-flex bg-transparent p-0 h-8">
+              <div className="flex flex-wrap items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "h-8 min-w-[120px] justify-start",
+                        title &&
+                          "bg-primary/10 text-primary hover:bg-primary/20",
+                      )}
+                    >
+                      <CareIcon icon="l-search" className="mr-2 h-4 w-4" />
+                      {title ? (
+                        <span className="truncate">{title}</span>
+                      ) : (
+                        t("search")
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-[20rem] p-3"
+                    align="start"
+                    onEscapeKeyDown={(event) => event.preventDefault()}
+                  >
+                    <div className="space-y-4">
+                      <h4 className="font-medium leading-none">
+                        {t("search_resource")}
+                      </h4>
+                      <SearchByMultipleFields
+                        id="resource-search"
+                        options={searchOptions}
+                        initialOptionIndex={0}
+                        onFieldChange={() =>
+                          updateQuery({
+                            status: currentStatus,
+                            title: undefined,
+                          })
+                        }
+                        onSearch={(key, value) =>
+                          updateQuery({
+                            status: currentStatus,
+                            [key]: value || undefined,
+                          })
+                        }
+                        className="w-full border-none shadow-none"
+                        autoFocus
+                      />
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                <div className="items-center">
+                  <Tabs
+                    value={outgoing ? "outgoing" : "incoming"}
+                    className="w-full"
+                  >
+                    <TabsList className="bg-transparent p-0 h-8">
                       <TabsTrigger
                         value="outgoing"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() => updateQuery({ incoming: false })}
-                        data-cy="tab-outgoing"
+                        onClick={() =>
+                          updateQuery({
+                            outgoing: true,
+                            title,
+                          })
+                        }
                       >
                         {t("outgoing")}
                       </TabsTrigger>
                       <TabsTrigger
                         value="incoming"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() => updateQuery({ incoming: true })}
-                        data-cy="tab-incoming"
+                        onClick={() =>
+                          updateQuery({
+                            outgoing: false,
+                            title,
+                          })
+                        }
                       >
                         {t("incoming")}
                       </TabsTrigger>
@@ -153,20 +208,34 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                   </Tabs>
                 </div>
               </div>
-              <div className="flex justify-center sm:justify-end w-full sm:w-auto">
-                <Tabs value={isActive ? "active" : "completed"}>
+
+              <div className="items-center">
+                <Tabs
+                  value={isActive ? "active" : "completed"}
+                  className="w-full"
+                >
                   <TabsList className="bg-transparent p-0 h-8">
                     <TabsTrigger
                       value="active"
                       className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() => updateQuery({ status: "pending" })}
+                      onClick={() =>
+                        updateQuery({
+                          status: "pending",
+                          title,
+                        })
+                      }
                     >
                       {t("active")}
                     </TabsTrigger>
                     <TabsTrigger
                       value="completed"
                       className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() => updateQuery({ status: "completed" })}
+                      onClick={() =>
+                        updateQuery({
+                          status: "completed",
+                          title,
+                        })
+                      }
                     >
                       {t("completed")}
                     </TabsTrigger>
@@ -178,34 +247,19 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
             <Separator />
 
             <div className="p-4 h-auto overflow-hidden">
-              <div className="block sm:hidden w-full">
-                <Select
-                  value={currentStatus}
-                  onValueChange={(value) => updateQuery({ status: value })}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={t("select_status")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {currentStatuses.map((statusOption) => (
-                      <SelectItem key={statusOption} value={statusOption}>
-                        {t(`resource_status__${statusOption}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Desktop Tabs */}
-              <Tabs value={currentStatus} className="hidden sm:block w-full">
+              <Tabs value={currentStatus} className="w-full">
                 <TabsList className="bg-transparent p-0 h-auto flex-wrap justify-start gap-y-2 overflow-auto">
                   {currentStatuses.map((statusOption) => (
                     <TabsTrigger
                       key={statusOption}
                       value={statusOption}
                       className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      data-cy={`tab-${statusOption}`}
-                      onClick={() => updateQuery({ status: statusOption })}
+                      onClick={() =>
+                        updateQuery({
+                          status: statusOption,
+                          title,
+                        })
+                      }
                     >
                       <CareIcon
                         icon={
@@ -213,7 +267,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                             (o) => o.text === statusOption,
                           )?.icon || "l-folder-open"
                         }
-                        className="size-4"
+                        className="mr-2 h-4 w-4"
                       />
                       {t(`resource_status__${statusOption}`)}
                     </TabsTrigger>
@@ -224,7 +278,10 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+        <div
+          className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+          data-cy="resource-list-cards"
+        >
           {isLoading ? (
             <CardGridSkeleton count={6} />
           ) : resources.length === 0 ? (
@@ -233,11 +290,10 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
             </div>
           ) : (
             <>
-              {resources.map((resource: ResourceRequest, index) => (
+              {resources.map((resource: ResourceRequest) => (
                 <Card
-                  key={index}
+                  key={resource.id}
                   className="hover:shadow-lg transition-shadow group flex flex-col justify-between"
-                  data-cy={`resource-card-${index}`}
                 >
                   <CardHeader className="space-y-1 pb-2">
                     <div className="flex items-center justify-between">
@@ -252,9 +308,17 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                   <CardContent className="flex flex-col space-y-2 px-6 py-0">
                     <div className="flex flex-wrap items-center gap-2">
                       {resource.emergency && (
-                        <Badge variant="destructive">{t("emergency")}</Badge>
+                        <Badge
+                          variant="outline"
+                          className="bg-red-100 text-red-800"
+                        >
+                          {t("emergency")}
+                        </Badge>
                       )}
-                      <Badge variant="secondary">
+                      <Badge
+                        variant="outline"
+                        className="bg-gray-100 text-gray-800"
+                      >
                         {
                           RESOURCE_CATEGORY_CHOICES.find(
                             (o) => o.id === resource.category,
@@ -263,11 +327,14 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       </Badge>
                     </div>
                     <div className="flex flex-row gap-2">
-                      <Badge variant="secondary">
+                      <Badge
+                        variant="outline"
+                        className="bg-gray-100 text-gray-800"
+                      >
                         {resource.origin_facility?.name}
                         <CareIcon
                           icon="l-arrow-right"
-                          className="mx-2 size-4"
+                          className="mx-2 h-4 w-4"
                         />
                         {resource.assigned_facility?.name}
                       </Badge>
@@ -278,10 +345,9 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     <Link
                       href={`/facility/${resource.origin_facility.id}/resource/${resource.id}`}
                       className="items-center self-end pt-2 pr-4 pb-3 text-sm text-primary hover:underline text-right flex justify-end group-hover:translate-x-1 transition-transform"
-                      data-cy={`resource-view-details-${index}`}
                     >
-                      {t("view_details")}
-                      <CareIcon icon="l-arrow-right" className="ml-1 size-4" />
+                      View Details
+                      <CareIcon icon="l-arrow-right" className="ml-1 h-4 w-4" />
                     </Link>
                   </CardFooter>
                 </Card>

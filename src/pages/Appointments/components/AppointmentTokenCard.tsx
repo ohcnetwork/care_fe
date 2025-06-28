@@ -23,33 +23,34 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
   return (
     <Card
       id={id}
-      className="p-6 lg:w-[25rem] border border-gray-300 relative hover:scale-105 hover:rotate-1 hover:shadow-xl transition-all duration-300 ease-in-out print:scale-100 print:rotate-0 print:shadow-none print:hover:scale-100 print:hover:rotate-0 print:hover:shadow-none"
+      className="p-6 lg:w-[25rem] border border-gray-300 relative hover:scale-105 hover:rotate-1 hover:shadow-xl transition-all duration-300 ease-in-out"
     >
       <div className="absolute inset-0 opacity-[0.1] pointer-events-none bg-[url('/images/care_logo_gray.svg')] bg-center bg-no-repeat bg-[length:40%_auto] lg:bg-[length:60%_auto]" />
 
       <div className="relative">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-bold tracking-tight break-words">
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="text-lg font-bold tracking-tight">
               {facility.name}
             </h3>
-            <div className="text-sm text-gray-600">
-              <span>{facility.pincode}</span>
-              <div className="whitespace-normal">{`Ph.: ${facility.phone_number}`}</div>
+            <div className="flex flex-col lg:flex-row text-sm text-gray-600">
+              <span>{facility.pincode}, </span>
+              <span>{`Ph.: ${facility.phone_number}`}</span>
             </div>
           </div>
 
-          <div className="flex-shrink-0">
+          <div>
             <div className="text-sm whitespace-nowrap text-center bg-gray-100 px-3 pb-2 pt-6 -mt-6 font-medium text-gray-500">
-              <p>{t("general")}</p>
-              <p>{t("op_token")}</p>
+              <p>GENERAL</p>
+              <p>OP TOKEN</p>
             </div>
           </div>
         </div>
-        <div className="mt-4 flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
+
+        <div className="mt-4 flex items-start justify-between">
+          <div>
             <Label>{t("name")}</Label>
-            <p className="font-semibold break-words">{patient.name}</p>
+            <p className="font-semibold">{patient.name}</p>
             <p className="text-sm text-gray-600 font-medium">
               {formatPatientAge(patient, true)},{" "}
               {t(`GENDER__${patient.gender}`)}
@@ -58,8 +59,8 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
 
           <div className="flex items-center gap-2">
             <div>
-              <Label className="text-black font-semibold text-sm/none whitespace-nowrap">
-                {t("token_no")}
+              <Label className="text-black font-semibold text-sm/none">
+                Token No.
               </Label>
               <p className="text-5xl font-bold leading-none">
                 {/* TODO: get token number from backend */}
@@ -68,11 +69,12 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
             </div>
           </div>
         </div>
-        <div className="mt-4 flex justify-between items-start gap-4">
-          <div className="space-y-2 flex-1 min-w-0">
+
+        <div className="mt-4 flex justify-between">
+          <div className="space-y-2">
             <div>
               <Label>{t("practitioner")}:</Label>
-              <p className="text-sm font-semibold break-words">
+              <p className="text-sm font-semibold">
                 {formatName(appointment.user)}
               </p>
             </div>

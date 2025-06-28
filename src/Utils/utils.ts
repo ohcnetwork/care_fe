@@ -1,11 +1,11 @@
 import careConfig from "@careConfig";
 import { differenceInMinutes, format } from "date-fns";
 import { toPng } from "html-to-image";
-import { t } from "i18next";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
-import { Patient } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/newPatient";
+import { PatientModel } from "@/types/emr/patient";
 
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
@@ -34,40 +34,23 @@ export const formatTimeShort = (time: Time) => {
 
 export const relativeDate = (date: DateLike, withoutSuffix = false) => {
   const obj = dayjs(date);
-  const isToday = obj.isSame(dayjs(), "day");
-
-  const relative = obj.fromNow(withoutSuffix);
-
-  const hasTime = !!(obj.hour() || obj.minute() || obj.second());
-
-  if (isToday && !hasTime) {
-    return t("today");
-  }
-
-  return `${relative}`;
+  return `${obj.fromNow(withoutSuffix)}${
+    withoutSuffix ? " ago " : ""
+  } at ${obj.format(TIME_FORMAT)}`;
 };
 
-export const formatName = (
-  user: {
-    first_name: string;
-    last_name: string;
-    prefix?: string | null;
-    suffix?: string | null;
-    username: string;
-  },
-  hidePrefixSuffix: boolean = false,
-) => {
-  return (
-    [
-      hidePrefixSuffix ? undefined : user.prefix,
-      user.first_name,
-      user.last_name,
-      hidePrefixSuffix ? undefined : user.suffix,
-    ]
-      .map((s) => s?.trim())
-      .filter(Boolean)
-      .join(" ") || user.username
-  );
+export const formatName = (user: { first_name: string; last_name: string }) => {
+  return `${user.first_name} ${user.last_name}`;
+};
+
+export const formatDisplayName = (user: {
+  first_name: string;
+  last_name: string;
+  username: string;
+}) => {
+  return user.first_name && user.last_name
+    ? `${user.first_name} ${user.last_name}`
+    : user.first_name || user.username || "User";
 };
 
 export const relativeTime = (time?: DateLike) => {
@@ -130,7 +113,10 @@ const getRelativeDateSuffix = (abbreviated: boolean) => {
   };
 };
 
-export const formatPatientAge = (obj: Patient, abbreviated = false) => {
+export const formatPatientAge = (
+  obj: PatientModel | Patient,
+  abbreviated = false,
+) => {
   const suffixes = getRelativeDateSuffix(abbreviated);
   const start = dayjs(
     obj.date_of_birth
@@ -139,7 +125,7 @@ export const formatPatientAge = (obj: Patient, abbreviated = false) => {
   );
 
   const end = dayjs(
-    obj.deceased_datetime ? new Date(obj.deceased_datetime) : new Date(),
+    obj.death_datetime ? new Date(obj.death_datetime) : new Date(),
   );
 
   const years = end.diff(start, "years");
@@ -262,8 +248,7 @@ export const stringifyNestedObject = <
   T extends { name: string; parent?: Partial<T> },
 >(
   obj: T,
-  separator: string | React.ReactNode = ", ",
-  reverse: boolean = false,
+  separator = ", ",
 ) => {
   const levels: string[] = [];
 
@@ -273,18 +258,7 @@ export const stringifyNestedObject = <
     current = current.parent;
   }
 
-  if (reverse) {
-    levels.reverse();
-  }
-
-  if (typeof separator === "string") {
-    return levels.join(separator);
-  }
-
-  return levels.reduce((acc: (string | React.ReactNode)[], curr, i) => {
-    if (i === 0) return [curr];
-    return [...acc, separator, curr];
-  }, []);
+  return levels.join(separator);
 };
 
 export const mergeAutocompleteOptions = (
@@ -295,41 +269,3 @@ export const mergeAutocompleteOptions = (
   if (options.find((o) => o.value === value.value)) return options;
   return [value, ...options];
 };
-
-export const readFileAsDataURL = async (file: File) => {
-  let result_base64 = await new Promise((resolve) => {
-    let fileReader = new FileReader();
-    fileReader.onload = () => resolve(fileReader.result);
-    fileReader.readAsDataURL(file);
-  });
-
-  return result_base64 as string;
-};
-export function getWeeklyIntervalsFromTodayTill(pastDate?: Date | string) {
-  if (!pastDate) {
-    return [];
-  }
-
-  const intervals = [];
-  let current = new Date(pastDate);
-  let currentEnd = new Date();
-
-  while (currentEnd >= current) {
-    let currentStart = new Date(currentEnd);
-    currentStart.setDate(currentStart.getDate() - 6);
-
-    if (currentStart < current) {
-      currentStart = current;
-    }
-
-    intervals.push({
-      start: currentStart,
-      end: currentEnd,
-    });
-
-    currentEnd = new Date(currentStart);
-    currentEnd.setDate(currentEnd.getDate() - 1);
-  }
-
-  return intervals;
-}

@@ -4,10 +4,10 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
-import SearchInput from "@/components/Common/SearchInput";
 import {
   CardGridSkeleton,
   TableSkeleton,
@@ -24,13 +24,13 @@ export default function FacilityUsers(props: { facilityId: string }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
+    cacheBlacklist: ["username"],
   });
   const [activeTab, setActiveTab] = useView("users", "card");
 
   const { facilityId } = props;
 
-  let usersList: React.ReactNode = <></>;
+  let usersList: JSX.Element = <></>;
 
   const { data: userListData, isFetching: userListFetching } = useQuery({
     queryKey: ["facilityUsers", facilityId, qParams, resultsPerPage],
@@ -48,7 +48,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
   if (userListFetching || !userListData) {
     usersList =
       activeTab === "card" ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <CardGridSkeleton count={6} />
         </div>
       ) : (
@@ -83,41 +83,38 @@ export default function FacilityUsers(props: { facilityId: string }) {
         </Badge>
       }
     >
-      <hr className="mt-4 border-gray-200" />
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 m-5 ml-0">
-        <SearchInput
-          options={[
-            {
-              key: "username",
-              type: "text",
-              placeholder: t("search_by_username"),
-              value: qParams.username || "",
-            },
-          ]}
-          onSearch={(key, value) =>
-            updateQuery({
-              [key]: value || undefined,
-            })
-          }
+      <hr className="mt-4"></hr>
+      <div className="flex items-center justify-between gap-4 m-5 ml-0">
+        <Input
+          id="search-by-username"
+          name="username"
+          onChange={(e) => updateQuery({ username: e.target.value })}
+          value={qParams.username}
+          placeholder={t("search_by_username")}
           className="w-full max-w-sm"
         />
         <Tabs
           value={activeTab}
           onValueChange={(value) => setActiveTab(value as "card" | "list")}
+          className="ml-auto"
         >
           <TabsList className="flex">
             <TabsTrigger value="card" id="user-card-view">
-              <CareIcon icon="l-credit-card" className="text-lg" />
-              <span>{t("card")}</span>
+              <div className="flex items-center gap-2">
+                <CareIcon icon="l-credit-card" className="text-lg" />
+                <span>{t("card")}</span>
+              </div>
             </TabsTrigger>
             <TabsTrigger value="list" id="user-list-view">
-              <CareIcon icon="l-list-ul" className="text-lg" />
-              <span>{t("list")}</span>
+              <div className="flex items-center gap-2">
+                <CareIcon icon="l-list-ul" className="text-lg" />
+                <span>{t("list")}</span>
+              </div>
             </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
-      <div className="overflow-x-auto overflow-y-hidden">{usersList}</div>
+      <div>{usersList}</div>
     </Page>
   );
 }

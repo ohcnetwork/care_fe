@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import {
   Command,
@@ -17,17 +17,12 @@ import {
 
 import query from "@/Utils/request/query";
 import { stringifyNestedObject } from "@/Utils/utils";
-import {
-  LocationForm,
-  LocationList,
-  LocationMode,
-} from "@/types/location/location";
+import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 interface LocationSearchProps {
   facilityId: string;
-  mode?: LocationMode;
-  form?: LocationForm;
+  mode?: "kind" | "instance";
   onSelect: (location: LocationList) => void;
   disabled?: boolean;
   value?: LocationList | null;
@@ -36,45 +31,38 @@ interface LocationSearchProps {
 export function LocationSearch({
   facilityId,
   mode,
-  form,
   onSelect,
   disabled,
   value,
 }: LocationSearchProps) {
-  const { t } = useTranslation();
-
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
   const { data: locations } = useQuery({
     queryKey: ["locations", facilityId, mode, search],
-    queryFn: query.debounced(locationApi.list, {
+    queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
-      queryParams: { mode, name: search, form },
+      queryParams: { mode, name: search, form: "bd", available: "true" },
     }),
     enabled: facilityId !== "preview",
   });
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        asChild
-        disabled={disabled}
-        data-cy="location-search-trigger"
-      >
+      <PopoverTrigger asChild disabled={disabled}>
         <div
-          className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm flex items-center justify-between cursor-pointer"
+          className="w-full h-9 px-3 rounded-md border text-sm flex items-center justify-between cursor-pointer"
           role="combobox"
           aria-expanded={open}
         >
           {stringifyNestedObject(value || { name: "" }) || "Select location..."}
         </div>
       </PopoverTrigger>
-      <PopoverContent className="p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]">
+      <PopoverContent className="w-[400px] p-0">
         <Command className="pt-1">
           <CommandInput
             placeholder="Search locations..."
             value={search}
-            className="outline-hidden border-none ring-0 shadow-none"
+            className="outline-none border-none ring-0 shadow-none"
             onValueChange={setSearch}
           />
           <CommandEmpty>{t("no_locations_found")}</CommandEmpty>

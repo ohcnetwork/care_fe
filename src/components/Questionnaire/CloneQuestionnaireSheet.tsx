@@ -1,9 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Building, Check, ChevronsUpDown, Loader2, X } from "lucide-react";
+import { Building, Check, Loader2 } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useState } from "react";
-import { UseFormReturn, useWatch } from "react-hook-form";
-import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -18,11 +16,6 @@ import {
 } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Sheet,
   SheetContent,
@@ -40,17 +33,17 @@ import type { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 interface Props {
-  form: UseFormReturn<QuestionnaireDetail>;
+  questionnaire: QuestionnaireDetail;
   trigger?: React.ReactNode;
 }
 
-export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
+export default function CloneQuestionnaireSheet({
+  questionnaire,
+  trigger,
+}: Props) {
   const navigate = useNavigate();
-  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const slug = useWatch({ control: form.control, name: "slug" });
-  const tags = useWatch({ control: form.control, name: "tags" });
-  const [newSlug, setNewSlug] = useState(slug + "-copy");
+  const [newSlug, setNewSlug] = useState(questionnaire.slug + "-copy");
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -90,13 +83,12 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
     }
 
     const clonedQuestionnaire = {
-      ...form.getValues(),
+      ...questionnaire,
       slug: newSlug.trim(),
       id: undefined,
       status: "draft" as const,
-      title: `${form.getValues("title")} (Clone)`,
+      title: `${questionnaire.title} (Clone)`,
       organizations: selectedIds,
-      tags: tags.map((tag) => tag.id),
     };
 
     cloneQuestionnaire(clonedQuestionnaire);
@@ -115,16 +107,17 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>{t("clone_questionnaire")}</SheetTitle>
+          <SheetTitle>Clone Questionnaire</SheetTitle>
           <SheetDescription>
-            {t("clone_questionnaire_description")}
+            Create a copy of this questionnaire with a new slug and select
+            organizations.
           </SheetDescription>
         </SheetHeader>
 
         <div className="space-y-6 py-4">
           {/* Slug Input */}
           <div className="space-y-2">
-            <Label htmlFor="slug">{t("slug")}</Label>
+            <Label htmlFor="slug">Slug</Label>
             <Input
               id="slug"
               value={newSlug}
@@ -132,16 +125,14 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
                 setNewSlug(e.target.value);
                 setError(null);
               }}
-              placeholder={t("slug_input_placeholder")}
+              placeholder="Enter a unique slug"
             />
             {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
 
           {/* Selected Organizations */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium">
-              {t("selected_organizations")}
-            </h3>
+            <h3 className="text-sm font-medium">Selected Organizations</h3>
             <div className="flex flex-wrap gap-2">
               {selectedIds.length > 0 ? (
                 availableOrganizations?.results
@@ -153,19 +144,11 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
                       className="flex items-center gap-1"
                     >
                       {org.name}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-4 p-0 hover:bg-transparent"
-                        onClick={() => handleToggleOrganization(org.id)}
-                      >
-                        <X className="size-3" />
-                      </Button>
                     </Badge>
                   ))
               ) : (
                 <p className="text-sm text-gray-500">
-                  {t("no_organizations_selected")}
+                  No organizations selected
                 </p>
               )}
             </div>
@@ -173,79 +156,59 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
 
           {/* Organization Selector */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium">{t("add_organizations")}</h3>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  className="w-full justify-between"
-                >
-                  <span className="truncate">{t("select_organizations")}</span>
-                  <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                className="p-0 w-[var(--radix-popover-trigger-width)]"
-                align="start"
-              >
-                <Command>
-                  <CommandInput
-                    placeholder={t("search_organizations")}
-                    onValueChange={setSearchQuery}
-                    className="focus:ring-0 focus:outline-hidden border-none"
-                  />
-                  <CommandList>
-                    <CommandEmpty>{t("no_organizations_found")}</CommandEmpty>
-                    <CommandGroup>
-                      {isLoadingOrganizations ? (
-                        <div className="flex items-center justify-center py-6">
-                          <Loader2 className="h-6 w-4 animate-spin" />
+            <h3 className="text-sm font-medium">Add Organizations</h3>
+            <Command className="rounded-lg border shadow-md">
+              <CommandInput
+                placeholder="Search organizations..."
+                onValueChange={setSearchQuery}
+              />
+              <CommandList>
+                <CommandEmpty>No organizations found.</CommandEmpty>
+                <CommandGroup>
+                  {isLoadingOrganizations ? (
+                    <div className="flex items-center justify-center py-6">
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    </div>
+                  ) : (
+                    availableOrganizations?.results.map((org) => (
+                      <CommandItem
+                        key={org.id}
+                        value={org.id}
+                        onSelect={() => handleToggleOrganization(org.id)}
+                      >
+                        <div className="flex flex-1 items-center gap-2">
+                          <Building className="h-4 w-4" />
+                          <span>{org.name}</span>
+                          {org.description && (
+                            <span className="text-xs text-gray-500">
+                              - {org.description}
+                            </span>
+                          )}
                         </div>
-                      ) : (
-                        availableOrganizations?.results.map((org) => (
-                          <CommandItem
-                            key={org.id}
-                            value={org.id}
-                            onSelect={() => handleToggleOrganization(org.id)}
-                            className="flex items-center justify-between pr-2"
-                          >
-                            <div className="flex flex-1 items-center gap-2">
-                              <Building className="size-4" />
-                              <span>{org.name}</span>
-                              {org.description && (
-                                <span className="text-xs text-gray-500">
-                                  - {org.description}
-                                </span>
-                              )}
-                            </div>
-                            {selectedIds.includes(org.id) && (
-                              <Check className="size-4" />
-                            )}
-                          </CommandItem>
-                        ))
-                      )}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+                        {selectedIds.includes(org.id) && (
+                          <Check className="h-4 w-4" />
+                        )}
+                      </CommandItem>
+                    ))
+                  )}
+                </CommandGroup>
+              </CommandList>
+            </Command>
           </div>
         </div>
 
-        <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+        <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t">
           <div className="flex w-full justify-end gap-4">
             <Button
-              type="button"
               variant="outline"
               onClick={() => {
-                setNewSlug(slug + "-copy");
+                setNewSlug(questionnaire.slug + "-copy");
                 setSelectedIds([]);
                 setError(null);
                 setOpen(false);
               }}
             >
-              {t("cancel")}
+              Cancel
             </Button>
             <Button
               onClick={handleClone}
@@ -255,11 +218,11 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
             >
               {isCloning ? (
                 <>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                  {t("cloning")}...
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Cloning...
                 </>
               ) : (
-                t("clone")
+                "Clone"
               )}
             </Button>
           </div>

@@ -1,7 +1,9 @@
+"use client";
+
 import { useMutation } from "@tanstack/react-query";
+import { t } from "i18next";
 import { Search } from "lucide-react";
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -53,12 +55,10 @@ const MedicineListItem = ({
   onAdministrationChange,
   isValid,
 }: MedicineListItemProps) => {
-  const { t } = useTranslation();
-
   const medicationDisplay = medicine.medication?.display;
 
   return (
-    <div className="border-b border-gray-200 py-4">
+    <div className="border-b border-border py-4">
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
@@ -73,7 +73,7 @@ const MedicineListItem = ({
         <Checkbox
           checked={isSelected}
           onCheckedChange={onSelect}
-          className="mt-1 mr-6 border-gray-800 size-5"
+          className="mt-1 mr-6 border-gray-800 h-5 w-5"
           aria-label="Select for administration"
         />
       </div>
@@ -109,8 +109,6 @@ export function MedicineAdminSheet({
   patientId,
   encounterId,
 }: Props) {
-  const { t } = useTranslation();
-
   const [selectedMedicines, setSelectedMedicines] = useState<Set<string>>(
     new Set(),
   );
@@ -184,7 +182,6 @@ export function MedicineAdminSheet({
     onOpenChange(false);
     setSelectedMedicines(new Set());
     setAdministrationRequests({});
-    setSearch("");
   };
 
   const handleAdministrationChange = useCallback(
@@ -224,12 +221,12 @@ export function MedicineAdminSheet({
           onSubmit={handleSubmit}
           className="flex flex-col h-full"
         >
-          <SheetHeader className="space-y-4 shrink-0 mr-2">
+          <SheetHeader className="space-y-4 flex-shrink-0 mr-2">
             <SheetTitle className="text-xl">
               {t("administer_medicines")}
             </SheetTitle>
             <div className="relative">
-              <Search className="absolute left-2 top-2.5 size-4 text-gray-500" />
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
               <Input
                 placeholder={t("search_medicine")}
                 value={search}
@@ -258,7 +255,7 @@ export function MedicineAdminSheet({
             </div>
           </div>
 
-          <SheetFooter className="border-t border-gray-200 pt-4 mr-2">
+          <SheetFooter className="border-t pt-4 mr-2">
             <div className="flex justify-between w-full">
               <Button type="button" variant="outline" onClick={handleClose}>
                 {t("cancel")}

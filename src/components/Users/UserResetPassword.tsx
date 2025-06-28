@@ -91,7 +91,7 @@ export default function UserResetPassword({
   };
 
   return (
-    <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:px-6">
+    <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
       {!isEditing && (
         <div className="mb-4 flex justify-start">
           <Button
@@ -102,7 +102,7 @@ export default function UserResetPassword({
           >
             <CareIcon
               icon={isEditing ? "l-times" : "l-pen"}
-              className="size-4"
+              className="h-4 w-4"
             />
             {t("update_password")}
           </Button>
@@ -131,83 +131,80 @@ export default function UserResetPassword({
                 )}
               />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex flex-col">
-                  <FormField
-                    control={form.control}
-                    name="new_password_1"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("new_password")}</FormLabel>
-                        <FormControl>
-                          <PasswordInput
-                            {...field}
-                            onChange={(e) => {
-                              field.onChange(e.target.value);
-                            }}
-                            onFocus={() => setIsPasswordFieldFocused(true)}
-                            onBlur={() => setIsPasswordFieldFocused(false)}
+                <FormField
+                  control={form.control}
+                  name="new_password_1"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("new_password")}</FormLabel>
+                      <FormControl>
+                        <PasswordInput
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e.target.value);
+                          }}
+                          onFocus={() => setIsPasswordFieldFocused(true)}
+                          onBlur={() => setIsPasswordFieldFocused(false)}
+                        />
+                      </FormControl>
+                      {isPasswordFieldFocused ? (
+                        <div
+                          className="text-small mt-2 pl-2 text-secondary-500"
+                          aria-live="polite"
+                        >
+                          <ValidationHelper
+                            isInputEmpty={!field.value}
+                            successMessage={t("password_success_message")}
+                            validations={[
+                              {
+                                description: "password_length_validation",
+                                fulfilled: field.value.length >= 8,
+                              },
+                              {
+                                description: "password_lowercase_validation",
+                                fulfilled: /[a-z]/.test(field.value),
+                              },
+                              {
+                                description: "password_uppercase_validation",
+                                fulfilled: /[A-Z]/.test(field.value),
+                              },
+                              {
+                                description: "password_number_validation",
+                                fulfilled: /\d/.test(field.value),
+                              },
+                              {
+                                description: "new_password_same_as_old",
+                                fulfilled:
+                                  field.value !== form.watch("old_password"),
+                              },
+                            ]}
                           />
-                        </FormControl>
-                        {isPasswordFieldFocused ? (
-                          <div
-                            className="text-small mt-2 pl-2 text-secondary-500"
-                            aria-live="polite"
-                          >
-                            <ValidationHelper
-                              isInputEmpty={!field.value}
-                              successMessage={t("password_success_message")}
-                              validations={[
-                                {
-                                  description: "password_length_validation",
-                                  fulfilled: field.value.length >= 8,
-                                },
-                                {
-                                  description: "password_lowercase_validation",
-                                  fulfilled: /[a-z]/.test(field.value),
-                                },
-                                {
-                                  description: "password_uppercase_validation",
-                                  fulfilled: /[A-Z]/.test(field.value),
-                                },
-                                {
-                                  description: "password_number_validation",
-                                  fulfilled: /\d/.test(field.value),
-                                },
-                                {
-                                  description: "new_password_same_as_old",
-                                  fulfilled:
-                                    field.value !== form.watch("old_password"),
-                                },
-                              ]}
-                            />
-                          </div>
-                        ) : (
-                          <FormMessage />
-                        )}
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <FormField
-                    control={form.control}
-                    name="new_password_2"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("new_password_confirmation")}</FormLabel>
-                        <FormControl>
-                          <PasswordInput
-                            {...field}
-                            onChange={(e) => {
-                              field.onChange(e.target.value);
-                            }}
-                          />
-                        </FormControl>
+                        </div>
+                      ) : (
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                      )}
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="new_password_2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("new_password_confirmation")}</FormLabel>
+                      <FormControl>
+                        <PasswordInput
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e.target.value);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
 
@@ -231,7 +228,7 @@ export default function UserResetPassword({
                 {isPending && (
                   <CareIcon
                     icon="l-spinner"
-                    className="mr-2 size-4 animate-spin"
+                    className="mr-2 h-4 w-4 animate-spin"
                   />
                 )}
                 {isPending ? t("updating") : t("update_password")}

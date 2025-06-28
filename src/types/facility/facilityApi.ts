@@ -9,10 +9,4 @@ export default {
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<FacilityData>>(),
   },
-  deleteFacility: {
-    path: "/api/v1/facility/{id}/",
-    method: HttpMethod.DELETE,
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<void>(),
-  },
 };

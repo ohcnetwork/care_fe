@@ -44,15 +44,7 @@ export default function UserSoftwareUpdate() {
         </Button>
       ) : updateStatus.isUpdateAvailable ? (
         // When an update is available
-        <UpdatableApp
-          silentlyAutoUpdate={false}
-          onDismissUpdateToast={() => {
-            setUpdateStatus({
-              isUpdateAvailable: false,
-              isChecking: false,
-            });
-          }}
-        >
+        <UpdatableApp silentlyAutoUpdate={false}>
           <Button disabled>
             <div className="flex items-center gap-4">
               <CareIcon

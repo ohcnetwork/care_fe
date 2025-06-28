@@ -3,7 +3,6 @@ import { UserBase } from "@/types/user/user";
 export type userChildProps = {
   userData: UserBase;
   username: string;
-  permissions?: string[];
 };
 
 export default function UserColumns({
@@ -14,7 +13,7 @@ export default function UserColumns({
 }: {
   heading: string;
   note: string;
-  Child: (childProps: userChildProps) => React.ReactNode | undefined;
+  Child: (childProps: userChildProps) => JSX.Element | undefined;
   childProps: userChildProps;
 }) {
   return (

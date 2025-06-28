@@ -1,20 +1,11 @@
 import { UpdateIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
-import { t } from "i18next";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -35,17 +26,10 @@ import valuesetApi from "@/types/valueset/valuesetApi";
 
 interface CodingEditorProps {
   code?: Code;
-  questionIndex: number;
-  form: ReturnType<typeof useForm<any>>;
   onChange: (code: Code | undefined) => void;
 }
 
-export function CodingEditor({
-  code,
-  onChange,
-  form,
-  questionIndex,
-}: CodingEditorProps) {
+export function CodingEditor({ code, onChange }: CodingEditorProps) {
   const { mutate: verifyCode, isPending } = useMutation({
     mutationFn: mutate(valuesetApi.lookup),
     onSuccess: (response: ValuesetLookupResponse) => {
@@ -59,10 +43,6 @@ export function CodingEditor({
     },
     onError: (error) => {
       console.error(error);
-      form.setError(`questions.${questionIndex}.code.display`, {
-        type: "manual",
-        message: t("code_verification_required"),
-      });
       toast.error("Failed to verify code");
     },
   });
@@ -73,17 +53,16 @@ export function CodingEditor({
         <Button
           variant="outline"
           size="sm"
-          onClick={(e) => {
-            e.preventDefault();
+          onClick={() => {
             onChange({
-              system: TERMINOLOGY_SYSTEMS["LOINC"],
+              system: Object.values(TERMINOLOGY_SYSTEMS)[0],
               code: "",
               display: "",
             });
           }}
         >
-          <CareIcon icon="l-plus" className="mr-2 size-4" />
-          {t("add_coding")}
+          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+          Add Coding
         </Button>
       </div>
     );
@@ -97,20 +76,19 @@ export function CodingEditor({
           <Button
             variant="ghost"
             size="sm"
-            onClick={(e) => {
-              e.preventDefault();
+            onClick={() => {
               onChange(undefined);
-              form.clearErrors([`questions.${questionIndex}.code`]);
             }}
           >
-            <CareIcon icon="l-trash-alt" className="mr-2 size-4" />
-            {t("remove_coding")}
+            <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />
+            Remove Coding
           </Button>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
         <div>
+
           <FormField
             control={form.control}
             name={`questions.${questionIndex}.code.system`}
@@ -147,57 +125,31 @@ export function CodingEditor({
               </FormItem>
             )}
           />
+
         </div>
 
-        <div className="flex flex-wrap sm:grid sm:grid-cols-[1fr_1fr_auto] gap-4 sm:items-start">
+        <div className="grid grid-cols-[1fr,1fr,auto] gap-4 items-start">
           <div>
-            <FormField
-              control={form.control}
-              name={`questions.${questionIndex}.code.code`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("code")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      value={code.code}
-                      onChange={(e) => {
-                        onChange({
-                          ...code,
-                          code: e.target.value,
-                          display: "",
-                        });
-                        form.clearErrors([
-                          `questions.${questionIndex}.code.display`,
-                        ]);
-                      }}
-                      placeholder={t("enter_code")}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <Label>Code</Label>
+            <Input
+              value={code.code}
+              onChange={(e) => {
+                onChange({
+                  ...code,
+                  code: e.target.value,
+                  display: "",
+                });
+              }}
+              placeholder="Enter code"
             />
           </div>
           <div>
-            <FormField
-              control={form.control}
-              name={`questions.${questionIndex}.code.display`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("display")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      value={code.display}
-                      placeholder="Unverified"
-                      className={!code.display ? "text-gray-500" : undefined}
-                      readOnly
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <Label>Display</Label>
+            <Input
+              value={code.display}
+              placeholder="Unverified"
+              className={!code.display ? "text-gray-500" : undefined}
+              readOnly
             />
           </div>
           <div className="pt-6">
@@ -218,7 +170,7 @@ export function CodingEditor({
                 });
               }}
             >
-              <UpdateIcon className="size-4" />
+              <UpdateIcon className="h-4 w-4" />
             </Button>
           </div>
         </div>

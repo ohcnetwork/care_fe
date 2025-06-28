@@ -1,10 +1,9 @@
+"use client";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
-import { Link, usePathParams } from "raviger";
+import { t } from "i18next";
 import React, { useCallback, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-
-import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -92,8 +91,6 @@ function getAdministrationsForTimeSlot(
 interface AdministrationTabProps {
   patientId: string;
   encounterId: string;
-  canAccess: boolean;
-  canWrite: boolean;
 }
 
 interface TimeSlotHeaderProps {
@@ -121,45 +118,36 @@ interface MedicationRowProps {
     admin: MedicationAdministration,
   ) => void;
   onDiscontinue: (medication: MedicationRequestRead) => void;
-  canWrite: boolean;
 }
 
 // Utility Components
 const MedicationStatusBadge: React.FC<MedicationStatusBadgeProps> = ({
   status,
-}) => {
-  const { t } = useTranslation();
+}) => (
+  <span
+    className={`text-xs px-2 py-0.5 rounded-md font-medium ${
+      status === "active"
+        ? "text-emerald-900 bg-emerald-100"
+        : "text-gray-900 bg-gray-100"
+    }`}
+  >
+    {t(status)}
+  </span>
+);
 
-  return (
-    <span
-      className={`text-xs px-2 py-0.5 rounded-md font-medium ${
-        status === "active"
-          ? "text-emerald-900 bg-emerald-100"
-          : "text-gray-900 bg-gray-100"
-      }`}
-    >
-      {t(status)}
+const MedicationBadges: React.FC<MedicationBadgesProps> = ({ medication }) => (
+  <div className="flex flex-wrap gap-2 mt-1">
+    <span className="text-xs text-blue-900 bg-blue-100 px-2 py-0.5 rounded-md font-medium">
+      {medication.dosage_instruction[0]?.route?.display || "Oral"}
     </span>
-  );
-};
-
-const MedicationBadges: React.FC<MedicationBadgesProps> = ({ medication }) => {
-  const { t } = useTranslation();
-
-  return (
-    <div className="flex flex-wrap gap-2 mt-1">
-      <span className="text-xs text-blue-900 bg-blue-100 px-2 py-0.5 rounded-md font-medium">
-        {medication.dosage_instruction[0]?.route?.display || "Oral"}
+    {medication.dosage_instruction[0]?.as_needed_boolean && (
+      <span className="text-xs text-pink-900 bg-pink-100 px-2 py-0.5 rounded-md font-medium">
+        {t("as_needed_prn")}
       </span>
-      {medication.dosage_instruction[0]?.as_needed_boolean && (
-        <span className="text-xs text-pink-900 bg-pink-100 px-2 py-0.5 rounded-md font-medium">
-          {t("as_needed_prn")}
-        </span>
-      )}
-      <MedicationStatusBadge status={medication.status} />
-    </div>
-  );
-};
+    )}
+    <MedicationStatusBadge status={medication.status} />
+  </div>
+);
 
 const TimeSlotHeader: React.FC<TimeSlotHeaderProps> = ({
   slot,
@@ -204,7 +192,7 @@ const TimeSlotHeader: React.FC<TimeSlotHeaderProps> = ({
       )}
       {isCurrentSlot && isEndSlot && (
         <div className="absolute top-0 left-1/2 -translate-y-1/2 -translate-x-1/2">
-          <div className="size-2 rounded-full bg-blue-500" />
+          <div className="h-2 w-2 rounded-full bg-blue-500" />
         </div>
       )}
     </div>
@@ -219,27 +207,15 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
   onAdminister,
   onEditAdministration,
   onDiscontinue,
-  canWrite,
 }) => {
-  const { t } = useTranslation();
   const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
     medication.status as (typeof INACTIVE_MEDICATION_STATUSES)[number],
   );
 
   return (
     <React.Fragment>
-      <div
-        className={cn(
-          "p-4 border-t border-gray-200",
-          isInactive && "bg-gray-200 opacity-40",
-        )}
-      >
-        <div
-          className={cn(
-            "font-semibold truncate",
-            isInactive && medication.status === "ended" && "line-through",
-          )}
-        >
+      <div className={`p-4 border-t ${isInactive ? "bg-gray-100" : ""}`}>
+        <div className="font-semibold truncate">
           {medication.medication?.display}
         </div>
         <MedicationBadges medication={medication} />
@@ -272,10 +248,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
         return (
           <div
             key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-            className={cn(
-              "p-4 border-t relative text-sm",
-              isInactive && "bg-gray-200 opacity-40",
-            )}
+            className={`p-4 border-t relative text-sm ${isInactive ? "bg-gray-100" : ""}`}
           >
             {administrationRecords?.map((admin) => {
               const colorClass =
@@ -285,14 +258,14 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
               return (
                 <div
                   key={admin.id}
-                  className={`flex font-medium flex-col rounded-md p-2 mb-2 cursor-pointer border border-gray-200 ${colorClass}`}
+                  className={`flex font-medium flex-col rounded-md p-2 mb-2 cursor-pointer border ${colorClass}`}
                   onClick={() => onEditAdministration(medication, admin)}
                 >
                   <div className="flex justify-between">
                     <div>
                       <CareIcon
                         icon="l-check-circle"
-                        className="size-4 self-center"
+                        className="h-4 w-4 self-center"
                       />
                     </div>
                     <div>
@@ -300,9 +273,9 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className={`size-4 hover:${colorClass} p-0`}
+                          className={`h-4 w-4 hover:${colorClass} p-0`}
                         >
-                          <CareIcon icon="l-notes" className="size-3" />
+                          <CareIcon icon="l-notes" className="h-3 w-3" />
                         </Button>
                       )}
                     </div>
@@ -335,7 +308,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
                 </div>
               );
             })}
-            {isCurrentSlot && medication.status === "active" && canWrite && (
+            {isCurrentSlot && medication.status === "active" && (
               <Button
                 variant="outline"
                 size="sm"
@@ -350,38 +323,34 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
       })}
 
       <div
-        className={cn(
-          "p-4 border-t border-gray-200 flex justify-center",
-          isInactive && "bg-gray-200 opacity-40",
-        )}
+        className={`p-4 border-t flex justify-center ${isInactive ? "bg-gray-100" : ""}`}
       >
         {ACTIVE_MEDICATION_STATUSES.includes(
           medication.status as (typeof ACTIVE_MEDICATION_STATUSES)[number],
-        ) &&
-          canWrite && (
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="size-6">
-                  <CareIcon icon="l-ellipsis-h" className="size-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-40 p-0">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start px-3 py-2 text-sm text-red-600 hover:text-red-600 hover:bg-red-50"
-                  onClick={() => {
-                    onDiscontinue(medication);
-                    // Close the popover after clicking
-                    const button = document.activeElement as HTMLElement;
-                    button?.blur();
-                  }}
-                >
-                  <CareIcon icon="l-ban" className="mr-2 size-4" />
-                  {t("discontinue")}
-                </Button>
-              </PopoverContent>
-            </Popover>
-          )}
+        ) && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-6 w-6">
+                <CareIcon icon="l-ellipsis-h" className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-40 p-0">
+              <Button
+                variant="ghost"
+                className="w-full justify-start px-3 py-2 text-sm text-red-600 hover:text-red-600 hover:bg-red-50"
+                onClick={() => {
+                  onDiscontinue(medication);
+                  // Close the popover after clicking
+                  const button = document.activeElement as HTMLElement;
+                  button?.blur();
+                }}
+              >
+                <CareIcon icon="l-ban" className="mr-2 h-4 w-4" />
+                {t("discontinue")}
+              </Button>
+            </PopoverContent>
+          </Popover>
+        )}
       </div>
     </React.Fragment>
   );
@@ -390,13 +359,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
 export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   patientId,
   encounterId,
-  canAccess,
-  canWrite,
 }) => {
-  const { t } = useTranslation();
-  const subpathMatch = usePathParams("/facility/:facilityId/*");
-  const facilityIdExists = !!subpathMatch?.facilityId;
-
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
   const [showStopped, setShowStopped] = useState(false);
@@ -439,7 +402,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         status: ACTIVE_MEDICATION_STATUSES.join(","),
       },
     }),
-    enabled: !!patientId && canAccess,
+    enabled: !!patientId,
   });
 
   const { data: stoppedMedications } = useQuery({
@@ -452,7 +415,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         status: INACTIVE_MEDICATION_STATUSES.join(","),
       },
     }),
-    enabled: !!patientId && canAccess,
+    enabled: !!patientId,
   });
 
   const { data: administrations } = useQuery({
@@ -480,7 +443,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         }),
       },
     }),
-    enabled: !!patientId && !!visibleSlots?.length && canAccess,
+    enabled: !!patientId && !!visibleSlots?.length,
   });
 
   // Get last administered date and last administered by for each medication
@@ -694,7 +657,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         )}
         <ScrollArea className="w-full whitespace-nowrap rounded-md">
           <Card className="w-full border-none shadow-none min-w-[640px]">
-            <div className="grid grid-cols-[minmax(200px,2fr)_repeat(4,minmax(140px,1fr))_40px]">
+            <div className="grid grid-cols-[minmax(200px,2fr),repeat(4,minmax(140px,1fr)),40px]">
               {/* Top row without vertical borders */}
               <div className="col-span-full grid grid-cols-subgrid">
                 <div className="flex items-center justify-between p-4 bg-gray-50 border-t border-gray-50">
@@ -710,7 +673,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                     <Button
                       variant="outline"
                       size="icon"
-                      className="size-8 text-gray-400 mr-2"
+                      className="h-8 w-8 text-gray-400 mr-2"
                       onClick={handlePreviousSlot}
                       disabled={!canGoBack}
                       title={
@@ -719,7 +682,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                           : ""
                       }
                     >
-                      <CareIcon icon="l-angle-left" className="size-4" />
+                      <CareIcon icon="l-angle-left" className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -735,36 +698,36 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                   <Button
                     variant="outline"
                     size="icon"
-                    className="size-8 text-gray-400"
+                    className="h-8 w-8 text-gray-400"
                     onClick={handleNextSlot}
                     disabled={isTimeInSlot(currentDate, visibleSlots[3])}
                   >
-                    <CareIcon icon="l-angle-right" className="size-4" />
+                    <CareIcon icon="l-angle-right" className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
 
               {/* Main content with borders */}
-              <div className="col-span-full grid grid-cols-subgrid divide-x divide-[#e5e7eb] border-l border-r border-gray-200">
+              <div className="col-span-full grid grid-cols-subgrid divide-x divide-[#e5e7eb] border-l border-r">
                 {/* Headers */}
-                <div className="p-4 font-medium text-sm border-t border-gray-200 bg-[#F3F4F6] text-secondary-700">
+                <div className="p-4 font-medium text-sm border-t bg-[#F3F4F6] text-secondary-700">
                   {t("medicine")}:
                 </div>
                 {visibleSlots.map((slot, i) => (
                   <div
                     key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-                    className="p-4 font-semibold text-xs text-center border-t border-gray-200 relative bg-[#F3F4F6] text-secondary-700"
+                    className="p-4 font-semibold text-xs text-center border-t relative bg-[#F3F4F6] text-secondary-700"
                   >
                     {i === endSlotIndex &&
                       slot.date.getTime() === currentDate.getTime() && (
                         <div className="absolute top-0 left-1/2 -translate-y-1/2 -translate-x-1/2">
-                          <div className="size-2 rounded-full bg-blue-500" />
+                          <div className="h-2 w-2 rounded-full bg-blue-500" />
                         </div>
                       )}
                     {slot.label}
                   </div>
                 ))}
-                <div className="border-t border-gray-200 bg-[#F3F4F6]" />
+                <div className="border-t bg-[#F3F4F6]" />
 
                 {/* Medication rows */}
                 {filteredMedications?.map((medication) => (
@@ -777,7 +740,6 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                     onAdminister={handleAdminister}
                     onEditAdministration={handleEditAdministration}
                     onDiscontinue={handleDiscontinue}
-                    canWrite={canWrite}
                   />
                 ))}
               </div>
@@ -790,7 +752,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               >
                 <CareIcon
                   icon={showStopped ? "l-eye-slash" : "l-eye"}
-                  className="size-4"
+                  className="h-4 w-4"
                 />
                 <span className="text-sm underline">
                   {showStopped ? t("hide") : t("show")}{" "}
@@ -816,7 +778,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               placeholder={t("search_medications")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 bg-transparent text-sm outline-hidden placeholder:text-gray-500"
+              className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-500"
             />
             {searchQuery && (
               <Button
@@ -830,30 +792,15 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             )}
           </div>
         </div>
-        {canWrite && (
-          <Button
-            variant="outline"
-            className="text-emerald-600 border-emerald-600 hover:bg-emerald-50 w-full sm:w-auto"
-            onClick={() => setIsSheetOpen(true)}
-            disabled={!activeMedications?.results.length}
-          >
-            <CareIcon icon="l-plus" className="mr-2 size-4" />
-            {t("administer_medicine")}
-          </Button>
-        )}
-        {facilityIdExists && (
-          <Button
-            variant="outline"
-            disabled={!activeMedications?.results?.length}
-            size="sm"
-            className="text-gray-950 hover:text-gray-700 h-9"
-          >
-            <Link href={`medicines/administrations/print`}>
-              <CareIcon icon="l-print" className="mr-2" />
-              {t("print")}
-            </Link>
-          </Button>
-        )}
+        <Button
+          variant="outline"
+          className="text-emerald-600 border-emerald-600 hover:bg-emerald-50 w-full sm:w-auto"
+          onClick={() => setIsSheetOpen(true)}
+          disabled={!activeMedications?.results.length}
+        >
+          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+          {t("administer_medicine")}
+        </Button>
       </div>
 
       <div className="mt-4">{content}</div>

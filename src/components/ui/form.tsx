@@ -3,12 +3,11 @@ import { Slot } from "@radix-ui/react-slot";
 import * as React from "react";
 import {
   Controller,
-  type ControllerProps,
-  type FieldPath,
-  type FieldValues,
+  ControllerProps,
+  FieldPath,
+  FieldValues,
   FormProvider,
   useFormContext,
-  useFormState,
 } from "react-hook-form";
 
 import { cn } from "@/lib/utils";
@@ -44,8 +43,8 @@ const FormField = <
 const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext);
   const itemContext = React.useContext(FormItemContext);
-  const { getFieldState } = useFormContext();
-  const formState = useFormState({ name: fieldContext.name });
+  const { getFieldState, formState } = useFormContext();
+
   const fieldState = getFieldState(fieldContext.name, formState);
 
   if (!fieldContext) {
@@ -72,47 +71,53 @@ const FormItemContext = React.createContext<FormItemContextValue>(
   {} as FormItemContextValue,
 );
 
-function FormItem({ className, ...props }: React.ComponentProps<"div">) {
+const FormItem = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => {
   const id = React.useId();
 
   return (
     <FormItemContext.Provider value={{ id }}>
-      <div
-        data-slot="form-item"
-        className={cn("grid gap-2", className)}
-        {...props}
-      />
+      <div ref={ref} className={cn("space-y-2", className)} {...props} />
     </FormItemContext.Provider>
   );
-}
+});
+FormItem.displayName = "FormItem";
 
-function FormLabel({
-  className,
-  ...props
-}: React.ComponentProps<typeof LabelPrimitive.Root>) {
+const FormLabel = React.forwardRef<
+  React.ElementRef<typeof LabelPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> & {
+    required?: boolean;
+  }
+>(({ className, required, ...props }, ref) => {
   const { error, formItemId } = useFormField();
 
   return (
     <Label
-      data-slot="form-label"
-      data-error={!!error}
+      ref={ref}
       className={cn(
-        "data-[error=true]:text-red-500 dark:data-[error=true]:text-red-900",
+        error && "text-red-500 dark:text-red-900",
+        required && "after:content-['*'] after:ml-0.5 after:text-red-500",
         className,
       )}
       htmlFor={formItemId}
       {...props}
     />
   );
-}
+});
+FormLabel.displayName = "FormLabel";
 
-function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
+const FormControl = React.forwardRef<
+  React.ElementRef<typeof Slot>,
+  React.ComponentPropsWithoutRef<typeof Slot>
+>(({ ...props }, ref) => {
   const { error, formItemId, formDescriptionId, formMessageId } =
     useFormField();
 
   return (
     <Slot
-      data-slot="form-control"
+      ref={ref}
       id={formItemId}
       aria-describedby={
         !error
@@ -123,24 +128,35 @@ function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
       {...props}
     />
   );
-}
+});
+FormControl.displayName = "FormControl";
 
-function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
+const FormDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => {
   const { formDescriptionId } = useFormField();
 
   return (
     <p
-      data-slot="form-description"
+      ref={ref}
       id={formDescriptionId}
-      className={cn("text-gray-500 text-sm dark:text-gray-400", className)}
+      className={cn(
+        "text-[0.8rem] text-gray-500 dark:text-gray-400",
+        className,
+      )}
       {...props}
     />
   );
-}
+});
+FormDescription.displayName = "FormDescription";
 
-function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
+const FormMessage = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, children, ...props }, ref) => {
   const { error, formMessageId } = useFormField();
-  const body = error ? String(error?.message ?? "") : props.children;
+  const body = error ? String(error?.message) : children;
 
   if (!body) {
     return null;
@@ -148,15 +164,19 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
 
   return (
     <p
-      data-slot="form-message"
+      ref={ref}
       id={formMessageId}
-      className={cn("text-red-500 text-sm dark:text-red-900", className)}
+      className={cn(
+        "text-[0.8rem] font-medium text-red-500 dark:text-red-900",
+        className,
+      )}
       {...props}
     >
       {body}
     </p>
   );
-}
+});
+FormMessage.displayName = "FormMessage";
 
 export {
   useFormField,

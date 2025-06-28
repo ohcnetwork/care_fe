@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import imageCompression from "browser-image-compression";
+import { t } from "i18next";
 import jsPDF from "jspdf";
 import {
   ChangeEvent,
@@ -8,7 +9,6 @@ import {
   useEffect,
   useState,
 } from "react";
-import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import AudioCaptureDialog from "@/components/Files/AudioCaptureDialog";
@@ -58,8 +58,8 @@ export type FileUploadReturn = {
     associating_id: string,
     combineToPDF?: boolean,
   ) => Promise<void>;
-  Dialogues: React.ReactNode;
-  Input: (_: FileInputProps) => React.ReactNode;
+  Dialogues: JSX.Element;
+  Input: (_: FileInputProps) => JSX.Element;
   fileNames: string[];
   files: File[];
   setFileName: (names: string, index?: number) => void;
@@ -92,8 +92,6 @@ export default function useFileUpload(
     multiple,
     allowNameFallback = true,
   } = options;
-
-  const { t } = useTranslation();
 
   const [uploadFileNames, setUploadFileNames] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -387,8 +385,7 @@ export default function useFileUpload(
   const Input = (props: FileInputProps) => (
     <input
       {...props}
-      data-cy="upload-files-input"
-      id={`file_upload_${fileType}`}
+      id="file_upload_patient"
       title={t("change_file")}
       onChange={onFileChange}
       type="file"

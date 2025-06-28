@@ -23,12 +23,7 @@ export interface PatientMeta {
 
 // File Upload Models
 
-export type FileCategory =
-  | "unspecified"
-  | "xray"
-  | "audio"
-  | "identity_proof"
-  | "consent_attachment";
+export type FileCategory = "unspecified" | "xray" | "audio" | "identity_proof";
 
 export interface CreateFileRequest {
   file_type: string | number;
@@ -60,7 +55,6 @@ export interface FileUploadModel {
   archive_reason?: string;
   extension?: string;
   archived_by?: UserBareMinimum;
-  mime_type?: string;
   archived_datetime?: string;
 }
 

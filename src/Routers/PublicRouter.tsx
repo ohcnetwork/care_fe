@@ -1,9 +1,7 @@
 import { useRoutes } from "raviger";
 
-import { Authenticate } from "@/components/Auth/Authenticate";
 import Login from "@/components/Auth/Login";
 import ResetPassword from "@/components/Auth/ResetPassword";
-import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import InvalidReset from "@/components/ErrorPages/InvalidReset";
 import SessionExpired from "@/components/ErrorPages/SessionExpired";
 
@@ -27,7 +25,6 @@ export const routes = {
     page: string;
   }) => <PatientLogin facilityId={facilityId} staffId={staffId} page={page} />,
   "/login": () => <Login />,
-  "/2fa": () => <Authenticate />,
   "/forgot-password": () => <Login forgot={true} />,
   "/password_reset/:token": ({ token }: { token: string }) => (
     <ResetPassword token={token} />
@@ -38,10 +35,5 @@ export const routes = {
 };
 
 export default function PublicRouter() {
-  return (
-    <>
-      <BrowserWarning />
-      {useRoutes(routes) || <Login />}
-    </>
-  );
+  return useRoutes(routes) || <Login />;
 }

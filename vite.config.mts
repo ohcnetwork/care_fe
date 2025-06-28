@@ -1,7 +1,6 @@
 import { ValidateEnv } from "@julr/vite-plugin-validate-env";
 import federation from "@originjs/vite-plugin-federation";
 import reactScan from "@react-scan/vite-plugin-react-scan";
-import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import DOMPurify from "dompurify";
 import fs from "fs";
@@ -15,16 +14,17 @@ import { VitePWA } from "vite-plugin-pwa";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import { z } from "zod";
 
-import { careConsoleArt } from "./plugins/careConsoleArt";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
 
-const pdfWorkerPath = path.join(
-  path.dirname(
-    createRequire(import.meta.url).resolve("pdfjs-dist/package.json"),
-  ),
-  "build",
-  "pdf.worker.min.mjs",
-);
+const pdfWorkerPath = path
+  .join(
+    path.dirname(
+      createRequire(import.meta.url).resolve("pdfjs-dist/package.json"),
+    ),
+    "build",
+    "pdf.worker.min.mjs",
+  )
+  .replace(/\\/g, "/");
 
 // Convert goal description markdown to HTML
 function getDescriptionHtml(description: string) {
@@ -164,14 +164,11 @@ export default defineConfig(({ mode }) => {
   return {
     envPrefix: "REACT_",
     define: {
-      "process.env.IS_PREACT": JSON.stringify("true"),
       __CUSTOM_DESCRIPTION_HTML__: getDescriptionHtml(
         env.REACT_CUSTOM_DESCRIPTION || "",
       ),
     },
     plugins: [
-      careConsoleArt(),
-      tailwindcss(),
       federation({
         name: "core",
         remotes: getRemotes(env.REACT_ENABLED_APPS),
@@ -300,7 +297,8 @@ export default defineConfig(({ mode }) => {
       host: "0.0.0.0",
       allowedHosts: true,
       headers: {
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "Strict-Transport-Security":
+          "max-age=31536000; includeSubDomains; preload",
         "X-XSS-Protection": "1; mode=block",
         "X-Frame-Options": "SAMEORIGIN",
         "X-Content-Type-Options": "nosniff",

@@ -37,12 +37,10 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
+import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
-import roleApi from "@/types/emr/role/roleApi";
 import { FacilityOrganizationUserRole } from "@/types/facilityOrganization/facilityOrganization";
-import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface Props {
   facilityId: string;
@@ -64,13 +62,13 @@ export default function EditUserRoleSheet({
 
   const { data: roles } = useQuery({
     queryKey: ["roles"],
-    queryFn: query(roleApi.listRoles),
+    queryFn: query(routes.role.list),
     enabled: open,
   });
 
   const { mutate: updateRole } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
-      mutate(facilityOrganizationApi.updateUserRole, {
+      mutate(routes.facilityOrganization.updateUserRole, {
         pathParams: {
           facilityId,
           organizationId: organizationId,
@@ -95,7 +93,7 @@ export default function EditUserRoleSheet({
 
   const { mutate: removeRole } = useMutation({
     mutationFn: () =>
-      mutate(facilityOrganizationApi.removeUserRole, {
+      mutate(routes.facilityOrganization.removeUserRole, {
         pathParams: {
           facilityId,
           organizationId: organizationId,
@@ -142,16 +140,16 @@ export default function EditUserRoleSheet({
           </SheetDescription>
         </SheetHeader>
         <div className="space-y-6 py-4">
-          <div className="rounded-lg border border-gray-200 p-4 space-y-4">
+          <div className="rounded-lg border p-4 space-y-4">
             <div className="flex items-start gap-4">
               <Avatar
                 name={`${userRole.user.first_name} ${userRole.user.last_name}`}
-                className="size-12"
+                className="h-12 w-12"
                 imageUrl={userRole.user.profile_picture_url}
               />
               <div className="flex flex-col flex-1">
                 <span className="font-medium text-lg">
-                  {formatName(userRole.user)}
+                  {userRole.user.first_name} {userRole.user.last_name}
                 </span>
                 <span className="text-sm text-gray-500">
                   {userRole.user.email}
@@ -159,7 +157,7 @@ export default function EditUserRoleSheet({
               </div>
             </div>
 
-            <div className="flex flex-col flex-wrap gap-2 pt-2 border-t border-gray-200">
+            <div className="flex flex-col flex-wrap gap-2 pt-2 border-t">
               <div className="flex flex-wrap">
                 <div className="mr-3">
                   <span className="text-sm text-gray-500">{t("username")}</span>
@@ -187,10 +185,10 @@ export default function EditUserRoleSheet({
               {t("select_new_role")}
             </Label>
             <Select value={selectedRole} onValueChange={setSelectedRole}>
-              <SelectTrigger className="h-12" data-cy="select-updated-role">
+              <SelectTrigger className="h-12">
                 <SelectValue placeholder={t("select_role")} />
               </SelectTrigger>
-              <SelectContent className="w-[var(--radix-select-trigger-width)]">
+              <SelectContent>
                 {roles?.results?.map((role) => (
                   <SelectItem key={role.id} value={role.id}>
                     <div className="flex flex-col text-left">
@@ -212,18 +210,13 @@ export default function EditUserRoleSheet({
               className="w-full"
               onClick={handleUpdateRole}
               disabled={selectedRole === userRole.role.id}
-              data-cy="update-user-role"
             >
               {t("update_role")}
             </Button>
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button
-                  variant="destructive"
-                  className="w-full"
-                  data-cy="remove-user"
-                >
+                <Button variant="destructive" className="w-full">
                   {t("remove_user")}
                 </Button>
               </AlertDialogTrigger>
@@ -244,7 +237,6 @@ export default function EditUserRoleSheet({
                   <AlertDialogAction
                     onClick={() => removeRole()}
                     className={cn(buttonVariants({ variant: "destructive" }))}
-                    data-cy="confirm-remove-user"
                   >
                     {t("remove")}
                   </AlertDialogAction>

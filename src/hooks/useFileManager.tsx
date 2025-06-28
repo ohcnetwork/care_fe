@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useState } from "react";
-import { Trans, useTranslation } from "react-i18next";
+import { Trans } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -63,7 +64,6 @@ export default function useFileManager(
 ): FileManagerResult {
   const { type: fileType, onArchive, onEdit, uploadedFiles } = options;
 
-  const { t } = useTranslation();
   const [file_state, setFileState] = useState<StateInterface>({
     open: false,
     isImage: false,
@@ -320,7 +320,6 @@ export default function useFileManager(
                   archiveReasonError &&
                     "border-red-500 focus-visible:ring-red-500",
                 )}
-                data-cy="archive-reason-textarea"
               />
               {archiveReasonError && (
                 <p className="text-sm text-red-500">{archiveReasonError}</p>
@@ -463,7 +462,6 @@ export default function useFileManager(
                     name: e.target.value,
                   });
                 }}
-                data-cy="edit-filename-input"
               />
               {editError && <p className="text-sm text-red-500">{editError}</p>}
             </div>

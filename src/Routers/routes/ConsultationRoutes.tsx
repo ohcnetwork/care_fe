@@ -1,10 +1,4 @@
-import { Suspense, lazy } from "react";
-
-import Loading from "@/components/Common/Loading";
-import { PrintQuestionnaireQuestionnaireResponses } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireQuestionnaireResponses";
-import { PrintQuestionnaireResponse } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireResponse";
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
-import { PrintMedicationAdministration } from "@/components/Medicine/MedicationAdministration/PrintMedicationAdministration";
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
 import TreatmentSummary from "@/components/Patient/TreatmentSummary";
 
@@ -12,65 +6,10 @@ import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
 import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
 
-const ExcalidrawEditor = lazy(
-  () => import("@/components/Common/Drawings/ExcalidrawEditor"),
-);
-
 const consultationRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/prescriptions/print":
     ({ facilityId, encounterId, patientId }) => (
       <PrintPrescription
-        facilityId={facilityId}
-        encounterId={encounterId}
-        patientId={patientId}
-      />
-    ),
-  ...[
-    "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:questionnaireId/responses/print",
-    "/organization/:organizationId/patient/:patientId/encounter/:encounterId/questionnaire/:questionnaireId/responses/print",
-    "/facility/:facilityId/patient/:patientId/questionnaire/:questionnaireId/responses/print",
-    "/organization/:organizationId/patient/:patientId/questionnaire/:questionnaireId/responses/print",
-    "/patient/:patientId/questionnaire/:questionnaireId/responses/print",
-  ].reduce((acc: AppRoutes, path) => {
-    acc[path] = ({ encounterId, patientId, questionnaireId, facilityId }) => {
-      return (
-        <PrintQuestionnaireQuestionnaireResponses
-          encounterId={encounterId}
-          patientId={patientId}
-          questionnaireId={questionnaireId}
-          facilityId={facilityId}
-        />
-      );
-    };
-    return acc;
-  }, {}),
-  ...[
-    "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire_response/:questionnaireResponseId/print",
-    "/organization/:organizationId/patient/:patientId/encounter/:encounterId/questionnaire_response/:questionnaireResponseId/print",
-    "/facility/:facilityId/patient/:patientId/questionnaire_response/:questionnaireResponseId/print",
-    "/organization/:organizationId/patient/:patientId/questionnaire_response/:questionnaireResponseId/print",
-    "/patient/:patientId/questionnaire_response/:questionnaireResponseId/print",
-  ].reduce((acc: AppRoutes, path) => {
-    acc[path] = ({
-      encounterId,
-      patientId,
-      questionnaireResponseId,
-      facilityId,
-    }) => {
-      return (
-        <PrintQuestionnaireResponse
-          encounterId={encounterId}
-          patientId={patientId}
-          questionnaireResponseId={questionnaireResponseId}
-          facilityId={facilityId}
-        />
-      );
-    };
-    return acc;
-  }, {}),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/medicines/administrations/print":
-    ({ facilityId, encounterId, patientId }) => (
-      <PrintMedicationAdministration
         facilityId={facilityId}
         encounterId={encounterId}
         patientId={patientId}
@@ -84,10 +23,6 @@ const consultationRoutes: AppRoutes = {
         patientId={patientId}
       />
     ),
-  "/organization/:organizationId/patient/:patientId/encounter/:encounterId/treatment_summary":
-    ({ encounterId, patientId }) => (
-      <TreatmentSummary encounterId={encounterId} patientId={patientId} />
-    ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
     ({ facilityId, encounterId, patientId }) => (
       <EncounterQuestionnaire
@@ -97,27 +32,6 @@ const consultationRoutes: AppRoutes = {
         subjectType="encounter"
       />
     ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/drawings/new":
-    ({ encounterId }) => (
-      <Suspense fallback={<Loading />}>
-        <ExcalidrawEditor
-          associatingId={encounterId}
-          associating_type="encounter"
-        />
-      </Suspense>
-    ),
-
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/drawings/:drawingId":
-    ({ encounterId, drawingId }) => (
-      <Suspense fallback={<Loading />}>
-        <ExcalidrawEditor
-          associatingId={encounterId}
-          associating_type="encounter"
-          drawingId={drawingId}
-        />
-      </Suspense>
-    ),
-
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:slug":
     ({ facilityId, encounterId, slug, patientId }) => (
       <EncounterQuestionnaire
@@ -143,6 +57,17 @@ const consultationRoutes: AppRoutes = {
           facilityId={identifier === "facility" ? id : undefined}
         />
       );
+    acc[
+      `/${identifier}/:id/patient/:patientId/encounter/:encounterId/:tab/:subPage`
+    ] = ({ id, encounterId, patientId, tab, subPage }) => (
+      <EncounterShow
+        patientId={patientId}
+        encounterId={encounterId}
+        tab={tab}
+        facilityId={identifier === "facility" ? id : undefined}
+        subPage={subPage}
+      />
+    );
     return acc;
   }, {}),
   "/facility/:facilityId/patient/:patientId/consultation": ({
@@ -153,7 +78,6 @@ const consultationRoutes: AppRoutes = {
       facilityId={facilityId}
       patientId={patientId}
       questionnaireSlug="encounter"
-      subjectType="encounter"
     />
   ),
   "/facility/:facilityId/patient/:patientId/questionnaire": ({

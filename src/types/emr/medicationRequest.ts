@@ -4,33 +4,28 @@ import { Code } from "@/types/questionnaire/code";
 
 export const DOSAGE_UNITS_CODES = [
   {
-    code: "{tbl}",
-    display: "tablets",
-    system: "http://unitsofmeasure.org",
-  },
-  {
     code: "mg",
-    display: "milligram",
+    display: "Milligram",
     system: "http://unitsofmeasure.org",
   },
   {
     code: "g",
-    display: "gram",
+    display: "Gram",
     system: "http://unitsofmeasure.org",
   },
   {
     code: "mL",
-    display: "milliliter",
+    display: "Milliliter",
     system: "http://unitsofmeasure.org",
   },
   {
     code: "[drp]",
-    display: "drop",
+    display: "Drop",
     system: "http://unitsofmeasure.org",
   },
   {
-    code: "ug",
-    display: "microgram",
+    code: "{tbl}",
+    display: "Tablets",
     system: "http://unitsofmeasure.org",
   },
 ] as const;
@@ -174,7 +169,6 @@ export interface MedicationRequest {
   dosage_instruction: MedicationRequestDosageInstruction[];
   note?: string;
   authored_on: string;
-  created_by?: UserBareMinimum;
 }
 
 export interface MedicationRequestRead {

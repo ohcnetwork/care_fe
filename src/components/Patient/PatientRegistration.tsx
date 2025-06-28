@@ -1,7 +1,5 @@
-import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { InfoIcon } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useEffect, useMemo, useState } from "react";
@@ -10,8 +8,6 @@ import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 import { z } from "zod";
-
-import { tzAwareDateTime } from "@/lib/validators";
 
 import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
 
@@ -30,6 +26,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -40,11 +37,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
-import { DateTimeInput } from "@/components/Common/DateTimeInput";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
-import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
@@ -60,7 +55,7 @@ import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
-import { Patient } from "@/types/emr/patient";
+import { PatientModel } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
 
 interface PatientRegistrationPageProps {
@@ -75,15 +70,15 @@ export const BLOOD_GROUPS = BLOOD_GROUP_CHOICES.map((bg) => bg.id) as [
 export default function PatientRegistration(
   props: PatientRegistrationPageProps,
 ) {
-  const { enableMinimalPatientRegistration } = careConfig;
   const [{ phone_number }] = useQueryParams();
   const { patientId, facilityId } = props;
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
-  const defaultCountry = careConfig.defaultCountry.name;
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
+  const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const [isDeceased, setIsDeceased] = useState(false);
 
   const formSchema = useMemo(
     () =>
@@ -106,7 +101,7 @@ export default function PatientRegistration(
               return parsedDate.isValid() && !parsedDate.isAfter(dayjs());
             }, t("enter_valid_dob"))
             .optional(),
-          deceased_datetime: tzAwareDateTime.optional(),
+          death_datetime: z.string().nullable().optional(),
           age: z
             .number()
             .int()
@@ -114,24 +109,20 @@ export default function PatientRegistration(
             .min(1, t("age_must_be_positive"))
             .max(120, t("age_must_be_below_120"))
             .optional(),
-          address: enableMinimalPatientRegistration
-            ? z.string().optional()
-            : z.string().nonempty(t("address_is_required")),
+          address: z.string().nonempty(t("address_is_required")),
           same_address: z.boolean(),
-          permanent_address: enableMinimalPatientRegistration
-            ? z.string().optional()
-            : z.string().nonempty(t("field_required")),
-          pincode: enableMinimalPatientRegistration
-            ? validators().pincode.optional()
-            : validators().pincode,
+          permanent_address: z.string().nonempty(t("field_required")),
+          pincode: z
+            .number()
+            .int()
+            .positive()
+            .min(100000, t("pincode_must_be_6_digits"))
+            .max(999999, t("pincode_must_be_6_digits")),
           nationality: z.string().nonempty(t("nationality_is_required")),
-          geo_organization: z.string().uuid({
-            message: enableMinimalPatientRegistration
-              ? t("minimal_patient_registration_geo_organization_required")
-              : t("geo_organization_is_required"),
-          }),
-          _selected_levels: z.array(z.custom<Organization>()),
-          _is_deceased: z.boolean(),
+          geo_organization: z
+            .string()
+            .uuid({ message: t("geo_organization_is_required") })
+            .optional(),
         })
         .refine(
           (data) => (data.age_or_dob === "dob" ? !!data.date_of_birth : true),
@@ -146,59 +137,31 @@ export default function PatientRegistration(
         })
         .refine(
           (data) =>
-            data.nationality === defaultCountry
-              ? !!data.geo_organization
-              : true,
+            data.nationality === "India" ? !!data.geo_organization : true,
           {
             message: t("geo_organization_required"),
             path: ["geo_organization"],
           },
-        )
-        .refine(
-          (data) => {
-            if (!data.deceased_datetime) return true;
-
-            const deathDate = dayjs(data.deceased_datetime);
-            if (!deathDate.isValid()) return false;
-
-            const dob = data.date_of_birth
-              ? dayjs(data.date_of_birth)
-              : dayjs().subtract(data.age || 0, "years");
-
-            return data.date_of_birth
-              ? dob.isBefore(deathDate)
-              : dob.year() < deathDate.year();
-          },
-          (data) => ({
-            message: dayjs(data.deceased_datetime).isValid()
-              ? t("death_date_must_be_after_dob")
-              : t("invalid_date_format", { format: "DD-MM-YYYY HH:mm" }),
-            path: ["deceased_datetime"],
-          }),
         ),
-
     [], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nationality: defaultCountry,
+      nationality: "India",
       phone_number: phone_number || "",
       emergency_phone_number: "",
       age_or_dob: "dob",
       same_phone_number: false,
       same_address: true,
-      _selected_levels: [],
-      _is_deceased: false,
     },
-    mode: "onSubmit",
   });
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
     mutationKey: ["create_patient"],
     mutationFn: mutate(routes.addPatient),
-    onSuccess: (resp: Patient) => {
+    onSuccess: (resp: PatientModel) => {
       toast.success(t("patient_registration_success"));
       // Lets navigate the user to the verify page as the patient is not accessible to the user yet
       navigate(`/facility/${facilityId}/patients/verify`, {
@@ -239,13 +202,6 @@ export default function PatientRegistration(
         age: values.age_or_dob === "age" ? values.age : undefined,
         date_of_birth:
           values.age_or_dob === "dob" ? values.date_of_birth : undefined,
-        emergency_phone_number: values.same_phone_number
-          ? values.phone_number
-          : values.emergency_phone_number,
-        permanent_address: values.same_address
-          ? values.address
-          : values.permanent_address,
-        pincode: values.pincode || undefined,
       });
       return;
     }
@@ -253,12 +209,6 @@ export default function PatientRegistration(
     if (facilityId) {
       createPatient({
         ...values,
-        emergency_phone_number: values.same_phone_number
-          ? values.phone_number
-          : values.emergency_phone_number,
-        permanent_address: values.same_address
-          ? values.address
-          : values.permanent_address,
         facility: facilityId,
         ward_old: undefined,
       });
@@ -311,11 +261,11 @@ export default function PatientRegistration(
 
   useEffect(() => {
     if (patientQuery.data) {
+      setSelectedLevels([
+        patientQuery.data.geo_organization as unknown as Organization,
+      ]);
+      setIsDeceased(!!patientQuery.data.death_datetime);
       form.reset({
-        _selected_levels: [
-          patientQuery.data.geo_organization as unknown as Organization,
-        ],
-        _is_deceased: !!patientQuery.data.deceased_datetime,
         name: patientQuery.data.name || "",
         phone_number: patientQuery.data.phone_number || "",
         emergency_phone_number: patientQuery.data.emergency_phone_number || "",
@@ -335,11 +285,11 @@ export default function PatientRegistration(
         address: patientQuery.data.address || "",
         permanent_address: patientQuery.data.permanent_address || "",
         pincode: patientQuery.data.pincode || undefined,
-        nationality: patientQuery.data.nationality || defaultCountry,
+        nationality: patientQuery.data.nationality || "India",
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
-        deceased_datetime: patientQuery.data.deceased_datetime || undefined,
+        death_datetime: patientQuery.data.death_datetime || undefined,
       } as unknown as z.infer<typeof formSchema>);
     }
   }, [patientQuery.data]);
@@ -366,7 +316,7 @@ export default function PatientRegistration(
 
   return (
     <Page title={title}>
-      <hr className="mt-4 border-gray-200" />
+      <hr className="mt-4" />
       <div className="relative mt-4 flex flex-col md:flex-row gap-4">
         <SectionNavigator sections={sidebarItems} className="hidden md:flex" />
 
@@ -378,7 +328,6 @@ export default function PatientRegistration(
             <PLUGIN_Component
               __name="PatientRegistrationForm"
               form={form}
-              facilityId={facilityId}
               patientId={patientId}
             />
 
@@ -395,7 +344,7 @@ export default function PatientRegistration(
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel aria-required>{t("name")}</FormLabel>
+                    <FormLabel required>{t("name")}</FormLabel>
                     <FormControl>
                       <Input
                         placeholder={t("type_patient_name")}
@@ -413,18 +362,14 @@ export default function PatientRegistration(
                 name="phone_number"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel aria-required>{t("phone_number")}</FormLabel>
+                    <FormLabel required>{t("phone_number")}</FormLabel>
                     <FormControl>
                       <PhoneInput
                         {...field}
                         onChange={(value) => {
-                          field.onChange(value);
-                          if (form.getValues("same_phone_number")) {
-                            form.setValue(
-                              "emergency_phone_number",
-                              value || "",
-                              { shouldDirty: true },
-                            );
+                          form.setValue("phone_number", value);
+                          if (form.watch("same_phone_number")) {
+                            form.setValue("emergency_phone_number", value);
                           }
                         }}
                         data-cy="patient-phone-input"
@@ -445,13 +390,6 @@ export default function PatientRegistration(
                                     form.setValue(
                                       "emergency_phone_number",
                                       form.watch("phone_number"),
-                                      { shouldValidate: true },
-                                    );
-                                  } else {
-                                    form.setValue(
-                                      "emergency_phone_number",
-                                      "",
-                                      { shouldValidate: true },
                                     );
                                   }
                                 }}
@@ -477,7 +415,7 @@ export default function PatientRegistration(
                 disabled={form.watch("same_phone_number")}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel aria-required>
+                    <FormLabel required>
                       {t("emergency_phone_number")}
                     </FormLabel>
                     <FormControl>
@@ -495,18 +433,32 @@ export default function PatientRegistration(
                 control={form.control}
                 name="gender"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel aria-required>{t("sex")}</FormLabel>
+                  <FormItem className="space-y-3">
+                    <FormLabel required>{t("sex")}</FormLabel>
                     <FormControl>
-                      <RadioInput
+                      <RadioGroup
                         {...field}
                         onValueChange={field.onChange}
-                        value={field.value ?? undefined}
-                        options={GENDER_TYPES.map((g) => ({
-                          value: g.id,
-                          label: t(`GENDER__${g.id}`),
-                        }))}
-                      />
+                        value={field.value}
+                        className="flex gap-5 flex-wrap"
+                      >
+                        {GENDER_TYPES.map((g) => (
+                          <FormItem
+                            key={g.id}
+                            className="flex items-center space-x-2 space-y-0"
+                          >
+                            <FormControl>
+                              <RadioGroupItem
+                                value={g.id}
+                                data-cy={`gender-radio-${g.id.toLowerCase()}`}
+                              />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              {t(`GENDER__${g.id}`)}
+                            </FormLabel>
+                          </FormItem>
+                        ))}
+                      </RadioGroup>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -518,7 +470,7 @@ export default function PatientRegistration(
                 name="blood_group"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel aria-required>{t("blood_group")}</FormLabel>
+                    <FormLabel required>{t("blood_group")}</FormLabel>
                     <Select
                       {...field}
                       onValueChange={field.onChange}
@@ -600,12 +552,10 @@ export default function PatientRegistration(
                     name="age"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel aria-required>{t("age")}</FormLabel>
+                        <FormLabel required>{t("age")}</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
                             placeholder={t("age")}
                             min={1}
                             max={120}
@@ -616,7 +566,6 @@ export default function PatientRegistration(
                                 e.target.value
                                   ? Number(e.target.value)
                                   : (null as unknown as number),
-                                { shouldDirty: true },
                               )
                             }
                             data-cy="age-input"
@@ -627,14 +576,9 @@ export default function PatientRegistration(
                         {form.getValues("age") && (
                           <div className="text-sm font-bold">
                             {Number(form.getValues("age")) <= 0 ? (
-                              <span className="text-red-600">
-                                {t("invalid_age")}
-                              </span>
+                              <span className="text-red-600">Invalid age</span>
                             ) : (
-                              <span
-                                className="text-violet-600"
-                                data-cy="year-of-birth"
-                              >
+                              <span className="text-violet-600">
                                 {t("year_of_birth")}:{" "}
                                 {new Date().getFullYear() -
                                   Number(form.getValues("age"))}
@@ -664,12 +608,12 @@ export default function PatientRegistration(
                   <div className="flex items-center gap-2">
                     <Checkbox
                       id="is-deceased"
-                      checked={form.watch("_is_deceased")}
+                      checked={isDeceased}
                       onCheckedChange={(checked) => {
-                        form.setValue("_is_deceased", checked as boolean);
+                        setIsDeceased(checked as boolean);
                         form.setValue(
-                          "deceased_datetime",
-                          checked ? form.getValues("deceased_datetime") : "",
+                          "death_datetime",
+                          checked ? form.getValues("death_datetime") : null,
                         );
                       }}
                       data-cy="is-deceased-checkbox"
@@ -683,11 +627,10 @@ export default function PatientRegistration(
                   </div>
                 </div>
 
-                {(form.watch("_is_deceased") ||
-                  form.watch("deceased_datetime")) && (
+                {(isDeceased || form.watch("death_datetime")) && (
                   <div className="mt-4">
                     <div className="flex items-center gap-2 mb-4 text-gray-500">
-                      <InfoIcon className="size-4" />
+                      <InfoIcon className="w-4 h-4" />
                       <p className="text-sm text-gray-500">
                         {t("deceased_disclaimer")}
                       </p>
@@ -695,20 +638,23 @@ export default function PatientRegistration(
 
                     <FormField
                       control={form.control}
-                      name="deceased_datetime"
+                      name="death_datetime"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>{t("date_and_time_of_death")}</FormLabel>
                           <FormControl>
-                            <DateTimeInput
+                            <Input
+                              type="datetime-local"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                const value = e.target.value || undefined;
+                                field.onChange(value);
+                                setIsDeceased(!!value);
+                              }}
+                              max={dayjs().format("YYYY-MM-DDTHH:mm")}
                               id="death-datetime"
                               data-cy="death-datetime-input"
-                              value={field.value ?? ""}
-                              onDateChange={(val) => {
-                                field.onChange(val);
-                                form.setValue("_is_deceased", !!val);
-                              }}
-                              max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
                             />
                           </FormControl>
                           <FormMessage />
@@ -724,21 +670,14 @@ export default function PatientRegistration(
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel
-                      aria-required={!enableMinimalPatientRegistration}
-                    >
-                      {t("current_address")}
-                    </FormLabel>
+                    <FormLabel required>{t("current_address")}</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
                         onChange={(e) => {
-                          field.onChange(e);
-                          if (form.getValues("same_address")) {
-                            form.setValue("permanent_address", e.target.value, {
-                              shouldDirty: true,
-                              shouldValidate: true,
-                            });
+                          form.setValue("address", e.target.value);
+                          if (form.watch("same_address")) {
+                            form.setValue("permanent_address", e.target.value);
                           }
                         }}
                         data-cy="current-address-input"
@@ -758,8 +697,7 @@ export default function PatientRegistration(
                                   if (v) {
                                     form.setValue(
                                       "permanent_address",
-                                      form.getValues("address"),
-                                      { shouldValidate: true },
+                                      form.watch("address"),
                                     );
                                   }
                                 }}
@@ -784,11 +722,7 @@ export default function PatientRegistration(
                 disabled={form.watch("same_address")}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel
-                      aria-required={!enableMinimalPatientRegistration}
-                    >
-                      {t("permanent_address")}
-                    </FormLabel>
+                    <FormLabel required>{t("permanent_address")}</FormLabel>
                     <FormControl>
                       <Textarea {...field} data-cy="permanent-address-input" />
                     </FormControl>
@@ -802,23 +736,19 @@ export default function PatientRegistration(
                 name="pincode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel
-                      aria-required={!enableMinimalPatientRegistration}
-                    >
-                      {t("pincode")}
-                    </FormLabel>
+                    <FormLabel required>{t("pincode")}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
                         {...field}
-                        onChange={(e) => {
-                          const value = e.target.value
-                            ? Number(e.target.value)
-                            : undefined;
-                          field.onChange(value);
-                        }}
+                        onChange={(e) =>
+                          form.setValue(
+                            "pincode",
+                            e.target.value
+                              ? Number(e.target.value)
+                              : (undefined as unknown as number), // intentionally setting to undefined, when the value is empty to avoid 0 in the input field
+                          )
+                        }
                         data-cy="pincode-input"
                       />
                     </FormControl>
@@ -833,7 +763,7 @@ export default function PatientRegistration(
                   name="nationality"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel aria-required>{t("nationality")}</FormLabel>
+                      <FormLabel required>{t("nationality")}</FormLabel>
                       <FormControl>
                         <Autocomplete
                           options={countryList.map((c) => ({
@@ -842,9 +772,7 @@ export default function PatientRegistration(
                           }))}
                           {...field}
                           onChange={(value) =>
-                            form.setValue("nationality", value, {
-                              shouldDirty: true,
-                            })
+                            form.setValue("nationality", value)
                           }
                           data-cy="nationality-input"
                         />
@@ -856,7 +784,7 @@ export default function PatientRegistration(
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {form.watch("nationality") === defaultCountry && (
+                {form.watch("nationality") === "India" && (
                   <FormField
                     control={form.control}
                     name="geo_organization"
@@ -865,14 +793,11 @@ export default function PatientRegistration(
                         <FormControl>
                           <GovtOrganizationSelector
                             {...field}
-                            required={!enableMinimalPatientRegistration}
-                            selected={form.watch("_selected_levels")}
+                            required={true}
+                            selected={selectedLevels}
                             value={form.watch("geo_organization")}
                             onChange={(value) =>
-                              form.setValue("geo_organization", value, {
-                                shouldDirty: true,
-                                shouldValidate: form.formState.isSubmitted,
-                              })
+                              form.setValue("geo_organization", value)
                             }
                           />
                         </FormControl>

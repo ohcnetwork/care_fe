@@ -8,7 +8,6 @@ dotenv.config();
 export default defineConfig({
   projectId: "wf7d2m",
   defaultCommandTimeout: 10000,
-
   e2e: {
     setupNodeEvents(on, config) {
       // implement node event listeners here
@@ -29,29 +28,12 @@ export default defineConfig({
         cypressSplit(on, config);
       }
 
-      // Add required environment parameters for parallel execution
-      config.env = {
-        ...config.env,
-        osName: "linux",
-        osVersion: "Ubuntu",
-        browserName: "Chrome",
-        browserVersion: "136",
-      };
-
       return config;
     },
     baseUrl: "http://localhost:4000",
-    retries: {
-      runMode: 1,
-      openMode: 0,
-    },
+    retries: 2,
     requestTimeout: 15000,
-    numTestsKeptInMemory: 15,
-    experimentalMemoryManagement: true,
-    watchForFileChanges: false,
-    trashAssetsBeforeRuns: true,
   },
-
   env: {
     API_URL: process.env.REACT_CARE_API_URL,
     ENABLE_HCX: process.env.REACT_ENABLE_HCX ?? false,

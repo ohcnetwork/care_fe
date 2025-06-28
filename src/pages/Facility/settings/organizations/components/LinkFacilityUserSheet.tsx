@@ -1,7 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -26,11 +24,10 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import UserSelector from "@/components/Common/UserSelector";
 
+import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import roleApi from "@/types/emr/role/roleApi";
-import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import { UserBase } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
 
@@ -49,7 +46,6 @@ export default function LinkFacilityUserSheet({
   setOpen,
   preSelectedUsername,
 }: Props) {
-  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedUser, setSelectedUser] = useState<UserBase>();
   const [selectedRole, setSelectedRole] = useState<string>("");
@@ -70,13 +66,13 @@ export default function LinkFacilityUserSheet({
 
   const { data: roles } = useQuery({
     queryKey: ["roles"],
-    queryFn: query(roleApi.listRoles),
+    queryFn: query(routes.role.list),
     enabled: open,
   });
 
   const { mutate: assignUser } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
-      mutate(facilityOrganizationApi.assignUser, {
+      mutate(routes.facilityOrganization.assignUser, {
         pathParams: { facilityId: facilityId, organizationId: organizationId },
         body,
       })(body),
@@ -117,38 +113,38 @@ export default function LinkFacilityUserSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button data-cy="link-user">
-          <CareIcon icon="l-plus" className="mr-2 size-4" />
-          {t("link_user")}
+        <Button>
+          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+          Link User
         </Button>
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-md overflow-y-auto p-8">
         <SheetHeader>
-          <SheetTitle>{t("link_user_to_facility")}</SheetTitle>
+          <SheetTitle>Link User to Facility</SheetTitle>
           <SheetDescription>
-            {t("link_user_to_facility_description")}
+            Search for a user and assign a role to add them to the facility.
           </SheetDescription>
         </SheetHeader>
         <div className="space-y-6 py-4 min-h-full">
           <UserSelector
             selected={selectedUser}
             onChange={handleUserChange}
-            placeholder={t("search_for_a_user")}
+            placeholder="Search for a user"
             noOptionsMessage="No users found"
             popoverClassName="w-full"
           />
           {selectedUser && (
             <div className="space-y-4">
-              <div className="rounded-lg border border-gray-200 p-4 space-y-4">
+              <div className="rounded-lg border p-4 space-y-4">
                 <div className="flex gap-4 flex-row">
                   <Avatar
                     imageUrl={selectedUser.profile_picture_url}
-                    name={formatName(selectedUser, true)}
-                    className="size-12"
+                    name={formatName(selectedUser)}
+                    className="h-12 w-12"
                   />
                   <div className="w-3/4">
                     <p className="font-medium text-lg truncate">
-                      {formatName(selectedUser)}
+                      {selectedUser.first_name} {selectedUser.last_name}
                     </p>
                     <span className="text-sm text-gray-500">
                       {selectedUser.email}
@@ -156,46 +152,27 @@ export default function LinkFacilityUserSheet({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
+                <div className="grid grid-cols-2 gap-4 pt-2 border-t">
                   <div className="truncate">
-                    <span className="text-sm text-gray-500">
-                      {t("username")}
-                    </span>
+                    <span className="text-sm text-gray-500">Username</span>
                     <p className="text-sm font-medium">
                       {selectedUser.username}
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">
-                      {t("user_type")}
-                    </span>
+                    <span className="text-sm text-gray-500">User Type</span>
                     <p className="text-sm font-medium">
                       {selectedUser.user_type}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-500">
-                      {t("phone_number")}
-                    </span>
-                    <p className="text-sm font-medium truncate">
-                      {selectedUser.phone_number
-                        ? formatPhoneNumberIntl(selectedUser.phone_number)
-                        : "-"}
                     </p>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  {t("select_role")}
-                </label>
+                <label className="text-sm font-medium">Select Role</label>
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
-                  <SelectTrigger
-                    className="h-12"
-                    data-cy="select-role-dropdown"
-                  >
-                    <SelectValue placeholder={t("select_role")} />
+                  <SelectTrigger className="h-12">
+                    <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent
                     position="popper"
@@ -224,9 +201,8 @@ export default function LinkFacilityUserSheet({
                 className="w-full"
                 onClick={handleAddUser}
                 disabled={!selectedRole}
-                data-cy="add-user-to-organization"
               >
-                {t("add_to_organization")}
+                Add to Organization
               </Button>
             </div>
           )}

@@ -40,6 +40,14 @@
 npm install
 ```
 
+#### First-time setup
+
+For first-time setup, run the following command to generate the pluginMap and install plugin configurations:
+
+```sh
+npm run setup
+```
+
 #### 🏃 Run the app in development mode
 
 ```sh
@@ -48,38 +56,23 @@ npm run dev
 
 Once the development server has started, open [localhost:4000](http://localhost:4000) in your browser. The page will be automatically reloaded when you make edits and save. You will also see any lint errors in the console.
 
-#### 🔑 Local Backend Setup and Credentials
+#### 🔑 Staging API Credentials
 
-First, set up the CARE local backend by following the instructions in the [CARE Backend Documentation](https://care-be-docs.ohc.network/).
-
-Create a `.env.local` file in the root directory of the project :
-
-```env
-# Point the frontend to your local backend
-REACT_CARE_API_URL=http://127.0.0.1:8000
-```
-
-Once you have the local backend running and loaded dummy data, you can use the following credentials to authenticate:
+Authenticate to staging API with any of the following credentials
 
 ```yaml
-# Default Local Backend Credentials
-ROLE            USERNAME                PASSWORD
-----------------------------------------------------------------
-Volunteer       volunteer_2_0           Coronasafe@123
-Doctor          doctor_2_0              Coronasafe@123
-Staff           staff_2_0               Coronasafe@123
-Nurse           nurse_2_0               Coronasafe@123
-Administrator   administrator_2_0       Coronasafe@123
-Facility Admin  facility_admin_2_0      Coronasafe@123
+- username: devdistrictadmin
+  password: Coronasafe@123
+  role: Administrator
+
+- username: staffdev
+  password: Coronasafe@123
+  role: Nurse
+
+- username: doctordev
+  password: Coronasafe@123
+  role: Doctor
 ```
-
-#### 📱 Patient Login in Staging
-
-For patient login via phone number:
-
-- In production, an actual SMS with OTP is sent to the provided phone number
-- In staging environment, to save costs, SMS messages are not actually sent
-- For testing purposes in staging, use the hardcoded OTP: `45612`
 
 #### Contributing to CARE
 

@@ -13,10 +13,6 @@ export type UserBase = {
   profile_picture_url: string;
   phone_number: string;
   gender: (typeof GENDER_TYPES)[number]["id"];
-  suffix: string | null;
-  prefix: string | null;
-  mfa_enabled: boolean;
-  deleted: boolean;
 };
 
 export type CreateUserModel = {

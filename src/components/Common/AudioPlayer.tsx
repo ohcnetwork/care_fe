@@ -69,8 +69,7 @@ function AudioPlayer({ src, className }: AudioPlayerProps) {
       audio.removeEventListener("ended", () => setIsPlaying(false));
       audio.remove();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src]);
+  }, [src, handleLoadedMetadata, handleDurationChange, handleTimeUpdate]);
 
   const togglePlay = useCallback(() => {
     if (audioRef.current) {
@@ -116,7 +115,7 @@ function AudioPlayer({ src, className }: AudioPlayerProps) {
         variant="ghost"
         size="icon"
         onClick={togglePlay}
-        className="size-6"
+        className="h-6 w-6"
       >
         <CareIcon icon={isPlaying ? "l-pause" : "l-play"} />
       </Button>

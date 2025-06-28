@@ -1,5 +1,4 @@
 import {
-  AvatarIcon,
   CalendarIcon,
   CheckCircledIcon,
   ClockIcon,
@@ -15,9 +14,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { differenceInYears, format, isSameDay } from "date-fns";
 import { BanIcon, Loader2, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -34,10 +32,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
+import { Badge, BadgeProps } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -50,10 +47,6 @@ import {
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
-import { getPermissions } from "@/common/Permissions";
-
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -63,12 +56,9 @@ import {
   saveElementAsImage,
   stringifyNestedObject,
 } from "@/Utils/utils";
-import { usePermissions } from "@/context/PermissionContext";
 import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
-import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { FacilityData } from "@/types/facility/facility";
 import {
-  APPOINTMENT_STATUS_COLORS,
   Appointment,
   AppointmentFinalStatuses,
   AppointmentUpdateRequest,
@@ -85,10 +75,8 @@ interface Props {
 export default function AppointmentDetail(props: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const { hasPermission } = usePermissions();
-  const { goBack } = useAppHistory();
 
-  const { data: facilityData, isLoading: isFacilityLoading } = useQuery({
+  const facilityQuery = useQuery({
     queryKey: ["facility", props.facilityId],
     queryFn: query(routes.getPermittedFacility, {
       pathParams: {
@@ -97,10 +85,7 @@ export default function AppointmentDetail(props: Props) {
     }),
   });
 
-  const { canViewAppointments, canUpdateAppointment, canCreateAppointment } =
-    getPermissions(hasPermission, facilityData?.permissions ?? []);
-
-  const { data: appointment } = useQuery({
+  const appointmentQuery = useQuery({
     queryKey: ["appointment", props.appointmentId],
     queryFn: query(scheduleApis.appointments.retrieve, {
       pathParams: {
@@ -108,7 +93,6 @@ export default function AppointmentDetail(props: Props) {
         id: props.appointmentId,
       },
     }),
-    enabled: canViewAppointments,
   });
 
   const redirectToPatientPage = () => {
@@ -120,14 +104,6 @@ export default function AppointmentDetail(props: Props) {
       },
     });
   };
-
-  useEffect(() => {
-    if (!canViewAppointments && !isFacilityLoading) {
-      toast.error(t("no_permission_to_view_page"));
-      goBack(`/facility/${props.facilityId}/overview`);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canViewAppointments, isFacilityLoading]);
 
   const { mutate: updateAppointment, isPending } = useMutation<
     Appointment,
@@ -150,7 +126,10 @@ export default function AppointmentDetail(props: Props) {
     },
   });
 
-  if (!facilityData || !appointment) {
+  const appointment = appointmentQuery.data;
+  const facility = facilityQuery.data;
+
+  if (!facility || !appointment) {
     return <Loading />;
   }
 
@@ -166,15 +145,15 @@ export default function AppointmentDetail(props: Props) {
           )}
         >
           <AppointmentDetails
-            appointment={appointment}
-            facility={facilityData}
+            appointment={appointmentQuery.data}
+            facility={facilityQuery.data}
           />
           <div className="mt-3">
             <div id="section-to-print" className="print:w-[400px] print:pt-4">
               <div id="appointment-token-card" className="bg-gray-50 md:p-4">
                 <AppointmentTokenCard
-                  appointment={appointment}
-                  facility={facilityData}
+                  appointment={appointmentQuery.data}
+                  facility={facilityQuery.data}
                 />
               </div>
             </div>
@@ -197,20 +176,15 @@ export default function AppointmentDetail(props: Props) {
                 <span>{t("save")}</span>
               </Button>
             </div>
-            {canUpdateAppointment && (
-              <>
-                <Separator className="my-4" />
-                <div className="md:mx-6 mt-10">
-                  <AppointmentActions
-                    facilityId={props.facilityId}
-                    appointment={appointment}
-                    onChange={(status) => updateAppointment({ status })}
-                    onViewPatient={redirectToPatientPage}
-                    canCreateAppointment={canCreateAppointment}
-                  />
-                </div>
-              </>
-            )}
+            <Separator className="my-4" />
+            <div className="md:mx-6 mt-10">
+              <AppointmentActions
+                facilityId={props.facilityId}
+                appointment={appointment}
+                onChange={(status) => updateAppointment({ status })}
+                onViewPatient={redirectToPatientPage}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -236,14 +210,33 @@ const AppointmentDetails = ({
             <span className="mr-3 inline-block mb-2">
               {t("schedule_information")}
             </span>
-            <Badge variant={APPOINTMENT_STATUS_COLORS[appointment.status]}>
+            <Badge
+              variant={
+                (
+                  {
+                    booked: "secondary",
+                    checked_in: "primary",
+                    in_consultation: "primary",
+                    pending: "secondary",
+                    arrived: "primary",
+                    fulfilled: "primary",
+                    entered_in_error: "destructive",
+                    cancelled: "destructive",
+                    rescheduled: "secondary",
+                    noshow: "destructive",
+                  } as Partial<
+                    Record<Appointment["status"], BadgeProps["variant"]>
+                  >
+                )[appointment.status] ?? "outline"
+              }
+            >
               {t(appointment.status)}
             </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-4 text-sm">
-            <CalendarIcon className="size-5 text-gray-600" />
+            <CalendarIcon className="h-5 w-5 text-gray-600" />
             <div>
               <p className="font-medium">
                 {format(appointment.token_slot.start_datetime, "MMMM d, yyyy")}
@@ -254,7 +247,7 @@ const AppointmentDetails = ({
             </div>
           </div>
           <div className="flex items-center space-x-4 text-sm">
-            <ClockIcon className="size-5 text-gray-600" />
+            <ClockIcon className="h-5 w-5 text-gray-600" />
             <div>
               <p className="font-medium">
                 {format(appointment.token_slot.start_datetime, "h:mm a")} -{" "}
@@ -266,19 +259,6 @@ const AppointmentDetails = ({
                   appointment.token_slot.start_datetime,
                   appointment.token_slot.end_datetime,
                 )}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4 text-sm">
-            <AvatarIcon className="size-5 text-gray-600" />
-            <div className="text-sm">
-              <p className="font-medium">{t("booked_by")}</p>
-              <p className="text-gray-600">
-                {appointment.booked_by
-                  ? formatName(appointment.booked_by)
-                  : `${appointment.patient.name} (${t("patient")})`}{" "}
-                {t("on")}{" "}
-                {format(appointment.booked_on, "MMMM d, yyyy 'at' h:mm a")}
               </p>
             </div>
           </div>
@@ -298,7 +278,7 @@ const AppointmentDetails = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-4 text-sm">
-            <PersonIcon className="size-5 text-gray-600" />
+            <PersonIcon className="h-5 w-5 text-gray-600" />
             <div>
               <p className="font-medium">{appointment.patient.name}</p>
               <p className="text-gray-600">
@@ -326,14 +306,14 @@ const AppointmentDetails = ({
             </div>
           </div>
           <div className="flex items-center space-x-4 text-sm">
-            <MobileIcon className="size-5 text-gray-600" />
+            <MobileIcon className="h-5 w-5 text-gray-600" />
             <div>
               <p className="font-medium">
                 <a
                   href={`tel:${appointment.patient.phone_number}`}
                   className="text-primary hover:underline"
                 >
-                  {formatPhoneNumberIntl(appointment.patient.phone_number)}
+                  {appointment.patient.phone_number}
                 </a>
               </p>
               <p className="text-gray-600">
@@ -343,16 +323,14 @@ const AppointmentDetails = ({
                     href={`tel:${appointment.patient.emergency_phone_number}`}
                     className="text-primary hover:underline"
                   >
-                    {formatPhoneNumberIntl(
-                      appointment.patient.emergency_phone_number,
-                    )}
+                    {appointment.patient.emergency_phone_number}
                   </a>
                 )}
               </p>
             </div>
           </div>
           <div className="flex items-center space-x-4 text-sm">
-            <DrawingPinIcon className="size-5 text-gray-600" />
+            <DrawingPinIcon className="h-5 w-5 text-gray-600" />
             <div>
               <p className="font-medium">
                 {appointment.patient.address || t("no_address_provided")}
@@ -386,6 +364,12 @@ const AppointmentDetails = ({
           </div>
         </CardContent>
       </Card>
+
+      <div className="text-sm text-gray-600">
+        {t("booked_by")} {appointment.booked_by?.first_name}{" "}
+        {appointment.booked_by?.last_name} {t("on")}{" "}
+        {format(appointment.booked_on, "MMMM d, yyyy 'at' h:mm a")}
+      </div>
     </div>
   );
 };
@@ -395,7 +379,6 @@ interface AppointmentActionsProps {
   appointment: Appointment;
   onChange: (status: Appointment["status"]) => void;
   onViewPatient: () => void;
-  canCreateAppointment: boolean;
 }
 
 const AppointmentActions = ({
@@ -403,15 +386,10 @@ const AppointmentActions = ({
   appointment,
   onChange,
   onViewPatient,
-  canCreateAppointment,
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
-  const [selectedPractitioner, setSelectedPractitioner] = useState(
-    appointment.user,
-  );
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
   const currentStatus = appointment.status;
@@ -464,14 +442,48 @@ const AppointmentActions = ({
         {t("view_patient")}
       </Button>
 
-      {canCreateAppointment && (
-        <Sheet open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
-          <SheetTrigger asChild>
-            {appointment.status !== "in_consultation" && (
-              <Button variant="outline" size="lg">
-                <CalendarIcon className="size-4 mr-2" />
-                {t("reschedule")}
+      <Sheet open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
+        <SheetTrigger asChild>
+          <Button variant="outline" size="lg">
+            <CalendarIcon className="size-4 mr-2" />
+            {t("reschedule")}
+          </Button>
+        </SheetTrigger>
+        <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
+          </SheetHeader>
+
+          <div className="mt-6">
+            <AppointmentSlotPicker
+              facilityId={facilityId}
+              resourceId={appointment.user?.id}
+              selectedSlotId={selectedSlotId}
+              onSlotSelect={setSelectedSlotId}
+            />
+
+            <div className="flex justify-end gap-2 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsRescheduleOpen(false);
+                  setSelectedSlotId(undefined);
+                }}
+              >
+                {t("cancel")}
               </Button>
+              <Button
+                variant="default"
+                disabled={!selectedSlotId || isRescheduling}
+                onClick={() => {
+                  if (selectedSlotId) {
+                    rescheduleAppointment({ new_slot: selectedSlotId });
+                  }
+                }}
+              >
+                {isRescheduling ? t("rescheduling") : t("reschedule")}
+              </Button>
+
             )}
           </SheetTrigger>
           <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
@@ -519,10 +531,11 @@ const AppointmentActions = ({
                   {isRescheduling ? t("rescheduling") : t("reschedule")}
                 </Button>
               </div>
+
             </div>
-          </SheetContent>
-        </Sheet>
-      )}
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {currentStatus === "booked" && (
         <>
@@ -570,42 +583,40 @@ const AppointmentActions = ({
         </Button>
       )}
 
-      {appointment.status !== "in_consultation" && (
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="outline" size="lg">
-              <BanIcon className="size-4 mr-2" />
-              {t("cancel_appointment")}
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t("cancel_appointment")}</AlertDialogTitle>
-              <AlertDialogDescription>
-                <Alert variant="destructive" className="mt-4">
-                  <AlertTitle>{t("warning")}</AlertTitle>
-                  <AlertDescription>
-                    {t("cancel_appointment_warning")}
-                  </AlertDescription>
-                </Alert>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => cancelAppointment({ reason: "cancelled" })}
-                className={cn(buttonVariants({ variant: "destructive" }))}
-              >
-                {isCancelling ? (
-                  <Loader2 className="size-4 animate-spin mr-2" />
-                ) : (
-                  t("confirm")
-                )}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="outline" size="lg">
+            <BanIcon className="size-4 mr-2" />
+            {t("cancel_appointment")}
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("cancel_appointment")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              <Alert variant="destructive" className="mt-4">
+                <AlertTitle>{t("warning")}</AlertTitle>
+                <AlertDescription>
+                  {t("cancel_appointment_warning")}
+                </AlertDescription>
+              </Alert>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => cancelAppointment({ reason: "cancelled" })}
+              className={cn(buttonVariants({ variant: "destructive" }))}
+            >
+              {isCancelling ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                t("confirm")
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog>
         <AlertDialogTrigger asChild>
@@ -633,7 +644,7 @@ const AppointmentActions = ({
               className={cn(buttonVariants({ variant: "destructive" }))}
             >
               {isCancelling ? (
-                <Loader2 className="size-4 animate-spin mr-2" />
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : (
                 t("confirm")
               )}

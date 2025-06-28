@@ -31,7 +31,7 @@ export default function LocationSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+      <SheetContent className="sm:max-w-xl">
         <SheetHeader>
           <SheetTitle>
             {location?.id ? t("edit_location") : t("add_location")}

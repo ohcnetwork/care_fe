@@ -5,24 +5,18 @@ import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
-import {
-  getTabs,
-  patientTabs as tabs,
-} from "@/components/Patient/PatientDetailsTab";
-
-import { getPermissions } from "@/common/Permissions";
+import { patientTabs as tabs } from "@/components/Patient/PatientDetailsTab";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { formatPatientAge } from "@/Utils/utils";
-import { usePermissions } from "@/context/PermissionContext";
-import { Patient } from "@/types/emr/patient";
+import { formatDateTime, formatPatientAge, relativeTime } from "@/Utils/utils";
+import { Patient } from "@/types/emr/newPatient";
 
 export const PatientHome = (props: {
   facilityId?: string;
@@ -32,7 +26,6 @@ export const PatientHome = (props: {
   const { facilityId, id, page } = props;
 
   const { t } = useTranslation();
-  const { hasPermission } = usePermissions();
 
   const { data: patientData, isLoading } = useQuery<Patient>({
     queryKey: ["patient", id],
@@ -44,21 +37,9 @@ export const PatientHome = (props: {
     enabled: !!id,
   });
 
-  const { getPatientTabs } = getTabs(
-    patientData?.permissions ?? [],
-    hasPermission,
-  );
-
-  const { canCreateAppointment } = getPermissions(
-    hasPermission,
-    patientData?.permissions ?? [],
-  );
-
   if (isLoading) {
     return <Loading />;
   }
-
-  const tabs = getPatientTabs;
 
   const Tab = tabs.find((t) => t.route === page)?.component;
 
@@ -71,7 +52,7 @@ export const PatientHome = (props: {
       title={t("patient_details")}
       options={
         <>
-          {facilityId && canCreateAppointment && (
+          {facilityId && (
             <Button asChild variant="primary">
               <Link
                 href={`/facility/${facilityId}/patient/${id}/book-appointment`}
@@ -85,35 +66,32 @@ export const PatientHome = (props: {
     >
       <div className="mt-3 overflow-y-auto" data-testid="patient-dashboard">
         <div className="px-3 md:px-0">
-          <div className="rounded-md bg-white p-3 shadow-xs">
+          <div className="rounded-md bg-white p-3 shadow-sm">
             <div>
               <div className="flex flex-col justify-between gap-4 gap-y-2 md:flex-row">
                 <div className="flex flex-col gap-4 md:flex-row">
                   <div className="flex flex-row gap-x-4">
-                    <div className="size-10 shrink-0 md:size-14">
+                    <div className="h-10 w-10 flex-shrink-0 md:h-14 md:w-14">
                       <Avatar
                         className="size-10 font-semibold text-secondary-800 md:size-auto"
                         name={patientData.name}
                       />
                     </div>
 
-                    <div className="space-y-1">
-                      <div className="flex flex-col md:flex-row gap-x-4">
+                    <div>
+                      <div className="flex flex-row gap-x-4">
                         <h1
                           id="patient-name"
-                          className="text-base md:text-xl font-semibold capitalize text-gray-950 mb-2 leading-tight"
+                          className="text-xl font-bold capitalize text-gray-950"
                         >
                           {patientData.name}
                         </h1>
-                        {patientData.deceased_datetime && (
-                          <Badge
-                            variant="destructive"
-                            className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
-                          >
-                            <h3 className="text-xs font-normal sm:text-sm sm:font-medium">
-                              {t("time_of_death")}
+                        {patientData.death_datetime && (
+                          <Badge variant="destructive">
+                            <h3 className="text-sm font-medium">
+                              {t("expired_on")}
                               {": "}
-                              {dayjs(patientData.deceased_datetime).format(
+                              {dayjs(patientData.death_datetime).format(
                                 "DD MMM YYYY, hh:mm A",
                               )}
                             </h3>
@@ -135,7 +113,7 @@ export const PatientHome = (props: {
         </div>
 
         <div
-          className="sticky top-0 z-9 mt-4 w-full border-b border-gray-200 bg-gray-50"
+          className="sticky top-0 z-10 mt-4 w-full border-b bg-gray-50"
           role="navigation"
         >
           <div className="overflow-x-auto pb-3">
@@ -186,7 +164,6 @@ export const PatientHome = (props: {
                       <PLUGIN_Component
                         __name="PatientHomeActions"
                         patient={patientData}
-                        facilityId={facilityId}
                         className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
                       />
                     </div>
@@ -194,7 +171,7 @@ export const PatientHome = (props: {
                 </div>
               </div>
             </section>
-            <hr className="border-gray-200" />
+            <hr />
             <div
               id="actions"
               className="my-2 flex h-full flex-col justify-between space-y-2"
@@ -211,7 +188,11 @@ export const PatientHome = (props: {
 
                   <div className="whitespace-normal text-xs font-normal text-gray-900">
                     {patientData.modified_date ? (
-                      <RelativeDateTooltip date={patientData.modified_date} />
+                      <TooltipComponent
+                        content={formatDateTime(patientData.modified_date)}
+                      >
+                        <span>{relativeTime(patientData.modified_date)}</span>
+                      </TooltipComponent>
                     ) : (
                       "--:--"
                     )}
@@ -228,7 +209,11 @@ export const PatientHome = (props: {
                   </div>
                   <div className="whitespace-normal text-xs font-normal text-gray-900">
                     {patientData.created_date ? (
-                      <RelativeDateTooltip date={patientData.created_date} />
+                      <TooltipComponent
+                        content={formatDateTime(patientData.created_date)}
+                      >
+                        <span>{relativeTime(patientData.created_date)}</span>
+                      </TooltipComponent>
                     ) : (
                       "--:--"
                     )}

@@ -32,10 +32,6 @@ export interface FacilityOrganizationCreate {
   parent?: string;
 }
 
-export interface FacilityOrganizationEdit extends FacilityOrganizationCreate {
-  facility: string;
-}
-
 export interface FacilityOrganizationUserRole {
   id: string;
   user: UserBase;

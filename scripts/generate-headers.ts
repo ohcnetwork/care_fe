@@ -15,14 +15,7 @@ async function writeHeaders() {
   console.log(`Writing headers to file at path: ${headersPath}`);
 
   try {
-    const headerEntries = headers.split(" | ");
-    let formattedHeaders = "/*\n";
-
-    for (const header of headerEntries) {
-      formattedHeaders += `  ${header}\n`;
-    }
-
-    await writeFile(headersPath, formattedHeaders, "utf-8");
+    await writeFile(headersPath, headers, "utf-8");
     console.log("Headers written to file successfully.");
     process.exit(0);
   } catch (error) {

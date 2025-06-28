@@ -37,18 +37,17 @@ const initials = (name: string): string => {
     .toUpperCase();
 };
 
-function Avatar({
-  colors: propColors,
-  name,
-  imageUrl,
-  className,
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Root> & {
+interface AvatarProps {
   colors?: [string, string];
   name: string;
   imageUrl?: string;
   className?: string;
-}) {
+}
+
+const Avatar = React.forwardRef<
+  React.ElementRef<typeof AvatarPrimitive.Root>,
+  AvatarProps
+>(({ colors: propColors, name, imageUrl, className }, ref) => {
   const avatarText = name.match(/[a-zA-Z]+/g)?.join(" ");
 
   const [bgColor, textColor] =
@@ -57,51 +56,50 @@ function Avatar({
 
   return (
     <AvatarPrimitive.Root
-      data-slot="avatar"
-      className={cn("aspect-square size-full rounded-md", className)}
+      ref={ref}
+      className={cn("w-full h-full rounded-md", className)}
       style={{
         background: bgColor,
       }}
-      {...props}
     >
-      <AvatarPrimitive.Image
-        data-slot="avatar-image"
-        src={imageUrl}
-        alt={name}
-        className={cn(
-          "aspect-square size-full object-cover rounded-md",
-          className,
-        )}
-      />
-      <AvatarPrimitive.Fallback
-        data-slot="avatar-fallback"
-        className="flex h-full w-full select-none items-center justify-center text-center"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          version="1.1"
-          viewBox="0 0 100 100"
-          className="aspect-square h-full w-full object-cover"
-        >
-          <text
-            fill={textColor}
-            fillOpacity="0.5"
-            fontSize="50"
-            fontWeight="900"
-            x="50"
-            y="54"
-            textAnchor="middle"
-            dominantBaseline="middle"
-            alignmentBaseline="middle"
+      {imageUrl ? (
+        <AvatarPrimitive.Image
+          src={imageUrl}
+          alt={name}
+          className={cn(
+            "aspect-square h-full w-full object-cover rounded-md",
+            className,
+          )}
+        />
+      ) : (
+        <AvatarPrimitive.Fallback className="flex h-full w-full select-none items-center justify-center text-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            version="1.1"
+            viewBox="0 0 100 100"
+            className="aspect-square h-full w-full object-cover"
           >
-            {avatarText ? initials(avatarText) : null}
-          </text>
-        </svg>
-      </AvatarPrimitive.Fallback>
+            <text
+              fill={textColor}
+              fillOpacity="0.5"
+              fontSize="50"
+              fontWeight="900"
+              x="50"
+              y="54"
+              textAnchor="middle"
+              dominantBaseline="middle"
+              alignmentBaseline="middle"
+            >
+              {avatarText ? initials(avatarText) : null}
+            </text>
+          </svg>
+        </AvatarPrimitive.Fallback>
+      )}
     </AvatarPrimitive.Root>
   );
-}
+});
 
 Avatar.displayName = "Avatar";
 
 export { Avatar };
+export type { AvatarProps };

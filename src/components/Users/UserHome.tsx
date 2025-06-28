@@ -15,12 +15,9 @@ import UserSummaryTab from "@/components/Users/UserSummary";
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { getPermissions } from "@/common/Permissions";
-
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName, keysOf } from "@/Utils/utils";
-import { usePermissions } from "@/context/PermissionContext";
 
 export interface UserHomeProps {
   username?: string;
@@ -28,20 +25,19 @@ export interface UserHomeProps {
   facilityId?: string;
 }
 export interface TabChildProp {
-  body: (childProps: userChildProps) => React.ReactNode | undefined;
+  body: (childProps: userChildProps) => JSX.Element | undefined;
   hidden?: boolean;
 }
 
 export default function UserHome(props: UserHomeProps) {
   const { tab } = props;
-  let { username, facilityId } = props;
+  let { username } = props;
   const { t } = useTranslation();
   const authUser = useAuthUser();
+  const { goBack } = useAppHistory();
   if (!username) {
     username = authUser.username;
   }
-  const { hasPermission } = usePermissions();
-  const { goBack } = useAppHistory();
 
   const {
     data: userData,
@@ -55,19 +51,6 @@ export default function UserHome(props: UserHomeProps) {
       },
     }),
   });
-
-  const { data: facilityData } = useQuery({
-    queryKey: ["getFacilityDetails", props.facilityId],
-    queryFn: query(routes.getPermittedFacility, {
-      pathParams: { id: facilityId ?? "" },
-    }),
-    enabled: !!facilityId,
-  });
-
-  const { canViewSchedule } = getPermissions(
-    hasPermission,
-    facilityId ? (facilityData?.permissions ?? []) : authUser.permissions,
-  );
 
   if (isError) {
     goBack("/");
@@ -84,7 +67,7 @@ export default function UserHome(props: UserHomeProps) {
     },
     AVAILABILITY: {
       body: UserAvailabilityTab,
-      hidden: !props.facilityId || !canViewSchedule,
+      hidden: !props.facilityId,
     },
   } satisfies Record<string, TabChildProp>;
 
@@ -106,6 +89,7 @@ export default function UserHome(props: UserHomeProps) {
     <>
       <Page
         title={formatName(userData) || userData.username || t("manage_user")}
+        focusOnLoad={true}
         hideTitleOnPage
       >
         {
@@ -142,11 +126,7 @@ export default function UserHome(props: UserHomeProps) {
                 </div>
               </div>
             </div>
-            <SelectedTab
-              userData={userData}
-              username={username}
-              permissions={facilityData?.permissions ?? []}
-            />
+            <SelectedTab userData={userData} username={username} {...props} />
           </>
         }
       </Page>

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import dayjs from "dayjs";
+import { isBefore, parse } from "date-fns";
 import { Loader2, SaveIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -40,7 +40,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Sheet,
   SheetContent,
@@ -49,7 +48,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
 import { formatAvailabilityTime } from "@/components/Users/UserAvailabilityTab";
@@ -57,11 +55,7 @@ import { formatAvailabilityTime } from "@/components/Users/UserAvailabilityTab";
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
-import {
-  calculateSlotDuration,
-  getSlotsPerSession,
-  getTokenDuration,
-} from "@/pages/Scheduling/utils";
+import { getSlotsPerSession, getTokenDuration } from "@/pages/Scheduling/utils";
 import {
   AvailabilityDateTime,
   ScheduleAvailability,
@@ -163,14 +157,16 @@ const ScheduleTemplateEditor = ({
       }),
     })
     .refine(
-      (data) => !dayjs(data.valid_to).isBefore(dayjs(data.valid_from), "day"),
+      (data) => {
+        return isBefore(data.valid_from, data.valid_to);
+      },
       {
-        message: t("to_date_equal_or_after_from_date"),
-        path: ["valid_to"],
+        message: t("from_date_must_be_before_to_date"),
+        path: ["valid_from"],
       },
     );
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof templateFormSchema>>({
     resolver: zodResolver(templateFormSchema),
     defaultValues: {
       name: template.name,
@@ -220,7 +216,7 @@ const ScheduleTemplateEditor = ({
   }
 
   return (
-    <div className="rounded-lg bg-white p-4 shadow-sm">
+    <div className="rounded-lg bg-white p-4 shadow">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
@@ -228,9 +224,7 @@ const ScheduleTemplateEditor = ({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel aria-required>
-                  {t("schedule_template_name")}
-                </FormLabel>
+                <FormLabel required>{t("schedule_template_name")}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder={t("schedule_template_name_placeholder")}
@@ -248,7 +242,7 @@ const ScheduleTemplateEditor = ({
               name="valid_from"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel aria-required>{t("valid_from")}</FormLabel>
+                  <FormLabel required>{t("valid_from")}</FormLabel>
                   <DatePicker
                     date={field.value}
                     onChange={(date) => field.onChange(date)}
@@ -263,7 +257,7 @@ const ScheduleTemplateEditor = ({
               name="valid_to"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel aria-required>{t("valid_to")}</FormLabel>
+                  <FormLabel required>{t("valid_to")}</FormLabel>
                   <DatePicker
                     date={field.value}
                     onChange={(date) => field.onChange(date)}
@@ -318,7 +312,7 @@ const ScheduleTemplateEditor = ({
                     }}
                   >
                     {isDeleting ? (
-                      <Loader2 className="size-4 animate-spin mr-2" />
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     ) : (
                       t("confirm")
                     )}
@@ -408,7 +402,7 @@ const AvailabilityEditor = ({
   })();
 
   return (
-    <div className="mt-4 rounded-lg bg-white p-4 shadow-sm">
+    <div className="mt-4 rounded-lg bg-white p-4 shadow">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <CareIcon icon="l-clock" className="text-lg text-blue-600" />
@@ -458,7 +452,7 @@ const AvailabilityEditor = ({
                 }}
               >
                 {isDeleting ? (
-                  <Loader2 className="size-4 animate-spin mr-2" />
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : (
                   t("confirm")
                 )}
@@ -581,16 +575,14 @@ const NewAvailabilityCard = ({
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek>)
         .min(1, t("schedule_weekdays_min_error")),
-      is_auto_fill: z.boolean().optional(),
-      num_of_slots: z.number().min(1, t("number_min_error", { min: 0 })),
     })
     .refine(
       (data) => {
         // Parse time strings into Date objects for comparison
-        const startTime = dayjs(data.start_time, "HH:mm");
-        const endTime = dayjs(data.end_time, "HH:mm");
+        const startTime = parse(data.start_time, "HH:mm", new Date());
+        const endTime = parse(data.end_time, "HH:mm", new Date());
 
-        return startTime.isBefore(endTime);
+        return isBefore(startTime, endTime);
       },
       {
         message: t("start_time_must_be_before_end_time"),
@@ -598,7 +590,7 @@ const NewAvailabilityCard = ({
       },
     );
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -609,8 +601,6 @@ const NewAvailabilityCard = ({
       tokens_per_slot: null,
       reason: "",
       weekdays: [],
-      is_auto_fill: false,
-      num_of_slots: 1,
     },
   });
 
@@ -701,20 +691,9 @@ const NewAvailabilityCard = ({
       </div>
     );
   }
-  const updateSlotDuration = () => {
-    const isAutoFill = form.watch("is_auto_fill");
-    if (isAutoFill) {
-      const duration = calculateSlotDuration(
-        form.watch("start_time"),
-        form.watch("end_time"),
-        form.watch("num_of_slots"),
-      );
-      form.setValue("slot_size_in_minutes", duration);
-    }
-  };
 
   return (
-    <div className="mt-4 rounded-lg bg-white p-4 shadow-sm">
+    <div className="mt-4 rounded-lg bg-white p-4 shadow">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <CareIcon icon="l-clock" className="text-lg text-blue-600" />
@@ -729,7 +708,7 @@ const NewAvailabilityCard = ({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel aria-required>{t("session_title")}</FormLabel>
+                <FormLabel required>{t("session_title")}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder={t("session_title_placeholder")}
@@ -746,7 +725,7 @@ const NewAvailabilityCard = ({
             name="slot_type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel aria-required>{t("session_type")}</FormLabel>
+                <FormLabel required>{t("session_type")}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -780,16 +759,9 @@ const NewAvailabilityCard = ({
               name="start_time"
               render={({ field }) => (
                 <FormItem className="flex flex-col w-full">
-                  <FormLabel aria-required>{t("start_time")}</FormLabel>
+                  <FormLabel required>{t("start_time")}</FormLabel>
                   <FormControl>
-                    <Input
-                      type="time"
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        updateSlotDuration();
-                      }}
-                    />
+                    <Input type="time" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -801,16 +773,9 @@ const NewAvailabilityCard = ({
               name="end_time"
               render={({ field }) => (
                 <FormItem className="flex flex-col w-full mt-2">
-                  <FormLabel aria-required>{t("end_time")}</FormLabel>
+                  <FormLabel required>{t("end_time")}</FormLabel>
                   <FormControl>
-                    <Input
-                      type="time"
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        updateSlotDuration();
-                      }}
-                    />
+                    <Input type="time" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -820,73 +785,18 @@ const NewAvailabilityCard = ({
 
           {form.watch("slot_type") === "appointment" && (
             <>
-              <div className="flex flex-wrap mt-0 pt-2 gap-2">
-                <div className="w-full gap-x-2 grid grid-cols-[auto_1fr_auto] mb-2 bg-gray-50 p-3 rounded-lg">
-                  <CareIcon icon="l-bolt" className="text-lg text-blue-600" />
-                  <Label
-                    htmlFor={"auto-fill"}
-                    className="text-sm font-medium cursor-pointer col-start-2"
-                  >
-                    {t("auto_fill_slot_duration")}
-                  </Label>
-                  <Switch
-                    className="col-start-3"
-                    id={"auto-fill"}
-                    checked={form.watch(`is_auto_fill`)}
-                    onCheckedChange={(checked) => {
-                      form.setValue(`is_auto_fill`, checked);
-                      if (checked) {
-                        updateSlotDuration();
-                      }
-                    }}
-                  />
-                  {form.watch(`is_auto_fill`) && (
-                    <div className="row-start-2 col-start-2 col-span-2">
-                      <FormField
-                        control={form.control}
-                        name={`num_of_slots`}
-                        render={({ field }) => (
-                          <FormItem className="flex flex-col mt-2 space-y-0">
-                            <Label className="text-sm font-light">
-                              {t("number_of_slots")}
-                            </Label>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                inputMode="numeric"
-                                pattern="[0-9]*"
-                                min={1}
-                                defaultValue={1}
-                                {...field}
-                                className="shadow-none"
-                                onChange={(e) => {
-                                  field.onChange(e.target.valueAsNumber);
-                                  updateSlotDuration();
-                                }}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
               <div className="flex items-center gap-4">
                 <FormField
                   control={form.control}
                   name="slot_size_in_minutes"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel aria-required>
+                      <FormLabel required>
                         {t("schedule_slot_size_label")}
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
                           min={0}
                           placeholder="e.g. 10"
                           {...field}
@@ -894,7 +804,6 @@ const NewAvailabilityCard = ({
                           onChange={(e) =>
                             field.onChange(e.target.valueAsNumber)
                           }
-                          disabled={form.watch("is_auto_fill")}
                         />
                       </FormControl>
                       <FormMessage />
@@ -907,14 +816,10 @@ const NewAvailabilityCard = ({
                   name="tokens_per_slot"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel aria-required>
-                        {t("patients_per_slot")}
-                      </FormLabel>
+                      <FormLabel required>{t("patients_per_slot")}</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
                           min={0}
                           placeholder="e.g. 1"
                           {...field}
@@ -938,7 +843,7 @@ const NewAvailabilityCard = ({
             name="weekdays"
             render={({ field }) => (
               <FormItem>
-                <FormLabel aria-required>{t("schedule_weekdays")}</FormLabel>
+                <FormLabel required>{t("schedule_weekdays")}</FormLabel>
                 <FormControl>
                   <WeekdayCheckbox
                     value={field.value}

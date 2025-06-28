@@ -1,7 +1,5 @@
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import { CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -53,10 +51,7 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
   }
 
   return (
-    <div
-      className="border border-gray-200 rounded-lg overflow-hidden"
-      data-cy="medications-table"
-    >
+    <div className="border rounded-lg overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow className="divide-x bg-gray-100">
@@ -82,11 +77,7 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
             return (
               <TableRow
                 key={medication.id}
-                className={cn(
-                  "divide-x font-medium",
-                  isInactive && "opacity-40",
-                  isInactive && medication.status !== "ended" && "line-through",
-                )}
+                className={`divide-x font-medium ${isInactive ? "bg-gray-100" : ""}`}
               >
                 <TableCell className="py-2 px-3">
                   {medication.medication?.display}
@@ -96,11 +87,9 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
                   {instruction?.as_needed_boolean
                     ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display})`
                     : frequency?.meaning}
-                  {(instruction?.additional_instruction ?? []).length > 0 && (
-                    <div className="text-sm text-gray-600 space-y-1">
-                      {instruction.additional_instruction?.map(
-                        (item, index) => <div key={index}>{item.display}</div>,
-                      )}
+                  {instruction?.additional_instruction?.[0]?.display && (
+                    <div className="text-sm text-gray-600">
+                      {instruction.additional_instruction[0].display}
                     </div>
                   )}
                 </TableCell>

@@ -6,9 +6,8 @@ import {
   CircleDashed,
   Clock,
   Droplet,
-  UserRound,
 } from "lucide-react";
-import { Link, usePathParams } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -20,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -28,7 +28,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import { CareTeamSheet } from "@/components/CareTeam/CareTeamSheet";
 import { Avatar } from "@/components/Common/Avatar";
 import EncounterActions from "@/components/Encounter/EncounterActions";
 import { LocationSheet } from "@/components/Location/LocationSheet";
@@ -43,21 +42,18 @@ import {
   completedEncounterStatus,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/newPatient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
 export interface PatientInfoCardProps {
   patient: Patient;
   encounter: Encounter;
   fetchPatientData?: (state: { aborted: boolean }) => void;
-  canWrite: boolean;
   disableButtons?: boolean;
 }
 
 export default function PatientInfoCard(props: PatientInfoCardProps) {
-  const { patient, encounter, canWrite, disableButtons = false } = props;
-  const subpathMatch = usePathParams("/facility/:facilityId/*");
-  const facilityIdExists = !!subpathMatch?.facilityId;
+  const { patient, encounter, disableButtons = false } = props;
   const { t } = useTranslation();
 
   return (
@@ -67,42 +63,39 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           className="flex w-full flex-col bg-white px-4 pt-4 lg:flex-row"
           id="patient-infobadges"
         >
-          <div className="flex justify-items-start gap-2 lg:justify-normal">
+          <div className="flex justify-items-start gap-5 lg:justify-normal">
             <div className="flex flex-col items-start lg:items-center">
-              <div className="w-16 min-w-16 bg-secondary-200 h-16 md:size-24 rounded">
+              <div className="w-16 min-w-16 bg-secondary-200 h-16 md:w-24 md:h-24 rounded">
                 <Avatar name={patient.name} className="w-full h-full" />
               </div>
             </div>
             <div className="flex justify-center">
               <div
-                className="mb-2 flex flex-col text-base md:text-xl font-semibold capitalize lg:hidden"
+                className="mb-2 flex flex-col text-xl font-semibold capitalize lg:hidden"
                 id="patient-name-consultation"
               >
                 <Link
                   href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}`}
-                  className="text-gray-950 font-semibold flex items-start leading-tight"
+                  className="text-gray-950 font-semibold flex items-start gap-0.5"
                   id="patient-details"
                   data-cy="patient-details-button"
                 >
                   {patient.name}
                   <CareIcon
                     icon="l-external-link-alt"
-                    className="size-3 opacity-50 mt-1"
+                    className="w-3 h-3 opacity-50 mt-1"
                   />
                 </Link>
-                <div className="my-[2px] text-sm font-semibold text-secondary-600">
+                <div className="mt-[6px] text-sm font-semibold text-secondary-600">
                   {formatPatientAge(patient, true)} •{" "}
                   {t(`GENDER__${patient.gender}`)}
                 </div>
-                {patient.deceased_datetime && (
-                  <Badge
-                    variant="destructive"
-                    className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
-                  >
-                    <h3 className="text-xs font-normal sm:text-sm sm:font-medium">
-                      {t("time_of_death")}
+                {patient.death_datetime && (
+                  <Badge variant="destructive">
+                    <h3 className="text-sm font-medium">
+                      {t("expired_on")}
                       {": "}
-                      {dayjs(patient.deceased_datetime).format(
+                      {dayjs(patient.death_datetime).format(
                         "DD MMM YYYY, hh:mm A",
                       )}
                     </h3>
@@ -126,22 +119,19 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   {patient.name}
                   <CareIcon
                     icon="l-external-link-alt"
-                    className="size-4 opacity-70"
+                    className="w-4 h-4 opacity-70"
                   />
                 </Link>
                 <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-secondary-600">
                   {formatPatientAge(patient, true)} •{" "}
                   {t(`GENDER__${patient.gender}`)}
                 </div>
-                {patient.deceased_datetime && (
-                  <Badge
-                    variant="destructive"
-                    className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
-                  >
+                {patient.death_datetime && (
+                  <Badge variant="destructive">
                     <h3 className="text-sm font-medium">
-                      {t("time_of_death")}
+                      {t("expired_on")}
                       {": "}
-                      {dayjs(patient.deceased_datetime).format(
+                      {dayjs(patient.death_datetime).format(
                         "DD MMM YYYY, hh:mm A",
                       )}
                     </h3>
@@ -180,8 +170,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   </div>
                 )}
               </div>
-
-              <div className="mt-3 w-full flex flex-col gap-3 sm:flex-row">
+              <div className="flex flex-wrap items-center gap-2 text-sm sm:flex-row mt-2">
                 <div
                   className="flex w-full flex-wrap items-center justify-start gap-2 text-sm text-secondary-900 sm:flex-row sm:text-sm md:pr-10 lg:justify-normal"
                   id="patient-consultationbadges"
@@ -196,16 +185,16 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                         >
                           {completedEncounterStatus.includes(
                             props.encounter.status,
-                          ) || props.encounter.status === "discharged" ? (
+                          ) ? (
                             <CircleCheck
-                              className="size-4 text-green-300"
+                              className="w-4 h-4 text-green-300"
                               fill="green"
                             />
                           ) : (
-                            <CircleDashed className="size-4 text-yellow-500" />
+                            <CircleDashed className="w-4 h-4 text-yellow-500" />
                           )}
                           {t(`encounter_status__${props.encounter.status}`)}
-                          <ChevronDown className="size-3 opacity-50" />
+                          <ChevronDown className="h-3 w-3 opacity-50" />
                         </Badge>
                       </div>
                     </PopoverTrigger>
@@ -242,13 +231,13 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                           title={`Encounter Class: ${props.encounter.encounter_class}`}
                         >
                           <BedSingle
-                            className="size-4 text-blue-400"
+                            className="w-4 h-4 text-blue-400"
                             fill="#93C5FD"
                           />
                           {t(
                             `encounter_class__${props.encounter.encounter_class}`,
                           )}
-                          <ChevronDown className="size-3 opacity-50" />
+                          <ChevronDown className="h-3 w-3 opacity-50" />
                         </Badge>
                       </div>
                     </PopoverTrigger>
@@ -282,7 +271,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       `encounter_priority__${props.encounter.priority.toLowerCase()}`,
                     )}`}
                   >
-                    <Clock className="size-4 text-yellow-500" />
+                    <Clock className="w-4 h-4 text-yellow-500" />
                     {t(
                       `encounter_priority__${props.encounter.priority.toLowerCase()}`,
                     )}
@@ -294,7 +283,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       variant="outline"
                       title={`Blood Group: ${patient.blood_group?.replace("_", " ")}`}
                     >
-                      <Droplet className="size-4 text-red-300" fill="red" />
+                      <Droplet className="w-4 h-4 text-red-300" fill="red" />
                       {patient.blood_group?.replace("_", " ")}
                     </Badge>
                   )}
@@ -310,7 +299,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       >
                         <CareIcon
                           icon="l-signout"
-                          className="size-4 text-blue-400"
+                          className="w-4 h-4 text-blue-400"
                         />
                         {t(
                           `encounter_discharge_disposition__${encounter.hospitalization.discharge_disposition}`,
@@ -319,41 +308,28 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     )
                   }
 
-                  {canWrite ? (
-                    <LinkDepartmentsSheet
-                      entityType="encounter"
-                      entityId={encounter.id}
-                      currentOrganizations={encounter.organizations}
-                      facilityId={encounter.facility.id}
-                      trigger={
-                        <div
-                          className="flex flex-wrap gap-2"
-                          data-cy="add-organization-badge"
-                        >
-                          {encounter.organizations.map((org) =>
-                            organizationBadge(org),
-                          )}
-                          {encounter.organizations.length === 0 && (
-                            <Badge
-                              className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
-                              variant="outline"
-                            >
-                              <Building className="size-4 text-blue-400" />
-                              {t("add_organization_other")}
-                            </Badge>
-                          )}
-                        </div>
-                      }
-                    />
-                  ) : (
-                    encounter.organizations.length > 0 && (
+                  <LinkDepartmentsSheet
+                    entityType="encounter"
+                    entityId={encounter.id}
+                    currentOrganizations={encounter.organizations}
+                    facilityId={encounter.facility.id}
+                    trigger={
                       <div className="flex flex-wrap gap-2">
                         {encounter.organizations.map((org) =>
                           organizationBadge(org),
                         )}
+                        {encounter.organizations.length === 0 && (
+                          <Badge
+                            className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
+                            variant="outline"
+                          >
+                            <Building className="w-4 h-4 text-blue-400" />
+                            Add Organizations
+                          </Badge>
+                        )}
                       </div>
-                    )
-                  )}
+                    }
+                  />
                   {props.encounter.current_location ? (
                     <Popover>
                       <PopoverTrigger asChild>
@@ -362,14 +338,13 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                             className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
                             variant="outline"
                             title={`Current Location: ${props.encounter.current_location.name}`}
-                            data-cy="current-location-badge"
                           >
                             <CareIcon
                               icon="l-location-point"
-                              className="size-4 text-green-600"
+                              className="h-4 w-4 text-green-600"
                             />
                             {props.encounter.current_location.name}
-                            <ChevronDown className="size-3 opacity-50" />
+                            <ChevronDown className="h-3 w-3 opacity-50" />
                           </Badge>
                         </div>
                       </PopoverTrigger>
@@ -382,13 +357,13 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
 
                             <LocationSheet
                               facilityId={props.encounter.facility.id}
+                              encounterId={props.encounter.id}
                               history={encounter.location_history}
-                              encounter={encounter}
                               trigger={
                                 <div>
                                   <CareIcon
                                     icon="l-history"
-                                    className="size-4 text-gray-700"
+                                    className="w-4 h-4 text-gray-700"
                                   />
                                   <Button
                                     variant="link"
@@ -405,108 +380,75 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                             location={props.encounter.current_location}
                           />
                           <div className="border-b border-dashed border-gray-200 my-2" />
-                          {canWrite && (
-                            <LocationSheet
-                              facilityId={props.encounter.facility.id}
-                              encounter={encounter}
-                              trigger={
-                                <Button
-                                  variant="outline"
-                                  className="border-gray-400 w-full"
-                                  data-cy="update-encounter-location-button"
-                                >
-                                  {t("update_location")}
-                                </Button>
-                              }
-                              history={encounter.location_history}
-                            />
-                          )}
+                          <LocationSheet
+                            facilityId={props.encounter.facility.id}
+                            encounterId={props.encounter.id}
+                            trigger={
+                              <Button
+                                variant="outline"
+                                className="border-gray-400 w-full"
+                              >
+                                {t("update_location")}
+                              </Button>
+                            }
+                            history={encounter.location_history}
+                          />
                         </div>
                       </PopoverContent>
                     </Popover>
-                  ) : canWrite ? (
-                    <Badge variant="outline">
-                      <LocationSheet
-                        facilityId={props.encounter.facility.id}
-                        encounter={encounter}
-                        trigger={
-                          <div
-                            className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100"
-                            data-cy="add-encounter-location"
-                          >
-                            <CareIcon
-                              icon="l-location-point"
-                              className="size-4 text-green-600"
-                            />
-                            {t("add_location")}
-                          </div>
-                        }
-                        history={encounter.location_history}
-                      />
-                    </Badge>
                   ) : (
-                    <></>
-                  )}
-                  <Badge variant="outline">
-                    <CareTeamSheet
-                      encounter={encounter}
-                      trigger={
-                        <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
-                          <UserRound className="size-4 text-green-600" />
-                          {canWrite
-                            ? t("manage_care_team")
-                            : t("view_care_team")}
-                        </div>
-                      }
-                      canWrite={canWrite}
-                    />
-                  </Badge>
-                </div>
-                <div
-                  className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
-                  id="consultation-buttons"
-                >
-                  <PLUGIN_Component
-                    __name="PatientInfoCardQuickActions"
-                    encounter={encounter}
-                    className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
-                  />
-                  {!disableButtons && (
-                    <div
-                      className="flex w-full flex-col gap-3 sm:w-auto"
-                      data-cy="update-encounter-button"
-                    >
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="primary">
-                            {inactiveEncounterStatus.includes(
-                              encounter.status,
-                            ) || !facilityIdExists
-                              ? t("actions")
-                              : t("update")}
-                            <ChevronDown className="ml-2 size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          className="w-(--radix-dropdown-menu-trigger-width) sm:w-auto"
-                        >
-                          <EncounterActions
-                            encounter={encounter}
-                            layout="dropdown"
-                          />
-                          <PLUGIN_Component
-                            __name="PatientInfoCardActions"
-                            encounter={encounter}
-                          />
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+                    !inactiveEncounterStatus.includes(encounter.status) && (
+                      <Badge variant="outline">
+                        <LocationSheet
+                          facilityId={props.encounter.facility.id}
+                          encounterId={props.encounter.id}
+                          trigger={
+                            <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
+                              <CareIcon
+                                icon="l-location-point"
+                                className="h-4 w-4 text-green-600"
+                              />
+                              {t("add_location")}
+                            </div>
+                          }
+                          history={encounter.location_history}
+                        />
+                      </Badge>
+                    )
                   )}
                 </div>
               </div>
             </div>
           </div>
+        </div>
+        <div
+          className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
+          id="consultation-buttons"
+        >
+          {!completedEncounterStatus.includes(encounter.status) &&
+            !disableButtons && (
+              <div
+                className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
+                data-cy="update-encounter-button"
+              >
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="primary">
+                      {t("update")}
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
+                    <EncounterActions encounter={encounter} layout="dropdown" />
+                    <PLUGIN_Component
+                      __name="PatientInfoCardActions"
+                      encounter={encounter}
+                    />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
         </div>
       </section>
     </>
@@ -522,7 +464,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
         variant="outline"
         title={`Organization: ${org.name}${org.description ? ` - ${org.description}` : ""}`}
       >
-        <Building className="size-4 text-blue-400" />
+        <Building className="w-4 h-4 text-blue-400" />
         {org.name}
       </Badge>
     );

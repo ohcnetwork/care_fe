@@ -1,9 +1,9 @@
 import { UserAvatar } from "@/pageObject/Users/UserAvatar";
 
 describe("User Profile Avatar Modification", () => {
-  const userAvatar = new UserAvatar("doctor_2_0");
+  const userAvatar = new UserAvatar("teststaff4");
   beforeEach(() => {
-    cy.loginByApi("doctor");
+    cy.loginByApi("teststaff4");
     cy.visit("/");
   });
   it("should modify an avatar", () => {
@@ -12,7 +12,6 @@ describe("User Profile Avatar Modification", () => {
       .interceptUploadAvatarRequest()
       .clickChangeAvatarButton()
       .uploadAvatar()
-      .clickCropAvatar()
       .clickSaveAvatarButton()
       .verifyUploadAvatarApiCall()
       .interceptDeleteAvatarRequest()

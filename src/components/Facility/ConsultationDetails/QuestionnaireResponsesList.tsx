@@ -1,36 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { Printer } from "lucide-react";
-import { Link, useQueryParams } from "raviger";
-import React from "react";
-import { useTranslation } from "react-i18next";
+import { useQueryParams } from "raviger";
+import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 import PaginationComponent from "@/components/Common/Pagination";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { formatDateTime, formatName, properCase } from "@/Utils/utils";
+import { formatDateTime, properCase } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -39,9 +25,18 @@ import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireRespon
 interface Props {
   encounter?: Encounter;
   patientId: string;
+  facilityId?: string;
   isPrintPreview?: boolean;
   onlyUnstructured?: boolean;
-  canAccess?: boolean;
+}
+
+interface QuestionResponseProps {
+  question: Question;
+  response?: {
+    values: ResponseValue[];
+    note?: string;
+    question_id: string;
+  };
 }
 
 export function formatValue(
@@ -62,193 +57,111 @@ export function formatValue(
   switch (type) {
     case "dateTime":
       return value instanceof Date
-        ? formatDateTime(value.toISOString(), "hh:mm A; DD/MM/YYYY")
-        : formatDateTime(value.toString(), "hh:mm A; DD/MM/YYYY");
-    case "date":
-      return formatDateTime(value.toString());
+        ? formatDateTime(value.toISOString())
+        : formatDateTime(value.toString());
     case "choice":
       return properCase(value.toString());
     case "decimal":
     case "integer":
       return typeof value === "number" ? value.toString() : value.toString();
-    case "boolean":
-      return value === "true" ? t("yes") : t("no");
-    case "time":
-      return value.toString().slice(0, 5);
     default:
       return value.toString();
   }
 }
 
+function QuestionResponseValue({ question, response }: QuestionResponseProps) {
+  if (!response) return null;
+
+  return (
+    <div>
+      <div className="text-xs text-gray-500">{question.text}</div>
+      <div className="space-y-1">
+        {response.values.map((valueObj, index) => {
+          const value = valueObj.value || valueObj.value_quantity?.value;
+          if (!value) return null;
+
+          return (
+            <div
+              key={index}
+              className="text-sm font-medium whitespace-pre-wrap"
+            >
+              {formatValue(value, question.type)}
+              {question.unit?.code && (
+                <span className="ml-1 text-xs">{question.unit.code}</span>
+              )}
+              {index === response.values.length - 1 && response.note && (
+                <span className="ml-2 text-xs text-gray-500">
+                  ({response.note})
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function QuestionGroup({
   group,
   responses,
-  parentTitle = "",
-  isSingleGroup = false,
+  level = 0,
 }: {
   group: Question;
-  responses: QuestionnaireResponse["responses"];
-  parentTitle?: string;
-  isSingleGroup?: boolean;
+  responses: {
+    values: ResponseValue[];
+    note?: string;
+    question_id: string;
+  }[];
+  level?: number;
 }) {
-  const hasResponses = group.questions?.some((q) => {
-    if (q.type === "group") {
-      return q.questions?.some((subQ) =>
-        responses.some((r) => r.question_id === subQ.id),
-      );
-    }
-    return responses.some((r) => r.question_id === q.id);
-  });
+  const hasResponses = responses.some((r) =>
+    group.questions?.some((q) => q.id === r.question_id),
+  );
 
   if (!hasResponses) return null;
 
-  const currentTitle = parentTitle
-    ? `${parentTitle} - ${group.text}`
-    : group.text;
-
-  // Filter out questions with responses and split them for two-column layout
-  const questionsWithResponses =
-    group.questions?.reduce((acc: Question[], question) => {
-      if (question.type === "structured") return acc;
-      if (question.type === "group") return acc;
-
-      const response = responses.find((r) => r.question_id === question.id);
-      if (!response) return acc;
-
-      const value = response.values[0]?.value;
-      if (!value && !response.values[0]?.coding) return acc;
-
-      acc.push(question);
-      return acc;
-    }, []) || [];
-
-  // Check if any response has long text (>100 chars)
-  const hasLongText = questionsWithResponses.some((question) => {
-    const response = responses.find((r) => r.question_id === question.id);
-    if (!response) return false;
-
-    const value = response.values[0]?.value;
-    const coding = response.values[0]?.coding;
-    const text = [
-      value?.toString() || "",
-      coding?.display || "",
-      coding?.code || "",
-    ].join(" ");
-
-    return text.length > 50;
-  });
-
-  // Use single column if any response has long text
-  const shouldUseTwoColumns = isSingleGroup && !hasLongText;
-  const midPoint = shouldUseTwoColumns
-    ? Math.ceil(questionsWithResponses.length / 2)
-    : questionsWithResponses.length;
-  const leftQuestions = questionsWithResponses.slice(0, midPoint);
-  const rightQuestions = shouldUseTwoColumns
-    ? questionsWithResponses.slice(midPoint)
-    : [];
-
-  const renderQuestionRow = (question: Question) => {
-    const response = responses.find((r) => r.question_id === question.id);
-    if (!response) return null;
-
-    const values = response.values;
-    if (!values?.length) return null;
-
-    const hasAnyValue = values.some((v) => v.value || v.coding);
-    if (!hasAnyValue) return null;
-
-    return (
-      <TableRow key={question.id}>
-        <TableCell className="py-1 pl-0 align-top">
-          <div className="text-sm text-gray-600 break-words whitespace-normal">
-            {question.text}
-          </div>
-        </TableCell>
-        <TableCell
-          className="py-1 pr-0 align-top"
-          colSpan={response.note ? 1 : 2}
-        >
-          <div className="text-sm font-medium break-words whitespace-normal">
-            {values.map((val, idx) => (
-              <React.Fragment key={idx}>
-                {idx > 0 && ", "}
-                {val.value && formatValue(val.value, question.type)}
-                {val.unit && (
-                  <span className="ml-1 text-gray-600">{val.unit.code}</span>
-                )}
-                {val.coding && (
-                  <span className="ml-1 text-gray-600">
-                    {val.coding.display} ({val.coding.code})
-                  </span>
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </TableCell>
-        {response.note && (
-          <TableCell className="py-1 pr-0 align-top">
-            <div className="flex justify-end">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-xs shrink-0"
-                  >
-                    {t("see_note")}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-52 p-4">
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                    {response.note}
-                  </p>
-                </PopoverContent>
-              </Popover>
-            </div>
-          </TableCell>
-        )}
-      </TableRow>
-    );
-  };
+  const containerClass = group.styling_metadata?.containerClasses || "";
+  const classes = group.styling_metadata?.classes || "";
 
   return (
-    <div className="border border-gray-200 rounded-lg px-4 py-2">
-      <h3 className="text-base font-semibold text-gray-900 border-b border-gray-200 pb-1 mb-1">
-        {group.text}
-      </h3>
-      <div
-        className={cn("w-full", {
-          "grid md:grid-cols-2 grid-cols-1 gap-8": shouldUseTwoColumns,
-        })}
-      >
-        {leftQuestions.length > 0 && (
-          <div className="w-full">
-            <Table className="table-fixed w-full">
-              <TableBody>{leftQuestions.map(renderQuestionRow)}</TableBody>
-            </Table>
-          </div>
-        )}
+    <div className={`space-y-2 ${classes}`}>
+      {group.text && (
+        <div className="flex flex-col space-y-1">
+          <h4 className="text-sm font-medium text-secondary-700">
+            {group.text}
+            {group.code && (
+              <span className="ml-1 text-xs text-gray-500">
+                ({group.code.display})
+              </span>
+            )}
+          </h4>
+          {level === 0 && <Separator className="my-2" />}
+        </div>
+      )}
+      <div className={`${containerClass}`}>
+        {group.questions?.map((question) => {
+          if (question.type === "group") {
+            return (
+              <QuestionGroup
+                key={question.id}
+                group={question}
+                responses={responses}
+                level={level + 1}
+              />
+            );
+          }
 
-        {shouldUseTwoColumns && rightQuestions.length > 0 && (
-          <div className="w-full">
-            <Table className="table-fixed w-full">
-              <TableBody>{rightQuestions.map(renderQuestionRow)}</TableBody>
-            </Table>
-          </div>
-        )}
+          if (question.type === "structured") return null;
 
-        {group.questions?.map((subQuestion, idx) => {
-          if (subQuestion.type === "structured" || !subQuestion.type)
-            return null;
-          if (subQuestion.type !== "group") return null;
+          const response = responses.find((r) => r.question_id === question.id);
+          if (!response) return null;
 
           return (
-            <QuestionGroup
-              key={idx}
-              group={subQuestion}
-              responses={responses}
-              parentTitle={currentTitle}
+            <QuestionResponseValue
+              key={question.id}
+              question={question}
+              response={response}
             />
           );
         })}
@@ -257,197 +170,31 @@ function QuestionGroup({
   );
 }
 
-function PrintButton({ item }: { item: QuestionnaireResponse }) {
-  const { t } = useTranslation();
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="xs" className="[&_svg]:size-3">
-          <Printer className="size-4" />
-          {t("print")}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <Link href={`questionnaire_response/${item.id}/print`}>
-          <DropdownMenuItem>{t("print_this_response")}</DropdownMenuItem>
-        </Link>
-        <Link href={`questionnaire/${item.questionnaire?.id}/responses/print`}>
-          <DropdownMenuItem>
-            {t("print_all_responses", {
-              title: item.questionnaire?.title,
-            })}
-          </DropdownMenuItem>
-        </Link>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
-  const groups =
-    item.questionnaire?.questions.filter(
-      (q) =>
-        q.type === "group" ||
-        item.responses.some((r) => r.question_id === q.id),
-    ) || [];
-
-  // Split groups into two columns only if there are enough items
-  const shouldUseTwoColumns = groups.length > 3;
-  const midPoint = shouldUseTwoColumns
-    ? Math.ceil(groups.length / 2)
-    : groups.length;
-  const leftGroups = groups.slice(0, midPoint);
-  const rightGroups = shouldUseTwoColumns ? groups.slice(midPoint) : [];
-
-  // Helper function to render a column of questions
-  const renderColumn = (questions: Question[]) => {
-    const result: React.ReactElement[] = [];
-    let currentNonGroupQuestions: Question[] = [];
-
-    const flushNonGroupQuestions = () => {
-      if (currentNonGroupQuestions.length > 0) {
-        result.push(
-          <div
-            key={`group-${result.length}`}
-            className="border border-gray-200 rounded-lg px-4 py-2"
-          >
-            <div className="w-full">
-              <Table className="table-fixed w-full">
-                <TableBody>
-                  {currentNonGroupQuestions.map((question) => {
-                    const response = item.responses.find(
-                      (r) => r.question_id === question.id,
-                    );
-                    if (!response) return null;
-
-                    const values = response.values;
-                    if (!values?.length) return null;
-
-                    const hasAnyValue = values.some((v) => v.value || v.coding);
-                    if (!hasAnyValue) return null;
-
-                    return (
-                      <TableRow key={question.id}>
-                        <TableCell className="py-1 pl-0 align-top">
-                          <div className="text-sm text-gray-600 break-words whitespace-normal">
-                            {question.text}
-                          </div>
-                        </TableCell>
-                        <TableCell
-                          className="py-1 pr-0 align-top"
-                          colSpan={response.note ? 1 : 2}
-                        >
-                          <div className="text-sm font-medium break-words whitespace-normal">
-                            {values.map((val, idx) => (
-                              <React.Fragment key={idx}>
-                                {idx > 0 && ", "}
-                                {val.value &&
-                                  formatValue(val.value, question.type)}
-                                {val.unit && (
-                                  <span className="ml-1 text-gray-600">
-                                    {val.unit.code}
-                                  </span>
-                                )}
-                                {val.coding && (
-                                  <span className="ml-1 text-gray-600">
-                                    {val.coding.display} ({val.coding.code})
-                                  </span>
-                                )}
-                              </React.Fragment>
-                            ))}
-                          </div>
-                        </TableCell>
-                        {response.note && (
-                          <TableCell className="py-1 pr-0 align-top text-right">
-                            <div className="flex justify-end">
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-7 text-xs shrink-0"
-                                  >
-                                    {t("see_note")}
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-52 p-4">
-                                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                                    {response.note}
-                                  </p>
-                                </PopoverContent>
-                              </Popover>
-                            </div>
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          </div>,
-        );
-        currentNonGroupQuestions = [];
-      }
-    };
-
-    questions.forEach((question, index) => {
-      if (question.type === "structured") return;
-
-      if (question.type === "group") {
-        flushNonGroupQuestions();
-        result.push(
-          <React.Fragment key={`group-${index}`}>
-            <QuestionGroup
-              group={question}
-              responses={item.responses}
-              isSingleGroup={groups.length === 1 && question.type === "group"}
-            />
-          </React.Fragment>,
-        );
-      } else {
-        currentNonGroupQuestions.push(question);
-      }
-    });
-
-    flushNonGroupQuestions();
-    return result;
+function StructuredResponseBadge({
+  type,
+  submitType,
+}: {
+  type: string;
+  submitType: string;
+}) {
+  const colors = {
+    symptom: "bg-yellow-100 text-yellow-800",
+    diagnosis: "bg-blue-100 text-blue-800",
+    medication_request: "bg-green-100 text-green-800",
+    medication_statement: "bg-purple-100 text-purple-800",
+    follow_up_appointment: "bg-pink-100 text-pink-800",
   };
 
   return (
-    <div className="w-full p-3">
-      <div
-        className={cn(
-          "grid gap-6",
-          shouldUseTwoColumns ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1",
-        )}
-      >
-        {/* Left Column */}
-        <div className="space-y-3">{renderColumn(leftGroups)}</div>
-
-        {/* Right Column */}
-        {shouldUseTwoColumns && (
-          <div className="space-y-3">{renderColumn(rightGroups)}</div>
-        )}
-      </div>
-
-      <div className="flex items-center justify-between border-t border-gray-200 mt-8 pt-4 text-sm text-gray-500">
-        <div>
-          <span className="text-gray-600">filed by</span>{" "}
-          <span className="font-medium text-gray-700">
-            {formatName(item.created_by)}
-            {item.created_by?.user_type && ` (${item.created_by.user_type})`}
-          </span>
-        </div>
-        <div>
-          <span className="text-gray-600">at</span>{" "}
-          <span className="font-medium text-gray-700">
-            {formatDateTime(item.created_date)}
-          </span>
-        </div>
-      </div>
-    </div>
+    <Badge
+      variant="outline"
+      className={`${
+        colors[type as keyof typeof colors] || "bg-gray-100 text-gray-800"
+      } border-none`}
+    >
+      {submitType === "CREATE" ? t("created") : t("updated")}{" "}
+      {properCase(type.replace(/_/g, " "))}
+    </Badge>
   );
 }
 
@@ -460,27 +207,89 @@ function ResponseCard({
 }) {
   const isStructured = !item.questionnaire;
   const structuredType = Object.keys(item.structured_responses || {})[0];
-  const title =
-    isStructured && structuredType
-      ? properCase(structuredType.replace(/_/g, " "))
-      : item.questionnaire?.title || "";
 
-  return isPrintPreview ? (
-    <Card className="shadow-none rounded-xl border border-gray-200">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-medium">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ResponseCardContent item={item} />
-      </CardContent>
-    </Card>
-  ) : (
-    <EncounterAccordionLayout
-      title={isStructured && structuredType ? structuredType : title}
-      actionButton={<PrintButton item={item} />}
+  return (
+    <Card
+      className={cn(
+        "flex flex-col py-3 px-4 transition-colors hover:bg-muted/50",
+        isPrintPreview && "shadow-none",
+      )}
     >
-      <ResponseCardContent item={item} />
-    </EncounterAccordionLayout>
+      <div className="flex items-start justify-between">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-xs text-gray-500">
+            <div className="flex items-center gap-2">
+              {isStructured && structuredType ? (
+                <StructuredResponseBadge
+                  type={structuredType}
+                  submitType={
+                    Object.values(item.structured_responses || {})[0]
+                      ?.submit_type
+                  }
+                />
+              ) : (
+                <Trans
+                  i18nKey="filed"
+                  values={{ title: item.questionnaire?.title }}
+                  components={{ strong: <strong /> }}
+                />
+              )}
+            </div>
+            <span>
+              <Trans
+                i18nKey="at_time"
+                values={{ time: formatDateTime(item.created_date) }}
+                components={{ strong: <strong /> }}
+              />
+            </span>
+            <span>
+              <Trans
+                i18nKey="by_name"
+                values={{
+                  by: `${item.created_by?.first_name || ""} ${item.created_by?.last_name || ""}${
+                    item.created_by?.user_type
+                      ? ` (${item.created_by.user_type})`
+                      : ""
+                  }`,
+                }}
+                components={{ strong: <strong /> }}
+              />
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {item.questionnaire && (
+        <div className="mt-4 space-y-4">
+          {item.questionnaire?.questions.map((question: Question) => {
+            if (question.type === "structured") return null;
+
+            if (question.type === "group") {
+              return (
+                <QuestionGroup
+                  key={question.id}
+                  group={question}
+                  responses={item.responses}
+                />
+              );
+            }
+
+            const response = item.responses.find(
+              (r) => r.question_id === question.id,
+            );
+            if (!response) return null;
+
+            return (
+              <QuestionResponseValue
+                key={question.id}
+                question={question}
+                response={response}
+              />
+            );
+          })}
+        </div>
+      )}
+    </Card>
   );
 }
 
@@ -489,7 +298,6 @@ export default function QuestionnaireResponsesList({
   patientId,
   isPrintPreview = false,
   onlyUnstructured,
-  canAccess = true,
 }: Props) {
   const { t } = useTranslation();
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
@@ -510,10 +318,10 @@ export default function QuestionnaireResponsesList({
       maxPages: isPrintPreview ? undefined : 1,
       pageSize: isPrintPreview ? 100 : RESULTS_PER_PAGE_LIMIT,
     }),
-    enabled: canAccess,
   });
+
   return (
-    <div className="gap-4">
+    <div className="mt-4 gap-4">
       <div className="max-w-full">
         {isLoading ? (
           <div className="grid gap-5">
@@ -525,7 +333,7 @@ export default function QuestionnaireResponsesList({
               <Card
                 className={cn(
                   "p-6",
-                  isPrintPreview && "shadow-none border-gray-200",
+                  isPrintPreview && "shadow-none border-gray",
                 )}
               >
                 <div className="text-lg font-medium text-gray-500">

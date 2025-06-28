@@ -1,6 +1,4 @@
-import { useTranslation } from "react-i18next";
-
-import { cn } from "@/lib/utils";
+import { t } from "i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,44 +17,38 @@ import {
 } from "@/components/ui/table";
 
 import { Avatar } from "@/components/Common/Avatar";
-import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 
 import {
-  DIAGNOSIS_CLINICAL_STATUS_COLORS,
-  DIAGNOSIS_VERIFICATION_STATUS_COLORS,
+  DIAGNOSIS_CLINICAL_STATUS_STYLES,
+  DIAGNOSIS_VERIFICATION_STATUS_STYLES,
   Diagnosis,
 } from "@/types/emr/diagnosis/diagnosis";
 
 interface DiagnosisTableProps {
   diagnoses: Diagnosis[];
-  title?: string;
 }
 
-export function DiagnosisTable({ diagnoses, title }: DiagnosisTableProps) {
-  const { t } = useTranslation();
-
-  title = title ?? t("diagnosis");
-
+export function DiagnosisTable({ diagnoses }: DiagnosisTableProps) {
   return (
     <Table className="border-separate border-spacing-y-0.5">
       <TableHeader>
         <TableRow className="rounded-md overflow-hidden bg-gray-100">
           <TableHead className="first:rounded-l-md h-auto  py-1 px-2  text-gray-600">
-            {title}
+            {t("diagnosis")}
           </TableHead>
-          <TableHead className="h-auto  py-1 px-2  text-gray-600 text-center">
+          <TableHead className="h-auto  py-1 px-2  text-gray-600">
             {t("status")}
           </TableHead>
-          <TableHead className="h-auto  py-1 px-2 text-gray-600 text-center">
+          <TableHead className="h-auto  py-1 px-2 text-gray-600">
             {t("verification")}
           </TableHead>
-          <TableHead className="h-auto  py-1 px-2  text-gray-600 text-center">
+          <TableHead className="h-auto  py-1 px-2  text-gray-600">
             {t("onset")}
           </TableHead>
-          <TableHead className="h-auto  py-1 px-2  text-gray-600 text-center">
+          <TableHead className="h-auto  py-1 px-2  text-gray-600">
             {t("notes")}
           </TableHead>
-          <TableHead className="last:rounded-r-md h-auto  py-1 px-2 text-gray-600 text-center">
+          <TableHead className="last:rounded-r-md h-auto  py-1 px-2 text-gray-600">
             {t("logged_by")}
           </TableHead>
         </TableRow>
@@ -65,48 +57,43 @@ export function DiagnosisTable({ diagnoses, title }: DiagnosisTableProps) {
         {diagnoses.map((diagnosis) => (
           <TableRow
             key={diagnosis.id}
-            className={cn(
-              "rounded-md overflow-hidden",
+            className={`rounded-md overflow-hidden bg-gray-50 ${
               diagnosis.verification_status === "entered_in_error"
                 ? "opacity-50"
-                : "bg-gray-50",
-            )}
+                : ""
+            }`}
           >
             <TableCell className="font-medium first:rounded-l-md">
-              <div className="flex items-center gap-2 md:whitespace-normal">
-                {diagnosis.code.display}
-              </div>
+              {diagnosis.code.display}
             </TableCell>
-            <TableCell className="text-center">
+            <TableCell>
               <Badge
-                variant={
-                  DIAGNOSIS_CLINICAL_STATUS_COLORS[diagnosis.clinical_status]
-                }
-                className="whitespace-nowrap"
+                variant="outline"
+                className={`whitespace-nowrap ${
+                  DIAGNOSIS_CLINICAL_STATUS_STYLES[diagnosis.clinical_status]
+                }`}
               >
                 {t(diagnosis.clinical_status)}
               </Badge>
             </TableCell>
-            <TableCell className="text-center">
+            <TableCell>
               <Badge
-                variant={
-                  DIAGNOSIS_VERIFICATION_STATUS_COLORS[
+                variant="outline"
+                className={`whitespace-nowrap capitalize ${
+                  DIAGNOSIS_VERIFICATION_STATUS_STYLES[
                     diagnosis.verification_status
                   ]
-                }
-                className="whitespace-nowrap capitalize"
+                }`}
               >
                 {t(diagnosis.verification_status)}
               </Badge>
             </TableCell>
-            <TableCell className="whitespace-nowrap text-center">
-              {diagnosis.onset?.onset_datetime ? (
-                <RelativeDateTooltip date={diagnosis.onset.onset_datetime} />
-              ) : (
-                "-"
-              )}
+            <TableCell className="whitespace-nowrap">
+              {diagnosis.onset?.onset_datetime
+                ? new Date(diagnosis.onset.onset_datetime).toLocaleDateString()
+                : "-"}
             </TableCell>
-            <TableCell className="max-w-[200px] text-center">
+            <TableCell className="max-w-[200px]">
               {diagnosis.note ? (
                 <div className="flex items-center gap-2">
                   <Popover>
@@ -130,11 +117,11 @@ export function DiagnosisTable({ diagnoses, title }: DiagnosisTableProps) {
                 "-"
               )}
             </TableCell>
-            <TableCell className="last:rounded-r-md text-center">
+            <TableCell className="last:rounded-r-md">
               <div className="flex items-center gap-2">
                 <Avatar
                   name={diagnosis.created_by.username}
-                  className="size-4"
+                  className="w-4 h-4"
                   imageUrl={diagnosis.created_by.profile_picture_url}
                 />
 

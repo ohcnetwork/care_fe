@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { navigate } from "raviger";
 import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { formatPhoneNumberIntl } from "react-phone-number-input";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -10,12 +10,10 @@ import { Button } from "@/components/ui/button";
 
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 
-import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import { formatPatientAge } from "@/Utils/utils";
-import { usePermissions } from "@/context/PermissionContext";
 import {
   Organization,
   OrganizationParent,
@@ -23,14 +21,8 @@ import {
 } from "@/types/organization/organization";
 
 export const Demography = (props: PatientProps) => {
-  const { patientData, facilityId } = props;
-  const patientId = patientData.id;
+  const { patientData, facilityId, patientId } = props;
   const { t } = useTranslation();
-  const { hasPermission } = usePermissions();
-  const { canWritePatient } = getPermissions(
-    hasPermission,
-    patientData.permissions,
-  );
 
   const [activeSection, _setActiveSection] = useState<string | null>(null);
 
@@ -41,7 +33,7 @@ export const Demography = (props: PatientProps) => {
   const scrollToSection = (sectionId: string) => {
     const section = document.getElementById(sectionId);
     if (section) {
-      section.scrollIntoView();
+      section.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -53,6 +45,11 @@ export const Demography = (props: PatientProps) => {
     } else {
       navigate(`/patient/${patientId}/update?section=${sectionId}`);
     }
+  };
+
+  const hasEditPermission = () => {
+    // Todo: Wire updated Permissions
+    return true;
   };
 
   const EmergencyContact = (props: { number?: string; name?: string }) => (
@@ -70,7 +67,7 @@ export const Demography = (props: PatientProps) => {
                 href={`tel:${props.number}`}
                 className="text-sm font-medium text-black hover:text-secondary-500"
               >
-                {(props.number && formatPhoneNumberIntl(props.number)) || "-"}
+                {props.number || "-"}
               </a>
             </div>
             {props.number && (
@@ -99,6 +96,14 @@ export const Demography = (props: PatientProps) => {
       </div>
     </div>
   );
+
+  const withPermissionCheck = (action: () => void) => () => {
+    if (!hasEditPermission()) {
+      toast.error(t("permission_denied"));
+      return;
+    }
+    action();
+  };
 
   type Data = {
     id: string;
@@ -133,7 +138,7 @@ export const Demography = (props: PatientProps) => {
   const data: Data[] = [
     {
       id: "general-info",
-      allowEdit: canWritePatient,
+      allowEdit: true,
       details: [
         <PLUGIN_Component
           key="patient_details_tab__demography__general_info"
@@ -150,8 +155,7 @@ export const Demography = (props: PatientProps) => {
                 href={`tel:${patientData.phone_number}`}
                 className="text-sm font-medium text-black hover:text-secondary-500"
               >
-                {patientData.phone_number &&
-                  formatPhoneNumberIntl(patientData.phone_number)}
+                {patientData.phone_number || "-"}
               </a>
               <br />
               <a
@@ -250,7 +254,7 @@ export const Demography = (props: PatientProps) => {
                 <div
                   key={i}
                   id={subtab.id}
-                  className="group mt-4 rounded-md bg-white pb-2 pl-5 pt-5 shadow-sm"
+                  className="group mt-4 rounded-md bg-white pb-2 pl-5 pt-5 shadow"
                 >
                   <hr className="mb-1 mr-5 h-1 w-5 border-0 bg-blue-500" />
                   <div className="flex flex-row items-center justify-between gap-x-4 mb-4 mr-4">
@@ -259,15 +263,16 @@ export const Demography = (props: PatientProps) => {
                       <Button
                         data-cy="edit-patient-button"
                         variant="outline"
-                        disabled={!!patientData.deceased_datetime}
-                        onClick={() => handleEditClick(subtab.id)}
+                        onClick={withPermissionCheck(() =>
+                          handleEditClick(subtab.id),
+                        )}
                       >
                         <CareIcon icon="l-edit-alt" className="text-md pr-1" />
                         {t("edit")}
                       </Button>
                     )}
                   </div>
-                  <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 md:gap-y-8">
+                  <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-2">
                     {subtab.details.map((detail, j) =>
                       detail &&
                       typeof detail === "object" &&

@@ -6,11 +6,10 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Input } from "@/components/ui/input";
 
-function PasswordInput({
-  className,
-  ref,
-  ...props
-}: React.ComponentProps<"input">) {
+const PasswordInput = React.forwardRef<
+  HTMLInputElement,
+  React.ComponentProps<"input">
+>(({ className, ...props }, ref) => {
   const [showPassword, setShowPassword] = React.useState(false);
   return (
     <div className="relative">
@@ -22,15 +21,14 @@ function PasswordInput({
       />
       <button
         type="button"
-        tabIndex={-1}
-        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 focus:outline-hidden"
+        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 focus:outline-none"
         onClick={() => setShowPassword(!showPassword)}
       >
         <CareIcon icon={showPassword ? "l-eye" : "l-eye-slash"} />
       </button>
     </div>
   );
-}
+});
 
 PasswordInput.displayName = "PasswordInput";
 

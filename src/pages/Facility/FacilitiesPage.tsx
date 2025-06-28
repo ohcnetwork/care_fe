@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 
 import { LoginHeader } from "@/components/Common/LoginHeader";
-import SearchInput from "@/components/Common/SearchInput";
+import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
@@ -87,18 +87,20 @@ export function FacilitiesPage() {
           }}
           className="flex flex-row w-full"
         />
-        <SearchInput
+        <SearchByMultipleFields
           id="facility-search"
           options={[
             {
-              key: "name",
-              type: "text",
-              placeholder: t("search_by_facility_name"),
+              key: "facility_search_placeholder_text",
+              type: "text" as const,
+              placeholder: t("facility_search_placeholder_text"),
               value: qParams.name || "",
             },
           ]}
+          initialOptionIndex={0}
           className="w-[calc(100vw-2rem)] sm:max-w-min sm:min-w-64"
           onSearch={(key, value) => updateQuery({ name: value })}
+          enableOptionButtons={false}
         />
       </div>
 

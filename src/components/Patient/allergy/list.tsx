@@ -1,15 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 import {
   BeakerIcon,
   CookingPotIcon,
   HeartPulseIcon,
   LeafIcon,
 } from "lucide-react";
+import { Link } from "raviger";
 import { ReactNode, useState } from "react";
-import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -26,14 +32,13 @@ import {
 } from "@/components/ui/table";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import {
-  ALLERGY_CLINICAL_STATUS_COLORS,
-  ALLERGY_CRITICALITY_COLORS,
-  ALLERGY_VERIFICATION_STATUS_COLORS,
+  ALLERGY_CLINICAL_STATUS_STYLES,
+  ALLERGY_CRITICALITY_STYLES,
+  ALLERGY_VERIFICATION_STATUS_STYLES,
   AllergyCategory,
   AllergyIntolerance,
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
@@ -46,16 +51,21 @@ interface AllergyListProps {
   encounterId?: string;
   className?: string;
   readOnly?: boolean;
+
   encounterStatus?: Encounter["status"];
 }
 
 export const CATEGORY_ICONS: Record<AllergyCategory, ReactNode> = {
-  food: <CookingPotIcon className="size-4" aria-label="Food allergy" />,
-  medication: <BeakerIcon className="size-4" aria-label="Medication allergy" />,
-  environment: (
-    <LeafIcon className="size-4" aria-label="Environmental allergy" />
+  food: <CookingPotIcon className="h-4 w-4" aria-label="Food allergy" />,
+  medication: (
+    <BeakerIcon className="h-4 w-4" aria-label="Medication allergy" />
   ),
-  biologic: <HeartPulseIcon className="size-4" aria-label="Biologic allergy" />,
+  environment: (
+    <LeafIcon className="h-4 w-4" aria-label="Environmental allergy" />
+  ),
+  biologic: (
+    <HeartPulseIcon className="h-4 w-4" aria-label="Biologic allergy" />
+  ),
 };
 
 export function AllergyList({
@@ -65,8 +75,6 @@ export function AllergyList({
   readOnly = false,
   encounterStatus,
 }: AllergyListProps) {
-  const { t } = useTranslation();
-
   const [showEnteredInError, setShowEnteredInError] = useState(false);
 
   const { data: allergies, isLoading } = useQuery({
@@ -83,14 +91,11 @@ export function AllergyList({
 
   if (isLoading) {
     return (
-      <EncounterAccordionLayout
-        title="allergies"
-        readOnly={readOnly}
-        className={className}
-        editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
-      >
-        <Skeleton className="h-[100px] w-full" />
-      </EncounterAccordionLayout>
+      <AllergyListLayout readOnly={readOnly} className={className}>
+        <CardContent className="px-2 pb-2">
+          <Skeleton className="h-[100px] w-full" />
+        </CardContent>
+      </AllergyListLayout>
     );
   }
 
@@ -104,7 +109,13 @@ export function AllergyList({
   );
 
   if (!filteredAllergies?.length) {
-    return null;
+    return (
+      <AllergyListLayout readOnly={readOnly} className={className}>
+        <CardContent className="px-2 pb-3 pt-2">
+          <p className="text-gray-500">{t("no_allergies_recorded")}</p>
+        </CardContent>
+      </AllergyListLayout>
+    );
   }
 
   interface AllergyRowProps {
@@ -123,31 +134,35 @@ export function AllergyList({
             {CATEGORY_ICONS[allergy.category ?? ""]}
           </div>
         </TableCell>
-        <TableCell className="font-medium pl-0 md:whitespace-normal">
+        <TableCell className="font-medium pl-0 ">
           {allergy.code.display}
         </TableCell>
         <TableCell>
           <Badge
-            variant={ALLERGY_CLINICAL_STATUS_COLORS[allergy.clinical_status]}
-            className="whitespace-nowrap"
+            variant="outline"
+            className={`whitespace-nowrap ${
+              ALLERGY_CLINICAL_STATUS_STYLES[allergy.clinical_status]
+            }`}
           >
             {t(allergy.clinical_status)}
           </Badge>
         </TableCell>
         <TableCell>
           <Badge
-            variant={ALLERGY_CRITICALITY_COLORS[allergy.criticality]}
-            className="whitespace-nowrap"
+            variant="outline"
+            className={`whitespace-nowrap ${
+              ALLERGY_CRITICALITY_STYLES[allergy.criticality]
+            }`}
           >
             {t(allergy.criticality)}
           </Badge>
         </TableCell>
         <TableCell>
           <Badge
-            variant={
-              ALLERGY_VERIFICATION_STATUS_COLORS[allergy.verification_status]
-            }
-            className="whitespace-nowrap capitalize"
+            variant="outline"
+            className={`whitespace-nowrap capitalize ${
+              ALLERGY_VERIFICATION_STATUS_STYLES[allergy.verification_status]
+            }`}
           >
             {t(allergy.verification_status)}
           </Badge>
@@ -178,7 +193,7 @@ export function AllergyList({
           <div className="flex items-center gap-2">
             <Avatar
               name={allergy.created_by.username}
-              className="size-4"
+              className="w-4 h-4"
               imageUrl={allergy.created_by.profile_picture_url}
             />
             <span className="text-sm">{formatName(allergy.created_by)}</span>
@@ -189,12 +204,7 @@ export function AllergyList({
   }
 
   return (
-    <EncounterAccordionLayout
-      title="allergies"
-      readOnly={readOnly}
-      className={className}
-      editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
-    >
+    <AllergyListLayout readOnly={readOnly} className={className}>
       <Table className="border-separate border-spacing-y-0.5">
         <TableHeader>
           <TableRow className="rounded-md overflow-hidden bg-gray-100">
@@ -255,6 +265,34 @@ export function AllergyList({
           </div>
         </>
       )}
-    </EncounterAccordionLayout>
+    </AllergyListLayout>
   );
 }
+
+const AllergyListLayout = ({
+  children,
+  className,
+  readOnly = false,
+}: {
+  children: ReactNode;
+  className?: string;
+  readOnly?: boolean;
+}) => {
+  return (
+    <Card className={cn("border-none rounded-sm", className)}>
+      <CardHeader className="flex justify-between flex-row px-4 pt-4 pb-2">
+        <CardTitle>{t("allergies")}</CardTitle>
+        {!readOnly && (
+          <Link
+            href={`questionnaire/allergy`}
+            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
+          >
+            <CareIcon icon="l-pen" className="w-4 h-4" />
+            {t("edit")}
+          </Link>
+        )}
+      </CardHeader>
+      <CardContent className="px-2 pb-2">{children}</CardContent>
+    </Card>
+  );
+};

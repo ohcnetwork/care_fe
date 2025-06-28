@@ -29,7 +29,7 @@ const logo = (value?: string, fallback?: ILogo) => {
 
 const careConfig = {
   apiUrl: env.REACT_CARE_API_URL,
-  sbomBaseUrl: env.REACT_SBOM_BASE_URL || "https://sbom.ohc.network",
+
   urls: {
     dashboard: env.REACT_DASHBOARD_URL,
     github: env.REACT_GITHUB_URL || "https://github.com/ohcnetwork",
@@ -80,6 +80,14 @@ const careConfig = {
     environment: env.REACT_SENTRY_ENVIRONMENT || "staging",
   },
 
+  hcx: {
+    enabled: boolean("REACT_ENABLE_HCX"),
+  },
+
+  abdm: {
+    enabled: boolean("REACT_ENABLE_ABDM", true),
+  },
+
   appointments: {
     /**
      * Relative number of days to show in the appointments page by default.
@@ -95,11 +103,6 @@ const careConfig = {
       true,
     ),
   },
-
-  enableMinimalPatientRegistration: boolean(
-    "REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION",
-    false,
-  ),
 
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
@@ -132,18 +135,11 @@ const careConfig = {
   plotsConfigUrl:
     env.REACT_OBSERVATION_PLOTS_CONFIG_URL || "/config/plots.json",
 
-  defaultCountry: {
-    code: (env.REACT_DEFAULT_COUNTRY || "IN") as CountryCode,
-    name: env.REACT_DEFAULT_COUNTRY_NAME || "India",
-  },
+  defaultCountry: (env.REACT_DEFAULT_COUNTRY || "IN") as CountryCode,
 
   resendOtpTimeout: env.REACT_APP_RESEND_OTP_TIMEOUT
     ? parseInt(env.REACT_APP_RESEND_OTP_TIMEOUT, 10)
     : 30,
-
-  imageUploadMaxSizeInMB: env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB
-    ? parseInt(env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB, 10)
-    : 2,
 } as const;
 
 export default careConfig;

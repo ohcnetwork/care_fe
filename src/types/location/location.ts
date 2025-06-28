@@ -10,8 +10,6 @@ import {
   Map,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-
 import { Encounter } from "@/types/emr/encounter";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import { Code } from "@/types/questionnaire/code";
@@ -40,7 +38,6 @@ export interface LocationBase {
 export interface LocationDetail extends LocationBase {
   id: string;
   organizations: FacilityOrganization[];
-  sort_index: number;
 }
 
 export interface LocationList extends LocationBase {
@@ -48,7 +45,6 @@ export interface LocationList extends LocationBase {
   has_children: boolean;
   parent?: LocationList;
   current_encounter?: Encounter;
-  sort_index: number;
 }
 
 export interface LocationWrite extends LocationBase {
@@ -93,24 +89,3 @@ export const LocationTypeIcons = {
   jdn: Map, // garden
   vi: Eye, // virtual
 } as const satisfies Record<LocationForm, LucideIcon>;
-
-export const LOCATION_TYPE_BADGE_COLORS = {
-  bd: "blue", // bed
-  wa: "teal", // ward
-  lvl: "green", // level/floor
-  bu: "yellow", // building
-  si: "destructive", // site
-  wi: "indigo", // wing
-  co: "pink", // corridor
-  ro: "blue", // room
-  ve: "cyan", // vehicle
-  ho: "primary", // house
-  ca: "indigo", // carpark
-  rd: "yellow", // road
-  area: "green", // area
-  jdn: "teal", // garden
-  vi: "indigo", // virtual
-} as const satisfies Record<
-  LocationForm,
-  React.ComponentProps<typeof Badge>["variant"]
->;

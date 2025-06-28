@@ -1,6 +1,8 @@
+"use client";
+
 import { useMutation } from "@tanstack/react-query";
+import { t } from "i18next";
 import React from "react";
-import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -38,8 +40,6 @@ export const MedicineAdminDialog = ({
   administrationRequest: initialRequest,
   patientId,
 }: Props) => {
-  const { t } = useTranslation();
-
   const [administrationRequest, setAdministrationRequest] =
     React.useState<MedicationAdministrationRequest>(initialRequest);
   const [isFormValid, setIsFormValid] = React.useState(true);
@@ -67,7 +67,7 @@ export const MedicineAdminDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-screen overflow-auto max-w-xl">
+      <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl">

@@ -1,5 +1,5 @@
+import { t } from "i18next";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 import Webcam from "react-webcam";
 import { toast } from "sonner";
 
@@ -14,7 +14,9 @@ import {
 } from "@/components/ui/dialog";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+
 import { useMediaStream } from "@/hooks/useMediaStream";
+
 
 export interface CameraCaptureDialogProps {
   open: boolean;
@@ -25,10 +27,9 @@ export interface CameraCaptureDialogProps {
 }
 
 export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
-  const { t } = useTranslation();
-
   const { open, onOpenChange, onCapture, onResetCapture, setPreview } = props;
   const isLaptopScreen = useBreakpoints({ lg: true, default: false });
+
   const [cameraFacingMode, setCameraFacingMode] = useState(
     isLaptopScreen ? "user" : "environment",
   );
@@ -41,9 +42,11 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     facingMode: cameraFacingMode,
   };
 
+
   const { startStream, stopStream } = useMediaStream({
     constraints: { video: { facingMode: cameraFacingMode } },
   });
+
 
   const handleSwitchCamera = useCallback(async () => {
     const devices = await navigator.mediaDevices.enumerateDevices();
@@ -122,21 +125,13 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                 ref={webRef}
                 videoConstraints={{
                   ...videoConstraints,
-                  width: {
-                    ...videoConstraints.width,
-                    ideal: window.innerWidth,
-                  },
-                  height: {
-                    ...videoConstraints.height,
-                    ideal: window.innerHeight,
-                  },
                   facingMode: cameraFacingMode,
                 }}
               />
             </div>
           ) : (
             <div className="m-3">
-              <img loading="lazy" decoding="async" src={previewImage} />
+              <img src={previewImage} />
             </div>
           )}
         </div>
@@ -167,7 +162,6 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       setPreview?.(true);
                     }}
                     className="m-2"
-                    data-cy="capture-button"
                   >
                     {t("capture")}
                   </Button>
@@ -184,7 +178,6 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       setPreview?.(false);
                     }}
                     className="m-2"
-                    data-cy="retake-button"
                   >
                     {t("retake")}
                   </Button>
@@ -196,7 +189,6 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       setPreview?.(false);
                     }}
                     className="m-2"
-                    data-cy="capture-submit-button"
                   >
                     {t("submit")}
                   </Button>

@@ -32,56 +32,55 @@ type PhoneInputProps = Omit<
     onChange?: (value: RPNInput.Value) => void;
   };
 
-function PhoneInput({
-  className,
-  onChange,
-  ...props
-}: React.ComponentProps<typeof RPNInput.default> & PhoneInputProps) {
-  return (
-    <RPNInput.default
-      className={cn(
-        "flex rounded-md focus-within:ring-1",
-        className,
-        props.value &&
-          !RPNInput.isValidPhoneNumber((props.value ?? "") as string)
-          ? "ring-red-500"
-          : "ring-primary-700",
-      )}
-      flagComponent={FlagComponent}
-      countrySelectComponent={CountrySelect}
-      inputComponent={InputComponent}
-      defaultCountry={careConfig.defaultCountry.code}
-      smartCaret={true}
-      /**
-       * Handles the onChange event.
-       *
-       * react-phone-number-input might trigger the onChange event as undefined
-       * when a valid phone number is not entered. To prevent this,
-       * the value is coerced to an empty string.
-       *
-       * @param {E164Number | undefined} value - The entered value
-       */
-      onChange={(value) => onChange?.(value || ("" as RPNInput.Value))}
-      {...props}
-    />
+const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
+  React.forwardRef<React.ElementRef<typeof RPNInput.default>, PhoneInputProps>(
+    ({ className, onChange, ...props }, ref) => {
+      return (
+        <RPNInput.default
+          ref={ref}
+          className={cn(
+            "flex rounded-md focus-within:ring-1",
+            className,
+            props.value &&
+              !RPNInput.isValidPhoneNumber((props.value ?? "") as string)
+              ? "ring-red-500"
+              : "ring-primary-700",
+          )}
+          flagComponent={FlagComponent}
+          countrySelectComponent={CountrySelect}
+          inputComponent={InputComponent}
+          defaultCountry={careConfig.defaultCountry}
+          smartCaret={true}
+          /**
+           * Handles the onChange event.
+           *
+           * react-phone-number-input might trigger the onChange event as undefined
+           * when a valid phone number is not entered. To prevent this,
+           * the value is coerced to an empty string.
+           *
+           * @param {E164Number | undefined} value - The entered value
+           */
+          onChange={(value) => onChange?.(value || ("" as RPNInput.Value))}
+          {...props}
+        />
+      );
+    },
   );
-}
 PhoneInput.displayName = "PhoneInput";
 
-function InputComponent({
-  className,
-  ...props
-}: React.ComponentProps<"input">) {
-  return (
-    <Input
-      className={cn(
-        "rounded-e-md rounded-s-none focus-visible:ring-0 focus-visible:outline-hidden focus-visible:border-gray-200",
-        className,
-      )}
-      {...props}
-    />
-  );
-}
+const InputComponent = React.forwardRef<
+  HTMLInputElement,
+  React.ComponentProps<"input">
+>(({ className, ...props }, ref) => (
+  <Input
+    className={cn(
+      "rounded-e-md rounded-s-none focus-visible:ring-0 focus-visible:outline-none focus-visible:border-gray-200",
+      className,
+    )}
+    {...props}
+    ref={ref}
+  />
+));
 InputComponent.displayName = "InputComponent";
 
 type CountryEntry = { label: string; value: RPNInput.Country | undefined };
@@ -100,11 +99,8 @@ const CountrySelect = ({
   onChange,
 }: CountrySelectProps) => {
   const { t } = useTranslation();
-  const scrollAreaRef = React.useRef<HTMLDivElement>(null);
-  const [searchValue, setSearchValue] = React.useState("");
-
   return (
-    <Popover modal>
+    <Popover>
       <PopoverTrigger asChild>
         <Button
           type="button"
@@ -131,25 +127,11 @@ const CountrySelect = ({
       >
         <Command>
           <CommandInput
-            value={searchValue}
-            onValueChange={(value) => {
-              setSearchValue(value);
-              setTimeout(() => {
-                if (scrollAreaRef.current) {
-                  const viewportElement = scrollAreaRef.current.querySelector(
-                    "[data-radix-scroll-area-viewport]",
-                  );
-                  if (viewportElement) {
-                    viewportElement.scrollTop = 0;
-                  }
-                }
-              }, 0);
-            }}
             placeholder={t("search_country")}
-            className="outline-hidden border-none ring-0 shadow-none"
+            className="outline-none border-none ring-0 shadow-none"
           />
           <CommandList>
-            <ScrollArea ref={scrollAreaRef} className="h-72">
+            <ScrollArea className="h-72">
               <CommandEmpty>{t("no_country_found")}</CommandEmpty>
               <CommandGroup>
                 {countryList.map(({ value, label }) =>

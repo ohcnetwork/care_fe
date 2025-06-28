@@ -1,67 +1,58 @@
 import { UserCreation } from "@/pageObject/Users/UserCreation";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
 import {
-  generateEmailDomain,
   generateName,
   generatePhoneNumber,
   generateUsername,
 } from "@/utils/commonUtils";
-import { viewPort } from "@/utils/viewPort";
 
 describe("User Creation", () => {
   const facilityCreation = new FacilityCreation();
   const userCreation = new UserCreation();
   const userRole = "Doctor";
-  const defaultPassword = "Test@123";
-
-  const locationTestCases = [
-    {
-      description: "without any location data",
-      geoData: {},
-    },
-  ];
 
   beforeEach(() => {
-    cy.viewport(viewPort.laptopStandard.width, viewPort.laptopStandard.height);
-    cy.loginByApi("superadmin");
+    cy.loginByApi("admin");
     cy.visit("/");
   });
 
-  locationTestCases.forEach(({ description, geoData }) => {
-    it(`creates a new user ${description}`, () => {
-      // Generate fresh data for each test
-      const fullName = generateName();
-      const [firstName, lastName] = fullName.split(" ");
-      const username = generateUsername(firstName);
+  it("should create a new user successfully", () => {
+    // Generate fresh data at the start of each test attempt
+    const fullName = generateName();
+    const [firstName, lastName] = fullName.split(" ");
+    const defaultPassword = "Test@123";
 
-      const baseUserData = {
-        firstName,
-        lastName,
-        username,
-        password: defaultPassword,
-        confirmPassword: defaultPassword,
-        email: `${username}@${generateEmailDomain()}`,
-        phoneNumber: generatePhoneNumber(),
-        userType: "Doctor",
-        gender: "Male",
-      };
+    const testUserData = {
+      firstName,
+      lastName,
+      username: generateUsername(firstName),
+      password: defaultPassword,
+      confirmPassword: defaultPassword,
+      email: `${generateUsername(firstName)}@test.com`,
+      phoneNumber: generatePhoneNumber(),
+      userType: "Doctor",
+      gender: "Male",
+      state: "Kerala",
+      district: "Ernakulam",
+      localBody: "Aluva",
+      ward: "4",
+    };
 
-      facilityCreation.navigateToGovernance("Government");
+    facilityCreation.navigateToOrganization("Kerala");
 
-      userCreation
-        .navigateToUsersTab()
-        .clickAddUserButton()
-        .fillEmail(baseUserData.email)
-        .submitUserForm()
-        .verifyValidationErrors()
-        .fillUserDetails({ ...baseUserData, ...geoData })
-        .interceptUserCreationRequest()
-        .submitUserForm()
-        .verifyUserCreationApiCall()
-        .selectUserRole(userRole)
-        .interceptOrganizationUserLinking()
-        .clickLinkToOrganization()
-        .verifyOrganizationUserLinkingApiCall();
-    });
+    userCreation
+      .navigateToUsersTab()
+      .clickAddUserButton()
+      .fillEmail(testUserData.email)
+      .submitUserForm()
+      .verifyValidationErrors()
+      .fillUserDetails(testUserData)
+      .interceptUserCreationRequest()
+      .submitUserForm()
+      .verifyUserCreationApiCall()
+      .selectUserRole(userRole)
+      .interceptOrganizationUserLinking()
+      .clickLinkToOrganization()
+      .verifyOrganizationUserLinkingApiCall();
   });
 });

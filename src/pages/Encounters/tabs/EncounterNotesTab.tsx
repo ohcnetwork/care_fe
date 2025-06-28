@@ -16,14 +16,13 @@ import {
   Users,
 } from "lucide-react";
 import { Link, usePathParams } from "raviger";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import { AutoExpandingTextarea } from "@/components/ui/auto-expanding-textarea";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,25 +43,21 @@ import {
   SheetDescription,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Textarea } from "@/components/ui/textarea";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
-import { useIsMobile } from "@/hooks/use-mobile";
 import useAuthUser from "@/hooks/useAuthUser";
-
-import { getPermissions } from "@/common/Permissions";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime } from "@/Utils/utils";
-import { usePermissions } from "@/context/PermissionContext";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
-import { inactiveEncounterStatus } from "@/types/emr/encounter";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
 
@@ -83,7 +78,7 @@ const threadTemplates = [
 // Info tooltip component for help text
 const InfoTooltip = ({ content }: { content: string }) => (
   <TooltipComponent content={content}>
-    <Info className="size-4 text-gray-500 hover:text-primary cursor-help" />
+    <Info className="h-4 w-4 text-gray-500 hover:text-primary cursor-help" />
   </TooltipComponent>
 );
 
@@ -99,13 +94,12 @@ const ThreadItem = ({
 }) => (
   <button
     className={cn(
-      "group relative w-full p-4 text-left rounded-lg transition-colors border",
+      "group relative w-full p-4 text-left rounded-lg transition-colors border ",
       isSelected
         ? "bg-primary-100 hover:bg-primary/15 border-primary"
         : "hover:bg-gray-100 hover:border-gray-200",
     )}
     onClick={onClick}
-    data-cy="thread-title"
   >
     <div className="flex items-start justify-between gap-3">
       <div className="flex-1 min-w-0">
@@ -120,84 +114,83 @@ const ThreadItem = ({
 
 // Message item component
 
-function MessageItem({
-  message,
-  className,
-  ...props
-}: React.ComponentProps<"div"> & { message: Message }) {
-  const authUser = useAuthUser();
-  const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
-  const isCurrentUser = authUser?.external_id === message.created_by.id;
+const MessageItem = forwardRef<HTMLDivElement, { message: Message }>(
+  ({ message }, ref) => {
+    const authUser = useAuthUser();
+    const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
+    const isCurrentUser = authUser?.external_id === message.created_by.id;
 
-  return (
-    <div
-      className={cn(
-        "flex w-full mb-4 animate-in fade-in-0 slide-in-from-bottom-4",
-        isCurrentUser ? "justify-end" : "justify-start",
-        className,
-      )}
-      {...props}
-    >
+    return (
       <div
         className={cn(
-          "flex max-w-[80%] items-start gap-3",
-          isCurrentUser ? "flex-row-reverse" : "flex-row",
+          "flex w-full mb-4 animate-in fade-in-0 slide-in-from-bottom-4",
+          isCurrentUser ? "justify-end" : "justify-start",
         )}
+        ref={ref}
       >
-        <TooltipComponent content={message.created_by?.username}>
-          <Link
-            href={
-              facilityId
-                ? `/facility/${facilityId}/users/${message.created_by?.username}`
-                : `/users/${message.created_by?.username}`
-            }
-          >
-            <span className="flex pr-2">
-              <Avatar
-                name={message.created_by?.username}
-                imageUrl={message.created_by?.profile_picture_url}
-                className="size-8 rounded-full object-cover ring-1 ring-transparent hover:ring-red-200 transition"
-              />
-            </span>
-          </Link>
-        </TooltipComponent>
         <div
           className={cn(
-            "p-3 rounded-lg break-words whitespace-pre-wrap w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg",
-            isCurrentUser
-              ? "bg-white text-black rounded-tr-none border border-gray-200"
-              : "bg-gray-100 rounded-tl-none border border-gray-200",
+            "flex max-w-[80%] items-start gap-3",
+            isCurrentUser ? "flex-row-reverse" : "flex-row",
           )}
         >
-          <p className="text-xs space-x-2 mb-1">
-            <span className="text-gray-700 font-medium">
-              {message.created_by.username}
-            </span>
-            <time
-              className="text-gray-500"
-              dateTime={message.created_date}
-              title={formatDateTime(message.created_date)}
+          <TooltipComponent content={message.created_by?.username}>
+            <Link
+              href={
+                facilityId
+                  ? `/facility/${facilityId}/users/${message.created_by?.username}`
+                  : `/users/${message.created_by?.username}`
+              }
             >
-              {formatRelative(message.created_date, new Date())}
-            </time>
-          </p>
+              <span className="flex pr-2">
+                <Avatar
+                  name={message.created_by?.username}
+                  imageUrl={message.created_by?.profile_picture_url}
+                  className="w-8 h-8 rounded-full object-cover ring-1 ring-transparent hover:ring-red-200 transition"
+                />
+              </span>
+            </Link>
+          </TooltipComponent>
           <div
             className={cn(
-              "p-3 rounded-lg break-words",
+              "p-3 rounded-lg break-words whitespace-pre-wrap w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg",
               isCurrentUser
                 ? "bg-white text-black rounded-tr-none border border-gray-200"
                 : "bg-gray-100 rounded-tl-none border border-gray-200",
             )}
           >
-            {message.message && (
-              <Markdown content={message.message} className="text-sm" />
-            )}
+            <p className="text-xs space-x-2 mb-1">
+              <span className="text-gray-700 font-medium">
+                {message.created_by.username}
+              </span>
+              <time
+                className="text-gray-500"
+                dateTime={message.created_date}
+                title={formatDateTime(message.created_date)}
+              >
+                {formatRelative(message.created_date, new Date())}
+              </time>
+            </p>
+            <div
+              className={cn(
+                "p-3 rounded-lg break-words",
+                isCurrentUser
+                  ? "bg-white text-black rounded-tr-none border border-gray-200"
+                  : "bg-gray-100 rounded-tl-none border border-gray-200",
+              )}
+            >
+              {message.message && (
+                <Markdown content={message.message} className="text-sm" />
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  },
+);
+
+MessageItem.displayName = "MessageItem";
 
 // New thread dialog component
 const NewThreadDialog = ({
@@ -215,11 +208,6 @@ const NewThreadDialog = ({
 }) => {
   const { t } = useTranslation();
   const [title, setTitle] = useState("");
-  useEffect(() => {
-    if (isOpen) {
-      setTitle("");
-    }
-  }, [isOpen]);
 
   return (
     <Dialog
@@ -263,7 +251,6 @@ const NewThreadDialog = ({
               placeholder={t("encounter_notes__enter_discussion_title")}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              data-cy="new-thread-title-input"
             />
           </div>
         </div>
@@ -276,12 +263,11 @@ const NewThreadDialog = ({
           <Button
             onClick={() => onCreate(title)}
             disabled={!title.trim() || isCreating}
-            data-cy="create-thread-button"
           >
             {isCreating ? (
-              <Loader2 className="size-4 animate-spin mr-2" />
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
             ) : (
-              <MessageSquarePlus className="size-4 mr-2" />
+              <MessageSquarePlus className="h-4 w-4 mr-2" />
             )}
             {t("create")}
           </Button>
@@ -301,14 +287,14 @@ const MobileNav = ({
   onOpenThreads: () => void;
   onNewThread: () => void;
 }) => (
-  <div className="lg:hidden fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-2 flex items-center justify-around z-50 divide-x">
+  <div className="lg:hidden fixed bottom-0 left-0 right-0 border-t bg-white p-2 flex items-center justify-around z-50 divide-x">
     <Button
       variant="ghost"
       size="sm"
       onClick={onOpenThreads}
       className="flex-1 flex flex-col items-center gap-1 h-auto py-2 rounded-none"
     >
-      <MessageCircle className="size-5" />
+      <MessageCircle className="h-5 w-5" />
       <span className="text-xs">Threads ({threadsCount})</span>
     </Button>
     <Button
@@ -317,17 +303,14 @@ const MobileNav = ({
       onClick={onNewThread}
       className="flex-1 flex flex-col items-center gap-1 h-auto py-2 rounded-none"
     >
-      <MessageSquarePlus className="size-5" />
+      <MessageSquarePlus className="h-5 w-5" />
       <span className="text-xs">New Thread</span>
     </Button>
   </div>
 );
 
 // Main component
-export const EncounterNotesTab = ({
-  encounter,
-  patient,
-}: EncounterTabProps) => {
+export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedThread, setSelectedThread] = useState<string | null>(null);
@@ -338,20 +321,7 @@ export const EncounterNotesTab = ({
   // points to the first message fetched in the last page or the newly created message
   const recentMessageRef = useRef<HTMLDivElement | null>(null);
   const { ref, inView } = useInView();
-  const { hasPermission } = usePermissions();
-  const { canViewClinicalData } = getPermissions(
-    hasPermission,
-    patient.permissions,
-  );
-  const { canViewEncounter, canWriteEncounter } = getPermissions(
-    hasPermission,
-    encounter.permissions,
-  );
-  const canAccess = canViewClinicalData || canViewEncounter;
-  const inactiveEncounter = inactiveEncounterStatus.includes(encounter.status);
-  const canWriteCurrentEncounter = canWriteEncounter && !inactiveEncounter;
   const [commentAdded, setCommentAdded] = useState(false);
-  const isMobile = useIsMobile();
 
   // Fetch threads
   const { data: threadsData, isLoading: threadsLoading } = useQuery({
@@ -360,7 +330,6 @@ export const EncounterNotesTab = ({
       pathParams: { patientId: encounter.patient.id },
       queryParams: { encounter: encounter.id },
     }),
-    enabled: canAccess,
   });
 
   // Fetch messages with infinite scroll
@@ -390,7 +359,7 @@ export const EncounterNotesTab = ({
       const currentOffset = allPages.length * MESSAGES_LIMIT;
       return currentOffset < lastPage.count ? currentOffset : null;
     },
-    enabled: !!selectedThread && canAccess,
+    enabled: !!selectedThread,
   });
 
   // Create thread mutation
@@ -454,7 +423,10 @@ export const EncounterNotesTab = ({
   }, [inView, hasNextPage, fetchNextPage]);
 
   useEffect(() => {
-    recentMessageRef.current?.scrollIntoView({ block: "start" });
+    recentMessageRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   }, [messagesData]);
 
   const handleCreateThread = (title: string) => {
@@ -474,10 +446,7 @@ export const EncounterNotesTab = ({
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    const canSend =
-      newMessage.trim() && selectedThread && !createMessageMutation.isPending;
-    if (canSend) {
+    if (newMessage.trim() && selectedThread) {
       createMessageMutation.mutate({ message: newMessage.trim() });
     }
   };
@@ -495,29 +464,26 @@ export const EncounterNotesTab = ({
   const totalMessages = messagesData?.pages[0]?.count ?? 0;
 
   return (
-    <div className="flex h-[calc(100vh-12rem)] overflow-hidden lg:h-[calc(80vh-12rem)]">
+    <div className="flex h-[calc(100vh-12rem)]">
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-gray-200">
-        <div className="p-4 border-b border-gray-200">
+      <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r">
+        <div className="p-4 border-b">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <MessageCircle className="size-4 text-primary" />
+              <MessageCircle className="h-4 w-4 text-primary" />
               <h3 className="text-sm font-medium">
                 {t("encounter_notes__discussions")}
               </h3>
             </div>
-            {canWriteCurrentEncounter && (
-              <Button
-                data-cy="new-thread-button"
-                variant="outline"
-                size="sm"
-                onClick={() => setShowNewThreadDialog(true)}
-                className="h-8"
-              >
-                <Plus className="size-4" />
-                {t("encounter_notes__new")}
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowNewThreadDialog(true)}
+              className="h-8"
+            >
+              <Plus className="h-4 w-4" />
+              {t("encounter_notes__new")}
+            </Button>
           </div>
         </div>
 
@@ -525,7 +491,7 @@ export const EncounterNotesTab = ({
           <div className="space-y-2 p-4">
             {threadsData?.results.length === 0 ? (
               <div className="text-center py-6">
-                <MessageSquarePlus className="size-8 text-primary mx-auto mb-3" />
+                <MessageSquarePlus className="h-8 w-8 text-primary mx-auto mb-3" />
                 <p className="text-sm text-gray-500">
                   {t("encounter_notes__no_discussions")}
                 </p>
@@ -552,10 +518,10 @@ export const EncounterNotesTab = ({
           </SheetDescription>
           <SheetTitle className="sr-only">{t("encounter")}</SheetTitle>
           <div className="flex flex-col h-full">
-            <div className="p-4 border-b border-gray-200">
+            <div className="p-4 border-b">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <MessageCircle className="size-4 text-primary" />
+                  <MessageCircle className="h-4 w-4 text-primary" />
                   <h3 className="text-sm font-medium">
                     {t("encounter_notes__all_discussions")}
                   </h3>
@@ -569,7 +535,7 @@ export const EncounterNotesTab = ({
                   }}
                   className="h-8 hidden lg:block"
                 >
-                  <MessageSquarePlus className="size-4 mr-2" />
+                  <MessageSquarePlus className="h-4 w-4 mr-2" />
                   {t("encounter_notes__new")}
                 </Button>
               </div>
@@ -579,7 +545,7 @@ export const EncounterNotesTab = ({
               <div className="space-y-2 p-4">
                 {threadsData?.results.length === 0 ? (
                   <div className="text-center py-6">
-                    <MessageSquarePlus className="size-8 text-primary mx-auto mb-3" />
+                    <MessageSquarePlus className="h-8 w-8 text-primary mx-auto mb-3" />
                     <p className="text-sm text-gray-500">
                       {t("encounter_notes__no_discussions")}
                     </p>
@@ -604,10 +570,10 @@ export const EncounterNotesTab = ({
       </Sheet>
 
       {/* Main Content */}
-      <div className="flex-1 min-w-0 flex flex-col">
-        <div className="flex flex-col h-full relative">
+      <div className="flex-1 min-w-0">
+        <div className="flex flex-col h-full pb-[60px] lg:pb-0">
           {/* Header */}
-          <div className="p-3 sm:p-4 border-b border-gray-200 bg-white z-10">
+          <div className="p-4 border-b sticky top-0 z-10">
             {selectedThread ? (
               <div className="flex items-center gap-3">
                 <h2 className="text-base font-medium truncate flex-1">
@@ -621,11 +587,11 @@ export const EncounterNotesTab = ({
                   ${t("messages")}: ${totalMessages}`}
                 >
                   <div className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
-                    <Users className="size-4" />
+                    <Users className="h-4 w-4" />
                     <span>
                       {new Set(messages.map((m) => m.created_by.id)).size}
                     </span>
-                    <MessageSquare className="size-4 ml-3" />
+                    <MessageSquare className="h-4 w-4 ml-3" />
                     <span>{totalMessages}</span>
                   </div>
                 </TooltipComponent>
@@ -647,13 +613,21 @@ export const EncounterNotesTab = ({
               ) : (
                 <>
                   {/* Messages List */}
-                  {isMobile ? (
-                    <div className="flex-1 overflow-y-auto overscroll-y-contain -mx-2 px-2">
-                      <div
-                        className="flex flex-col-reverse py-2 min-h-full"
-                        data-cy="chat-messages"
-                      >
-                        {messages.map((message, i) => (
+                  <ScrollArea className="flex-1 px-4 h-full max-h-screen">
+                    <div className="flex flex-col-reverse h-full py-4">
+                      <div ref={messagesEndRef} />
+                      {messages.length === 0 ? (
+                        <div className="text-center py-8">
+                          <MessageSquarePlus className="h-8 w-8 text-primary mx-auto mb-4" />
+                          <p className="text-sm font-medium">
+                            {t("encounter_notes__start_conversation")}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {t("encounter_notes__be_first_to_send")}
+                          </p>
+                        </div>
+                      ) : (
+                        messages.map((message) => (
                           <MessageItem
                             key={message.id}
                             message={message}
@@ -662,92 +636,61 @@ export const EncounterNotesTab = ({
                                 ? recentMessageRef
                                 : undefined
                             }
-                            className={cn(i === 0 && "mb-14")}
                           />
-                        ))}
-                        {isFetchingNextPage && (
-                          <div className="py-2">
-                            <div className="space-y-4">
-                              <CardListSkeleton count={3} />
-                            </div>
+                        ))
+                      )}
+                      {isFetchingNextPage ? (
+                        <div className="py-2">
+                          <div className="space-y-4">
+                            <CardListSkeleton count={3} />
                           </div>
-                        )}
+                        </div>
+                      ) : (
                         <div ref={ref} />
-                      </div>
+                      )}
                     </div>
-                  ) : (
-                    <ScrollArea className="flex-1 px-4 h-[calc(100vh-16rem)] overflow-y-auto">
-                      <div
-                        className="flex flex-col-reverse py-4 min-h-full"
-                        data-cy="chat-messages"
-                      >
-                        {messages.map((message, i) => (
-                          <MessageItem
-                            key={message.id}
-                            message={message}
-                            ref={
-                              message.id === recentMessage?.id
-                                ? recentMessageRef
-                                : undefined
-                            }
-                            className={cn(i === 0 && "mb-14")}
-                          />
-                        ))}
-                        {isFetchingNextPage && (
-                          <div className="py-2">
-                            <div className="space-y-4">
-                              <CardListSkeleton count={3} />
-                            </div>
-                          </div>
-                        )}
-                        <div ref={ref} />
-                      </div>
-                    </ScrollArea>
-                  )}
-
+                  </ScrollArea>
                   {/* Message Input */}
-                  {canWriteCurrentEncounter && (
-                    <div className="border-t border-gray-200 p-3 sm:p-4 bg-white sticky max-sm:bottom-14">
-                      <form onSubmit={handleSendMessage}>
-                        <div className="flex gap-2">
-                          <AutoExpandingTextarea
-                            data-cy="encounter-notes-chat-message-input"
-                            placeholder={t("encounter_notes__type_message")}
-                            value={newMessage}
-                            onChange={(e) => setNewMessage(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" && e.shiftKey) {
+                  <div className="border-t p-4 sticky bottom-0">
+                    <form onSubmit={handleSendMessage}>
+                      <div className="flex gap-2">
+                        <Textarea
+                          placeholder={t("encounter_notes__type_message")}
+                          value={newMessage}
+                          onChange={(e) => setNewMessage(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                              e.preventDefault();
+                              if (newMessage.trim()) {
                                 handleSendMessage(e);
                               }
-                            }}
-                            className="flex-1 min-h-10 max-h-[50vh]"
-                          />
-                          <Button
-                            data-cy="send-chat-message-button"
-                            type="submit"
-                            size="icon"
-                            disabled={
-                              !newMessage.trim() ||
-                              createMessageMutation.isPending
                             }
-                            className="size-10 shrink-0"
-                          >
-                            {createMessageMutation.isPending ? (
-                              <Loader2 className="size-5 animate-spin" />
-                            ) : (
-                              <Send className="size-5" />
-                            )}
-                          </Button>
-                        </div>
-                      </form>
-                    </div>
-                  )}
+                          }}
+                        />
+                        <Button
+                          type="submit"
+                          size="icon"
+                          disabled={
+                            !newMessage.trim() ||
+                            createMessageMutation.isPending
+                          }
+                          className="h-10 w-10 shrink-0"
+                        >
+                          {createMessageMutation.isPending ? (
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                          ) : (
+                            <Send className="h-5 w-5" />
+                          )}
+                        </Button>
+                      </div>
+                    </form>
+                  </div>
                 </>
               )}
             </>
           ) : (
             <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-              <MessageSquarePlus className="size-12 text-primary mb-4" />
+              <MessageSquarePlus className="h-12 w-12 text-primary mb-4" />
               <h3 className="text-lg font-medium mb-2">
                 {t("encounter_notes__welcome")}
               </h3>
@@ -757,26 +700,10 @@ export const EncounterNotesTab = ({
               <Button
                 onClick={() => setShowNewThreadDialog(true)}
                 className="shadow-lg"
-                disabled={!canWriteCurrentEncounter}
               >
-                <MessageSquarePlus className="size-5 mr-2" />
+                <MessageSquarePlus className="h-5 w-5 mr-2" />
                 {t("encounter_notes__start_new_discussion")}
               </Button>
-              {!canWriteEncounter && (
-                <p className="text-sm text-gray-500 mt-4">
-                  {inactiveEncounter ? (
-                    <>
-                      {t("encounter_notes__inactive_encounter", {
-                        encounterStatus: t(
-                          `encounter_status__${encounter.status}`,
-                        ),
-                      })}
-                    </>
-                  ) : (
-                    t("permission_denied")
-                  )}
-                </p>
-              )}
             </div>
           )}
         </div>

@@ -1,3 +1,5 @@
+const colors = require("tailwindcss/colors");
+
 const secondary = {
   50: "#F9FAFB",
   100: "#FBFAFC",
@@ -13,6 +15,7 @@ const secondary = {
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  important: true,
   darkMode: ["class"],
   theme: {
     extend: {
@@ -20,9 +23,9 @@ module.exports = {
         sans: ["Figtree", "sans-serif"],
       },
       colors: {
-        green: "colors.emerald",
-        yellow: "colors.amber",
-        purple: "colors.violet",
+        green: colors.emerald,
+        yellow: colors.amber,
+        purple: colors.violet,
         primary: {
           100: "#def7ec",
           200: "#bcf0da",
@@ -36,10 +39,36 @@ module.exports = {
           DEFAULT: "#0d9f6e",
         },
         secondary: secondary,
-        danger: "colors.red",
-        warning: "colors.amber",
-        alert: "colors.violet",
-        gray: "colors.gray",
+        danger: colors.red,
+        warning: colors.amber,
+        alert: colors.violet,
+        gray: colors.gray,
+        patient: {
+          comfort: {
+            DEFAULT: colors.slate[200],
+            fore: colors.slate[700],
+          },
+          stable: {
+            DEFAULT: "#59D4FF",
+            fore: colors.white,
+          },
+          abnormal: {
+            DEFAULT: "#F6CB23",
+            fore: colors.yellow[900],
+          },
+          critical: {
+            DEFAULT: colors.red[500],
+            fore: colors.red[100],
+          },
+          unknown: {
+            DEFAULT: secondary[400],
+            fore: secondary[800],
+          },
+          activelydying: {
+            DEFAULT: colors.red[800],
+            fore: colors.red[100],
+          },
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -93,5 +122,6 @@ module.exports = {
     require("@tailwindcss/forms"),
     require("@tailwindcss/typography"),
     require("@tailwindcss/container-queries"),
+    require("tailwindcss-animate"),
   ],
 };
