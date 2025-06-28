@@ -152,7 +152,7 @@ const QuestionnaireQuestions = ({ questions }: { questions: Question[] }) => {
                     </div>
                     <Badge
                       variant="secondary"
-                      className="mr-1 font-semibold rounded-full capitalize"
+                      className="font-semibold rounded-full capitalize"
                     >
                       {question.type}
                       {question.type === "group" &&
