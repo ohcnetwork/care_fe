@@ -37,7 +37,6 @@ interface QuestionGroupProps {
   facilityId?: string;
   patientId: string;
   isSubQuestion?: boolean;
-  groupInstanceId?: string;
 }
 
 export function isQuestionEnabled(
@@ -120,7 +119,6 @@ export const QuestionGroup = memo(function QuestionGroup({
   facilityId,
   patientId,
   isSubQuestion = false,
-  groupInstanceId,
 }: QuestionGroupProps) {
   const [groupInstances, setGroupInstances] = useState(() => {
     return [questionnaireResponses[0].group_instance_id];
@@ -144,26 +142,37 @@ export const QuestionGroup = memo(function QuestionGroup({
         facilityId={facilityId}
         patientId={patientId}
         isSubQuestion={isSubQuestion}
-        groupInstanceId={groupInstanceId}
       />
     );
   }
 
   function handleOnClick(): void {
     const id = crypto.randomUUID();
-    setGroupInstances((prev) => [...prev, id]);
-    question.questions?.forEach((q) => {
-      updateQuestionnaireResponseCB(
-        [],
-        q.id,
-        id,
-        q.structured_type ?? null,
-        q.link_id,
-      );
+    questionnaireResponses.forEach((res) => {
+      const newValues = [...res.values];
+      newValues.push({ type: "string", value: "", instance_id: id });
+      updateQuestionnaireResponseCB(newValues, res.question_id);
     });
+
+    setGroupInstances((prev) => [...prev, id]);
   }
 
   const isActive = activeGroupId === question.id;
+
+  function removeValue(instance_id: string | undefined): void {
+    if (groupInstances.length <= 1) return; // Don't remove the last instance
+
+    setGroupInstances((prev) => prev.filter((inst) => inst !== instance_id));
+
+    question.questions?.forEach((q) => {
+      const existingValues =
+        questionnaireResponses.find((res) => res.question_id === q.id)
+          ?.values || [];
+      const values = existingValues.filter((v) => v.instance_id != instance_id);
+      updateQuestionnaireResponseCB(values, q.id);
+    });
+    console.log("after remove", questionnaireResponses);
+  }
 
   return (
     <div
@@ -196,15 +205,30 @@ export const QuestionGroup = memo(function QuestionGroup({
       >
         {groupInstances.map((instanceId) => {
           console.log("questionnaireResponses", questionnaireResponses);
-          const instanceResponses = questionnaireResponses.filter(
-            (res) => res.group_instance_id === instanceId,
-          );
+          const instanceResponses: QuestionnaireResponse[] =
+            questionnaireResponses.map((res) => ({
+              ...res,
+              values: res.values.filter(
+                (val) => val.instance_id === instanceId,
+              ),
+            }));
           console.log("instanceResponses", instanceResponses);
           return (
             <div
               key={instanceId}
-              className="border p-2 mb-2 rounded-md bg-white"
+              className="border p-2 mb-2 rounded-md bg-white relative"
             >
+              {groupInstances.length > 1 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeValue(instanceId)}
+                  className="size-8 absolute top-1 right-1"
+                  disabled={disabled}
+                >
+                  <CareIcon icon="l-trash" className="size-4" />
+                </Button>
+              )}
               {question.questions?.map((subQuestion) => (
                 <QuestionGroup
                   key={`${subQuestion.id}-${instanceId}`}
@@ -217,17 +241,40 @@ export const QuestionGroup = memo(function QuestionGroup({
                     structured_type?: QuestionnaireResponse["structured_type"],
                     link_id?: string,
                     note?: string,
-                  ) =>
+                  ) => {
+                    const existingValues =
+                      questionnaireResponses.find(
+                        (res) => res.question_id === subQuestion.id,
+                      )?.values || [];
+                    const valuesWithInstanceId = values.map((value) => ({
+                      ...value,
+                      instance_id: instanceId,
+                    }));
+
+                    // Merge existing values with new values, replacing values for the current instance
+                    const mergedValues = existingValues.map((existingValue) =>
+                      existingValue.instance_id === instanceId
+                        ? valuesWithInstanceId[0] || existingValue
+                        : existingValue,
+                    );
+
+                    // If no existing value for this instance, add the new values
+                    const hasInstanceValue = existingValues.some(
+                      (v) => v.instance_id === instanceId,
+                    );
+                    const finalValues = hasInstanceValue
+                      ? mergedValues
+                      : [...existingValues, ...valuesWithInstanceId];
+
                     updateQuestionnaireResponseCB(
-                      values,
+                      finalValues,
                       questionId,
                       instanceId,
                       structured_type,
                       link_id,
                       note,
-                    )
-                  }
-                  groupInstanceId={instanceId}
+                    );
+                  }}
                   encounterId={encounterId}
                   errors={errors}
                   clearError={clearError}

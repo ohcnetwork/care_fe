@@ -857,30 +857,9 @@ export function QuestionnaireForm({
                           ...formItem,
                           responses: (() => {
                             const existingResponses = formItem.responses;
-                            const exists = existingResponses.some(
-                              (r) =>
-                                r.question_id === questionId &&
-                                r.group_instance_id === groupInstanceId,
-                            );
-                            if (!exists) {
-                              console.log("not exists");
-
-                              const newResponse: QuestionnaireResponse = {
-                                question_id: questionId,
-                                group_instance_id: groupInstanceId,
-                                structured_type: structured_type ?? null,
-                                link_id: link_id ?? "",
-                                values: [],
-                                note: note,
-                              };
-                              return [...existingResponses, newResponse];
-                            }
 
                             return existingResponses.map((r) =>
-                              r.question_id === questionId &&
-                              (groupInstanceId
-                                ? r.group_instance_id === groupInstanceId
-                                : !r.group_instance_id)
+                              r.question_id === questionId
                                 ? { ...r, values, note: note }
                                 : r,
                             );

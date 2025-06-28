@@ -52,7 +52,6 @@ interface QuestionInputProps {
   facilityId?: string;
   patientId: string;
   isSubQuestion?: boolean;
-  groupInstanceId?: string;
 }
 
 export function QuestionInput({
@@ -66,16 +65,11 @@ export function QuestionInput({
   facilityId,
   patientId,
   isSubQuestion,
-  groupInstanceId,
 }: QuestionInputProps) {
   const { t } = useTranslation();
   console.log(questionnaireResponses);
   const questionnaireResponse = questionnaireResponses.find(
-    (v) =>
-      v.question_id === question.id &&
-      (v.group_instance_id
-        ? v.group_instance_id === groupInstanceId
-        : !v.group_instance_id),
+    (v) => v.question_id === question.id,
   );
   console.log("after", questionnaireResponses);
 
