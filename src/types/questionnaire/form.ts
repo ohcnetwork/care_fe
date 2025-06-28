@@ -41,7 +41,6 @@ export type ResponseValue =
 
 export interface QuestionnaireResponse {
   question_id: string;
-  group_instance_id?: string;
   structured_type: StructuredQuestionType | null;
   link_id: string;
   values: ResponseValue[];

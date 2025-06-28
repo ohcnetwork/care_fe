@@ -22,14 +22,7 @@ const FULL_WIDTH_QUESTION_TYPES: StructuredQuestionType[] = [
 interface QuestionRendererProps {
   questions: Question[];
   responses: QuestionnaireResponse[];
-  onResponseChange: (
-    values: ResponseValue[],
-    questionId: string,
-    groupInstanceId?: string,
-    structured_type?: QuestionnaireResponse["structured_type"],
-    link_id?: string,
-    note?: string,
-  ) => void;
+  onResponseChange: (values: ResponseValue[], questionId: string) => void;
   errors: QuestionValidationError[];
   clearError: (questionId: string) => void;
   disabled?: boolean;
@@ -83,23 +76,7 @@ export function QuestionRenderer({
               question={question}
               encounterId={encounterId}
               questionnaireResponses={responses}
-              updateQuestionnaireResponseCB={(
-                values: ResponseValue[],
-                questionId: string,
-                groupInstanceId?: string,
-                structured_type?: QuestionnaireResponse["structured_type"],
-                link_id?: string,
-                note?: string,
-              ) =>
-                onResponseChange(
-                  values,
-                  questionId,
-                  groupInstanceId,
-                  structured_type,
-                  link_id,
-                  note,
-                )
-              }
+              updateQuestionnaireResponseCB={onResponseChange}
               errors={errors}
               clearError={clearError}
               disabled={disabled || isPreview}

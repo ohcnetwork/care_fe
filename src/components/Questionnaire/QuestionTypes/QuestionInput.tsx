@@ -41,9 +41,6 @@ interface QuestionInputProps {
   updateQuestionnaireResponseCB: (
     values: ResponseValue[],
     questionId: string,
-    groupInstanceId?: string,
-    structured_type?: QuestionnaireResponse["structured_type"],
-    link_id?: string,
     note?: string,
   ) => void;
   errors: QuestionValidationError[];
@@ -85,9 +82,6 @@ export function QuestionInput({
     updateQuestionnaireResponseCB(
       newValues,
       questionnaireResponse.question_id,
-      questionnaireResponse.group_instance_id,
-      questionnaireResponse.structured_type,
-      questionnaireResponse.link_id,
       questionnaireResponse.note,
     );
   };
@@ -99,9 +93,6 @@ export function QuestionInput({
     updateQuestionnaireResponseCB(
       updatedValues,
       questionnaireResponse.question_id,
-      questionnaireResponse.group_instance_id,
-      questionnaireResponse.structured_type,
-      questionnaireResponse.link_id,
       questionnaireResponse.note,
     );
   };
@@ -268,9 +259,6 @@ export function QuestionInput({
                 updateQuestionnaireResponseCB(
                   [...questionnaireResponse.values],
                   questionnaireResponse.question_id,
-                  questionnaireResponse.group_instance_id,
-                  questionnaireResponse.structured_type,
-                  questionnaireResponse.link_id,
                   note,
                 );
               }}
@@ -348,9 +336,6 @@ export function QuestionInput({
                         updateQuestionnaireResponseCB(
                           [...questionnaireResponse.values],
                           questionnaireResponse.question_id,
-                          questionnaireResponse.group_instance_id,
-                          questionnaireResponse.structured_type,
-                          questionnaireResponse.link_id,
                           note,
                         );
                       }}
@@ -381,9 +366,6 @@ export function QuestionInput({
                 updateQuestionnaireResponseCB(
                   [...questionnaireResponse.values],
                   questionnaireResponse.question_id,
-                  questionnaireResponse.group_instance_id,
-                  questionnaireResponse.structured_type,
-                  questionnaireResponse.link_id,
                   note,
                 );
               }}

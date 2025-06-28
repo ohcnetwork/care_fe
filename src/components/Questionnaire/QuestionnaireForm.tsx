@@ -484,7 +484,7 @@ export function QuestionnaireForm({
 
     const processQuestion = (q: Question) => {
       if (q.type === "group" && q.questions) {
-        q.questions.forEach((subQ) => processQuestion(subQ));
+        q.questions.forEach(processQuestion);
       } else {
         responses.push({
           question_id: q.id,
@@ -832,9 +832,6 @@ export function QuestionnaireForm({
               onResponseChange={(
                 values: ResponseValue[],
                 questionId: string,
-                groupInstanceId?: string,
-                structured_type?: QuestionnaireResponse["structured_type"],
-                link_id?: string,
                 note?: string,
               ) => {
                 setQuestionnaireForms((existingForms) =>
@@ -842,15 +839,11 @@ export function QuestionnaireForm({
                     formItem.questionnaire.id === form.questionnaire.id
                       ? {
                           ...formItem,
-                          responses: (() => {
-                            const existingResponses = formItem.responses;
-
-                            return existingResponses.map((r) =>
-                              r.question_id === questionId
-                                ? { ...r, values, note: note }
-                                : r,
-                            );
-                          })(),
+                          responses: formItem.responses.map((r) =>
+                            r.question_id === questionId
+                              ? { ...r, values, note: note }
+                              : r,
+                          ),
                           errors: [],
                         }
                       : formItem,

@@ -1,5 +1,5 @@
-import { t } from "i18next";
 import { memo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -25,9 +25,6 @@ interface QuestionGroupProps {
   updateQuestionnaireResponseCB: (
     values: ResponseValue[],
     questionId: string,
-    groupInstanceId?: string,
-    structured_type?: QuestionnaireResponse["structured_type"],
-    link_id?: string,
     note?: string,
   ) => void;
   errors: QuestionValidationError[];
@@ -120,6 +117,7 @@ export const QuestionGroup = memo(function QuestionGroup({
   patientId,
   isSubQuestion = false,
 }: QuestionGroupProps) {
+  const { t } = useTranslation();
   const [groupInstances, setGroupInstances] = useState(() => {
     return [crypto.randomUUID()];
   });
@@ -235,9 +233,6 @@ export const QuestionGroup = memo(function QuestionGroup({
                   updateQuestionnaireResponseCB={(
                     values: ResponseValue[],
                     questionId: string,
-                    groupInstanceId?: string,
-                    structured_type?: QuestionnaireResponse["structured_type"],
-                    link_id?: string,
                     note?: string,
                   ) => {
                     const existingValues =
@@ -267,9 +262,6 @@ export const QuestionGroup = memo(function QuestionGroup({
                     updateQuestionnaireResponseCB(
                       finalValues,
                       questionId,
-                      instanceId,
-                      structured_type,
-                      link_id,
                       note,
                     );
                   }}
