@@ -169,7 +169,7 @@ const QuestionnaireQuestions = ({ questions }: { questions: Question[] }) => {
 
                 <div className="flex items-center text-xs mt-1">
                   {question.required && (
-                    <Badge variant="destructive" className="mr-1 rounded-full">
+                    <Badge variant="destructive" className="rounded-full">
                       {t("required")}
                     </Badge>
                   )}
