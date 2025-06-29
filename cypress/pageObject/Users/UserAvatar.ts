@@ -30,7 +30,12 @@ export class UserAvatar {
   }
 
   clickSaveAvatarButton() {
-    cy.verifyAndClickElement('[data-cy="save-cover-image"]', "Save");
+    cy.get("button").contains("Upload").click();
+    return this;
+  }
+
+  clickCropAvatar() {
+    cy.get("button").contains("Crop").click();
     return this;
   }
 
@@ -48,7 +53,12 @@ export class UserAvatar {
   }
 
   clickDeleteAvatarButton() {
-    cy.verifyAndClickElement('[data-cy="delete-avatar"]', "Delete");
+    cy.get('[role="dialog"], .modal')
+      .should("exist")
+      .within(() => {
+        cy.contains("button", "Delete").should("be.visible").click();
+      });
+
     return this;
   }
 

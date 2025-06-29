@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -16,6 +15,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 
 import PaginationComponent from "@/components/Common/Pagination";
@@ -58,8 +62,10 @@ export function formatValue(
   switch (type) {
     case "dateTime":
       return value instanceof Date
-        ? formatDateTime(value.toISOString())
-        : formatDateTime(value.toString());
+        ? formatDateTime(value.toISOString(), "hh:mm A; DD/MM/YYYY")
+        : formatDateTime(value.toString(), "hh:mm A; DD/MM/YYYY");
+    case "date":
+      return formatDateTime(value.toString());
     case "choice":
       return properCase(value.toString());
     case "decimal":
@@ -146,9 +152,11 @@ function QuestionGroup({
     const response = responses.find((r) => r.question_id === question.id);
     if (!response) return null;
 
-    const value = response.values[0]?.value;
-    const unit = response.values[0]?.unit || question.unit;
-    const coding = response.values[0]?.coding;
+    const values = response.values;
+    if (!values?.length) return null;
+
+    const hasAnyValue = values.some((v) => v.value || v.coding);
+    if (!hasAnyValue) return null;
 
     return (
       <TableRow key={question.id}>
@@ -157,17 +165,49 @@ function QuestionGroup({
             {question.text}
           </div>
         </TableCell>
-        <TableCell className="py-1 pr-0 align-top">
+        <TableCell
+          className="py-1 pr-0 align-top"
+          colSpan={response.note ? 1 : 2}
+        >
           <div className="text-sm font-medium break-words whitespace-normal">
-            {formatValue(value, question.type)}
-            {unit && <span className="ml-1 text-gray-600">{unit.code}</span>}
-            {coding && (
-              <span className="ml-1 text-gray-600">
-                {coding.display} ({coding.code})
-              </span>
-            )}
+            {values.map((val, idx) => (
+              <React.Fragment key={idx}>
+                {idx > 0 && ", "}
+                {val.value && formatValue(val.value, question.type)}
+                {val.unit && (
+                  <span className="ml-1 text-gray-600">{val.unit.code}</span>
+                )}
+                {val.coding && (
+                  <span className="ml-1 text-gray-600">
+                    {val.coding.display} ({val.coding.code})
+                  </span>
+                )}
+              </React.Fragment>
+            ))}
           </div>
         </TableCell>
+        {response.note && (
+          <TableCell className="py-1 pr-0 align-top">
+            <div className="flex justify-end">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs shrink-0"
+                  >
+                    {t("see_note")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-52 p-4">
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                    {response.note}
+                  </p>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </TableCell>
+        )}
       </TableRow>
     );
   };
@@ -214,36 +254,6 @@ function QuestionGroup({
         })}
       </div>
     </div>
-  );
-}
-
-export function StructuredResponseBadge({
-  type,
-  submitType,
-}: {
-  type: string;
-  submitType: string;
-}) {
-  const { t } = useTranslation();
-
-  const colors = {
-    symptom: "bg-yellow-100 text-yellow-800",
-    diagnosis: "bg-blue-100 text-blue-800",
-    medication_request: "bg-green-100 text-green-800",
-    medication_statement: "bg-purple-100 text-purple-800",
-    follow_up_appointment: "bg-pink-100 text-pink-800",
-  };
-
-  return (
-    <Badge
-      variant="outline"
-      className={`${
-        colors[type as keyof typeof colors] || "bg-gray-100 text-gray-800"
-      } border-none`}
-    >
-      {submitType === "CREATE" ? t("created") : t("updated")}{" "}
-      {properCase(type.replace(/_/g, " "))}
-    </Badge>
   );
 }
 
@@ -311,11 +321,11 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                     );
                     if (!response) return null;
 
-                    const value = response.values[0]?.value;
-                    const unit = response.values[0]?.unit || question.unit;
-                    const coding = response.values[0]?.coding;
+                    const values = response.values;
+                    if (!values?.length) return null;
 
-                    if (!value && !coding) return null;
+                    const hasAnyValue = values.some((v) => v.value || v.coding);
+                    if (!hasAnyValue) return null;
 
                     return (
                       <TableRow key={question.id}>
@@ -324,21 +334,52 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                             {question.text}
                           </div>
                         </TableCell>
-                        <TableCell className="py-1 pr-0 align-top">
+                        <TableCell
+                          className="py-1 pr-0 align-top"
+                          colSpan={response.note ? 1 : 2}
+                        >
                           <div className="text-sm font-medium break-words whitespace-normal">
-                            {formatValue(value, question.type)}
-                            {unit && (
-                              <span className="ml-1 text-gray-600">
-                                {unit.code}
-                              </span>
-                            )}
-                            {coding && (
-                              <span className="ml-1 text-gray-600">
-                                {coding.display} ({coding.code})
-                              </span>
-                            )}
+                            {values.map((val, idx) => (
+                              <React.Fragment key={idx}>
+                                {idx > 0 && ", "}
+                                {val.value &&
+                                  formatValue(val.value, question.type)}
+                                {val.unit && (
+                                  <span className="ml-1 text-gray-600">
+                                    {val.unit.code}
+                                  </span>
+                                )}
+                                {val.coding && (
+                                  <span className="ml-1 text-gray-600">
+                                    {val.coding.display} ({val.coding.code})
+                                  </span>
+                                )}
+                              </React.Fragment>
+                            ))}
                           </div>
                         </TableCell>
+                        {response.note && (
+                          <TableCell className="py-1 pr-0 align-top text-right">
+                            <div className="flex justify-end">
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-7 text-xs shrink-0"
+                                  >
+                                    {t("see_note")}
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-52 p-4">
+                                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                                    {response.note}
+                                  </p>
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                          </TableCell>
+                        )}
                       </TableRow>
                     );
                   })}

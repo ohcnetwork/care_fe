@@ -207,7 +207,9 @@ function formatValue(value: ResponseValue["value"], type: string): string {
 
   switch (type) {
     case "dateTime":
-      return formatDateTime(value as string);
+      return formatDateTime(value as string, "hh:mm A; DD/MM/YYYY");
+    case "date":
+      return formatDateTime(value as string, "DD/MM/YYYY");
     case "choice":
       return properCase(value.toString());
     case "decimal":
