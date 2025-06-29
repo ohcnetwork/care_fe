@@ -333,9 +333,9 @@ export function QuestionnaireForm({
     QuestionnaireFormState[]
   >([]);
   const [serverErrors, setServerErrors] = useState<ServerValidationError[]>();
-  const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string>();
-  const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
-  const [activeGroupId, setActiveGroupId] = useState<string>();
+  const [activeQuestionnaireId] = useState<string>();
+  const [activeGroupId] = useState<string>();
+  const [activeQuestionId, setActiveQuestionId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
 
   const {
@@ -737,8 +737,7 @@ export function QuestionnaireForm({
                 activeQuestionnaireId === form.questionnaire.id &&
                   "bg-gray-100 text-green-600",
               )}
-              onClick={() => setActiveQuestionnaireId(form.questionnaire.id)}
-              disabled={isPending}
+              disabled
             >
               {form.questionnaire.title}
             </button>
@@ -754,17 +753,13 @@ export function QuestionnaireForm({
                           "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
                           activeGroupId === question.id && "text-green-600",
                         )}
-                        onClick={() => {
-                          setActiveQuestionnaireId(form.questionnaire.id);
-                          setActiveGroupId(question.id);
-                        }}
-                        disabled={isPending}
+                        disabled
                       >
                         {`${index + 1}. ${question.text}`}
                       </button>
 
                       {/* Sub-Questions */}
-                      {question.questions && question.questions.length > 0 && (
+                      {question.questions && (
                         <div className="pl-4 space-y-1">
                           {question.questions.map((sub, subIndex) => (
                             <button
@@ -772,20 +767,9 @@ export function QuestionnaireForm({
                               className={cn(
                                 "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
                                 activeQuestionId === sub.id &&
-                                  "border  text-green-600 bg-white shadow-sm",
+                                  "border border-green-600 text-green-600 bg-white shadow-sm",
                               )}
-                              onClick={() => {
-                                setActiveQuestionnaireId(form.questionnaire.id);
-                                setActiveGroupId(question.id);
-                                setActiveQuestionId(sub.id);
-                                document
-                                  .getElementById(`question-${sub.id}`)
-                                  ?.scrollIntoView({
-                                    behavior: "smooth",
-                                    block: "center",
-                                  });
-                              }}
-                              disabled={isPending}
+                              disabled
                             >
                               {`${index + 1}.${subIndex + 1} ${sub.text}`}
                             </button>
@@ -796,27 +780,16 @@ export function QuestionnaireForm({
                   );
                 }
 
-                // Non-group questions
+                // Non-group question
                 return (
                   <button
                     key={question.id}
                     className={cn(
                       "w-full text-left px-2 py-1 rounded hover:bg-gray-100",
                       activeQuestionId === question.id &&
-                        "border  text-green-600 bg-white shadow-sm",
+                        "border border-green-600 text-green-600 bg-white shadow-sm",
                     )}
-                    onClick={() => {
-                      setActiveQuestionnaireId(form.questionnaire.id);
-                      setActiveQuestionId(question.id);
-                      setActiveGroupId(undefined);
-                      document
-                        .getElementById(`question-${question.id}`)
-                        ?.scrollIntoView({
-                          behavior: "smooth",
-                          block: "center",
-                        });
-                    }}
-                    disabled={isPending}
+                    disabled
                   >
                     {`${index + 1}. ${question.text}`}
                   </button>
@@ -895,6 +868,9 @@ export function QuestionnaireForm({
                 if (!isDirty) {
                   setIsDirty(true);
                 }
+
+                // 🔥 NEW: Update activeQuestionId here so it reflects in the sidebar
+                setActiveQuestionId(questionId);
               }}
               disabled={isPending}
               activeGroupId={activeGroupId}
@@ -914,6 +890,7 @@ export function QuestionnaireForm({
                   ),
                 );
               }}
+              // ✅ Pass down this function to allow child to update active question
             />
           </div>
         ))}
