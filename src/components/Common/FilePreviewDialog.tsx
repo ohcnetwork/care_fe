@@ -504,7 +504,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
               <div
                 ref={containerRef}
                 className={cn(
-                  "flex h-[50vh] md:h-[70vh] w-full items-center justify-center overflow-hidden rounded-lg border border-gray-200 touch-none",
+                  "flex h-[50vh] md:h-[70vh] w-[50vh] md:w-[70vh] items-center justify-center overflow-hidden rounded-lg border border-gray-200 touch-none",
                 )}
                 style={{ cursor: getCursorStyle() }}
                 onMouseDown={handleMouseDown}
@@ -552,7 +552,6 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                       }}
                       pageNumber={page}
                       scale={scale}
-                      className="max-md:max-w-[50vw]"
                     />
                   </Suspense>
                 ) : previewExtensions.includes(file_state.extension) ? (
