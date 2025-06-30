@@ -26,8 +26,6 @@ export default function PDFViewer(
             pageNumber={props.pageNumber}
             scale={props.scale}
             height={650}
-            renderAnnotationLayer={false}
-            renderTextLayer={false}
           />
         </Document>
       </div>
