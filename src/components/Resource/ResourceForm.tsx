@@ -276,6 +276,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     </FormLabel>
                     <FormControl>
                       <Autocomplete
+                        {...field}
                         data-cy="select-facility"
                         options={mergeAutocompleteOptions(
                           facilityOptions ?? [],
@@ -350,7 +351,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     <FormLabel aria-required>{t("status")}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger data-cy="select-status-dropdown">
+                        <SelectTrigger
+                          data-cy="select-status-dropdown"
+                          ref={field.ref}
+                        >
                           <SelectValue placeholder={t("select_status")} />
                         </SelectTrigger>
                       </FormControl>
@@ -375,7 +379,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     <FormLabel aria-required>{t("category")}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger data-cy="select-category-dropdown">
+                        <SelectTrigger
+                          data-cy="select-category-dropdown"
+                          ref={field.ref}
+                        >
                           <SelectValue
                             placeholder={t("category_description")}
                           />
