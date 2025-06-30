@@ -87,11 +87,12 @@ export class PatientEncounter {
 
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .should("have.length.gte", 1)
+      .should("have.length.gte", 2)
       .then(($rows) => {
         const secondRow = $rows.eq(1);
         cy.wrap(secondRow)
           .find("td")
+          .should("have.length.gte", 6)
           .then(($tds) => {
             const criticalitySelector = $tds.eq(2);
             const statusSelector = $tds.eq(3);
@@ -107,11 +108,12 @@ export class PatientEncounter {
     cy.wait(300);
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .should("have.length.gte", 1)
+      .should("have.length.gte", 2)
       .then(($rows) => {
         const secondLastRow = $rows.eq(-2);
         cy.wrap(secondLastRow)
           .find("td")
+          .should("have.length.gte", 6)
           .then(($tds) => {
             const optionsSelector = $tds.eq(5);
             cy.wrap(optionsSelector)
@@ -177,11 +179,12 @@ export class PatientEncounter {
 
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .should("have.length.gte", 1)
+      .should("have.length.gte", 2)
       .then(($rows) => {
         const lastRow = $rows.last();
         cy.wrap(lastRow)
           .find("td")
+          .should("have.length.gte", 6)
           .then(($tds) => {
             const statusSelector = $tds.eq(1);
             const severitySelector = $tds.eq(2);
@@ -197,11 +200,12 @@ export class PatientEncounter {
     cy.wait(300);
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .should("have.length.gte", 1)
+      .should("have.length.gte", 2)
       .then(($rows) => {
         const lastRow = $rows.last();
         cy.wrap(lastRow)
           .find("td")
+          .should("have.length.gte", 6)
           .then(($tds) => {
             const optionsSelector = $tds.eq(4);
             cy.wrap(optionsSelector)
@@ -266,11 +270,12 @@ export class PatientEncounter {
 
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .should("have.length.gte", 1)
+      .should("have.length.gte", 2)
       .then(($rows) => {
         const lastRow = $rows.last();
         cy.wrap(lastRow)
           .find("td")
+          .should("have.length.gte", 4)
           .then(($tds) => {
             const statusSelector = $tds.eq(2);
             const severitySelector = $tds.eq(3);
@@ -279,12 +284,6 @@ export class PatientEncounter {
           });
       });
 
-    cy.get('[data-cy="diagnosis-verification"]').scrollIntoView();
-    cy.clickAndSelectOption('[data-cy="diagnosis-verification"]', verification);
-
-    cy.get('[data-cy="diagnosis-status"]').scrollIntoView();
-    cy.clickAndSelectOption('[data-cy="diagnosis-status"]', status);
-
     return this;
   }
 
@@ -292,11 +291,12 @@ export class PatientEncounter {
     cy.wait(300);
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .should("have.length.gte", 1)
+      .should("have.length.gte", 2)
       .then(($rows) => {
         const lastRow = $rows.last();
         cy.wrap(lastRow)
           .find("td")
+          .should("have.length.gte", 4)
           .then(($tds) => {
             const optionsSelector = $tds.eq(4);
             cy.wrap(optionsSelector)
