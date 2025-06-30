@@ -1,6 +1,7 @@
 import { ChevronRight } from "lucide-react";
 import { ActiveLink } from "raviger";
 import { useState } from "react";
+import React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -45,13 +46,12 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
         {links
           .filter((link) => link.visibility !== false)
           .map((link) => (
-            <>
+            <React.Fragment key={link.name}>
               {link.children ? (
                 isCollapsed ? (
-                  <PopoverMenu key={link.name} link={link} />
+                  <PopoverMenu link={link} />
                 ) : (
                   <Collapsible
-                    key={link.name}
                     asChild
                     defaultOpen={isChildActive(link)}
                     className="group/collapsible"
@@ -135,7 +135,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
-            </>
+            </React.Fragment>
           ))}
       </SidebarMenu>
     </SidebarGroup>

@@ -155,31 +155,38 @@ export default function ExcalidrawEditor({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <div className="flex flex-row items-center justify-between ml-0 mx-2 my-3">
-        <Button variant="ghost" size="sm" onClick={handleBack}>
-          <CareIcon icon="l-arrow-left" />
-          {t("back")}
+      <div className="flex flex-row items-center justify-between ml-0 mx-2 my-3 gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleBack}
+          className="shrink-0"
+        >
+          <CareIcon icon="l-arrow-left" className="text-xl" />
+          <span className="hidden sm:inline">{t("back")}</span>
         </Button>
         {!drawingId ? (
           <Input
             type="text"
-            className="max-w-xs text-center"
+            className="flex-1 min-w-0 max-w-xs text-center mx-2"
             value={name}
             placeholder={t("enter_drawing_name")}
             onChange={(e) => setName(e.target.value)}
           />
         ) : (
-          <h1 className="text-base font-semibold">{name}</h1>
+          <h1 className="text-base font-semibold text-center flex-1 min-w-0 truncate px-2">
+            {name}
+          </h1>
         )}
         <Button
           variant="white"
           size="sm"
           onClick={handleSave}
           disabled={!isDirty}
+          className="shrink-0"
         >
-          <CareIcon icon="l-save" className="text-base hidden sm:block" />
-          {t("save")}
+          <CareIcon icon="l-save" className="text-base" />
+          <span className="hidden sm:inline ml-1">{t("save")}</span>
         </Button>
       </div>
 

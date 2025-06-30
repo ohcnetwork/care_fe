@@ -1,4 +1,5 @@
 import {
+  AvatarIcon,
   CalendarIcon,
   CheckCircledIcon,
   ClockIcon,
@@ -33,7 +34,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge, BadgeProps } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -67,6 +68,7 @@ import { AppointmentTokenCard } from "@/pages/Appointments/components/Appointmen
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { FacilityData } from "@/types/facility/facility";
 import {
+  APPOINTMENT_STATUS_COLORS,
   Appointment,
   AppointmentFinalStatuses,
   AppointmentUpdateRequest,
@@ -234,26 +236,7 @@ const AppointmentDetails = ({
             <span className="mr-3 inline-block mb-2">
               {t("schedule_information")}
             </span>
-            <Badge
-              variant={
-                (
-                  {
-                    booked: "secondary",
-                    checked_in: "primary",
-                    in_consultation: "primary",
-                    pending: "secondary",
-                    arrived: "primary",
-                    fulfilled: "primary",
-                    entered_in_error: "destructive",
-                    cancelled: "destructive",
-                    rescheduled: "secondary",
-                    noshow: "destructive",
-                  } as Partial<
-                    Record<Appointment["status"], BadgeProps["variant"]>
-                  >
-                )[appointment.status] ?? "outline"
-              }
-            >
+            <Badge variant={APPOINTMENT_STATUS_COLORS[appointment.status]}>
               {t(appointment.status)}
             </Badge>
           </CardTitle>
@@ -283,6 +266,19 @@ const AppointmentDetails = ({
                   appointment.token_slot.start_datetime,
                   appointment.token_slot.end_datetime,
                 )}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-4 text-sm">
+            <AvatarIcon className="size-5 text-gray-600" />
+            <div className="text-sm">
+              <p className="font-medium">{t("booked_by")}</p>
+              <p className="text-gray-600">
+                {appointment.booked_by
+                  ? formatName(appointment.booked_by)
+                  : `${appointment.patient.name} (${t("patient")})`}{" "}
+                {t("on")}{" "}
+                {format(appointment.booked_on, "MMMM d, yyyy 'at' h:mm a")}
               </p>
             </div>
           </div>
@@ -390,12 +386,6 @@ const AppointmentDetails = ({
           </div>
         </CardContent>
       </Card>
-
-      <div className="text-sm text-gray-600">
-        {t("booked_by")} {appointment.booked_by?.first_name}{" "}
-        {appointment.booked_by?.last_name} {t("on")}{" "}
-        {format(appointment.booked_on, "MMMM d, yyyy 'at' h:mm a")}
-      </div>
     </div>
   );
 };
@@ -504,6 +494,7 @@ const AppointmentActions = ({
                 resourceId={selectedPractitioner?.id}
                 selectedSlotId={selectedSlotId}
                 onSlotSelect={setSelectedSlotId}
+                currentAppointment={appointment}
               />
 
               <div className="flex justify-end gap-2 mt-6">
@@ -563,7 +554,6 @@ const AppointmentActions = ({
 
       {currentStatus === "in_consultation" && (
         <Button
-          disabled={!isToday}
           variant="outline_primary"
           onClick={() => onChange("fulfilled")}
           size="lg"

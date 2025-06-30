@@ -24,7 +24,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -33,6 +32,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+
+import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import { ReportTemplateFormData } from "@/pages/Encounters/ReportBuilder/schema";
 import {
@@ -156,20 +157,14 @@ export default function LayoutBuilder({ form }: LayoutBuilderProps) {
             <FormItem>
               <FormLabel>{t("page_margin")}</FormLabel>
               <FormControl>
-                <RadioGroup
-                  value={field.value}
+                <RadioInput
+                  {...field}
                   onValueChange={field.onChange}
-                  className="flex flex-row gap-2 mt-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="uniform" id="uniform" />
-                    <FormLabel htmlFor="uniform">{t("uniform")}</FormLabel>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="custom" id="custom" />
-                    <FormLabel htmlFor="custom">{t("custom")}</FormLabel>
-                  </div>
-                </RadioGroup>
+                  options={[
+                    { value: "uniform", label: t("uniform") },
+                    { value: "custom", label: t("custom") },
+                  ]}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

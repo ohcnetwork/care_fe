@@ -107,6 +107,7 @@ export default function UserAvatar({ username }: { username: string }) {
         handleUpload={handleAvatarUpload}
         handleDelete={handleAvatarDelete}
         onOpenChange={(open) => setEditAvatar(open)}
+        aspectRatio={1}
       />
       <div>
         <div className="my-4 overflow-visible rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:px-6 flex justify-between">
