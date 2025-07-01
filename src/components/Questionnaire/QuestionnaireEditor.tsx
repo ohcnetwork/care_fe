@@ -10,7 +10,7 @@ import {
   ViewIcon,
 } from "lucide-react";
 import { useNavigate } from "raviger";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -24,6 +24,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Collapsible,
   CollapsibleContent,
@@ -97,10 +98,12 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 
 import { CodingEditor } from "./CodingEditor";
+import { QuestionActions } from "./QuestionActions";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 import { QuestionnaireProperties } from "./QuestionnaireProperties";
 import { SelectOrCreateValueset } from "./SelectOrCreateValueset";
 import ValueSetSelect from "./ValueSetSelect";
+import { scrollToQuestion } from "./utils";
 
 interface QuestionnaireEditorProps {
   id?: string;
@@ -201,6 +204,30 @@ function LayoutOptionCard({
 
 const HIDE_REPEATABLE_QUESTION_TYPES = ["boolean", "group", "display"];
 
+function findFirstErrorPath(errors: any, path: number[] = []): number[] | null {
+  for (let i = 0; i < errors.length; i++) {
+    const current = errors[i];
+    const currentPath = [...path, i];
+
+    if (current && typeof current === "object") {
+      const hasOwnErrors = Object.entries(current).some(([key, value]) => {
+        return key !== "questions" && value !== undefined;
+      });
+
+      if (hasOwnErrors) {
+        return currentPath;
+      }
+
+      if (Array.isArray(current.questions)) {
+        const subPath = findFirstErrorPath(current.questions, currentPath);
+        if (subPath) return subPath;
+      }
+    }
+  }
+
+  return null;
+}
+
 export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -216,6 +243,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [importUrl, setImportUrl] = useState("");
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showFileImportDialog, setShowFileImportDialog] = useState(false);
+  const [selectedQuestions, setSelectedQuestions] = useState<Set<string>>(
+    new Set(),
+  );
   const [selectedImportFile, setSelectedImportFile] = useState<File | null>(
     null,
   );
@@ -231,6 +261,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     Map<string, Set<{ question: Question; path: string[] }>>
   >(new Map());
   const [expandPath, setExpandPath] = useState<string[]>([]);
+  const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
     const errorData = (
@@ -438,10 +469,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     mode: "onChange",
   });
 
+  const { isDirty } = form.formState;
+
   useEffect(() => {
     if (initialQuestionnaire) {
-      setQuestionnaire(initialQuestionnaire);
-      form.reset({
+      const formValues = {
         title: initialQuestionnaire.title || "",
         slug: initialQuestionnaire.slug || "",
         description: initialQuestionnaire.description || "",
@@ -450,11 +482,25 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         subject_type: initialQuestionnaire.subject_type,
         version: initialQuestionnaire.version,
         tags: initialQuestionnaire.tags,
-      });
+      };
+
+      setQuestionnaire(initialQuestionnaire);
+      form.reset(formValues);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuestionnaire]);
 
+  const handleToggleSelection = (questionId: string) => {
+    setSelectedQuestions((prev) => {
+      const next = new Set(prev);
+      if (next.has(questionId)) {
+        next.delete(questionId);
+      } else {
+        next.add(questionId);
+      }
+      return next;
+    });
+  };
   const rootQuestions: Question[] = useWatch({
     control: form.control,
     name: "questions",
@@ -537,7 +583,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     value: unknown,
   ) => {
     form.setValue(field, value, {
-      shouldValidate: false,
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
     });
   };
   const handleValidatedChange = (
@@ -546,12 +594,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   ) => {
     form.setValue(field as "title" | "description" | "slug", value, {
       shouldValidate: true,
+      shouldDirty: true,
     });
   };
 
   const updateQuestions = (newQuestions: Question[]) => {
     form.setValue("questions", newQuestions, {
       shouldValidate: true,
+      shouldDirty: true,
     });
   };
 
@@ -594,17 +644,72 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     const hasOrganizations = validateOrganizations();
     const hasValidStructuredType = validateStructuredType();
 
-    rootQuestions.forEach((question, idx) => {
-      if (question.code && !question.code?.display) {
-        form.setError(`questions.${idx}.code.display`, {
-          type: "manual",
-          message: t("code_verification_required"),
-        });
-        isValid = false;
-      }
-    });
+    const validateQuestions = (questions: any[], path = "questions") => {
+      questions.forEach((question, idx) => {
+        const currentPath = `${path}.${idx}`;
+
+        if (question.code && !question.code?.display) {
+          form.setError(`${currentPath}.code.display`, {
+            type: "manual",
+            message: t("code_verification_required"),
+          });
+          isValid = false;
+        }
+
+        if (question.type === "group" && Array.isArray(question.questions)) {
+          validateQuestions(question.questions, `${currentPath}.questions`);
+        }
+      });
+    };
+    validateQuestions(rootQuestions);
 
     if (!isValid || !hasOrganizations || !hasValidStructuredType) {
+      setTimeout(() => {
+        const errorEntries = Object.entries(form.formState.errors);
+
+        for (const [fieldName, error] of errorEntries) {
+          if (fieldName !== "questions") {
+            const el = document.querySelector(`[name="${fieldName}"]`);
+            if (el) {
+              el.scrollIntoView({ behavior: "smooth", block: "center" });
+              break;
+            }
+          } else {
+            const errorPath = findFirstErrorPath(error);
+            if (errorPath) {
+              // Expand parent groups
+              for (let i = 0; i < errorPath.length; i++) {
+                const question = getQuestionByPath(
+                  rootQuestions,
+                  errorPath.slice(0, i + 1),
+                );
+                if (question?.link_id) {
+                  setExpandedQuestions((prev) =>
+                    new Set(prev).add(question.link_id),
+                  );
+                }
+              }
+
+              // After expanding, scroll to the error question
+              setTimeout(() => {
+                const errorQuestion = getQuestionByPath(
+                  rootQuestions,
+                  errorPath,
+                );
+                if (
+                  errorQuestion?.link_id &&
+                  questionRefs.current[errorQuestion.link_id]
+                ) {
+                  questionRefs.current[errorQuestion.link_id]?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+                }
+              }, 200);
+            }
+          }
+        }
+      }, 0); // delay lets react-hook-form update `formState.errors`
       return;
     }
 
@@ -794,8 +899,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             </DropdownMenu>
           )}
           <Button
+            type="submit"
             onClick={handleSave}
-            disabled={isCreating || isUpdating}
+            disabled={!isDirty || isCreating || isUpdating}
             data-cy="save-questionnaire-form"
           >
             <CareIcon icon="l-save" className="mr-2 size-4" />
@@ -820,7 +926,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         </TabsList>
         <TabsContent value="edit">
           <div className="flex flex-col md:flex-row gap-2">
-            <div className="space-y-4 md:w-60">
+            <div className="space-y-4 md:w-60 sticky top-4 self-start h-fit max-h-screen overflow-y-auto">
               <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
                 <CardHeader className="p-0">
                   <CardTitle>{t("navigation")}</CardTitle>
@@ -836,13 +942,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                         <div key={question.link_id} className="space-y-1">
                           <button
                             onClick={() => {
-                              const element = document.getElementById(
-                                `question-${question.link_id}`,
-                              );
-                              if (element) {
-                                element.scrollIntoView();
-                                toggleQuestionExpanded(question.link_id);
-                              }
+                              scrollToQuestion(question.link_id);
+                              toggleQuestionExpanded(question.link_id);
                             }}
                             className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
                               expandedQuestions.has(question.link_id)
@@ -871,21 +972,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                           question.link_id,
                                         );
                                         setTimeout(() => {
-                                          const element =
-                                            document.getElementById(
-                                              `question-${subQuestion.link_id}`,
-                                            );
-                                          if (element) {
-                                            element.scrollIntoView();
-                                          }
+                                          scrollToQuestion(subQuestion.link_id);
                                         }, 100);
                                       } else {
-                                        const element = document.getElementById(
-                                          `question-${subQuestion.link_id}`,
-                                        );
-                                        if (element) {
-                                          element.scrollIntoView();
-                                        }
+                                        scrollToQuestion(subQuestion.link_id);
                                       }
                                     }}
                                     className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
@@ -933,6 +1023,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     isLoading: isLoadingAvailableTags,
                     onTagCreated: !id ? handleTagCreated : undefined,
                   }}
+                />
+                <QuestionActions
+                  selectedQuestions={selectedQuestions}
+                  questions={rootQuestions}
+                  updateQuestionnaireField={updateQuestionnaireField}
+                  onQuestionsChange={updateQuestions}
+                  setSelectedQuestions={setSelectedQuestions}
+                  setExpandedQuestions={setExpandedQuestions}
                 />
               </div>
             </div>
@@ -1042,20 +1140,12 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                             type: "string",
                             questions: [],
                           };
-                          handleValidatedChange("questions", [
-                            ...rootQuestions,
-                            newQuestion,
-                          ]);
+                          updateQuestions([...rootQuestions, newQuestion]);
                           setExpandedQuestions(
                             (prev) => new Set([...prev, newQuestion.link_id]),
                           );
                           setTimeout(() => {
-                            const element = document.getElementById(
-                              `question-${newQuestion.link_id}`,
-                            );
-                            if (element) {
-                              element.scrollIntoView();
-                            }
+                            scrollToQuestion(newQuestion.link_id);
                           }, 100);
                         }}
                       >
@@ -1069,13 +1159,18 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           <div
                             key={question.id}
                             id={`question-${question.link_id}`}
+                            ref={(el) => {
+                              questionRefs.current[question.link_id] = el;
+                            }}
                             className="relative bg-white rounded-lg shadow-md"
                           >
-                            <div className="absolute -left-4 top-4 font-medium text-gray-500"></div>
                             <QuestionEditor
+                              name={`questions.${index}`}
                               index={index}
                               key={question.link_id}
                               question={question}
+                              selectedQuestions={selectedQuestions}
+                              onToggleSelection={handleToggleSelection}
                               form={form}
                               onChange={(updatedQuestion) => {
                                 const newQuestions = rootQuestions.map(
@@ -1132,6 +1227,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                 handleEnableWhenDependentClick
                               }
                               expandPath={expandPath}
+                              questionRefs={questionRefs}
                             />
                           </div>
                         ))}
@@ -1141,7 +1237,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 </form>
               </Form>
             </div>
-            <div className="space-y-4 w-60 hidden lg:block">
+            <div className="space-y-4 w-60 lg:block sticky top-4 self-start h-fit">
               <QuestionnaireProperties
                 form={form}
                 updateQuestionnaireField={updateQuestionnaireField}
@@ -1167,6 +1263,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   isLoading: isLoadingAvailableTags,
                   onTagCreated: handleTagCreated,
                 }}
+              />
+              <QuestionActions
+                selectedQuestions={selectedQuestions}
+                questions={rootQuestions}
+                onQuestionsChange={updateQuestions}
+                updateQuestionnaireField={updateQuestionnaireField}
+                setSelectedQuestions={setSelectedQuestions}
+                setExpandedQuestions={setExpandedQuestions}
               />
             </div>
           </div>
@@ -1369,6 +1473,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 }
 
 interface QuestionEditorProps {
+  name: string;
   form: ReturnType<typeof useForm<any>>;
   index: number;
   question: Question;
@@ -1384,15 +1489,19 @@ interface QuestionEditorProps {
   isLast?: boolean;
   structuredTypeError?: string;
   setStructuredTypeError?: (error: string | undefined) => void;
+  onToggleSelection: (id: string) => void;
+  selectedQuestions: Set<string>;
   enableWhenDependencies: Map<
     string,
     Set<{ question: Question; path: string[] }>
   >;
   handleEnableWhenDependentClick: (path: string[], targetId: string) => void;
   expandPath?: string[];
+  questionRefs: React.RefObject<{ [key: string]: HTMLDivElement | null }>;
 }
 
 function QuestionEditor({
+  name,
   form,
   question,
   onChange,
@@ -1408,9 +1517,12 @@ function QuestionEditor({
   index,
   structuredTypeError,
   setStructuredTypeError,
+  onToggleSelection,
+  selectedQuestions,
   enableWhenDependencies,
   handleEnableWhenDependentClick,
   expandPath,
+  questionRefs,
 }: QuestionEditorProps): React.ReactElement {
   const { t } = useTranslation();
   const {
@@ -1682,6 +1794,14 @@ function QuestionEditor({
       className={`rounded-lg p-1 bg-card text-card-foreground`}
     >
       <div className={cn("flex items-center p-2", isExpanded && "bg-gray-50")}>
+        {depth > 0 && (
+          <Checkbox
+            checked={selectedQuestions.has(question.id)}
+            onCheckedChange={() => onToggleSelection(question.id)}
+            onChange={(e) => e.stopPropagation()}
+            className="mb-6 mr-2"
+          />
+        )}
         <CollapsibleTrigger className="flex-1 flex items-center">
           <div className="flex-1">
             <div className="font-semibold text-left">
@@ -1698,6 +1818,7 @@ function QuestionEditor({
               )}
             </div>
           </div>
+
           {isExpanded ? (
             <ChevronsDownUp className="size-4 text-gray-500" />
           ) : (
@@ -1755,7 +1876,7 @@ function QuestionEditor({
             <div className="flex-1">
               <FormField
                 control={form.control}
-                name={`questions.${index}.text`}
+                name={`${name}.text`}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("question_text")}</FormLabel>
@@ -1765,11 +1886,10 @@ function QuestionEditor({
                         value={text}
                         onChange={(e) => {
                           updateField("text", e.target.value);
-                          form.setValue(
-                            `questions.${index}.text`,
-                            e.target.value,
-                            { shouldValidate: true },
-                          );
+                          form.setValue(`${name}.text`, e.target.value, {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          });
                         }}
                       />
                     </FormControl>
@@ -1783,7 +1903,7 @@ function QuestionEditor({
           <div>
             <FormField
               control={form.control}
-              name={`questions.${index}.description`}
+              name={`${name}.description`}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t("description")}</FormLabel>
@@ -1793,11 +1913,10 @@ function QuestionEditor({
                       value={question.description || ""}
                       onChange={(e) => {
                         updateField("description", e.target.value);
-                        form.setValue(
-                          `questions.${index}.description`,
-                          e.target.value,
-                          { shouldValidate: true },
-                        );
+                        form.setValue(`${name}.description`, e.target.value, {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        });
                       }}
                       placeholder={t("question_description_placeholder")}
                       className="h-20"
@@ -1911,7 +2030,7 @@ function QuestionEditor({
             {UNIT_TYPES.includes(type) && (
               <FormField
                 control={form.control}
-                name={`questions.${index}.unit`}
+                name={`${name}.unit`}
                 render={({ field }) => (
                   <FormItem className="pb-4">
                     <FormLabel>{t("unit")}</FormLabel>
@@ -1923,8 +2042,9 @@ function QuestionEditor({
                         value={unit}
                         onSelect={(code) => {
                           updateField("unit", code);
-                          form.setValue(`questions.${index}.unit`, code, {
+                          form.setValue(`${name}.unit`, code, {
                             shouldValidate: true,
+                            shouldDirty: true,
                           });
                         }}
                       />
@@ -1938,7 +2058,7 @@ function QuestionEditor({
               <CodingEditor
                 code={code}
                 form={form}
-                questionIndex={index}
+                name={name}
                 onChange={(newCode) => updateField("code", newCode)}
               />
             )}
@@ -2514,12 +2634,7 @@ function QuestionEditor({
                       (prev) => new Set([...prev, newQuestion.link_id]),
                     );
                     setTimeout(() => {
-                      const element = document.getElementById(
-                        `question-${newQuestion.link_id}`,
-                      );
-                      if (element) {
-                        element.scrollIntoView();
-                      }
+                      scrollToQuestion(newQuestion.link_id);
                     }, 100);
                   }}
                 >
@@ -2533,8 +2648,12 @@ function QuestionEditor({
                     key={subQuestion.id}
                     id={`question-${subQuestion.link_id}`}
                     className="relative bg-white rounded-lg shadow-md"
+                    ref={(el) => {
+                      questionRefs.current[subQuestion.link_id] = el;
+                    }}
                   >
                     <QuestionEditor
+                      name={`${name}.questions.${idx}`}
                       handleEnableWhenDependentClick={
                         handleEnableWhenDependentClick
                       }
@@ -2542,6 +2661,8 @@ function QuestionEditor({
                       form={form}
                       index={idx}
                       key={subQuestion.link_id}
+                      onToggleSelection={onToggleSelection}
+                      selectedQuestions={selectedQuestions}
                       question={subQuestion}
                       onChange={(updated) => {
                         const newQuestions = [...(questions || [])];
@@ -2583,6 +2704,7 @@ function QuestionEditor({
                       isFirst={idx === 0}
                       isLast={idx === (questions?.length || 0) - 1}
                       expandPath={expandPath?.slice(1)}
+                      questionRefs={questionRefs}
                     />
                   </div>
                 ))}
@@ -2872,4 +2994,12 @@ function QuestionEditor({
       </CollapsibleContent>
     </Collapsible>
   );
+}
+
+function getQuestionByPath(questions: any, path: number[]) {
+  let q = questions[path[0]];
+  for (let i = 1; i < path.length; i++) {
+    q = q?.questions?.[path[i]];
+  }
+  return q;
 }

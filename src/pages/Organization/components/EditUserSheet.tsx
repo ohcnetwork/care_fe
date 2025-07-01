@@ -34,7 +34,7 @@ export default function EditUserSheet({
       >
         <SheetHeader>
           <SheetTitle>{t("edit_user")}</SheetTitle>
-          <SheetDescription>{t("update_user")}</SheetDescription>
+          <SheetDescription>{t("edit_user_description")}</SheetDescription>
         </SheetHeader>
         <div className="mt-6">
           <UserForm

@@ -210,6 +210,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
         handleDelete={handleCoverImageDelete}
         onOpenChange={(open) => setEditCoverImage(open)}
         hint={coverImageHint}
+        aspectRatio={16 / 9}
       />
       <div className="container mx-auto pt-2">
         <div className="mx-auto max-w-3xl space-y-6">
