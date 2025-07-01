@@ -814,11 +814,14 @@ export function QuestionnaireForm({
                   size="sm"
                   onClick={() => {
                     setQuestionnaireForms((prev) =>
-                      prev.filter(
-                        (f) =>
-                          f.questionnaire.instanceId !==
-                          form.questionnaire.instanceId,
-                      ),
+                      prev.filter((f) => {
+                        const fId =
+                          f.questionnaire.instanceId || f.questionnaire.id;
+                        const formId =
+                          form.questionnaire.instanceId ||
+                          form.questionnaire.id;
+                        return fId !== formId;
+                      }),
                     );
                   }}
                   disabled={isPending}
@@ -841,8 +844,9 @@ export function QuestionnaireForm({
               ) => {
                 setQuestionnaireForms((existingForms) =>
                   existingForms.map((formItem) =>
-                    formItem.questionnaire.instanceId ===
-                    form.questionnaire.instanceId
+                    (formItem.questionnaire.instanceId ||
+                      formItem.questionnaire.id) ===
+                    (form.questionnaire.instanceId || form.questionnaire.id)
                       ? {
                           ...formItem,
                           responses: formItem.responses.map((r) =>
@@ -866,7 +870,8 @@ export function QuestionnaireForm({
               clearError={(questionId: string) => {
                 setQuestionnaireForms((prev) =>
                   prev.map((f) =>
-                    f.questionnaire.instanceId === form.questionnaire.instanceId
+                    (f.questionnaire.instanceId || f.questionnaire.id) ===
+                    (f.questionnaire.instanceId || f.questionnaire.id)
                       ? {
                           ...f,
                           errors: f.errors.filter(
