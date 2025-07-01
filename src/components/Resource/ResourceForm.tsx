@@ -277,7 +277,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     <FormControl>
                       <Autocomplete
                         {...field}
-                        showClearButton={!id}
                         data-cy="select-facility"
                         options={mergeAutocompleteOptions(
                           facilityOptions ?? [],

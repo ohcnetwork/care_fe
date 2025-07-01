@@ -494,7 +494,6 @@ const AppointmentActions = ({
                 resourceId={selectedPractitioner?.id}
                 selectedSlotId={selectedSlotId}
                 onSlotSelect={setSelectedSlotId}
-                currentAppointment={appointment}
               />
 
               <div className="flex justify-end gap-2 mt-6">
@@ -554,6 +553,7 @@ const AppointmentActions = ({
 
       {currentStatus === "in_consultation" && (
         <Button
+          disabled={!isToday}
           variant="outline_primary"
           onClick={() => onChange("fulfilled")}
           size="lg"

@@ -91,10 +91,6 @@ export interface TokenSlot {
   allocated: number;
 }
 
-export interface GetSlotsForDayResponse {
-  results: TokenSlot[];
-}
-
 export interface AvailabilityHeatmapRequest {
   from_date: string;
   to_date: string;
