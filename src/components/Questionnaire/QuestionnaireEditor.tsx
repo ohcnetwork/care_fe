@@ -444,10 +444,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     mode: "onChange",
   });
 
+  const { isDirty } = form.formState;
+
   useEffect(() => {
     if (initialQuestionnaire) {
-      setQuestionnaire(initialQuestionnaire);
-      form.reset({
+      const formValues = {
         title: initialQuestionnaire.title || "",
         slug: initialQuestionnaire.slug || "",
         description: initialQuestionnaire.description || "",
@@ -456,7 +457,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         subject_type: initialQuestionnaire.subject_type,
         version: initialQuestionnaire.version,
         tags: initialQuestionnaire.tags,
-      });
+      };
+
+      setQuestionnaire(initialQuestionnaire);
+      form.reset(formValues);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuestionnaire]);
@@ -554,7 +558,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     value: unknown,
   ) => {
     form.setValue(field, value, {
-      shouldValidate: false,
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
     });
   };
   const handleValidatedChange = (
@@ -563,12 +569,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   ) => {
     form.setValue(field as "title" | "description" | "slug", value, {
       shouldValidate: true,
+      shouldDirty: true,
     });
   };
 
   const updateQuestions = (newQuestions: Question[]) => {
     form.setValue("questions", newQuestions, {
       shouldValidate: true,
+      shouldDirty: true,
     });
   };
 
@@ -813,7 +821,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           <Button
             type="submit"
             onClick={handleSave}
-            disabled={isCreating || isUpdating}
+            disabled={!isDirty || isCreating || isUpdating}
             data-cy="save-questionnaire-form"
           >
             <CareIcon icon="l-save" className="mr-2 size-4" />
@@ -1794,6 +1802,7 @@ function QuestionEditor({
                           updateField("text", e.target.value);
                           form.setValue(`${name}.text`, e.target.value, {
                             shouldValidate: true,
+                            shouldDirty: true,
                           });
                         }}
                       />
@@ -1820,6 +1829,7 @@ function QuestionEditor({
                         updateField("description", e.target.value);
                         form.setValue(`${name}.description`, e.target.value, {
                           shouldValidate: true,
+                          shouldDirty: true,
                         });
                       }}
                       placeholder={t("question_description_placeholder")}
@@ -1948,6 +1958,7 @@ function QuestionEditor({
                           updateField("unit", code);
                           form.setValue(`${name}.unit`, code, {
                             shouldValidate: true,
+                            shouldDirty: true,
                           });
                         }}
                       />
