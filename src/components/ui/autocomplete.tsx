@@ -1,5 +1,6 @@
-import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
+import { CaretSortIcon, CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -43,6 +44,7 @@ interface AutocompleteProps {
   popoverClassName?: string;
   freeInput?: boolean;
   closeOnSelect?: boolean;
+  showClearButton?: boolean;
   "data-cy"?: string;
 
   ref?: React.RefCallback<HTMLButtonElement | null>;
@@ -65,6 +67,7 @@ export default function Autocomplete({
   popoverClassName,
   freeInput = false,
   closeOnSelect = true,
+  showClearButton = true,
   "data-cy": dataCy,
   ref,
   ...props
@@ -116,6 +119,21 @@ export default function Autocomplete({
     }
   };
 
+  const handleClear = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    onChange("");
+
+    if (freeInput) {
+      setInputValue("");
+    }
+
+    onSearch?.("");
+
+    setOpen(false);
+  };
+  const { t } = useTranslation();
   const commandContent = (
     <>
       <CommandInput
@@ -196,7 +214,20 @@ export default function Autocomplete({
                   : selectedOption?.label
                 : placeholder}
             </span>
-            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+            {selectedOption && showClearButton ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-3 p-0 hover:bg-transparent opacity-50"
+                onClick={handleClear}
+                title={t("clear")}
+              >
+                <Cross2Icon className="size-3" />
+                <span className="sr-only">{t("clear")}</span>
+              </Button>
+            ) : (
+              <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+            )}
           </Button>
         </SheetTrigger>
         <SheetContent
@@ -235,7 +266,20 @@ export default function Autocomplete({
           >
             {displayText}
           </span>
-          <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+          {selectedOption && showClearButton ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-3 p-0 hover:bg-transparent opacity-50"
+              onClick={handleClear}
+              title={t("clear")}
+            >
+              <Cross2Icon className="size-3" />
+              <span className="sr-only">{t("clear")}</span>
+            </Button>
+          ) : (
+            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent

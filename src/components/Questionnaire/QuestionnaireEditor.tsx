@@ -10,7 +10,7 @@ import {
   ViewIcon,
 } from "lucide-react";
 import { useNavigate } from "raviger";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -206,6 +206,30 @@ function LayoutOptionCard({
 
 const HIDE_REPEATABLE_QUESTION_TYPES = ["boolean", "group", "display"];
 
+function findFirstErrorPath(errors: any, path: number[] = []): number[] | null {
+  for (let i = 0; i < errors.length; i++) {
+    const current = errors[i];
+    const currentPath = [...path, i];
+
+    if (current && typeof current === "object") {
+      const hasOwnErrors = Object.entries(current).some(([key, value]) => {
+        return key !== "questions" && value !== undefined;
+      });
+
+      if (hasOwnErrors) {
+        return currentPath;
+      }
+
+      if (Array.isArray(current.questions)) {
+        const subPath = findFirstErrorPath(current.questions, currentPath);
+        if (subPath) return subPath;
+      }
+    }
+  }
+
+  return null;
+}
+
 export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -240,6 +264,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     Map<string, Set<{ question: Question; path: string[] }>>
   >(new Map());
   const [expandPath, setExpandPath] = useState<string[]>([]);
+  const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
     const errorData = (
@@ -447,10 +472,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     mode: "onChange",
   });
 
+  const { isDirty } = form.formState;
+
   useEffect(() => {
     if (initialQuestionnaire) {
-      setQuestionnaire(initialQuestionnaire);
-      form.reset({
+      const formValues = {
         title: initialQuestionnaire.title || "",
         slug: initialQuestionnaire.slug || "",
         description: initialQuestionnaire.description || "",
@@ -459,7 +485,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         subject_type: initialQuestionnaire.subject_type,
         version: initialQuestionnaire.version,
         tags: initialQuestionnaire.tags,
-      });
+      };
+
+      setQuestionnaire(initialQuestionnaire);
+      form.reset(formValues);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuestionnaire]);
@@ -557,7 +586,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     value: unknown,
   ) => {
     form.setValue(field, value, {
-      shouldValidate: false,
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
     });
   };
   const handleValidatedChange = (
@@ -566,12 +597,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   ) => {
     form.setValue(field as "title" | "description" | "slug", value, {
       shouldValidate: true,
+      shouldDirty: true,
     });
   };
 
   const updateQuestions = (newQuestions: Question[]) => {
     form.setValue("questions", newQuestions, {
       shouldValidate: true,
+      shouldDirty: true,
     });
   };
 
@@ -614,17 +647,72 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     const hasOrganizations = validateOrganizations();
     const hasValidStructuredType = validateStructuredType();
 
-    rootQuestions.forEach((question, idx) => {
-      if (question.code && !question.code?.display) {
-        form.setError(`questions.${idx}.code.display`, {
-          type: "manual",
-          message: t("code_verification_required"),
-        });
-        isValid = false;
-      }
-    });
+    const validateQuestions = (questions: any[], path = "questions") => {
+      questions.forEach((question, idx) => {
+        const currentPath = `${path}.${idx}`;
+
+        if (question.code && !question.code?.display) {
+          form.setError(`${currentPath}.code.display`, {
+            type: "manual",
+            message: t("code_verification_required"),
+          });
+          isValid = false;
+        }
+
+        if (question.type === "group" && Array.isArray(question.questions)) {
+          validateQuestions(question.questions, `${currentPath}.questions`);
+        }
+      });
+    };
+    validateQuestions(rootQuestions);
 
     if (!isValid || !hasOrganizations || !hasValidStructuredType) {
+      setTimeout(() => {
+        const errorEntries = Object.entries(form.formState.errors);
+
+        for (const [fieldName, error] of errorEntries) {
+          if (fieldName !== "questions") {
+            const el = document.querySelector(`[name="${fieldName}"]`);
+            if (el) {
+              el.scrollIntoView({ behavior: "smooth", block: "center" });
+              break;
+            }
+          } else {
+            const errorPath = findFirstErrorPath(error);
+            if (errorPath) {
+              // Expand parent groups
+              for (let i = 0; i < errorPath.length; i++) {
+                const question = getQuestionByPath(
+                  rootQuestions,
+                  errorPath.slice(0, i + 1),
+                );
+                if (question?.link_id) {
+                  setExpandedQuestions((prev) =>
+                    new Set(prev).add(question.link_id),
+                  );
+                }
+              }
+
+              // After expanding, scroll to the error question
+              setTimeout(() => {
+                const errorQuestion = getQuestionByPath(
+                  rootQuestions,
+                  errorPath,
+                );
+                if (
+                  errorQuestion?.link_id &&
+                  questionRefs.current[errorQuestion.link_id]
+                ) {
+                  questionRefs.current[errorQuestion.link_id]?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+                }
+              }, 200);
+            }
+          }
+        }
+      }, 0); // delay lets react-hook-form update `formState.errors`
       return;
     }
 
@@ -826,7 +914,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           <Button
             type="submit"
             onClick={handleSave}
-            disabled={isCreating || isUpdating}
+            disabled={!isDirty || isCreating || isUpdating}
             data-cy="save-questionnaire-form"
           >
             <CareIcon icon="l-save" className="mr-2 size-4" />
@@ -986,6 +1074,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           <div
                             key={question.id}
                             id={`question-${question.link_id}`}
+                            ref={(el) => {
+                              questionRefs.current[question.link_id] = el;
+                            }}
                             className="relative bg-white rounded-lg shadow-md"
                           >
                             <QuestionEditor
@@ -1051,6 +1142,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                 handleEnableWhenDependentClick
                               }
                               expandPath={expandPath}
+                              questionRefs={questionRefs}
                             />
                           </div>
                         ))}
@@ -1381,6 +1473,7 @@ interface QuestionEditorProps {
   >;
   handleEnableWhenDependentClick: (path: string[], targetId: string) => void;
   expandPath?: string[];
+  questionRefs: React.RefObject<{ [key: string]: HTMLDivElement | null }>;
 }
 
 function QuestionEditor({
@@ -1405,6 +1498,7 @@ function QuestionEditor({
   enableWhenDependencies,
   handleEnableWhenDependentClick,
   expandPath,
+  questionRefs,
 }: QuestionEditorProps): React.ReactElement {
   const { t } = useTranslation();
   const {
@@ -1770,6 +1864,7 @@ function QuestionEditor({
                           updateField("text", e.target.value);
                           form.setValue(`${name}.text`, e.target.value, {
                             shouldValidate: true,
+                            shouldDirty: true,
                           });
                         }}
                       />
@@ -1796,6 +1891,7 @@ function QuestionEditor({
                         updateField("description", e.target.value);
                         form.setValue(`${name}.description`, e.target.value, {
                           shouldValidate: true,
+                          shouldDirty: true,
                         });
                       }}
                       placeholder={t("question_description_placeholder")}
@@ -1924,6 +2020,7 @@ function QuestionEditor({
                           updateField("unit", code);
                           form.setValue(`${name}.unit`, code, {
                             shouldValidate: true,
+                            shouldDirty: true,
                           });
                         }}
                       />
@@ -1937,7 +2034,7 @@ function QuestionEditor({
               <CodingEditor
                 code={code}
                 form={form}
-                questionIndex={index}
+                name={name}
                 onChange={(newCode) => updateField("code", newCode)}
               />
             )}
@@ -2527,6 +2624,9 @@ function QuestionEditor({
                     key={subQuestion.id}
                     id={`question-${subQuestion.link_id}`}
                     className="relative bg-white rounded-lg shadow-md"
+                    ref={(el) => {
+                      questionRefs.current[subQuestion.link_id] = el;
+                    }}
                   >
                     <QuestionEditor
                       name={`${name}.questions.${idx}`}
@@ -2580,6 +2680,7 @@ function QuestionEditor({
                       isFirst={idx === 0}
                       isLast={idx === (questions?.length || 0) - 1}
                       expandPath={expandPath?.slice(1)}
+                      questionRefs={questionRefs}
                     />
                   </div>
                 ))}
@@ -2869,4 +2970,12 @@ function QuestionEditor({
       </CollapsibleContent>
     </Collapsible>
   );
+}
+
+function getQuestionByPath(questions: any, path: number[]) {
+  let q = questions[path[0]];
+  for (let i = 1; i < path.length; i++) {
+    q = q?.questions?.[path[i]];
+  }
+  return q;
 }
