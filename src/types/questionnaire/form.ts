@@ -18,7 +18,6 @@ type RV<T extends string, V> = {
   unit?: Code;
   type: T;
   value?: V;
-  instance_id?: string;
 };
 
 export type ResponseValue =
