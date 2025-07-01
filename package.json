@@ -48,7 +48,7 @@
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src ./cypress --write",
     "sort-locales": "node ./scripts/sort-locales.js",
-    "removed-unused-keys": "node ./scripts/removed-unused-i18key.js --locales en ml ta hi kn mr"
+    "removed-unused-keys": "node ./scripts/removed-unused-i18key.js"
   },
   "dependencies": {
     "@babel/core": "^7.27.4",

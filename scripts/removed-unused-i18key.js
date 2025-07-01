@@ -6,7 +6,6 @@ const babel = require("@babel/core");
 
 async function extractAndCleanTranslations(options) {
   const { src, localesPath, extensions, locales } = options;
-  //const translationFileDynamicKeyPattern = /[a-zA-Z_]*__[a-zA-Z._]*/;
 
   if (!src || !localesPath) {
     throw new Error("src, localesPath are required options.");
@@ -126,9 +125,21 @@ async function extractAndCleanTranslations(options) {
       "encounter_status__",
       "encounter_admit_sources__",
       "encounter_diet_preference__",
-      "encounter_discharge_disposition__",
       "medication_status__",
       "Diagnosis_",
+      "SCHEDULE_AVAILABILITY_TYPE_DESCRIPTION__",
+      "SCHEDULE_AVAILABILITY_TYPE__",
+      "SORT_OPTIONS__",
+      "SYSTEM__govt_org_type__",
+      "SYSTEM__org_type__",
+      "USERMANAGEMENT_TAB__",
+      "consent_category__",
+      "consent_status__",
+      "contact_point_placeholder__",
+      "encounter_re_admission__",
+      "facility_organization_type__",
+      "location_form__",
+      "patient__",
     ];
     for (const key of keys) {
       if (
