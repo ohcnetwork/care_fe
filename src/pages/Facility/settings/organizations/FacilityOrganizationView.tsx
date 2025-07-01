@@ -78,10 +78,7 @@ function OrganizationCard({
           )}
         </div>
 
-        <Badge
-          variant="primary"
-          className="w-fit border border-transparent text-indigo-800 bg-indigo-100 px-2 py-1"
-        >
+        <Badge variant="indigo" className="w-fit">
           {t(`facility_organization_type__${org.org_type}`)}
         </Badge>
 
@@ -246,10 +243,7 @@ export default function FacilityOrganizationView({
                         </TableCell>
                         <TableCell>
                           {" "}
-                          <Badge
-                            variant="primary"
-                            className=" border border-transparent text-indigo-800 bg-indigo-100 px-2 py-1"
-                          >
+                          <Badge variant="indigo" className="w-fit">
                             {t(`facility_organization_type__${org.org_type}`)}
                           </Badge>
                         </TableCell>

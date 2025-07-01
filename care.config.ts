@@ -80,14 +80,6 @@ const careConfig = {
     environment: env.REACT_SENTRY_ENVIRONMENT || "staging",
   },
 
-  hcx: {
-    enabled: boolean("REACT_ENABLE_HCX"),
-  },
-
-  abdm: {
-    enabled: boolean("REACT_ENABLE_ABDM", true),
-  },
-
   appointments: {
     /**
      * Relative number of days to show in the appointments page by default.
@@ -103,6 +95,11 @@ const careConfig = {
       true,
     ),
   },
+
+  enableMinimalPatientRegistration: boolean(
+    "REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION",
+    false,
+  ),
 
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
