@@ -83,21 +83,26 @@ export class PatientEncounter {
 
   updateAllergy(details: AllergyDetails) {
     const { criticality, status } = details;
+
     cy.wait(200);
 
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
       .should("have.length.gte", 2)
-      .then(($rows) => {
-        const secondRow = $rows.eq(1);
-        cy.wrap(secondRow)
-          .find("td")
-          .should("have.length.gte", 6)
-          .then(($tds) => {
-            const criticalitySelector = $tds.eq(2);
-            const statusSelector = $tds.eq(3);
-            this.clickAndSelectClinical(criticalitySelector, criticality);
-            this.clickAndSelectClinical(statusSelector, status);
+      .eq(1)
+      .within(() => {
+        cy.get("td").should("have.length.gte", 6);
+
+        cy.get("td")
+          .eq(2)
+          .then(($criticality) => {
+            this.clickAndSelectClinical($criticality, criticality);
+          });
+
+        cy.get("td")
+          .eq(3)
+          .then(($status) => {
+            this.clickAndSelectClinical($status, status);
           });
       });
 
@@ -108,22 +113,18 @@ export class PatientEncounter {
     cy.wait(300);
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .should("have.length.gte", 2)
-      .then(($rows) => {
-        const secondLastRow = $rows.eq(-2);
-        cy.wrap(secondLastRow)
-          .find("td")
+      .should("have.length.gte", 3)
+      .eq(-2)
+      .within(() => {
+        cy.get("td")
           .should("have.length.gte", 6)
-          .then(($tds) => {
-            const optionsSelector = $tds.eq(5);
-            cy.wrap(optionsSelector)
-              .scrollIntoView()
-              .should("be.visible")
-              .click();
-          });
+          .eq(5)
+          .scrollIntoView()
+          .should("be.visible")
+          .click();
       });
 
-    cy.contains("Remove Allergy").click();
+    cy.contains("Remove Allergy").should("be.visible").click();
 
     return this;
   }
@@ -175,21 +176,26 @@ export class PatientEncounter {
   }
   updateSymptom(details: SymptomDetails) {
     const { severity, status } = details;
+
     cy.wait(200);
 
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
       .should("have.length.gte", 2)
-      .then(($rows) => {
-        const lastRow = $rows.last();
-        cy.wrap(lastRow)
-          .find("td")
-          .should("have.length.gte", 6)
-          .then(($tds) => {
-            const statusSelector = $tds.eq(1);
-            const severitySelector = $tds.eq(2);
-            this.clickAndSelectClinical(statusSelector, status);
-            this.clickAndSelectClinical(severitySelector, severity);
+      .last()
+      .within(() => {
+        cy.get("td").should("have.length.gte", 6);
+
+        cy.get("td")
+          .eq(1)
+          .then(($status) => {
+            this.clickAndSelectClinical($status, status);
+          });
+
+        cy.get("td")
+          .eq(2)
+          .then(($severity) => {
+            this.clickAndSelectClinical($severity, severity);
           });
       });
 
@@ -198,24 +204,19 @@ export class PatientEncounter {
 
   deleteSymptom() {
     cy.wait(300);
+
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
       .should("have.length.gte", 2)
-      .then(($rows) => {
-        const lastRow = $rows.last();
-        cy.wrap(lastRow)
-          .find("td")
-          .should("have.length.gte", 6)
-          .then(($tds) => {
-            const optionsSelector = $tds.eq(4);
-            cy.wrap(optionsSelector)
-              .scrollIntoView()
-              .should("be.visible")
-              .click();
-          });
+      .last()
+      .within(() => {
+        cy.get("td").should("have.length.gte", 6);
+
+        cy.get("td").eq(4).scrollIntoView().should("be.visible").click();
       });
 
-    cy.contains("Remove Symptom").click();
+    cy.contains("Remove Symptom").should("be.visible").click();
+
     return this;
   }
 
@@ -266,21 +267,26 @@ export class PatientEncounter {
 
   updateDiagnosis(details: DiagnosisDetails) {
     const { verification, status } = details;
+
     cy.wait(200);
 
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
       .should("have.length.gte", 2)
-      .then(($rows) => {
-        const lastRow = $rows.last();
-        cy.wrap(lastRow)
-          .find("td")
-          .should("have.length.gte", 4)
-          .then(($tds) => {
-            const statusSelector = $tds.eq(2);
-            const severitySelector = $tds.eq(3);
-            this.clickAndSelectClinical(statusSelector, status);
-            this.clickAndSelectClinical(severitySelector, verification);
+      .last()
+      .within(() => {
+        cy.get("td").should("have.length.gte", 4);
+
+        cy.get("td")
+          .eq(2)
+          .then(($statusCell) => {
+            this.clickAndSelectClinical($statusCell, status);
+          });
+
+        cy.get("td")
+          .eq(3)
+          .then(($severityCell) => {
+            this.clickAndSelectClinical($severityCell, verification);
           });
       });
 
@@ -289,24 +295,19 @@ export class PatientEncounter {
 
   deleteDiagnosis() {
     cy.wait(300);
+
     cy.get("tr")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
       .should("have.length.gte", 2)
-      .then(($rows) => {
-        const lastRow = $rows.last();
-        cy.wrap(lastRow)
-          .find("td")
-          .should("have.length.gte", 4)
-          .then(($tds) => {
-            const optionsSelector = $tds.eq(4);
-            cy.wrap(optionsSelector)
-              .scrollIntoView()
-              .should("be.visible")
-              .click();
-          });
+      .last()
+      .within(() => {
+        cy.get("td").should("have.length.gte", 4);
+
+        cy.get("td").eq(4).scrollIntoView().should("be.visible").click();
       });
 
-    cy.contains("Remove Diagnosis").click();
+    cy.contains("Remove Diagnosis").should("be.visible").click();
+
     return this;
   }
 
