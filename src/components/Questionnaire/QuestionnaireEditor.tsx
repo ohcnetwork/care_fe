@@ -679,7 +679,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     const mappedData: Partial<QuestionnaireDetail> = {
       title: importedData.title,
       description: importedData.description,
-      status: "draft",
+      status: importedData.status,
       version: "1.0",
       subject_type: importedData.subject_type || "encounter",
       questions:
