@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -263,7 +264,6 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!file_state.isImage || file_state.zoom <= 4) return;
 
-    e.preventDefault();
     setDragState((prev) => ({
       ...prev,
       isDragging: true,
@@ -277,7 +277,6 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!dragState.isDragging || !file_state.isImage) return;
 
-    e.preventDefault();
     const container = containerRef.current;
     const image = imageRef.current;
 
@@ -307,8 +306,6 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    e.preventDefault();
-
     if (e.touches.length === 2) {
       const touch1 = e.touches[0] as unknown as Touch;
       const touch2 = e.touches[1] as unknown as Touch;
@@ -341,8 +338,6 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    e.preventDefault();
-
     if (e.touches.length === 2 && pinchState.isPinching) {
       // Pinch zoom
       const touch1 = e.touches[0] as unknown as Touch;
@@ -400,7 +395,6 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
 
   const handleWheel = (e: React.WheelEvent) => {
     if (e.ctrlKey) {
-      e.preventDefault();
       e.stopPropagation();
 
       const zoomIn = e.deltaY < 0;
@@ -451,6 +445,9 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
           <DialogTitle className="text-sm text-gray-600">
             {t("file_preview")}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            {t("file_preview")}
+          </DialogDescription>
         </DialogHeader>
         {fileUrl ? (
           <>
