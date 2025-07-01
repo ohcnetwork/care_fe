@@ -81,7 +81,16 @@ export default function Autocomplete({
     } else {
       setInputValue("");
     }
-  }, [value, options]);
+  }, [value, options, onSearch]);
+
+  React.useEffect(() => {
+    if (open) {
+      setInputValue("");
+      if (onSearch) {
+        onSearch("");
+      }
+    }
+  }, [open, onSearch]);
 
   // Determine what text to display on the button.
   const displayText = freeInput
