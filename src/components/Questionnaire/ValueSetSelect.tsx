@@ -56,6 +56,7 @@ interface Props {
   title?: string;
   asSheet?: boolean;
   onFocus?: () => void;
+  closeOnSelect?: boolean;
 }
 
 const Item = ({
@@ -104,6 +105,7 @@ export default function ValueSetSelect({
   wrapTextForSmallScreen = false,
   hideTrigger = false,
   controlledOpen = false,
+  closeOnSelect = true,
   title,
   asSheet = false,
   onFocus,
@@ -274,7 +276,11 @@ export default function ValueSetSelect({
                       display: option.display || "",
                       system: option.system || "",
                     });
-                    setInternalOpen(false);
+                    if (closeOnSelect) {
+                      setInternalOpen(false);
+                    } else {
+                      inputRef.current?.focus();
+                    }
                     addRecentMutation.mutate(option);
                   }}
                   onFavourite={() => {
@@ -339,7 +345,11 @@ export default function ValueSetSelect({
                       display: option.display || "",
                       system: option.system || "",
                     });
-                    setInternalOpen(false);
+                    if (closeOnSelect) {
+                      setInternalOpen(false);
+                    } else {
+                      inputRef.current?.focus();
+                    }
                     addRecentMutation.mutate(option);
                   }}
                   onFavourite={() => {
@@ -446,7 +456,7 @@ export default function ValueSetSelect({
                 icon="l-plus"
                 className="mr-2 text-5xl text-primary-700 font-normal"
               />
-              <span className="text-primary-700 flex items-center font-semibold text-base text-wrap">
+              <span className="text-primary-700 flex items-center font-semibold text-wrap text-sm md:text-base">
                 {value?.display || placeholder}
               </span>
             </div>
@@ -473,20 +483,22 @@ export default function ValueSetSelect({
       >
         {!hideTrigger && (
           <PopoverTrigger asChild disabled={disabled}>
-            <Button
-              variant="outline"
-              role="combobox"
-              className={cn(
-                "w-full justify-between",
-                wrapTextForSmallScreen
-                  ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
-                  : "truncate",
-                !value?.display && "text-gray-400",
-              )}
-            >
-              <span>{value?.display || placeholder}</span>
-              <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-            </Button>
+            <div className={cn(value?.display ? "w-full" : "mr-11")}>
+              <Button
+                variant="outline"
+                role="combobox"
+                className={cn(
+                  "justify-between",
+                  wrapTextForSmallScreen
+                    ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
+                    : "truncate",
+                  !value?.display && "text-gray-400",
+                )}
+              >
+                <span>{value?.display || placeholder}</span>
+                <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+              </Button>
+            </div>
           </PopoverTrigger>
         )}
 

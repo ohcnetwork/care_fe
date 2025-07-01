@@ -48,34 +48,29 @@ npm run dev
 
 Once the development server has started, open [localhost:4000](http://localhost:4000) in your browser. The page will be automatically reloaded when you make edits and save. You will also see any lint errors in the console.
 
-#### 🔑 API Credentials for care.ohc.network
+#### 🔑 Local Backend Setup and Credentials
 
-Authenticate to care.ohc.network with any of the following credentials
+First, set up the CARE local backend by following the instructions in the [CARE Backend Documentation](https://care-be-docs.ohc.network/).
+
+Create a `.env.local` file in the root directory of the project :
+
+```env
+# Point the frontend to your local backend
+REACT_CARE_API_URL=http://127.0.0.1:8000
+```
+
+Once you have the local backend running and loaded dummy data, you can use the following credentials to authenticate:
 
 ```yaml
-# Doctor at Aluva PHC
-- username: care-doctor
-  password: Ohcn@123
-
-# Staff at Aluva PHC
-- username: care-staff
-  password: Ohcn@123
-
-# Admin at Aluva PHC
-- username: care-nurse
-  password: Ohcn@123
-
-# Facility Admin at Aluva PHC
-- username: care-fac-admin
-  password: Ohcn@123
-
-# Volunteer at Aluva PHC
-- username: care-volunteer
-  password: Ohcn@123
-
-# Administrator
-- username: care-admin
-  password: Ohcn@123
+# Default Local Backend Credentials
+ROLE            USERNAME                PASSWORD
+----------------------------------------------------------------
+Volunteer       volunteer_2_0           Coronasafe@123
+Doctor          doctor_2_0              Coronasafe@123
+Staff           staff_2_0               Coronasafe@123
+Nurse           nurse_2_0               Coronasafe@123
+Administrator   administrator_2_0       Coronasafe@123
+Facility Admin  facility_admin_2_0      Coronasafe@123
 ```
 
 #### 📱 Patient Login in Staging
