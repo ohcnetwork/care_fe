@@ -789,7 +789,10 @@ export function QuestionnaireForm({
         {/* Questionnaire Forms */}
         {questionnaireForms.map((form, index) => (
           <div
-            key={`${form.questionnaire.id}-${index}`}
+            key={
+              form.questionnaire.instanceId ||
+              `${form.questionnaire.id}-${index}`
+            }
             className="rounded-lg py-6 space-y-6"
             data-questionnaire-id={form.questionnaire.id}
           >
@@ -812,7 +815,9 @@ export function QuestionnaireForm({
                   onClick={() => {
                     setQuestionnaireForms((prev) =>
                       prev.filter(
-                        (f) => f.questionnaire.id !== form.questionnaire.id,
+                        (f) =>
+                          f.questionnaire.instanceId !==
+                          form.questionnaire.instanceId,
                       ),
                     );
                   }}
@@ -836,7 +841,8 @@ export function QuestionnaireForm({
               ) => {
                 setQuestionnaireForms((existingForms) =>
                   existingForms.map((formItem) =>
-                    formItem.questionnaire.id === form.questionnaire.id
+                    formItem.questionnaire.instanceId ===
+                    form.questionnaire.instanceId
                       ? {
                           ...formItem,
                           responses: formItem.responses.map((r) =>
@@ -860,7 +866,7 @@ export function QuestionnaireForm({
               clearError={(questionId: string) => {
                 setQuestionnaireForms((prev) =>
                   prev.map((f) =>
-                    f.questionnaire.id === form.questionnaire.id
+                    f.questionnaire.instanceId === form.questionnaire.instanceId
                       ? {
                           ...f,
                           errors: f.errors.filter(
@@ -886,18 +892,13 @@ export function QuestionnaireForm({
               <QuestionnaireSearch
                 subjectType={subjectType}
                 onSelect={(selected) => {
-                  if (
-                    questionnaireForms.some(
-                      (form) => form.questionnaire.id === selected.id,
-                    )
-                  ) {
-                    return;
-                  }
-
                   setQuestionnaireForms((prev) => [
                     ...prev,
                     {
-                      questionnaire: selected,
+                      questionnaire: {
+                        ...selected,
+                        instanceId: crypto.randomUUID(),
+                      },
                       responses: initializeResponses(selected.questions),
                       errors: [],
                     },

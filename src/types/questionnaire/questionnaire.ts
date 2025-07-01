@@ -17,6 +17,7 @@ export interface QuestionnaireDetail {
   status: QuestionStatus;
   subject_type: SubjectType;
   tags: QuestionnaireTagModel[];
+  instanceId?: string;
 }
 
 export interface QuestionnaireCreate
