@@ -514,7 +514,13 @@ export default function AvatarEditModal({
                       onClick={deleteAvatar}
                       disabled={isProcessing || isDeleting}
                     >
-                      {t("delete")}
+                      {isDeleting ? (
+                        <CareIcon
+                          icon="l-spinner"
+                          className="animate-spin text-lg mr-1"
+                        />
+                      ) : null}
+                      {isDeleting ? `${t("deleting")}...` : t("delete")}
                     </Button>
                   )}
                   <Button
@@ -528,7 +534,7 @@ export default function AvatarEditModal({
                       (!croppedAreaPixels && !showCroppedPreview)
                     }
                   >
-                    {isProcessing || isDeleting ? (
+                    {isProcessing ? (
                       <CareIcon
                         icon="l-spinner"
                         className="animate-spin text-lg"
@@ -541,11 +547,9 @@ export default function AvatarEditModal({
                     <span>
                       {isProcessing
                         ? `${t("uploading")}...`
-                        : isDeleting
-                          ? `${t("deleting")}...`
-                          : showCroppedPreview
-                            ? `${t("upload")}`
-                            : `${t("crop")}`}
+                        : showCroppedPreview
+                          ? `${t("upload")}`
+                          : `${t("crop")}`}
                     </span>
                   </Button>
                 </div>
