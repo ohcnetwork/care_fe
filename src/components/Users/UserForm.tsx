@@ -359,6 +359,7 @@ export default function UserForm({
               <FormItem>
                 <FormLabel>{t("prefix")}</FormLabel>
                 <Autocomplete
+                  {...field}
                   options={NAME_PREFIXES.map((prefix) => ({
                     label: prefix,
                     value: prefix,

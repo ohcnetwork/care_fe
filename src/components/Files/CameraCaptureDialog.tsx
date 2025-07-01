@@ -14,8 +14,7 @@ import {
 } from "@/components/ui/dialog";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
-
-import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
+import { useMediaStream } from "@/hooks/useMediaStream";
 
 export interface CameraCaptureDialogProps {
   open: boolean;
@@ -30,14 +29,11 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
 
   const { open, onOpenChange, onCapture, onResetCapture, setPreview } = props;
   const isLaptopScreen = useBreakpoints({ lg: true, default: false });
-  const { requestPermission } = useMediaDevicePermission();
-  const [stream, setStream] = useState<MediaStream | null>(null);
-
   const [cameraFacingMode, setCameraFacingMode] = useState(
     isLaptopScreen ? "user" : "environment",
   );
-  const [previewImage, setPreviewImage] = useState(null);
-  const webRef = useRef<any>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const webRef = useRef<Webcam>(null);
 
   const videoConstraints = {
     width: { ideal: 4096 },
@@ -45,34 +41,9 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     facingMode: cameraFacingMode,
   };
 
-  useEffect(() => {
-    if (!open) return;
-
-    const getCameraStream = async () => {
-      const hasPermission = await requestPermission(cameraFacingMode);
-      if (!hasPermission.hasPermission) {
-        onOpenChange(false);
-        return;
-      }
-
-      try {
-        const mediaStream = hasPermission.mediaStream;
-        setStream(mediaStream);
-      } catch (error) {
-        console.error("Error accessing camera:", error);
-      }
-    };
-
-    getCameraStream();
-
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => {
-          track.stop();
-        });
-      }
-    };
-  }, [open, cameraFacingMode, onOpenChange]);
+  const { startStream, stopStream } = useMediaStream({
+    constraints: { video: { facingMode: cameraFacingMode } },
+  });
 
   const handleSwitchCamera = useCallback(async () => {
     const devices = await navigator.mediaDevices.enumerateDevices();
@@ -92,9 +63,12 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   }, []);
 
   const captureImage = () => {
-    setPreviewImage(webRef.current.getScreenshot());
+    if (!webRef.current) return;
+    const screenshot = webRef.current.getScreenshot();
+    setPreviewImage(screenshot);
     const canvas = webRef.current.getCanvas();
-    canvas?.toBlob((blob: Blob) => {
+    canvas?.toBlob((blob: Blob | null) => {
+      if (!blob) return;
       const extension = blob.type.split("/").pop();
       const myFile = new File([blob], `capture.${extension}`, {
         type: blob.type,
@@ -102,6 +76,20 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       onCapture(myFile, `capture.${extension}`);
     });
   };
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (open) {
+      timer = setTimeout(() => {
+        startStream();
+      }, 100);
+    }
+
+    return () => {
+      clearTimeout(timer);
+      stopStream();
+    };
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
