@@ -104,10 +104,8 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                           className={cn(
                             "cursor-pointer hover:bg-gray-200 hover:text-green-700",
                             {
-                              "bg-white text-green-700 shadow": isChildActive(
-                                link,
-                                path,
-                              ),
+                              "bg-white text-green-700 shadow":
+                                isChildActive(link, path) && isCollapsed,
                             },
                           )}
                         >
