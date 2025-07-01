@@ -107,11 +107,11 @@ export default function PrintResourceLetter({ id }: { id: string }) {
               </div>
             </div>
 
-            {data.status !== "PENDING" && (
+            {data.status !== "pending" && (
               <div>
                 <div className="mb-20">
                   <div className="font-semibold">
-                    {data.status === "REJECTED" ? t("rejected") : t("approved")}{" "}
+                    {data.status === "rejected" ? t("rejected") : t("approved")}{" "}
                     {t("by")}:
                   </div>
                   <div>{formatName(data.updated_by)}</div>

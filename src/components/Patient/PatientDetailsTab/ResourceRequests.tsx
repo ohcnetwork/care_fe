@@ -20,7 +20,7 @@ import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
-import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
+import { ResourceRequestStatus } from "@/types/resourceRequest/resourceRequest";
 
 import { PatientProps } from ".";
 
@@ -39,21 +39,25 @@ export const ResourceRequests = (props: PatientProps) => {
     enabled: !!patientId,
   });
 
-  const getStatusBadge = (status: ResourceRequest["status"]) => {
-    const statusColors: Record<ResourceRequest["status"], string> = {
-      PENDING:
+  const getStatusBadge = (status: ResourceRequestStatus) => {
+    const statusColors: Record<ResourceRequestStatus, string> = {
+      pending:
         "bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900",
-      APPROVED:
+      approved:
         "bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-900",
-      REJECTED: "bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900",
-      COMPLETED:
-        "bg-blue-100 text-blue-800 hover:bg-blue-200 hover:text-blue-900",
-      DEFAULT:
+      rejected: "bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900",
+      cancelled:
         "bg-gray-100 text-gray-800 hover:bg-gray-200 hover:text-gray-900",
+      transportation_to_be_arranged:
+        "bg-purple-100 text-purple-800 hover:bg-purple-200 hover:text-purple-900",
+      transfer_in_progress:
+        "bg-indigo-100 text-indigo-800 hover:bg-indigo-200 hover:text-indigo-900",
+      completed:
+        "bg-blue-100 text-blue-800 hover:bg-blue-200 hover:text-blue-900",
     };
 
     return (
-      <Badge className={statusColors[status] || statusColors.DEFAULT}>
+      <Badge className={statusColors[status]}>
         {t(`resource_status__${status}`)}
       </Badge>
     );

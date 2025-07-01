@@ -50,7 +50,10 @@ import query from "@/Utils/request/query";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import facilityApi from "@/types/facility/facilityApi";
-import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
+import {
+  ResourceRequest,
+  ResourceRequestStatus,
+} from "@/types/resourceRequest/resourceRequest";
 import { UserBase } from "@/types/user/user";
 
 interface ResourceProps {
@@ -67,7 +70,15 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const authUser = useAuthUser();
 
   const resourceFormSchema = z.object({
-    status: z.string().min(1, { message: t("field_required") }),
+    status: z.enum([
+      "pending",
+      "approved",
+      "rejected",
+      "cancelled",
+      "transportation_to_be_arranged",
+      "transfer_in_progress",
+      "completed",
+    ]),
     category: z.string().min(1, { message: t("field_required") }),
     assigned_facility: z.object({
       id: z.string(),
@@ -105,7 +116,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const form = useForm({
     resolver: zodResolver(resourceFormSchema),
     defaultValues: {
-      status: "pending",
+      status: "pending" as ResourceRequestStatus,
       category: "",
       assigned_facility: undefined,
       assigned_to: "",
@@ -162,7 +173,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
   const onSubmit = (data: ResourceFormValues) => {
     const resourcePayload = {
-      status: data.status,
+      status: data.status as ResourceRequestStatus,
       category: data.category,
       origin_facility: String(facilityId),
       assigned_facility: data.assigned_facility?.id,
