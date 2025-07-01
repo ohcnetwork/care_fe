@@ -81,7 +81,7 @@ export default function Autocomplete({
     } else {
       setInputValue("");
     }
-  }, [value, options, onSearch]);
+  }, [value, options]);
 
   React.useEffect(() => {
     if (open) {
