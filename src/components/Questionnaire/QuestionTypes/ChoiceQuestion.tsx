@@ -39,7 +39,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
 }: ChoiceQuestionProps) {
   const options = question.answer_option || [];
   const selectType =
-    question.answer_option?.length && question.answer_option?.length > 4
+    question.answer_option?.length && question.answer_option?.length > 5
       ? "dropdown"
       : "radio";
   const currentValue = questionnaireResponse.values[index]?.value?.toString();

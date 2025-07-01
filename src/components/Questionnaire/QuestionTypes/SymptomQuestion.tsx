@@ -803,6 +803,7 @@ export function SymptomQuestion({
   return (
     <div className="space-y-2">
       <HistoricalRecordSelector<SymptomRequest>
+        title={t("symptom_history")}
         structuredTypes={[
           {
             type: t("symptoms"),

@@ -53,22 +53,22 @@ export const ALLERGY_VERIFICATION_STATUS = {
   entered_in_error: "Entered in Error",
 } as const;
 
-export const ALLERGY_VERIFICATION_STATUS_STYLES = {
-  unconfirmed: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  confirmed: "bg-green-100 text-green-800 border-green-200",
-  refuted: "bg-red-100 text-red-800 border-red-200",
-  presumed: "bg-blue-100 text-blue-800 border-blue-200",
-  entered_in_error: "bg-red-100 text-red-800 border-red-200",
+export const ALLERGY_VERIFICATION_STATUS_COLORS = {
+  unconfirmed: "yellow",
+  confirmed: "green",
+  refuted: "destructive",
+  presumed: "blue",
+  entered_in_error: "destructive",
 } as const;
 
-export const ALLERGY_CLINICAL_STATUS_STYLES = {
-  active: "bg-green-100 text-green-800 border-green-200",
-  inactive: "bg-gray-100 text-gray-800 border-gray-200",
-  resolved: "bg-blue-100 text-blue-800 border-blue-200",
+export const ALLERGY_CLINICAL_STATUS_COLORS = {
+  active: "primary",
+  inactive: "secondary",
+  resolved: "blue",
 } as const;
 
-export const ALLERGY_CRITICALITY_STYLES = {
-  low: "bg-blue-100 text-blue-800 border-blue-200",
-  high: "bg-red-100 text-red-800 border-red-200",
-  unable_to_assess: "bg-gray-100 text-gray-800 border-gray-200",
+export const ALLERGY_CRITICALITY_COLORS = {
+  low: "blue",
+  high: "destructive",
+  unable_to_assess: "secondary",
 } as const;

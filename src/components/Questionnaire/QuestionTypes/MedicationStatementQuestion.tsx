@@ -308,7 +308,12 @@ export function MedicationStatementQuestion({
   });
 
   return (
-    <div className="space-y-4">
+    <div
+      className={cn(
+        "space-y-4",
+        medications.length > 0 ? "md:max-w-fit" : "max-w-4xl",
+      )}
+    >
       <AlertDialog
         open={medicationToDelete !== null}
         onOpenChange={(open) => !open && setMedicationToDelete(null)}
@@ -336,6 +341,7 @@ export function MedicationStatementQuestion({
       </AlertDialog>
 
       <HistoricalRecordSelector<MedicationRequestRead | MedicationStatementRead>
+        title={t("medication_history")}
         structuredTypes={[
           {
             type: t("past_prescriptions"),
@@ -577,7 +583,7 @@ export function MedicationStatementQuestion({
                                   <div className="text-sm mt-1 text-gray-600">
                                     <span>
                                       {t(
-                                        `medication_status_${medication.status}`,
+                                        `medication_status__${medication.status}`,
                                       )}
                                       {" · "}
                                     </span>
@@ -811,7 +817,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
               (status) =>
                 (medication.id || status !== "entered_in_error") && (
                   <SelectItem key={status} value={status}>
-                    {t(`medication_status_${status}`)}
+                    {t(`medication_status__${status}`)}
                   </SelectItem>
                 ),
             )}

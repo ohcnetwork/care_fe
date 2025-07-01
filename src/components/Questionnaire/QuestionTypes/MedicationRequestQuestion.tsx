@@ -374,7 +374,12 @@ export function MedicationRequestQuestion({
   });
 
   return (
-    <div className="space-y-4">
+    <div
+      className={cn(
+        "space-y-4",
+        medications.length > 0 ? "md:max-w-fit" : "max-w-4xl",
+      )}
+    >
       <AlertDialog
         open={medicationToDelete !== null}
         onOpenChange={(open) => !open && setMedicationToDelete(null)}
@@ -402,6 +407,7 @@ export function MedicationRequestQuestion({
         </AlertDialogContent>
       </AlertDialog>
       <HistoricalRecordSelector<MedicationRequestRead | MedicationStatementRead>
+        title={t("medication_history")}
         structuredTypes={[
           {
             type: t("past_prescriptions"),
@@ -1107,6 +1113,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           {dosageInstruction?.timing && (
             <Input
               type="number"
+              inputMode="decimal"
+              pattern="[0-9]*[.]?[0-9]*"
               min={0}
               value={
                 dosageInstruction.timing.repeat.bounds_duration?.value == 0

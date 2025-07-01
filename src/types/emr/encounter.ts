@@ -8,6 +8,8 @@ import {
   Stethoscope,
 } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
+
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { Patient } from "@/types/emr/patient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
@@ -78,6 +80,25 @@ export const ENCOUNTER_PRIORITY = [
   "use_as_directed",
 ] as const;
 
+export const ENCOUNTER_PRIORITY_COLORS = {
+  stat: "destructive",
+  ASAP: "yellow",
+  emergency: "destructive",
+  urgent: "orange",
+  routine: "blue",
+  elective: "indigo",
+  rush_reporting: "orange",
+  timing_critical: "yellow",
+  callback_results: "green",
+  callback_for_scheduling: "purple",
+  preop: "pink",
+  as_needed: "teal",
+  use_as_directed: "indigo",
+} as const satisfies Record<
+  EncounterPriority,
+  React.ComponentProps<typeof Badge>["variant"]
+>;
+
 export const ENCOUNTER_STATUS = [
   "planned",
   "in_progress",
@@ -89,6 +110,21 @@ export const ENCOUNTER_STATUS = [
   "entered_in_error",
   "unknown",
 ] as const;
+
+export const ENCOUNTER_STATUS_COLORS = {
+  planned: "blue",
+  in_progress: "yellow",
+  on_hold: "orange",
+  discharged: "primary",
+  completed: "green",
+  cancelled: "destructive",
+  discontinued: "destructive",
+  entered_in_error: "destructive",
+  unknown: "secondary",
+} as const satisfies Record<
+  EncounterStatus,
+  React.ComponentProps<typeof Badge>["variant"]
+>;
 
 export const ENCOUNTER_CLASSES_ICONS = {
   imp: BedDouble,
