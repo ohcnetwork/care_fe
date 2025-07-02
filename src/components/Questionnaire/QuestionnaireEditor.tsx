@@ -938,14 +938,48 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="edit">
-          <div className="flex flex-col md:flex-row gap-2">
-            <div className="space-y-4 md:w-60 ">
-              <div className="lg:sticky lg:top-6">
-                <QuestionnaireNavigation
-                  rootQuestions={rootQuestions}
-                  toggleQuestionExpanded={toggleQuestionExpanded}
-                  expandedQuestions={expandedQuestions}
-                  scrollToQuestion={scrollToQuestion}
+          <div className="flex flex-col lg:flex-row gap-2">
+            <div className="space-y-4 lg:w-60 top-4 self-start h-fit max-h-screen overflow-y-auto lg:sticky">
+              <QuestionnaireNavigation
+                rootQuestions={rootQuestions}
+                toggleQuestionExpanded={toggleQuestionExpanded}
+                expandedQuestions={expandedQuestions}
+                scrollToQuestion={scrollToQuestion}
+              />
+              <div className="space-y-4 max-w-sm lg:hidden">
+                <QuestionnaireProperties
+                  form={form}
+                  updateQuestionnaireField={updateQuestionnaireField}
+                  id={id}
+                  organizations={organizations}
+                  organizationSelection={{
+                    selectedOrgs: selectedOrgs,
+                    onToggle: handleToggleOrganization,
+                    searchQuery: orgSearchQuery,
+                    setSearchQuery: setOrgSearchQuery,
+                    available: availableOrganizations,
+                    isLoading: isLoadingAvailableOrganizations,
+                    error: orgError,
+                    setError: setOrgError,
+                  }}
+                  tags={tags}
+                  tagSelection={{
+                    selectedTags: selectedTags,
+                    onToggle: handleToggleTag,
+                    searchQuery: tagSearchQuery,
+                    setSearchQuery: setTagSearchQuery,
+                    available: tagOptions,
+                    isLoading: isLoadingAvailableTags,
+                    onTagCreated: !id ? handleTagCreated : undefined,
+                  }}
+                />
+                <QuestionActions
+                  selectedQuestions={selectedQuestions}
+                  questions={rootQuestions}
+                  updateQuestionnaireField={updateQuestionnaireField}
+                  onQuestionsChange={updateQuestions}
+                  setSelectedQuestions={setSelectedQuestions}
+                  setExpandedQuestions={setExpandedQuestions}
                 />
               </div>
             </div>
@@ -1197,17 +1231,15 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         </TabsContent>
 
         <TabsContent value="preview">
-          <div className="flex flex-col md:flex-row gap-2">
-            <div className="space-y-4 md:w-60 ">
-              <div className="lg:sticky lg:top-6">
-                <QuestionnaireNavigation
-                  rootQuestions={rootQuestions}
-                  toggleQuestionExpanded={toggleQuestionExpanded}
-                  expandedQuestions={expandedQuestions}
-                  isPreview={true}
-                  scrollToQuestion={scrollToPreviewQuestion}
-                />
-              </div>
+          <div className="flex flex-col lg:flex-row gap-2">
+            <div className="space-y-4 lg:w-60 top-4 self-start h-fit max-h-screen overflow-y-auto lg:sticky">
+              <QuestionnaireNavigation
+                rootQuestions={rootQuestions}
+                toggleQuestionExpanded={toggleQuestionExpanded}
+                expandedQuestions={expandedQuestions}
+                isPreview={true}
+                scrollToQuestion={scrollToPreviewQuestion}
+              />
               <div className="space-y-4 max-w-sm lg:hidden">
                 <QuestionnairePreviewProperties questionnaire={questionnaire} />
               </div>
