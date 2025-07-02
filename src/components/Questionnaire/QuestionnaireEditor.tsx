@@ -1157,7 +1157,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 className="mt-4"
               />
             </div>
-            <div className="space-y-4 w-60 lg:block sticky top-4 self-start h-fit">
+            <div className="space-y-4 w-60 hidden lg:block top-4 self-start h-fit lg:sticky">
               <QuestionnaireProperties
                 form={form}
                 updateQuestionnaireField={updateQuestionnaireField}
