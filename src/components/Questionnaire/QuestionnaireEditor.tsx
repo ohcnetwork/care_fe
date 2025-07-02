@@ -925,8 +925,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="edit">
-          <div className="flex flex-col md:flex-row gap-2">
-            <div className="space-y-4 md:w-60 sticky top-4 self-start h-fit max-h-screen overflow-y-auto">
+          <div className="flex flex-col lg:flex-row gap-2">
+            <div className="space-y-4 lg:w-60 top-4 self-start h-fit max-h-screen overflow-y-auto lg:sticky">
               <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
                 <CardHeader className="p-0">
                   <CardTitle>{t("navigation")}</CardTitle>
@@ -1237,7 +1237,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 </form>
               </Form>
             </div>
-            <div className="space-y-4 w-60 lg:block sticky top-4 self-start h-fit">
+            <div className="space-y-4 w-60 hidden lg:block top-4 self-start h-fit lg:sticky">
               <QuestionnaireProperties
                 form={form}
                 updateQuestionnaireField={updateQuestionnaireField}
