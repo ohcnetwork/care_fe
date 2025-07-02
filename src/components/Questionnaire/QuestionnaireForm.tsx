@@ -18,6 +18,7 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { dateQueryString } from "@/Utils/utils";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { FileUploadQuestion } from "@/types/files/files";
@@ -30,7 +31,10 @@ import type {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
-import type { Question } from "@/types/questionnaire/question";
+import {
+  type Question,
+  findQuestionById,
+} from "@/types/questionnaire/question";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
@@ -40,6 +44,7 @@ import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion
 import { validateFileUploadQuestion } from "./QuestionTypes/FileQuestion";
 import { validateMedicationRequestQuestion } from "./QuestionTypes/MedicationRequestQuestion";
 import { validateMedicationStatementQuestion } from "./QuestionTypes/MedicationStatementQuestion";
+import { isQuestionEnabled } from "./QuestionTypes/QuestionGroup";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
@@ -179,8 +184,8 @@ function ValidationErrorDisplay({
                   size="sm"
                   className="mt-2 h-8 text-xs"
                   onClick={() => {
-                    const element = document.querySelector(
-                      `[data-question-id="${structuredQuestion.questionId}"]`,
+                    const element = document.getElementById(
+                      "question-" + structuredQuestion.questionId,
                     );
                     if (element) {
                       element.scrollIntoView({ block: "center" });
@@ -241,8 +246,8 @@ function ValidationErrorDisplay({
                         size="sm"
                         className="mt-2 h-8 text-xs"
                         onClick={() => {
-                          const element = document.querySelector(
-                            `[data-question-id="${error.question_id}"]`,
+                          const element = document.getElementById(
+                            "question-" + error.question_id,
                           );
                           if (element) {
                             element.scrollIntoView({ block: "center" });
@@ -278,10 +283,18 @@ function ValidationErrorDisplay({
 }
 
 const STRUCTURED_TYPE_VALIDATORS = {
-  appointment: (response: ResponseValue | undefined, questionId: string) => {
+  appointment: (
+    response: ResponseValue | undefined,
+    questionId: string,
+    required?: boolean,
+  ) => {
     const appointmentData =
       (response?.value as CreateAppointmentQuestion[]) || [];
-    return validateAppointmentQuestion(appointmentData[0], questionId);
+    return validateAppointmentQuestion(
+      appointmentData[0],
+      questionId,
+      required ?? false,
+    );
   },
   medication_statement: (
     response: ResponseValue | undefined,
@@ -584,7 +597,12 @@ export function QuestionnaireForm({
             ];
 
           if (validator) {
-            const validationErrors = validator(response?.values?.[0], q.id);
+            let validationErrors: QuestionValidationError[] = [];
+            validationErrors = validator(
+              response?.values?.[0],
+              q.id,
+              q.required,
+            );
             errors.push(...validationErrors);
             if (validationErrors.length > 0) {
               firstErrorId = firstErrorId ? firstErrorId : q.id;
@@ -601,9 +619,7 @@ export function QuestionnaireForm({
 
     if (firstErrorId) {
       setTimeout(() => {
-        const element = document.querySelector(
-          `[data-question-id="${firstErrorId}"]`,
-        );
+        const element = document.getElementById("question-" + firstErrorId);
         element?.scrollIntoView({ block: "center" });
       });
       return;
@@ -611,7 +627,7 @@ export function QuestionnaireForm({
 
     // Continue with existing submission logic...
     const requests: FormBatchRequest[] = [];
-    if (encounterId && patientId) {
+    if (patientId) {
       const context = { facilityId, patientId, encounterId };
       const structuredPromises: Promise<FormBatchRequest[]>[] = [];
 
@@ -656,31 +672,51 @@ export function QuestionnaireForm({
             resource_id: encounterId ? encounterId : patientId,
             encounter: encounterId,
             patient: patientId,
-            results: validResponses.map((response) => ({
-              question_id: response.question_id,
-              values: response.values.map((value) => {
-                if (value.type === "dateTime" && value.value) {
-                  return {
-                    ...value,
-                    value: value.value.toISOString(),
-                  };
-                }
-                if (value.unit) {
-                  return {
-                    value: value.value?.toString(),
-                    unit: value.unit,
-                    coding: value.coding,
-                  };
-                }
-                if (value.coding) {
-                  return { coding: value.coding };
-                }
-                return { value: String(value.value) };
-              }),
-              note: response.note,
-              body_site: response.body_site,
-              method: response.method,
-            })),
+            results: validResponses
+              .filter((response) =>
+                isQuestionEnabled(
+                  findQuestionById(
+                    form.questionnaire.questions,
+                    response.question_id,
+                  ) as Question,
+                  form.responses,
+                ),
+              )
+              .map((response) => ({
+                question_id: response.question_id,
+                values: response.values.map((value) => {
+                  if (value.type === "date" && value.value) {
+                    const date = new Date(value.value);
+                    if (isNaN(date.getTime())) {
+                      return { ...value, value: "" };
+                    }
+                    const formattedDate = dateQueryString(date);
+                    return {
+                      ...value,
+                      value: formattedDate,
+                    };
+                  } else if (value.type === "dateTime" && value.value) {
+                    return {
+                      ...value,
+                      value: value.value.toISOString(),
+                    };
+                  }
+                  if (value.unit) {
+                    return {
+                      value: value.value?.toString(),
+                      unit: value.unit,
+                      coding: value.coding,
+                    };
+                  }
+                  if (value.coding) {
+                    return { coding: value.coding };
+                  }
+                  return { value: String(value.value) };
+                }),
+                note: response.note,
+                body_site: response.body_site,
+                method: response.method,
+              })),
           },
         });
       }

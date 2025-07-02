@@ -29,3 +29,9 @@ export interface QuestionnaireForms {
   count: number;
   results: QuestionnaireDetail[];
 }
+
+export const QUESTIONNAIRE_STATUS_COLORS = {
+  active: "primary",
+  draft: "yellow",
+  retired: "destructive",
+} as const;

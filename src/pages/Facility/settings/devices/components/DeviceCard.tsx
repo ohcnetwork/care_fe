@@ -13,12 +13,11 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-import {
-  DeviceAvailabilityStatusBadge,
-  DeviceStatusBadge,
-} from "@/pages/Facility/settings/devices/Utils";
 import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceTypeIcon";
-import { DeviceList } from "@/types/device/device";
+import {
+  DEVICE_AVAILABILITY_STATUS_COLORS,
+  DeviceList,
+} from "@/types/device/device";
 
 interface Props {
   devices: DeviceList[];
@@ -55,22 +54,19 @@ export default function DeviceCard({ devices }: Props) {
 
           <CardContent className="flex flex-col flex-1 justify-between px-4 pb-4 pt-2 space-y-2">
             <div className="flex flex-wrap gap-2">
-              <DeviceStatusBadge
-                status={device.status}
-                className="text-xs px-2 py-0.5"
-              />
-              <DeviceAvailabilityStatusBadge
-                status={device.availability_status}
-                className="text-xs px-2 py-0.5"
-              />
+              <Badge variant={DEVICE_AVAILABILITY_STATUS_COLORS[device.status]}>
+                {t(`device_status_${device.status}`)}
+              </Badge>
+              <Badge
+                variant={
+                  DEVICE_AVAILABILITY_STATUS_COLORS[device.availability_status]
+                }
+              >
+                {t(`device_availability_status_${device.availability_status}`)}
+              </Badge>
 
               {device.care_type && (
-                <Badge
-                  variant="secondary"
-                  className="rounded-md bg-blue-100 text-blue-800 text-xs font-medium capitalize px-2 py-0.5"
-                >
-                  {device.care_type}
-                </Badge>
+                <Badge variant="blue">{device.care_type}</Badge>
               )}
             </div>
 

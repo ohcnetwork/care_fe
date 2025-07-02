@@ -20,6 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -37,14 +38,13 @@ import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import {
-  DeviceAvailabilityStatusBadge,
-  DeviceStatusBadge,
-} from "@/pages/Facility/settings/devices/Utils";
 import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceTypeIcon";
 import { usePluginDevice } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 import { ContactPoint } from "@/types/common/contactPoint";
-import { type DeviceDetail } from "@/types/device/device";
+import {
+  DEVICE_AVAILABILITY_STATUS_COLORS,
+  type DeviceDetail,
+} from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
 import DeviceEncounterHistory from "./DeviceEncounterHistory";
@@ -284,10 +284,22 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <DeviceStatusBadge status={device.status} />
-                <DeviceAvailabilityStatusBadge
-                  status={device.availability_status}
-                />
+                <Badge
+                  variant={DEVICE_AVAILABILITY_STATUS_COLORS[device.status]}
+                >
+                  {t(`device_status_${device.status}`)}
+                </Badge>
+                <Badge
+                  variant={
+                    DEVICE_AVAILABILITY_STATUS_COLORS[
+                      device.availability_status
+                    ]
+                  }
+                >
+                  {t(
+                    `device_availability_status_${device.availability_status}`,
+                  )}
+                </Badge>
               </div>
             </div>
 

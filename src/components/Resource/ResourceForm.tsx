@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -37,6 +36,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 import UserSelector from "@/components/Common/UserSelector";
+import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -276,6 +276,8 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     </FormLabel>
                     <FormControl>
                       <Autocomplete
+                        {...field}
+                        showClearButton={!id}
                         data-cy="select-facility"
                         options={mergeAutocompleteOptions(
                           facilityOptions ?? [],
@@ -322,31 +324,17 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                 control={form.control}
                 name="emergency"
                 render={({ field }) => (
-                  <FormItem className="space-y-3">
+                  <FormItem>
                     <FormLabel>{t("is_this_an_emergency")}</FormLabel>
                     <FormControl>
-                      <RadioGroup
+                      <RadioInput
+                        {...field}
                         onValueChange={field.onChange}
-                        value={field.value}
-                        className="flex gap-4"
-                      >
-                        <FormItem className="flex">
-                          <FormControl>
-                            <RadioGroupItem value="true" />
-                          </FormControl>
-                          <FormLabel className="font-normal">
-                            {t("yes")}
-                          </FormLabel>
-                        </FormItem>
-                        <FormItem className="flex">
-                          <FormControl>
-                            <RadioGroupItem value="false" />
-                          </FormControl>
-                          <FormLabel className="font-normal">
-                            {t("no")}
-                          </FormLabel>
-                        </FormItem>
-                      </RadioGroup>
+                        options={[
+                          { value: "true", label: t("yes") },
+                          { value: "false", label: t("no") },
+                        ]}
+                      />
                     </FormControl>
                     <FormDescription>
                       {t("emergency_description")}
@@ -364,7 +352,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     <FormLabel aria-required>{t("status")}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger data-cy="select-status-dropdown">
+                        <SelectTrigger
+                          data-cy="select-status-dropdown"
+                          ref={field.ref}
+                        >
                           <SelectValue placeholder={t("select_status")} />
                         </SelectTrigger>
                       </FormControl>
@@ -389,7 +380,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     <FormLabel aria-required>{t("category")}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger data-cy="select-category-dropdown">
+                        <SelectTrigger
+                          data-cy="select-category-dropdown"
+                          ref={field.ref}
+                        >
                           <SelectValue
                             placeholder={t("category_description")}
                           />

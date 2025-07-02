@@ -156,3 +156,16 @@ export interface Question {
   questions?: Question[];
   formula?: string;
 }
+
+export const findQuestionById = (
+  questions: Question[],
+  id: string,
+): Question | undefined => {
+  return questions.find((question) => {
+    if (question.id === id) return true;
+    if (question.questions) {
+      return findQuestionById(question.questions, id);
+    }
+    return false;
+  });
+};
