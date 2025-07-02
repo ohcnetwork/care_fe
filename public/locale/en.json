@@ -2832,6 +2832,7 @@
   "select_investigation": "Select Investigations (all investigations will be selected by default)",
   "select_investigation_groups": "Select Investigation Groups",
   "select_investigations": "Select Investigations",
+  "select_language": "Select Language",
   "select_local_body": "Select Local Body",
   "select_location": "Select Location",
   "select_location_first": "Select Location First",
