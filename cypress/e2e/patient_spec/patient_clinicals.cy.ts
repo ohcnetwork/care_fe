@@ -7,7 +7,7 @@ import {
   getRandomAllergyStatus,
   getRandomConditionName,
   getRandomConditionStatus,
-  getRandomDiagnosisVerification,
+  getRandomConditionVerification,
   getRandomSymptomSeverity,
 } from "@/utils/clinicalData";
 import { viewPort } from "@/utils/viewPort";
@@ -49,7 +49,9 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifyAllergy(updateAllergyDetails);
 
-    patientEncounter.clickAddAllergy().deleteAllergy();
+    patientEncounter
+      .clickAddAllergy()
+      .deleteAllergy(createAllergyDetails.allergyName);
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifyItemDelete(createAllergyDetails.allergyName);
   });
@@ -59,12 +61,14 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
       symptomName: getRandomConditionName(),
       severity: "Moderate",
       status: "Active",
+      verification: "Confirmed",
     };
 
     const updateSymptomsDetails = {
       symptomName: createSymptomsDetails.symptomName,
       severity: getRandomSymptomSeverity(),
       status: getRandomConditionStatus(),
+      verification: getRandomConditionVerification(),
     };
 
     patientEncounter
@@ -81,7 +85,7 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
       .clickAddSymptoms()
       .verifyDuplicateSymptom(createSymptomsDetails.symptomName);
 
-    patientEncounter.deleteSymptom();
+    patientEncounter.deleteSymptom(createSymptomsDetails.symptomName);
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifyItemDelete(createSymptomsDetails.symptomName);
 
@@ -95,7 +99,9 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifySymptom(updateSymptomsDetails);
 
-    patientEncounter.clickAddSymptoms().deleteSymptom();
+    patientEncounter
+      .clickAddSymptoms()
+      .deleteSymptom(createSymptomsDetails.symptomName);
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifyItemDelete(createSymptomsDetails.symptomName);
   });
@@ -109,7 +115,7 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
 
     const updateDiagnosisDetails = {
       diagnosisName: createDiagnosisDetails.diagnosisName,
-      verification: getRandomDiagnosisVerification(),
+      verification: getRandomConditionVerification(),
       status: getRandomConditionStatus(),
     };
 
@@ -126,7 +132,7 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
       .clickAddDiagnosis()
       .verifyDuplicateDiagnosis(createDiagnosisDetails.diagnosisName);
 
-    patientEncounter.deleteDiagnosis();
+    patientEncounter.deleteDiagnosis(createDiagnosisDetails.diagnosisName);
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifyItemDelete(createDiagnosisDetails.diagnosisName);
 
@@ -141,7 +147,9 @@ describe("Patient Encounter Allergies, Symptoms and Diagnosis", () => {
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifyDiagnoses(updateDiagnosisDetails);
 
-    patientEncounter.clickAddDiagnosis().deleteDiagnosis();
+    patientEncounter
+      .clickAddDiagnosis()
+      .deleteDiagnosis(createDiagnosisDetails.diagnosisName);
     patientPrescription.submitQuestionnaire();
     patientEncounter.verifyItemDelete(createDiagnosisDetails.diagnosisName);
   });

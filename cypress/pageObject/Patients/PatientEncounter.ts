@@ -14,6 +14,7 @@ interface SymptomDetails {
   symptomName?: string;
   severity?: string;
   status?: string;
+  verification?: string;
 }
 export class PatientEncounter {
   // Navigation
@@ -51,16 +52,7 @@ export class PatientEncounter {
   clickAddAllergy() {
     cy.intercept("GET", "**/allergy_intolerance/**").as("getAllergies");
 
-    cy.contains("a", "Add Allergy")
-      .then(($el) => {
-        $el.attr("data-cy", "add-allergy-button");
-      })
-      .then(() => {
-        cy.verifyAndClickElement(
-          '[data-cy="add-allergy-button"]',
-          "Add Allergy",
-        );
-      });
+    cy.verifyAndClickElement('[data-slot="button"]', "Add Allergy");
 
     cy.wait("@getAllergies").its("response.statusCode").should("eq", 200);
     return this;
@@ -82,49 +74,42 @@ export class PatientEncounter {
   }
 
   updateAllergy(details: AllergyDetails) {
-    const { criticality, status } = details;
+    const { allergyName, criticality, status } = details;
 
     cy.wait(200);
 
-    cy.get("tr")
+    cy.get("[data-slot='table-row']")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .should("have.length.gte", 2)
-      .eq(1)
+      .contains(allergyName)
+      .should("be.visible")
       .within(() => {
-        cy.get("td").should("have.length.gte", 6);
-
-        cy.get("td")
-          .eq(2)
-          .then(($criticality) => {
-            this.clickAndSelectClinical($criticality, criticality);
-          });
-
-        cy.get("td")
-          .eq(3)
-          .then(($status) => {
-            this.clickAndSelectClinical($status, status);
-          });
+        cy.get("[data-slot='select-trigger']").first().scrollIntoView();
+        cy.clickAndSelectOption('[data-slot="select-trigger"]', criticality, {
+          position: "first",
+        });
+        cy.get("[data-slot='select-trigger']").last().scrollIntoView();
+        cy.clickAndSelectOption('[data-slot="select-trigger"]', status, {
+          position: "last",
+        });
       });
 
     return this;
   }
 
-  deleteAllergy() {
+  deleteAllergy(allergyName: string) {
     cy.wait(300);
-    cy.get("tr")
+    cy.get("[data-slot='table-row']")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .should("have.length.gte", 3)
-      .eq(-2)
+      .contains(allergyName)
+      .should("be.visible")
       .within(() => {
-        cy.get("td")
-          .should("have.length.gte", 6)
-          .eq(5)
-          .scrollIntoView()
-          .should("be.visible")
-          .click();
+        cy.get("[data-slot='dropdown-menu-trigger']").scrollIntoView().click();
       });
 
-    cy.contains("Remove Allergy").should("be.visible").click();
+    cy.get("[data-slot='dropdown-menu-item']")
+      .contains("Remove Allergy")
+      .should("be.visible")
+      .click();
 
     return this;
   }
@@ -140,16 +125,7 @@ export class PatientEncounter {
   clickAddSymptoms() {
     cy.intercept("GET", "**/symptom/**").as("getSymptoms");
 
-    cy.contains("a", "Add Symptoms")
-      .then(($el) => {
-        $el.attr("data-cy", "add-symptoms-button");
-      })
-      .then(() => {
-        cy.verifyAndClickElement(
-          '[data-cy="add-symptoms-button"]',
-          "Add Symptoms",
-        );
-      });
+    cy.verifyAndClickElement('[data-slot="button"]', "Add Symptoms");
 
     cy.wait("@getSymptoms").its("response.statusCode").should("eq", 200);
     return this;
@@ -174,48 +150,51 @@ export class PatientEncounter {
     cy.verifyNotification("Symptom already exists!");
     return this;
   }
+  clickAndSelectSymptomOption(position: number, value: string) {
+    cy.get("[data-slot='select-trigger']")
+      .eq(position)
+      .scrollIntoView()
+      .click();
+    cy.get('[role="listbox"]')
+      .find('[role="option"]')
+      .contains(value)
+      .should("be.visible")
+      .click();
+    return this;
+  }
   updateSymptom(details: SymptomDetails) {
-    const { severity, status } = details;
+    const { symptomName, severity, status, verification } = details;
 
     cy.wait(200);
 
-    cy.get("tr")
+    cy.get("[data-slot='table-row']")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .should("have.length.gte", 2)
-      .last()
+      .contains(symptomName)
+      .should("be.visible")
       .within(() => {
-        cy.get("td").should("have.length.gte", 6);
-
-        cy.get("td")
-          .eq(1)
-          .then(($status) => {
-            this.clickAndSelectClinical($status, status);
-          });
-
-        cy.get("td")
-          .eq(2)
-          .then(($severity) => {
-            this.clickAndSelectClinical($severity, severity);
-          });
+        this.clickAndSelectSymptomOption(0, status);
+        this.clickAndSelectSymptomOption(1, severity);
+        this.clickAndSelectSymptomOption(2, verification);
       });
 
     return this;
   }
 
-  deleteSymptom() {
+  deleteSymptom(symptomName: string) {
     cy.wait(300);
 
-    cy.get("tr")
+    cy.get("[data-slot='table-row']")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .should("have.length.gte", 2)
-      .last()
+      .contains(symptomName)
+      .should("be.visible")
       .within(() => {
-        cy.get("td").should("have.length.gte", 6);
-
-        cy.get("td").eq(4).scrollIntoView().should("be.visible").click();
+        cy.get("[data-slot='dropdown-menu-trigger']").scrollIntoView().click();
       });
 
-    cy.contains("Remove Symptom").should("be.visible").click();
+    cy.get("[data-slot='dropdown-menu-item']")
+      .contains("Remove Symptom")
+      .should("be.visible")
+      .click();
 
     return this;
   }
@@ -231,16 +210,7 @@ export class PatientEncounter {
   clickAddDiagnosis() {
     cy.intercept("GET", "**/diagnosis/**").as("getDiagnosis");
 
-    cy.contains("a", "Add Diagnosis")
-      .then(($el) => {
-        $el.attr("data-cy", "add-diagnosis-button");
-      })
-      .then(() => {
-        cy.verifyAndClickElement(
-          '[data-cy="add-diagnosis-button"]',
-          "Add Diagnosis",
-        );
-      });
+    cy.verifyAndClickElement('[data-slot="button"]', "Add Diagnosis");
 
     cy.wait("@getDiagnosis").its("response.statusCode").should("eq", 200);
     return this;
@@ -266,47 +236,43 @@ export class PatientEncounter {
   }
 
   updateDiagnosis(details: DiagnosisDetails) {
-    const { verification, status } = details;
+    const { diagnosisName, verification, status } = details;
 
     cy.wait(200);
 
-    cy.get("tr")
+    cy.get("[data-slot='table-row']")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .should("have.length.gte", 2)
-      .last()
+      .contains(diagnosisName)
+      .should("be.visible")
       .within(() => {
-        cy.get("td").should("have.length.gte", 4);
-
-        cy.get("td")
-          .eq(2)
-          .then(($statusCell) => {
-            this.clickAndSelectClinical($statusCell, status);
-          });
-
-        cy.get("td")
-          .eq(3)
-          .then(($severityCell) => {
-            this.clickAndSelectClinical($severityCell, verification);
-          });
+        cy.get("[data-slot='select-trigger']").first().scrollIntoView();
+        cy.clickAndSelectOption('[data-slot="select-trigger"]', status, {
+          position: "first",
+        });
+        cy.get("[data-slot='select-trigger']").last().scrollIntoView();
+        cy.clickAndSelectOption('[data-slot="select-trigger"]', verification, {
+          position: "last",
+        });
       });
 
     return this;
   }
 
-  deleteDiagnosis() {
+  deleteDiagnosis(diagnosisName: string) {
     cy.wait(300);
 
-    cy.get("tr")
+    cy.get("[data-slot='table-row']")
       .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .should("have.length.gte", 2)
-      .last()
+      .contains(diagnosisName)
+      .should("be.visible")
       .within(() => {
-        cy.get("td").should("have.length.gte", 4);
-
-        cy.get("td").eq(4).scrollIntoView().should("be.visible").click();
+        cy.get("[data-slot='dropdown-menu-trigger']").scrollIntoView().click();
       });
 
-    cy.contains("Remove Diagnosis").should("be.visible").click();
+    cy.get("[data-slot='dropdown-menu-item']")
+      .contains("Remove Diagnosis")
+      .should("be.visible")
+      .click();
 
     return this;
   }

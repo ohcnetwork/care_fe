@@ -42,7 +42,7 @@ export const conditionStatus = ["Active", "Recurrence", "Relapse"];
 
 export const symptomSeverity = ["Severe", "Moderate", "Mild"];
 
-export const diagnosisVerification = [
+export const conditionVerification = [
   "Unconfirmed",
   "Provisional",
   "Differential",
@@ -80,7 +80,7 @@ export function getRandomSymptomSeverity(): string {
   return symptomSeverity[randomIndex];
 }
 
-export function getRandomDiagnosisVerification(): string {
-  const randomIndex = getRandomIndex(diagnosisVerification.length);
-  return diagnosisVerification[randomIndex];
+export function getRandomConditionVerification(): string {
+  const randomIndex = getRandomIndex(conditionVerification.length);
+  return conditionVerification[randomIndex];
 }
