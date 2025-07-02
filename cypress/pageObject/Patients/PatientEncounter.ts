@@ -72,8 +72,11 @@ export class PatientEncounter {
     cy.wait(200);
 
     cy.get("[data-slot='table-row']")
-      .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .contains(allergyName)
+      .filter(
+        (_, el) =>
+          getComputedStyle(el).pointerEvents !== "none" &&
+          el.textContent?.includes(allergyName),
+      )
       .should("be.visible")
       .within(() => {
         cy.get("[data-slot='select-trigger']").first().scrollIntoView();
@@ -92,8 +95,11 @@ export class PatientEncounter {
   deleteAllergy(allergyName: string) {
     cy.wait(300);
     cy.get("[data-slot='table-row']")
-      .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .contains(allergyName)
+      .filter(
+        (_, el) =>
+          getComputedStyle(el).pointerEvents !== "none" &&
+          el.textContent?.includes(allergyName),
+      )
       .should("be.visible")
       .within(() => {
         cy.get("[data-slot='dropdown-menu-trigger']").scrollIntoView().click();
@@ -172,8 +178,11 @@ export class PatientEncounter {
     cy.wait(200);
 
     cy.get("[data-slot='table-row']")
-      .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .contains(symptomName)
+      .filter(
+        (_, el) =>
+          getComputedStyle(el).pointerEvents !== "none" &&
+          el.textContent?.includes(symptomName),
+      )
       .should("be.visible")
       .within(() => {
         this.clickAndSelectSymptomOption(0, status);
@@ -188,8 +197,11 @@ export class PatientEncounter {
     cy.wait(300);
 
     cy.get("[data-slot='table-row']")
-      .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .contains(symptomName)
+      .filter(
+        (_, el) =>
+          getComputedStyle(el).pointerEvents !== "none" &&
+          el.textContent?.includes(symptomName),
+      )
       .should("be.visible")
       .within(() => {
         cy.get("[data-slot='dropdown-menu-trigger']").scrollIntoView().click();
@@ -252,8 +264,11 @@ export class PatientEncounter {
     cy.wait(200);
 
     cy.get("[data-slot='table-row']")
-      .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .contains(diagnosisName)
+      .filter(
+        (_, el) =>
+          getComputedStyle(el).pointerEvents !== "none" &&
+          el.textContent?.includes(diagnosisName),
+      )
       .should("be.visible")
       .within(() => {
         cy.get("[data-slot='select-trigger']").first().scrollIntoView();
@@ -273,8 +288,11 @@ export class PatientEncounter {
     cy.wait(300);
 
     cy.get("[data-slot='table-row']")
-      .filter((_, el) => getComputedStyle(el).pointerEvents !== "none")
-      .contains(diagnosisName)
+      .filter(
+        (_, el) =>
+          getComputedStyle(el).pointerEvents !== "none" &&
+          el.textContent?.includes(diagnosisName),
+      )
       .should("be.visible")
       .within(() => {
         cy.get("[data-slot='dropdown-menu-trigger']").scrollIntoView().click();
