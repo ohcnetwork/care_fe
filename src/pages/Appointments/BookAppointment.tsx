@@ -1,4 +1,9 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  onlineManager,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -11,13 +16,28 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import Page from "@/components/Common/Page";
+import { AuthUserModel } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
 
+import {
+  isOfflineId,
+  normalizedAppointmentRecord,
+  saveOfflineWrite,
+  updateSlotCacheAfterOfflineAppointment,
+} from "@/OfflineSupport/offlineWriteHelpers";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
+import { Patient } from "@/types/emr/patient";
+import { FacilityData } from "@/types/facility/facility";
+import {
+  AppointmentNonCancelledStatus,
+  TokenSlot,
+} from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+import { UserBase } from "@/types/user/user";
 
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
 
@@ -29,9 +49,17 @@ interface Props {
 export default function BookAppointment(props: Props) {
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
-
+  const authUser = useAuthUser();
+  const queryClient = useQueryClient();
   const [resourceId, setResourceId] = useState<string>();
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
+  const [selectedPracticioner, setSelectedPracticioner] =
+    useState<UserBase | null>(null);
+  const [OfflineSelectedSlot, setOfflineSelectedSlot] = useState<
+    TokenSlot | undefined
+  >();
+  const [selectedMonthOffline, setSelectedMonthOffline] = useState(new Date());
+  const [selectedDateOffline, setSelectedDateOffline] = useState(new Date());
 
   const [reason, setReason] = useState("");
 
@@ -55,6 +83,7 @@ export default function BookAppointment(props: Props) {
 
     if (users.length === 1) {
       setResourceId(users[0].id);
+      setSelectedPracticioner(users[0]);
     }
 
     if (users.length === 0) {
@@ -71,6 +100,103 @@ export default function BookAppointment(props: Props) {
     }),
   });
 
+  const queueAppointmentRecordOffline = async (
+    createAppointmentData: any,
+    selectedSlot: TokenSlot | undefined,
+    selectedPracticioner: UserBase | null,
+    authUser: AuthUserModel,
+    status: AppointmentNonCancelledStatus,
+  ) => {
+    if (!selectedSlot) {
+      toast.error(t("slot_is_not_selected"));
+      return;
+    }
+    if (!selectedPracticioner) {
+      toast.error(t("practicioner_is_not_selected"));
+      return;
+    }
+    try {
+      const generatedId = `offline-${crypto.randomUUID()}`;
+      const offlineEntry = {
+        id: generatedId,
+        userId: authUser?.external_id,
+        mutationSyncrouteKey: "createAppointment",
+        mutationPathParams: {
+          facility_id: props.facilityId,
+          slot_id: selectedSlotId ?? "",
+        },
+        type: "createAppointment",
+        resourceType: "Appointment",
+        payload: createAppointmentData,
+        parentMutationIds: isOfflineId(props.patientId)
+          ? [props.patientId]
+          : [],
+      };
+
+      const saveResult = await saveOfflineWrite(offlineEntry);
+
+      if (!saveResult.success) {
+        toast.error(saveResult.error);
+        return;
+      }
+
+      const facilityData = queryClient.getQueryData<FacilityData>([
+        "facility",
+        props.facilityId,
+      ]);
+
+      const FacilityBareMinimumData = {
+        id: facilityData?.id ?? "-",
+        name: facilityData?.name ?? "-",
+      };
+
+      const Patientdata = queryClient.getQueryData<Patient>([
+        "patient",
+        props.patientId,
+      ]);
+
+      if (!Patientdata) {
+        toast.error(
+          t("eror_while_appointment_schedule1_patient_missin_offline"),
+        );
+        return;
+      }
+      const normalizeAppointment = normalizedAppointmentRecord(
+        saveResult.entry,
+        selectedSlot,
+        Patientdata ?? Patientdata,
+        authUser,
+        status,
+        selectedPracticioner,
+        FacilityBareMinimumData,
+      );
+
+      queryClient.setQueryData(
+        ["appointment", generatedId],
+        normalizeAppointment,
+      );
+
+      updateSlotCacheAfterOfflineAppointment({
+        queryClient: queryClient,
+        selectedSlot: selectedSlot,
+        selectedPracticioner: selectedPracticioner,
+        facilityId: props.facilityId,
+        selectedDate: selectedDateOffline,
+        selectedMonth: selectedMonthOffline,
+        action: "booked",
+      });
+
+      toast.success("Appointment created successfully");
+      navigate(
+        `/facility/${props.facilityId}/patient/${props.patientId}/appointments/${generatedId}`,
+      );
+    } catch (error) {
+      console.error("Error while scheduling appointment", error);
+      toast.error(t("eror_while_appointment_schedule"));
+    }
+  };
+
+  console.log(selectedDateOffline, selectedMonthOffline);
   const handleSubmit = async () => {
     if (!resourceId) {
       toast.error("Please select a practitioner");
@@ -82,10 +208,25 @@ export default function BookAppointment(props: Props) {
     }
 
     try {
-      const data = await createAppointment({
+      const createAppointmentData = {
         patient: props.patientId,
         reason_for_visit: reason,
-      });
+      };
+
+      if (!onlineManager.isOnline()) {
+        const status = "booked";
+        await queueAppointmentRecordOffline(
+          createAppointmentData,
+          OfflineSelectedSlot,
+          selectedPracticioner,
+          authUser,
+          status,
+        );
+
+        return;
+      }
+
+      const data = await createAppointment(createAppointmentData);
       toast.success("Appointment created successfully");
       navigate(
         `/facility/${props.facilityId}/patient/${props.patientId}/appointments/${data.id}`,
@@ -119,7 +260,10 @@ export default function BookAppointment(props: Props) {
               <PractitionerSelector
                 facilityId={props.facilityId}
                 selected={resource ?? null}
-                onSelect={(user) => setResourceId(user?.id ?? undefined)}
+                onSelect={(user) => {
+                  setResourceId(user?.id ?? undefined);
+                  setSelectedPracticioner(user ?? null);
+                }}
                 clearSelection={t("show_all")}
               />
             </div>
@@ -136,6 +280,9 @@ export default function BookAppointment(props: Props) {
               resourceId={resourceId}
               selectedSlotId={selectedSlotId}
               onSlotSelect={setSelectedSlotId}
+              setOfflineSelectedSlot={setOfflineSelectedSlot}
+              setSelectedMonthOffline={setSelectedMonthOffline}
+              setSelectedDateOffline={setSelectedDateOffline}
             />
           </div>
 

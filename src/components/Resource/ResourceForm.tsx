@@ -81,6 +81,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const authUser = useAuthUser();
   const queryClient = useQueryClient();
   const db = new AppCacheDB();
+  // const persister = createUserPersister();
   const resourceFormSchema = z.object({
     status: z.string().min(1, { message: t("field_required") }),
     category: z.string().min(1, { message: t("field_required") }),
@@ -255,11 +256,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           authUser,
         );
 
-        queryClient.removeQueries({
-          queryKey: ["resource_request", resourceId],
-          exact: true,
-        });
-
         queryClient.setQueryData(
           ["resource_request", resourceId],
           normalizedResource,
@@ -291,11 +287,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           authUser,
         );
 
-        queryClient.removeQueries({
-          queryKey: ["resource_request", resourceId],
-          exact: true,
-        });
-
         queryClient.setQueryData(
           ["resource_request", resourceId],
           normalizedResource,
@@ -303,6 +294,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       }
 
       toast.success(t("resource_updated_successfully"));
+
       navigate(`/facility/${facilityId}/resource/${resourceId}`);
     } catch (error) {
       console.error("Error while queuing resource update:", error);
@@ -314,28 +306,18 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const queueNewResourceRequest = async (resourcePayload: any) => {
     try {
       const generatedId = `offline-${crypto.randomUUID()}`;
-      const baseEntry = {
+
+      const offlineEntry = {
         id: generatedId,
         userId: authUser.external_id,
         mutationSyncrouteKey: "createResource",
         type: "createResourceRequest",
         resourceType: "resourceRequest",
         payload: resourcePayload,
+        parentMutationIds: isOfflineId(related_patient)
+          ? [related_patient]
+          : [],
       };
-
-      const offlineEntry = isOfflineId(related_patient)
-        ? {
-            ...baseEntry,
-            parentMutationIds: [related_patient],
-            dependentFields: [
-              {
-                parentId: related_patient,
-                parentField: "id",
-                childField: "related_patient",
-              },
-            ],
-          }
-        : baseEntry;
 
       const saveResult = await saveOfflineWrite(offlineEntry);
       if (!saveResult.success) {
@@ -356,6 +338,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         ["resource_request", generatedId],
         normalizedResource,
       );
+
       toast.success(t("resource_updated_successfully"));
       navigate(`/facility/${facilityId}/resource/${generatedId}`);
     } catch (error) {

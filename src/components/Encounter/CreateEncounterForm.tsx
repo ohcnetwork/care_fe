@@ -126,31 +126,19 @@ export default function CreateEncounterForm({
     },
   });
 
-  const queueNewEncounterOffline = async (encounterRequest: any) => {
+  const queueNewEncounterOffline = async (encounterRequestData: any) => {
     try {
       const generatedId = `offline-${crypto.randomUUID()}`;
-      const baseEntry = {
+
+      const offlineWrite = {
         id: generatedId,
         userId: user.external_id,
         mutationSyncrouteKey: "createEncounter",
         type: "createEncounter",
         resourceType: "Encounter",
-        payload: encounterRequest,
+        payload: encounterRequestData,
+        parentMutationIds: isOfflineId(patientId) ? [patientId] : [],
       };
-
-      const offlineWrite = isOfflineId(patientId)
-        ? {
-            ...baseEntry,
-            parentMutationIds: [patientId],
-            dependentFields: [
-              {
-                parentId: patientId,
-                parentField: "id",
-                childField: "patient",
-              },
-            ],
-          }
-        : baseEntry;
 
       const saveResult = await saveOfflineWrite(offlineWrite);
       if (!saveResult.success) {
@@ -177,6 +165,7 @@ export default function CreateEncounterForm({
       period: {
         start: data.start_date,
       },
+      id: crypto.randomUUID(),
     };
 
     if (!onlineManager.isOnline()) {

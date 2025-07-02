@@ -1,9 +1,13 @@
 import {
+  DehydratedState,
+  hydrate,
   onlineManager,
   useIsRestoring,
   useQueryClient,
 } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+
+import { createUserPersister } from "@/OfflineSupport/createUserPersister";
 
 const CHECK_URL = "https://careapi.ohc.network";
 
@@ -12,34 +16,25 @@ export default function useNetworkStatus() {
   const [isChecked, setIsChecked] = useState(false);
   const isRestoring = useIsRestoring();
   const queryClient = useQueryClient();
-
-  const clearPausedQueries = async () => {
-    const allQueries = queryClient.getQueryCache().getAll();
-    console.log("Checking for paused queries...", allQueries);
-    for (const query of allQueries) {
-      const { status } = query.state;
-      const observersCount = query.getObserversCount();
-
-      const shouldRemove = status !== "success" && observersCount === 0;
-      console.log(
-        "sttus , observecount",
-        status,
-        observersCount,
-        shouldRemove,
-        query,
-      );
-      if (shouldRemove) {
-        queryClient.getQueryCache().remove(query);
-        console.log("Removed paused query:", query);
-      }
-      await Promise.resolve();
-    }
-    console.log(
-      "Checking for paused queries after removing",
-      queryClient.getQueryCache().getAll(),
-    );
+  const persistor = createUserPersister();
+  const cancelNonSuccessQueries = async () => {
+    queryClient
+      .getQueryCache()
+      .getAll()
+      .forEach((query) => {
+        queryClient.cancelQueries({ queryKey: query.queryKey });
+      });
   };
 
+  const restorePersistedCache = async () => {
+    if (!persistor) return;
+    const restored = await persistor.restoreClient();
+
+    if (restored?.clientState) {
+      queryClient.clear();
+      hydrate(queryClient, restored.clientState as DehydratedState);
+    }
+  };
   const checkConnection = async () => {
     if (isRestoring) return;
     try {
@@ -54,13 +49,20 @@ export default function useNetworkStatus() {
 
       clearTimeout(timeoutId);
       const online = response.ok;
-      await clearPausedQueries();
+      if (!onlineManager.isOnline()) {
+        await cancelNonSuccessQueries();
+      }
+
       setIsOnline(online);
       onlineManager.setOnline(online);
+      console.log("inavlidate user refrsh toker befoe");
+      await queryClient.invalidateQueries({ queryKey: ["user-refresh-token"] });
+      console.log("inavlidate user refrsh toker after");
     } catch {
       setIsOnline(false);
       console.log("❌ HEAD fetch failed:");
       onlineManager.setOnline(false);
+      await restorePersistedCache();
     } finally {
       setIsChecked(true);
     }
@@ -71,10 +73,11 @@ export default function useNetworkStatus() {
       checkConnection();
     }
 
-    const handleOffline = () => {
+    const handleOffline = async () => {
       setIsOnline(false);
       onlineManager.setOnline(false);
       setIsChecked(true);
+      await restorePersistedCache();
       console.log("❌ Browser says: offline");
     };
 

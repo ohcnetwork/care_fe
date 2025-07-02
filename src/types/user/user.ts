@@ -17,6 +17,7 @@ export type UserBase = {
   prefix: string | null;
   mfa_enabled: boolean;
   deleted: boolean;
+  is_Updated_Offline?: boolean;
 };
 
 export type CreateUserModel = {

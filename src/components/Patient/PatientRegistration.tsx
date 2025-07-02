@@ -273,16 +273,15 @@ export default function PatientRegistration(
           },
         };
         await db.OfflineWrites.update(patientId, updatedEntry);
+        const permissions = patientQuery.data?.permissions || [];
+
         const normalizePatient = normalizeOfflinePatientRecord(
           updatedEntry,
           user,
           selectedOrganization,
-          [],
+          permissions,
         );
-        queryClient.removeQueries({
-          queryKey: ["patient", patientId],
-          exact: true,
-        });
+
         queryClient.setQueryData(["patient", patientId], normalizePatient);
       } else {
         const offlineWrite = {
@@ -303,21 +302,17 @@ export default function PatientRegistration(
           return;
         }
 
-        const selectorganization = selectedOrganization
-          ? selectedOrganization
-          : patientQuery.data?.geo_organization;
+        const permissions = patientQuery.data?.permissions || [];
 
         const normalizePatient = normalizeOfflinePatientRecord(
           saveResult.entry,
           user,
-          selectorganization ? selectorganization : null,
-          [],
+          selectedOrganization,
+          permissions,
+          patientQuery.data?.created_date,
+          patientQuery.data?.modified_date,
         );
 
-        queryClient.removeQueries({
-          queryKey: ["patient", patientId],
-          exact: true,
-        });
         queryClient.setQueryData(["patient", patientId], normalizePatient);
       }
       toast.success(t("offline_patient_update_success"));
@@ -332,6 +327,7 @@ export default function PatientRegistration(
   const queueNewPatientOffline = async (createPatientData: any) => {
     try {
       const generatedId = `offline-${crypto.randomUUID()}`;
+
       const offlineWrite = {
         id: generatedId,
         userId: user.external_id,
@@ -412,6 +408,7 @@ export default function PatientRegistration(
           : values.permanent_address,
         facility: facilityId,
         ward_old: undefined,
+        id: crypto.randomUUID(),
       };
       if (!onlineManager.isOnline() && userConfirmedOfflineDuplicateRisk) {
         await queueNewPatientOffline(createPatientData);
@@ -469,6 +466,9 @@ export default function PatientRegistration(
 
   useEffect(() => {
     if (patientQuery.data) {
+      setSelectedOrganization(
+        patientQuery.data.geo_organization as unknown as Organization,
+      );
       form.reset({
         _selected_levels: [
           patientQuery.data.geo_organization as unknown as Organization,

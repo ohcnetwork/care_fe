@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  onlineManager,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -39,12 +44,21 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import UserSelector from "@/components/Common/UserSelector";
+import { AuthUserModel } from "@/components/Users/models";
+
+import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
+import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import {
+  isOfflineId,
+  saveOfflineWrite,
+} from "@/OfflineSupport/offlineWriteHelpers";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import roleApi from "@/types/emr/role/roleApi";
@@ -54,11 +68,15 @@ import { PatientProps } from ".";
 
 interface AddUserSheetProps {
   patientId: string;
+  users: PaginatedResponse<UserBase> | undefined;
+
+  authUser: AuthUserModel;
 }
 
-function AddUserSheet({ patientId }: AddUserSheetProps) {
+function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+
   const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserBase>();
   const [selectedRole, setSelectedRole] = useState<string>("");
@@ -94,16 +112,81 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
     },
   });
 
-  const handleAddUser = () => {
+  const queueNewAssignUseroffline = async (
+    assignUserData: any,
+    selectedUser: UserBase,
+    users: PaginatedResponse<UserBase> | undefined,
+  ) => {
+    try {
+      const canAddUser = !users?.results?.some(
+        (user) => user.id === selectedUser.id,
+      );
+
+      if (!canAddUser) {
+        toast.error("User_already_assigned_to_this_patient");
+        return;
+      }
+      const generatedId = `offline-${crypto.randomUUID()}`;
+      const offlineWrite = {
+        id: generatedId,
+        userId: authUser.external_id,
+        mutationSyncrouteKey: "assignUser",
+        mutationPathParams: { patientId },
+        type: "assignUser",
+        resourceType: "patient",
+        payload: assignUserData,
+        parentMutationIds: isOfflineId(patientId) ? [patientId] : [],
+      };
+
+      const saveResult = await saveOfflineWrite(offlineWrite);
+      if (!saveResult.success) {
+        toast.error(saveResult.error);
+        return;
+      }
+
+      const updatedUserList: PaginatedResponse<UserBase> = users?.results
+        ? {
+            ...users,
+            results: [
+              ...users.results,
+              { ...selectedUser, is_Updated_Offline: true },
+            ],
+            count: (users.count ?? users.results.length) + 1,
+          }
+        : {
+            count: 1,
+            results: [{ ...selectedUser, is_Updated_Offline: true }],
+          };
+
+      // queryClient.removeQueries({ queryKey: ["patientUsers", patientId] });
+      queryClient.setQueryData(["patientUsers", patientId], updatedUserList);
+
+      toast.success("User added to patient successfully");
+      setOpen(false);
+      setSelectedUser(undefined);
+      setSelectedRole("");
+    } catch (error) {
+      console.error("Error while queueing assign user offline:", error);
+      toast.error("Error_while_queueing_assign_user_offline");
+    }
+  };
+
+  const handleAddUser = async () => {
     if (!selectedUser || !selectedRole) {
       toast.error("Please select both user and role");
       return;
     }
 
-    assignUser({
+    const assignUserData = {
       user: selectedUser.id,
       role: selectedRole,
-    });
+    };
+    if (!onlineManager.isOnline()) {
+      await queueNewAssignUseroffline(assignUserData, selectedUser, users);
+      return;
+    }
+
+    assignUser(assignUserData);
   };
 
   const handleUserChange = (user: UserBase) => {
@@ -228,9 +311,11 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 
 export const PatientUsers = ({ patientData }: PatientProps) => {
   const patientId = patientData.id;
-
+  const db = new AppCacheDB();
+  const authUser = useAuthUser();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+
   const { hasPermission } = usePermissions();
   const { canWritePatient } = getPermissions(
     hasPermission,
@@ -245,6 +330,60 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
     meta: { persist: true },
     networkMode: "online",
   });
+
+  const queueRemoveUserOffline = async (removeUserId: string) => {
+    try {
+      const generatedId = `offline-${crypto.randomUUID()}`;
+      const offlineWrite = {
+        id: generatedId,
+        userId: authUser.external_id,
+        mutationSyncrouteKey: "removeAssignUser",
+        mutationPathParams: { patientId },
+        type: "removeAssignUser",
+        resourceType: "patient",
+        payload: { user: removeUserId },
+        parentMutationIds: isOfflineId(patientId) ? [patientId] : [],
+      };
+
+      const saveResult = await saveOfflineWrite(offlineWrite);
+      if (!saveResult.success) {
+        toast.error(saveResult.error);
+        return;
+      }
+      await db.OfflineWrites.where({
+        type: "assignUser",
+        resourceType: "patient",
+      })
+        .and((entry) => {
+          const payload = entry.payload as { user: string; role: string };
+          return (
+            entry.mutationPathParams?.patientId === patientId &&
+            payload?.user === removeUserId
+          );
+        })
+        .delete();
+
+      //update the query cache list of users
+      const users = queryClient.getQueryData<PaginatedResponse<UserBase>>([
+        "patientUsers",
+        patientId,
+      ]);
+      const updatedUserList = users
+        ? {
+            ...users,
+            results: users.results.filter((u) => u.id !== removeUserId),
+            count: users.count - 1,
+          }
+        : { count: 0, results: [] };
+
+      queryClient.setQueryData(["patientUsers", patientId], updatedUserList);
+
+      toast.success("User removal queued offline");
+    } catch (err) {
+      console.error("Error queuing remove user offline:", err);
+      toast.error("Error queuing remove user offline");
+    }
+  };
 
   const { mutate: removeUser } = useMutation({
     mutationFn: (user: string) =>
@@ -265,6 +404,20 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
       });
     },
   });
+
+  const handleRemoveUser = async (userId: string) => {
+    if (!userId) {
+      toast.error("User ID is missing");
+      return;
+    }
+
+    if (!onlineManager.isOnline()) {
+      await queueRemoveUserOffline(userId);
+      return;
+    }
+
+    removeUser(userId);
+  };
 
   const ManageUsers = () => {
     if (!users?.results?.length) {
@@ -336,7 +489,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
                       <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                       <AlertDialogAction
                         data-cy="patient-user-remove-confirm-button"
-                        onClick={() => removeUser(user.id)}
+                        onClick={() => handleRemoveUser(user.id)}
                         className={cn(
                           buttonVariants({ variant: "destructive" }),
                         )}
@@ -375,7 +528,13 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
             <div className="mr-4 text-xl font-bold text-secondary-900">
               {t("users")}
             </div>
-            {canWritePatient && <AddUserSheet patientId={patientId} />}
+            {canWritePatient && (
+              <AddUserSheet
+                authUser={authUser}
+                users={users}
+                patientId={patientId}
+              />
+            )}
           </div>
           <ManageUsers />
         </div>

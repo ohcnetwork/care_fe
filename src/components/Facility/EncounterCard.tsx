@@ -15,11 +15,8 @@ import { formatDateTime } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 
-interface EncounterWithMeta extends Encounter {
-  isUpdatedOffline?: boolean;
-}
 interface EncounterCardProps {
-  encounter: EncounterWithMeta;
+  encounter: Encounter;
   permissions: string[];
   facilityId?: string;
 }
@@ -82,7 +79,7 @@ export const EncounterCard = (props: EncounterCardProps) => {
                 {Icon}
                 {t(`encounter_class__${encounter.encounter_class}`)}
               </Badge>
-              {(isOfflineId(encounter.id) || encounter?.isUpdatedOffline) && (
+              {(isOfflineId(encounter.id) || encounter?.is_Updated_Offline) && (
                 <Badge
                   variant="outline"
                   className="ml-2 py-0 border-2 border-yellow-400 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900"

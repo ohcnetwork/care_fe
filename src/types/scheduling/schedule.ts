@@ -167,6 +167,8 @@ export interface Appointment {
   user: UserBase;
   booked_by: UserBase | null; // This is null if the appointment was booked by the patient itself.
   facility: FacilityBareMinimum;
+  is_updated_offline?: boolean;
+  modified_date: string;
 }
 
 export interface AppointmentCreateRequest {

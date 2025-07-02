@@ -91,6 +91,8 @@ export const useAvailabilityHeatmap = ({
     queryKey: ["availabilityHeatmap", userId, fromDate, toDate],
     queryFn,
     enabled: !!userId,
+    meta: { persist: true },
+    networkMode: "online",
   });
 };
 

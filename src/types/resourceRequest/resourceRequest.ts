@@ -24,6 +24,7 @@ export interface ResourceRequest {
   created_date: string;
   modified_date: string;
   related_patient: Patient | null;
+  is_updated_offline?: boolean;
 }
 
 export interface CreateResourceRequest {

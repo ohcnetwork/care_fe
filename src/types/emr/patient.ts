@@ -37,6 +37,7 @@ export interface Patient {
   permissions: string[];
   nationality?: string;
   partial_id?: string;
+  is_updated_offline?: boolean;
 }
 
 export interface PartialPatientModel {

@@ -63,12 +63,11 @@ export const ResourceRequests = (props: PatientProps) => {
         const allWrites = await db.OfflineWrites.where("type")
           .equals("createResourceRequest")
           .toArray();
-        console.log("allWrites", allWrites);
         const resourceRequests = allWrites.filter((entry) => {
           const payload = entry.payload as any;
           return payload.related_patient === props.patientId;
         });
-        console.log("resourceRequests", resourceRequests);
+
         const normalized = resourceRequests.map((entry) => {
           return normaliZedResourcerequestRecord(
             entry,

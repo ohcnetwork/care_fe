@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { differenceInMinutes, format } from "date-fns";
+import { differenceInMinutes, format, startOfMonth } from "date-fns";
 import { toPng } from "html-to-image";
 import { t } from "i18next";
 
@@ -201,6 +201,11 @@ export const getMonthStartAndEnd = (date: Date) => {
     start: new Date(date.getFullYear(), date.getMonth(), 1),
     end: new Date(date.getFullYear(), date.getMonth() + 1, 0),
   };
+};
+
+export const getMonthFromDate = (dateStr: string | Date) => {
+  const date = new Date(dateStr);
+  return startOfMonth(date);
 };
 
 /**

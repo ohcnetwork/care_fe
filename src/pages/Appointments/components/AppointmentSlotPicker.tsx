@@ -33,6 +33,9 @@ interface AppointmentSlotPickerProps {
   facilityId: string;
   resourceId?: string;
   onSlotSelect: (slotId: string | undefined) => void;
+  setOfflineSelectedSlot?: (slot: TokenSlot | undefined) => void;
+  setSelectedMonthOffline?: (month: Date) => void;
+  setSelectedDateOffline?: (month: Date) => void;
   selectedSlotId?: string;
   onSlotDetailsChange?: (slot: TokenSlot) => void;
 }
@@ -42,7 +45,10 @@ export function AppointmentSlotPicker({
   resourceId,
   onSlotSelect,
   selectedSlotId,
+  setOfflineSelectedSlot,
   onSlotDetailsChange,
+  setSelectedMonthOffline,
+  setSelectedDateOffline,
 }: AppointmentSlotPickerProps) {
   const { t } = useTranslation();
   const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -85,6 +91,7 @@ export function AppointmentSlotPicker({
   // Update slot details when a slot is selected
   const handleSlotSelect = (slotId: string | undefined) => {
     onSlotSelect(slotId);
+
     if (slotId && onSlotDetailsChange) {
       const allSlots = slotsQuery.data?.results || [];
       const selectedSlot = allSlots.find((slot) => slot.id === slotId);
@@ -131,6 +138,7 @@ export function AppointmentSlotPicker({
           disabled
           onClick={() => {
             setSelectedDate(date);
+            setSelectedDateOffline?.(date);
           }}
           className={cn(
             "h-full w-full hover:bg-gray-50 rounded-lg relative overflow-hidden border border-gray-200 cursor-not-allowed",
@@ -159,6 +167,7 @@ export function AppointmentSlotPicker({
         disabled={isBeforeToday || isFullyBooked}
         onClick={() => {
           setSelectedDate(date);
+          setSelectedDateOffline?.(date);
         }}
         className={cn(
           "h-full w-full hover:bg-gray-50 rounded-lg relative overflow-hidden border-2 hover:scale-105 hover:shadow-md transition-all",
@@ -207,6 +216,7 @@ export function AppointmentSlotPicker({
           month={selectedMonth}
           onMonthChange={(month) => {
             setSelectedMonth(month);
+            setSelectedMonthOffline?.(month);
           }}
           renderDay={renderDay}
           className="mb-6"
@@ -256,11 +266,16 @@ export function AppointmentSlotPicker({
                             availability={availability}
                             selectedSlotId={selectedSlotId}
                             onClick={() => {
-                              handleSlotSelect(
-                                selectedSlotId === slot.id
-                                  ? undefined
-                                  : slot.id,
-                              );
+                              if (selectedSlotId === slot.id) {
+                                setOfflineSelectedSlot?.(undefined);
+                                handleSlotSelect(undefined);
+                              } else {
+                                setOfflineSelectedSlot?.({
+                                  ...slot,
+                                  availability,
+                                });
+                                handleSlotSelect(slot.id);
+                              }
                             }}
                           />
                         ))}

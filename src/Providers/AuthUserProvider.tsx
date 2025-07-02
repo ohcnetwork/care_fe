@@ -66,6 +66,7 @@ export default function AuthUserProvider({
     queryFn: query(routes.currentUser, { silent: true }),
     retry: false,
     networkMode: "online",
+    meta: { persist: true },
     enabled:
       !!localStorage.getItem(LocalStorageKeys.accessToken) && !!isChecked,
   });
@@ -177,8 +178,11 @@ export default function AuthUserProvider({
   const signOut = useCallback(async () => {
     const accessToken = localStorage.getItem(LocalStorageKeys.accessToken);
     const refreshToken = localStorage.getItem(LocalStorageKeys.refreshToken);
+    await createUserPersister().removeClient();
+    await queryClient.resetQueries({ queryKey: ["offlineCurrentUser"] });
 
     if (accessToken && refreshToken) {
+      console.log("befor logout api call");
       try {
         await mutate({
           ...routes.logout,
@@ -188,16 +192,15 @@ export default function AuthUserProvider({
         console.error("Error during logout:", error);
       }
     }
-
+    await queryClient.resetQueries({ queryKey: ["currentUser"] });
+    queryClient.clear();
+    console.log("after logout mutate");
     localStorage.removeItem(LocalStorageKeys.accessToken);
     localStorage.removeItem(LocalStorageKeys.refreshToken);
     localStorage.removeItem(LocalStorageKeys.patientTokenKey);
     setAccessToken(null);
     setPatientToken(null);
 
-    await queryClient.resetQueries({ queryKey: ["currentUser"] });
-    queryClient.clear();
-    await createUserPersister().removeClient();
     const redirectURL = getRedirectURL();
     navigate(redirectURL ? `/login?redirect=${redirectURL}` : "/login");
   }, [queryClient]);
@@ -232,6 +235,10 @@ export default function AuthUserProvider({
     isrestoring,
     "isChecked",
     isChecked,
+    "online user:",
+    onlineuser,
+    "offlineuser : ",
+    offlineUser,
   );
 
   if (isLoading || isrestoring || !isChecked) {
@@ -246,12 +253,12 @@ export default function AuthUserProvider({
         verifyMFA,
         isAuthenticating,
         isVerifyingMFA,
-        user: onlineManager.isOnline() ? onlineuser : offlineUser,
+        user: onlineuser ? onlineuser : offlineUser,
         patientLogin,
         patientToken,
       }}
     >
-      {(onlineManager.isOnline() ? onlineuser : offlineUser)
+      {(onlineuser ? onlineuser : offlineUser)
         ? children
         : patientToken?.token
           ? otpAuthorized

@@ -1,14 +1,22 @@
 import { QueryClient } from "@tanstack/react-query";
+import { max, startOfToday } from "date-fns";
 import dayjs from "dayjs";
 
 import { FacilityModel } from "@/components/Facility/models";
 import { AuthUserModel } from "@/components/Users/models";
 
+import { dateQueryString, getMonthStartAndEnd } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/patient";
-import { FacilityData } from "@/types/facility/facility";
+import { FacilityBareMinimum, FacilityData } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
+import {
+  Appointment,
+  AppointmentNonCancelledStatus,
+  AvailabilityHeatmapResponse,
+  TokenSlot,
+} from "@/types/scheduling/schedule";
 import { UserBase } from "@/types/user/user";
 
 import { OfflineWritesEntry } from "./AppcacheDB";
@@ -84,7 +92,9 @@ export const saveOfflineWrite = async ({
     return { success: false, error: errorMessage };
   }
 };
+
 export const isOfflineId = (id: string) => id.startsWith("offline-");
+
 export const getYearOfBirth = (
   date_of_birth?: string,
   age?: number,
@@ -106,12 +116,14 @@ export const getYearOfBirth = (
 };
 
 export const normalizeOfflinePatientRecord = (
-  entry: any,
+  entry: OfflineWritesEntry,
   user: AuthUserModel,
   selectedGeoLocation: Organization | null,
   permissions?: string[],
+  created_date?: string,
+  modified_date?: string,
 ): Patient => {
-  const payload = entry?.payload ?? {};
+  const payload = entry?.payload as any;
   const nowIso = new Date(entry.clientTimestamp).toISOString();
 
   const yob = getYearOfBirth(payload.date_of_birth, payload.age);
@@ -124,14 +136,14 @@ export const normalizeOfflinePatientRecord = (
     emergency_phone_number: payload.emergency_phone_number ?? "",
     address: payload.address ?? "",
     permanent_address: payload.permanent_address ?? "",
-    pincode: payload.pincode ?? null,
+    pincode: payload.pincode ?? undefined,
     blood_group: payload.blood_group ?? null,
     date_of_birth: payload.date_of_birth ?? null,
     year_of_birth: yob ?? 0,
     deceased_datetime: payload.deceased_datetime,
 
-    created_date: nowIso,
-    modified_date: nowIso,
+    created_date: created_date ? created_date : nowIso,
+    modified_date: modified_date ? modified_date : nowIso,
 
     geo_organization: selectedGeoLocation ?? {
       id: payload.geo_organization ?? "unknown",
@@ -175,11 +187,12 @@ export const normalizeOfflinePatientRecord = (
     },
 
     permissions: permissions ?? [],
+    is_updated_offline: true,
   };
 };
 
 export const normalizeOfflineEncounterRecord = (
-  entry: any,
+  entry: OfflineWritesEntry,
   patientData: Patient,
 ): Encounter => {
   const payload = entry.payload as any;
@@ -215,19 +228,22 @@ export const normalizeOfflineEncounterRecord = (
     location_history: payload.location_history ?? [],
     permissions: payload.permissions ?? [],
     care_team: payload.care_team ?? [],
+    is_Updated_Offline: true,
   };
 };
 
 export const normaliZedResourcerequestRecord = (
-  entry: any,
+  entry: OfflineWritesEntry,
   patientData: Patient | undefined,
   assigned_facility: FacilityModel | undefined,
   assignToUser: UserBase | undefined,
   queryClient: QueryClient,
   user: AuthUserModel,
+  created_date?: string,
+  modified_date?: string,
 ): ResourceRequest => {
   const payload = entry.payload as any;
-  console.log("datetime", entry.clientTimestamp);
+
   const nowIso = new Date(entry.clientTimestamp).toISOString();
   const originFacilityId = payload.origin_facility;
   const originfacility =
@@ -263,40 +279,169 @@ export const normaliZedResourcerequestRecord = (
     status: payload.status ?? "unknown(offline)",
     title: payload.title ?? "unknown(offline)",
     assigned_to: assignToUser ?? null,
-    created_by: {
-      id: user.external_id,
-      first_name: user.first_name,
-      username: user.username,
-      email: user.email,
-      last_name: user.last_name,
-      user_type: user.user_type,
-      last_login: user.last_login ?? "",
-      profile_picture_url: user.read_profile_picture_url ?? "",
-      phone_number: user.phone_number ?? "unknown(offline)",
-      gender: user.gender ?? "male",
-      suffix: user.suffix,
-      prefix: user.prefix,
-      mfa_enabled: user.mfa_enabled ?? false,
-      deleted: user.deleted ?? false,
-    },
-    updated_by: {
-      id: user.external_id,
-      first_name: user.first_name,
-      username: user.username,
-      email: user.email,
-      last_name: user.last_name,
-      user_type: user.user_type,
-      last_login: user.last_login ?? "",
-      profile_picture_url: user.read_profile_picture_url ?? "",
-      phone_number: user.phone_number ?? "unknown(offline)",
-      gender: user.gender ?? "male",
-      suffix: user.suffix,
-      prefix: user.prefix,
-      mfa_enabled: user.mfa_enabled ?? false,
-      deleted: user.deleted ?? false,
-    },
-    created_date: nowIso,
-    modified_date: nowIso,
+    created_by: normalizeUserBase(user),
+    updated_by: normalizeUserBase(user),
+    created_date: created_date ? created_date : nowIso,
+    modified_date: modified_date ? modified_date : nowIso,
     related_patient: patientData ?? null,
+    is_updated_offline: true,
   };
 };
+
+export const normalizedAppointmentRecord = (
+  entry: OfflineWritesEntry,
+  selectedTokenSlot: TokenSlot,
+  patientData: Patient,
+  bookedBy: AuthUserModel | null,
+  status: AppointmentNonCancelledStatus,
+  practitioner: UserBase,
+  facility: FacilityBareMinimum,
+): Appointment => {
+  const payload = entry.payload as any;
+  const nowIso = new Date(entry.clientTimestamp).toISOString();
+  return {
+    id: entry.id,
+    token_slot: selectedTokenSlot,
+    patient: patientData ?? null,
+    booked_on: nowIso,
+    booked_by: bookedBy ? normalizeUserBase(bookedBy) : null,
+    status: status,
+    reason_for_visit: payload?.reason_for_visit,
+    user: practitioner,
+    facility: facility,
+    is_updated_offline: true,
+    modified_date: nowIso,
+  };
+};
+
+export const updateSlotCacheAfterOfflineAppointment = ({
+  queryClient,
+  selectedSlot,
+  selectedPracticioner,
+  facilityId,
+  action,
+  selectedDate,
+  selectedMonth,
+  previousSlot,
+  previousDate,
+  previousMonth,
+}: {
+  queryClient: QueryClient;
+  selectedSlot?: TokenSlot;
+  selectedPracticioner: UserBase;
+  facilityId: string;
+  action: "booked" | "rescheduled" | "cancel" | "mark_as_entered_in_error";
+  selectedDate?: Date;
+  selectedMonth?: Date;
+  previousSlot?: TokenSlot;
+  previousDate?: Date;
+  previousMonth?: Date;
+}) => {
+  const getKeys = (date: Date, month: Date) => {
+    const { start, end } = getMonthStartAndEnd(month);
+    const fromDate = dateQueryString(max([start, startOfToday()]));
+    const toDate = dateQueryString(max([fromDate, end]));
+    return {
+      availabilityHeatmapKey: [
+        "availabilityHeatmap",
+        selectedPracticioner.id,
+        fromDate,
+        toDate,
+      ],
+      slotQueryKey: [
+        "slots",
+        facilityId,
+        selectedPracticioner.id,
+        dateQueryString(date),
+      ],
+      dateKey: dateQueryString(date),
+    };
+  };
+
+  // Utility to update heatmap slot counts
+  const updateHeatmap = (key: any[], dateKey: string, delta: number) => {
+    const heatmap = queryClient.getQueryData<AvailabilityHeatmapResponse>(key);
+    if (heatmap && heatmap[dateKey]) {
+      const prev = heatmap[dateKey];
+      const updated: AvailabilityHeatmapResponse = {
+        ...heatmap,
+        [dateKey]: {
+          ...prev,
+          booked_slots: Math.max((prev.booked_slots ?? 0) + delta, 0),
+        },
+      };
+      queryClient.setQueryData(key, updated);
+    }
+  };
+
+  // Utility to update slot allocation
+  const updateSlots = (key: any[], slotId: string, delta: number) => {
+    const slotList = queryClient.getQueryData<{ results: TokenSlot[] }>(key);
+    if (slotList) {
+      const updatedSlots = {
+        ...slotList,
+        results: slotList.results.map((slot) =>
+          slot.id === slotId
+            ? {
+                ...slot,
+                allocated: Math.max((slot.allocated ?? 0) + delta, 0),
+              }
+            : slot,
+        ),
+      };
+      queryClient.setQueryData(key, updatedSlots);
+    }
+  };
+
+  // Handle increment for "booked" and "rescheduled"
+  if (
+    (action === "booked" || action === "rescheduled") &&
+    selectedDate &&
+    selectedMonth &&
+    selectedSlot
+  ) {
+    const { availabilityHeatmapKey, slotQueryKey, dateKey } = getKeys(
+      selectedDate,
+      selectedMonth,
+    );
+    updateHeatmap(availabilityHeatmapKey, dateKey, +1);
+    updateSlots(slotQueryKey, selectedSlot.id, +1);
+  }
+
+  // Handle decrement for "rescheduled", "cancel", and "mark_as_entered_in_error"
+  if (
+    (action === "rescheduled" ||
+      action === "cancel" ||
+      action === "mark_as_entered_in_error") &&
+    previousSlot &&
+    previousDate &&
+    previousMonth
+  ) {
+    const {
+      availabilityHeatmapKey: prevHeatmapKey,
+      slotQueryKey: prevSlotKey,
+      dateKey: prevDateKey,
+    } = getKeys(previousDate, previousMonth);
+    updateHeatmap(prevHeatmapKey, prevDateKey, -1);
+    updateSlots(prevSlotKey, previousSlot.id, -1);
+  }
+};
+
+export function normalizeUserBase(authUser: AuthUserModel): UserBase {
+  return {
+    id: authUser?.external_id,
+    first_name: authUser?.first_name,
+    username: authUser?.username,
+    email: authUser?.email,
+    last_name: authUser?.last_name,
+    user_type: authUser?.user_type,
+    last_login: authUser?.last_login ?? "",
+    profile_picture_url: authUser?.read_profile_picture_url ?? "",
+    phone_number: authUser?.phone_number ?? "unknown(offline)",
+    gender: authUser?.gender ?? "male",
+    suffix: authUser?.suffix,
+    prefix: authUser?.prefix,
+    mfa_enabled: authUser?.mfa_enabled ?? false,
+    deleted: authUser?.deleted ?? false,
+  };
+}

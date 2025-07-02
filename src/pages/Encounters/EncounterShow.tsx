@@ -19,7 +19,6 @@ import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import {
   isOfflineId,
   normalizeOfflineEncounterRecord,
-  normalizeOfflinePatientRecord,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -79,6 +78,7 @@ export const EncounterShow = (props: Props) => {
   const [offlinePatientPayload, setOfflinePatientPayload] =
     useState<Patient | null>(null);
   const queryClient = useQueryClient();
+  console.log(queryClient);
   const tabs: Record<string, React.FC<EncounterTabProps>> = {
     ...defaultTabs,
     ...pluginTabs,
@@ -169,11 +169,11 @@ export const EncounterShow = (props: Props) => {
         if (isOfflineId(patientId)) {
           const record = await db.OfflineWrites.get(patientId);
           if (record) {
-            const normalized = normalizeOfflinePatientRecord(
-              record,
-              queryClient,
-            );
-            setOfflinePatientPayload(normalized);
+            // const normalized = normalizeOfflinePatientRecord(
+            //   record,
+            //   queryClient,
+            // );
+            setOfflinePatientPayload(null);
           }
         } else if (patient) {
           setOfflinePatientPayload(patient);
@@ -194,6 +194,7 @@ export const EncounterShow = (props: Props) => {
             .filter((entry) => entry.type === "createEncounter")
             .first();
 
+          if (!newEncounter) return;
           const normalizedEncounter = normalizeOfflineEncounterRecord(
             newEncounter,
             offlinePatientPayload,

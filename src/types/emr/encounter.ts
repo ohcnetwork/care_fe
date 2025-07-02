@@ -207,6 +207,7 @@ export interface Encounter {
   permissions: string[];
   care_team: CareTeamResponse[];
   discharge_summary_advice?: string;
+  is_Updated_Offline?: boolean;
 }
 
 export interface EncounterEditRequest {
@@ -233,6 +234,7 @@ export interface EncounterRequest {
   external_identifier?: string;
   facility: string;
   discharge_summary_advice?: string;
+  id?: string;
 }
 
 export const completedEncounterStatus = ["completed"];
