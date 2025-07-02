@@ -59,7 +59,7 @@ export function VitalsTable({ vitals, vitalCodes }: VitalsTableProps) {
                     collisionPadding={16}
                   >
                     <div className="space-y-2">
-                      <div key={code.code} className="text-xs">
+                      <div className="text-xs">
                         {code.display} ({code.code})
                       </div>
                     </div>
