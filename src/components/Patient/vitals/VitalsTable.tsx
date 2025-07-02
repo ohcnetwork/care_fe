@@ -44,7 +44,7 @@ export function VitalsTable({ vitals, vitalCodes }: VitalsTableProps) {
               className="h-auto  py-1 px-2  text-gray-600 text-center"
             >
               <div className="flex items-center justify-center space-x-1">
-                <span className="text-xs font-medium">
+                <span className="text-sm font-medium">
                   {code.display || ""}
                 </span>
                 <Popover>
