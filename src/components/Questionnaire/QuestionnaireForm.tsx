@@ -921,7 +921,7 @@ export function QuestionnaireForm({
                 <Button
                   type="submit"
                   onClick={handleSubmit}
-                  disabled={isPending || hasErrors}
+                  disabled={isPending || hasErrors || !isDirty}
                   className="relative"
                 >
                   {isPending ? (
