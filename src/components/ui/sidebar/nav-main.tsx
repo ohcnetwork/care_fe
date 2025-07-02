@@ -79,6 +79,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const path = usePath();
+  const [open, setIsOpen] = useState<string | null>(null);
 
   return (
     <SidebarGroup>
@@ -93,7 +94,8 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                 ) : (
                   <Collapsible
                     asChild
-                    defaultOpen={isChildActive(link, path)}
+                    open={open === link.name}
+                    onOpenChange={(open) => setIsOpen(open ? link.name : null)}
                     className="group/collapsible"
                   >
                     <SidebarMenuItem>
@@ -105,7 +107,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                             "cursor-pointer hover:bg-gray-200 hover:text-green-700",
                             {
                               "bg-white text-green-700 shadow":
-                                isChildActive(link, path) && isCollapsed,
+                                open !== link.name && isChildActive(link, path),
                             },
                           )}
                         >
