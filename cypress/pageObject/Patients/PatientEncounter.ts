@@ -79,11 +79,17 @@ export class PatientEncounter {
       )
       .should("be.visible")
       .within(() => {
-        cy.get("[data-slot='select-trigger']").first().scrollIntoView();
+        cy.get("[data-slot='select-trigger']")
+          .first()
+          .should("be.enabled")
+          .scrollIntoView();
         cy.clickAndSelectOption('[data-slot="select-trigger"]', criticality, {
           position: "first",
         });
-        cy.get("[data-slot='select-trigger']").last().scrollIntoView();
+        cy.get("[data-slot='select-trigger']")
+          .last()
+          .should("be.enabled")
+          .scrollIntoView();
         cy.clickAndSelectOption('[data-slot="select-trigger"]', status, {
           position: "last",
         });
@@ -163,6 +169,7 @@ export class PatientEncounter {
   clickAndSelectSymptomOption(position: number, value: string) {
     cy.get("[data-slot='select-trigger']")
       .eq(position)
+      .should("be.enabled")
       .scrollIntoView()
       .click();
     cy.get('[role="listbox"]')
@@ -271,11 +278,17 @@ export class PatientEncounter {
       )
       .should("be.visible")
       .within(() => {
-        cy.get("[data-slot='select-trigger']").first().scrollIntoView();
+        cy.get("[data-slot='select-trigger']")
+          .first()
+          .should("be.enabled")
+          .scrollIntoView();
         cy.clickAndSelectOption('[data-slot="select-trigger"]', status, {
           position: "first",
         });
-        cy.get("[data-slot='select-trigger']").last().scrollIntoView();
+        cy.get("[data-slot='select-trigger']")
+          .last()
+          .should("be.enabled")
+          .scrollIntoView();
         cy.clickAndSelectOption('[data-slot="select-trigger"]', verification, {
           position: "last",
         });
