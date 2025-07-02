@@ -51,6 +51,7 @@ import { mergeAutocompleteOptions } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import facilityApi from "@/types/facility/facilityApi";
 import {
+  RESOURCE_REQUEST_STATUSES,
   ResourceRequest,
   ResourceRequestStatus,
 } from "@/types/resourceRequest/resourceRequest";
@@ -70,15 +71,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const authUser = useAuthUser();
 
   const resourceFormSchema = z.object({
-    status: z.enum([
-      "pending",
-      "approved",
-      "rejected",
-      "cancelled",
-      "transportation_to_be_arranged",
-      "transfer_in_progress",
-      "completed",
-    ]),
+    status: z.enum(RESOURCE_REQUEST_STATUSES),
     category: z.string().min(1, { message: t("field_required") }),
     assigned_facility: z.object({
       id: z.string(),

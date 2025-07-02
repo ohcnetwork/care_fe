@@ -4,14 +4,17 @@ import { UserBareMinimum } from "@/components/Users/models";
 import { Patient } from "@/types/emr/patient";
 import { UserBase } from "@/types/user/user";
 
-export type ResourceRequestStatus =
-  | "pending"
-  | "approved"
-  | "rejected"
-  | "cancelled"
-  | "transportation_to_be_arranged"
-  | "transfer_in_progress"
-  | "completed";
+export const RESOURCE_REQUEST_STATUSES = [
+  "pending",
+  "approved",
+  "rejected",
+  "cancelled",
+  "transportation_to_be_arranged",
+  "transfer_in_progress",
+  "completed",
+] as const;
+
+export type ResourceRequestStatus = (typeof RESOURCE_REQUEST_STATUSES)[number];
 
 export interface ResourceRequest {
   approving_facility: FacilityModel | null;
