@@ -39,20 +39,13 @@ export class PatientEncounter {
     return this;
   }
 
-  clickAndSelectClinical(selector: JQuery, reference: string) {
-    cy.wrap(selector).scrollIntoView().click();
-    cy.get('[role="listbox"]')
-      .find('[role="option"]')
-      .contains(reference)
-      .should("be.visible")
-      .click();
-    return this;
-  }
-
   clickAddAllergy() {
     cy.intercept("GET", "**/allergy_intolerance/**").as("getAllergies");
 
-    cy.verifyAndClickElement('[data-slot="button"]', "Add Allergy");
+    cy.get('[data-slot="button"]')
+      .contains("Add Allergy")
+      .scrollIntoView()
+      .click();
 
     cy.wait("@getAllergies").its("response.statusCode").should("eq", 200);
     return this;
@@ -133,7 +126,10 @@ export class PatientEncounter {
   clickAddSymptoms() {
     cy.intercept("GET", "**/symptom/**").as("getSymptoms");
 
-    cy.verifyAndClickElement('[data-slot="button"]', "Add Symptoms");
+    cy.get('[data-slot="button"]')
+      .contains("Add Symptoms")
+      .scrollIntoView()
+      .click();
 
     cy.wait("@getSymptoms").its("response.statusCode").should("eq", 200);
     return this;
@@ -223,8 +219,10 @@ export class PatientEncounter {
   clickAddDiagnosis() {
     cy.intercept("GET", "**/diagnosis/**").as("getDiagnosis");
 
-    cy.verifyAndClickElement('[data-slot="button"]', "Add Diagnosis");
-
+    cy.get('[data-slot="button"]')
+      .contains("Add Diagnosis")
+      .scrollIntoView()
+      .click();
     cy.wait("@getDiagnosis").its("response.statusCode").should("eq", 200);
     return this;
   }
