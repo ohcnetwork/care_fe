@@ -3314,6 +3314,7 @@
   "valid_year_of_birth": "Please enter a valid year of birth (YYYY)",
   "validation_failed": "Validation failed",
   "value": "Value",
+  "value_already_selected": "Value already selected",
   "value_set": "Value Set",
   "value_set_search_placeholder": "Type to search and select from the list",
   "valueset_created": "ValueSet created successfully",

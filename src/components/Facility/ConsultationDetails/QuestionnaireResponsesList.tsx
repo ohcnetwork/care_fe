@@ -169,7 +169,7 @@ function QuestionGroup({
           className="py-1 pr-0 align-top"
           colSpan={response.note ? 1 : 2}
         >
-          <div className="text-sm font-medium break-words whitespace-normal">
+          <div className="text-sm font-medium break-words whitespace-pre-wrap">
             {values.map((val, idx) => (
               <React.Fragment key={idx}>
                 {idx > 0 && ", "}
@@ -338,7 +338,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                           className="py-1 pr-0 align-top"
                           colSpan={response.note ? 1 : 2}
                         >
-                          <div className="text-sm font-medium break-words whitespace-normal">
+                          <div className="text-sm font-medium break-words whitespace-pre-wrap">
                             {values.map((val, idx) => (
                               <React.Fragment key={idx}>
                                 {idx > 0 && ", "}
