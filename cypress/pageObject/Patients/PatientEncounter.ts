@@ -72,11 +72,17 @@ export class PatientEncounter {
     cy.wait(200);
 
     cy.get("[data-slot='table-row']")
-      .filter(
-        (_, el) =>
-          getComputedStyle(el).pointerEvents !== "none" &&
-          el.textContent?.includes(allergyName),
-      )
+      .filter((_, el) => {
+        const hasPointerEvents = getComputedStyle(el).pointerEvents !== "none";
+        const containsName = el.textContent?.includes(allergyName);
+        const selectTriggers = el.querySelectorAll(
+          "[data-slot='select-trigger']",
+        );
+        const allEnabled = Array.from(selectTriggers).every(
+          (b: HTMLButtonElement) => !b.disabled,
+        );
+        return hasPointerEvents && containsName && allEnabled;
+      })
       .should("be.visible")
       .within(() => {
         cy.get("[data-slot='select-trigger']")
@@ -101,11 +107,17 @@ export class PatientEncounter {
   deleteAllergy(allergyName: string) {
     cy.wait(300);
     cy.get("[data-slot='table-row']")
-      .filter(
-        (_, el) =>
-          getComputedStyle(el).pointerEvents !== "none" &&
-          el.textContent?.includes(allergyName),
-      )
+      .filter((_, el) => {
+        const hasPointerEvents = getComputedStyle(el).pointerEvents !== "none";
+        const containsName = el.textContent?.includes(allergyName);
+        const selectTriggers = el.querySelectorAll(
+          "[data-slot='select-trigger']",
+        );
+        const allEnabled = Array.from(selectTriggers).every(
+          (b: HTMLButtonElement) => !b.disabled,
+        );
+        return hasPointerEvents && containsName && allEnabled;
+      })
       .should("be.visible")
       .within(() => {
         cy.get("[data-slot='dropdown-menu-trigger']").scrollIntoView().click();
@@ -185,11 +197,17 @@ export class PatientEncounter {
     cy.wait(200);
 
     cy.get("[data-slot='table-row']")
-      .filter(
-        (_, el) =>
-          getComputedStyle(el).pointerEvents !== "none" &&
-          el.textContent?.includes(symptomName),
-      )
+      .filter((_, el) => {
+        const hasPointerEvents = getComputedStyle(el).pointerEvents !== "none";
+        const containsName = el.textContent?.includes(symptomName);
+        const selectTriggers = el.querySelectorAll(
+          "[data-slot='select-trigger']",
+        );
+        const allEnabled = Array.from(selectTriggers).every(
+          (b: HTMLButtonElement) => !b.disabled,
+        );
+        return hasPointerEvents && containsName && allEnabled;
+      })
       .should("be.visible")
       .within(() => {
         this.clickAndSelectSymptomOption(0, status);
@@ -204,11 +222,17 @@ export class PatientEncounter {
     cy.wait(300);
 
     cy.get("[data-slot='table-row']")
-      .filter(
-        (_, el) =>
-          getComputedStyle(el).pointerEvents !== "none" &&
-          el.textContent?.includes(symptomName),
-      )
+      .filter((_, el) => {
+        const hasPointerEvents = getComputedStyle(el).pointerEvents !== "none";
+        const containsName = el.textContent?.includes(symptomName);
+        const selectTriggers = el.querySelectorAll(
+          "[data-slot='select-trigger']",
+        );
+        const allEnabled = Array.from(selectTriggers).every(
+          (b: HTMLButtonElement) => !b.disabled,
+        );
+        return hasPointerEvents && containsName && allEnabled;
+      })
       .should("be.visible")
       .within(() => {
         cy.get("[data-slot='dropdown-menu-trigger']").scrollIntoView().click();
@@ -271,11 +295,17 @@ export class PatientEncounter {
     cy.wait(200);
 
     cy.get("[data-slot='table-row']")
-      .filter(
-        (_, el) =>
-          getComputedStyle(el).pointerEvents !== "none" &&
-          el.textContent?.includes(diagnosisName),
-      )
+      .filter((_, el) => {
+        const hasPointerEvents = getComputedStyle(el).pointerEvents !== "none";
+        const containsName = el.textContent?.includes(diagnosisName);
+        const selectTriggers = el.querySelectorAll(
+          "[data-slot='select-trigger']",
+        );
+        const allEnabled = Array.from(selectTriggers).every(
+          (b: HTMLButtonElement) => !b.disabled,
+        );
+        return hasPointerEvents && containsName && allEnabled;
+      })
       .should("be.visible")
       .within(() => {
         cy.get("[data-slot='select-trigger']")
@@ -301,11 +331,17 @@ export class PatientEncounter {
     cy.wait(300);
 
     cy.get("[data-slot='table-row']")
-      .filter(
-        (_, el) =>
-          getComputedStyle(el).pointerEvents !== "none" &&
-          el.textContent?.includes(diagnosisName),
-      )
+      .filter((_, el) => {
+        const hasPointerEvents = getComputedStyle(el).pointerEvents !== "none";
+        const containsName = el.textContent?.includes(diagnosisName);
+        const selectTriggers = el.querySelectorAll(
+          "[data-slot='select-trigger']",
+        );
+        const allEnabled = Array.from(selectTriggers).every(
+          (b: HTMLButtonElement) => !b.disabled,
+        );
+        return hasPointerEvents && containsName && allEnabled;
+      })
       .should("be.visible")
       .within(() => {
         cy.get("[data-slot='dropdown-menu-trigger']").scrollIntoView().click();
