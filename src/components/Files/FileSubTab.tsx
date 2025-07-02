@@ -634,13 +634,13 @@ export const FilesPage = ({
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <FilterButton />
           {type === "encounter" && (
             <>
               <Button
                 variant="outline_primary"
-                className="min-w-24 sm:min-w-28"
+                className="w-full sm:w-auto"
                 onClick={async () => {
                   await queryClient.invalidateQueries({
                     queryKey: ["files"],
@@ -661,7 +661,7 @@ export const FilesPage = ({
                 permissions={encounter?.permissions || []}
                 trigger={
                   <Button variant="primary" asChild>
-                    <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer">
+                    <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer w-full sm:w-auto">
                       <CareIcon
                         icon="l-file-export"
                         className="size-4 text-green-600"
