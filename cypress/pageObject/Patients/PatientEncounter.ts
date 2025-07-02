@@ -116,8 +116,16 @@ export class PatientEncounter {
 
   verifyAllergy(details: AllergyDetails) {
     const { allergyName, criticality, status } = details;
-    cy.get("table").scrollIntoView();
-    cy.verifyContentPresence("table", [allergyName, criticality, status]);
+    const texts = [allergyName, criticality, status];
+
+    cy.get("table").first().scrollIntoView();
+    cy.get("table")
+      .first()
+      .then(($el) => {
+        texts.forEach((text) => {
+          cy.wrap($el).should("contain", text);
+        });
+      });
 
     return this;
   }
@@ -201,8 +209,13 @@ export class PatientEncounter {
 
   verifySymptom(details: SymptomDetails) {
     const { symptomName, severity, status } = details;
-    cy.get("table").scrollIntoView();
-    cy.verifyContentPresence("table", [symptomName, severity, status]);
+    cy.get("table").first().scrollIntoView();
+    cy.get("table").then(($el) => {
+      const texts = [symptomName, severity, status];
+      texts.forEach((text) => {
+        cy.wrap($el).should("contain", text);
+      });
+    });
 
     return this;
   }
@@ -284,20 +297,19 @@ export class PatientEncounter {
   }
 
   verifyItemDelete(name: string) {
-    cy.get("body").then(($body) => {
-      if ($body.find("table").length > 0) {
-        cy.get("table").scrollIntoView().should("not.contain", name);
-      } else {
-        cy.log("Table not found — allergy is deleted, as expected");
-      }
-    });
+    cy.get("table").first().scrollIntoView().should("not.contain", name);
     return this;
   }
 
   verifyDiagnoses(details: DiagnosisDetails) {
     const { diagnosisName, verification, status } = details;
-    cy.get("table").scrollIntoView();
-    cy.verifyContentPresence("table", [diagnosisName, verification, status]);
+    cy.get("table").first().scrollIntoView();
+    cy.get("table").then(($el) => {
+      const texts = [diagnosisName, verification, status];
+      texts.forEach((text) => {
+        cy.wrap($el).should("contain", text);
+      });
+    });
 
     return this;
   }
