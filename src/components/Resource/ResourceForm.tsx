@@ -53,7 +53,6 @@ import facilityApi from "@/types/facility/facilityApi";
 import {
   RESOURCE_REQUEST_STATUSES,
   ResourceRequest,
-  ResourceRequestStatus,
 } from "@/types/resourceRequest/resourceRequest";
 import { UserBase } from "@/types/user/user";
 
@@ -109,7 +108,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const form = useForm({
     resolver: zodResolver(resourceFormSchema),
     defaultValues: {
-      status: "pending" as ResourceRequestStatus,
+      status: "pending",
       category: "",
       assigned_facility: undefined,
       assigned_to: "",
@@ -166,7 +165,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
   const onSubmit = (data: ResourceFormValues) => {
     const resourcePayload = {
-      status: data.status as ResourceRequestStatus,
+      status: data.status,
       category: data.category,
       origin_facility: String(facilityId),
       assigned_facility: data.assigned_facility?.id,
