@@ -51,8 +51,6 @@
     "removed-unused-keys": "node ./scripts/removed-unused-i18key.js"
   },
   "dependencies": {
-    "@babel/core": "^7.27.4",
-    "@babel/preset-typescript": "^7.27.1",
     "@excalidraw/excalidraw": "^0.18.0-a18b139",
     "@fontsource/figtree": "^5.1.1",
     "@hookform/resolvers": "^5.0.1",
@@ -99,7 +97,6 @@
     "i18next-browser-languagedetector": "^8.0.2",
     "i18next-http-backend": "^3.0.1",
     "i18next-resources-to-backend": "^1.2.1",
-    "i18next-scanner": "^4.6.0",
     "input-otp": "^1.4.2",
     "jotai": "^2.12.3",
     "jspdf": "^3.0.0",
@@ -130,6 +127,8 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@babel/core": "^7.27.4",
+    "@babel/preset-typescript": "^7.27.1",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
     "@faker-js/faker": "^9.8.0",
@@ -167,6 +166,7 @@
     "glob": "^11.0.0",
     "globals": "^16.0.0",
     "husky": "^9.1.7",
+    "i18next-scanner": "^4.6.0",
     "jsdom": "^26.0.0",
     "lint-staged": "^15.2.10",
     "local-cypress": "^1.2.6",

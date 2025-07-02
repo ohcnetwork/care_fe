@@ -90,6 +90,12 @@ async function extractAndCleanTranslations(options) {
   // get all locale files in localesPath
   const localeFiles = [];
   locales.forEach((locale) => {
+    if (locale !== "en") {
+      console.warn(
+        `Warning: Processing non-English locale '${locale}'. ` +
+          `Make sure this doesn’t conflict with Crowdin-managed translations.`,
+      );
+    }
     const files = glob.sync(`${locale}.json`, { cwd: localesPath });
     if (files.length > 0) {
       localeFiles.push(...files);
@@ -163,28 +169,35 @@ async function extractAndCleanTranslations(options) {
   }
 }
 async function main() {
-  // get locales from command line
   const args = process.argv.slice(2);
-  let locales = ["en"];
-  const localesArgIndex = args.indexOf("--locales");
-  if (localesArgIndex !== -1) {
-    if (localesArgIndex + 1 < args.length) {
-      locales = args.slice(localesArgIndex + 1);
-    } else {
-      console.warn(
-        "Warning: --locales flag provided without any locales. Using default 'en'.",
-      );
+  const options = {
+    src: "./src",
+    localesPath: "./public/locale",
+    locales: ["en"],
+    extensions: ["ts", "tsx"],
+  };
+  // Parse command line arguments
+  for (let i = 0; i < args.length; i++) {
+    switch (args[i]) {
+      case "--locales":
+        if (i + 1 < args.length) {
+          options.locales = args.slice(i + 1);
+          break;
+        }
+        console.warn(
+          "Warning: --locales flag provided without any locales. Using default 'en'.",
+        );
+        break;
+      case "--src":
+        if (i + 1 < args.length) options.src = args[++i];
+        break;
+      case "--locales-path":
+        if (i + 1 < args.length) options.localesPath = args[++i];
+        break;
     }
   }
-
-  // Run the script, with following options
   try {
-    await extractAndCleanTranslations({
-      src: "./src",
-      localesPath: "./public/locale",
-      locales: locales,
-      extensions: ["ts", "tsx"],
-    });
+    await extractAndCleanTranslations(options);
     console.log("Translation extraction and cleanup completed.");
   } catch (error) {
     console.error("Error:", error.message);
