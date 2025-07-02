@@ -1,3 +1,10 @@
+import { Info } from "lucide-react";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Table,
   TableBody,
@@ -36,7 +43,29 @@ export function VitalsTable({ vitals, vitalCodes }: VitalsTableProps) {
               key={code.code}
               className="h-auto  py-1 px-2  text-gray-600 text-center"
             >
-              {code.display || ""}
+              <div className="flex items-center justify-center space-x-1">
+                <span className="text-xs font-medium">
+                  {code.display || ""}
+                </span>
+                <Popover>
+                  <PopoverTrigger>
+                    <Info className="size-4 text-gray-500 hover:text-gray-700 cursor-pointer" />
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="max-w-fit w-[calc(100vw-2rem)] sm:max-w-fit sm:w-auto break-words"
+                    side="bottom"
+                    align="start"
+                    sideOffset={4}
+                    collisionPadding={16}
+                  >
+                    <div className="space-y-2">
+                      <div key={code.code} className="text-xs">
+                        {code.display} ({code.code})
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
             </TableHead>
           ))}
         </TableRow>
