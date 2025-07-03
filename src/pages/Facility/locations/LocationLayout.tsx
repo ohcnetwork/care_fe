@@ -5,13 +5,14 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import BedsList from "@/pages/Facility/locations/BedsList";
 import { InventoryList } from "@/pages/Facility/services/inventory/InventoryList";
 import { ReceiveStock } from "@/pages/Facility/services/inventory/ReceiveStock";
+// import SupplyRequestForm from "@/pages/Facility/services/supply/SupplyRequestForm";
+import SupplyRequestForm from "@/pages/Facility/services/inventory/SupplyRequestForm";
 import { ApproveExternalSupplyDelivery } from "@/pages/Facility/services/inventory/externalSupply/ApproveDeliveries";
 import { IncomingDeliveries } from "@/pages/Facility/services/inventory/externalSupply/IncomingDeliveries";
 import PurchaseOrderForm from "@/pages/Facility/services/inventory/externalSupply/PurchaseOrderForm";
 import { PurchaseOrders } from "@/pages/Facility/services/inventory/externalSupply/PurchaseOrders";
 import PurchaseOrdersBySupplier from "@/pages/Facility/services/inventory/externalSupply/PurchaseOrdersBySupplier";
 import PurchaseRequestView from "@/pages/Facility/services/inventory/externalSupply/PurchaseRequestView";
-import RaiseStockRequest from "@/pages/Facility/services/inventory/internalTransfer/RaiseStockRequest";
 import ReceiveItem from "@/pages/Facility/services/inventory/internalTransfer/ReceiveItem";
 import SupplyRequestDetail from "@/pages/Facility/services/inventory/internalTransfer/SupplyRequestDetail";
 import SupplyRequestDispatch from "@/pages/Facility/services/inventory/internalTransfer/SupplyRequestDispatch";
@@ -31,7 +32,6 @@ import SupplyDeliveryList, {
   SupplyDeliveryTab,
 } from "@/pages/Facility/services/supply/SupplyDeliveryList";
 import SupplyDeliveryView from "@/pages/Facility/services/supply/SupplyDeliveryView";
-import SupplyRequestForm from "@/pages/Facility/services/supply/SupplyRequestForm";
 import SupplyRequestList, {
   SupplyRequestTab,
 } from "@/pages/Facility/services/supply/SupplyRequestList";
@@ -82,9 +82,9 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       to={`/facility/${facilityId}/locations/${locationId}/supply_requests/incoming`}
     />
   ),
-  "/supply_requests/new": () => (
-    <SupplyRequestForm facilityId={facilityId} locationId={locationId} />
-  ),
+  // "/supply_requests/new": () => (
+  //   <SupplyRequestForm facilityId={facilityId} locationId={locationId} />
+  // ),
   "/supply_requests/incoming": () => (
     <SupplyRequestList
       facilityId={facilityId}
@@ -106,13 +106,13 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       supplyRequestId={id}
     />
   ),
-  "/supply_requests/:id/edit": ({ id }: { id: string }) => (
-    <SupplyRequestForm
-      facilityId={facilityId}
-      locationId={locationId}
-      supplyRequestId={id}
-    />
-  ),
+  // "/supply_requests/:id/edit": ({ id }: { id: string }) => (
+  //   <SupplyRequestForm
+  //     facilityId={facilityId}
+  //     locationId={locationId}
+  //     supplyRequestId={id}
+  //   /raise_stock_reques>
+  // ),
 
   // Supply Delivery Routes
   "/supply_deliveries": () => (
@@ -150,7 +150,12 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     <ToReceive facilityId={facilityId} locationId={locationId} />
   ),
   "/internal_transfers/to_receive/raise_stock_request": () => (
-    <RaiseStockRequest facilityId={facilityId} locationId={locationId} />
+    // <RaiseStockRequest facilityId={facilityId} locationId={locationId} />
+    <SupplyRequestForm
+      facilityId={facilityId}
+      locationId={locationId}
+      mode="internal"
+    />
   ),
   "/internal_transfers/to_receive/:deliveryId": ({
     deliveryId,
@@ -183,10 +188,11 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     />
   ),
   "/internal_transfers/requests/:id/edit": ({ id }: { id: string }) => (
-    <RaiseStockRequest
+    <SupplyRequestForm
       facilityId={facilityId}
       locationId={locationId}
       supplyRequestId={id}
+      mode="internal"
     />
   ),
 

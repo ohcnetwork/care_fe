@@ -3369,6 +3369,7 @@
   "request_reason_placeholder": "Type your description here",
   "request_sample_test": "Request Sample Test",
   "request_stock_from_another_store_or_pharmacy_within_the_facility": "Request stock from another store or pharmacy within the facility",
+  "request_stock_from_vendor": "Request stock from external vendor",
   "request_the_following_resource": "This is to request the following resource",
   "request_title": "Request Title",
   "request_title_description": "A brief title that describes what resource is needed.",
