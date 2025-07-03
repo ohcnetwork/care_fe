@@ -13,7 +13,7 @@ export class PatientPrescription {
   }
   clickEditPrescription() {
     cy.intercept("GET", "**/medication/request/**").as("getMedications");
-    cy.verifyAndClickElement('[data-cy="edit-prescription"]', "Edit");
+    cy.verifyAndClickElement('[data-cy="edit-prescription"]', /Add|Edit/);
     cy.wait("@getMedications").its("response.statusCode").should("eq", 200);
     return this;
   }
