@@ -617,22 +617,20 @@ export default function SupplyRequestForm({
                   </Table>
                 </div>
 
-                {!isEditMode && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() =>
-                      append({
-                        quantity: 1,
-                        item: "",
-                      })
-                    }
-                    className="mt-4"
-                  >
-                    <PlusCircle className="mr-2 size-4" />
-                    {t("add_another_item")}
-                  </Button>
-                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    append({
+                      quantity: 1,
+                      item: "",
+                    })
+                  }
+                  className="mt-4"
+                >
+                  <PlusCircle className="mr-2 size-4" />
+                  {t("add_another_item")}
+                </Button>
               </CardContent>
             </Card>
 
