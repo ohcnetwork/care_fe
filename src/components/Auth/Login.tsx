@@ -1,7 +1,7 @@
 import careConfig from "@careConfig";
 import { useMutation } from "@tanstack/react-query";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { useQueryParams } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import ReCaptcha from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
@@ -370,6 +370,7 @@ const Login = (props: LoginProps) => {
                   value={loginMode}
                   onValueChange={(value) => {
                     setLoginMode(value as LoginMode);
+                    navigate(`/login?mode=${value}`);
                     if (value === "staff") {
                       resetPatientLogin();
                     } else {
