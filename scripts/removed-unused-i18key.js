@@ -10,6 +10,9 @@ async function extractAndCleanTranslations(options) {
   if (!src || !localesPath) {
     throw new Error("src, localesPath are required options.");
   }
+  if (!extensions || !Array.isArray(extensions) || extensions.length === 0) {
+    throw new Error("extensions must be a non-empty array.");
+  }
   const files = glob.sync(`**/*.+(${extensions.join("|")})`, {
     cwd: src,
     ignore: ["node_modules/**", "style/**", "types/**"],
@@ -77,7 +80,7 @@ async function extractAndCleanTranslations(options) {
         parsedContent = result.code;
       } catch (error) {
         console.warn(
-          `Warning: Failed to transform file, using ts file instead ${filePath}: ${error.message}`,
+          `Warning: Failed to transform ${filePath}, skipping Trans component parsing: ${error.message}`,
         );
       }
       parser.parseTransFromString(parsedContent, (key, options) => {
@@ -108,6 +111,21 @@ async function extractAndCleanTranslations(options) {
   for (const localeFile of localeFiles) {
     const locale = path.basename(localeFile, ".json");
     const localeFilePath = path.join(localesPath, localeFile);
+
+    // Create backup if not in dry-run mode
+    if (!options.dryRun) {
+      const backupPath = `${localeFilePath}.backup.${Date.now()}`;
+      try {
+        fs.copyFileSync(localeFilePath, backupPath);
+        console.log(`Backup created: ${backupPath}`);
+      } catch (error) {
+        console.error(
+          `Failed to create backup for ${localeFilePath}: ${error.message}`,
+        );
+        continue;
+      }
+    }
+
     let translations;
     try {
       translations = JSON.parse(fs.readFileSync(localeFilePath, "utf-8"));
@@ -156,16 +174,20 @@ async function extractAndCleanTranslations(options) {
       }
     }
 
-    try {
-      fs.writeFileSync(
-        localeFilePath,
-        JSON.stringify(cleanedTranslations, null, 2),
-      );
-    } catch (error) {
-      console.error(`Error writing ${localeFilePath}: ${error.message}`);
-      continue;
+    if (options.dryRun) {
+      console.log(`[DRY RUN] Would update ${localeFilePath}`);
+    } else {
+      try {
+        fs.writeFileSync(
+          localeFilePath,
+          JSON.stringify(cleanedTranslations, null, 2),
+        );
+        console.log(`Cleaned translations for ${locale}.`);
+      } catch (error) {
+        console.error(`Error writing ${localeFilePath}: ${error.message}`);
+        continue;
+      }
     }
-    console.log(`Cleaned translations for ${locale}.`);
   }
 }
 async function main() {
