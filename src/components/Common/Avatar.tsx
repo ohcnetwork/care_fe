@@ -72,8 +72,7 @@ function Avatar({
           className={cn(
             "aspect-square size-full object-cover rounded-md",
             className,
-            "transition-opacity duration-300",
-            isImageLoaded ? "opacity-100" : "opacity-0",
+            "opacity-100",
           )}
           onLoad={() => setIsImageLoaded(true)}
           onError={() => setIsImageLoaded(false)}
