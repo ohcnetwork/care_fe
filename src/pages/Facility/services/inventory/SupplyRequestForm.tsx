@@ -554,7 +554,7 @@ export default function SupplyRequestForm({
                           key={field.id}
                           className="divide-x divide-gray-300"
                         >
-                          <TableCell>
+                          <TableCell className="align-top">
                             <FormField
                               control={form.control}
                               name={`requests.${index}.item`}
@@ -577,7 +577,7 @@ export default function SupplyRequestForm({
                               )}
                             />
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="align-top">
                             <FormField
                               control={form.control}
                               name={`requests.${index}.quantity`}
@@ -599,7 +599,7 @@ export default function SupplyRequestForm({
                             />
                           </TableCell>
                           {!isEditMode && (
-                            <TableCell>
+                            <TableCell className="align-top">
                               <Button
                                 type="button"
                                 variant="ghost"
