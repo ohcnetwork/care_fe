@@ -1,5 +1,5 @@
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
-import React from "react";
+import React, { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -50,10 +50,11 @@ function Avatar({
   className?: string;
 }) {
   const avatarText = name.match(/[a-zA-Z]+/g)?.join(" ");
-
   const [bgColor, textColor] =
     propColors ||
     (avatarText ? getColorPair(avatarText) : getColorPair("user"));
+
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
 
   return (
     <AvatarPrimitive.Root
@@ -64,18 +65,26 @@ function Avatar({
       }}
       {...props}
     >
-      <AvatarPrimitive.Image
-        data-slot="avatar-image"
-        src={imageUrl}
-        alt={name}
-        className={cn(
-          "aspect-square size-full object-cover rounded-md",
-          className,
-        )}
-      />
+      {imageUrl && (
+        <img
+          src={imageUrl}
+          alt={name}
+          className={cn(
+            "aspect-square size-full object-cover rounded-md",
+            className,
+            "transition-opacity duration-300",
+            isImageLoaded ? "opacity-100" : "opacity-0",
+          )}
+          onLoad={() => setIsImageLoaded(true)}
+          onError={() => setIsImageLoaded(false)}
+        />
+      )}
       <AvatarPrimitive.Fallback
         data-slot="avatar-fallback"
-        className="flex h-full w-full select-none items-center justify-center text-center"
+        className={cn(
+          "flex h-full w-full select-none items-center justify-center text-center",
+          imageUrl && isImageLoaded && "opacity-0",
+        )}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
