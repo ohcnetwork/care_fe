@@ -1179,7 +1179,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                             id={`question-${question.link_id}`}
                             ref={(el) => {
                               questionRefs.current[question.link_id] = el;
-                            }} 
+                            }}
                             className={cn(
                               "relative bg-white rounded-lg shadow-md",
                               expandedQuestions.has(question.link_id) &&
