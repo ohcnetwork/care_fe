@@ -514,7 +514,12 @@ export default function SupplyRequestDetail({
         ) : (
           <div className="flex items-center justify-center p-4 bg-white rounded-md">
             <p className="text-base text-gray-800 font-medium">
-              {t("no_deliveries_dispatched_for_this_supply_request")}
+              {t("no_deliveries_dispatched_for_this_supply_request", {
+                action:
+                  mode === "external"
+                    ? t("purchase_order")
+                    : t("stock_request"),
+              })}
             </p>
           </div>
         )}
