@@ -165,7 +165,7 @@ export function MultiSelect({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-full"
+          className="p-0 w-[var(--radix-popover-trigger-width)]"
           align="center"
           onEscapeKeyDown={() => setIsPopoverOpen(false)}
           onWheel={(e) => e.stopPropagation()}

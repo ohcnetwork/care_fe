@@ -54,6 +54,8 @@ interface Props {
   hideTrigger?: boolean;
   controlledOpen?: boolean;
   title?: string;
+  asSheet?: boolean;
+  closeOnSelect?: boolean;
 }
 
 const Item = ({
@@ -102,7 +104,9 @@ export default function ValueSetSelect({
   wrapTextForSmallScreen = false,
   hideTrigger = false,
   controlledOpen = false,
+  closeOnSelect = true,
   title,
+  asSheet = false,
 }: Props) {
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
@@ -210,14 +214,19 @@ export default function ValueSetSelect({
 
   const content = (
     <Command filter={() => 1} className="rounded-t-3xl">
-      <div className="py-3 px-3 border-b border-gray-200 flex justify-between items-center">
+      <div
+        className={cn(
+          "p-3 border-b border-gray-200 flex justify-between items-center",
+          !title && "p-0",
+        )}
+      >
         {title && <h3 className="text-base font-semibold">{title}</h3>}
         <Tabs
           value={activeTab.toString()}
           onValueChange={(value) => {
             setActiveTab(Number(value));
           }}
-          className="md:hidden"
+          className={cn("md:hidden", !title && "p-2 w-full")}
         >
           <TabsList className="flex w-full">
             <TabsTrigger value={"0"} className="flex-1">
@@ -263,7 +272,11 @@ export default function ValueSetSelect({
                       display: option.display || "",
                       system: option.system || "",
                     });
-                    setInternalOpen(false);
+                    if (closeOnSelect) {
+                      setInternalOpen(false);
+                    } else {
+                      inputRef.current?.focus();
+                    }
                     addRecentMutation.mutate(option);
                   }}
                   onFavourite={() => {
@@ -328,7 +341,11 @@ export default function ValueSetSelect({
                       display: option.display || "",
                       system: option.system || "",
                     });
-                    setInternalOpen(false);
+                    if (closeOnSelect) {
+                      setInternalOpen(false);
+                    } else {
+                      inputRef.current?.focus();
+                    }
                     addRecentMutation.mutate(option);
                   }}
                   onFavourite={() => {
@@ -382,14 +399,7 @@ export default function ValueSetSelect({
     </AlertDialog>
   );
 
-  if (
-    isMobile &&
-    !hideTrigger &&
-    (system === "system-additional-instruction" ||
-      system === "system-route" ||
-      system === "system-body-site" ||
-      system === "system-administration-method")
-  ) {
+  if (isMobile && !hideTrigger && asSheet) {
     return (
       <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
         <SheetTrigger asChild>
@@ -442,7 +452,7 @@ export default function ValueSetSelect({
                 icon="l-plus"
                 className="mr-2 text-5xl text-primary-700 font-normal"
               />
-              <span className="text-primary-700 flex items-center font-semibold text-base text-wrap">
+              <span className="text-primary-700 flex items-center font-semibold text-wrap text-sm md:text-base">
                 {value?.display || placeholder}
               </span>
             </div>
@@ -469,20 +479,23 @@ export default function ValueSetSelect({
       >
         {!hideTrigger && (
           <PopoverTrigger asChild disabled={disabled}>
-            <Button
-              variant="outline"
-              role="combobox"
-              className={cn(
-                "w-full justify-between",
-                wrapTextForSmallScreen
-                  ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
-                  : "truncate",
-                !value?.display && "text-gray-400",
-              )}
-            >
-              <span>{value?.display || placeholder}</span>
-              <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-            </Button>
+            <div className={cn(value?.display ? "w-full" : "mr-11")}>
+              <Button
+                type="button"
+                variant="outline"
+                role="combobox"
+                className={cn(
+                  "justify-between",
+                  wrapTextForSmallScreen
+                    ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
+                    : "truncate",
+                  !value?.display && "text-gray-400",
+                )}
+              >
+                <span>{value?.display || placeholder}</span>
+                <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+              </Button>
+            </div>
           </PopoverTrigger>
         )}
 

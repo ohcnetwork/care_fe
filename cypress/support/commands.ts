@@ -72,6 +72,24 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add(
+  "typeAndVerifyOptionNotPresent",
+  (selector: string, value: string, emptyMessage: string) => {
+    cy.get(selector)
+      .click()
+      .then(() => {
+        cy.get("[cmdk-input]")
+          .should("be.visible")
+          .type(value)
+          .then(() => {
+            cy.get("[cmdk-empty]")
+              .should("be.visible")
+              .and("contain", emptyMessage);
+          });
+      });
+  },
+);
+
+Cypress.Commands.add(
   "clickAndMultiSelectOption",
   (selector: string, options: string | string[]) => {
     const optionArray = Array.isArray(options) ? options : [options];
@@ -90,7 +108,7 @@ Cypress.Commands.add(
   "clickAndSelectOption",
   (
     element: string,
-    reference: string,
+    reference?: string,
     options: { position?: "first" | "last" } = {},
   ) => {
     // Click to open the select dropdown based on position
@@ -102,18 +120,20 @@ Cypress.Commands.add(
       cy.get(element).click();
     }
 
-    // Common selection logic
-    cy.get('[role="listbox"]')
-      .find('[role="option"]')
-      .contains(reference)
-      .should("be.visible")
-      .click();
+    // Selection logic based on whether reference is provided
+    const listbox = cy.get('[role="listbox"]').find('[role="option"]');
+
+    if (reference) {
+      listbox.contains(reference).should("be.visible").click();
+    } else {
+      listbox.first().should("be.visible").click();
+    }
   },
 );
 
 Cypress.Commands.add(
   "verifyAndClickElement",
-  (element: string, reference: string) => {
+  (element: string, reference: string | RegExp) => {
     cy.get(element).scrollIntoView();
     cy.get(element).contains(reference).should("be.visible").click();
   },
@@ -148,14 +168,16 @@ Cypress.Commands.add("verifyContentPresence", (selector, texts) => {
 });
 
 export interface ErrorMessageItem {
-  label: string;
+  label?: string;
   message: string;
 }
 
 Cypress.Commands.add("verifyErrorMessages", (errors: ErrorMessageItem[]) => {
   errors.forEach(({ label, message }) => {
-    // Verify the label is present
-    cy.contains(label).scrollIntoView().should("be.visible");
+    if (label) {
+      // Verify the label is present if provided
+      cy.contains(label).scrollIntoView().should("be.visible");
+    }
     // Verify the error message is present
     cy.contains(message).scrollIntoView().should("be.visible");
   });
@@ -194,7 +216,7 @@ Cypress.Commands.add(
     const inputField = cy.get(selector);
 
     if (clearBeforeTyping) {
-      inputField.clear();
+      inputField.click().clear();
     }
 
     // Handle click based on position
@@ -211,5 +233,94 @@ Cypress.Commands.add(
         cy.get(selector).should("have.value", value);
       }
     });
+  },
+);
+
+Cypress.Commands.add(
+  "selectComboboxDropdown",
+  (labelText: string, value: string, unit?: string) => {
+    cy.contains("label", labelText)
+      .parent('[data-slot="form-item"]')
+      .find("input")
+      .click({ force: true })
+      .type(value);
+    if (unit) {
+      cy.get('[role="option"]').contains(unit).click();
+    } else {
+      cy.get('[role="option"]').contains(value).click();
+    }
+  },
+);
+
+Cypress.Commands.add(
+  "clickAndSelectOptionV2",
+  (labelText: string, reference: string) => {
+    cy.contains("label", labelText)
+      .parent('[data-slot="form-item"]')
+      .find('[type="button"]')
+      .click();
+    cy.get('[role="option"]').contains(reference).click();
+  },
+);
+
+Cypress.Commands.add(
+  "typeAndSelectOptionV2",
+  (labelText: string, value: string) => {
+    // Click to open the dropdown
+    cy.contains("label", labelText)
+      .parent('[data-slot="form-item"]')
+      .find("[data-slot='popover-trigger']")
+      .click()
+      .scrollIntoView()
+      .then(() => {
+        // Type in the command input
+        cy.get("[cmdk-input]")
+          .should("be.visible")
+          .type(value)
+          .then(() => {
+            // Select the filtered option from command menu
+            cy.get("[cmdk-group]")
+              .find("[cmdk-item]")
+              .contains(value)
+              .should("be.visible")
+              .click();
+          });
+      });
+  },
+);
+
+Cypress.Commands.add(
+  "clearAndTypeIntoField",
+  (selector: string, value: string) => {
+    cy.get(selector)
+      .scrollIntoView()
+      .should("be.visible")
+      .clear()
+      .click()
+      .type(value);
+  },
+);
+
+Cypress.Commands.add("getFacilityIdAndNavigate", (path?: string) => {
+  cy.url().then((url) => {
+    const facilityId = url.split("/facility/")[1].split("/")[0];
+    if (path) {
+      cy.visit(`/facility/${facilityId}/${path}`);
+    }
+    cy.wrap(facilityId);
+  });
+});
+
+// Custom command for clicking radio buttons
+Cypress.Commands.add(
+  "clickRadioButton",
+  (labelText: string, buttonValue: string) => {
+    cy.get("label").contains(labelText).scrollIntoView();
+    cy.get("label")
+      .contains(labelText)
+      .parent()
+      .within(() => {
+        cy.get(`button[value='${buttonValue}']`).click();
+      });
   },
 );

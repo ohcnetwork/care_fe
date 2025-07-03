@@ -123,10 +123,17 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     }),
     select: (data: { results: TokenSlot[] }) => {
       return data.results.filter((slot) => {
-        return !isWithinInterval(new Date(), {
+        // Filter out slots that are happening right now
+        const isCurrentlyActive = isWithinInterval(new Date(), {
           start: slot.start_datetime,
           end: slot.end_datetime,
         });
+
+        // Filter out the current appointment's slot when rescheduling
+        const isCurrentAppointmentSlot =
+          appointment && slot.id === appointment.token_slot.id;
+
+        return !isCurrentlyActive && !isCurrentAppointmentSlot;
       });
     },
     enabled: !!selectedDate && !!tokenData.token,
@@ -326,27 +333,29 @@ export function ScheduleAppointment(props: AppointmentsProps) {
             {(isCreatingAppointment || isCancellingAppointment) && (
               <Loader2 className="size-4 animate-spin self-center mr-2" />
             )}
-            <Button
-              variant="primary_gradient"
-              disabled={isCreatingAppointment || isCancellingAppointment}
-              onClick={() => {
-                if (appointmentId && appointment) {
-                  handleRescheduleAppointment(appointment);
-                } else {
-                  localStorage.setItem(
-                    "selectedSlot",
-                    JSON.stringify(selectedSlot),
-                  );
-                  localStorage.setItem("reason", reason);
-                  navigate(
-                    `/facility/${facilityId}/appointments/${staffId}/patient-select`,
-                  );
-                }
-              }}
-            >
-              {appointmentId ? t("reschedule_appointment") : t("continue")}
-              <CareIcon icon="l-arrow-right" className="size-4" />
-            </Button>
+            {appointment?.status !== "in_consultation" && (
+              <Button
+                variant="primary_gradient"
+                disabled={isCreatingAppointment || isCancellingAppointment}
+                onClick={() => {
+                  if (appointmentId && appointment) {
+                    handleRescheduleAppointment(appointment);
+                  } else {
+                    localStorage.setItem(
+                      "selectedSlot",
+                      JSON.stringify(selectedSlot),
+                    );
+                    localStorage.setItem("reason", reason);
+                    navigate(
+                      `/facility/${facilityId}/appointments/${staffId}/patient-select`,
+                    );
+                  }
+                }}
+              >
+                {appointmentId ? t("reschedule_appointment") : t("continue")}
+                <CareIcon icon="l-arrow-right" className="size-4" />
+              </Button>
+            )}
           </div>
         )}
       </div>

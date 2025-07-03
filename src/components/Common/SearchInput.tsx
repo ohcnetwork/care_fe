@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -36,15 +30,13 @@ interface SearchOption {
   component?: React.ComponentType<HTMLDivElement>;
 }
 
-interface SearchByMultipleFieldsProps {
-  id: string;
+interface SearchInputProps
+  extends Omit<React.ComponentProps<"input">, "onChange" | "value" | "ref"> {
   options: SearchOption[];
   onSearch: (key: string, value: string) => void;
-  initialOptionIndex: number;
   className?: string;
   inputClassName?: string;
   buttonClassName?: string;
-  clearSearch?: { value: boolean; params?: string[] };
   enableOptionButtons?: boolean;
   onFieldChange?: (options: SearchOption) => void;
   autoFocus?: boolean;
@@ -79,20 +71,79 @@ const KeyboardShortcutHint = ({ open }: { open: boolean }) => {
     </div>
   );
 };
-
-const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
-  id,
+const SearchInputFieldRenderer = ({
+  selectedOption,
+  searchValue,
+  setSearchValue,
+  inputRef,
+  inputClassName,
+  autoFocus,
+  isSingleOption,
+  open,
+  ...prop
+}: {
+  selectedOption: SearchOption;
+  searchValue: string;
+  setSearchValue: (value: string) => void;
+  inputRef?: React.RefObject<HTMLInputElement | null>;
+  inputClassName?: string;
+  autoFocus?: boolean;
+  isSingleOption: boolean;
+  open: boolean;
+}) => {
+  switch (selectedOption.type) {
+    case "phone":
+      return (
+        <div className="relative">
+          <PhoneInput
+            name={selectedOption.key}
+            placeholder={selectedOption.placeholder}
+            value={searchValue}
+            onChange={(value) => setSearchValue(value || "")}
+            className={inputClassName}
+            autoFocus={autoFocus}
+            ref={inputRef}
+            {...prop}
+          />
+          {!isSingleOption && <KeyboardShortcutHint open={open} />}
+        </div>
+      );
+    default:
+      return (
+        <div className="relative">
+          <Input
+            type="text"
+            placeholder={selectedOption.placeholder}
+            ref={inputRef as React.RefObject<HTMLInputElement>}
+            value={searchValue}
+            onChange={(event) => setSearchValue(event.target.value)}
+            className={cn(
+              !isSingleOption &&
+                "grow border-none shadow-none focus-visible:ring-0",
+              inputClassName,
+            )}
+            {...prop}
+          />
+          {!isSingleOption && <KeyboardShortcutHint open={open} />}
+        </div>
+      );
+  }
+};
+export default function SearchInput({
   options,
   onSearch,
-  initialOptionIndex,
   className,
   inputClassName,
   buttonClassName,
-  clearSearch,
   onFieldChange,
   enableOptionButtons = true,
   autoFocus = false,
-}) => {
+  ...props
+}: SearchInputProps) {
+  const initialOptionIndex = Math.max(
+    options.findIndex((option) => option.value !== ""),
+    0,
+  );
   const { t } = useTranslation();
   const [selectedOptionIndex, setSelectedOptionIndex] =
     useState(initialOptionIndex);
@@ -103,14 +154,6 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [error, setError] = useState<string | undefined | boolean>();
   const isSingleOption = options.length == 1;
-
-  useEffect(() => {
-    if (clearSearch?.value) {
-      setSearchValue("");
-      inputRef.current?.focus();
-    }
-  }, [clearSearch?.value]);
-
   const handleOptionChange = useCallback(
     (index: number) => {
       setSelectedOptionIndex(index);
@@ -126,9 +169,8 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     [onSearch],
   );
 
-  const unselectedOptions = useMemo(
-    () => options.filter((option) => option.key !== selectedOption.key),
-    [options, selectedOption],
+  const unselectedOptions = options.filter(
+    (option) => option.key !== selectedOption.key,
   );
 
   useEffect(() => {
@@ -183,44 +225,6 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     }
   }, [searchValue]);
 
-  const renderSearchInput = useMemo(() => {
-    switch (selectedOption.type) {
-      case "phone":
-        return (
-          <div className="relative">
-            <PhoneInput
-              id={id}
-              name={selectedOption.key}
-              placeholder={selectedOption.placeholder}
-              value={searchValue}
-              onChange={(value) => setSearchValue(value ?? "")}
-              className={inputClassName}
-              autoFocus={autoFocus}
-            />
-            {!isSingleOption && <KeyboardShortcutHint open={open} />}
-          </div>
-        );
-      default:
-        return (
-          <div className="relative">
-            <Input
-              id={id}
-              type="text"
-              placeholder={selectedOption.placeholder}
-              ref={inputRef}
-              value={searchValue}
-              onChange={(event) => setSearchValue(event.target.value)}
-              className={cn(
-                "grow border-none shadow-none focus-visible:ring-0",
-                inputClassName,
-              )}
-            />
-            {!isSingleOption && <KeyboardShortcutHint open={open} />}
-          </div>
-        );
-    }
-  }, [selectedOption, searchValue, t, inputClassName, open]);
-
   useEffect(() => {
     if (autoFocus) {
       inputRef.current?.focus();
@@ -230,7 +234,8 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   return (
     <div
       className={cn(
-        "border rounded-lg border-gray-200 bg-white shadow-sm",
+        !isSingleOption &&
+          "border rounded-lg border-gray-200 bg-white shadow-sm",
         className,
       )}
     >
@@ -239,14 +244,14 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         aria-expanded={open}
         aria-controls="search-options"
         aria-haspopup="listbox"
-        className="flex items-center rounded-t-lg"
+        className="flex items-center rounded-t-lg gap-1"
       >
         {!isSingleOption && (
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
-                className="focus:ring-0 px-2 ml-1"
+                className="focus:ring-0  ml-1"
                 size="sm"
                 onClick={() => setOpen(true)}
               >
@@ -336,14 +341,26 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             </PopoverContent>
           </Popover>
         )}
-        <div className="w-full">{renderSearchInput}</div>
+        <div className="w-full">
+          <SearchInputFieldRenderer
+            selectedOption={selectedOption}
+            searchValue={searchValue}
+            setSearchValue={setSearchValue}
+            inputRef={inputRef}
+            inputClassName={inputClassName}
+            autoFocus={autoFocus}
+            isSingleOption={isSingleOption}
+            open={open}
+            {...props}
+          />
+        </div>
       </div>
       {error && (
         <div className="px-2 mb-1 text-xs font-medium tracking-wide transition-opacity duration-300 error-text text-danger-500">
           {t("phone_number_validation_error")}
         </div>
       )}
-      {enableOptionButtons && (
+      {enableOptionButtons && !isSingleOption && (
         <div className="flex flex-wrap gap-2 p-2 border-t rounded-b-lg bg-gray-50 border-t-gray-100">
           {options.map((option, i) => (
             <Button
@@ -351,7 +368,6 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
               onClick={() => handleOptionChange(i)}
               variant="outline"
               size="xs"
-              data-test-id={id + "__" + option.key}
               className={cn(
                 selectedOption.key === option.key
                   ? "bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
@@ -364,7 +380,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
           ))}
         </div>
       )}
-      {searchValue.length !== 0 && (
+      {searchValue.length !== 0 && !isSingleOption && (
         <Button
           variant="ghost"
           size="sm"
@@ -380,6 +396,4 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       )}
     </div>
   );
-};
-
-export default SearchByMultipleFields;
+}

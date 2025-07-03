@@ -215,10 +215,7 @@ export default function FacilityOrganizationList({
                     <div className="flex items-center">
                       <h2 className="text-xl font-semibold">{org.name}</h2>
                       {org.org_type && (
-                        <Badge
-                          variant="outline"
-                          className="ml-2 border border-transparent text-indigo-800 bg-indigo-100 py-1 w-auto"
-                        >
+                        <Badge variant="indigo" className="ml-2 w-auto">
                           {t(`facility_organization_type__${org.org_type}`)}
                         </Badge>
                       )}
@@ -241,6 +238,7 @@ export default function FacilityOrganizationList({
                               key={item.value}
                               value={item.value}
                               className="border-0 border-b-2 border-transparent px-2 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                              data-cy={`${item.value}-tab`}
                             >
                               {item.title}
                             </TabsTrigger>

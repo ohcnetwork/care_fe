@@ -107,6 +107,7 @@ export default function UserAvatar({ username }: { username: string }) {
         handleUpload={handleAvatarUpload}
         handleDelete={handleAvatarDelete}
         onOpenChange={(open) => setEditAvatar(open)}
+        aspectRatio={1}
       />
       <div>
         <div className="my-4 overflow-visible rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:px-6 flex justify-between">
@@ -146,7 +147,9 @@ export default function UserAvatar({ username }: { username: string }) {
               )}
 
               <p className="text-xs leading-5 text-gray-500">
-                {t("change_avatar_note")}
+                {t("change_avatar_note", {
+                  maxSize: careConfig.imageUploadMaxSizeInMB,
+                })}
               </p>
             </div>
           </div>

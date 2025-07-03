@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { isBefore, startOfTomorrow } from "date-fns";
+import { isFuture } from "date-fns";
 import { useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -10,6 +10,7 @@ import { z } from "zod";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -33,7 +34,6 @@ import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import useAppHistory from "@/hooks/useAppHistory";
 
 import mutate from "@/Utils/request/mutate";
-import { dateQueryString } from "@/Utils/utils";
 import {
   usePluginDevice,
   usePluginDevices,
@@ -70,13 +70,13 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
       availability_status: z.enum(DeviceAvailabilityStatuses),
       manufacturer: z.string().optional(),
       manufacture_date: z
-        .string()
+        .date()
         .optional()
         .refine(
-          (date) => !date || isBefore(new Date(date), startOfTomorrow()),
+          (date) => !date || !isFuture(date),
           t("manufacture_date_cannot_be_in_future"),
         ),
-      expiration_date: z.string().optional(),
+      expiration_date: z.date().optional(),
       lot_number: z.string().optional(),
       serial_number: z.string().optional(),
       registered_name: z
@@ -109,7 +109,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
     .refine(
       (data) => {
         if (!data.expiration_date || !data.manufacture_date) return true;
-        return new Date(data.expiration_date) > new Date(data.manufacture_date);
+        return data.expiration_date > data.manufacture_date;
       },
       {
         message: t("expiration_date_must_be_after_manufacture_date"),
@@ -130,6 +130,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues,
+    mode: "onChange",
   });
 
   const [careType, setCareType] = useState<string>();
@@ -160,8 +161,12 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
         user_friendly_name: device.user_friendly_name || undefined,
         identifier: device.identifier || undefined,
         manufacturer: device.manufacturer || undefined,
-        manufacture_date: device.manufacture_date || undefined,
-        expiration_date: device.expiration_date || undefined,
+        manufacture_date: device.manufacture_date
+          ? new Date(device.manufacture_date)
+          : undefined,
+        expiration_date: device.expiration_date
+          ? new Date(device.expiration_date)
+          : undefined,
         lot_number: device.lot_number || undefined,
         serial_number: device.serial_number || undefined,
         model_number: device.model_number || undefined,
@@ -182,23 +187,16 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
     }
   }, [device, form, qParams.type]);
 
-  useEffect(() => {
-    if (device?.manufacture_date) {
-      form.setValue(
-        "manufacture_date",
-        dateQueryString(device.manufacture_date),
-      );
-    }
-
-    if (device?.expiration_date) {
-      form.setValue("expiration_date", dateQueryString(device.expiration_date));
-    }
-  }, [device, form]);
-
   function onSubmit(values: z.infer<typeof formSchema>) {
     const metadata = values.metadata;
     delete values.metadata;
-    submitForm({ ...metadata, ...values, care_type: careType });
+    submitForm({
+      ...metadata,
+      ...values,
+      care_type: careType,
+      manufacture_date: values.manufacture_date?.toISOString(),
+      expiration_date: values.expiration_date?.toISOString(),
+    });
   }
 
   return (
@@ -335,13 +333,13 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("manufacture_date")}</FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    {...field}
-                    data-cy="manufacture-date-input"
-                  />
-                </FormControl>
+                <DatePicker
+                  date={field.value}
+                  onChange={(date) => {
+                    field.onChange(date);
+                    form.trigger("expiration_date");
+                  }}
+                />
                 <FormMessage />
               </FormItem>
             )}
@@ -353,13 +351,10 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("expiration_date")}</FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    {...field}
-                    data-cy="expiration-date-input"
-                  />
-                </FormControl>
+                <DatePicker
+                  date={field.value}
+                  onChange={(date) => field.onChange(date)}
+                />
                 <FormMessage />
               </FormItem>
             )}
@@ -459,7 +454,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
           </div>
 
           {fields.length === 0 && (
-            <div className="py-4 text-center text-sm text-muted-foreground">
+            <div className="py-4 text-center text-sm text-gray-700">
               {t("no_contact_points_added")}
             </div>
           )}
@@ -484,7 +479,20 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 name={`contact.${index}.system`}
                 render={({ field }) => (
                   <FormItem className="space-y-0">
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => {
+                        const isPhone = (system: string) =>
+                          ["phone", "fax", "sms"].includes(system);
+
+                        // If the system is changing from a phone type to a non-phone type, clear the value
+                        if (isPhone(value) !== isPhone(field.value)) {
+                          form.setValue(`contact.${index}.value`, "");
+                        }
+
+                        field.onChange(value);
+                      }}
+                    >
                       <FormControl>
                         <SelectTrigger className="h-[42px] md:h-[38px]">
                           <SelectValue
@@ -573,7 +581,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               control={form.control}
               name="metadata"
               render={({ field }) => (
-                <FormItem className="space-y-0">
+                <FormItem className="space-y-0 block">
                   <PluginDeviceConfigureForm
                     type={careType}
                     facilityId={facilityId}

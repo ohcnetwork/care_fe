@@ -146,20 +146,28 @@ export const PrintPrescription = (props: {
             rows={activeMedications?.results.map((medication) => {
               const instruction = medication.dosage_instruction[0];
               const frequency = getFrequencyDisplay(instruction?.timing);
+              const additionalInstructions = instruction?.additional_instruction
+                ?.map((item) => item.display)
+                .filter(Boolean)
+                .join(", ");
               const dosage = formatDosage(instruction);
               const duration = instruction?.timing?.repeat?.bounds_duration;
               const remarks = formatSig(instruction);
               const notes = medication.note;
               return {
                 medicine: medication.medication?.display,
-                status: t(`medication_status_${medication.status}`),
+                status: t(`medication_status__${medication.status}`),
                 dosage: dosage,
                 frequency: instruction?.as_needed_boolean
-                  ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})`
-                  : (frequency?.meaning ?? "-") +
-                    (instruction?.additional_instruction?.[0]?.display
-                      ? `, ${instruction.additional_instruction[0].display}`
-                      : ""),
+                  ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})` +
+                    (instruction?.additional_instruction?.length
+                      ? `, ${additionalInstructions}`
+                      : "")
+                  : `${frequency?.meaning ?? "-"}${
+                      instruction?.additional_instruction?.length
+                        ? `, ${additionalInstructions}`
+                        : ""
+                    }`,
                 duration: duration ? `${duration.value} ${duration.unit}` : "-",
                 instructions: `${remarks || "-"}${notes ? ` (${t("note")}: ${notes})` : ""}`,
               };

@@ -1,5 +1,6 @@
-import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
+import { CaretSortIcon, CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -43,7 +44,12 @@ interface AutocompleteProps {
   popoverClassName?: string;
   freeInput?: boolean;
   closeOnSelect?: boolean;
+  showClearButton?: boolean;
   "data-cy"?: string;
+
+  ref?: React.RefCallback<HTMLButtonElement | null>;
+
+  "aria-invalid"?: boolean;
 }
 
 export default function Autocomplete({
@@ -61,7 +67,10 @@ export default function Autocomplete({
   popoverClassName,
   freeInput = false,
   closeOnSelect = true,
+  showClearButton = true,
   "data-cy": dataCy,
+  ref,
+  ...props
 }: AutocompleteProps) {
   const [open, setOpen] = React.useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
@@ -110,14 +119,27 @@ export default function Autocomplete({
     }
   };
 
+  const handleClear = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    onChange("");
+
+    if (freeInput) {
+      setInputValue("");
+    }
+
+    onSearch?.("");
+
+    setOpen(false);
+  };
+  const { t } = useTranslation();
   const commandContent = (
     <>
       <CommandInput
         placeholder={inputPlaceholder}
         disabled={disabled}
         onValueChange={handleInputChange}
-        // Control the input when freeInput is true.
-        {...(freeInput ? { value: inputValue } : {})}
         className="outline-hidden border-none ring-0 shadow-none"
         autoFocus
       />
@@ -168,6 +190,7 @@ export default function Autocomplete({
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button
+            aria-invalid={props["aria-invalid"]}
             title={
               value
                 ? freeInput
@@ -176,6 +199,7 @@ export default function Autocomplete({
                 : undefined
             }
             variant="outline"
+            ref={ref}
             role="combobox"
             aria-expanded={open}
             className={cn("w-full justify-between", className)}
@@ -190,7 +214,20 @@ export default function Autocomplete({
                   : selectedOption?.label
                 : placeholder}
             </span>
-            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+            {selectedOption && showClearButton ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-3 p-0 hover:bg-transparent opacity-50"
+                onClick={handleClear}
+                title={t("clear")}
+              >
+                <Cross2Icon className="size-3" />
+                <span className="sr-only">{t("clear")}</span>
+              </Button>
+            ) : (
+              <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+            )}
           </Button>
         </SheetTrigger>
         <SheetContent
@@ -213,16 +250,36 @@ export default function Autocomplete({
           title={selectedOption ? selectedOption.label : undefined}
           variant="outline"
           role="combobox"
+          aria-invalid={props["aria-invalid"]}
           aria-expanded={open}
           className={cn("w-full justify-between", className)}
           disabled={disabled}
           data-cy={dataCy}
           onClick={() => setOpen(!open)}
+          ref={ref}
         >
-          <span className={cn("truncate", !selectedOption && "text-gray-500")}>
+          <span
+            className={cn(
+              inputValue && "truncate",
+              !selectedOption && "text-gray-500",
+            )}
+          >
             {displayText}
           </span>
-          <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+          {selectedOption && showClearButton ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-3 p-0 hover:bg-transparent opacity-50"
+              onClick={handleClear}
+              title={t("clear")}
+            >
+              <Cross2Icon className="size-3" />
+              <span className="sr-only">{t("clear")}</span>
+            </Button>
+          ) : (
+            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent

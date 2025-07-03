@@ -1,10 +1,9 @@
 import { ChevronRight } from "lucide-react";
 import { ActiveLink } from "raviger";
 import { useState } from "react";
+import React from "react";
 
 import { cn } from "@/lib/utils";
-
-import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
 import {
   Collapsible,
@@ -47,13 +46,12 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
         {links
           .filter((link) => link.visibility !== false)
           .map((link) => (
-            <>
+            <React.Fragment key={link.name}>
               {link.children ? (
                 isCollapsed ? (
-                  <PopoverMenu key={link.name} link={link} />
+                  <PopoverMenu link={link} />
                 ) : (
                   <Collapsible
-                    key={link.name}
                     asChild
                     defaultOpen={isChildActive(link)}
                     className="group/collapsible"
@@ -66,7 +64,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                           className="cursor-pointer hover:bg-gray-200 hover:text-green-700"
                         >
                           {link.icon ? (
-                            <CareIcon icon={link.icon as IconName} />
+                            link.icon
                           ) : (
                             <Avatar
                               name={link.name}
@@ -122,7 +120,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                       exactActiveClass="bg-white text-green-700 shadow-sm"
                     >
                       {link.icon ? (
-                        <CareIcon icon={link.icon as IconName} />
+                        link.icon
                       ) : (
                         <Avatar
                           name={link.name}
@@ -137,7 +135,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
-            </>
+            </React.Fragment>
           ))}
       </SidebarMenu>
     </SidebarGroup>
@@ -160,7 +158,7 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
           )}
         >
           {link.icon ? (
-            <CareIcon icon={link.icon as IconName} />
+            link.icon
           ) : (
             <Avatar name={link.name} className="size-6 -m-1 rounded-sm" />
           )}

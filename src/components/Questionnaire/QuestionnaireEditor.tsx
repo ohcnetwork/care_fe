@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  AArrowDown,
   ChevronDown,
   ChevronUp,
   ChevronsDownUp,
@@ -9,8 +10,8 @@ import {
   ViewIcon,
 } from "lucide-react";
 import { useNavigate } from "raviger";
-import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -20,10 +21,10 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Collapsible,
   CollapsibleContent,
@@ -32,6 +33,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -53,6 +55,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -65,6 +72,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
+import { AnimatedWrapper } from "@/components/Common/AnimatedWrapper";
 import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
 import {
@@ -72,9 +80,12 @@ import {
   StructuredQuestionType,
 } from "@/components/Questionnaire/data/StructuredFormData";
 
+import useDragAndDrop from "@/hooks/useDragAndDrop";
+
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
+import { HTTPError } from "@/Utils/request/types";
+import { swapElements } from "@/Utils/request/utils";
 import organizationApi from "@/types/organization/organizationApi";
 import {
   EnableWhen,
@@ -85,12 +96,14 @@ import {
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
-import { ValuesetBase } from "@/types/valueset/valueset";
-import valuesetApi from "@/types/valueset/valuesetApi";
 
 import { CodingEditor } from "./CodingEditor";
+import { QuestionActions } from "./QuestionActions";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 import { QuestionnaireProperties } from "./QuestionnaireProperties";
+import { SelectOrCreateValueset } from "./SelectOrCreateValueset";
+import ValueSetSelect from "./ValueSetSelect";
+import { scrollToQuestion } from "./utils";
 
 interface QuestionnaireEditorProps {
   id?: string;
@@ -176,7 +189,7 @@ function LayoutOptionCard({
       <Label
         htmlFor={optionId}
         className={cn(
-          "flex flex-col items-center justify-between rounded-md border-2 border-gray-200 bg-white p-4 hover:bg-gray-50 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
+          "flex flex-col items-center justify-between rounded-md border-2 border-gray-200 bg-white p-2 md:p-4 hover:bg-gray-50 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
           isSelected && "border-primary",
         )}
       >
@@ -187,6 +200,32 @@ function LayoutOptionCard({
       </Label>
     </div>
   );
+}
+
+const HIDE_REPEATABLE_QUESTION_TYPES = ["boolean", "group", "display"];
+
+function findFirstErrorPath(errors: any, path: number[] = []): number[] | null {
+  for (let i = 0; i < errors.length; i++) {
+    const current = errors[i];
+    const currentPath = [...path, i];
+
+    if (current && typeof current === "object") {
+      const hasOwnErrors = Object.entries(current).some(([key, value]) => {
+        return key !== "questions" && value !== undefined;
+      });
+
+      if (hasOwnErrors) {
+        return currentPath;
+      }
+
+      if (Array.isArray(current.questions)) {
+        const subPath = findFirstErrorPath(current.questions, currentPath);
+        if (subPath) return subPath;
+      }
+    }
+  }
+
+  return null;
 }
 
 export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
@@ -203,6 +242,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [orgError, setOrgError] = useState<string | undefined>();
   const [importUrl, setImportUrl] = useState("");
   const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showFileImportDialog, setShowFileImportDialog] = useState(false);
+  const [selectedQuestions, setSelectedQuestions] = useState<Set<string>>(
+    new Set(),
+  );
+  const [selectedImportFile, setSelectedImportFile] = useState<File | null>(
+    null,
+  );
   const [importedData, setImportedData] = useState<QuestionnaireDetail | null>(
     null,
   );
@@ -210,6 +256,12 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [structuredTypeErrors, setStructuredTypeErrors] = useState<
     Record<string, string | undefined>
   >({});
+  const { dragOver, onDragOver, onDragLeave } = useDragAndDrop();
+  const [enableWhenDependencies, setEnableWhenDependencies] = useState<
+    Map<string, Set<{ question: Question; path: string[] }>>
+  >(new Map());
+  const [expandPath, setExpandPath] = useState<string[]>([]);
+  const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
     const errorData = (
@@ -360,6 +412,28 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         message: t("slug_format_message"),
       }),
     description: z.string().optional(),
+    questions: z.array(
+      z.object({
+        text: z.string().trim().min(1, t("field_required")),
+        link_id: z.string().trim().min(1, t("field_required")),
+        description: z.string().optional(),
+        code: z
+          .object({
+            system: z.string().optional(),
+            code: z.string().optional(),
+            display: z.string().optional(),
+          })
+          .optional(),
+
+        unit: z
+          .object({
+            system: z.string().optional(),
+            code: z.string().optional(),
+            display: z.string().optional(),
+          })
+          .optional(),
+      }),
+    ),
   });
 
   const [questionnaire, setQuestionnaire] =
@@ -371,7 +445,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           description: "",
           status: "draft",
           version: "1.0",
-          subject_type: "patient",
+          subject_type: "encounter",
           questions: [],
           slug: "",
           tags: [],
@@ -380,26 +454,106 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       return null;
     });
 
-  const form = useForm({
+  const form = useForm<any>({
     resolver: zodResolver(QuestionnaireFormPartialSchema),
     defaultValues: {
       title: questionnaire?.title ?? "",
       slug: questionnaire?.slug ?? "",
       description: questionnaire?.description ?? "",
+      questions: questionnaire?.questions,
+      status: questionnaire?.status,
+      subject_type: questionnaire?.subject_type,
+      version: questionnaire?.version,
+      tags: questionnaire?.tags,
     },
     mode: "onChange",
   });
 
+  const { isDirty } = form.formState;
+
   useEffect(() => {
     if (initialQuestionnaire) {
-      setQuestionnaire(initialQuestionnaire);
-      form.reset({
+      const formValues = {
         title: initialQuestionnaire.title || "",
         slug: initialQuestionnaire.slug || "",
         description: initialQuestionnaire.description || "",
-      });
+        questions: initialQuestionnaire.questions,
+        status: initialQuestionnaire.status,
+        subject_type: initialQuestionnaire.subject_type,
+        version: initialQuestionnaire.version,
+        tags: initialQuestionnaire.tags,
+      };
+
+      setQuestionnaire(initialQuestionnaire);
+      form.reset(formValues);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuestionnaire]);
+
+  const handleToggleSelection = (questionId: string) => {
+    setSelectedQuestions((prev) => {
+      const next = new Set(prev);
+      if (next.has(questionId)) {
+        next.delete(questionId);
+      } else {
+        next.add(questionId);
+      }
+      return next;
+    });
+  };
+  const rootQuestions: Question[] = useWatch({
+    control: form.control,
+    name: "questions",
+  });
+
+  const tags = useWatch({
+    control: form.control,
+    name: "tags",
+  });
+
+  useEffect(() => {
+    if (!rootQuestions) return;
+    const newEnableWhenDependencies = new Map<
+      string,
+      Set<{ question: Question; path: string[] }>
+    >();
+    const processQuestions = (
+      questions: Question[],
+      currentPath: string[] = [],
+    ) => {
+      questions.forEach((question) => {
+        question.enable_when?.forEach(({ question: dependentQuestionId }) => {
+          const deps =
+            newEnableWhenDependencies.get(dependentQuestionId) || new Set();
+          deps.add({
+            question: question,
+            path: [...currentPath, question.link_id],
+          });
+          newEnableWhenDependencies.set(dependentQuestionId, deps);
+        });
+        if (question.questions?.length) {
+          processQuestions(question.questions, [
+            ...currentPath,
+            question.link_id,
+          ]);
+        }
+      });
+    };
+
+    processQuestions(rootQuestions);
+    setEnableWhenDependencies(newEnableWhenDependencies);
+  }, [rootQuestions]);
+
+  const handleEnableWhenDependentClick = (path: string[], targetId: string) => {
+    const rootQuestionId = path[0];
+    toggleQuestionExpanded(rootQuestionId, false);
+    setExpandPath(path.slice(1));
+    setTimeout(() => {
+      const element = document.getElementById(`question-${targetId}`);
+      if (element) element.scrollIntoView();
+      setExpandPath([]);
+    }, 100);
+  };
 
   if (id && isLoading) return <Loading />;
 
@@ -428,15 +582,26 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     field: keyof QuestionnaireDetail,
     value: unknown,
   ) => {
-    setQuestionnaire((prev) => (prev ? { ...prev, [field]: value } : null));
+    form.setValue(field, value, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    });
   };
   const handleValidatedChange = (
-    field: keyof typeof questionnaire,
-    value: string | undefined,
+    field: keyof QuestionnaireDetail,
+    value: QuestionnaireDetail[keyof QuestionnaireDetail],
   ) => {
-    updateQuestionnaireField(field, value);
     form.setValue(field as "title" | "description" | "slug", value, {
       shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
+
+  const updateQuestions = (newQuestions: Question[]) => {
+    form.setValue("questions", newQuestions, {
+      shouldValidate: true,
+      shouldDirty: true,
     });
   };
 
@@ -460,7 +625,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     let hasError = false;
     const updatedErrors: Record<string, string | undefined> = {};
 
-    questionnaire.questions.forEach((q) => {
+    rootQuestions.forEach((q) => {
       if (q.type === "structured" && !q.structured_type) {
         updatedErrors[q.id] = t("field_required");
         hasError = true;
@@ -475,19 +640,88 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   const handleSave = async () => {
-    const isValid = await form.trigger();
+    let isValid = await form.trigger();
     const hasOrganizations = validateOrganizations();
     const hasValidStructuredType = validateStructuredType();
 
+    const validateQuestions = (questions: any[], path = "questions") => {
+      questions.forEach((question, idx) => {
+        const currentPath = `${path}.${idx}`;
+
+        if (question.code && !question.code?.display) {
+          form.setError(`${currentPath}.code.display`, {
+            type: "manual",
+            message: t("code_verification_required"),
+          });
+          isValid = false;
+        }
+
+        if (question.type === "group" && Array.isArray(question.questions)) {
+          validateQuestions(question.questions, `${currentPath}.questions`);
+        }
+      });
+    };
+    validateQuestions(rootQuestions);
+
     if (!isValid || !hasOrganizations || !hasValidStructuredType) {
+      setTimeout(() => {
+        const errorEntries = Object.entries(form.formState.errors);
+
+        for (const [fieldName, error] of errorEntries) {
+          if (fieldName !== "questions") {
+            const el = document.querySelector(`[name="${fieldName}"]`);
+            if (el) {
+              el.scrollIntoView({ behavior: "smooth", block: "center" });
+              break;
+            }
+          } else {
+            const errorPath = findFirstErrorPath(error);
+            if (errorPath) {
+              // Expand parent groups
+              for (let i = 0; i < errorPath.length; i++) {
+                const question = getQuestionByPath(
+                  rootQuestions,
+                  errorPath.slice(0, i + 1),
+                );
+                if (question?.link_id) {
+                  setExpandedQuestions((prev) =>
+                    new Set(prev).add(question.link_id),
+                  );
+                }
+              }
+
+              // After expanding, scroll to the error question
+              setTimeout(() => {
+                const errorQuestion = getQuestionByPath(
+                  rootQuestions,
+                  errorPath,
+                );
+                if (
+                  errorQuestion?.link_id &&
+                  questionRefs.current[errorQuestion.link_id]
+                ) {
+                  questionRefs.current[errorQuestion.link_id]?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+                }
+              }, 200);
+            }
+          }
+        }
+      }, 0); // delay lets react-hook-form update `formState.errors`
       return;
     }
 
     if (id) {
-      updateQuestionnaire(questionnaire);
+      updateQuestionnaire({
+        ...form.getValues(),
+        questions: rootQuestions,
+      });
     } else {
       createQuestionnaire({
-        ...questionnaire,
+        ...form.getValues(),
+        questions: rootQuestions,
         organizations: selectedOrgs.map((o) => o.id),
         tags: selectedTags.map((t) => t.id),
       });
@@ -499,9 +733,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   const handleDownload = () => {
-    const dataStr = JSON.stringify(questionnaire, null, 2);
+    const dataStr = JSON.stringify(form.getValues(), null, 2);
     const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
-    const exportFileDefaultName = `${questionnaire.slug || "questionnaire"}.json`;
+    const exportFileDefaultName = `${form.getValues("slug") || "questionnaire"}.json`;
 
     const linkElement = document.createElement("a");
     linkElement.setAttribute("href", dataUri);
@@ -534,7 +768,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       description: importedData.description,
       status: "draft",
       version: "1.0",
-      subject_type: importedData.subject_type || "patient",
+      subject_type: importedData.subject_type || "encounter",
       questions:
         importedData.questions?.map((q: Question) => ({
           ...q,
@@ -548,14 +782,17 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     };
 
     setQuestionnaire({
-      ...questionnaire,
+      ...form.getValues(),
       ...mappedData,
     } as QuestionnaireDetail);
     form.reset({
       title: mappedData.title || "",
       slug: mappedData.slug || "",
       description: mappedData.description || "",
+      questions: mappedData.questions || [],
     });
+
+    form.trigger();
 
     setShowImportDialog(false);
     setImportUrl("");
@@ -563,13 +800,16 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     toast.success(t("questionnaire_imported_successfully"));
   };
 
-  const toggleQuestionExpanded = (questionId: string) => {
+  const toggleQuestionExpanded = (
+    questionLinkId: string,
+    allowCollapse: boolean = true,
+  ) => {
     setExpandedQuestions((prev) => {
       const next = new Set(prev);
-      if (next.has(questionId)) {
-        next.delete(questionId);
+      if (next.has(questionLinkId) && allowCollapse) {
+        next.delete(questionLinkId);
       } else {
-        next.add(questionId);
+        next.add(questionLinkId);
       }
       return next;
     });
@@ -613,28 +853,57 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         <div>
           <h1 className="text-2xl font-bold">
             {id
-              ? t("edit") + " " + questionnaire.title
+              ? t("edit") + " " + form.watch("title")
               : t("create_questionnaire")}
           </h1>
-          <p className="text-sm text-gray-500">{questionnaire.description}</p>
+          <p className="text-sm text-gray-500">{form.watch("description")}</p>
         </div>
         <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={handleCancel}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleCancel}
+            disabled={isCreating || isUpdating}
+            data-cy="cancel-questionnaire-form"
+          >
             {t("cancel")}
           </Button>
           {id && (
-            <Button variant="outline" onClick={handleDownload}>
+            <Button
+              variant="outline"
+              onClick={handleDownload}
+              data-cy="download-questionnaire-form"
+            >
               <CareIcon icon="l-import" className="mr-1 size-4" />
               {t("download")}
             </Button>
           )}
           {!id && (
-            <Button variant="outline" onClick={() => setShowImportDialog(true)}>
-              <CareIcon icon="l-import" className="mr-1 size-4" />
-              {t("import_from_url")}
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" disabled={isCreating || isUpdating}>
+                  <CareIcon icon="l-import" className="mr-1 size-4" />
+                  {t("import")}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => setShowImportDialog(true)}>
+                  <CareIcon icon="l-link" className="mr-2 size-4" />
+                  {t("import_from_url")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowFileImportDialog(true)}>
+                  <CareIcon icon="l-file" className="mr-2 size-4" />
+                  {t("import_from_file")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
-          <Button onClick={handleSave} disabled={isCreating || isUpdating}>
+          <Button
+            type="submit"
+            onClick={handleSave}
+            disabled={!isDirty || isCreating || isUpdating}
+            data-cy="save-questionnaire-form"
+          >
             <CareIcon icon="l-save" className="mr-2 size-4" />
             {id ? t("save") : t("create")}
           </Button>
@@ -656,33 +925,28 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="edit">
-          <div className="flex flex-col md:flex-row gap-2">
-            <div className="space-y-4 md:w-60">
+          <div className="flex flex-col lg:flex-row gap-2">
+            <div className="space-y-4 lg:w-60 top-4 self-start h-fit max-h-screen overflow-y-auto lg:sticky">
               <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
                 <CardHeader className="p-0">
                   <CardTitle>{t("navigation")}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   <nav className="space-y-1">
-                    {questionnaire.questions.map((question, index) => {
+                    {rootQuestions.map((question, index) => {
                       const hasSubQuestions =
                         question.type === "group" &&
                         question.questions &&
                         question.questions.length > 0;
                       return (
-                        <div key={question.id} className="space-y-1">
+                        <div key={question.link_id} className="space-y-1">
                           <button
                             onClick={() => {
-                              const element = document.getElementById(
-                                `question-${question.id}`,
-                              );
-                              if (element) {
-                                element.scrollIntoView();
-                                toggleQuestionExpanded(question.id);
-                              }
+                              scrollToQuestion(question.link_id);
+                              toggleQuestionExpanded(question.link_id);
                             }}
                             className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
-                              expandedQuestions.has(question.id)
+                              expandedQuestions.has(question.link_id)
                                 ? "bg-accent"
                                 : ""
                             }`}
@@ -701,24 +965,17 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                   <button
                                     key={subQuestion.id}
                                     onClick={() => {
-                                      if (!expandedQuestions.has(question.id)) {
-                                        toggleQuestionExpanded(question.id);
+                                      if (
+                                        !expandedQuestions.has(question.link_id)
+                                      ) {
+                                        toggleQuestionExpanded(
+                                          question.link_id,
+                                        );
                                         setTimeout(() => {
-                                          const element =
-                                            document.getElementById(
-                                              `question-${subQuestion.id}`,
-                                            );
-                                          if (element) {
-                                            element.scrollIntoView();
-                                          }
+                                          scrollToQuestion(subQuestion.link_id);
                                         }, 100);
                                       } else {
-                                        const element = document.getElementById(
-                                          `question-${subQuestion.id}`,
-                                        );
-                                        if (element) {
-                                          element.scrollIntoView();
-                                        }
+                                        scrollToQuestion(subQuestion.link_id);
                                       }
                                     }}
                                     className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
@@ -742,7 +999,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
               </Card>
               <div className="space-y-4 max-w-sm lg:hidden">
                 <QuestionnaireProperties
-                  questionnaire={questionnaire}
+                  form={form}
                   updateQuestionnaireField={updateQuestionnaireField}
                   id={id}
                   organizations={organizations}
@@ -756,7 +1013,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     error: orgError,
                     setError: setOrgError,
                   }}
-                  tags={questionnaire.tags}
+                  tags={tags}
                   tagSelection={{
                     selectedTags: selectedTags,
                     onToggle: handleToggleTag,
@@ -767,197 +1024,222 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     onTagCreated: !id ? handleTagCreated : undefined,
                   }}
                 />
+                <QuestionActions
+                  selectedQuestions={selectedQuestions}
+                  questions={rootQuestions}
+                  updateQuestionnaireField={updateQuestionnaireField}
+                  onQuestionsChange={updateQuestions}
+                  setSelectedQuestions={setSelectedQuestions}
+                  setExpandedQuestions={setExpandedQuestions}
+                />
               </div>
             </div>
 
             <div className="space-y-4 flex-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t("basic_info")}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Form {...form}>
-                    <form className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="title"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t("title")}</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder={t("enter_title")}
-                                {...field}
-                                onChange={(e) =>
-                                  handleValidatedChange("title", e.target.value)
-                                }
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="slug"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t("slug")}</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="unique-identifier-for-questionnaire"
-                                {...field}
-                                onChange={(e) =>
-                                  handleValidatedChange("slug", e.target.value)
-                                }
-                              />
-                            </FormControl>
-                            <FormMessage />
-                            <p className="text-sm text-gray-500 mt-1">
-                              A unique URL-friendly identifier for this
-                              questionnaire
-                            </p>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t("description")}</FormLabel>
-                            <FormControl>
-                              <Textarea
-                                placeholder={t("enter_description")}
-                                {...field}
-                                onChange={(e) =>
-                                  handleValidatedChange(
-                                    "description",
-                                    e.target.value,
-                                  )
-                                }
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </form>
-                  </Form>
-                </CardContent>
-              </Card>
-
-              <Card className="border-none bg-transparent shadow-none">
-                <CardHeader className="flex flex-row items-center justify-between px-0 py-2">
-                  <div>
-                    <CardTitle>
-                      <p className="text-sm text-gray-700 font-medium mt-1">
-                        {(questionnaire.questions?.length || 0) > 1
-                          ? t("questions")
-                          : t("question")}
-                      </p>
-                    </CardTitle>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const newQuestion: Question = {
-                        id: crypto.randomUUID(),
-                        link_id: `${questionnaire.questions.length + 1}`,
-                        text: "New Question",
-                        type: "string",
-                        questions: [],
-                      };
-                      updateQuestionnaireField("questions", [
-                        ...questionnaire.questions,
-                        newQuestion,
-                      ]);
-                      setExpandedQuestions(
-                        (prev) => new Set([...prev, newQuestion.id]),
-                      );
-                    }}
-                  >
-                    <CareIcon icon="l-plus" className="mr-2 size-4" />
-                    {t("add_question")}
-                  </Button>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="space-y-6">
-                    {questionnaire.questions.map((question, index) => (
-                      <div
-                        key={question.id}
-                        id={`question-${question.id}`}
-                        className="relative bg-white rounded-lg shadow-md"
-                      >
-                        <div className="absolute -left-4 top-4 font-medium text-gray-500"></div>
-                        <QuestionEditor
-                          index={index}
-                          key={question.id}
-                          question={question}
-                          onChange={(updatedQuestion) => {
-                            const newQuestions = [...questionnaire.questions];
-                            newQuestions[index] = updatedQuestion;
-                            updateQuestionnaireField("questions", newQuestions);
-                          }}
-                          onDelete={() => {
-                            const newQuestions = questionnaire.questions.filter(
-                              (_, i) => i !== index,
-                            );
-                            updateQuestionnaireField("questions", newQuestions);
-                          }}
-                          isExpanded={expandedQuestions.has(question.id)}
-                          onToggleExpand={() =>
-                            toggleQuestionExpanded(question.id)
-                          }
-                          depth={0}
-                          onMoveUp={() => {
-                            if (index > 0) {
-                              const newQuestions = [...questionnaire.questions];
-                              [newQuestions[index - 1], newQuestions[index]] = [
-                                newQuestions[index],
-                                newQuestions[index - 1],
-                              ];
-                              updateQuestionnaireField(
-                                "questions",
-                                newQuestions,
-                              );
-                            }
-                          }}
-                          onMoveDown={() => {
-                            if (index < questionnaire.questions.length - 1) {
-                              const newQuestions = [...questionnaire.questions];
-                              [newQuestions[index], newQuestions[index + 1]] = [
-                                newQuestions[index + 1],
-                                newQuestions[index],
-                              ];
-                              updateQuestionnaireField(
-                                "questions",
-                                newQuestions,
-                              );
-                            }
-                          }}
-                          isFirst={index === 0}
-                          isLast={index === questionnaire.questions.length - 1}
-                          structuredTypeError={
-                            structuredTypeErrors[question.id]
-                          }
-                          setStructuredTypeError={(error) => {
-                            setStructuredTypeErrors((prev) => ({
-                              ...prev,
-                              [question.id]: error,
-                            }));
-                          }}
+              <Form {...form}>
+                <form>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{t("basic_info")}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="title"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t("title")}</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder={t("enter_title")}
+                                  {...field}
+                                  onChange={(e) =>
+                                    handleValidatedChange(
+                                      "title",
+                                      e.target.value,
+                                    )
+                                  }
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="slug"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t("slug")}</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="unique-identifier-for-questionnaire"
+                                  {...field}
+                                  onChange={(e) =>
+                                    handleValidatedChange(
+                                      "slug",
+                                      e.target.value,
+                                    )
+                                  }
+                                />
+                              </FormControl>
+                              <FormMessage />
+                              <p className="text-sm text-gray-500 mt-1">
+                                {t("unique_url_for_questionnaire")}
+                              </p>
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t("description")}</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  placeholder={t("enter_description")}
+                                  {...field}
+                                  onChange={(e) =>
+                                    handleValidatedChange(
+                                      "description",
+                                      e.target.value,
+                                    )
+                                  }
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-none bg-transparent shadow-none">
+                    <CardHeader className="flex flex-row items-center justify-between px-0 py-2">
+                      <div>
+                        <CardTitle>
+                          <p className="text-sm text-gray-700 font-medium mt-1">
+                            {(rootQuestions?.length || 0) > 1
+                              ? t("questions")
+                              : t("question")}
+                          </p>
+                        </CardTitle>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const newQuestion: Question = {
+                            id: crypto.randomUUID(),
+                            link_id: `Q-${Date.now()}`,
+                            text: "New Question",
+                            type: "string",
+                            questions: [],
+                          };
+                          updateQuestions([...rootQuestions, newQuestion]);
+                          setExpandedQuestions(
+                            (prev) => new Set([...prev, newQuestion.link_id]),
+                          );
+                          setTimeout(() => {
+                            scrollToQuestion(newQuestion.link_id);
+                          }, 100);
+                        }}
+                      >
+                        <CareIcon icon="l-plus" className="mr-2 size-4" />
+                        {t("add_question")}
+                      </Button>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <div className="space-y-6">
+                        {rootQuestions.map((question, index) => (
+                          <div
+                            key={question.id}
+                            id={`question-${question.link_id}`}
+                            ref={(el) => {
+                              questionRefs.current[question.link_id] = el;
+                            }}
+                            className="relative bg-white rounded-lg shadow-md"
+                          >
+                            <QuestionEditor
+                              name={`questions.${index}`}
+                              index={index}
+                              key={question.link_id}
+                              question={question}
+                              selectedQuestions={selectedQuestions}
+                              onToggleSelection={handleToggleSelection}
+                              form={form}
+                              onChange={(updatedQuestion) => {
+                                const newQuestions = rootQuestions.map(
+                                  (q, i) => (i === index ? updatedQuestion : q),
+                                );
+                                updateQuestions(newQuestions);
+                              }}
+                              onDelete={() => {
+                                const newQuestions = rootQuestions.filter(
+                                  (_, i) => i !== index,
+                                );
+                                updateQuestions(newQuestions);
+                              }}
+                              isExpanded={expandedQuestions.has(
+                                question.link_id,
+                              )}
+                              onToggleExpand={() =>
+                                toggleQuestionExpanded(question.link_id)
+                              }
+                              depth={0}
+                              onMoveUp={() => {
+                                if (index > 0) {
+                                  const newQuestions = swapElements<Question>(
+                                    rootQuestions,
+                                    index,
+                                    index - 1,
+                                  );
+                                  updateQuestions(newQuestions);
+                                }
+                              }}
+                              onMoveDown={() => {
+                                if (index < rootQuestions.length - 1) {
+                                  const newQuestions = swapElements<Question>(
+                                    rootQuestions,
+                                    index,
+                                    index + 1,
+                                  );
+                                  updateQuestions(newQuestions);
+                                }
+                              }}
+                              isFirst={index === 0}
+                              isLast={index === rootQuestions.length - 1}
+                              structuredTypeError={
+                                structuredTypeErrors[question.id]
+                              }
+                              setStructuredTypeError={(error) => {
+                                setStructuredTypeErrors((prev) => ({
+                                  ...prev,
+                                  [question.id]: error,
+                                }));
+                              }}
+                              enableWhenDependencies={enableWhenDependencies}
+                              handleEnableWhenDependentClick={
+                                handleEnableWhenDependentClick
+                              }
+                              expandPath={expandPath}
+                              questionRefs={questionRefs}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </form>
+              </Form>
             </div>
-            <div className="space-y-4 w-60 hidden lg:block">
+            <div className="space-y-4 w-60 hidden lg:block top-4 self-start h-fit lg:sticky">
               <QuestionnaireProperties
-                questionnaire={questionnaire}
+                form={form}
                 updateQuestionnaireField={updateQuestionnaireField}
                 id={id}
                 organizations={organizations}
@@ -971,7 +1253,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   error: orgError,
                   setError: setOrgError,
                 }}
-                tags={questionnaire.tags}
+                tags={tags}
                 tagSelection={{
                   selectedTags: selectedTags,
                   onToggle: handleToggleTag,
@@ -982,10 +1264,18 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   onTagCreated: handleTagCreated,
                 }}
               />
+              <QuestionActions
+                selectedQuestions={selectedQuestions}
+                questions={rootQuestions}
+                onQuestionsChange={updateQuestions}
+                updateQuestionnaireField={updateQuestionnaireField}
+                setSelectedQuestions={setSelectedQuestions}
+                setExpandedQuestions={setExpandedQuestions}
+              />
             </div>
           </div>
           <DebugPreview
-            data={questionnaire}
+            data={form.getValues()}
             title={t("questionnaire")}
             className="mt-4"
           />
@@ -1000,7 +1290,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
               <QuestionnaireForm
                 questionnaireSlug={id}
                 patientId="preview"
-                subjectType={questionnaire.subject_type}
+                subjectType={form.watch("subject_type")}
                 encounterId="preview"
                 facilityId="preview"
               />
@@ -1008,20 +1298,31 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </Card>
         </TabsContent>
       </Tabs>
-      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+      <Dialog
+        open={showImportDialog}
+        onOpenChange={(open) => {
+          setShowImportDialog(open);
+          if (!open) {
+            setImportUrl("");
+            setImportedData(null);
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("import_questionnaire")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>{t("questionnaire_json_url")}</Label>
-              <Input
-                value={importUrl}
-                onChange={(e) => setImportUrl(e.target.value)}
-                placeholder={t("questionnaire_json_url_placeholder")}
-              />
-            </div>
+            {!importedData && (
+              <div className="space-y-2">
+                <Label>{t("questionnaire_json_url")}</Label>
+                <Input
+                  value={importUrl}
+                  onChange={(e) => setImportUrl(e.target.value)}
+                  placeholder={t("questionnaire_json_url_placeholder")}
+                />
+              </div>
+            )}
             {importedData && (
               <div className="space-y-2">
                 <Label>{t("preview")}</Label>
@@ -1041,7 +1342,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setShowImportDialog(false)}
+              onClick={() => {
+                setShowImportDialog(false);
+                setImportUrl("");
+                setImportedData(null);
+              }}
             >
               {t("cancel")}
             </Button>
@@ -1058,11 +1363,118 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <Dialog
+        open={showFileImportDialog}
+        onOpenChange={setShowFileImportDialog}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("import_questionnaire")}</DialogTitle>
+            <DialogDescription>
+              {t("drag_and_drop_or_click_to_select")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div
+              className={cn(
+                "border-2 border-dashed rounded-lg p-8 text-center transition-colors",
+                dragOver
+                  ? "border-primary bg-primary/10"
+                  : "border-gray-200 hover:border-gray-300",
+              )}
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={async (e) => {
+                e.preventDefault();
+                onDragLeave();
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                  setSelectedImportFile(file);
+                }
+              }}
+              onClick={() => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = "application/json";
+                input.onchange = async (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0];
+                  if (file) {
+                    setSelectedImportFile(file);
+                  }
+                };
+                input.click();
+              }}
+            >
+              <div className="flex flex-col items-center gap-2">
+                <CareIcon
+                  icon="l-cloud-upload"
+                  className="size-12 text-gray-400"
+                />
+                <p className="text-sm text-gray-500 select-none">
+                  {dragOver
+                    ? t("drop_file_here")
+                    : t("drag_and_drop_or_click_to_select")}
+                </p>
+                <p className="text-xs text-gray-400 select-none">
+                  {t("json_files_only")}
+                </p>
+              </div>
+            </div>
+            {selectedImportFile && (
+              <div className="flex items-center justify-between p-2 border rounded-lg">
+                <div className="flex items-center gap-2">
+                  <CareIcon icon="l-file" className="size-4 text-gray-400" />
+                  <span className="text-sm">{selectedImportFile.name}</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSelectedImportFile(null)}
+                >
+                  <CareIcon icon="l-times" className="size-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowFileImportDialog(false);
+                setSelectedImportFile(null);
+              }}
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              onClick={async () => {
+                if (selectedImportFile) {
+                  try {
+                    const content = await selectedImportFile.text();
+                    const data = JSON.parse(content);
+                    setImportedData(data);
+                    setShowFileImportDialog(false);
+                    setShowImportDialog(true);
+                    setSelectedImportFile(null);
+                  } catch (_error) {
+                    toast.error(t("failed_to_import_questionnaire"));
+                  }
+                }
+              }}
+              disabled={!selectedImportFile}
+            >
+              {t("continue")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
 interface QuestionEditorProps {
+  name: string;
+  form: ReturnType<typeof useForm<any>>;
   index: number;
   question: Question;
   onChange: (updated: Question) => void;
@@ -1077,9 +1489,20 @@ interface QuestionEditorProps {
   isLast?: boolean;
   structuredTypeError?: string;
   setStructuredTypeError?: (error: string | undefined) => void;
+  onToggleSelection: (id: string) => void;
+  selectedQuestions: Set<string>;
+  enableWhenDependencies: Map<
+    string,
+    Set<{ question: Question; path: string[] }>
+  >;
+  handleEnableWhenDependentClick: (path: string[], targetId: string) => void;
+  expandPath?: string[];
+  questionRefs: React.RefObject<{ [key: string]: HTMLDivElement | null }>;
 }
 
 function QuestionEditor({
+  name,
+  form,
   question,
   onChange,
   onDelete,
@@ -1094,7 +1517,13 @@ function QuestionEditor({
   index,
   structuredTypeError,
   setStructuredTypeError,
-}: QuestionEditorProps) {
+  onToggleSelection,
+  selectedQuestions,
+  enableWhenDependencies,
+  handleEnableWhenDependentClick,
+  expandPath,
+  questionRefs,
+}: QuestionEditorProps): React.ReactElement {
   const { t } = useTranslation();
   const {
     text,
@@ -1105,23 +1534,32 @@ function QuestionEditor({
     answer_option,
     questions,
     code,
+    unit,
   } = question;
+
+  const rootQuestions = useWatch({
+    control: form.control,
+    name: "questions",
+  }) as Question[];
+  // Memoize answer options to ensure unique IDs to avoid unnecessary re-renders in value field of AnwserOption
+
+  const annotatedAnswerOptions = useMemo(() => {
+    return (
+      answer_option?.map((option: any) => ({
+        ...option,
+        _id: option._id || crypto.randomUUID(),
+      })) || []
+    );
+  }, [answer_option]);
 
   const [expandedSubQuestions, setExpandedSubQuestions] = useState<Set<string>>(
     new Set(),
   );
+  const [enableWhenQuestionAnswers, setEnableWhenQuestionAnswers] = useState<
+    Record<number, Question[]>
+  >({});
 
-  const [valueSetSearchQuery, setValueSetSearchQuery] = useState("");
-  const { data: valuesets, isFetching: isFetchingValuesets } = useQuery({
-    queryKey: ["valuesets", valueSetSearchQuery],
-    queryFn: query.debounced(valuesetApi.list, {
-      queryParams: {
-        name: valueSetSearchQuery,
-        status: "active",
-      },
-    }),
-    select: (data: PaginatedResponse<ValuesetBase>) => data.results,
-  });
+  const [inputPosition, setInputPosition] = useState("");
 
   const updateField = <K extends keyof Question>(
     field: K,
@@ -1131,13 +1569,16 @@ function QuestionEditor({
     onChange({ ...question, [field]: value, ...additionalFields });
   };
 
-  const toggleSubQuestionExpanded = (questionId: string) => {
+  const toggleSubQuestionExpanded = (
+    questionLinkId: string,
+    allowCollapse: boolean = true,
+  ) => {
     setExpandedSubQuestions((prev) => {
       const next = new Set(prev);
-      if (next.has(questionId)) {
-        next.delete(questionId);
+      if (next.has(questionLinkId) && allowCollapse) {
+        next.delete(questionLinkId);
       } else {
-        next.add(questionId);
+        next.add(questionLinkId);
       }
       return next;
     });
@@ -1147,6 +1588,205 @@ function QuestionEditor({
     return parentId ? `${parentId}-${question.id}` : question.id;
   };
 
+  const findQuestionPath = (
+    questions: Question[],
+    targetId: string,
+  ): Question[] | null => {
+    const pathStack: [Question, Question[]][] = questions
+      .filter((q) => !!q && !!q.text)
+      .map((q) => [q, []]);
+
+    while (pathStack.length > 0) {
+      const [current, path] = pathStack.pop()!;
+
+      if (current.link_id === targetId) {
+        return [...path, current];
+      }
+
+      if (
+        current.type === "group" &&
+        current.questions &&
+        current.questions.length > 0
+      ) {
+        current.questions.forEach((q) => {
+          pathStack.push([q, [...path, current]]);
+        });
+      }
+    }
+    return null;
+  };
+
+  useEffect(() => {
+    if (question.enable_when && question.enable_when.length > 0) {
+      question.enable_when.forEach((condition, idx) => {
+        const path = findQuestionPath(rootQuestions, condition.question);
+        if (path) {
+          setEnableWhenQuestionAnswers((prev) => ({
+            ...prev,
+            [idx]: path,
+          }));
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [question.enable_when]);
+
+  useEffect(() => {
+    if (
+      expandPath?.length &&
+      expandPath.length > 0 &&
+      type === "group" &&
+      questions
+    ) {
+      const nextQuestionId = expandPath[0];
+      const hasQuestion = questions.some((q) => q.link_id === nextQuestionId);
+      if (hasQuestion) {
+        toggleSubQuestionExpanded(nextQuestionId, false);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expandPath]);
+
+  const getOperatorChoices = (index: number) => {
+    const currentEnableWhenArr = enableWhenQuestionAnswers[index];
+    const currentEnableWhen =
+      currentEnableWhenArr?.[currentEnableWhenArr.length - 1];
+
+    switch (currentEnableWhen?.type) {
+      case "boolean":
+      case "text":
+      case "string":
+      case "url":
+      case "choice":
+        return ["equals", "not_equals", "exists"];
+      default:
+        return [
+          "equals",
+          "not_equals",
+          "exists",
+          "greater",
+          "less",
+          "greater_or_equals",
+          "less_or_equals",
+        ];
+    }
+  };
+
+  const getAnswerChoices = (index: number, condition: EnableWhen) => {
+    const currentEnableWhenArr = enableWhenQuestionAnswers[index];
+    const currentEnableWhen =
+      currentEnableWhenArr?.[currentEnableWhenArr.length - 1];
+    switch (currentEnableWhen?.type) {
+      case "boolean": {
+        // temp fix for boolean answers in existing questionnaires
+        let answer = condition.answer.toString();
+        if (answer === "true") {
+          answer = "Yes";
+        } else if (answer === "false") {
+          answer = "No";
+        }
+        return (
+          <Select
+            value={answer}
+            onValueChange={(val) => {
+              const newConditions = [...(question.enable_when || [])];
+              newConditions[index] = {
+                question: condition.question,
+                operator: condition.operator as "equals" | "not_equals",
+                answer: val,
+              };
+              updateField("enable_when", newConditions);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a value" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Yes">Yes</SelectItem>
+              <SelectItem value="No">No</SelectItem>
+            </SelectContent>
+          </Select>
+        );
+      }
+      case "choice":
+        return (
+          <Select
+            value={condition.answer.toString()}
+            onValueChange={(val) => {
+              const newConditions = [...(question.enable_when || [])];
+              newConditions[index] = {
+                question: condition.question,
+                operator: condition.operator as "equals" | "not_equals",
+                answer: val,
+              };
+              updateField("enable_when", newConditions);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a value" />
+            </SelectTrigger>
+            <SelectContent>
+              {currentEnableWhen.answer_option?.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.value}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      default:
+        return (
+          <Input
+            value={condition.answer?.toString() ?? ""}
+            type={
+              [
+                "greater",
+                "less",
+                "greater_or_equals",
+                "less_or_equals",
+              ].includes(condition.operator)
+                ? "number"
+                : "text"
+            }
+            onChange={(e) => {
+              const newConditions = [...(question.enable_when || [])];
+              const value = e.target.value;
+              let newCondition;
+              if (
+                [
+                  "greater",
+                  "less",
+                  "greater_or_equals",
+                  "less_or_equals",
+                ].includes(condition.operator)
+              ) {
+                newCondition = {
+                  question: condition.question,
+                  operator: condition.operator as
+                    | "greater"
+                    | "less"
+                    | "greater_or_equals"
+                    | "less_or_equals",
+                  answer: Number(value),
+                };
+              } else {
+                newCondition = {
+                  question: condition.question,
+                  operator: condition.operator as "equals" | "not_equals",
+                  answer: value,
+                };
+              }
+
+              newConditions[index] = newCondition;
+              updateField("enable_when", newConditions);
+            }}
+            placeholder="Answer value"
+          />
+        );
+    }
+  };
+  const UNIT_TYPES = ["quantity", "choice", "decimal", "integer"];
+
   return (
     <Collapsible
       open={isExpanded}
@@ -1154,6 +1794,14 @@ function QuestionEditor({
       className={`rounded-lg p-1 bg-card text-card-foreground`}
     >
       <div className={cn("flex items-center p-2", isExpanded && "bg-gray-50")}>
+        {depth > 0 && (
+          <Checkbox
+            checked={selectedQuestions.has(question.id)}
+            onCheckedChange={() => onToggleSelection(question.id)}
+            onChange={(e) => e.stopPropagation()}
+            className="mb-6 mr-2"
+          />
+        )}
         <CollapsibleTrigger className="flex-1 flex items-center">
           <div className="flex-1">
             <div className="font-semibold text-left">
@@ -1170,6 +1818,7 @@ function QuestionEditor({
               )}
             </div>
           </div>
+
           {isExpanded ? (
             <ChevronsDownUp className="size-4 text-gray-500" />
           ) : (
@@ -1205,6 +1854,7 @@ function QuestionEditor({
                 {t("move_down")}
               </DropdownMenuItem>
             )}
+
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={(e) => {
@@ -1224,36 +1874,92 @@ function QuestionEditor({
         <div className="p-2 pt-0 space-y-4 mt-2">
           <div className="flex gap-4">
             <div className="flex-1">
-              <Label>{t("question_text")}</Label>
-              <Input
-                value={text}
-                onChange={(e) => updateField("text", e.target.value)}
-              />
-            </div>
-            <div className="flex-1">
-              <Label>{t("link_id")}</Label>
-              <Input
-                value={question.link_id}
-                onChange={(e) => updateField("link_id", e.target.value)}
-                placeholder={t("link_id_placeholder")}
+              <FormField
+                control={form.control}
+                name={`${name}.text`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("question_text")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={text}
+                        onChange={(e) => {
+                          updateField("text", e.target.value);
+                          form.setValue(`${name}.text`, e.target.value, {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          });
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
           </div>
 
           <div>
-            <Label>{t("description")}</Label>
-            <Textarea
-              value={question.description || ""}
-              onChange={(e) => updateField("description", e.target.value)}
-              placeholder={t("question_description_placeholder")}
-              className="h-20"
+            <FormField
+              control={form.control}
+              name={`${name}.description`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("description")}</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      value={question.description || ""}
+                      onChange={(e) => {
+                        updateField("description", e.target.value);
+                        form.setValue(`${name}.description`, e.target.value, {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        });
+                      }}
+                      placeholder={t("question_description_placeholder")}
+                      className="h-20"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
+
+          {(enableWhenDependencies.get(question.link_id)?.size || 0) > 0 && (
+            <>
+              <div className="text-sm text-gray-500 flex flex-col gap-1">
+                {t("questionnaire_question_dependent")}
+                <div className="flex flex-wrap gap-2">
+                  {Array.from(
+                    enableWhenDependencies.get(question.link_id) || [],
+                  ).map(({ question, path }) => (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="xs"
+                      key={question.link_id}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleEnableWhenDependentClick(path, question.link_id);
+                      }}
+                      className="text-primary hover:underline"
+                    >
+                      {question.text}
+                    </Button>
+                  ))}
+                </div>
+                {t("ensure_conditions_are_valid")}
+              </div>
+            </>
+          )}
 
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>{t("type")}</Label>
+                <Label className="mb-2">{t("type")}</Label>
                 <Select
                   value={type}
                   onValueChange={(val: QuestionType) => {
@@ -1277,7 +1983,7 @@ function QuestionEditor({
                       <SelectItem key={type.value} value={type.value}>
                         <div className="flex flex-col items-start">
                           <span>{type.name}</span>
-                          <span className="text-xs max-w-xs text-muted-foreground whitespace-normal">
+                          <span className="text-xs max-w-xs text-gray-500 whitespace-normal">
                             {t(type.description)}
                           </span>
                         </div>
@@ -1289,7 +1995,7 @@ function QuestionEditor({
 
               {type === "structured" && (
                 <div>
-                  <Label>{t("structured_type")}</Label>
+                  <Label className="mb-2">{t("structured_type")}</Label>
                   <Select
                     value={structured_type || ""}
                     onValueChange={(val: StructuredQuestionType) => {
@@ -1321,9 +2027,38 @@ function QuestionEditor({
               )}
             </div>
 
+            {UNIT_TYPES.includes(type) && (
+              <FormField
+                control={form.control}
+                name={`${name}.unit`}
+                render={({ field }) => (
+                  <FormItem className="pb-4">
+                    <FormLabel>{t("unit")}</FormLabel>
+                    <FormControl>
+                      <ValueSetSelect
+                        {...field}
+                        system="system-ucum-units"
+                        placeholder={t("add_unit")}
+                        value={unit}
+                        onSelect={(code) => {
+                          updateField("unit", code);
+                          form.setValue(`${name}.unit`, code, {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          });
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             {type !== "structured" && (
               <CodingEditor
                 code={code}
+                form={form}
+                name={name}
                 onChange={(newCode) => updateField("code", newCode)}
               />
             )}
@@ -1350,16 +2085,18 @@ function QuestionEditor({
                     </Label>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={repeats ?? false}
-                      onCheckedChange={(val) => updateField("repeats", val)}
-                      id={`repeats-${getQuestionPath()}`}
-                    />
-                    <Label htmlFor={`repeats-${getQuestionPath()}`}>
-                      {t("repeatable")}
-                    </Label>
-                  </div>
+                  {!HIDE_REPEATABLE_QUESTION_TYPES.includes(question.type) && (
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={repeats ?? false}
+                        onCheckedChange={(val) => updateField("repeats", val)}
+                        id={`repeats-${getQuestionPath()}`}
+                      />
+                      <Label htmlFor={`repeats-${getQuestionPath()}`}>
+                        {t("repeatable")}
+                      </Label>
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-2">
                     <Switch
@@ -1461,7 +2198,7 @@ function QuestionEditor({
                 <h3 className="text-sm font-medium mb-2">
                   {t("group_layout_options")}
                 </h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="text-sm text-gray-500 mb-4">
                   {t("choose_layout_style")}
                 </p>
                 <RadioGroup
@@ -1499,9 +2236,9 @@ function QuestionEditor({
               <Card>
                 {question.type === "choice" && (
                   <>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardHeader className="flex sm:flex-row sm:items-center sm:justify-between sm:space-y-0 sm:pb-2 flex-col gap-2">
                       <div>
-                        <CardTitle className="text-base font-medium">
+                        <CardTitle className="text-base font-medium ">
                           {t("answer_options")}
                         </CardTitle>
                         <p className="text-sm text-gray-500">
@@ -1552,100 +2289,317 @@ function QuestionEditor({
                 )}
 
                 {question.type === "choice" && !question.answer_value_set ? (
-                  <CardContent className="space-y-4">
-                    {(answer_option || []).map((opt, idx) => (
-                      <div
-                        key={idx}
-                        className="space-y-4 pb-4 border-b border-gray-200 last:border-0 last:pb-0"
-                      >
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>Value</Label>
-                            <Input
-                              value={opt.value}
-                              onChange={(e) => {
-                                const newOptions = answer_option
-                                  ? [...answer_option]
-                                  : [];
-                                newOptions[idx] = {
-                                  ...opt,
-                                  value: e.target.value,
-                                };
-                                updateField("answer_option", newOptions);
-                              }}
-                              placeholder="Option value"
-                            />
-                          </div>
-                          <div className="flex gap-2">
-                            <div className="flex-1">
-                              <Label>Display Text</Label>
-                              <Input
-                                value={opt.display || ""}
-                                onChange={(e) => {
-                                  const newOptions = answer_option
-                                    ? [...answer_option]
-                                    : [];
-                                  newOptions[idx] = {
-                                    ...opt,
-                                    display: e.target.value,
-                                  };
-                                  updateField("answer_option", newOptions);
-                                }}
-                                placeholder="Display text (optional)"
-                              />
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="mt-8"
-                              onClick={() => {
-                                const newOptions = answer_option?.filter(
-                                  (_, i) => i !== idx,
-                                );
-                                updateField("answer_option", newOptions);
-                              }}
-                            >
-                              <CareIcon icon="l-times" className="size-4" />
-                            </Button>
-                          </div>
-                        </div>
+                  <CardContent className="sm:space-y-4 space-y-3">
+                    {annotatedAnswerOptions.length !== 0 && (
+                      <div className="flex justify-end">
+                        <Button
+                          variant="outline"
+                          type="button"
+                          size="sm"
+                          onClick={() => {
+                            const sorted = annotatedAnswerOptions
+                              ? [...annotatedAnswerOptions].sort((a, b) =>
+                                  a.value.localeCompare(b.value),
+                                )
+                              : [];
+                            updateField("answer_option", sorted);
+                          }}
+                        >
+                          <AArrowDown className="size-4" />
+                          {t("sort_alphabetically")}
+                        </Button>
                       </div>
-                    ))}
+                    )}
+                    {annotatedAnswerOptions &&
+                      annotatedAnswerOptions.map((opt, idx) => (
+                        <AnimatedWrapper key={opt._id} keyValue={opt._id}>
+                          <div className="space-y-4 pb-4 border-b border-gray-300 last:border-0 last:pb-0">
+                            <div className="grid sm:grid-cols-2 grid-cols-1 gap-4">
+                              <div>
+                                <Label className="mb-2">
+                                  {idx + 1} {" . "} {t("value")}
+                                </Label>
+                                <Input
+                                  value={opt.value}
+                                  onChange={(e) => {
+                                    const newOptions = [
+                                      ...annotatedAnswerOptions,
+                                    ];
+
+                                    newOptions[idx] = {
+                                      ...opt,
+                                      value: e.target.value,
+                                    };
+                                    updateField("answer_option", newOptions);
+                                  }}
+                                  placeholder={t("option_value")}
+                                />
+                              </div>
+                              <div className="flex gap-2">
+                                <div className="flex-1">
+                                  <Label className="mb-2">
+                                    {t("display_text")}
+                                  </Label>
+                                  <Input
+                                    value={opt.display || ""}
+                                    onChange={(e) => {
+                                      const newOptions = [
+                                        ...annotatedAnswerOptions,
+                                      ];
+                                      newOptions[idx] = {
+                                        ...opt,
+                                        display: e.target.value,
+                                      };
+                                      updateField("answer_option", newOptions);
+                                    }}
+                                    placeholder={t("display_text_placeholder")}
+                                  />
+                                </div>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="size-8"
+                                    >
+                                      <CareIcon
+                                        icon="l-ellipsis-v"
+                                        className="size-4"
+                                      />
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-80">
+                                    <div className="flex flex-col gap-2">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <span className="font-semibold flex items-center gap-1">
+                                          <ChevronDown className="size-4" />
+                                          {t("move_item")}
+                                        </span>
+                                        <span className="text-xs font-medium">
+                                          {t("position")}{" "}
+                                          {inputPosition
+                                            ? inputPosition
+                                            : idx + 1}
+                                        </span>
+                                      </div>
+                                      <div className="border-b pb-2 mb-2">
+                                        <div className="font-semibold text-xs text-gray-500 mb-1">
+                                          {t("quick_actions")}
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={idx === 0}
+                                            onClick={() => {
+                                              if (idx > 0) {
+                                                const newOptions = swapElements(
+                                                  annotatedAnswerOptions,
+                                                  idx,
+                                                  idx - 1,
+                                                );
+                                                updateField(
+                                                  "answer_option",
+                                                  newOptions,
+                                                );
+                                              }
+                                            }}
+                                          >
+                                            ↑ {t("move_up")}
+                                          </Button>
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={
+                                              idx ===
+                                              annotatedAnswerOptions.length - 1
+                                            }
+                                            onClick={() => {
+                                              if (
+                                                idx <
+                                                annotatedAnswerOptions.length -
+                                                  1
+                                              ) {
+                                                const newOptions = swapElements(
+                                                  annotatedAnswerOptions,
+                                                  idx,
+                                                  idx + 1,
+                                                );
+                                                updateField(
+                                                  "answer_option",
+                                                  newOptions,
+                                                );
+                                              }
+                                            }}
+                                          >
+                                            ↓ {t("move_down")}
+                                          </Button>
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={idx === 0}
+                                            onClick={() => {
+                                              if (idx > 0) {
+                                                const newOptions = [
+                                                  ...annotatedAnswerOptions,
+                                                ];
+                                                const [item] =
+                                                  newOptions.splice(idx, 1);
+                                                newOptions.unshift(item);
+                                                updateField(
+                                                  "answer_option",
+                                                  newOptions,
+                                                );
+                                              }
+                                            }}
+                                          >
+                                            # {t("to_top")}
+                                          </Button>
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={
+                                              idx ===
+                                              annotatedAnswerOptions.length - 1
+                                            }
+                                            onClick={() => {
+                                              if (
+                                                idx <
+                                                annotatedAnswerOptions.length -
+                                                  1
+                                              ) {
+                                                const newOptions = [
+                                                  ...annotatedAnswerOptions,
+                                                ];
+                                                const [item] =
+                                                  newOptions.splice(idx, 1);
+                                                newOptions.push(item);
+                                                updateField(
+                                                  "answer_option",
+                                                  newOptions,
+                                                );
+                                              }
+                                            }}
+                                          >
+                                            # {t("to_bottom")}
+                                          </Button>
+                                        </div>
+                                      </div>
+                                      <div className="mb-2">
+                                        <div className="font-semibold text-xs text-gray-500 mb-1">
+                                          {t("move_to_specific_position")}
+                                        </div>
+                                        <div className="flex gap-2">
+                                          <Input
+                                            type="number"
+                                            min={1}
+                                            max={annotatedAnswerOptions.length}
+                                            className="h-7 w-full text-sm"
+                                            value={inputPosition}
+                                            onChange={(e) =>
+                                              setInputPosition(e.target.value)
+                                            }
+                                            placeholder={t("enter_position")}
+                                          />
+                                          <Button
+                                            size="sm"
+                                            variant="secondary"
+                                            onClick={() => {
+                                              const newPosition =
+                                                parseInt(inputPosition) - 1;
+                                              if (
+                                                !isNaN(newPosition) &&
+                                                newPosition >= 0 &&
+                                                newPosition <
+                                                  annotatedAnswerOptions.length &&
+                                                newPosition !== idx
+                                              ) {
+                                                const newArray = [
+                                                  ...annotatedAnswerOptions,
+                                                ];
+                                                const [movedItem] =
+                                                  newArray.splice(idx, 1);
+                                                newArray.splice(
+                                                  newPosition,
+                                                  0,
+                                                  movedItem,
+                                                );
+                                                updateField(
+                                                  "answer_option",
+                                                  newArray,
+                                                );
+                                              }
+                                              setInputPosition("");
+                                            }}
+                                            className="gap-2"
+                                          >
+                                            {t("move")}
+                                          </Button>
+                                        </div>
+                                        <div className="text-xs text-gray-400 mt-1">
+                                          {t("range")}: 1 {t("to")}{" "}
+                                          {annotatedAnswerOptions.length}
+                                        </div>
+                                      </div>
+
+                                      <div className="border-t pt-2">
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => {
+                                            const newOptions =
+                                              annotatedAnswerOptions.filter(
+                                                (_, i) => i !== idx,
+                                              );
+                                            updateField(
+                                              "answer_option",
+                                              newOptions,
+                                            );
+                                          }}
+                                        >
+                                          <CareIcon
+                                            icon="l-trash-alt"
+                                            className="mr-1 size-4"
+                                          />
+                                          {t("delete")}
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </PopoverContent>
+                                </Popover>
+                              </div>
+                            </div>
+                          </div>
+                        </AnimatedWrapper>
+                      ))}
 
                     <Button
                       variant="outline"
+                      type="button"
                       size="sm"
                       onClick={() => {
                         const newOption = { value: "" };
-                        const newOptions = answer_option
-                          ? [...answer_option, newOption]
+                        const newOptions = annotatedAnswerOptions
+                          ? [...annotatedAnswerOptions, newOption]
                           : [newOption];
                         updateField("answer_option", newOptions);
                       }}
                     >
-                      <CareIcon icon="l-plus" className="mr-2 size-4" />
+                      <CareIcon icon="l-plus" className="size-4" />
                       {t("add_option")}
                     </Button>
                   </CardContent>
                 ) : (
                   <CardContent className="space-y-4">
-                    <Autocomplete
-                      options={(valuesets ?? []).map((valueset) => ({
-                        label: valueset.name,
-                        value: valueset.slug,
-                      }))}
+                    <SelectOrCreateValueset
+                      onValueSetChange={(val) =>
+                        updateField("answer_value_set", val)
+                      }
                       value={
                         question.answer_value_set === "valueset"
                           ? ""
                           : (question.answer_value_set ?? "")
                       }
-                      onChange={(val: string) =>
-                        updateField("answer_value_set", val)
-                      }
-                      onSearch={setValueSetSearchQuery}
-                      placeholder={t("select_a_value_set")}
-                      isLoading={isFetchingValuesets}
-                      noOptionsMessage={t("no_valuesets_found")}
                     />
                   </CardContent>
                 )}
@@ -1663,7 +2617,8 @@ function QuestionEditor({
                   variant="ghost"
                   size="sm"
                   className="underline text-gray-950 font-semibold"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
                     const newQuestion: Question = {
                       id: crypto.randomUUID(),
                       link_id: `Q-${Date.now()}`,
@@ -1676,8 +2631,11 @@ function QuestionEditor({
                       newQuestion,
                     ]);
                     setExpandedSubQuestions(
-                      (prev) => new Set([...prev, newQuestion.id]),
+                      (prev) => new Set([...prev, newQuestion.link_id]),
                     );
+                    setTimeout(() => {
+                      scrollToQuestion(newQuestion.link_id);
+                    }, 100);
                   }}
                 >
                   <CareIcon icon="l-plus" className="size-4" />
@@ -1688,12 +2646,23 @@ function QuestionEditor({
                 {(questions || []).map((subQuestion, idx) => (
                   <div
                     key={subQuestion.id}
-                    id={`question-${subQuestion.id}`}
+                    id={`question-${subQuestion.link_id}`}
                     className="relative bg-white rounded-lg shadow-md"
+                    ref={(el) => {
+                      questionRefs.current[subQuestion.link_id] = el;
+                    }}
                   >
                     <QuestionEditor
+                      name={`${name}.questions.${idx}`}
+                      handleEnableWhenDependentClick={
+                        handleEnableWhenDependentClick
+                      }
+                      enableWhenDependencies={enableWhenDependencies}
+                      form={form}
                       index={idx}
-                      key={subQuestion.id}
+                      key={subQuestion.link_id}
+                      onToggleSelection={onToggleSelection}
+                      selectedQuestions={selectedQuestions}
                       question={subQuestion}
                       onChange={(updated) => {
                         const newQuestions = [...(questions || [])];
@@ -1706,34 +2675,36 @@ function QuestionEditor({
                         );
                         updateField("questions", newQuestions);
                       }}
-                      isExpanded={expandedSubQuestions.has(subQuestion.id)}
+                      isExpanded={expandedSubQuestions.has(subQuestion.link_id)}
                       onToggleExpand={() =>
-                        toggleSubQuestionExpanded(subQuestion.id)
+                        toggleSubQuestionExpanded(subQuestion.link_id)
                       }
                       depth={depth + 1}
                       parentId={getQuestionPath()}
                       onMoveUp={() => {
                         if (idx > 0) {
-                          const newQuestions = [...(questions || [])];
-                          [newQuestions[idx - 1], newQuestions[idx]] = [
-                            newQuestions[idx],
-                            newQuestions[idx - 1],
-                          ];
+                          const newQuestions = swapElements<Question>(
+                            questions || [],
+                            idx,
+                            idx - 1,
+                          );
                           updateField("questions", newQuestions);
                         }
                       }}
                       onMoveDown={() => {
                         if (idx < (questions?.length || 0) - 1) {
-                          const newQuestions = [...(questions || [])];
-                          [newQuestions[idx], newQuestions[idx + 1]] = [
-                            newQuestions[idx + 1],
-                            newQuestions[idx],
-                          ];
+                          const newQuestions = swapElements<Question>(
+                            questions || [],
+                            idx,
+                            idx + 1,
+                          );
                           updateField("questions", newQuestions);
                         }
                       }}
                       isFirst={idx === 0}
                       isLast={idx === (questions?.length || 0) - 1}
+                      expandPath={expandPath?.slice(1)}
+                      questionRefs={questionRefs}
                     />
                   </div>
                 ))}
@@ -1746,7 +2717,7 @@ function QuestionEditor({
             <div className="space-y-2">
               {(question.enable_when || []).length > 0 && (
                 <div>
-                  <Label className="text-xs">{t("enable_behavior")}</Label>
+                  <Label className="text-xs mb-1">{t("enable_behavior")}</Label>
                   <Select
                     value={question.enable_behavior ?? "all"}
                     onValueChange={(val: "all" | "any") =>
@@ -1770,188 +2741,235 @@ function QuestionEditor({
               {(question.enable_when || []).map((condition, idx) => (
                 <div
                   key={idx}
-                  className="grid grid-cols-[2fr_1fr_2fr] gap-2 items-start"
+                  className="flex flex-col border border-gray-300 rounded-lg p-4"
                 >
-                  <div>
-                    <Label className="text-xs">Question</Label>
-                    <Input
-                      value={condition.question}
-                      onChange={(e) => {
-                        const newConditions = [...(question.enable_when || [])];
-                        newConditions[idx] = {
-                          ...condition,
-                          question: e.target.value,
-                        };
-                        updateField("enable_when", newConditions);
-                      }}
-                      placeholder="Question Link ID"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Operator</Label>
-                    <Select
-                      value={condition.operator}
-                      onValueChange={(
-                        val:
-                          | "equals"
-                          | "not_equals"
-                          | "exists"
-                          | "greater"
-                          | "less"
-                          | "greater_or_equals"
-                          | "less_or_equals",
-                      ) => {
-                        const newConditions = [...(question.enable_when || [])];
-
-                        switch (val) {
-                          case "greater":
-                          case "less":
-                          case "greater_or_equals":
-                          case "less_or_equals":
-                            newConditions[idx] = {
-                              question: condition.question,
-                              operator: val,
-                              answer: 0,
-                            };
-                            break;
-                          case "exists":
-                            newConditions[idx] = {
-                              question: condition.question,
-                              operator: val,
-                              answer: true,
-                            };
-                            break;
-                          case "equals":
-                          case "not_equals":
-                            newConditions[idx] = {
-                              question: condition.question,
-                              operator: val,
-                              answer: "",
-                            };
-                            break;
-                        }
-
-                        updateField("enable_when", newConditions);
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="equals">Equals</SelectItem>
-                        <SelectItem value="not_equals">Not Equals</SelectItem>
-                        <SelectItem value="greater">Greater Than</SelectItem>
-                        <SelectItem value="less">Less Than</SelectItem>
-                        <SelectItem value="greater_or_equals">
-                          Greater Than or Equal
-                        </SelectItem>
-                        <SelectItem value="less_or_equals">
-                          Less Than or Equal
-                        </SelectItem>
-                        <SelectItem value="exists">Exists</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex gap-2">
-                    <div className="flex-1">
-                      <Label className="text-xs">Answer</Label>
-                      {condition.operator === "exists" ? (
-                        <Select
-                          value={condition.answer ? "true" : "false"}
-                          onValueChange={(val: "true" | "false") => {
-                            const newConditions = [
-                              ...(question.enable_when || []),
-                            ];
-                            newConditions[idx] = {
-                              question: condition.question,
-                              operator: "exists" as const,
-                              answer: val === "true",
-                            };
-                            updateField("enable_when", newConditions);
-                          }}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="true">{t("true")}</SelectItem>
-                            <SelectItem value="false">{t("false")}</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input
-                          value={condition.answer?.toString() ?? ""}
-                          type={
-                            [
-                              "greater",
-                              "less",
-                              "greater_or_equals",
-                              "less_or_equals",
-                            ].includes(condition.operator)
-                              ? "number"
-                              : "text"
-                          }
-                          onChange={(e) => {
-                            const newConditions = [
-                              ...(question.enable_when || []),
-                            ];
-                            const value = e.target.value;
-                            let newCondition;
-
-                            if (
-                              [
-                                "greater",
-                                "less",
-                                "greater_or_equals",
-                                "less_or_equals",
-                              ].includes(condition.operator)
-                            ) {
-                              newCondition = {
-                                question: condition.question,
-                                operator: condition.operator as
-                                  | "greater"
-                                  | "less"
-                                  | "greater_or_equals"
-                                  | "less_or_equals",
-                                answer: Number(value),
-                              };
-                            } else {
-                              newCondition = {
-                                question: condition.question,
-                                operator: condition.operator as
-                                  | "equals"
-                                  | "not_equals",
-                                answer: value,
-                              };
-                            }
-
-                            newConditions[idx] = newCondition;
-                            updateField("enable_when", newConditions);
-                          }}
-                          placeholder="Answer value"
-                        />
-                      )}
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">
+                      {t("condition")} {idx + 1}
+                    </span>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="mt-5"
-                      onClick={() => {
+                      className="self-end"
+                      onClick={(e) => {
+                        e.preventDefault();
                         const newConditions = question.enable_when?.filter(
                           (_, i) => i !== idx,
                         );
                         updateField("enable_when", newConditions);
+                        setEnableWhenQuestionAnswers((prev) => {
+                          const newAnswers: typeof prev = {};
+                          Object.keys(prev)
+                            .map(Number)
+                            .sort((a, b) => a - b)
+                            .forEach((key) => {
+                              if (key < idx) newAnswers[key] = prev[key];
+                              else if (key > idx)
+                                newAnswers[key - 1] = prev[key];
+                            });
+                          return newAnswers;
+                        });
                       }}
                     >
                       <CareIcon icon="l-times" className="size-4" />
                     </Button>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <div>
+                      <Label className="text-xs mb-1">{t("question")}</Label>
+                      <div className="grid grid-cols-2 gap-2 justify-around">
+                        <Select
+                          value={
+                            enableWhenQuestionAnswers[idx] &&
+                            enableWhenQuestionAnswers[idx].length > 0
+                              ? (enableWhenQuestionAnswers[idx][0]?.link_id ??
+                                "")
+                              : undefined
+                          }
+                          onValueChange={(val: string) => {
+                            const selectedQuestion = rootQuestions.find(
+                              (q) => q.link_id === val,
+                            );
+                            if (selectedQuestion) {
+                              setEnableWhenQuestionAnswers((prev) => ({
+                                ...prev,
+                                [idx]: [selectedQuestion],
+                              }));
+
+                              if (selectedQuestion.type !== "group") {
+                                const newConditions = [
+                                  ...(question.enable_when || []),
+                                ];
+                                newConditions[idx] = {
+                                  ...condition,
+                                  question: val,
+                                };
+                                updateField("enable_when", newConditions);
+                              }
+                            }
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a question" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {(rootQuestions || [])
+                              .filter((q) => !!q && !!q.text)
+                              .map((rootQn, index) => {
+                                if (rootQn.id === question.id) return null;
+                                return (
+                                  <SelectItem
+                                    key={rootQn.id}
+                                    value={rootQn.link_id}
+                                  >
+                                    {index + 1}. {rootQn.text}
+                                  </SelectItem>
+                                );
+                              })}
+                          </SelectContent>
+                        </Select>
+                        {enableWhenQuestionAnswers[idx]?.map((q, index) => {
+                          if (q.type !== "group" || q.questions?.length === 0) {
+                            return null;
+                          }
+                          return (
+                            <Select
+                              key={q.id}
+                              value={
+                                enableWhenQuestionAnswers[idx][index + 1]
+                                  ?.link_id ?? undefined
+                              }
+                              onValueChange={(val: string) => {
+                                const selectedSubQuestion = q.questions?.find(
+                                  (q) => q.link_id === val,
+                                );
+                                if (selectedSubQuestion) {
+                                  setEnableWhenQuestionAnswers((prev) => {
+                                    const newAnswers = {
+                                      ...prev,
+                                      [idx]: [
+                                        ...prev[idx].slice(0, index + 1),
+                                        selectedSubQuestion,
+                                      ],
+                                    };
+                                    return newAnswers;
+                                  });
+
+                                  if (selectedSubQuestion.type !== "group") {
+                                    const newConditions = [
+                                      ...(question.enable_when || []),
+                                    ];
+                                    newConditions[idx] = {
+                                      ...condition,
+                                      question: val,
+                                    };
+                                    updateField("enable_when", newConditions);
+                                  }
+                                }
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a sub-question" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {q.questions?.map((subQuestion, index) => {
+                                  if (subQuestion.id === question.id)
+                                    return null;
+                                  return (
+                                    <SelectItem
+                                      key={subQuestion.id}
+                                      value={subQuestion.link_id}
+                                    >
+                                      {index + 1}. {subQuestion.text}
+                                    </SelectItem>
+                                  );
+                                })}
+                              </SelectContent>
+                            </Select>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs mb-1">{t("operator")}</Label>
+                      <Select
+                        value={condition.operator}
+                        onValueChange={(
+                          val:
+                            | "equals"
+                            | "not_equals"
+                            | "exists"
+                            | "greater"
+                            | "less"
+                            | "greater_or_equals"
+                            | "less_or_equals",
+                        ) => {
+                          const newConditions = [
+                            ...(question.enable_when || []),
+                          ];
+
+                          switch (val) {
+                            case "greater":
+                            case "less":
+                            case "greater_or_equals":
+                            case "less_or_equals":
+                              newConditions[idx] = {
+                                question: condition.question,
+                                operator: val,
+                                answer: 0,
+                              };
+                              break;
+                            case "exists":
+                              newConditions[idx] = {
+                                question: condition.question,
+                                operator: val,
+                                answer: true,
+                              };
+                              break;
+                            case "equals":
+                            case "not_equals":
+                              newConditions[idx] = {
+                                question: condition.question,
+                                operator: val,
+                                answer: "",
+                              };
+                              break;
+                          }
+                          updateField("enable_when", newConditions);
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getOperatorChoices(idx).map((operator) => (
+                            <SelectItem key={operator} value={operator}>
+                              {t(operator)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        {condition.operator !== "exists" && (
+                          <Label className="text-xs mb-1">{t("answer")}</Label>
+                        )}
+                        {condition.operator === "exists" ? (
+                          <span></span>
+                        ) : (
+                          getAnswerChoices(idx, condition)
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault();
                   const newCondition: EnableWhen = {
                     question: "",
                     operator: "equals",
@@ -1961,6 +2979,10 @@ function QuestionEditor({
                     ...(question.enable_when || []),
                     newCondition,
                   ]);
+                  setEnableWhenQuestionAnswers((prev) => ({
+                    ...prev,
+                    [question.enable_when?.length ?? 0]: [],
+                  }));
                 }}
               >
                 <CareIcon icon="l-plus" className="mr-2 size-4" />
@@ -1972,4 +2994,12 @@ function QuestionEditor({
       </CollapsibleContent>
     </Collapsible>
   );
+}
+
+function getQuestionByPath(questions: any, path: number[]) {
+  let q = questions[path[0]];
+  for (let i = 1; i < path.length; i++) {
+    q = q?.questions?.[path[i]];
+  }
+  return q;
 }

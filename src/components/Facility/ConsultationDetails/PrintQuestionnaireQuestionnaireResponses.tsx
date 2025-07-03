@@ -17,7 +17,7 @@ import query from "@/Utils/request/query";
 import { formatDateTime, properCase } from "@/Utils/utils";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
@@ -207,7 +207,9 @@ function formatValue(value: ResponseValue["value"], type: string): string {
 
   switch (type) {
     case "dateTime":
-      return formatDateTime(value as string);
+      return formatDateTime(value as string, "hh:mm A; DD/MM/YYYY");
+    case "date":
+      return formatDateTime(value as string, "DD/MM/YYYY");
     case "choice":
       return properCase(value.toString());
     case "decimal":
@@ -349,7 +351,7 @@ export function ResponseCard({ item }: ResponseCardProps) {
   if (isStructured && structuredType) return null;
 
   return (
-    <div className="flex flex-col py-3 transition-colors hover:bg-muted/50">
+    <div className="flex flex-col py-3 transition-colors">
       <div className="text-sm m-1">
         <p>
           {t("created_by")}: {formatName(item.created_by)}

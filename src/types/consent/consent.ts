@@ -32,8 +32,8 @@ export const CONSENT_DECISIONS = ["permit", "deny"] as const;
 export type ConsentDecision = (typeof CONSENT_DECISIONS)[number];
 
 export interface ConsentPeriod {
-  start?: Date;
-  end?: Date;
+  start: Date | null;
+  end: Date | null;
 }
 
 export interface ConsentVerification {

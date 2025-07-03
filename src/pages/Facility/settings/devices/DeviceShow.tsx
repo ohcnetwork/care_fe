@@ -41,7 +41,10 @@ import query from "@/Utils/request/query";
 import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceTypeIcon";
 import { usePluginDevice } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 import { ContactPoint } from "@/types/common/contactPoint";
-import { type DeviceDetail } from "@/types/device/device";
+import {
+  DEVICE_AVAILABILITY_STATUS_COLORS,
+  type DeviceDetail,
+} from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
 import DeviceEncounterHistory from "./DeviceEncounterHistory";
@@ -81,33 +84,6 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
   if (!device) {
     return null;
   }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-green-100 text-green-800 hover:bg-green-100/80";
-      case "inactive":
-        return "bg-gray-100 text-gray-800 hover:bg-gray-100/80";
-      case "entered_in_error":
-        return "bg-red-100 text-red-800 hover:bg-red-100/80";
-      default:
-        return "bg-gray-100 text-gray-800 hover:bg-gray-100/80";
-    }
-  };
-
-  const getAvailabilityStatusColor = (status: string) => {
-    switch (status) {
-      case "available":
-        return "bg-green-100 text-green-800 hover:bg-green-100/80";
-      case "lost":
-        return "bg-yellow-100 text-yellow-800 hover:bg-yellow-100/80";
-      case "damaged":
-      case "destroyed":
-        return "bg-red-100 text-red-800 hover:bg-red-100/80";
-      default:
-        return "bg-gray-100 text-gray-800 hover:bg-gray-100/80";
-    }
-  };
 
   const renderContactInfo = (contact: ContactPoint) => {
     const getContactLink = (system: string, value: string) => {
@@ -309,16 +285,16 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
 
               <div className="flex flex-wrap gap-2">
                 <Badge
-                  variant="secondary"
-                  className={getStatusColor(device.status)}
+                  variant={DEVICE_AVAILABILITY_STATUS_COLORS[device.status]}
                 >
                   {t(`device_status_${device.status}`)}
                 </Badge>
                 <Badge
-                  variant="secondary"
-                  className={getAvailabilityStatusColor(
-                    device.availability_status,
-                  )}
+                  variant={
+                    DEVICE_AVAILABILITY_STATUS_COLORS[
+                      device.availability_status
+                    ]
+                  }
                 >
                   {t(
                     `device_availability_status_${device.availability_status}`,
@@ -443,18 +419,22 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between gap-4 rounded-md border p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-md border p-4">
               <div className="space-y-1">
                 <h3 className="text-sm font-medium">
                   {t("delete_this_device")}
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-gray-700">
                   {t("delete_device_description")}
                 </p>
               </div>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" data-cy="delete-device-button">
+                  <Button
+                    variant="destructive"
+                    data-cy="delete-device-button"
+                    className="w-fit"
+                  >
                     {t("delete")}
                   </Button>
                 </AlertDialogTrigger>

@@ -1,4 +1,5 @@
 import {
+  AvatarIcon,
   CalendarIcon,
   CheckCircledIcon,
   ClockIcon,
@@ -33,9 +34,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge, BadgeProps } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -63,8 +65,10 @@ import {
 } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
+import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { FacilityData } from "@/types/facility/facility";
 import {
+  APPOINTMENT_STATUS_COLORS,
   Appointment,
   AppointmentFinalStatuses,
   AppointmentUpdateRequest,
@@ -232,26 +236,7 @@ const AppointmentDetails = ({
             <span className="mr-3 inline-block mb-2">
               {t("schedule_information")}
             </span>
-            <Badge
-              variant={
-                (
-                  {
-                    booked: "secondary",
-                    checked_in: "primary",
-                    in_consultation: "primary",
-                    pending: "secondary",
-                    arrived: "primary",
-                    fulfilled: "primary",
-                    entered_in_error: "destructive",
-                    cancelled: "destructive",
-                    rescheduled: "secondary",
-                    noshow: "destructive",
-                  } as Partial<
-                    Record<Appointment["status"], BadgeProps["variant"]>
-                  >
-                )[appointment.status] ?? "outline"
-              }
-            >
+            <Badge variant={APPOINTMENT_STATUS_COLORS[appointment.status]}>
               {t(appointment.status)}
             </Badge>
           </CardTitle>
@@ -281,6 +266,19 @@ const AppointmentDetails = ({
                   appointment.token_slot.start_datetime,
                   appointment.token_slot.end_datetime,
                 )}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-4 text-sm">
+            <AvatarIcon className="size-5 text-gray-600" />
+            <div className="text-sm">
+              <p className="font-medium">{t("booked_by")}</p>
+              <p className="text-gray-600">
+                {appointment.booked_by
+                  ? formatName(appointment.booked_by)
+                  : `${appointment.patient.name} (${t("patient")})`}{" "}
+                {t("on")}{" "}
+                {format(appointment.booked_on, "MMMM d, yyyy 'at' h:mm a")}
               </p>
             </div>
           </div>
@@ -388,12 +386,6 @@ const AppointmentDetails = ({
           </div>
         </CardContent>
       </Card>
-
-      <div className="text-sm text-gray-600">
-        {t("booked_by")} {appointment.booked_by?.first_name}{" "}
-        {appointment.booked_by?.last_name} {t("on")}{" "}
-        {format(appointment.booked_on, "MMMM d, yyyy 'at' h:mm a")}
-      </div>
     </div>
   );
 };
@@ -415,7 +407,11 @@ const AppointmentActions = ({
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
+  const [selectedPractitioner, setSelectedPractitioner] = useState(
+    appointment.user,
+  );
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
   const currentStatus = appointment.status;
@@ -471,10 +467,12 @@ const AppointmentActions = ({
       {canCreateAppointment && (
         <Sheet open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
           <SheetTrigger asChild>
-            <Button variant="outline" size="lg">
-              <CalendarIcon className="size-4 mr-2" />
-              {t("reschedule")}
-            </Button>
+            {appointment.status !== "in_consultation" && (
+              <Button variant="outline" size="lg">
+                <CalendarIcon className="size-4 mr-2" />
+                {t("reschedule")}
+              </Button>
+            )}
           </SheetTrigger>
           <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
             <SheetHeader>
@@ -482,11 +480,21 @@ const AppointmentActions = ({
             </SheetHeader>
 
             <div className="mt-6">
+              <div className="my-4">
+                <Label className="mb-2">{t("select_practitioner")}</Label>
+                <PractitionerSelector
+                  facilityId={facilityId}
+                  selected={selectedPractitioner}
+                  onSelect={(user) => user && setSelectedPractitioner(user)}
+                  clearSelection={t("show_all")}
+                />
+              </div>
               <AppointmentSlotPicker
                 facilityId={facilityId}
-                resourceId={appointment.user?.id}
+                resourceId={selectedPractitioner?.id}
                 selectedSlotId={selectedSlotId}
                 onSlotSelect={setSelectedSlotId}
+                currentAppointment={appointment}
               />
 
               <div className="flex justify-end gap-2 mt-6">
@@ -546,7 +554,6 @@ const AppointmentActions = ({
 
       {currentStatus === "in_consultation" && (
         <Button
-          disabled={!isToday}
           variant="outline_primary"
           onClick={() => onChange("fulfilled")}
           size="lg"
@@ -563,40 +570,42 @@ const AppointmentActions = ({
         </Button>
       )}
 
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button variant="outline" size="lg">
-            <BanIcon className="size-4 mr-2" />
-            {t("cancel_appointment")}
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("cancel_appointment")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              <Alert variant="destructive" className="mt-4">
-                <AlertTitle>{t("warning")}</AlertTitle>
-                <AlertDescription>
-                  {t("cancel_appointment_warning")}
-                </AlertDescription>
-              </Alert>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => cancelAppointment({ reason: "cancelled" })}
-              className={cn(buttonVariants({ variant: "destructive" }))}
-            >
-              {isCancelling ? (
-                <Loader2 className="size-4 animate-spin mr-2" />
-              ) : (
-                t("confirm")
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {appointment.status !== "in_consultation" && (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="outline" size="lg">
+              <BanIcon className="size-4 mr-2" />
+              {t("cancel_appointment")}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("cancel_appointment")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                <Alert variant="destructive" className="mt-4">
+                  <AlertTitle>{t("warning")}</AlertTitle>
+                  <AlertDescription>
+                    {t("cancel_appointment_warning")}
+                  </AlertDescription>
+                </Alert>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => cancelAppointment({ reason: "cancelled" })}
+                className={cn(buttonVariants({ variant: "destructive" }))}
+              >
+                {isCancelling ? (
+                  <Loader2 className="size-4 animate-spin mr-2" />
+                ) : (
+                  t("confirm")
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
 
       <AlertDialog>
         <AlertDialogTrigger asChild>

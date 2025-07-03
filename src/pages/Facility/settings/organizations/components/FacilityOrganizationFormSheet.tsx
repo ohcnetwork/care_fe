@@ -6,8 +6,6 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -34,6 +32,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import mutate from "@/Utils/request/mutate";
 import {
@@ -47,6 +50,10 @@ interface Props {
   facilityId: string;
   parentId?: string;
   org?: FacilityOrganization;
+
+  trigger: React.ReactNode;
+
+  tooltip?: string;
 }
 
 const ORG_TYPES = [
@@ -60,6 +67,8 @@ export default function FacilityOrganizationFormSheet({
   facilityId,
   parentId,
   org,
+  trigger,
+  tooltip,
 }: Props) {
   const { t } = useTranslation();
 
@@ -103,10 +112,7 @@ export default function FacilityOrganizationFormSheet({
       })(body),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["facilityOrganization", "list", facilityId, parentId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["getCurrentUser"],
+        queryKey: ["facilityOrganization"],
       });
       toast.success(t("organization_created_successfully"));
       setOpen(false);
@@ -128,10 +134,7 @@ export default function FacilityOrganizationFormSheet({
       })(body),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["facilityOrganization", "list", facilityId, parentId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["getCurrentUser"],
+        queryKey: ["facilityOrganization"],
       });
       toast.success(t("organization_updated_successfully"));
       setOpen(false);
@@ -157,19 +160,17 @@ export default function FacilityOrganizationFormSheet({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        {isEditMode ? (
-          <Button variant="white" size="sm" className="font-semibold">
-            {t("edit")}
-          </Button>
-        ) : (
-          <Button>
-            <CareIcon icon="l-plus" className="mr-2 size-4" />
-            {t("add_department_team")}
-          </Button>
-        )}
-      </SheetTrigger>
-      <SheetContent>
+      {tooltip ? (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SheetTrigger asChild>{trigger}</SheetTrigger>
+          </TooltipTrigger>
+          <TooltipContent>{tooltip}</TooltipContent>
+        </Tooltip>
+      ) : (
+        <SheetTrigger asChild>{trigger}</SheetTrigger>
+      )}
+      <SheetContent onCloseAutoFocus={(event) => event.preventDefault()}>
         <SheetHeader>
           <SheetTitle>
             {isEditMode
@@ -192,10 +193,11 @@ export default function FacilityOrganizationFormSheet({
               name="name"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>{t("name")}</FormLabel>
+                  <FormLabel aria-required>{t("name")}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
+                      data-cy="department-team-name-input"
                       placeholder={t("enter_department_team_name")}
                     />
                   </FormControl>
@@ -212,7 +214,10 @@ export default function FacilityOrganizationFormSheet({
                   <FormLabel>{t(`type`)}</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger
+                        data-cy="select-type-dropdown"
+                        ref={field.ref}
+                      >
                         <SelectValue
                           placeholder={t("select_organization_type")}
                         />
@@ -240,6 +245,7 @@ export default function FacilityOrganizationFormSheet({
                   <FormControl>
                     <Textarea
                       {...field}
+                      data-cy="department-team-description-input"
                       placeholder={t("enter_department_team_description")}
                     />
                   </FormControl>
@@ -247,16 +253,39 @@ export default function FacilityOrganizationFormSheet({
                 </FormItem>
               )}
             />
-
-            <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending
-                ? isEditMode
-                  ? t("updating")
-                  : t("creating")
-                : isEditMode
-                  ? t("update_organization")
-                  : t("create_organization")}
-            </Button>
+            <div className="flex justify-end mt-6 space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setOpen(false);
+                  form.reset();
+                }}
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                type="submit"
+                disabled={
+                  isPending ||
+                  !form.formState.isValid ||
+                  !form.formState.isDirty
+                }
+                data-cy={
+                  isEditMode
+                    ? "update-organization-button"
+                    : "create-organization-button"
+                }
+              >
+                {isPending
+                  ? isEditMode
+                    ? t("updating")
+                    : t("creating")
+                  : isEditMode
+                    ? t("update_organization")
+                    : t("create_organization")}
+              </Button>
+            </div>
           </form>
         </Form>
       </SheetContent>

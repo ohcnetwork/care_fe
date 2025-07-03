@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { PencilIcon } from "lucide-react";
+import { PencilIcon, PlusIcon } from "lucide-react";
 import { Link, usePathParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Loading from "@/components/Common/Loading";
 import { AdministrationTab } from "@/components/Medicine/MedicationAdministration/AdministrationTab";
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
+import { MedicationStatementList } from "@/components/Patient/MedicationStatementList";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -22,7 +23,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
-import { Patient } from "@/types/emr/newPatient";
+import { Patient } from "@/types/emr/patient";
 
 interface EmptyStateProps {
   searching?: boolean;
@@ -140,20 +141,29 @@ export default function MedicationRequestTable({ patient, encounter }: Props) {
     <div className="space-y-2">
       <div className="rounded-lg">
         <Tabs defaultValue="prescriptions">
-          <TabsList>
-            <TabsTrigger
-              value="prescriptions"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
-              {t("prescriptions")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="administration"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
-              {t("medicine_administration")}
-            </TabsTrigger>
-          </TabsList>
+          <ScrollArea className="w-full">
+            <TabsList className="w-fit">
+              <TabsTrigger
+                value="prescriptions"
+                className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+              >
+                {t("prescriptions")}
+              </TabsTrigger>
+              <TabsTrigger
+                value="ongoing"
+                className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+              >
+                {t("ongoing_medicines")}
+              </TabsTrigger>
+              <TabsTrigger
+                value="administration"
+                className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+              >
+                {t("medicine_administration")}
+              </TabsTrigger>
+            </TabsList>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
 
           <TabsContent value="prescriptions">
             <div className="flex flex-col gap-2">
@@ -187,8 +197,17 @@ export default function MedicationRequestTable({ patient, encounter }: Props) {
                       data-cy="edit-prescription"
                     >
                       <Link href={`questionnaire/medication_request`}>
-                        <PencilIcon className="mr-2 size-4" />
-                        {t("edit")}
+                        {!activeMedications?.results?.length ? (
+                          <>
+                            <PlusIcon className="mr-2 size-4" />
+                            {t("add")}
+                          </>
+                        ) : (
+                          <>
+                            <PencilIcon className="mr-2 size-4" />
+                            {t("edit")}
+                          </>
+                        )}
                       </Link>
                     </Button>
                   )}
@@ -246,6 +265,13 @@ export default function MedicationRequestTable({ patient, encounter }: Props) {
                 </ScrollArea>
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="ongoing">
+            <MedicationStatementList
+              patientId={patientId}
+              canAccess={canAccess}
+            />
           </TabsContent>
 
           <TabsContent value="administration">

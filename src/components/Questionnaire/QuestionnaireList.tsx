@@ -40,6 +40,7 @@ import {
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { QUESTIONNAIRE_STATUS_COLORS } from "@/types/questionnaire/questionnaire";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
@@ -93,15 +94,7 @@ const RenderCard = ({
                     {questionnaire.title}
                   </p>
                   <Badge
-                    className={
-                      {
-                        active:
-                          "bg-green-100 text-green-800 hover:bg-green-200",
-                        draft:
-                          "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
-                        retired: "bg-red-100 text-red-800 hover:bg-red-200",
-                      }[questionnaire.status]
-                    }
+                    variant={QUESTIONNAIRE_STATUS_COLORS[questionnaire.status]}
                   >
                     {t(questionnaire.status)}
                   </Badge>
@@ -126,6 +119,7 @@ const RenderCard = ({
 
                 <div className="mt-4 flex justify-end">
                   <Button
+                    data-cy="questionnaire-view"
                     variant="outline"
                     size="sm"
                     onClick={(e) => {
@@ -208,6 +202,7 @@ const RenderTable = ({
                       {questionnaire.description}
                     </div>
                     <Button
+                      data-cy="questionnaire-view"
                       variant="outline"
                       size="sm"
                       className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
@@ -236,7 +231,7 @@ export function QuestionnaireList() {
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["questionnaires", qParams],
-    queryFn: query(questionnaireApi.list, {
+    queryFn: query.debounced(questionnaireApi.list, {
       queryParams: {
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
@@ -282,6 +277,7 @@ export function QuestionnaireList() {
             <div className="relative md:min-w-80 w-full">
               <Search className="absolute left-2 top-2.5 size-4 text-gray-500" />
               <Input
+                data-cy="questionnaire-search"
                 placeholder={t("search_questionnaires")}
                 className="pl-10"
                 value={qParams.title || ""}

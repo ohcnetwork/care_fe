@@ -2,11 +2,7 @@ import { NavMain } from "@/components/ui/sidebar/nav-main";
 
 import { Organization } from "@/types/organization/organization";
 
-interface NavigationLink {
-  name: string;
-  url: string;
-  icon?: string;
-}
+import { NavigationLink } from "./facility-nav";
 
 interface OrgNavProps {
   organizations: Organization[];

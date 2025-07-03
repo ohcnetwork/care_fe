@@ -21,17 +21,14 @@ export interface PatientFormData {
   hasEmergencyContact?: boolean; // false by default
   emergencyPhoneNumber?: string;
   pincode: string;
-  localBody: string;
-  ward: string;
   state: string;
-  district: string;
 }
 
 export class PatientCreation {
   // Selectors
   private selectors = {
     patientsButton: '[data-cy="patients-button"]',
-    searchInput: "#patient-search",
+    searchInput: '[data-cy="patient-search"]',
     patientCard: "#patient-search-results",
     createNewPatientButton: '[data-cy="create-new-patient-button"]',
     nameInput: '[data-cy="patient-name-input"]',
@@ -40,7 +37,6 @@ export class PatientCreation {
     dobMonthInput: '[data-cy="dob-month-input"]',
     dobYearInput: '[data-cy="dob-year-input"]',
     ageInput: '[data-cy="age-input"]',
-    genderRadio: '[data-cy="gender-radio-{value}"]',
     bloodGroupSelect: '[data-cy="blood-group-select"]',
     addressInput: '[data-cy="current-address-input"]',
     sameAddressCheckbox: '[data-cy="same-address-checkbox"]',
@@ -48,12 +44,9 @@ export class PatientCreation {
     emergencyContactCheckbox: '[data-cy="same-phone-number-checkbox"]',
     emergencyPhoneInput: '[data-cy="patient-emergency-phone-input"]',
     pincodeInput: '[data-cy="pincode-input"]',
-    localBodySelect: '[data-cy="select-local_body"]',
-    wardSelect: '[data-cy="select-ward"]',
     submitButton: '[data-cy="submit-button"]',
     samePhoneNumberCheckbox: '[data-cy="same-phone-number-checkbox"]',
     stateSelect: '[data-cy="select-state"]',
-    districtSelect: '[data-cy="select-district"]',
     yearOfBirthInput: '[data-cy="year-of-birth-input"]',
     verifyButton: '[data-cy="confirm-verification-button"]',
   };
@@ -73,15 +66,12 @@ export class PatientCreation {
     return this;
   }
 
-  verifySearchResults(patientDetails: { name: string; phone: string }) {
-    // Convert object values to an array of strings
-    const detailsArray = Object.values(patientDetails);
-    cy.verifyContentPresence(this.selectors.patientCard, detailsArray);
+  verifySearchResults(patientName: string) {
+    cy.verifyContentPresence(this.selectors.patientCard, [patientName]);
     return this;
   }
 
   clickSearchPatients() {
-    cy.verifyAndClickElement('[data-cy="nav-patients"]', "Patients");
     cy.verifyAndClickElement(
       '[data-cy="nav-search-patients"]',
       "Search Patients",
@@ -120,9 +110,7 @@ export class PatientCreation {
 
   selectGender(gender: string) {
     const lowercaseGender = gender.toLowerCase();
-    cy.get(
-      this.selectors.genderRadio.replace("{value}", lowercaseGender),
-    ).click();
+    cy.get(`#${lowercaseGender}`).click();
     return this;
   }
 
@@ -176,22 +164,7 @@ export class PatientCreation {
       cy.get(this.selectors.emergencyContactCheckbox).click();
     }
 
-    this.enterPincode(data.pincode)
-      .selectState(data.state)
-      .selectDistrict(data.district)
-      .selectLocalBody(data.localBody)
-      .selectWard(data.ward);
-
-    return this;
-  }
-
-  selectLocalBody(localBody: string) {
-    cy.typeAndSelectOption(this.selectors.localBodySelect, localBody, false);
-    return this;
-  }
-
-  selectWard(ward: string) {
-    cy.typeAndSelectOption(this.selectors.wardSelect, ward);
+    this.enterPincode(data.pincode).selectState();
     return this;
   }
 
@@ -227,26 +200,18 @@ export class PatientCreation {
     return this;
   }
 
-  selectState(state: string) {
-    cy.get(this.selectors.stateSelect).then(($el) => {
-      if ($el.val() !== state) {
-        cy.typeAndSelectOption(this.selectors.stateSelect, state);
-      }
-    });
-    return this;
-  }
-
-  selectDistrict(district: string) {
-    cy.get(this.selectors.districtSelect).then(($el) => {
-      if ($el.val() !== district) {
-        cy.typeAndSelectOption(this.selectors.districtSelect, district);
-      }
-    });
+  selectState() {
+    cy.clickAndSelectOption(this.selectors.stateSelect);
     return this;
   }
 
   selectPatientFromResults(patientName: string) {
     cy.verifyAndClickElement(this.selectors.patientCard, patientName);
+    return this;
+  }
+
+  expandPatientNav() {
+    cy.verifyAndClickElement('[data-cy="nav-patients"]', "Patients");
     return this;
   }
 

@@ -8,10 +8,11 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { tzAwareDateTime } from "@/lib/validators";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -23,7 +24,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -39,6 +39,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+
+import { DateTimeInput } from "@/components/Common/DateTimeInput";
+import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import useFileUpload from "@/hooks/useFileUpload";
 
@@ -63,10 +66,10 @@ const consentFormSchema = (isEdit: boolean) =>
       decision: z.enum(CONSENT_DECISIONS).default("permit"),
       category: z.enum(CONSENT_CATEGORIES).default("treatment"),
       status: z.enum(CONSENT_STATUSES).default("active"),
-      date: z.date(),
+      date: tzAwareDateTime,
       period: z.object({
-        start: z.date().optional(),
-        end: z.date().optional(),
+        start: tzAwareDateTime.optional(),
+        end: tzAwareDateTime.optional(),
       }),
       note: z.string().optional(),
       fileEntries: z
@@ -80,15 +83,6 @@ const consentFormSchema = (isEdit: boolean) =>
     })
     .superRefine((data, ctx) => {
       if (isEdit) return;
-
-      if (data.period.end && data.date > data.period.end) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: t("consent_after_end"),
-          path: ["date"],
-        });
-      }
-
       if (
         data.period.start &&
         data.period.end &&
@@ -97,6 +91,17 @@ const consentFormSchema = (isEdit: boolean) =>
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("valid_from_after_valid_untill"),
+          path: ["period.end"],
+        });
+      }
+
+      if (
+        data.period.start &&
+        new Date(data.period.start) < new Date(data.date)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("consent_period_start_before_consent_date_validation"),
           path: ["period.start"],
         });
       }
@@ -133,13 +138,14 @@ export default function ConsentFormSheet({
 
   const form = useForm({
     resolver: zodResolver(consentFormSchema(isEdit)),
+    mode: "onChange",
     defaultValues: {
       decision: "permit",
       category: "treatment",
       status: "active",
-      date: new Date(),
+      date: new Date().toISOString(),
       period: {
-        start: new Date(),
+        start: new Date().toISOString(),
         end: undefined,
       },
       note: "",
@@ -220,13 +226,13 @@ export default function ConsentFormSheet({
         decision: existingConsent!.decision,
         category: existingConsent!.category,
         status: existingConsent!.status,
-        date: new Date(existingConsent!.date),
+        date: new Date(existingConsent!.date).toISOString(),
         period: {
           start: existingConsent!.period.start
-            ? new Date(existingConsent!.period.start)
+            ? new Date(existingConsent!.period.start).toISOString()
             : undefined,
           end: existingConsent!.period.end
-            ? new Date(existingConsent!.period.end)
+            ? new Date(existingConsent!.period.end).toISOString()
             : undefined,
         },
         note: existingConsent!.note || "",
@@ -248,20 +254,20 @@ export default function ConsentFormSheet({
     const consentData: CreateConsentRequest = {
       status: values.status,
       category: isEdit ? existingConsent!.category : values.category,
-      date: isEdit ? new Date(existingConsent!.date) : values.date,
+      date: isEdit ? new Date(existingConsent!.date) : new Date(values.date),
       decision: isEdit ? existingConsent!.decision : values.decision,
       period: isEdit
         ? {
             start: existingConsent!.period.start
               ? new Date(existingConsent!.period.start)
-              : undefined,
+              : null,
             end: existingConsent!.period.end
               ? new Date(existingConsent!.period.end)
-              : undefined,
+              : null,
           }
         : {
-            start: values.period.start,
-            end: values.period.end,
+            start: values.period.start ? new Date(values.period.start) : null,
+            end: values.period.end ? new Date(values.period.end) : null,
           },
       encounter: encounterId,
       source_attachments: [],
@@ -277,15 +283,7 @@ export default function ConsentFormSheet({
   };
 
   return (
-    <Sheet
-      open={isOpen}
-      onOpenChange={(open) => {
-        setIsOpen(open);
-        if (!open) {
-          form.reset();
-        }
-      }}
-    >
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button variant={isEdit ? "outline" : "primary"} className="gap-2">
           {isEdit ? (
@@ -327,25 +325,29 @@ export default function ConsentFormSheet({
                       <FormLabel aria-required>
                         {t("consent_given_on")}
                       </FormLabel>
-                      <DatePicker
-                        date={field.value}
-                        onChange={field.onChange}
+                      <DateTimeInput
+                        {...field}
+                        value={field.value}
+                        onDateChange={(val) => field.onChange(val)}
                       />
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="period.start"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("consent_valid_from")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={field.onChange}
+                        <DateTimeInput
+                          {...field}
+                          value={field.value ?? ""}
+                          onDateChange={(val) => {
+                            field.onChange(val ?? null);
+                          }}
                         />
                         <FormMessage />
                       </FormItem>
@@ -358,9 +360,12 @@ export default function ConsentFormSheet({
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("consent_valid_until")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={field.onChange}
+                        <DateTimeInput
+                          {...field}
+                          value={field.value ?? ""}
+                          onDateChange={(val) => {
+                            field.onChange(val ?? null);
+                          }}
                         />
                         <FormMessage />
                       </FormItem>
@@ -372,27 +377,16 @@ export default function ConsentFormSheet({
                   control={form.control}
                   name="decision"
                   render={({ field }) => (
-                    <FormItem className="space-y-2">
+                    <FormItem>
                       <FormLabel>{t("consent_decision")}</FormLabel>
-                      <RadioGroup
+                      <RadioInput
+                        {...field}
+                        options={CONSENT_DECISIONS.map((decision) => ({
+                          label: t(`consent_decision__${decision}`),
+                          value: decision,
+                        }))}
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        value={field.value}
-                        className="flex gap-4"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="permit" id="permit" />
-                          <Label htmlFor="permit">
-                            {t("consent_decision__permit")}
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="deny" id="deny" />
-                          <Label htmlFor="deny">
-                            {t("consent_decision__deny")}
-                          </Label>
-                        </div>
-                      </RadioGroup>
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
@@ -410,7 +404,7 @@ export default function ConsentFormSheet({
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger ref={field.ref}>
                             <SelectValue
                               placeholder={t("select_category")}
                               className="flex justify-start items-center w-full"
@@ -464,7 +458,7 @@ export default function ConsentFormSheet({
                     value={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger ref={field.ref}>
                         <SelectValue placeholder={t("select_status")} />
                       </SelectTrigger>
                     </FormControl>
@@ -567,8 +561,12 @@ export default function ConsentFormSheet({
             <div className="flex justify-end mt-6 space-x-2">
               <Button
                 type="button"
-                onClick={() => setIsOpen(false)}
-                className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
+                variant="outline"
+                onClick={() => {
+                  setIsOpen(false);
+                  form.reset();
+                }}
+                disabled={isPending}
               >
                 {t("cancel")}
               </Button>

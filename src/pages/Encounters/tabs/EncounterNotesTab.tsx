@@ -122,6 +122,7 @@ const ThreadItem = ({
 
 function MessageItem({
   message,
+  className,
   ...props
 }: React.ComponentProps<"div"> & { message: Message }) {
   const authUser = useAuthUser();
@@ -133,6 +134,7 @@ function MessageItem({
       className={cn(
         "flex w-full mb-4 animate-in fade-in-0 slide-in-from-bottom-4",
         isCurrentUser ? "justify-end" : "justify-start",
+        className,
       )}
       {...props}
     >
@@ -213,6 +215,11 @@ const NewThreadDialog = ({
 }) => {
   const { t } = useTranslation();
   const [title, setTitle] = useState("");
+  useEffect(() => {
+    if (isOpen) {
+      setTitle("");
+    }
+  }, [isOpen]);
 
   return (
     <Dialog
@@ -467,7 +474,10 @@ export const EncounterNotesTab = ({
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newMessage.trim() && selectedThread) {
+    e.stopPropagation();
+    const canSend =
+      newMessage.trim() && selectedThread && !createMessageMutation.isPending;
+    if (canSend) {
       createMessageMutation.mutate({ message: newMessage.trim() });
     }
   };
@@ -485,7 +495,7 @@ export const EncounterNotesTab = ({
   const totalMessages = messagesData?.pages[0]?.count ?? 0;
 
   return (
-    <div className="flex h-[calc(100vh-12rem)] overflow-hidden">
+    <div className="flex h-[calc(100vh-12rem)] overflow-hidden lg:h-[calc(80vh-12rem)]">
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-gray-200">
         <div className="p-4 border-b border-gray-200">
@@ -643,7 +653,7 @@ export const EncounterNotesTab = ({
                         className="flex flex-col-reverse py-2 min-h-full"
                         data-cy="chat-messages"
                       >
-                        {messages.map((message) => (
+                        {messages.map((message, i) => (
                           <MessageItem
                             key={message.id}
                             message={message}
@@ -652,6 +662,7 @@ export const EncounterNotesTab = ({
                                 ? recentMessageRef
                                 : undefined
                             }
+                            className={cn(i === 0 && "mb-14")}
                           />
                         ))}
                         {isFetchingNextPage && (
@@ -670,7 +681,7 @@ export const EncounterNotesTab = ({
                         className="flex flex-col-reverse py-4 min-h-full"
                         data-cy="chat-messages"
                       >
-                        {messages.map((message) => (
+                        {messages.map((message, i) => (
                           <MessageItem
                             key={message.id}
                             message={message}
@@ -679,6 +690,7 @@ export const EncounterNotesTab = ({
                                 ? recentMessageRef
                                 : undefined
                             }
+                            className={cn(i === 0 && "mb-14")}
                           />
                         ))}
                         {isFetchingNextPage && (
@@ -695,7 +707,7 @@ export const EncounterNotesTab = ({
 
                   {/* Message Input */}
                   {canWriteCurrentEncounter && (
-                    <div className="border-t border-gray-200 p-3 sm:p-4 bg-white sticky bottom-0">
+                    <div className="border-t border-gray-200 p-3 sm:p-4 bg-white sticky max-sm:bottom-14">
                       <form onSubmit={handleSendMessage}>
                         <div className="flex gap-2">
                           <AutoExpandingTextarea
@@ -704,14 +716,11 @@ export const EncounterNotesTab = ({
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
                             onKeyDown={(e) => {
-                              if (e.key === "Enter" && !e.shiftKey) {
-                                e.preventDefault();
-                                if (newMessage.trim()) {
-                                  handleSendMessage(e);
-                                }
+                              if (e.key === "Enter" && e.shiftKey) {
+                                handleSendMessage(e);
                               }
                             }}
-                            className="flex-1 min-h-20 max-h-[50vh]"
+                            className="flex-1 min-h-10 max-h-[50vh]"
                           />
                           <Button
                             data-cy="send-chat-message-button"
