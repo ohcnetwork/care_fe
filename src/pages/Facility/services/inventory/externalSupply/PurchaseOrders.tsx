@@ -42,7 +42,8 @@ interface Props {
 
 const TABS_CONFIG = [
   { value: "pending_pos", label: "pending_pos", status: "active" },
-  { value: "ordered", label: "ordered", status: "ordered" },
+  { value: "draft", label: "draft", status: "draft" },
+  { value: "processed", label: "processed", status: "processed" },
   { value: "completed", label: "completed", status: "completed" },
   { value: "suspended", label: "suspended", status: "suspended" },
   { value: "cancelled", label: "cancelled", status: "cancelled" },
