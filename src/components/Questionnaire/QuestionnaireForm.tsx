@@ -337,6 +337,7 @@ export function QuestionnaireForm({
 
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   const {
     data: questionnaireData,
@@ -461,6 +462,8 @@ export function QuestionnaireForm({
           },
         ]);
         setIsInitialized(true);
+        // Set a short delay before allowing dirty state changes
+        setTimeout(() => setIsInitializing(false), 500);
       }
     }
   }, [questionnaireData, isInitialized, questionnaireSlug]);
@@ -849,7 +852,7 @@ export function QuestionnaireForm({
                       : formItem,
                   ),
                 );
-                if (!isDirty) {
+                if (!isInitializing && !isDirty) {
                   setIsDirty(true);
                 }
               }}
