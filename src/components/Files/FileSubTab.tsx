@@ -284,7 +284,7 @@ export const FilesPage = ({
   const FilterButton = () => {
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger asChild className="w-full sm:w-auto">
           <Button
             variant="secondary"
             className="text-sm text-secondary-800"
@@ -345,7 +345,7 @@ export const FilesPage = ({
     if (!canEdit) return <></>;
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger asChild className="w-full sm:w-auto">
           <Button
             variant="outline_primary"
             className="flex flex-row items-center mr-2"
@@ -616,7 +616,7 @@ export const FilesPage = ({
         associatingId={associatingId}
         type={type}
       />
-      <div className="flex flex-wrap items-center gap-2 -mt-2 ">
+      <div className="flex flex-col sm:flex-row flex-wrap sm:items-center gap-2 -mt-2 ">
         <div className="relative flex-1 min-w-72 max-w-96 sm:ml-2">
           <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
           <Input
@@ -630,7 +630,7 @@ export const FilesPage = ({
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row flex-wrap items-center gap-2">
           <FilterButton />
           {/* {type === "encounter" && (
             <>
@@ -681,7 +681,7 @@ export const FilesPage = ({
           )} */}
         </div>
 
-        <div className="ml-auto">
+        <div className="w-full sm:w-auto ml-auto">
           <FileUploadButtons />
         </div>
       </div>

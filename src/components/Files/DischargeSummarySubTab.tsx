@@ -271,7 +271,7 @@ export const DischargeTab = ({
   const FilterButton = () => {
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger asChild className="w-full sm:w-auto">
           <Button variant="secondary" className="text-sm text-secondary-800">
             <span className="flex flex-row items-center gap-1">
               <CareIcon icon="l-filter" />
@@ -326,7 +326,7 @@ export const DischargeTab = ({
     if (!canEdit) return <></>;
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger asChild className="w-full sm:w-auto">
           <Button
             variant="outline_primary"
             className="flex flex-row items-center mr-2"
@@ -594,7 +594,7 @@ export const DischargeTab = ({
         associatingId={encounter.id}
         type={type}
       />
-      <div className="flex flex-wrap items-center gap-2 -mt-2">
+      <div className="flex flex-col sm:flex-row flex-wrap sm:items-center gap-2 -mt-2">
         <div className="relative flex-1 min-w-72 max-w-96 sm:ml-2">
           <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
           <Input
@@ -608,11 +608,11 @@ export const DischargeTab = ({
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col sm:flex-row flex-wrap items-center gap-2">
           <FilterButton />
           <Button
             variant="outline_primary"
-            className="min-w-24 sm:min-w-28"
+            className="min-w-24 sm:min-w-28 w-full sm:w-auto"
             onClick={async () => {
               await queryClient.invalidateQueries({
                 queryKey: ["discharge_files"],
@@ -632,7 +632,10 @@ export const DischargeTab = ({
             onClick={() => generateDischargeSummary()}
             disabled={isGenerating}
           >
-            <CareIcon icon="l-file-medical" className="hidden sm:block mr-2" />
+            <CareIcon
+              icon="l-file-medical"
+              className="hidden w-full sm:block mr-2"
+            />
             {isGenerating ? t("generating") : t("generate_discharge_summary")}
           </Button>
           {/* <ReportBuilderSheet

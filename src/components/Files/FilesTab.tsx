@@ -77,21 +77,21 @@ export const FilesTab = (props: FilesTabsProps) => {
         >
           <TabsTrigger
             value="all"
-            className="flex-shrink-0 data-[state=active]:bg-white rounded-md font-semibold"
+            className="data-[state=active]:bg-white rounded-md font-semibold"
           >
             {t("files")}
           </TabsTrigger>
           {type === "encounter" && encounter && (
             <TabsTrigger
               value="discharge_summary"
-              className="flex-shrink-0 data-[state=active]:bg-white rounded-md px-4 font-semibold"
+              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
             >
               {t("discharge_summary")}
             </TabsTrigger>
           )}
           <TabsTrigger
             value="drawings"
-            className="flex-shrink-0 data-[state=active]:bg-white rounded-md px-4 font-semibold"
+            className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
           >
             {t("drawings")}
           </TabsTrigger>
