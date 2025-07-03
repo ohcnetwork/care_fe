@@ -89,12 +89,14 @@ interface Props {
   facilityId: string;
   locationId: string;
   id: string;
+  mode: "internal" | "external";
 }
 
 export default function SupplyRequestDetail({
   facilityId,
   locationId,
   id,
+  mode,
 }: Props) {
   const { t } = useTranslation();
   const [qParams] = useQueryParams();
@@ -155,9 +157,11 @@ export default function SupplyRequestDetail({
       priority: supplyRequest.priority,
       reason: supplyRequest.reason,
       quantity: supplyRequest.quantity,
-      deliver_from: supplyRequest.deliver_from?.id,
+      deliver_from:
+        mode === "internal" ? supplyRequest.deliver_from?.id : undefined,
       deliver_to: supplyRequest.deliver_to.id,
       item: supplyRequest.item.id,
+      supplier: mode === "external" ? supplyRequest.supplier?.id : undefined,
     };
     updateSupplyRequest(data);
   };
@@ -273,15 +277,20 @@ export default function SupplyRequestDetail({
   }
 
   const backUrl =
-    qParams.from === "receive_item"
+    mode === "external"
       ? makeUrl(
-          `/facility/${facilityId}/locations/${locationId}/internal_transfers/to_receive/${qParams.deliveryId}`,
+          `/facility/${facilityId}/locations/${locationId}/external_supply/purchase_orders`,
           qParams,
         )
-      : makeUrl(
-          `/facility/${facilityId}/locations/${locationId}/internal_transfers/to_receive`,
-          qParams,
-        );
+      : qParams.from === "receive_item"
+        ? makeUrl(
+            `/facility/${facilityId}/locations/${locationId}/internal_transfers/to_receive/${qParams.deliveryId}`,
+            qParams,
+          )
+        : makeUrl(
+            `/facility/${facilityId}/locations/${locationId}/internal_transfers/to_receive`,
+            qParams,
+          );
 
   const actions = getActions(supplyRequest.status);
 
@@ -295,7 +304,13 @@ export default function SupplyRequestDetail({
         <div className="flex justify-between items-center gap-1">
           {supplyRequest.status === SupplyRequestStatus.draft && (
             <Button variant="outline" asChild className="w-full">
-              <Link href={`/internal_transfers/requests/${id}/edit`}>
+              <Link
+                href={
+                  mode === "internal"
+                    ? `/internal_transfers/requests/${id}/edit`
+                    : `/external_supply/purchase_orders/${id}/edit`
+                }
+              >
                 {t("edit")}
               </Link>
             </Button>
@@ -375,10 +390,12 @@ export default function SupplyRequestDetail({
             </div>
             <div>
               <p className="text-sm text-gray-700 font-medium">
-                {t("deliver_from")}
+                {mode === "internal" ? t("deliver_from") : t("vendor")}
               </p>
               <p className="font-semibold text-lg text-gray-950">
-                {supplyRequest.deliver_from?.name}
+                {mode === "internal"
+                  ? supplyRequest.deliver_from?.name
+                  : supplyRequest.supplier?.name}
               </p>
             </div>
             <div>

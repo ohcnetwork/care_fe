@@ -5,13 +5,11 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import BedsList from "@/pages/Facility/locations/BedsList";
 import { InventoryList } from "@/pages/Facility/services/inventory/InventoryList";
 import { ReceiveStock } from "@/pages/Facility/services/inventory/ReceiveStock";
-// import SupplyRequestForm from "@/pages/Facility/services/supply/SupplyRequestForm";
 import SupplyRequestForm from "@/pages/Facility/services/inventory/SupplyRequestForm";
 import { ApproveExternalSupplyDelivery } from "@/pages/Facility/services/inventory/externalSupply/ApproveDeliveries";
 import { IncomingDeliveries } from "@/pages/Facility/services/inventory/externalSupply/IncomingDeliveries";
 import { PurchaseOrders } from "@/pages/Facility/services/inventory/externalSupply/PurchaseOrders";
 import PurchaseOrdersBySupplier from "@/pages/Facility/services/inventory/externalSupply/PurchaseOrdersBySupplier";
-import PurchaseRequestView from "@/pages/Facility/services/inventory/externalSupply/PurchaseRequestView";
 import ReceiveItem from "@/pages/Facility/services/inventory/internalTransfer/ReceiveItem";
 import SupplyRequestDetail from "@/pages/Facility/services/inventory/internalTransfer/SupplyRequestDetail";
 import SupplyRequestDispatch from "@/pages/Facility/services/inventory/internalTransfer/SupplyRequestDispatch";
@@ -149,7 +147,6 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     <ToReceive facilityId={facilityId} locationId={locationId} />
   ),
   "/internal_transfers/to_receive/raise_stock_request": () => (
-    // <RaiseStockRequest facilityId={facilityId} locationId={locationId} />
     <SupplyRequestForm
       facilityId={facilityId}
       locationId={locationId}
@@ -184,6 +181,7 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       facilityId={facilityId}
       locationId={locationId}
       id={id}
+      mode="internal"
     />
   ),
   "/internal_transfers/requests/:id/edit": ({ id }: { id: string }) => (
@@ -219,10 +217,11 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     />
   ),
   "/external_supply/purchase_orders/:id": ({ id }: { id: string }) => (
-    <PurchaseRequestView
+    <SupplyRequestDetail
       facilityId={facilityId}
       locationId={locationId}
-      purchaseOrderId={id}
+      id={id}
+      mode="external"
     />
   ),
   "/external_supply/purchase_orders/:id/edit": ({ id }: { id: string }) => (
