@@ -80,20 +80,8 @@ export class PatientEncounter {
       .first()
       .should("be.visible")
       .within(() => {
-        cy.get("[data-slot='select-trigger']")
-          .first()
-          .should("be.enabled")
-          .scrollIntoView();
-        cy.clickAndSelectOption('[data-slot="select-trigger"]', criticality, {
-          position: "first",
-        });
-        cy.get("[data-slot='select-trigger']")
-          .last()
-          .should("be.enabled")
-          .scrollIntoView();
-        cy.clickAndSelectOption('[data-slot="select-trigger"]', status, {
-          position: "last",
-        });
+        this.clickAndSelectOption(1, criticality);
+        this.clickAndSelectOption(2, status);
       });
 
     return this;
@@ -168,7 +156,7 @@ export class PatientEncounter {
     cy.verifyNotification("Symptom already exists!");
     return this;
   }
-  clickAndSelectSymptomOption(position: number, value: string) {
+  clickAndSelectOption(position: number, value: string) {
     cy.get("[data-slot='select-trigger']")
       .eq(position)
       .should("be.enabled")
@@ -195,9 +183,9 @@ export class PatientEncounter {
       .first()
       .should("be.visible")
       .within(() => {
-        this.clickAndSelectSymptomOption(0, status);
-        this.clickAndSelectSymptomOption(1, severity);
-        this.clickAndSelectSymptomOption(2, verification);
+        this.clickAndSelectOption(0, status);
+        this.clickAndSelectOption(1, severity);
+        this.clickAndSelectOption(2, verification);
       });
 
     return this;
@@ -282,20 +270,8 @@ export class PatientEncounter {
       .first()
       .should("be.visible")
       .within(() => {
-        cy.get("[data-slot='select-trigger']")
-          .first()
-          .should("be.enabled")
-          .scrollIntoView();
-        cy.clickAndSelectOption('[data-slot="select-trigger"]', status, {
-          position: "first",
-        });
-        cy.get("[data-slot='select-trigger']")
-          .last()
-          .should("be.enabled")
-          .scrollIntoView();
-        cy.clickAndSelectOption('[data-slot="select-trigger"]', verification, {
-          position: "last",
-        });
+        this.clickAndSelectOption(0, status);
+        this.clickAndSelectOption(1, verification);
       });
 
     return this;

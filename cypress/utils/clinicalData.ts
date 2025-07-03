@@ -31,9 +31,7 @@ export const allergyCriticality = ["Low", "High", "Unable to Assess"];
 
 export const conditionNames = [
   "Adenosine deaminase 2 deficiency",
-  "Acquired arteriovenous malformation of vascular structure of gastrointestinal tract",
   "Venous ulcer of left ankle",
-  "Chronic respiratory failure due to obstructive sleep apnoea",
   "Malignant melanoma of skin of left wrist",
   "Renal scarring due to vesicoureteral reflux",
 ];
