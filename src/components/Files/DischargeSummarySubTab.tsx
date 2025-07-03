@@ -271,8 +271,11 @@ export const DischargeTab = ({
   const FilterButton = () => {
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger asChild className="w-full sm:w-auto">
-          <Button variant="secondary" className="text-sm text-secondary-800">
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="secondary"
+            className="w-full sm:w-auto text-sm text-secondary-800"
+          >
             <span className="flex flex-row items-center gap-1">
               <CareIcon icon="l-filter" />
               <span>{t("filter")}</span>
@@ -326,10 +329,10 @@ export const DischargeTab = ({
     if (!canEdit) return <></>;
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger asChild className="w-full sm:w-auto">
+        <DropdownMenuTrigger asChild>
           <Button
             variant="outline_primary"
-            className="flex flex-row items-center mr-2"
+            className="w-full sm:w-auto flex flex-row items-center mr-2"
           >
             <CareIcon icon="l-file-upload" className="mr-1" />
             <span>{t("add_files")}</span>

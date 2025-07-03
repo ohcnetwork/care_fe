@@ -284,10 +284,10 @@ export const FilesPage = ({
   const FilterButton = () => {
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger asChild className="w-full sm:w-auto">
+        <DropdownMenuTrigger asChild>
           <Button
             variant="secondary"
-            className="text-sm text-secondary-800"
+            className="w-full sm:w-auto text-sm text-secondary-800"
             data-cy="files-filter-button"
           >
             <span className="flex flex-row items-center gap-1">
@@ -342,13 +342,13 @@ export const FilesPage = ({
   };
 
   const FileUploadButtons = () => {
-    if (!canEdit) return <></>;
+    if (!canEdit) return null;
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger asChild className="w-full sm:w-auto">
+        <DropdownMenuTrigger asChild className="">
           <Button
             variant="outline_primary"
-            className="flex flex-row items-center mr-2"
+            className="w-full sm:w-auto flex flex-row items-center mr-2"
             data-cy="add-files-button"
           >
             <CareIcon icon="l-file-upload" className="mr-1" />
