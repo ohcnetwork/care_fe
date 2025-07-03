@@ -329,38 +329,22 @@ export default function PurchaseOrderForm({
                               value={field.value}
                               className="flex flex-col sm:flex-row gap-2"
                             >
-                              <div
-                                key={SupplyRequestStatus.active}
-                                className={cn(
-                                  "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
-                                  field.value === SupplyRequestStatus.active &&
-                                    "border-primary bg-primary/10",
-                                )}
-                              >
-                                <RadioGroupItem
-                                  value={SupplyRequestStatus.active}
-                                  id={SupplyRequestStatus.active}
-                                />
-                                <Label htmlFor={SupplyRequestStatus.active}>
-                                  {t(SupplyRequestStatus.active)}
-                                </Label>
-                              </div>
-                              <div
-                                key={SupplyRequestStatus.draft}
-                                className={cn(
-                                  "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
-                                  field.value === SupplyRequestStatus.draft &&
-                                    "border-primary bg-primary/10",
-                                )}
-                              >
-                                <RadioGroupItem
-                                  value={SupplyRequestStatus.draft}
-                                  id={SupplyRequestStatus.draft}
-                                />
-                                <Label htmlFor={SupplyRequestStatus.draft}>
-                                  {t(SupplyRequestStatus.draft)}
-                                </Label>
-                              </div>
+                              {[
+                                SupplyRequestStatus.active,
+                                SupplyRequestStatus.draft,
+                              ].map((status) => (
+                                <div
+                                  key={status}
+                                  className={cn(
+                                    "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
+                                    field.value === status &&
+                                      "border-primary bg-primary/10",
+                                  )}
+                                >
+                                  <RadioGroupItem value={status} id={status} />
+                                  <Label htmlFor={status}>{t(status)}</Label>
+                                </div>
+                              ))}
                             </RadioGroup>
                           </FormControl>
                         )}
