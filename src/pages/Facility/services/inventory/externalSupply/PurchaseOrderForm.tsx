@@ -339,6 +339,7 @@ export default function PurchaseOrderForm({
                               >
                                 <RadioGroupItem
                                   value={SupplyRequestStatus.active}
+                                  id={SupplyRequestStatus.active}
                                 />
                                 <Label htmlFor={SupplyRequestStatus.active}>
                                   {t(SupplyRequestStatus.active)}
@@ -354,6 +355,7 @@ export default function PurchaseOrderForm({
                               >
                                 <RadioGroupItem
                                   value={SupplyRequestStatus.draft}
+                                  id={SupplyRequestStatus.draft}
                                 />
                                 <Label htmlFor={SupplyRequestStatus.draft}>
                                   {t(SupplyRequestStatus.draft)}
@@ -390,7 +392,10 @@ export default function PurchaseOrderForm({
                                       "border-primary bg-primary/10",
                                   )}
                                 >
-                                  <RadioGroupItem value={priority} />
+                                  <RadioGroupItem
+                                    value={priority}
+                                    id={priority}
+                                  />
                                   <Label htmlFor={priority}>
                                     {t(priority)}
                                   </Label>
