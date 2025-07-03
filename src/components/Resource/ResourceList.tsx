@@ -135,7 +135,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                 />
                 <div className="w-full flex justify-center sm:justify-start sm:w-auto">
                   <Tabs value={incoming ? "incoming" : "outgoing"}>
-                    <TabsList className="inline-flex bg-gray-100 rounded-lg p-1 h-10 min-w-[200px]">
+                    <TabsList className="inline-flex bg-gray-100 rounded-lg p-1 h-10 min-w-[200px] sm:min-w-0 w-full">
                       <TabsTrigger
                         value="outgoing"
                         className="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all text-center data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:text-gray-900"
@@ -158,7 +158,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
               </div>
               <div className="flex justify-center sm:justify-end w-full sm:w-auto">
                 <Tabs value={isActive ? "active" : "completed"}>
-                  <TabsList className="inline-flex bg-gray-100 rounded-lg p-1 h-10 min-w-[200px]">
+                  <TabsList className="inline-flex bg-gray-100 rounded-lg p-1 h-10 min-w-[200px] sm:min-w-0 w-full">
                     <TabsTrigger
                       value="active"
                       className="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all text-center data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:text-gray-900"
