@@ -353,21 +353,19 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   {props.encounter.current_location ? (
                     <Popover>
                       <PopoverTrigger asChild>
-                        <div>
-                          <Badge
-                            className="capitalize gap-1 py-1 px-3 cursor-pointer hover:bg-secondary-100"
-                            variant="outline"
-                            title={`Current Location: ${props.encounter.current_location.name}`}
-                            data-cy="current-location-badge"
-                          >
-                            <CareIcon
-                              icon="l-location-point"
-                              className="size-4 text-green-600"
-                            />
-                            {props.encounter.current_location.name}
-                            <ChevronDown className="size-3 opacity-50" />
-                          </Badge>
-                        </div>
+                        <Badge
+                          className="capitalize gap-1 py-1 px-3 cursor-pointer hover:bg-secondary-100"
+                          variant="outline"
+                          title={`Current Location: ${props.encounter.current_location.name}`}
+                          data-cy="current-location-badge"
+                        >
+                          <CareIcon
+                            icon="l-location-point"
+                            className="size-4 text-green-600"
+                          />
+                          {props.encounter.current_location.name}
+                          <ChevronDown className="size-3 opacity-50" />
+                        </Badge>
                       </PopoverTrigger>
                       <PopoverContent align={"start"} className="w-auto p-2">
                         <div className="space-y-2 p-2 items-center">
