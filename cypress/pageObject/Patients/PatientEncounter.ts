@@ -163,8 +163,8 @@ export class PatientEncounter {
       .scrollIntoView()
       .click()
       .then(() => {
-        cy.get('[role="listbox"]')
-          .find('[role="option"]')
+        cy.get('[data-slot="select-content"]')
+          .find('[data-slot="select-item"]')
           .contains(value)
           .should("be.visible")
           .click();
