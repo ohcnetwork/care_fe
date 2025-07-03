@@ -166,7 +166,9 @@ async function extractAndCleanTranslations(options) {
       "patient__",
     ];
     for (const key of keys) {
+      const baseKey = key.replace(/_(zero|one|two|few|many|other)$/, "");
       if (
+        allUsedKeys.has(baseKey) ||
         allUsedKeys.has(key) ||
         dynamicPrefixes.some((prefix) => key.startsWith(prefix))
       ) {
