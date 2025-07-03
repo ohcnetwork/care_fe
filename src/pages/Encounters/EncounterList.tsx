@@ -36,9 +36,9 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import {
   ENCOUNTER_CLASSES,
-  ENCOUNTER_PRIORITIES,
+  ENCOUNTER_PRIORITY,
   ENCOUNTER_PRIORITY_EMOTES,
-  ENCOUNTER_STATUSES,
+  ENCOUNTER_STATUS,
   ENCOUNTER_STATUS_ICONS,
   Encounter,
   EncounterPriority,
@@ -187,10 +187,7 @@ export function EncounterList({
     <Page
       title={t("encounters")}
       componentRight={
-        <Badge
-          className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
-          variant="outline"
-        >
+        <Badge className="bg-purple-50 text-purple-700 ml-2 rounded-xl px-3 py-0.5 m-3 w-max border-gray-200">
           {isLoading
             ? t("loading")
             : t("entity_count", {
@@ -266,13 +263,13 @@ export function EncounterList({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">{t("all_priorities")}</SelectItem>
-                    {ENCOUNTER_PRIORITIES.map((priority) => (
-                      <SelectItem key={priority.id} value={priority.id}>
+                    {ENCOUNTER_PRIORITY.map((priority) => (
+                      <SelectItem key={priority} value={priority}>
                         <div className="flex items-center">
                           <span className="mr-2">
-                            {ENCOUNTER_PRIORITY_EMOTES[priority.id]}
+                            {ENCOUNTER_PRIORITY_EMOTES[priority]}
                           </span>
-                          {t(`encounter_priority__${priority.id}`)}
+                          {t(`encounter_priority__${priority}`)}
                         </div>
                       </SelectItem>
                     ))}
@@ -295,18 +292,16 @@ export function EncounterList({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">{t("all_status")}</SelectItem>
-                      {ENCOUNTER_STATUSES.filter(
-                        (status) => ENCOUNTER_STATUS_ICONS[status.id],
+                      {ENCOUNTER_STATUS.filter(
+                        (status) => ENCOUNTER_STATUS_ICONS[status],
                       ).map((status) => (
-                        <SelectItem value={status.id} key={status.id}>
-                          <div className="flex items-center">
+                        <SelectItem value={status} key={status}>
+                          <div className="flex gap-1 items-center">
                             <CareIcon
-                              icon={
-                                ENCOUNTER_STATUS_ICONS[status.id] as IconName
-                              }
-                              className="mr-2 size-4"
+                              icon={ENCOUNTER_STATUS_ICONS[status] as IconName}
+                              className="size-4"
                             />
-                            {t(`encounter_status__${status.id}`)}
+                            {t(`encounter_status__${status}`)}
                           </div>
                         </SelectItem>
                       ))}
@@ -367,27 +362,27 @@ export function EncounterList({
                         {t("all_status")}
                       </TabsTrigger>
 
-                      {ENCOUNTER_STATUSES.filter(
-                        (status) => ENCOUNTER_STATUS_ICONS[status.id],
+                      {ENCOUNTER_STATUS.filter(
+                        (status) => ENCOUNTER_STATUS_ICONS[status],
                       ).map((status) => (
                         <TabsTrigger
-                          key={status.id}
-                          value={status.id}
-                          data-cy={`${status.id}-filter`}
+                          key={status}
+                          value={status}
+                          data-cy={`${status}-filter`}
                           className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                           onClick={() =>
                             updateQuery({
                               encounter_class: encounterClass,
                               priority,
-                              status: status.id,
+                              status: status,
                             })
                           }
                         >
                           <CareIcon
-                            icon={ENCOUNTER_STATUS_ICONS[status.id] as IconName}
+                            icon={ENCOUNTER_STATUS_ICONS[status] as IconName}
                             className="size-4"
                           />
-                          {t(`encounter_status__${status.id}`)}
+                          {t(`encounter_status__${status}`)}
                         </TabsTrigger>
                       ))}
                     </div>

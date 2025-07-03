@@ -18,6 +18,10 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
         }
         props.onFocus?.(e);
       }}
+      onWheel={(e) => {
+        e.currentTarget.blur();
+        props.onWheel?.(e);
+      }}
     />
   );
 }

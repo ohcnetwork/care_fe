@@ -210,6 +210,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
         handleDelete={handleCoverImageDelete}
         onOpenChange={(open) => setEditCoverImage(open)}
         hint={coverImageHint}
+        aspectRatio={16 / 9}
       />
       <div className="container mx-auto pt-2">
         <div className="mx-auto max-w-3xl space-y-6">
@@ -426,7 +427,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button
-                            className="cursor-pointer font-semibold"
+                            className="cursor-pointer font-semibold w-fit"
                             variant="destructive"
                             size="sm"
                           >

@@ -159,7 +159,7 @@ export default function CreateEncounterForm({
                 return (
                   <FormItem>
                     <FormLabel>{t("date_and_time")}</FormLabel>
-                    <div className="flex sm:gap-2 flex-wrap">
+                    <div className="flex gap-2 flex-wrap">
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
@@ -193,7 +193,7 @@ export default function CreateEncounterForm({
                       </Popover>
                       <Input
                         type="time"
-                        className="sm:w-[150px] border-t-0 sm:border-t text-gray-500 border-gray-200 h-8"
+                        className="sm:w-[150px] text-gray-500 border-gray-200 h-8"
                         value={date.toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -266,7 +266,10 @@ export default function CreateEncounterForm({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger data-cy="encounter-status">
+                        <SelectTrigger
+                          data-cy="encounter-status"
+                          ref={field.ref}
+                        >
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
@@ -294,7 +297,10 @@ export default function CreateEncounterForm({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger data-cy="encounter-priority">
+                        <SelectTrigger
+                          data-cy="encounter-priority"
+                          ref={field.ref}
+                        >
                           <SelectValue placeholder="Select priority" />
                         </SelectTrigger>
                       </FormControl>

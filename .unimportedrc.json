@@ -6,6 +6,7 @@
   "ignoreUnimported": [
     "src/Locale/update_locale.js",
     "src/PluginRegistry.ts",
+    "src/pages/Encounters/ReportBuilder/ReportBuilderSheet.tsx",
     "src/pluginTypes.ts",
     "src/service-worker.ts"
   ],
@@ -15,7 +16,8 @@
     "@tailwindcss/vite",
     "@vitejs/plugin-react",
     "browserslist-useragent-regexp",
-    "cross-env"
+    "cross-env",
+    "normalize-wheel"
   ],
   "ignoreUnresolved": [
     [

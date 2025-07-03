@@ -1,6 +1,5 @@
 import { MinusCircledIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -43,6 +42,7 @@ import {
 } from "@/components/ui/select";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
+import { DateTimeInput } from "@/components/Common/DateTimeInput";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
@@ -374,7 +374,12 @@ export function MedicationRequestQuestion({
   });
 
   return (
-    <div className="space-y-4">
+    <div
+      className={cn(
+        "space-y-4",
+        medications.length > 0 ? "md:max-w-fit" : "max-w-4xl",
+      )}
+    >
       <AlertDialog
         open={medicationToDelete !== null}
         onOpenChange={(open) => !open && setMedicationToDelete(null)}
@@ -402,6 +407,7 @@ export function MedicationRequestQuestion({
         </AlertDialogContent>
       </AlertDialog>
       <HistoricalRecordSelector<MedicationRequestRead | MedicationStatementRead>
+        title={t("medication_history")}
         structuredTypes={[
           {
             type: t("past_prescriptions"),
@@ -1107,6 +1113,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           {dosageInstruction?.timing && (
             <Input
               type="number"
+              inputMode="decimal"
+              pattern="[0-9]*[.]?[0-9]*"
               min={0}
               value={
                 dosageInstruction.timing.repeat.bounds_duration?.value == 0
@@ -1307,14 +1315,9 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("authored_on")}
         </Label>
-        <Input
-          type="datetime-local"
-          value={
-            medication.authored_on
-              ? format(new Date(medication.authored_on), "yyyy-MM-dd'T'HH:mm")
-              : undefined
-          }
-          onChange={(e) => onUpdate?.({ authored_on: e.target.value })}
+        <DateTimeInput
+          value={medication.authored_on}
+          onDateChange={(val) => onUpdate?.({ authored_on: val })}
           disabled={disabled || isReadOnly}
         />
       </div>

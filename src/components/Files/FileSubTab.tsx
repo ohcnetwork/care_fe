@@ -1,9 +1,8 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { t } from "i18next";
 import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -50,7 +49,6 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import ReportBuilderSheet from "@/pages/Encounters/ReportBuilder/ReportBuilderSheet";
 import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/patient";
 
@@ -60,7 +58,6 @@ interface FilesTabProps {
   patient?: Patient;
   associatingId: string;
   canEdit: boolean | undefined;
-  facilityId: string;
 }
 
 export const FilesPage = ({
@@ -69,7 +66,6 @@ export const FilesPage = ({
   patient,
   encounter,
   canEdit,
-  facilityId,
 }: FilesTabProps) => {
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [openArchivedFileDialog, setOpenArchivedFileDialog] = useState(false);
@@ -82,6 +78,7 @@ export const FilesPage = ({
   const { qParams, updateQuery, Pagination } = useFilters({
     limit: 15,
   });
+  // const queryClient = useQueryClient();
   const { canViewClinicalData } = getPermissions(
     hasPermission,
     patient?.permissions ?? [],
@@ -94,7 +91,6 @@ export const FilesPage = ({
     type === "encounter"
       ? canViewClinicalData || canViewEncounter
       : canViewClinicalData;
-  const queryClient = useQueryClient();
 
   const {
     data: files,
@@ -115,6 +111,7 @@ export const FilesPage = ({
         ...(qParams.file !== "all" && {
           file_category: qParams.file,
         }),
+        ordering: "-modified_date",
       },
     }),
     enabled: canAccess,
@@ -332,14 +329,14 @@ export const FilesPage = ({
       <div className="flex flex-row gap-2 mt-2 mx-2">
         <Badge
           data-cy="file-status-badge"
-          variant="secondary"
-          className="cursor-pointer border border-gray-300 bg-white"
+          variant="outline"
+          className="cursor-pointer"
           onClick={() => updateQuery({ is_archived: undefined })}
         >
           {t(
             qParams.is_archived === "false" ? "active_files" : "archived_files",
           )}
-          <CareIcon icon="l-times-circle" className="ml-1" />
+          <CareIcon icon="l-times-circle" />
         </Badge>
       </div>
     );
@@ -636,7 +633,7 @@ export const FilesPage = ({
 
         <div className="flex items-center gap-2">
           <FilterButton />
-          {type === "encounter" && (
+          {/* {type === "encounter" && (
             <>
               <Button
                 variant="outline_primary"
@@ -682,7 +679,7 @@ export const FilesPage = ({
                 }}
               />
             </>
-          )}
+          )} */}
         </div>
 
         <div className="ml-auto">

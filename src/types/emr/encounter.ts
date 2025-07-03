@@ -1,12 +1,4 @@
-import {
-  Ambulance,
-  BedDouble,
-  Building2,
-  Home,
-  LucideIcon,
-  MonitorSmartphone,
-  Stethoscope,
-} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { Patient } from "@/types/emr/patient";
@@ -87,20 +79,6 @@ export const ENCOUNTER_PRIORITY = [
   "use_as_directed",
 ] as const;
 
-export const ENCOUNTER_STATUSES = [
-  { id: "planned" },
-  { id: "in_progress" },
-  { id: "on_hold" },
-  { id: "discharged" },
-  { id: "completed" },
-  { id: "cancelled" },
-  { id: "discontinued" },
-  { id: "entered_in_error" },
-  { id: "unknown" },
-] as const;
-
-export const ENCOUNTER_STATUS = ENCOUNTER_STATUSES.map((status) => status.id);
-
 export const ENCOUNTER_STATUS_ICONS = {
   planned: "l-calender",
   in_progress: "l-spinner",
@@ -112,31 +90,51 @@ export const ENCOUNTER_STATUS_ICONS = {
   entered_in_error: undefined,
   unknown: undefined,
 } as const;
+export const ENCOUNTER_PRIORITY_COLORS = {
+  stat: "destructive",
+  ASAP: "yellow",
+  emergency: "destructive",
+  urgent: "orange",
+  routine: "blue",
+  elective: "indigo",
+  rush_reporting: "orange",
+  timing_critical: "yellow",
+  callback_results: "green",
+  callback_for_scheduling: "purple",
+  preop: "pink",
+  as_needed: "teal",
+  use_as_directed: "indigo",
+} as const satisfies Record<
+  EncounterPriority,
+  React.ComponentProps<typeof Badge>["variant"]
+>;
 
-export const ENCOUNTER_CLASSES_ICONS = {
-  imp: BedDouble,
-  amb: Ambulance,
-  obsenc: Stethoscope,
-  emer: Building2,
-  vr: MonitorSmartphone,
-  hh: Home,
-} as const satisfies Record<EncounterClass, LucideIcon>;
+export const ENCOUNTER_STATUS = [
+  "planned",
+  "in_progress",
+  "on_hold",
+  "discharged",
+  "completed",
+  "cancelled",
+  "discontinued",
+  "entered_in_error",
+  "unknown",
+] as const;
 
-export const ENCOUNTER_PRIORITIES = [
-  { id: "stat" },
-  { id: "ASAP" },
-  { id: "emergency" },
-  { id: "urgent" },
-  { id: "routine" },
-  { id: "elective" },
-  { id: "rush_reporting" },
-  { id: "timing_critical" },
-  { id: "callback_results" },
-  { id: "callback_for_scheduling" },
-  { id: "preop" },
-  { id: "as_needed" },
-  { id: "use_as_directed" },
-] as const satisfies { id: EncounterPriority }[];
+export const ENCOUNTER_STATUS_COLORS = {
+  planned: "blue",
+  in_progress: "yellow",
+  on_hold: "orange",
+  discharged: "primary",
+  completed: "green",
+  cancelled: "destructive",
+  discontinued: "destructive",
+  entered_in_error: "destructive",
+  unknown: "secondary",
+} as const satisfies Record<
+  EncounterStatus,
+  React.ComponentProps<typeof Badge>["variant"]
+>;
 
 export const ENCOUNTER_PRIORITY_EMOTES = {
   stat: "🔴",
