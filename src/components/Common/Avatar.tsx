@@ -1,5 +1,5 @@
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -55,10 +55,6 @@ function Avatar({
     (avatarText ? getColorPair(avatarText) : getColorPair("user"));
 
   const [isImageLoaded, setIsImageLoaded] = useState(false);
-
-  useEffect(() => {
-    setIsImageLoaded(true);
-  }, [imageUrl]);
 
   return (
     <AvatarPrimitive.Root
