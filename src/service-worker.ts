@@ -6,17 +6,15 @@
 // You can also remove this file if you'd prefer not to use a
 // service worker, and the Workbox build step will be skipped.
 import { clientsClaim } from "workbox-core";
-import { ExpirationPlugin } from "workbox-expiration";
 import { precacheAndRoute } from "workbox-precaching";
-import { registerRoute } from "workbox-routing";
-import { NetworkFirst } from "workbox-strategies";
+import { NavigationRoute, registerRoute } from "workbox-routing";
 
 declare const self: ServiceWorkerGlobalScope;
 
 const precacheFiles = self.__WB_MANIFEST || [];
-
+precacheAndRoute(precacheFiles);
 clientsClaim();
-console.log(precacheFiles, precacheAndRoute);
+
 // This allows the web app to trigger skipWaiting via
 // registration.waiting.postMessage({type: 'SKIP_WAITING'})
 self.addEventListener("message", (event) => {
@@ -66,47 +64,20 @@ self.addEventListener("notificationclick", (e) => {
     }),
   );
 });
-// registerRoute(
-//   new NavigationRoute(async ({ request }) => {
-//     const cachedResponse = await caches.match("/index.html");
-//     if (cachedResponse) {
-//       return cachedResponse;
-//     }
-
-//     try {
-//       return await fetch(request);
-//     } catch {
-//       return new Response("Offline and no cached version available.", {
-//         status: 503,
-//         headers: { "Content-Type": "text/html" },
-//       });
-//     }
-//   }),
-// );
-
 registerRoute(
-  ({ request }) =>
-    request.destination === "style" ||
-    request.destination === "script" ||
-    request.destination === "image",
-  new NetworkFirst({
-    cacheName: "static-assets",
-    plugins: [
-      new ExpirationPlugin({
-        maxAgeSeconds: 7 * 24 * 60 * 60,
-      }),
-    ],
-  }),
-);
+  new NavigationRoute(async ({ request }) => {
+    const cachedResponse = await caches.match("/index.html");
+    if (cachedResponse) {
+      return cachedResponse;
+    }
 
-registerRoute(
-  ({ request }) => request.mode === "navigate",
-  new NetworkFirst({
-    cacheName: "html-cache-1",
-    plugins: [
-      new ExpirationPlugin({
-        maxAgeSeconds: 7 * 24 * 60 * 120, // 1 week
-      }),
-    ],
+    try {
+      return await fetch(request);
+    } catch {
+      return new Response("Offline and no cached version available.", {
+        status: 503,
+        headers: { "Content-Type": "text/html" },
+      });
+    }
   }),
 );

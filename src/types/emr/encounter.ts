@@ -202,7 +202,7 @@ export interface Encounter {
   encounter_class_history: EncounterClassHistory;
   status_history: StatusHistory;
   organizations: FacilityOrganization[];
-  current_location: LocationList;
+  current_location: LocationList | null;
   location_history: LocationHistory[];
   permissions: string[];
   care_team: CareTeamResponse[];

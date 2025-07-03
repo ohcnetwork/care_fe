@@ -1,4 +1,3 @@
-import { Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,8 +11,6 @@ interface Props {
   encounter: Encounter;
   canAccess: boolean;
   canEdit: boolean;
-  setIsMarkAsCompleteOffline?: Dispatch<SetStateAction<boolean>>;
-  IsMarkAsCompleteOffline?: boolean;
 }
 
 export default function SideOverview(props: Props) {
@@ -34,12 +31,7 @@ export default function SideOverview(props: Props) {
 
         <div>
           <TabsContent value="quick_access" className="p-2">
-            <QuickAccess
-              setIsMarkAsCompleteOffline={props.setIsMarkAsCompleteOffline}
-              encounter={props.encounter}
-              canEdit={props.canEdit}
-              IsMarkAsCompleteOffline={props.IsMarkAsCompleteOffline}
-            />
+            <QuickAccess encounter={props.encounter} canEdit={props.canEdit} />
           </TabsContent>
           <TabsContent value="observations" className="p-2">
             <ObservationsList

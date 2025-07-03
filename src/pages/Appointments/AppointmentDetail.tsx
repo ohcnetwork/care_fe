@@ -71,6 +71,7 @@ import {
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import {
   formatName,
   getMonthFromDate,
@@ -235,11 +236,34 @@ export default function AppointmentDetail(props: Props) {
       }
 
       // Update local cache immediately
-      queryClient.setQueryData(["appointment", appointment.id], {
+
+      const updatedAppointment = {
         ...appointment,
         status,
         is_updated_offline: true,
-      });
+      };
+      queryClient.setQueryData(
+        ["appointment", appointment.id],
+        updatedAppointment,
+      );
+
+      const prevAppointmentList = queryClient.getQueryData<
+        PaginatedResponse<Appointment>
+      >(["patient-appointments", appointment.patient.id]);
+
+      if (prevAppointmentList?.results?.length) {
+        const updatedAppointmentList = {
+          ...prevAppointmentList,
+          results: prevAppointmentList.results.map((entry) =>
+            entry.id === appointment.id ? updatedAppointment : entry,
+          ),
+        };
+
+        queryClient.setQueryData(
+          ["patient-appointments", appointment.patient.id],
+          updatedAppointmentList,
+        );
+      }
 
       toast.success(`Appointment marked as ${status}`);
       if (status === "in_consultation") {
@@ -558,7 +582,6 @@ const AppointmentActions = ({
   >();
   const currentStatus = appointment.status;
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
-  console.log(isToday);
   const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
     mutationFn: mutate(scheduleApis.appointments.cancel, {
       pathParams: {
@@ -628,13 +651,35 @@ const AppointmentActions = ({
       if (!saveResult.success) {
         toast.error(saveResult.error);
       }
-      queryClient.setQueryData(["appointment", appointment.id], {
+
+      const updatedAppointment = {
         ...appointment,
         status,
         is_updated_offline: true,
-      });
-    }
+      };
+      queryClient.setQueryData(
+        ["appointment", appointment.id],
+        updatedAppointment,
+      );
 
+      const prevAppointmentList = queryClient.getQueryData<
+        PaginatedResponse<Appointment>
+      >(["patient-appointments", appointment.patient.id]);
+
+      if (prevAppointmentList?.results?.length) {
+        const updatedAppointmentList = {
+          ...prevAppointmentList,
+          results: prevAppointmentList.results.map((entry) =>
+            entry.id === appointment.id ? updatedAppointment : entry,
+          ),
+        };
+
+        queryClient.setQueryData(
+          ["patient-appointments", appointment.patient.id],
+          updatedAppointmentList,
+        );
+      }
+    }
     const statusUpdateID = isOfflineId(appointment.id)
       ? `${appointment.id}-statusUpdate`
       : `offline-${appointment.id}-statusUpdate`;
@@ -776,6 +821,34 @@ const AppointmentActions = ({
         if (!saveResult.success) {
           toast.error(saveResult.error);
         }
+
+        const updatedAppointment = {
+          ...appointment,
+          token_slot: selectedSlot,
+          user: selectedPracticioner,
+          status: "booked" as AppointmentNonCancelledStatus,
+          booked_on: new Date().toISOString(),
+          booked_by: normalizeUserBase(authUser),
+          is_updated_offline: true,
+        };
+
+        const prevAppointmentList = queryClient.getQueryData<
+          PaginatedResponse<Appointment>
+        >(["patient-appointments", appointment.patient.id]);
+
+        if (prevAppointmentList?.results?.length) {
+          const updatedAppointmentList = {
+            ...prevAppointmentList,
+            results: prevAppointmentList.results.map((entry) =>
+              entry.id === appointment.id ? updatedAppointment : entry,
+            ),
+          };
+
+          queryClient.setQueryData(
+            ["patient-appointments", appointment.patient.id],
+            updatedAppointmentList,
+          );
+        }
       }
 
       const statusUpdateId = isOfflineId(appointment.id)
@@ -786,9 +859,6 @@ const AppointmentActions = ({
 
       if (existingStatusEntry && existingStatusEntry.type === "statusUpdate") {
         await db.OfflineWrites.delete(statusUpdateId);
-        console.log(
-          `Deleted stale status update for appointment ${appointment.id}`,
-        );
       }
 
       updateSlotCacheAfterOfflineAppointment({
@@ -841,7 +911,6 @@ const AppointmentActions = ({
     const rescheduleAppointmentData = { new_slot: selectedSlotId };
 
     if (!onlineManager.isOnline()) {
-      console.log("selectedPracticioner: ", selectedPractitioner);
       await queuerescheduleOfflineRecord(
         rescheduleAppointmentData,
         OfflineSelectedSlot,
@@ -931,6 +1000,7 @@ const AppointmentActions = ({
       {currentStatus === "booked" && (
         <>
           <Button
+            disabled={!isToday}
             variant="outline_primary"
             onClick={() => onChange("checked_in")}
             size="lg"
@@ -943,6 +1013,7 @@ const AppointmentActions = ({
 
       {["booked", "checked_in"].includes(currentStatus) && (
         <Button
+          disabled={!isToday}
           variant={
             currentStatus === "checked_in" ? "outline_primary" : "outline"
           }

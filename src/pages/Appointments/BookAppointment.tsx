@@ -29,10 +29,12 @@ import {
 } from "@/OfflineSupport/offlineWriteHelpers";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { Patient } from "@/types/emr/patient";
 import { FacilityData } from "@/types/facility/facility";
 import {
+  Appointment,
   AppointmentNonCancelledStatus,
   TokenSlot,
 } from "@/types/scheduling/schedule";
@@ -186,6 +188,29 @@ export default function BookAppointment(props: Props) {
         action: "booked",
       });
 
+      const prevAppointmentList = queryClient.getQueryData<
+        PaginatedResponse<Appointment>
+      >(["patient-appointments", props.patientId]);
+
+      const updatedAppointmentList: PaginatedResponse<Appointment> =
+        prevAppointmentList?.results
+          ? {
+              ...prevAppointmentList,
+              results: [...prevAppointmentList.results, normalizeAppointment],
+              count:
+                (prevAppointmentList.count ??
+                  prevAppointmentList.results.length) + 1,
+            }
+          : {
+              count: 1,
+              results: [normalizeAppointment],
+            };
+
+      queryClient.setQueryData(
+        ["patient-appointments", props.patientId],
+        updatedAppointmentList,
+      );
+
       toast.success("Appointment created successfully");
       navigate(
         `/facility/${props.facilityId}/patient/${props.patientId}/appointments/${generatedId}`,
@@ -195,8 +220,6 @@ export default function BookAppointment(props: Props) {
       toast.error(t("eror_while_appointment_schedule"));
     }
   };
-
-  console.log(selectedDateOffline, selectedMonthOffline);
   const handleSubmit = async () => {
     if (!resourceId) {
       toast.error("Please select a practitioner");

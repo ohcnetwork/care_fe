@@ -1,6 +1,6 @@
-import { onlineManager, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -15,11 +15,6 @@ import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
 
 import { getPermissions } from "@/common/Permissions";
 
-import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
-import {
-  isOfflineId,
-  normalizeOfflineEncounterRecord,
-} from "@/OfflineSupport/offlineWriteHelpers";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, keysOf } from "@/Utils/utils";
@@ -38,8 +33,6 @@ import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
 export interface EncounterTabProps {
   encounter: Encounter;
   patient: Patient;
-  setIsMarkAsCompleteOffline?: Dispatch<SetStateAction<boolean>>;
-  IsMarkAsCompleteOffline?: boolean;
 }
 
 const defaultTabs = {
@@ -68,23 +61,13 @@ export const EncounterShow = (props: Props) => {
   const { hasPermission } = usePermissions();
   const pluginTabs = useCareAppEncounterTabs();
   const { goBack } = useAppHistory();
-  const db = new AppCacheDB();
-  const [isEncounterUpdatedOffline, setIsEncounterUpdatedOffline] =
-    useState(false);
-  const [isMarkAsCompleteOffline, setIsMarkAsCompleteOffline] = useState(false);
-  const [offlineCreatedEncounter, setOfflineCreatedEncounter] =
-    useState<Encounter | null>(null);
 
-  const [offlinePatientPayload, setOfflinePatientPayload] =
-    useState<Patient | null>(null);
-  const queryClient = useQueryClient();
-  console.log(queryClient);
   const tabs: Record<string, React.FC<EncounterTabProps>> = {
     ...defaultTabs,
     ...pluginTabs,
   };
 
-  const { data: onlineEncounterData, isLoading } = useQuery({
+  const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(routes.encounter.get, {
       pathParams: { id: encounterId },
@@ -101,12 +84,7 @@ export const EncounterShow = (props: Props) => {
     enabled: !!encounterId,
   });
 
-  const encounterData =
-    onlineManager.isOnline() || onlineEncounterData
-      ? onlineEncounterData
-      : offlineCreatedEncounter;
-
-  const { data: onlinePatient, isLoading: isPatientLoading } = useQuery({
+  const { data: patient, isLoading: isPatientLoading } = useQuery({
     queryKey: ["patient", patientId],
     queryFn: query(routes.patient.getPatient, {
       pathParams: {
@@ -117,11 +95,6 @@ export const EncounterShow = (props: Props) => {
     networkMode: "online",
     enabled: !facilityIdFromProps && !!patientId,
   });
-
-  const patient =
-    onlineManager.isOnline() || onlinePatient
-      ? onlinePatient
-      : offlinePatientPayload;
 
   const facilityId = facilityIdFromProps ?? encounterData?.facility.id;
 
@@ -163,79 +136,13 @@ export const EncounterShow = (props: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, isPatientLoading]);
 
-  useEffect(() => {
-    const fetchOfflinePatient = async () => {
-      if (isOfflineId(encounterId)) {
-        if (isOfflineId(patientId)) {
-          const record = await db.OfflineWrites.get(patientId);
-          if (record) {
-            // const normalized = normalizeOfflinePatientRecord(
-            //   record,
-            //   queryClient,
-            // );
-            setOfflinePatientPayload(null);
-          }
-        } else if (patient) {
-          setOfflinePatientPayload(patient);
-        }
-      }
-    };
-
-    if (!onlineManager.isOnline()) fetchOfflinePatient();
-  }, []);
-
-  useEffect(() => {
-    const checkEncounterExist = async () => {
-      try {
-        if (isOfflineId(encounterId) && offlinePatientPayload) {
-          // fetch the encounter that was created when offline
-          const newEncounter = await db.OfflineWrites.where("id")
-            .equals(encounterId)
-            .filter((entry) => entry.type === "createEncounter")
-            .first();
-
-          if (!newEncounter) return;
-          const normalizedEncounter = normalizeOfflineEncounterRecord(
-            newEncounter,
-            offlinePatientPayload,
-          );
-
-          setOfflineCreatedEncounter(normalizedEncounter);
-          setIsEncounterUpdatedOffline(true);
-        } else {
-          const entries = await db.OfflineWrites.where("id")
-            .equals(encounterId)
-            .toArray();
-
-          const hasAnyEntry = entries.length > 0;
-          const hasMarkAsComplete = entries.some(
-            (entry) => entry.type === "markAsCompleteEncounter",
-          );
-
-          setIsEncounterUpdatedOffline(hasAnyEntry);
-          setIsMarkAsCompleteOffline(hasMarkAsComplete);
-        }
-      } catch (error) {
-        console.error("Error checking encounter existence:", error);
-      }
-    };
-
-    if (!onlineManager.isOnline()) {
-      checkEncounterExist();
-    }
-  }, [offlinePatientPayload]);
-
-  console.log(isLoading, !encounterData, !facilityIdFromProps, !onlinePatient);
-
-  if (isLoading || !encounterData || (!facilityIdFromProps && !onlinePatient)) {
+  if (isLoading || !encounterData || (!facilityIdFromProps && !patient)) {
     return <Loading />;
   }
 
   const encounterTabProps: EncounterTabProps = {
     encounter: encounterData,
     patient: patient ?? encounterData.patient,
-    setIsMarkAsCompleteOffline: setIsMarkAsCompleteOffline,
-    IsMarkAsCompleteOffline: isMarkAsCompleteOffline,
   };
 
   if (!props.tab) {
@@ -301,9 +208,6 @@ export const EncounterShow = (props: Props) => {
               encounter={encounterData}
               fetchPatientData={() => {}}
               canWrite={canWrite}
-              isMarkAsCompleteOffline={isMarkAsCompleteOffline}
-              isEncounterUpdatedOffline={isEncounterUpdatedOffline}
-              setIsMarkAsCompleteOffline={setIsMarkAsCompleteOffline}
             />
 
             <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">

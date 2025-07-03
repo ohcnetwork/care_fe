@@ -54,7 +54,9 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import {
   isOfflineId,
+  normalizeOfflineEncounterRecord,
   saveOfflineWrite,
+  updateActiveAndClosedEncounterList,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -67,6 +69,7 @@ import {
   EncounterClass,
   EncounterRequest,
 } from "@/types/emr/encounter";
+import { Patient } from "@/types/emr/patient";
 
 interface Props {
   patientId: string;
@@ -89,6 +92,7 @@ export default function CreateEncounterForm({
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
+  const authUser = useAuthUser();
   const { t } = useTranslation();
   const user = useAuthUser();
   const encounterFormSchema = z.object({
@@ -145,6 +149,35 @@ export default function CreateEncounterForm({
         toast.error(saveResult.error);
         return;
       }
+
+      const patientData = queryClient.getQueryData<Patient>([
+        "patient",
+        patientId,
+      ]);
+      if (!patientData) {
+        toast.error("encounter_created_but you_dont_full_cache_patient");
+        return;
+      }
+
+      const normalizeEncounter = normalizeOfflineEncounterRecord(
+        queryClient,
+        saveResult.entry,
+        patientData,
+        authUser,
+      );
+
+      queryClient.setQueryData(
+        ["encounter", normalizeEncounter.id],
+        normalizeEncounter,
+      );
+
+      updateActiveAndClosedEncounterList({
+        queryClient: queryClient,
+        action: "createEncounter",
+        patientID: patientId,
+        normalizeEncounter: normalizeEncounter,
+      });
+
       toast.success(t("encounter_created_offline"));
       setIsOpen(false);
       form.reset();

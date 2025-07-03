@@ -4,7 +4,6 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { Link, usePathParams } from "raviger";
-import { Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -30,7 +29,9 @@ import { getPermissions } from "@/common/Permissions";
 
 import {
   isOfflineId,
+  normalizeUserBase,
   saveOfflineWrite,
+  updateActiveAndClosedEncounterList,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
@@ -38,6 +39,7 @@ import mutate from "@/Utils/request/mutate";
 import { usePermissions } from "@/context/PermissionContext";
 import {
   Encounter,
+  EncounterEditRequest,
   EncounterStatus,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter";
@@ -49,8 +51,6 @@ interface EncounterActionsProps {
   disableButtons?: boolean;
   className?: string;
   layout?: "dropdown" | "standalone";
-  setIsMarkAsCompleteOffline?: Dispatch<SetStateAction<boolean>>;
-  IsMarkAsCompleteOffline?: boolean;
 }
 
 export default function EncounterActions({
@@ -60,31 +60,20 @@ export default function EncounterActions({
   disableButtons = false,
   className,
   layout = "standalone",
-  setIsMarkAsCompleteOffline,
-  IsMarkAsCompleteOffline,
 }: EncounterActionsProps) {
   const user = useAuthUser();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
-  const encounterPermissions = onlineManager.isOnline()
-    ? (encounter?.permissions ?? [])
-    : (user.permissions ?? []);
-
+  const authUser = useAuthUser();
   const { canWriteEncounter } = getPermissions(
     hasPermission,
-    encounterPermissions,
+    encounter?.permissions,
   );
 
-  const facilitysubpathMatch = usePathParams("/facility/:facilityId/*");
-  const facilityId = !!facilitysubpathMatch?.facilityId;
-  const patientSubpathMatch = usePathParams("/patient/:patientId/*");
-  const patientID = !!patientSubpathMatch?.patientId;
   const organizationId = usePathParams("/organization/:organizationId/*");
   const canWrite =
-    canWriteEncounter &&
-    !inactiveEncounterStatus.includes(encounter.status) &&
-    (onlineManager.isOnline() || IsMarkAsCompleteOffline === false);
+    canWriteEncounter && !inactiveEncounterStatus.includes(encounter.status);
 
   const { mutate: updateEncounter } = useMutation({
     mutationFn: mutate(routes.encounter.update, {
@@ -98,6 +87,63 @@ export default function EncounterActions({
       toast.error(t("error_updating_encounter"));
     },
   });
+
+  const queueMarkAscompleteRecord = async (
+    encounterUpdatedData: EncounterEditRequest,
+  ) => {
+    if (isOfflineId(encounter.id)) {
+      toast.error("you_can't_mark_offline _created_encounter_as_mark");
+      return;
+    }
+    const offlineWrite = {
+      id: encounter.id,
+      userId: user.external_id,
+      mutationSyncrouteKey: "updateEncounter",
+      type: "markAsCompleteEncounter",
+      resourceType: "Encounter",
+      mutationPathParams: { id: encounter.id },
+      payload: encounterUpdatedData,
+      serverTimestamp: encounter.modified_date,
+      useQueryrouteKey: "getEncounter",
+      useQueryPathParams: { id: encounter.id },
+      useQueryParams: encounter.id
+        ? {
+            facility: encounter.facility.id,
+          }
+        : {
+            patient: encounter.patient.id,
+          },
+    };
+
+    try {
+      const saveResult = await saveOfflineWrite(offlineWrite);
+      if (!saveResult.success) {
+        toast.error(saveResult.error);
+        return;
+      }
+
+      const updatedEncounter: Encounter = {
+        ...encounter,
+        status: "completed",
+        updated_by: normalizeUserBase(authUser),
+        is_Updated_Offline: true,
+      };
+
+      updateActiveAndClosedEncounterList({
+        queryClient,
+        action: "markAsCompleteEncounter",
+        patientID: encounter.patient.id,
+        normalizeEncounter: updatedEncounter,
+      });
+
+      queryClient.setQueryData(["encounter", encounter.id], updatedEncounter);
+
+      toast.success("encounter_mark_as_completed_offline");
+    } catch (error) {
+      console.error("Error while Marking Encounter as Complete : ", error);
+      toast.error("error_while_updating_encounter_offline");
+    }
+  };
 
   const handleMarkAsComplete = async () => {
     const encounterUpdatedData = {
@@ -120,45 +166,7 @@ export default function EncounterActions({
     };
 
     if (!onlineManager.isOnline()) {
-      try {
-        if (isOfflineId(encounter.id)) {
-          toast.error("you_can't_newly_created_encounter_as_complete");
-          return;
-        }
-
-        const offlineWrite = {
-          id: encounter.id,
-          userId: user.external_id,
-          mutationSyncrouteKey: "updateEncounter",
-          type: "markAsCompleteEncounter",
-          resourceType: "Encounter",
-          mutationPathParams: { id: encounter.id },
-          payload: encounterUpdatedData,
-          serverTimestamp: encounter.modified_date,
-          useQueryrouteKey: "getEncounter",
-          useQueryPathParams: { id: encounter.id },
-          useQueryParams: facilityId
-            ? {
-                facility: facilityId,
-              }
-            : {
-                patient: patientID,
-              },
-        };
-
-        const saveResult = await saveOfflineWrite(offlineWrite);
-        if (!saveResult.success) {
-          toast.error(saveResult.error);
-          return;
-        }
-        if (setIsMarkAsCompleteOffline) {
-          setIsMarkAsCompleteOffline(true);
-        }
-        toast.success("encounter_mark_as_completed_offline");
-      } catch (error) {
-        console.error("Error while Marking Encounter as Complete : ", error);
-        toast.error("error_while_updating_encounter_offline");
-      }
+      await queueMarkAscompleteRecord(encounterUpdatedData);
     } else updateEncounter(encounterUpdatedData);
   };
 

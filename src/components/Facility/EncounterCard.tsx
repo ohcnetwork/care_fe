@@ -10,7 +10,6 @@ import { Separator } from "@/components/ui/separator";
 import { getPermissions } from "@/common/Permissions";
 import { encounterIcons } from "@/common/constants";
 
-import { isOfflineId } from "@/OfflineSupport/offlineWriteHelpers";
 import { formatDateTime } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
@@ -79,7 +78,7 @@ export const EncounterCard = (props: EncounterCardProps) => {
                 {Icon}
                 {t(`encounter_class__${encounter.encounter_class}`)}
               </Badge>
-              {(isOfflineId(encounter.id) || encounter?.is_Updated_Offline) && (
+              {encounter?.is_Updated_Offline && (
                 <Badge
                   variant="outline"
                   className="ml-2 py-0 border-2 border-yellow-400 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900"

@@ -5,8 +5,9 @@ import dayjs from "dayjs";
 import { FacilityModel } from "@/components/Facility/models";
 import { AuthUserModel } from "@/components/Users/models";
 
+import { PaginatedResponse } from "@/Utils/request/types";
 import { dateQueryString, getMonthStartAndEnd } from "@/Utils/utils";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/patient";
 import { FacilityBareMinimum, FacilityData } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
@@ -192,42 +193,57 @@ export const normalizeOfflinePatientRecord = (
 };
 
 export const normalizeOfflineEncounterRecord = (
+  queryClient: QueryClient,
   entry: OfflineWritesEntry,
   patientData: Patient,
+  authUser: AuthUserModel,
+  permissions?: string[],
+  created_by?: UserBase,
+  created_date?: string,
+  modified_date?: string,
 ): Encounter => {
-  const payload = entry.payload as any;
+  const payload = entry.payload as EncounterEditRequest;
 
+  const facilityData = queryClient.getQueryData<FacilityData>([
+    "facility",
+    payload.facility,
+  ]);
   return {
     id: entry.id,
     patient: patientData,
     facility: {
-      id: payload.facility,
-      name: "Offline Facility",
+      id: facilityData?.id ?? payload.facility,
+      name: facilityData?.name ?? "Unknown(offline)",
     },
     status: payload.status ?? "Unknown (offline)",
     encounter_class: payload.encounter_class ?? "Unknown (offline)",
     period: {
       start:
-        payload.period?.start ??
-        payload.start_date ??
-        new Date(entry.clientTimestamp).toISOString(),
+        payload.period?.start ?? new Date(entry.clientTimestamp).toISOString(),
     },
+    hospitalization: payload?.hospitalization,
     priority: payload.priority ?? "Unknown (offline)",
-    created_by: payload.created_by ?? null,
-    updated_by: payload.updated_by ?? null,
-    created_date: new Date(entry.clientTimestamp).toISOString(),
-    modified_date: new Date(entry.clientTimestamp).toISOString(),
+    external_identifier: payload?.external_identifier,
+    created_by: created_by ? created_by : normalizeUserBase(authUser),
+    updated_by: normalizeUserBase(authUser),
+    created_date: created_date
+      ? created_date
+      : new Date(entry.clientTimestamp).toISOString(),
+    modified_date: modified_date
+      ? modified_date
+      : new Date(entry.clientTimestamp).toISOString(),
     encounter_class_history: {
       history: [],
     },
     status_history: {
       history: [],
     },
-    organizations: payload.organizations ?? [],
-    current_location: payload.current_location ?? null,
-    location_history: payload.location_history ?? [],
-    permissions: payload.permissions ?? [],
-    care_team: payload.care_team ?? [],
+    organizations: [],
+    current_location: null,
+    location_history: [],
+    permissions: permissions ?? [],
+    care_team: [],
+    discharge_summary_advice: payload?.discharge_summary_advice ?? undefined,
     is_Updated_Offline: true,
   };
 };
@@ -445,3 +461,74 @@ export function normalizeUserBase(authUser: AuthUserModel): UserBase {
     deleted: authUser?.deleted ?? false,
   };
 }
+
+export const updateActiveAndClosedEncounterList = ({
+  queryClient,
+  action,
+  patientID,
+  normalizeEncounter,
+}: {
+  queryClient: QueryClient;
+  action: string;
+  patientID: string;
+  normalizeEncounter: Encounter;
+}) => {
+  const addEncounterToList = (
+    EncouterList: PaginatedResponse<Encounter> | undefined,
+    newEncounter: Encounter,
+  ): PaginatedResponse<Encounter> => {
+    const updatedList: PaginatedResponse<Encounter> = EncouterList?.results
+      ? {
+          ...EncouterList,
+          results: [...EncouterList.results, newEncounter as Encounter],
+          count: (EncouterList.count ?? EncouterList.results.length) + 1,
+        }
+      : {
+          count: 1,
+          results: [newEncounter as Encounter],
+        };
+    return updatedList;
+  };
+
+  if (action == "createEncounter" && normalizeEncounter) {
+    const ActiveEncouterList = queryClient.getQueryData<
+      PaginatedResponse<Encounter>
+    >(["encounters", "live", patientID]);
+
+    const newList = addEncounterToList(ActiveEncouterList, normalizeEncounter);
+
+    queryClient.setQueryData(["encounters", "live", patientID], newList);
+  } else if (action === "markAsCompleteEncounter" && normalizeEncounter) {
+    const ActiveEncouterList = queryClient.getQueryData<
+      PaginatedResponse<Encounter>
+    >(["encounters", "live", patientID]);
+
+    const UpdatedActiveEncounterList: PaginatedResponse<Encounter> =
+      ActiveEncouterList?.results
+        ? {
+            ...ActiveEncouterList,
+            results: ActiveEncouterList.results.filter(
+              (entry) => entry.id !== normalizeEncounter?.id,
+            ),
+            count:
+              (ActiveEncouterList.count ?? ActiveEncouterList.results.length) -
+              1,
+          }
+        : {
+            count: 0,
+            results: [],
+          };
+    queryClient.setQueryData(
+      ["encounters", "live", patientID],
+      UpdatedActiveEncounterList,
+    );
+
+    const closedEncoutnerList = queryClient.getQueryData<
+      PaginatedResponse<Encounter>
+    >(["encounters", "closed", patientID]);
+
+    const newList = addEncounterToList(closedEncoutnerList, normalizeEncounter);
+
+    queryClient.setQueryData(["encounters", "closed", patientID], newList);
+  }
+};

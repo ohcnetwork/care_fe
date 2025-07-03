@@ -1,5 +1,5 @@
 import { Link, usePathParams } from "raviger";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -21,16 +21,9 @@ import { Encounter } from "@/types/emr/encounter";
 interface QuickAccessProps {
   encounter: Encounter;
   canEdit: boolean;
-  setIsMarkAsCompleteOffline?: Dispatch<SetStateAction<boolean>>;
-  IsMarkAsCompleteOffline?: boolean;
 }
 
-export default function QuickAccess({
-  encounter,
-  canEdit,
-  setIsMarkAsCompleteOffline,
-  IsMarkAsCompleteOffline,
-}: QuickAccessProps) {
+export default function QuickAccess({ encounter, canEdit }: QuickAccessProps) {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const questionnaireOptions = useQuestionnaireOptions(
@@ -75,11 +68,7 @@ export default function QuickAccess({
           {t("actions")}
         </h3>
 
-        <EncounterActions
-          setIsMarkAsCompleteOffline={setIsMarkAsCompleteOffline}
-          IsMarkAsCompleteOffline={IsMarkAsCompleteOffline}
-          encounter={encounter}
-        />
+        <EncounterActions encounter={encounter} />
       </section>
 
       {/* Departments and Teams */}

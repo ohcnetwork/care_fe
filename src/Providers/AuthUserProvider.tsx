@@ -182,7 +182,6 @@ export default function AuthUserProvider({
     await queryClient.resetQueries({ queryKey: ["offlineCurrentUser"] });
 
     if (accessToken && refreshToken) {
-      console.log("befor logout api call");
       try {
         await mutate({
           ...routes.logout,
@@ -194,7 +193,7 @@ export default function AuthUserProvider({
     }
     await queryClient.resetQueries({ queryKey: ["currentUser"] });
     queryClient.clear();
-    console.log("after logout mutate");
+
     localStorage.removeItem(LocalStorageKeys.accessToken);
     localStorage.removeItem(LocalStorageKeys.refreshToken);
     localStorage.removeItem(LocalStorageKeys.patientTokenKey);
@@ -227,19 +226,6 @@ export default function AuthUserProvider({
       removeEventListener("storage", listener);
     };
   }, [signOut]);
-
-  console.log(
-    "isloading",
-    isLoading,
-    "isrestoring",
-    isrestoring,
-    "isChecked",
-    isChecked,
-    "online user:",
-    onlineuser,
-    "offlineuser : ",
-    offlineUser,
-  );
 
   if (isLoading || isrestoring || !isChecked) {
     return <Loading />;
