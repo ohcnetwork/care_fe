@@ -59,14 +59,6 @@ export function LocationNav() {
               url: `${baseUrl}/inventory`,
             },
             {
-              name: t("supply_request"),
-              url: `${baseUrl}/supply_requests`,
-            },
-            {
-              name: t("supply_delivery"),
-              url: `${baseUrl}/supply_deliveries`,
-            },
-            {
               header: t("internal_transfers"),
               name: t("to_receive"),
               url: `${baseUrl}/internal_transfers/to_receive`,
