@@ -126,6 +126,10 @@ export default function SupplyRequestForm({
     ? t("request_stock_from_vendor")
     : t("request_stock_from_another_store_or_pharmacy_within_the_facility");
 
+  const returnPath = isExternalMode
+    ? `/facility/${facilityId}/locations/${locationId}/external_supply/purchase_orders`
+    : `/facility/${facilityId}/locations/${locationId}/internal_transfers/to_receive`;
+
   const queryClient = useQueryClient();
   const [searchItem, setSearchItem] = useState("");
   const [supplierSearchQuery, setSupplierSearchQuery] = useState("");
@@ -245,9 +249,7 @@ export default function SupplyRequestForm({
       toast.success(
         isEditMode ? t("purchase_order_updated") : t("purchase_orders_created"),
       );
-      navigate(
-        `/facility/${facilityId}/locations/${locationId}/external_supply/purchase_orders`,
-      );
+      navigate(returnPath);
     },
     onError: (error) => {
       const errorData = error.cause as {
@@ -635,16 +637,7 @@ export default function SupplyRequestForm({
             </Card>
 
             <div className="flex justify-end space-x-3">
-              <Button
-                variant="outline"
-                onClick={() =>
-                  navigate(
-                    isExternalMode
-                      ? `/facility/${facilityId}/locations/${locationId}/external_supply/purchase_orders`
-                      : `/facility/${facilityId}/locations/${locationId}/internal_transfers/to_receive`,
-                  )
-                }
-              >
+              <Button variant="outline" onClick={() => navigate(returnPath)}>
                 {t("cancel")}
               </Button>
               <Button type="submit" disabled={isPending}>
