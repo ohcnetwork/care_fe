@@ -161,12 +161,14 @@ export class PatientEncounter {
       .eq(position)
       .should("be.enabled")
       .scrollIntoView()
-      .click();
-    cy.get('[role="listbox"]')
-      .find('[role="option"]')
-      .contains(value)
-      .should("be.visible")
-      .click();
+      .click()
+      .then(() => {
+        cy.get('[role="listbox"]')
+          .find('[role="option"]')
+          .contains(value)
+          .should("be.visible")
+          .click();
+      });
     return this;
   }
   updateSymptom(details: SymptomDetails) {
