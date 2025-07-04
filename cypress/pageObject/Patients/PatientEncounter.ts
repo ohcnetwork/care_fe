@@ -68,7 +68,7 @@ export class PatientEncounter {
   updateAllergy(details: AllergyDetails) {
     const { allergyName, criticality, status } = details;
 
-    cy.wait(400);
+    cy.wait(500);
 
     cy.get("[data-slot='table-row']")
       .filter((_, row) => {
@@ -87,7 +87,7 @@ export class PatientEncounter {
   }
 
   deleteAllergy(allergyName: string) {
-    cy.wait(400);
+    cy.wait(500);
     cy.get("[data-slot='table-row']")
       .filter((_, row) => {
         return Array.from(row.querySelectorAll("td")).some((td) =>
@@ -173,7 +173,7 @@ export class PatientEncounter {
   updateSymptom(details: SymptomDetails) {
     const { symptomName, severity, status, verification } = details;
 
-    cy.wait(400);
+    cy.wait(500);
 
     cy.get("[data-slot='table-row']")
       .filter((_, row) => {
@@ -193,7 +193,7 @@ export class PatientEncounter {
   }
 
   deleteSymptom(symptomName: string) {
-    cy.wait(400);
+    cy.wait(500);
 
     cy.get("[data-slot='table-row']")
       .filter((_, row) => {
@@ -260,7 +260,7 @@ export class PatientEncounter {
   updateDiagnosis(details: DiagnosisDetails) {
     const { diagnosisName, verification, status } = details;
 
-    cy.wait(400);
+    cy.wait(500);
 
     cy.get("[data-slot='table-row']")
       .filter((_, row) => {
@@ -279,7 +279,7 @@ export class PatientEncounter {
   }
 
   deleteDiagnosis(diagnosisName: string) {
-    cy.wait(400);
+    cy.wait(500);
 
     cy.get("[data-slot='table-row']")
       .filter((_, row) => {
