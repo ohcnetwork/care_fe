@@ -41,7 +41,7 @@ const isChildActive = (link: NavigationLink, currentPath: string | null) => {
   if (!link.children) return false;
   return link.children.some(
     ({ url, matchPaths = [] }) =>
-      (currentPath !== null && url.startsWith(currentPath)) ||
+      (currentPath !== null && currentPath.startsWith(url)) ||
       matchPaths?.some((pattern) => matchPath(pattern, currentPath)),
   );
 };
