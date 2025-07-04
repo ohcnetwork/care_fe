@@ -55,7 +55,6 @@ export class PatientEncounter {
     const { allergyName } = details;
     cy.contains("button", /Add (another )?Allergy/i)
       .scrollIntoView()
-      .as("allergyButton")
       .then(($el) => {
         $el.attr("data-cy", "add-allergy");
       })
@@ -142,7 +141,6 @@ export class PatientEncounter {
     const { symptomName } = details;
     cy.contains("button", /Add (another )?Symptom/i)
       .scrollIntoView()
-      .as("symptomButton")
       .then(($el) => {
         $el.attr("data-cy", "add-symptom");
       })
@@ -246,7 +244,6 @@ export class PatientEncounter {
     const { diagnosisName } = details;
     cy.contains("button", /Add (another )?Diagnosis/i)
       .scrollIntoView()
-      .as("diagnosisButton")
       .then(($el) => {
         $el.attr("data-cy", "add-diagnosis");
       })
@@ -313,7 +310,17 @@ export class PatientEncounter {
   }
 
   verifyItemDelete(name: string) {
-    cy.get("table").first().scrollIntoView().should("not.contain", name);
+    cy.get("body").then(($body) => {
+      cy.wait(400);
+      const table = $body.find("table");
+      if (table.length > 0) {
+        cy.wrap(table).should("be.visible").and("not.contain", name);
+      } else {
+        cy.log(
+          "✅ Table removed after deleting the last symptom, as expected.",
+        );
+      }
+    });
     return this;
   }
 
