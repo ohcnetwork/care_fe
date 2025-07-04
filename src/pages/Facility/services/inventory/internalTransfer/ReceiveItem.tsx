@@ -76,6 +76,7 @@ interface Props {
   facilityId: string;
   locationId: string;
   deliveryId: string;
+  mode: "internal" | "external";
 }
 
 type ActionType = "receive" | "abandon";
@@ -84,6 +85,7 @@ export default function ReceiveItem({
   facilityId,
   locationId,
   deliveryId,
+  mode,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -202,7 +204,10 @@ export default function ReceiveItem({
   };
 
   const handleCancel = () => {
-    const path = `/facility/${facilityId}/locations/${locationId}/internal_transfers/to_receive`;
+    const path =
+      mode === "external"
+        ? `/facility/${facilityId}/locations/${locationId}/external_supply/inward_entry`
+        : `/facility/${facilityId}/locations/${locationId}/internal_transfers/to_receive`;
     const { deliveryId: _, from: __, ...cleanParams } = qParams;
     navigate(makeUrl(path, cleanParams));
   };

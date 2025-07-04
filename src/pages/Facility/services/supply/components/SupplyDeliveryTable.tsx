@@ -1,5 +1,5 @@
 import { formatDate } from "date-fns";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -18,6 +18,7 @@ import {
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { makeUrl } from "@/Utils/request/utils";
 import { SupplyDeliveryTab } from "@/pages/Facility/services/supply/SupplyDeliveryList";
 import {
   SUPPLY_DELIVERY_CONDITION_COLORS,
@@ -45,6 +46,7 @@ export default function SupplyDeliveryTable({
   showDate = false,
 }: Props) {
   const { t } = useTranslation();
+  const [qParams] = useQueryParams();
 
   if (isLoading) {
     return <TableSkeleton count={5} />;
@@ -169,7 +171,10 @@ export default function SupplyDeliveryTable({
                     className="font-semibold text-gray-950"
                     onClick={() =>
                       navigate(
-                        `/facility/${facilityId}/locations/${locationId}/supply_deliveries/${delivery.id}`,
+                        makeUrl(
+                          `/facility/${facilityId}/locations/${locationId}/external_supply/deliveries/${delivery.id}`,
+                          qParams,
+                        ),
                       )
                     }
                   >

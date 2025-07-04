@@ -28,7 +28,6 @@ import SupplyDeliveryForm from "@/pages/Facility/services/supply/SupplyDeliveryF
 import SupplyDeliveryList, {
   SupplyDeliveryTab,
 } from "@/pages/Facility/services/supply/SupplyDeliveryList";
-import SupplyDeliveryView from "@/pages/Facility/services/supply/SupplyDeliveryView";
 import SupplyRequestList, {
   SupplyRequestTab,
 } from "@/pages/Facility/services/supply/SupplyRequestList";
@@ -134,13 +133,6 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       tab={SupplyDeliveryTab.OUTGOING}
     />
   ),
-  "/supply_deliveries/:id": ({ id }: { id: string }) => (
-    <SupplyDeliveryView
-      facilityId={facilityId}
-      locationId={locationId}
-      supplyDeliveryId={id}
-    />
-  ),
 
   // Inventory - Internal Transfers
   "/internal_transfers/to_receive": () => (
@@ -162,6 +154,7 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       facilityId={facilityId}
       locationId={locationId}
       deliveryId={deliveryId}
+      mode="internal"
     />
   ),
   "/internal_transfers/to_dispatch": () => (
@@ -201,6 +194,15 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     <SupplyRequestForm
       facilityId={facilityId}
       locationId={locationId}
+      mode="external"
+    />
+  ),
+
+  "/external_supply/deliveries/:id": ({ id }: { id: string }) => (
+    <ReceiveItem
+      facilityId={facilityId}
+      locationId={locationId}
+      deliveryId={id}
       mode="external"
     />
   ),
