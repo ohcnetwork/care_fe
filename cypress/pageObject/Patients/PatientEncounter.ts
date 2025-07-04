@@ -161,14 +161,15 @@ export class PatientEncounter {
       .eq(position)
       .should("be.enabled")
       .scrollIntoView()
-      .click()
-      .then(() => {
-        cy.get('[data-slot="select-content"]')
-          .find('[data-slot="select-item"]')
-          .contains(value)
-          .should("be.visible")
-          .click();
-      });
+      .click();
+
+    cy.get('[data-slot="select-content"]')
+      .should("be.visible")
+      .find('[data-slot="select-item"]')
+      .contains(value)
+      .should("be.visible")
+      .click();
+
     return this;
   }
   updateSymptom(details: SymptomDetails) {
