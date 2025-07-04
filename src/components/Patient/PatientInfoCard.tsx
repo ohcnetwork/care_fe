@@ -186,7 +186,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   className="flex w-full flex-wrap items-center justify-start gap-2 text-sm text-secondary-900 sm:flex-row sm:text-sm md:pr-10 lg:justify-normal"
                   id="patient-consultationbadges"
                 >
-                  <Popover data-slot="encounter-status-popover">
+                  <Popover>
                     <PopoverTrigger asChild>
                       <Badge
                         className="capitalize gap-1 py-1 px-3 cursor-pointer hover:bg-secondary-100"
