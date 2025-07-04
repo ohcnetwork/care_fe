@@ -59,6 +59,8 @@ export default function VerifyPatient(props: { facilityId: string }) {
   const queryClient = useQueryClient();
   const [offlinePatientPayload, setOfflinePatientPayload] =
     useState<Patient | null>(null);
+  const [hasReachedEncounterLimitOffline, setHasReachedEncounterLimitOffline] =
+    useState(false);
 
   const { data: patientverificationdata } = useQuery<Patient>({
     queryKey: ["PatientVerification", phone_number, year_of_birth, partial_id],
@@ -132,6 +134,10 @@ export default function VerifyPatient(props: { facilityId: string }) {
     networkMode: "online",
     enabled: !!patientData?.id && canListEncounters,
   });
+
+  if (encounters && encounters.results.length >= 5) {
+    setHasReachedEncounterLimitOffline(true);
+  }
 
   const { data: closedEncounters } = useQuery({
     queryKey: ["encounters", "closed", patientData?.id],
@@ -298,6 +304,9 @@ export default function VerifyPatient(props: { facilityId: string }) {
                     patientId={patientData.id}
                     facilityId={props.facilityId}
                     patientName={patientData.name}
+                    hasReachedEncounterLimitOffline={
+                      hasReachedEncounterLimitOffline
+                    }
                     trigger={
                       <Button
                         variant="outline"
@@ -344,9 +353,9 @@ export default function VerifyPatient(props: { facilityId: string }) {
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-3 pt-2">
-                {encounters?.results && encounters?.results.length > 0 ? (
+                {encounters?.results && encounters.results.length > 0 ? (
                   <>
-                    {encounters?.results.map((encounter: Encounter) => (
+                    {encounters.results.map((encounter: Encounter) => (
                       <EncounterCard
                         encounter={encounter}
                         key={encounter.id}
@@ -384,9 +393,9 @@ export default function VerifyPatient(props: { facilityId: string }) {
               </CardHeader>
               <CardContent className="flex flex-col gap-3 pt-2">
                 {closedEncounters?.results &&
-                closedEncounters?.results.length > 0 ? (
+                closedEncounters.results.length > 0 ? (
                   <>
-                    {closedEncounters?.results.map((encounter: Encounter) => (
+                    {closedEncounters.results.map((encounter: Encounter) => (
                       <EncounterCard
                         encounter={encounter}
                         key={encounter.id}

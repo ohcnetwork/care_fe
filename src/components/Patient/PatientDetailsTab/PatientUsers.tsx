@@ -158,7 +158,6 @@ function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
             results: [{ ...selectedUser, is_Updated_Offline: true }],
           };
 
-      // queryClient.removeQueries({ queryKey: ["patientUsers", patientId] });
       queryClient.setQueryData(["patientUsers", patientId], updatedUserList);
 
       toast.success("User added to patient successfully");

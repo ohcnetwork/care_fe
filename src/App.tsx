@@ -28,7 +28,6 @@ import { createUserPersister } from "./OfflineSupport/createUserPersister";
 import useNetworkStatus from "./Utils/networkstatus";
 import { PubSubProvider } from "./Utils/pubsubContext";
 
-// onlineManager.setOnline(false); // Initialize as offline
 onlineManager.setEventListener(() => {
   return () => {};
 });
@@ -81,10 +80,6 @@ const App = () => {
   useEffect(() => {
     displayCareConsoleArt();
   }, []);
-
-  // const { isOnline, isChecked } = useNetworkStatus();
-  // console.log("Network status:", { isOnline, isChecked });
-  // if (!isChecked) return <Loading />;
 
   return (
     <>

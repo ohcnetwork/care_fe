@@ -43,7 +43,7 @@ export const EncounterOverviewTab = ({
     canViewClinicalData,
     canViewEncounter,
     canSubmitEncounterQuestionnaire,
-  } = getPermissions(hasPermission, encounter?.permissions);
+  } = getPermissions(hasPermission, encounter.permissions);
 
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;

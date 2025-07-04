@@ -94,7 +94,7 @@ export default function CreateEncounterForm({
   const queryClient = useQueryClient();
   const authUser = useAuthUser();
   const { t } = useTranslation();
-  const user = useAuthUser();
+
   const encounterFormSchema = z.object({
     status: z.enum(["planned", "in_progress", "on_hold"] as const),
     encounter_class: z.enum(ENCOUNTER_CLASS),
@@ -136,7 +136,7 @@ export default function CreateEncounterForm({
 
       const offlineWrite = {
         id: generatedId,
-        userId: user.external_id,
+        userId: authUser.external_id,
         mutationSyncrouteKey: "createEncounter",
         type: "createEncounter",
         resourceType: "Encounter",
@@ -198,7 +198,6 @@ export default function CreateEncounterForm({
       period: {
         start: data.start_date,
       },
-      id: crypto.randomUUID(),
     };
 
     if (!onlineManager.isOnline()) {

@@ -61,14 +61,13 @@ export default function EncounterActions({
   className,
   layout = "standalone",
 }: EncounterActionsProps) {
-  const user = useAuthUser();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
   const authUser = useAuthUser();
   const { canWriteEncounter } = getPermissions(
     hasPermission,
-    encounter?.permissions,
+    encounter.permissions,
   );
 
   const organizationId = usePathParams("/organization/:organizationId/*");
@@ -97,7 +96,7 @@ export default function EncounterActions({
     }
     const offlineWrite = {
       id: encounter.id,
-      userId: user.external_id,
+      userId: authUser.external_id,
       mutationSyncrouteKey: "updateEncounter",
       type: "markAsCompleteEncounter",
       resourceType: "Encounter",
