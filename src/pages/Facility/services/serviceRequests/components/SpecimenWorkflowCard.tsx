@@ -72,7 +72,6 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import mutate from "@/Utils/request/mutate";
 import { ProcessSpecimen } from "@/pages/Facility/services/serviceRequests/components/ProcessSpecimen";
-import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { ServiceRequestReadSpec } from "@/types/emr/serviceRequest/serviceRequest";
 import {
   ProcessingSpec,
@@ -732,20 +731,16 @@ export function SpecimenWorkflowCard({
               )}
 
               {/* 3. Processing (Only if collected and not discarded) */}
-              {hasCollected &&
-                !isDiscarded &&
-                request?.diagnostic_reports?.[0]?.status !==
-                  DiagnosticReportStatus.final &&
-                request?.diagnostic_reports?.[0]?.status !==
-                  DiagnosticReportStatus.preliminary && (
-                  <div className="px-1 pt-3 pb-4">
-                    <ProcessSpecimen
-                      existingProcessing={collectedSpecimen?.processing ?? []}
-                      onAddProcessing={handleAddProcessing}
-                      onUpdateProcessing={handleUpdateProcessing}
-                    />
-                  </div>
-                )}
+              {hasCollected && !isDiscarded && (
+                <div className="px-1 pt-3 pb-4">
+                  <ProcessSpecimen
+                    existingProcessing={collectedSpecimen?.processing ?? []}
+                    onAddProcessing={handleAddProcessing}
+                    onUpdateProcessing={handleUpdateProcessing}
+                    diagnosticReports={request.diagnostic_reports ?? []}
+                  />
+                </div>
+              )}
             </Accordion>
           </CardContent>
         </CollapsibleContent>

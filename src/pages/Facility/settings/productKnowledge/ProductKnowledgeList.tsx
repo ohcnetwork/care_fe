@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -93,6 +94,13 @@ export default function ProductKnowledgeList({
     limit: 15,
     disableCache: true,
   });
+
+  // TODO: Remove this once we have a default status (robo's PR)
+  useEffect(() => {
+    if (!qParams.status) {
+      updateQuery({ status: "active" });
+    }
+  }, []);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["productKnowledge", qParams],

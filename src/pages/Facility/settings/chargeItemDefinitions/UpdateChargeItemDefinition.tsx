@@ -84,7 +84,6 @@ export function UpdateChargeItemDefinition({
   }
 
   const handleSuccess = () => {
-    console.log("Update successful, navigating to detail view");
     navigate(
       `/facility/${facilityId}/settings/charge_item_definitions/${chargeItemDefinitionId}`,
     );

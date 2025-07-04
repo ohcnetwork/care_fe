@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { PencilIcon } from "lucide-react";
+import { PencilIcon, PlusIcon } from "lucide-react";
 import { Link, usePathParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -200,8 +200,17 @@ export default function MedicationRequestTable({ patient, encounter }: Props) {
                       data-cy="edit-prescription"
                     >
                       <Link href={`questionnaire/medication_request`}>
-                        <PencilIcon className="mr-2 size-4" />
-                        {t("edit")}
+                        {!activeMedications?.results?.length ? (
+                          <>
+                            <PlusIcon className="mr-2 size-4" />
+                            {t("add")}
+                          </>
+                        ) : (
+                          <>
+                            <PencilIcon className="mr-2 size-4" />
+                            {t("edit")}
+                          </>
+                        )}
                       </Link>
                     </Button>
                   )}

@@ -109,7 +109,7 @@ export function ServiceRequestDetails({
 
             <div>
               <div className="text-sm text-gray-600 mb-1">
-                {t("observation definitions")}
+                {t("observation_definitions")}
               </div>
               <div className="font-sm font-normal flex flex-wrap gap-1">
                 {observationRequirements.map(

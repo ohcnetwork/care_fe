@@ -206,7 +206,7 @@ export function SpecimenDefinitionDetail({
             <p className="text-sm font-medium text-gray-400">
               {t("description")}
             </p>
-            <p className="text-pretty">
+            <p className="text-pretty whitespace-pre-wrap">
               {specimenDefinition.description || "-"}
             </p>
           </div>

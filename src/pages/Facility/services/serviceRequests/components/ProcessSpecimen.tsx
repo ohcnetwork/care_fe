@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { CircleCheckBig, Edit, Settings2 } from "lucide-react";
 import { useState } from "react";
 
@@ -16,18 +17,21 @@ import { Textarea } from "@/components/ui/textarea";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import { Code } from "@/types/base/code/code";
+import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { ProcessingSpec } from "@/types/emr/specimen/specimen";
 
 interface ProcessSpecimenProps {
   onAddProcessing: (processing: ProcessingSpec) => void;
   onUpdateProcessing: (index: number, processing: ProcessingSpec) => void;
   existingProcessing?: ProcessingSpec[];
+  diagnosticReports?: DiagnosticReportRead[];
 }
 
 export function ProcessSpecimen({
   onAddProcessing,
   onUpdateProcessing,
   existingProcessing = [],
+  diagnosticReports = [],
 }: ProcessSpecimenProps) {
   const [noteDialog, setNoteDialog] = useState<{
     open: boolean;
@@ -89,13 +93,16 @@ export function ProcessSpecimen({
     setNoteDialog({ open: false, index: -1, description: "", method: null });
   };
 
+  // If there are diagnostic reports, don't show the processing steps selection
+  const hasReport = diagnosticReports.length > 0;
+
   return (
     <>
       <div>
         <div className="flex-row items-center justify-between space-y-0 pb-2">
           <div className="text-sm font-medium flex items-center gap-1">
             <Settings2 className="h-4 w-4" />
-            Process Specimen
+            {t("process") + " " + t("specimen")}
             <Badge variant="primary">{existingProcessing.length}</Badge>
           </div>
         </div>
@@ -117,11 +124,26 @@ export function ProcessSpecimen({
                     </div>
                   )}
               </div>
-              {process.performer && (
+              <div>
+                {process.performer && (
+                  <div className="text-sm text-gray-600 mt-0.5">
+                    {t("performed_by")}: {process.performer}
+                  </div>
+                )}
                 <div className="text-sm text-gray-600 mt-0.5">
-                  Performed by: {process.performer}
+                  {t("performed_on")}:{" "}
+                  {process.time_date_time
+                    ? new Date(process.time_date_time).toLocaleString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })
+                    : "N/A"}
                 </div>
-              )}
+              </div>
               <Button
                 type="button" // Explicitly set type to button
                 variant="ghost"
@@ -136,17 +158,19 @@ export function ProcessSpecimen({
             </div>
           ))}
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">
-              Choose Processing Steps Performed on the Specimen
-            </label>
-            <ValueSetSelect
-              system="system-specimen-processing-method-code"
-              placeholder="Select processing step..."
-              onSelect={handleSelectStep}
-              value={null}
-            />
-          </div>
+          {!hasReport && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                {t("PROCESS_SPECIMEN__step_heading")}
+              </label>
+              <ValueSetSelect
+                system="system-specimen-processing-method-code"
+                placeholder={t("PROCESS_SPECIMEN__valusetselect_placeholder")}
+                onSelect={handleSelectStep}
+                value={null}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -160,15 +184,19 @@ export function ProcessSpecimen({
           <DialogHeader>
             <DialogTitle>
               {noteDialog.index === -1
-                ? "Add Processing Step"
-                : "Edit Processing Step"}
+                ? t("PROCESS_SPECIMEN__dialog_action_title", {
+                    action: t("add"),
+                  })
+                : t("PROCESS_SPECIMEN__dialog_action_title", {
+                    action: t("edit"),
+                  })}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             {noteDialog.method && (
               <div className="rounded-md bg-gray-50 p-3">
                 <Label className="text-sm text-gray-600">
-                  Processing Method
+                  {t("processing") + " " + t("method")}
                 </Label>
                 <div className="font-medium mt-1">
                   {noteDialog.method.display}
@@ -176,7 +204,7 @@ export function ProcessSpecimen({
               </div>
             )}
             <div className="space-y-2">
-              <Label>Description</Label>
+              <Label>{t("description")}</Label>
               <Textarea
                 value={noteDialog.description}
                 onChange={(e) =>
@@ -185,12 +213,11 @@ export function ProcessSpecimen({
                     description: e.target.value,
                   }))
                 }
-                placeholder="Describe the processing step in detail..."
+                placeholder={t("PROCESS_SPECIMEN__textarea_placeholder")}
                 className="min-h-[100px]"
               />
               <p className="text-sm text-gray-500">
-                Add specific details about how this processing step was
-                performed.
+                {t("PROCESS_SPECIMEN__dialog_text_area_description")}
               </p>
             </div>
           </div>
@@ -207,10 +234,10 @@ export function ProcessSpecimen({
                 })
               }
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button type="button" onClick={handleUpdateNote}>
-              {noteDialog.index === -1 ? "Add Step" : "Update Step"}
+              {noteDialog.index === -1 ? t("add") : t("update")}
             </Button>
           </DialogFooter>
         </DialogContent>

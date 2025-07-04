@@ -221,9 +221,7 @@ export function SpecimenDefinitionForm({
         onSubmit={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          form.handleSubmit(handleSubmit, (errors) => {
-            console.log("Form submission failed with errors:", errors);
-          })();
+          form.handleSubmit(handleSubmit)();
         }}
         className="space-y-4"
       >

@@ -330,7 +330,9 @@ export function ProductFormContent({
                 name="product_knowledge"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("product_knowledge")}</FormLabel>
+                    <FormLabel aria-required>
+                      {t("product_knowledge")}
+                    </FormLabel>
                     <FormControl>
                       <ProductKnowledgeSelect
                         value={productKnowledgeResponse?.results.find(
@@ -354,7 +356,7 @@ export function ProductFormContent({
               name="batch.lot_number"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("lot_number")}</FormLabel>
+                  <FormLabel aria-required>{t("lot_number")}</FormLabel>
                   <FormControl>
                     <Input
                       placeholder={t("enter_lot_number")}
@@ -375,7 +377,7 @@ export function ProductFormContent({
               name="expiration_date"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>{t("expiration_date")}</FormLabel>
+                  <FormLabel aria-required>{t("expiration_date")}</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>

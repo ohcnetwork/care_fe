@@ -57,6 +57,7 @@ import {
   DiagnosticReportStatus,
 } from "@/types/emr/diagnosticReport/diagnosticReport";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
+import { ObservationStatus } from "@/types/emr/observation/observation";
 
 interface DiagnosticReportReviewProps {
   facilityId: string;
@@ -271,7 +272,10 @@ export function DiagnosticReportReview({
                       </p>
                     )}
                     <DiagnosticReportResultsTable
-                      observations={fullReport.observations}
+                      observations={fullReport.observations.filter(
+                        (obs) =>
+                          obs.status !== ObservationStatus.ENTERED_IN_ERROR,
+                      )}
                     />
                   </CardContent>
                 </Card>

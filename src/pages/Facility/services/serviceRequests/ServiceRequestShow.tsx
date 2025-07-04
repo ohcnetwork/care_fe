@@ -52,6 +52,7 @@ import { ChargeItemCard } from "./components/ChargeItemCard";
 import { DiagnosticReportForm } from "./components/DiagnosticReportForm";
 import { DiagnosticReportReview } from "./components/DiagnosticReportReview";
 import { MultiQRCodePrintSheet } from "./components/MultiQRCodePrintSheet";
+import { ObservationHistorySheet } from "./components/ObservationHistorySheet";
 import { PatientHeader } from "./components/PatientHeader";
 import { ServiceRequestDetails } from "./components/ServiceRequestDetails";
 import { SpecimenForm } from "./components/SpecimenForm";
@@ -520,7 +521,33 @@ export default function ServiceRequestShow({
 
           {observationRequirements.length > 0 && (
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold">{t("test_results")}</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">{t("test_results")}</h2>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreVertical className="size-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <ObservationHistorySheet
+                      patientId={request.encounter.patient.id}
+                      diagnosticReportId={
+                        request.diagnostic_reports[0]?.id || ""
+                      }
+                    >
+                      <DropdownMenuItem
+                        onSelect={(e) => e.preventDefault()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                      >
+                        {t("view_observation_history")}
+                      </DropdownMenuItem>
+                    </ObservationHistorySheet>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
               {(!diagnosticReports.length ||
                 diagnosticReports[0]?.status !==
                   DiagnosticReportStatus.final) && (

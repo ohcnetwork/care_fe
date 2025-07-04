@@ -42,7 +42,7 @@ export function UpdateSpecimenDefinition({
         queryClient.invalidateQueries({
           queryKey: ["specimen_definitions", facilityId, specimenDefinitionId],
         });
-        navigate(`/specimen_definitions`);
+        navigate(`/specimen_definitions/${specimenDefinitionId}`);
       },
     });
 

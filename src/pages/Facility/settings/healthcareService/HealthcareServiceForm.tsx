@@ -230,7 +230,7 @@ function HealthcareServiceFormContent({
                     {t("basic_information")}
                   </h2>
                   <p className="mt-0.5 text-sm text-gray-500">
-                    {t("Enter the basic details of the healthcare service")}
+                    {t("basic_details_of_the_healthcare_service")}
                   </p>
                 </div>
 

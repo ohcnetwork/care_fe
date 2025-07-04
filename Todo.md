@@ -26,12 +26,16 @@ x : Done
 - [ ] Specimen Definition - Add frontend permission check for the Specimen Definition page at the facility level.
 - [ ] SR Details page - Disable the process step once the report generation is done | Confirm with Bodhi before working on this - Backend
 - [-] New service request should be shown first within the list - Vignesh
-- [BE] Service Request - Show specimen.collection.collector details instead of UUID (After BE change) - Vignesh
-- [BE] Service Request - Show specimen.processing.performer details instead of UUID (After BE change) - Vignesh
 - [BE] SR details page - fix decimal points to two and round off amounts in charge items.
 - [BE] SR details page - Add a hyperlink to the payment page, for better UX
 - [BE] Encounter can be closed even if the SR is ACTIVE. But if encounter is closer SR cannot be marked as completed ( Showing error as encounter is already closed) - Fix can be not allow top close encounter if SR is open - Vignesh
 - [BE] Roles access for Labs. Only users with lab role should have access to lab services - Vignesh
+- [ ] Add support to create Observations without Observation definition
+- [ ] Loading skeletons
+- [ ] Disable save if no changes in all forms
+- [ ] Specimen Def - URI validation failing
+- [ ] AD form - Location Sheet - remove cursor pointer on hover on name
+- [-] Product Knowledge form - Validations - Yash
 
 ## Back End
 
@@ -51,7 +55,9 @@ x : Done
 - [ ] Not able to mark a SR as closed - Showing error location not found
 - [-] New service request should be shown first within the list - Aakash
 - [ ] Roles access for Labs. Only users with lab role should have access to lab services
-- [ ] Encounter can be closed even if the SR is ACTIVE. But if encounter is closer SR cannot be marked as completed ( Showing error as encounter is already closed) - Fix can be not allow top close encounter if SR is open
+- [ ] Encounter can be closed even if the SR is ACTIVE. But if encounter is closer SR cannot be marked as completed ( Showing error as encounter is already closed) - - [ ] Fix can be not allow top close encounter if SR is open
+- [x] Service Request - Show specimen.collection.collector details instead of UUID (After BE change) - Aakash
+- [x] Service Request - Show specimen.processing.performer details instead of UUID (After BE change) - Aakash
 
 # Archived
 

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -54,7 +55,7 @@ function SpecimenDefinitionCard({
               </Badge>
             </div>
             <h3 className="font-medium text-gray-900">{definition.title}</h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-500 whitespace-pre-wrap">
               {definition.description}
             </p>
           </div>
@@ -88,6 +89,13 @@ export function SpecimenDefinitionsList({
     limit: 15,
     disableCache: true,
   });
+
+  // TODO: Remove this once we have a default status (robo's PR)
+  useEffect(() => {
+    if (!qParams.status) {
+      updateQuery({ status: "active" });
+    }
+  }, []);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["specimen_definitions", facilityId, qParams],

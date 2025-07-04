@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -95,6 +95,13 @@ export default function PatientIdentifierConfigList({
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
   const [selectedConfig, setSelectedConfig] =
     React.useState<PatientIdentifierConfig | null>(null);
+
+  // TODO: Remove this once we have a default status (robo's PR)
+  useEffect(() => {
+    if (!qParams.status) {
+      updateQuery({ status: "active" });
+    }
+  }, []);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["patientIdentifierConfig", qParams, facilityId],

@@ -7,6 +7,7 @@ import { UserBase } from "@/types/user/user";
 export enum ObservationStatus {
   FINAL = "final",
   AMENDED = "amended",
+  ENTERED_IN_ERROR = "entered_in_error",
 }
 
 export enum PerformerType {

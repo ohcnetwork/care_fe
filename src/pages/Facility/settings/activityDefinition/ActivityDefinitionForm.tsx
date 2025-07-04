@@ -407,7 +407,9 @@ function ActivityDefinitionFormContent({
           ],
         });
         toast.success(t("activity_definition_updated_successfully"));
-        navigate(`/facility/${facilityId}/settings/activity_definitions`);
+        navigate(
+          `/facility/${facilityId}/settings/activity_definitions/${activityDefinitionId}`,
+        );
       },
     });
 
@@ -466,7 +468,7 @@ function ActivityDefinitionFormContent({
                     {t("basic_information")}
                   </h2>
                   <p className="mt-0.5 text-sm text-gray-500">
-                    {t("Enter the basic details of the activity")}
+                    {t("basic_details_of_the_activity")}
                   </p>
                 </div>
 

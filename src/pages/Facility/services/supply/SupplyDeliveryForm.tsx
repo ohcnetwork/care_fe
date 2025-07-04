@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -120,10 +120,6 @@ function SupplyDeliveryFormContent({
       },
     }),
   });
-
-  useEffect(() => {
-    console.log("existingData", existingData);
-  }, [existingData]);
 
   const deliveryToOptions =
     deliveryToLocations?.results.map((location) => ({

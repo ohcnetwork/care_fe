@@ -296,7 +296,7 @@ function ProductKnowledgeFormContent({
                     name="name"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
-                        <FormLabel>{t("name")}</FormLabel>
+                        <FormLabel aria-required>{t("name")}</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -310,7 +310,7 @@ function ProductKnowledgeFormContent({
                     name="slug"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
-                        <FormLabel>{t("slug")}</FormLabel>
+                        <FormLabel aria-required>{t("slug")}</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
