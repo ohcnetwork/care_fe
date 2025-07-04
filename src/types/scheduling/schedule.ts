@@ -1,5 +1,4 @@
-import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
-
+import { DayOfWeek } from "@/components/ui/WeekdayCheckbox";
 import { Badge } from "@/components/ui/badge";
 
 import { Time } from "@/Utils/types";
