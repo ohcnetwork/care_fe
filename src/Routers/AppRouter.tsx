@@ -41,6 +41,7 @@ const PATHS_WITHOUT_SIDEBAR = [
   /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/requests\/[^/]+\/edit$/,
   /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/purchase_orders\/new$/,
   /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/purchase_orders\/[^/]+\/edit$/,
+  /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/deliveries\/[^/]+$/,
 ];
 
 export type RouteParams<T extends string> =
