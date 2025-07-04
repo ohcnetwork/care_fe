@@ -381,13 +381,15 @@ export default function ReceiveItem({
             <div className="text-sm text-gray-600">
               {delivery.status === "in_progress" ? (
                 <>
-                  {t("dispatch_in_progress_from")} {delivery.origin?.name}{" "}
-                  {t("to")} {delivery.destination.name}
+                  {t("dispatch_in_progress_from")}{" "}
+                  {delivery.origin?.name || delivery.supplier?.name} {t("to")}{" "}
+                  {delivery.destination.name}
                 </>
               ) : delivery.status === "completed" ? (
                 <>
-                  {t("received")} {t("from")} {delivery.destination.name}{" "}
-                  {t("to")} {delivery.origin?.name}
+                  {t("received")} {t("from")}{" "}
+                  {delivery.origin?.name || delivery.supplier?.name} {t("to")}{" "}
+                  {delivery.destination.name}
                 </>
               ) : null}
             </div>
@@ -486,7 +488,7 @@ export default function ReceiveItem({
                   {t("dispatched_from")}:
                 </Label>
                 <div className="text-gray-950 text-normal font-semibold">
-                  {delivery.origin?.name || t("N/A")}
+                  {delivery.origin?.name || delivery.supplier?.name || t("N/A")}
                 </div>
               </div>
 
@@ -889,7 +891,9 @@ export default function ReceiveItem({
                 onClick={() =>
                   navigate(
                     makeUrl(
-                      `/facility/${facilityId}/locations/${locationId}/internal_transfers/requests/${delivery.supply_request?.id}`,
+                      mode === "external"
+                        ? `/facility/${facilityId}/locations/${locationId}/external_supply/purchase_orders/${delivery.supply_request?.id}`
+                        : `/facility/${facilityId}/locations/${locationId}/internal_transfers/requests/${delivery.supply_request?.id}`,
                       { ...qParams, from: "receive_item", deliveryId },
                     ),
                   )

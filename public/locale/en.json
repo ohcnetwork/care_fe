@@ -3283,6 +3283,7 @@
   "rebalancing": "Rebalancing",
   "receive_items": "Receive Items",
   "receive_stock": "Receive Stock",
+  "receive_stock_description": "Receive stock from external vendors",
   "receive_stock_empty_hint": "If a Purchase Order has been sent to a distributor, select the distributor from the dropdown above. If not, start adding items manually by clicking the Add Item button to match the received stock.",
   "received": "Received",
   "received_date": "Received Date",

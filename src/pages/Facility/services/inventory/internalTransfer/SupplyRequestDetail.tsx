@@ -497,7 +497,7 @@ export default function SupplyRequestDetail({
                       )}
                     </TableCell>
                     <TableCell className="font-medium text-gray-950">
-                      {delivery.origin?.name || "-"}
+                      {delivery.origin?.name || delivery.supplier?.name || "-"}
                     </TableCell>
                     <TableCell>
                       <Badge
