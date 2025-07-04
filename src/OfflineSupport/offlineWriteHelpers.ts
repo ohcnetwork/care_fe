@@ -244,7 +244,7 @@ export const normalizeOfflineEncounterRecord = (
     permissions: permissions ?? [],
     care_team: [],
     discharge_summary_advice: payload?.discharge_summary_advice ?? undefined,
-    is_Updated_Offline: true,
+    is_updated_offline: true,
   };
 };
 

@@ -125,7 +125,7 @@ export default function EncounterActions({
         ...encounter,
         status: "completed",
         updated_by: normalizeUserBase(authUser),
-        is_Updated_Offline: true,
+        is_updated_offline: true,
       };
 
       updateActiveAndClosedEncounterList({

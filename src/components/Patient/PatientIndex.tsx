@@ -13,7 +13,6 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -40,6 +39,7 @@ import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { PendingSyncBadge } from "@/OfflineSupport/pendingSyncbadge";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
@@ -321,14 +321,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                   }
                                 </TableCell>
                                 <TableCell>
-                                  <Badge
-                                    variant="outline"
-                                    className="py-0 border-2 border-yellow-400 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900"
-                                  >
-                                    <h3 className="text-xs font-medium">
-                                      {t("Pending_sync")}
-                                    </h3>
-                                  </Badge>
+                                  <PendingSyncBadge />
                                 </TableCell>
                               </TableRow>
                             ))}

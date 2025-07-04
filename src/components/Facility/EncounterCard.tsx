@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { getPermissions } from "@/common/Permissions";
 import { encounterIcons } from "@/common/constants";
 
+import { PendingSyncBadge } from "@/OfflineSupport/pendingSyncbadge";
 import { formatDateTime } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
@@ -78,14 +79,7 @@ export const EncounterCard = (props: EncounterCardProps) => {
                 {Icon}
                 {t(`encounter_class__${encounter.encounter_class}`)}
               </Badge>
-              {encounter?.is_Updated_Offline && (
-                <Badge
-                  variant="outline"
-                  className="ml-2 py-0 border-2 border-yellow-400 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900"
-                >
-                  <h3 className="text-xs font-medium">{t("Pending_sync")}</h3>
-                </Badge>
-              )}
+              {encounter?.is_updated_offline && <PendingSyncBadge />}
             </div>
 
             <div className="grid sm:flex sm:flex-wrap sm:justify-between gap-4">

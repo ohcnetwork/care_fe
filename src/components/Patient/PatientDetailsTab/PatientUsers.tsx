@@ -149,13 +149,13 @@ function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
             ...users,
             results: [
               ...users.results,
-              { ...selectedUser, is_Updated_Offline: true },
+              { ...selectedUser, is_updated_offline: true },
             ],
             count: (users.count ?? users.results.length) + 1,
           }
         : {
             count: 1,
-            results: [{ ...selectedUser, is_Updated_Offline: true }],
+            results: [{ ...selectedUser, is_updated_offline: true }],
           };
 
       queryClient.setQueryData(["patientUsers", patientId], updatedUserList);

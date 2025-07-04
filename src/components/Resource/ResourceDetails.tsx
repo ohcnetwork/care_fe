@@ -16,6 +16,7 @@ import CommentSection from "@/components/Resource/ResourceCommentSection";
 
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 
+import { PendingSyncBadge } from "@/OfflineSupport/pendingSyncbadge";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
@@ -150,14 +151,7 @@ export default function ResourceDetails({
               <CareIcon icon="l-pen" className="mr-2 size-4" />
               {t("update_status")}
             </Button>
-            {data.is_updated_offline === true && (
-              <Badge
-                variant="outline"
-                className="ml-2 py-0 border-2 border-yellow-400 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900"
-              >
-                <h3 className="text-xs font-medium">{t("Pending_sync")}</h3>
-              </Badge>
-            )}
+            {data.is_updated_offline === true && <PendingSyncBadge />}
           </div>
         </div>
 

@@ -35,6 +35,7 @@ import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
+import { PendingSyncBadge } from "@/OfflineSupport/pendingSyncbadge";
 import { PLUGIN_Component } from "@/PluginEngine";
 import dayjs from "@/Utils/dayjs";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
@@ -91,16 +92,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     icon="l-external-link-alt"
                     className="size-3 opacity-50 mt-1"
                   />
-                  {props.encounter.is_Updated_Offline && (
-                    <Badge
-                      variant="outline"
-                      className="ml-2 py-0 border-2 border-yellow-400 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900"
-                    >
-                      <h3 className="text-xs font-medium">
-                        {t("Pending_sync")}
-                      </h3>
-                    </Badge>
-                  )}
+                  {props.encounter.is_updated_offline && <PendingSyncBadge />}
                 </Link>
 
                 <div className="my-[2px] text-sm font-semibold text-secondary-600">
@@ -141,16 +133,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     icon="l-external-link-alt"
                     className="size-4 opacity-70"
                   />
-                  {props.encounter.is_Updated_Offline && (
-                    <Badge
-                      variant="outline"
-                      className="ml-2 py-0 border-2 border-yellow-400 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900"
-                    >
-                      <h3 className="text-xs font-medium">
-                        {t("Pending_sync")}
-                      </h3>
-                    </Badge>
-                  )}
+                  {props.encounter.is_updated_offline && <PendingSyncBadge />}
                 </Link>
                 <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-secondary-600">
                   {formatPatientAge(patient, true)} •{" "}

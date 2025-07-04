@@ -13,7 +13,6 @@ import { toast } from "sonner";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -35,6 +34,7 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
+import { PendingSyncBadge } from "@/OfflineSupport/pendingSyncbadge";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -135,9 +135,11 @@ export default function VerifyPatient(props: { facilityId: string }) {
     enabled: !!patientData?.id && canListEncounters,
   });
 
-  if (encounters && encounters.results.length >= 5) {
-    setHasReachedEncounterLimitOffline(true);
-  }
+  useEffect(() => {
+    if (encounters && encounters.results.length >= 5) {
+      setHasReachedEncounterLimitOffline(true);
+    }
+  }, [encounters]);
 
   const { data: closedEncounters } = useQuery({
     queryKey: ["encounters", "closed", patientData?.id],
@@ -226,14 +228,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
                       >
                         {patientData.name}
                         {patientData.is_updated_offline === true && (
-                          <Badge
-                            variant="outline"
-                            className="ml-2 py-0 border-2 border-yellow-400 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900"
-                          >
-                            <h3 className="text-xs font-medium">
-                              {t("Pending_sync")}
-                            </h3>
-                          </Badge>
+                          <PendingSyncBadge />
                         )}
                       </h1>
 

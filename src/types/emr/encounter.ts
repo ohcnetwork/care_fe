@@ -207,7 +207,7 @@ export interface Encounter {
   permissions: string[];
   care_team: CareTeamResponse[];
   discharge_summary_advice?: string;
-  is_Updated_Offline?: boolean;
+  is_updated_offline?: boolean;
 }
 
 export interface EncounterEditRequest {

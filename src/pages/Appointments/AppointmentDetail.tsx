@@ -68,6 +68,7 @@ import {
   saveOfflineWrite,
   updateSlotCacheAfterOfflineAppointment,
 } from "@/OfflineSupport/offlineWriteHelpers";
+import { PendingSyncBadge } from "@/OfflineSupport/pendingSyncbadge";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -390,14 +391,7 @@ const AppointmentDetails = ({
             <Badge variant={APPOINTMENT_STATUS_COLORS[appointment.status]}>
               {t(appointment.status)}
             </Badge>
-            {appointment.is_updated_offline === true && (
-              <Badge
-                variant="outline"
-                className="ml-2 border-2 border-yellow-400 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900"
-              >
-                {t("Pending_sync")}
-              </Badge>
-            )}
+            {appointment.is_updated_offline === true && <PendingSyncBadge />}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
