@@ -188,26 +188,24 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                 >
                   <Popover>
                     <PopoverTrigger asChild>
-                      <div>
-                        <Badge
-                          className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
-                          variant="outline"
-                          title={`Encounter Status: ${t(`encounter_status__${props.encounter.status}`)}`}
-                        >
-                          {completedEncounterStatus.includes(
-                            props.encounter.status,
-                          ) || props.encounter.status === "discharged" ? (
-                            <CircleCheck
-                              className="size-4 text-green-300"
-                              fill="green"
-                            />
-                          ) : (
-                            <CircleDashed className="size-4 text-yellow-500" />
-                          )}
-                          {t(`encounter_status__${props.encounter.status}`)}
-                          <ChevronDown className="size-3 opacity-50" />
-                        </Badge>
-                      </div>
+                      <Badge
+                        className="capitalize gap-1 py-1 px-3 cursor-pointer hover:bg-secondary-100"
+                        variant="outline"
+                        title={`Encounter Status: ${t(`encounter_status__${props.encounter.status}`)}`}
+                      >
+                        {completedEncounterStatus.includes(
+                          props.encounter.status,
+                        ) || props.encounter.status === "discharged" ? (
+                          <CircleCheck
+                            className="size-4 text-green-300"
+                            fill="green"
+                          />
+                        ) : (
+                          <CircleDashed className="size-4 text-yellow-500" />
+                        )}
+                        {t(`encounter_status__${props.encounter.status}`)}
+                        <ChevronDown className="size-3 opacity-50" />
+                      </Badge>
                     </PopoverTrigger>
                     <PopoverContent align={"start"} className="w-auto p-2">
                       <div className="space-y-2">
@@ -235,22 +233,20 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
 
                   <Popover>
                     <PopoverTrigger asChild>
-                      <div>
-                        <Badge
-                          className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
-                          variant="outline"
-                          title={`Encounter Class: ${props.encounter.encounter_class}`}
-                        >
-                          <BedSingle
-                            className="size-4 text-blue-400"
-                            fill="#93C5FD"
-                          />
-                          {t(
-                            `encounter_class__${props.encounter.encounter_class}`,
-                          )}
-                          <ChevronDown className="size-3 opacity-50" />
-                        </Badge>
-                      </div>
+                      <Badge
+                        className="capitalize gap-1 py-1 cursor-pointer hover:bg-secondary-100"
+                        variant="outline"
+                        title={`Encounter Class: ${props.encounter.encounter_class}`}
+                      >
+                        <BedSingle
+                          className="size-4 text-blue-400"
+                          fill="#93C5FD"
+                        />
+                        {t(
+                          `encounter_class__${props.encounter.encounter_class}`,
+                        )}
+                        <ChevronDown className="size-3 opacity-50" />
+                      </Badge>
                     </PopoverTrigger>
                     <PopoverContent align={"end"} className="w-auto p-2">
                       <div className="space-y-2">
@@ -276,7 +272,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     </PopoverContent>
                   </Popover>
                   <Badge
-                    className="capitalize gap-1 py-1 px-2"
+                    className="capitalize gap-1 py-1 px-3"
                     variant="outline"
                     title={`Priority: ${t(
                       `encounter_priority__${props.encounter.priority.toLowerCase()}`,
@@ -290,7 +286,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
 
                   {patient.blood_group && (
                     <Badge
-                      className="capitalize gap-1 py-1 px-2"
+                      className="capitalize gap-1 py-1 px-3"
                       variant="outline"
                       title={`Blood Group: ${patient.blood_group?.replace("_", " ")}`}
                     >
@@ -335,7 +331,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                           )}
                           {encounter.organizations.length === 0 && (
                             <Badge
-                              className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
+                              className="capitalize gap-1 py-1 px-3 cursor-pointer hover:bg-secondary-100"
                               variant="outline"
                             >
                               <Building className="size-4 text-blue-400" />
@@ -357,21 +353,19 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   {props.encounter.current_location ? (
                     <Popover>
                       <PopoverTrigger asChild>
-                        <div>
-                          <Badge
-                            className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
-                            variant="outline"
-                            title={`Current Location: ${props.encounter.current_location.name}`}
-                            data-cy="current-location-badge"
-                          >
-                            <CareIcon
-                              icon="l-location-point"
-                              className="size-4 text-green-600"
-                            />
-                            {props.encounter.current_location.name}
-                            <ChevronDown className="size-3 opacity-50" />
-                          </Badge>
-                        </div>
+                        <Badge
+                          className="capitalize gap-1 py-1 px-3 cursor-pointer hover:bg-secondary-100"
+                          variant="outline"
+                          title={`Current Location: ${props.encounter.current_location.name}`}
+                          data-cy="current-location-badge"
+                        >
+                          <CareIcon
+                            icon="l-location-point"
+                            className="size-4 text-green-600"
+                          />
+                          {props.encounter.current_location.name}
+                          <ChevronDown className="size-3 opacity-50" />
+                        </Badge>
                       </PopoverTrigger>
                       <PopoverContent align={"start"} className="w-auto p-2">
                         <div className="space-y-2 p-2 items-center">
@@ -425,7 +419,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       </PopoverContent>
                     </Popover>
                   ) : canWrite ? (
-                    <Badge variant="outline">
+                    <Badge variant="outline" className="py-0.5 px-3">
                       <LocationSheet
                         facilityId={props.encounter.facility.id}
                         encounter={encounter}
@@ -447,7 +441,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   ) : (
                     <></>
                   )}
-                  <Badge variant="outline">
+                  <Badge variant="outline" className="py-0.5 px-3">
                     <CareTeamSheet
                       encounter={encounter}
                       trigger={
@@ -517,7 +511,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
       <Badge
         key={org.id}
         className={cn(
-          "capitalize gap-1 py-1 px-2 hover:bg-secondary-100 cursor-pointer",
+          "capitalize gap-1 py-1 px-3 hover:bg-secondary-100 cursor-pointer",
         )}
         variant="outline"
         title={`Organization: ${org.name}${org.description ? ` - ${org.description}` : ""}`}
