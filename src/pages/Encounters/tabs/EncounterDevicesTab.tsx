@@ -31,23 +31,23 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import AssociateDeviceSheet from "@/pages/Encounters/AssociateDeviceSheet";
-import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import deviceApi from "@/types/device/deviceApi";
 
-export const EncounterDevicesTab = ({ encounter }: EncounterTabProps) => {
+export const EncounterDevicesTab = () => {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const queryClient = useQueryClient();
+  const { currentEncounterId, patientId, facilityId } = useEncounter();
 
   const limit = RESULTS_PER_PAGE_LIMIT;
-  const facilityId = encounter.facility.id;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["devices", facilityId, encounter.patient.id, page, limit],
+    queryKey: ["devices", facilityId, patientId, page, limit],
     queryFn: query(deviceApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
-        current_encounter: encounter.id,
+        current_encounter: currentEncounterId,
         offset: (page - 1) * limit,
         limit,
       },
@@ -62,7 +62,7 @@ export const EncounterDevicesTab = ({ encounter }: EncounterTabProps) => {
         })({ encounter: null }),
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ["devices", facilityId, encounter.patient.id],
+          queryKey: ["devices", facilityId, patientId],
         });
       },
     });
@@ -94,7 +94,7 @@ export const EncounterDevicesTab = ({ encounter }: EncounterTabProps) => {
                           <TableCell className="font-medium">
                             <Link
                               href={`/devices/${device.id}`}
-                              basePath={`/facility/${encounter.facility.id}/settings`}
+                              basePath={`/facility/${facilityId}/settings`}
                               className="group flex items-start gap-1"
                             >
                               <div>
@@ -161,15 +161,17 @@ export const EncounterDevicesTab = ({ encounter }: EncounterTabProps) => {
               />
             )}
 
-            <AssociateDeviceSheet
-              facilityId={facilityId}
-              encounterId={encounter.id}
-            >
-              <Button variant="white">
-                <CareIcon icon="l-link-add" className="size-4 mr-1" />
-                {t("associate_device_to_encounter")}
-              </Button>
-            </AssociateDeviceSheet>
+            {facilityId && (
+              <AssociateDeviceSheet
+                facilityId={facilityId}
+                encounterId={currentEncounterId}
+              >
+                <Button variant="white">
+                  <CareIcon icon="l-link-add" className="size-4 mr-1" />
+                  {t("associate_device_to_encounter")}
+                </Button>
+              </AssociateDeviceSheet>
+            )}
           </div>
         </div>
       )}

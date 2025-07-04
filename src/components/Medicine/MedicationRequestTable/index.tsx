@@ -16,14 +16,11 @@ import { AdministrationTab } from "@/components/Medicine/MedicationAdministratio
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 import { MedicationStatementList } from "@/components/Patient/MedicationStatementList";
 
-import { getPermissions } from "@/common/Permissions";
-
 import query from "@/Utils/request/query";
-import { usePermissions } from "@/context/PermissionContext";
-import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { inactiveEncounterStatus } from "@/types/emr/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
-import { Patient } from "@/types/emr/patient";
 
 interface EmptyStateProps {
   searching?: boolean;
@@ -61,40 +58,33 @@ export const EmptyState = ({
   );
 };
 
-interface Props {
-  readonly?: boolean;
-  patient: Patient;
-  encounter: Encounter;
-}
-
-export default function MedicationRequestTable({ patient, encounter }: Props) {
+export default function MedicationRequestTable() {
   const { t } = useTranslation();
 
-  const patientId = patient.id;
+  const {
+    patientId,
+    currentEncounterId,
+    currentEncounter,
+    patientPermissions: { canViewClinicalData },
+    currentEncounterPermissions: { canViewEncounter, canWriteEncounter },
+  } = useEncounter();
   const [searchQuery, setSearchQuery] = useState("");
   const [showStopped, setShowStopped] = useState(false);
-  const { hasPermission } = usePermissions();
-  const { canViewClinicalData } = getPermissions(
-    hasPermission,
-    patient.permissions,
-  );
-  const { canViewEncounter, canWriteEncounter } = getPermissions(
-    hasPermission,
-    encounter.permissions,
-  );
   const canAccess = canViewClinicalData || canViewEncounter;
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;
-  const canWrite =
+  const canWrite = !!(
+    currentEncounter &&
     facilityIdExists &&
     canWriteEncounter &&
-    !inactiveEncounterStatus.includes(encounter.status);
+    !inactiveEncounterStatus.includes(currentEncounter.status)
+  );
   const { data: activeMedications, isLoading: loadingActive } = useQuery({
     queryKey: ["medication_requests_active", patientId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId: patientId },
       queryParams: {
-        encounter: encounter.id,
+        encounter: currentEncounterId,
         limit: 100,
         status: ["active", "on-hold", "draft", "unknown"].join(","),
       },
@@ -107,7 +97,7 @@ export default function MedicationRequestTable({ patient, encounter }: Props) {
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId: patientId },
       queryParams: {
-        encounter: encounter.id,
+        encounter: currentEncounterId,
         limit: 100,
         status: ["ended", "completed", "cancelled", "entered_in_error"].join(
           ",",
@@ -277,7 +267,7 @@ export default function MedicationRequestTable({ patient, encounter }: Props) {
           <TabsContent value="administration">
             <AdministrationTab
               patientId={patientId}
-              encounterId={encounter.id}
+              encounterId={currentEncounterId}
               canWrite={canWrite}
               canAccess={canAccess}
             />

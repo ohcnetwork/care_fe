@@ -53,15 +53,12 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { useIsMobile } from "@/hooks/use-mobile";
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { getPermissions } from "@/common/Permissions";
-
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime } from "@/Utils/utils";
-import { usePermissions } from "@/context/PermissionContext";
-import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { inactiveEncounterStatus } from "@/types/emr/encounter";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
@@ -324,10 +321,7 @@ const MobileNav = ({
 );
 
 // Main component
-export const EncounterNotesTab = ({
-  encounter,
-  patient,
-}: EncounterTabProps) => {
+export const EncounterNotesTab = () => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedThread, setSelectedThread] = useState<string | null>(null);
@@ -338,27 +332,28 @@ export const EncounterNotesTab = ({
   // points to the first message fetched in the last page or the newly created message
   const recentMessageRef = useRef<HTMLDivElement | null>(null);
   const { ref, inView } = useInView();
-  const { hasPermission } = usePermissions();
-  const { canViewClinicalData } = getPermissions(
-    hasPermission,
-    patient.permissions,
-  );
-  const { canViewEncounter, canWriteEncounter } = getPermissions(
-    hasPermission,
-    encounter.permissions,
-  );
+  const {
+    patientPermissions: { canViewClinicalData },
+    currentEncounterPermissions: { canViewEncounter, canWriteEncounter },
+    currentEncounterId,
+    currentEncounter,
+    patientId,
+  } = useEncounter();
   const canAccess = canViewClinicalData || canViewEncounter;
-  const inactiveEncounter = inactiveEncounterStatus.includes(encounter.status);
+  const inactiveEncounter = !!(
+    currentEncounter &&
+    inactiveEncounterStatus.includes(currentEncounter.status)
+  );
   const canWriteCurrentEncounter = canWriteEncounter && !inactiveEncounter;
   const [commentAdded, setCommentAdded] = useState(false);
   const isMobile = useIsMobile();
 
   // Fetch threads
   const { data: threadsData, isLoading: threadsLoading } = useQuery({
-    queryKey: ["threads", encounter.id],
+    queryKey: ["threads", currentEncounterId],
     queryFn: query(routes.notes.patient.listThreads, {
-      pathParams: { patientId: encounter.patient.id },
-      queryParams: { encounter: encounter.id },
+      pathParams: { patientId: patientId },
+      queryParams: { encounter: currentEncounterId },
     }),
     enabled: canAccess,
   });
@@ -375,7 +370,7 @@ export const EncounterNotesTab = ({
     queryFn: async ({ pageParam = 0 }) => {
       const response = await query(routes.notes.patient.getMessages, {
         pathParams: {
-          patientId: encounter.patient.id,
+          patientId,
           threadId: selectedThread!,
         },
         queryParams: {
@@ -396,7 +391,7 @@ export const EncounterNotesTab = ({
   // Create thread mutation
   const createThreadMutation = useMutation({
     mutationFn: mutate(routes.notes.patient.createThread, {
-      pathParams: { patientId: encounter.patient.id },
+      pathParams: { patientId },
     }),
     onSuccess: (newThread) => {
       queryClient.invalidateQueries({ queryKey: ["threads"] });
@@ -412,10 +407,7 @@ export const EncounterNotesTab = ({
   // Create message mutation
   const createMessageMutation = useMutation({
     mutationFn: mutate(routes.notes.patient.postMessage, {
-      pathParams: {
-        patientId: encounter.patient.id,
-        threadId: selectedThread!,
-      },
+      pathParams: { patientId, threadId: selectedThread! },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["messages", selectedThread] });
@@ -467,7 +459,7 @@ export const EncounterNotesTab = ({
       }
       createThreadMutation.mutate({
         title: title.trim(),
-        encounter: encounter.id,
+        encounter: currentEncounterId,
       });
     }
   };
@@ -768,7 +760,7 @@ export const EncounterNotesTab = ({
                     <>
                       {t("encounter_notes__inactive_encounter", {
                         encounterStatus: t(
-                          `encounter_status__${encounter.status}`,
+                          `encounter_status__${currentEncounter.status}`,
                         ),
                       })}
                     </>

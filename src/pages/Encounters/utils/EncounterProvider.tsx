@@ -28,6 +28,7 @@ type EncounterContextType = {
   setSelectedEncounter: (encounterId: string | null) => void;
   currentEncounterPermissions: Permissions;
   selectedEncounterPermissions: Permissions;
+  patientPermissions: Permissions;
 };
 
 const encounterContext = createContext<EncounterContextType | undefined>(
@@ -104,6 +105,11 @@ export function EncounterProvider({
     selectedEncounter?.permissions ?? [],
   );
 
+  const patientPermissions = getPermissions(
+    hasPermission,
+    patient?.permissions ?? [],
+  );
+
   return (
     <encounterContext.Provider
       value={{
@@ -128,6 +134,7 @@ export function EncounterProvider({
         setSelectedEncounter,
         currentEncounterPermissions,
         selectedEncounterPermissions,
+        patientPermissions,
       }}
     >
       {children}

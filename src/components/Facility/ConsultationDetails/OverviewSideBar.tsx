@@ -71,7 +71,13 @@ const EncounterActions = () => {
     <div>
       <h6 className="text-black font-semibold mb-2">{t("actions")}</h6>
       <div className="flex flex-col gap-3">
-        <Button variant="outline" className="justify-start">
+        <Button
+          variant="outline"
+          className="justify-start"
+          onClick={() => {
+            navigate("consents");
+          }}
+        >
           <NotebookPen />
           {t("manage_consents")}
         </Button>
