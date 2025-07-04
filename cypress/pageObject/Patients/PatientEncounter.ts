@@ -98,7 +98,10 @@ export class PatientEncounter {
       .first()
       .should("be.visible")
       .then(() => {
-        cy.get("[data-slot='dropdown-menu-trigger']").scrollIntoView().click();
+        cy.get("[data-slot='dropdown-menu-trigger']")
+          .first()
+          .scrollIntoView()
+          .click();
       });
 
     cy.get("[data-slot='dropdown-menu-item']")
@@ -205,7 +208,10 @@ export class PatientEncounter {
       })
       .first()
       .then(() => {
-        cy.get("[data-slot='dropdown-menu-trigger']").scrollIntoView().click();
+        cy.get("[data-slot='dropdown-menu-trigger']")
+          .first()
+          .scrollIntoView()
+          .click();
       });
 
     cy.get("[data-slot='dropdown-menu-item']")
@@ -292,7 +298,10 @@ export class PatientEncounter {
       .first()
       .should("be.visible")
       .then(() => {
-        cy.get("[data-slot='dropdown-menu-trigger']").scrollIntoView().click();
+        cy.get("[data-slot='dropdown-menu-trigger']")
+          .first()
+          .scrollIntoView()
+          .click();
       });
 
     cy.get("[data-slot='dropdown-menu-item']")
