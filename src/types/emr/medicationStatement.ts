@@ -1,3 +1,5 @@
+import { Badge } from "@/components/ui/badge";
+
 import { UserBareMinimum } from "@/components/Users/models";
 
 import { Period } from "@/types/questionnaire/base";
@@ -32,7 +34,10 @@ export const MEDICATION_STATEMENT_STATUS_STYLES = {
   not_taken: "secondary",
   unknown: "secondary",
   entered_in_error: "destructive",
-} as const satisfies Record<MedicationStatementStatus, string>;
+} as const satisfies Record<
+  MedicationStatementStatus,
+  React.ComponentProps<typeof Badge>["variant"]
+>;
 
 export type MedicationStatement = {
   readonly id: string;

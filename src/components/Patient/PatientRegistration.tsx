@@ -525,7 +525,10 @@ export default function PatientRegistration(
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger data-cy="blood-group-select">
+                        <SelectTrigger
+                          data-cy="blood-group-select"
+                          ref={field.ref}
+                        >
                           <SelectValue
                             placeholder={t("please_select_blood_group")}
                           />
