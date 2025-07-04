@@ -1,3 +1,5 @@
+import { Badge } from "@/components/ui/Badge";
+
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -46,26 +48,31 @@ const KeyboardShortcutHint = ({ open }: { open: boolean }) => {
   return (
     <div className="absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center space-x-2 text-xs text-gray-500">
       {open ? (
-        <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-          <kbd>Esc</kbd>
-        </span>
+        <Badge variant="secondary">
+  <kbd>Esc</kbd>
+</Badge>
+
       ) : isAppleDevice ? (
         <div className="flex gap-1 font-medium">
-          <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-            <kbd>⌘</kbd>
-          </span>
-          <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-            <kbd>K</kbd>
-          </span>
+          <Badge variant="secondary">
+  <kbd>Esc</kbd>
+</Badge>
+
+          <Badge variant="secondary">
+  <kbd>Esc</kbd>
+</Badge>
+
         </div>
       ) : (
         <div className="flex gap-1 font-medium">
-          <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-            <kbd>Ctrl</kbd>
-          </span>
-          <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-            <kbd>K</kbd>
-          </span>
+          <Badge variant="secondary">
+  <kbd>Esc</kbd>
+</Badge>
+
+          <Badge variant="secondary">
+  <kbd>Esc</kbd>
+</Badge>
+
         </div>
       )}
     </div>
