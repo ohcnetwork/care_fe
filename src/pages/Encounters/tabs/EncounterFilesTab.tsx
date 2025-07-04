@@ -3,12 +3,12 @@ import { FilesTab } from "@/components/Files/FilesTab";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
 export const EncounterFilesTab = () => {
-  const { currentEncounter, patient, facilityId } = useEncounter();
+  const { selectedEncounter: encounter, patient, facilityId } = useEncounter();
 
   return (
     <FilesTab
       type="encounter"
-      encounter={currentEncounter}
+      encounter={encounter}
       patient={patient}
       facilityId={facilityId}
     />

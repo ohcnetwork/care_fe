@@ -334,15 +334,14 @@ export const EncounterNotesTab = () => {
   const { ref, inView } = useInView();
   const {
     patientPermissions: { canViewClinicalData },
-    currentEncounterPermissions: { canViewEncounter, canWriteEncounter },
-    currentEncounterId,
-    currentEncounter,
+    selectedEncounterPermissions: { canViewEncounter, canWriteEncounter },
+    selectedEncounterId: encounterId,
+    selectedEncounter: encounter,
     patientId,
   } = useEncounter();
   const canAccess = canViewClinicalData || canViewEncounter;
   const inactiveEncounter = !!(
-    currentEncounter &&
-    inactiveEncounterStatus.includes(currentEncounter.status)
+    encounter && inactiveEncounterStatus.includes(encounter.status)
   );
   const canWriteCurrentEncounter = canWriteEncounter && !inactiveEncounter;
   const [commentAdded, setCommentAdded] = useState(false);
@@ -350,10 +349,10 @@ export const EncounterNotesTab = () => {
 
   // Fetch threads
   const { data: threadsData, isLoading: threadsLoading } = useQuery({
-    queryKey: ["threads", currentEncounterId],
+    queryKey: ["threads", encounterId],
     queryFn: query(routes.notes.patient.listThreads, {
       pathParams: { patientId: patientId },
-      queryParams: { encounter: currentEncounterId },
+      queryParams: { encounter: encounterId },
     }),
     enabled: canAccess,
   });
@@ -459,7 +458,7 @@ export const EncounterNotesTab = () => {
       }
       createThreadMutation.mutate({
         title: title.trim(),
-        encounter: currentEncounterId,
+        encounter: encounterId,
       });
     }
   };
@@ -760,7 +759,7 @@ export const EncounterNotesTab = () => {
                     <>
                       {t("encounter_notes__inactive_encounter", {
                         encounterStatus: t(
-                          `encounter_status__${currentEncounter.status}`,
+                          `encounter_status__${encounter.status}`,
                         ),
                       })}
                     </>

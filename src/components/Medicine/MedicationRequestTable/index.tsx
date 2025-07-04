@@ -63,10 +63,10 @@ export default function MedicationRequestTable() {
 
   const {
     patientId,
-    currentEncounterId,
-    currentEncounter,
+    selectedEncounterId: encounterId,
+    selectedEncounter: encounter,
     patientPermissions: { canViewClinicalData },
-    currentEncounterPermissions: { canViewEncounter, canWriteEncounter },
+    selectedEncounterPermissions: { canViewEncounter, canWriteEncounter },
   } = useEncounter();
   const [searchQuery, setSearchQuery] = useState("");
   const [showStopped, setShowStopped] = useState(false);
@@ -74,17 +74,17 @@ export default function MedicationRequestTable() {
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;
   const canWrite = !!(
-    currentEncounter &&
+    encounter &&
     facilityIdExists &&
     canWriteEncounter &&
-    !inactiveEncounterStatus.includes(currentEncounter.status)
+    !inactiveEncounterStatus.includes(encounter.status)
   );
   const { data: activeMedications, isLoading: loadingActive } = useQuery({
     queryKey: ["medication_requests_active", patientId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId: patientId },
       queryParams: {
-        encounter: currentEncounterId,
+        encounter: encounterId,
         limit: 100,
         status: ["active", "on-hold", "draft", "unknown"].join(","),
       },
@@ -97,7 +97,7 @@ export default function MedicationRequestTable() {
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId: patientId },
       queryParams: {
-        encounter: currentEncounterId,
+        encounter: encounterId,
         limit: 100,
         status: ["ended", "completed", "cancelled", "entered_in_error"].join(
           ",",
@@ -267,7 +267,7 @@ export default function MedicationRequestTable() {
           <TabsContent value="administration">
             <AdministrationTab
               patientId={patientId}
-              encounterId={currentEncounterId}
+              encounterId={encounterId}
               canWrite={canWrite}
               canAccess={canAccess}
             />

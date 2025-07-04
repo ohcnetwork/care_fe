@@ -183,18 +183,18 @@ function ConsentCard({
 export const EncounterConsentsTab = () => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
-  const { currentEncounterId, patientId } = useEncounter();
+  const { selectedEncounterId: encounterId, patientId } = useEncounter();
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: CONSENTS_PER_PAGE,
   });
 
   const { data: existingConsents, isLoading } = useQuery({
-    queryKey: ["consents", patientId, currentEncounterId, qParams],
+    queryKey: ["consents", patientId, encounterId, qParams],
     queryFn: query(consentApi.list, {
       pathParams: { patientId },
       queryParams: {
-        encounter: currentEncounterId,
+        encounter: encounterId,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
@@ -231,10 +231,7 @@ export const EncounterConsentsTab = () => {
           />
         </div>
 
-        <ConsentFormSheet
-          patientId={patientId}
-          encounterId={currentEncounterId}
-        />
+        <ConsentFormSheet patientId={patientId} encounterId={encounterId} />
       </div>
 
       {filteredConsents && filteredConsents.length > 0 ? (

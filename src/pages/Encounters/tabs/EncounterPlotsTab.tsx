@@ -25,9 +25,9 @@ export const EncounterPlotsTab = () => {
 
   const {
     patientId,
-    currentEncounterId,
+    selectedEncounterId: encounterId,
     patientPermissions: { canViewClinicalData },
-    currentEncounterPermissions: { canViewEncounter },
+    selectedEncounterPermissions: { canViewEncounter },
   } = useEncounter();
 
   const canAccess = canViewClinicalData || canViewEncounter;
@@ -69,7 +69,7 @@ export const EncounterPlotsTab = () => {
           <TabsContent key={tab.id} value={tab.id}>
             <ObservationVisualizer
               patientId={patientId}
-              encounterId={currentEncounterId}
+              encounterId={encounterId}
               codeGroups={tab.groups}
               gridCols={plotColumns}
               canAccess={canAccess}

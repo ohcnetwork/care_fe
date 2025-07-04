@@ -38,7 +38,11 @@ export const EncounterDevicesTab = () => {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const queryClient = useQueryClient();
-  const { currentEncounterId, patientId, facilityId } = useEncounter();
+  const {
+    selectedEncounterId: encounterId,
+    patientId,
+    facilityId,
+  } = useEncounter();
 
   const limit = RESULTS_PER_PAGE_LIMIT;
 
@@ -47,7 +51,7 @@ export const EncounterDevicesTab = () => {
     queryFn: query(deviceApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
-        current_encounter: currentEncounterId,
+        current_encounter: encounterId,
         offset: (page - 1) * limit,
         limit,
       },
@@ -164,7 +168,7 @@ export const EncounterDevicesTab = () => {
             {facilityId && (
               <AssociateDeviceSheet
                 facilityId={facilityId}
-                encounterId={currentEncounterId}
+                encounterId={encounterId}
               >
                 <Button variant="white">
                   <CareIcon icon="l-link-add" className="size-4 mr-1" />
