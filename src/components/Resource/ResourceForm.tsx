@@ -59,6 +59,7 @@ import {
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import { FacilityData } from "@/types/facility/facility";
@@ -285,6 +286,32 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           assignedToUser,
           queryClient,
           authUser,
+        );
+
+        const prevResourceRequestList = queryClient.getQueryData<
+          PaginatedResponse<ResourceRequest>
+        >(["resourceRequests", related_patient]);
+
+        const updatedResourceRequestList: PaginatedResponse<ResourceRequest> =
+          prevResourceRequestList?.results
+            ? {
+                ...prevResourceRequestList,
+                results: [
+                  ...prevResourceRequestList.results,
+                  normalizedResource,
+                ],
+                count:
+                  (prevResourceRequestList.count ??
+                    prevResourceRequestList.results.length) + 1,
+              }
+            : {
+                count: 1,
+                results: [normalizedResource],
+              };
+
+        queryClient.setQueryData(
+          ["resourceRequests", related_patient],
+          updatedResourceRequestList,
         );
 
         queryClient.setQueryData(
