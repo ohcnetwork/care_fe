@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { isPast } from "date-fns";
-import { format } from "date-fns";
 import { List, Search } from "lucide-react";
 import { useNavigate, usePathParams } from "raviger";
 import { useState } from "react";
@@ -132,7 +131,7 @@ function ConsentCard({
             <p className="font-medium text-xs">
               {formatDateTime(consent.date, "DD/MM/YYYY")}
               <br />
-              {format(consent.date, "h:mm a")}
+              {formatDateTime(consent.date, "h:mm A")}
             </p>
           </div>
           <div className="flex flex-col gap-1">
@@ -141,16 +140,16 @@ function ConsentCard({
               {consent.period.start ? (
                 <>
                   <span>
-                    {format(new Date(consent.period.start), "dd/MM/yyyy")}
+                    {formatDateTime(consent.period.start, "DD/MM/YYYY")}
                     <br />
-                    {format(new Date(consent.period.start), "h:mm a")} -
+                    {formatDateTime(consent.period.start, "h:mm A")} -
                   </span>
                   <br />
                   {consent.period.end ? (
                     <span>
-                      {format(new Date(consent.period.end), "dd/MM/yyyy")}
+                      {formatDateTime(consent.period.end, "DD/MM/YYYY")}
                       <br />
-                      {format(new Date(consent.period.end), "h:mm a")}
+                      {formatDateTime(consent.period.end, "h:mm A")}
                     </span>
                   ) : (
                     <span>{t("na")}</span>
