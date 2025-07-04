@@ -68,16 +68,33 @@ function generateFacilityLinks(
         {
           name: t("search_patients"),
           url: `${baseUrl}/patients`,
+          matchPaths: [`${baseUrl}/patients/verify`],
         },
         {
           name: t("encounters"),
           url: `${baseUrl}/encounters/patients`,
-          matchPaths: [`${baseUrl}/patient/:patientId`],
+          matchPaths: [
+            `${baseUrl}/patient/:patientId/encounter/:encounterId/updates`,
+            `${baseUrl}/patient/:patientId/encounter/:encounterId/plots`,
+            `${baseUrl}/patient/:patientId/encounter/:encounterId/medicines`,
+            `${baseUrl}/patient/:patientId/encounter/:encounterId/files`,
+            `${baseUrl}/patient/:patientId/encounter/:encounterId/notes`,
+            `${baseUrl}/patient/:patientId/encounter/:encounterId/devices`,
+            `${baseUrl}/patient/:patientId/encounter/:encounterId/consents`,
+          ],
         },
         {
           name: t("locations"),
           url: `${baseUrl}/encounters/locations`,
         },
+      ],
+      matchPaths: [
+        `${baseUrl}/patient/:patientId`,
+        `${baseUrl}/patient/:patientId/book-appointment`,
+        `${baseUrl}/patient/:patientId/appointments`,
+        `${baseUrl}/patient/:patientId/encounters`,
+        `${baseUrl}/patient/:patientId/health-profile`,
+        `${baseUrl}/patient/:patientId/updates`,
       ],
     },
     {

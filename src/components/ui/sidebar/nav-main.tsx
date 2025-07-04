@@ -33,14 +33,16 @@ import { NavigationLink } from "./facility-nav";
 /* Converts a route pattern like '/path/:id' to a RegExp to match dynamic segments in URLs.
 Helps in checking if the current path matches a pattern for active link detection. */
 const matchPath = (pattern: string, path: string | null) => {
-  const regex = new RegExp(`^${pattern.replace(/:\w+/g, "[^/]+")}(?:/|$)`);
+  const regex = new RegExp(`^${pattern.replace(/:\w+/g, "[^/]+")}$`);
   return regex.test(path || "");
 };
 
 const isChildActive = (link: NavigationLink, currentPath: string | null) => {
   if (!link.children) return false;
-  return link.children.some(({ url, matchPaths = [] }) =>
-    [url, ...matchPaths].some((pattern) => matchPath(pattern, currentPath)),
+  return link.children.some(
+    ({ url, matchPaths = [] }) =>
+      (currentPath !== null && url.startsWith(currentPath)) ||
+      matchPaths?.some((pattern) => matchPath(pattern, currentPath)),
   );
 };
 
@@ -107,7 +109,11 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                             "cursor-pointer hover:bg-gray-200 hover:text-green-700",
                             {
                               "bg-white text-green-700 shadow":
-                                open !== link.name && isChildActive(link, path),
+                                (open !== link.name &&
+                                  isChildActive(link, path)) ||
+                                link.matchPaths?.some((pattern) =>
+                                  matchPath(pattern, path),
+                                ),
                             },
                           )}
                         >
@@ -160,10 +166,11 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                     className={cn(
                       "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700",
                       {
-                        "bg-white text-green-700 shadow": isChildActive(
-                          link,
-                          path,
-                        ),
+                        "bg-white text-green-700 shadow":
+                          isChildActive(link, path) ||
+                          link.matchPaths?.some((pattern) =>
+                            matchPath(pattern, path),
+                          ),
                       },
                     )}
                     data-cy={`nav-${link.name.toLowerCase().replace(/\s+/g, "-")}`}
