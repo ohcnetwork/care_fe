@@ -79,7 +79,7 @@ export class PatientEncounter {
       })
       .first()
       .should("be.visible")
-      .within(() => {
+      .then(() => {
         this.clickAndSelectOption(1, criticality);
         this.clickAndSelectOption(2, status);
       });
@@ -97,7 +97,7 @@ export class PatientEncounter {
       })
       .first()
       .should("be.visible")
-      .within(() => {
+      .then(() => {
         cy.get("[data-slot='dropdown-menu-trigger']").scrollIntoView().click();
       });
 
@@ -185,7 +185,7 @@ export class PatientEncounter {
       })
       .first()
       .should("be.visible")
-      .within(() => {
+      .then(() => {
         this.clickAndSelectOption(0, status);
         this.clickAndSelectOption(1, severity);
         this.clickAndSelectOption(2, verification);
@@ -204,7 +204,7 @@ export class PatientEncounter {
         );
       })
       .first()
-      .within(() => {
+      .then(() => {
         cy.get("[data-slot='dropdown-menu-trigger']").scrollIntoView().click();
       });
 
@@ -272,7 +272,7 @@ export class PatientEncounter {
       })
       .first()
       .should("be.visible")
-      .within(() => {
+      .then(() => {
         this.clickAndSelectOption(0, status);
         this.clickAndSelectOption(1, verification);
       });
@@ -291,7 +291,7 @@ export class PatientEncounter {
       })
       .first()
       .should("be.visible")
-      .within(() => {
+      .then(() => {
         cy.get("[data-slot='dropdown-menu-trigger']").scrollIntoView().click();
       });
 
