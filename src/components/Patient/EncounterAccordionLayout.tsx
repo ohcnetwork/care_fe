@@ -44,7 +44,7 @@ export function EncounterAccordionLayout({
                 {t(title)}
               </CardTitle>
               {!readOnly && editLink ? (
-                <Button variant="outline" size="xs" data-cy={`edit-${title}`}>
+                <Button variant="outline" size="xs">
                   <Link
                     href={editLink}
                     className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
