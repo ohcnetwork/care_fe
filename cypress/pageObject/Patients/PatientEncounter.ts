@@ -102,12 +102,11 @@ export class PatientEncounter {
           .first()
           .scrollIntoView()
           .click();
+        cy.get("[data-slot='dropdown-menu-item']")
+          .contains("Remove Allergy")
+          .should("be.visible")
+          .click();
       });
-
-    cy.get("[data-slot='dropdown-menu-item']")
-      .contains("Remove Allergy")
-      .should("be.visible")
-      .click();
 
     return this;
   }
@@ -212,12 +211,11 @@ export class PatientEncounter {
           .first()
           .scrollIntoView()
           .click();
+        cy.get("[data-slot='dropdown-menu-item']")
+          .contains("Remove Symptom")
+          .should("be.visible")
+          .click();
       });
-
-    cy.get("[data-slot='dropdown-menu-item']")
-      .contains("Remove Symptom")
-      .should("be.visible")
-      .click();
 
     return this;
   }
@@ -302,12 +300,11 @@ export class PatientEncounter {
           .first()
           .scrollIntoView()
           .click();
+        cy.get("[data-slot='dropdown-menu-item']")
+          .contains("Remove Diagnosis")
+          .should("be.visible")
+          .click();
       });
-
-    cy.get("[data-slot='dropdown-menu-item']")
-      .contains("Remove Diagnosis")
-      .should("be.visible")
-      .click();
 
     return this;
   }
