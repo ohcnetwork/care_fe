@@ -13,10 +13,8 @@ import { cn } from "@/lib/utils";
 
 import Callout from "@/CAREUI/display/Callout";
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import WeekdayCheckbox, {
-  DayOfWeek,
-} from "@/CAREUI/interactive/WeekdayCheckbox";
 
+import WeekdayCheckbox, { DayOfWeek } from "@/components/ui/WeekdayCheckbox";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,

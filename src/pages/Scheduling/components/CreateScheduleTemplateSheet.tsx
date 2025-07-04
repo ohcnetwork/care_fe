@@ -10,10 +10,8 @@ import * as z from "zod";
 
 import Callout from "@/CAREUI/display/Callout";
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import WeekdayCheckbox, {
-  DayOfWeek,
-} from "@/CAREUI/interactive/WeekdayCheckbox";
 
+import WeekdayCheckbox, { DayOfWeek } from "@/components/ui/WeekdayCheckbox";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
