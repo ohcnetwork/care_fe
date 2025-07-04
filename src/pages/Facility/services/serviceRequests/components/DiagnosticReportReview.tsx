@@ -6,7 +6,6 @@ import {
   ExternalLink,
   FileCheck2,
 } from "lucide-react";
-import { Info } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -35,12 +34,6 @@ import {
 } from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Tooltip } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { FileListTable } from "@/components/Files/FileListTable";
@@ -189,29 +182,9 @@ export function DiagnosticReportReview({
                 <CardTitle>
                   <p className="flex items-center gap-1.5">
                     <FileCheck2 className="size-[24px] text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
-                    {fullReport?.code ? (
-                      <>
-                        {fullReport?.code?.display}
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Info className="size-4 text-gray-600 inline-block cursor-help" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>
-                                {fullReport?.code?.system}
-                                {", "}
-                                {fullReport?.code?.code}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </>
-                    ) : (
-                      <span className="text-base/9 text-gray-950 font-medium">
-                        {t("result_review")}
-                      </span>
-                    )}
+                    <span className="text-base/9 text-gray-950 font-medium">
+                      {t("result_review")}
+                    </span>
                   </p>
                 </CardTitle>
               </div>
@@ -265,6 +238,11 @@ export function DiagnosticReportReview({
             {fullReport && (
               <div className="space-y-6">
                 <Card className="shadow-none rounded-lg border-gray-200 bg-gray-50">
+                  <CardHeader className="p-4 pb-0">
+                    <CardTitle className="text-base font-semibold">
+                      {fullReport?.code?.display}
+                    </CardTitle>
+                  </CardHeader>
                   <CardContent className="p-4">
                     {fullReport.observations.length == 0 && (
                       <p className="text-gray-800 whitespace-pre-wrap p-2 rounded-lg bg-white border cursor-default text-center">

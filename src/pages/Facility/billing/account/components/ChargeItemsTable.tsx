@@ -134,6 +134,7 @@ export function ChargeItemsTable({
         status: qParams.charge_item_status,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        ordering: "-created_date",
       },
     }),
   }) as {

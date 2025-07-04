@@ -51,6 +51,7 @@ export const EncounterServiceRequestTab = ({
         status: qParams.status,
         title: qParams.search,
         priority: qParams.priority,
+        ordering: "-created_date",
       },
     }),
   });

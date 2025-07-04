@@ -3,7 +3,6 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
   CloudUpload,
-  Info,
   NotepadText,
   PlusCircle,
   Save,
@@ -36,12 +35,6 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
@@ -951,29 +944,9 @@ export function DiagnosticReportForm({
                 <CardTitle>
                   <p className="flex items-center gap-1.5">
                     <NotepadText className="size-[24px] text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
-                    {fullReport?.code ? (
-                      <>
-                        {fullReport?.code?.display}
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Info className="size-4 text-gray-600 inline-block cursor-help" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>
-                                {fullReport?.code?.system}
-                                {", "}
-                                {fullReport?.code?.code}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </>
-                    ) : (
-                      <span className="text-base/9 text-gray-950 font-medium">
-                        {t("test_results_entry")}
-                      </span>
-                    )}
+                    <span className="text-base/9 text-gray-950 font-medium">
+                      {t("test_results_entry")}
+                    </span>
                   </p>
                 </CardTitle>
               </div>

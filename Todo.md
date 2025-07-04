@@ -36,6 +36,11 @@ x : Done
 - [ ] Specimen Def - URI validation failing
 - [ ] AD form - Location Sheet - remove cursor pointer on hover on name
 - [-] Product Knowledge form - Validations - Yash
+- [ ] Definitions - Add Delete button
+- [ ] Valueset - Wrap long text on mobile
+- [ ] Observation Def - validation for empty components
+- [ ] Observation Def - Preview mobile - status badge & button clash
+- [ ] AD form - Selected location alignment
 
 ## Back End
 

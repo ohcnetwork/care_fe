@@ -211,6 +211,7 @@ export default function ServiceRequestList({
         title: qParams.search,
         status: qParams.status,
         priority: qParams.priority,
+        ordering: "-created_date",
       },
     }),
   });

@@ -107,6 +107,7 @@ export function ChargeItemDefinitionsList({
         status: qParams.status,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        ordering: "-created_date",
       },
     }),
   });
