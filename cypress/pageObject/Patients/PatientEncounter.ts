@@ -310,17 +310,7 @@ export class PatientEncounter {
   }
 
   verifyItemDelete(name: string) {
-    cy.get("body").then(($body) => {
-      cy.wait(400);
-      const table = $body.find("table");
-      if (table.length > 0) {
-        cy.wrap(table).should("be.visible").and("not.contain", name);
-      } else {
-        cy.log(
-          "✅ Table removed after deleting the last symptom, as expected.",
-        );
-      }
-    });
+    cy.get("body").should("not.contain", name);
     return this;
   }
 
