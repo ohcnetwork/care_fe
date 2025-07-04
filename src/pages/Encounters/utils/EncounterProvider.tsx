@@ -2,9 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
 import { createContext, useContext } from "react";
 
+import { Permissions, getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { usePermissions } from "@/context/PermissionContext";
 import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/patient";
 
@@ -23,6 +26,8 @@ type EncounterContextType = {
   isSelectedEncounterLoading: boolean;
   isPastEncountersLoading: boolean;
   setSelectedEncounter: (encounterId: string | null) => void;
+  currentEncounterPermissions: Permissions;
+  selectedEncounterPermissions: Permissions;
 };
 
 const encounterContext = createContext<EncounterContextType | undefined>(
@@ -87,6 +92,18 @@ export function EncounterProvider({
     );
   };
 
+  const { hasPermission } = usePermissions();
+
+  const currentEncounterPermissions = getPermissions(
+    hasPermission,
+    currentEncounter?.permissions ?? [],
+  );
+
+  const selectedEncounterPermissions = getPermissions(
+    hasPermission,
+    selectedEncounter?.permissions ?? [],
+  );
+
   return (
     <encounterContext.Provider
       value={{
@@ -96,13 +113,12 @@ export function EncounterProvider({
         selectedEncounterId,
         patient,
         currentEncounter,
-        pastEncounters: {
+        pastEncounters: encounters && {
           ...encounters,
           results:
             encounters?.results.filter(
               (encounter) => encounter.id !== currentEncounterId,
             ) ?? [],
-          count: encounters?.count ?? 0,
         },
         selectedEncounter,
         isPatientLoading,
@@ -110,6 +126,8 @@ export function EncounterProvider({
         isSelectedEncounterLoading,
         isPastEncountersLoading,
         setSelectedEncounter,
+        currentEncounterPermissions,
+        selectedEncounterPermissions,
       }}
     >
       {children}

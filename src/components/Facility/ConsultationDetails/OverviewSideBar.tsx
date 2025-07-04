@@ -13,6 +13,7 @@ import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSea
 
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
+import EncounterProperties from "@/pages/Encounters/EncounterProperties";
 import { Encounter } from "@/types/emr/encounter";
 
 interface Props {
@@ -21,16 +22,16 @@ interface Props {
   canEdit: boolean;
 }
 
-export default function SideOverview(props: Props) {
+export default function SideOverview({ encounter, canEdit }: Props) {
   return (
-    <div className="flex flex-col gap-8 mt-6">
-      <Separator className="bg-slate-200" />
-      <EncounterActions />
-      <EncounterQuestionnaire
-        canEdit={props.canEdit}
-        encounter={props.encounter}
-      />
-      <EncounterLocation canEdit={props.canEdit} encounter={props.encounter} />
+    <div className="w-full max-w-[18rem] flex flex-col gap-4">
+      <EncounterProperties encounter={encounter} canEdit={canEdit} />
+      <div className="flex flex-col gap-8 mt-6">
+        <Separator className="bg-slate-200" />
+        <EncounterActions />
+        <EncounterQuestionnaire canEdit={canEdit} encounter={encounter} />
+        <EncounterLocation canEdit={canEdit} encounter={encounter} />
+      </div>
     </div>
   );
 
@@ -142,10 +143,6 @@ const EncounterLocation = ({
 }) => {
   const { t } = useTranslation();
 
-  if (!encounter.current_location) {
-    return null;
-  }
-
   return (
     <div>
       <div className="flex justify-between items-center">
@@ -165,24 +162,28 @@ const EncounterLocation = ({
           }
         />
       </div>
-      {encounter.current_location && (
-        <div className="bg-gray-100 border border-gray-200 rounded-lg mt-2 p-2 pb-4">
+      <div className="bg-gray-100 border border-gray-200 rounded-lg mt-2 p-2">
+        {encounter.current_location ? (
           <LocationTree location={encounter.current_location} />
-          {canEdit && (
-            <LocationSheet
-              facilityId={encounter.facility.id}
-              history={encounter.location_history}
-              encounter={encounter}
-              trigger={
-                <Button variant="outline" className="w-full mt-3">
-                  <EditIcon className="size-4" />
-                  {t("update_location")}
-                </Button>
-              }
-            />
-          )}
-        </div>
-      )}
+        ) : (
+          <p className="text-gray-500 text-sm">{t("no_location_associated")}</p>
+        )}
+        {canEdit && (
+          <LocationSheet
+            facilityId={encounter.facility.id}
+            history={encounter.location_history}
+            encounter={encounter}
+            trigger={
+              <Button variant="outline" className="w-full mt-3">
+                <EditIcon className="size-4" />
+                {encounter.current_location
+                  ? t("update_location")
+                  : t("add_location")}
+              </Button>
+            }
+          />
+        )}
+      </div>
     </div>
   );
 };

@@ -74,9 +74,10 @@ export function AllergyList({
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
       queryParams: {
-        encounter: completedEncounterStatus.includes(encounterStatus as string)
-          ? encounterId
-          : undefined,
+        encounter:
+          encounterStatus && completedEncounterStatus.includes(encounterStatus)
+            ? encounterId
+            : undefined,
       },
     }),
   });

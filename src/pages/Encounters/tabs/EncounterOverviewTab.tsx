@@ -11,11 +11,7 @@ import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 
-import { getPermissions } from "@/common/Permissions";
-
-import { usePermissions } from "@/context/PermissionContext";
-import EncounterProperties from "@/pages/Encounters/EncounterProperties";
-import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import EncounterOverviewDevices from "@/pages/Facility/settings/devices/components/EncounterOverviewDevices";
 import { inactiveEncounterStatus } from "@/types/emr/encounter";
 
@@ -34,23 +30,26 @@ const actionLinks = [
   },
 ];
 
-export const EncounterOverviewTab = ({
-  encounter,
-  patient,
-}: EncounterTabProps) => {
-  const { hasPermission } = usePermissions();
-  const {
-    canViewClinicalData,
-    canViewEncounter,
-    canSubmitEncounterQuestionnaire,
-  } = getPermissions(hasPermission, encounter.permissions);
+export const EncounterOverviewTab = () => {
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;
+
+  const {
+    selectedEncounter: encounter,
+    patientId,
+    selectedEncounterId: encounterId,
+    selectedEncounterPermissions: {
+      canViewClinicalData,
+      canViewEncounter,
+      canSubmitEncounterQuestionnaire,
+    },
+  } = useEncounter();
+
   const canAccess = canViewEncounter || canViewClinicalData;
   const canEdit =
     facilityIdExists &&
     canSubmitEncounterQuestionnaire &&
-    !inactiveEncounterStatus.includes(encounter.status ?? "");
+    !inactiveEncounterStatus.includes(encounter?.status ?? "");
 
   return (
     <div className="flex flex-col gap-4">
@@ -94,23 +93,23 @@ export const EncounterOverviewTab = ({
           )}
 
           {/* Associated Devices Section */}
-          <EncounterOverviewDevices encounter={encounter} />
+          {encounter && <EncounterOverviewDevices encounter={encounter} />}
 
           {/* Allergies Section */}
           <div>
             <AllergyList
-              patientId={patient.id}
-              encounterId={encounter.id}
+              patientId={patientId}
+              encounterId={encounterId}
               readOnly={!canEdit}
-              encounterStatus={encounter.status}
+              encounterStatus={encounter?.status}
             />
           </div>
 
           {/* Symptoms Section */}
           <div>
             <SymptomsList
-              patientId={patient.id}
-              encounterId={encounter.id}
+              patientId={patientId}
+              encounterId={encounterId}
               readOnly={!canEdit}
             />
           </div>
@@ -118,8 +117,8 @@ export const EncounterOverviewTab = ({
           {/* Diagnoses Section */}
           <div>
             <DiagnosisList
-              patientId={patient.id}
-              encounterId={encounter.id}
+              patientId={patientId}
+              encounterId={encounterId}
               readOnly={!canEdit}
             />
           </div>
@@ -128,21 +127,20 @@ export const EncounterOverviewTab = ({
           <div>
             <QuestionnaireResponsesList
               encounter={encounter}
-              patientId={patient.id}
+              patientId={patientId}
               canAccess={canAccess}
             />
           </div>
         </div>
 
         {/* Right Column */}
-        <div className="w-full max-w-[18rem] flex flex-col gap-4">
-          <EncounterProperties encounter={encounter} />
+        {encounter && (
           <SideOverview
             encounter={encounter}
             canAccess={canAccess}
             canEdit={canEdit}
           />
-        </div>
+        )}
       </div>
     </div>
   );

@@ -15,7 +15,6 @@ import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
 
 import { getPermissions } from "@/common/Permissions";
 
-import { keysOf } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { EncounterHeader } from "@/pages/Encounters/EncounterHeader";
 import EncounterHistorySelector from "@/pages/Encounters/EncounterHistorySelector";
@@ -31,7 +30,7 @@ import { Patient } from "@/types/emr/patient";
 
 import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
 
-export interface EncounterTabProps {
+export interface PluginEncounterTabProps {
   encounter: Encounter;
   patient: Patient;
 }
@@ -47,7 +46,7 @@ const defaultTabs = {
   // nursing: EncounterNursingTab,
   // neurological_monitoring: EncounterNeurologicalMonitoringTab,
   // pressure_sore: EncounterPressureSoreTab,
-} as Record<string, React.FC<EncounterTabProps>>;
+} as const;
 
 interface Props {
   tab?: string;
@@ -70,10 +69,10 @@ export const EncounterShow = (props: Props) => {
   const pluginTabs = useCareAppEncounterTabs();
   const { goBack } = useAppHistory();
 
-  const tabs: Record<string, React.FC<EncounterTabProps>> = {
-    ...defaultTabs,
-    ...pluginTabs,
-  };
+  const availableTabs = [
+    ...Object.keys(defaultTabs),
+    ...Object.keys(pluginTabs),
+  ];
 
   // const { data: facilityData } = useQuery({
   //   queryKey: ["facility", facilityId],
@@ -120,15 +119,16 @@ export const EncounterShow = (props: Props) => {
     return <Loading />;
   }
 
-  if (!props.tab) {
+  if (!props.tab || !availableTabs.includes(props.tab)) {
     return <ErrorPage />;
   }
 
-  if (!selectedEncounter || !patient) {
-    return <ErrorPage />;
+  if (!patient) {
+    return <Loading />;
   }
 
-  const SelectedTab = tabs[props.tab];
+  const CareTab = defaultTabs[props.tab as keyof typeof defaultTabs];
+  const PluginTab = pluginTabs[props.tab as keyof typeof pluginTabs];
 
   return (
     <Page title={t("encounter")} className="block">
@@ -144,11 +144,10 @@ export const EncounterShow = (props: Props) => {
                     className="flex space-x-6 overflow-x-auto pb-2 pl-2"
                     id="encounter_tab_nav"
                   >
-                    {keysOf(tabs).map((tab) => (
+                    {availableTabs.map((tab) => (
                       <Link
                         key={tab}
                         data-cy={`tab-${tab}`}
-                        data-tab-selected={props.tab === tab}
                         className={cn(
                           "capitalize min-w-max-content cursor-pointer font-bold whitespace-nowrap",
                           props.tab === tab
@@ -170,7 +169,13 @@ export const EncounterShow = (props: Props) => {
             </div>
             <div className="mt-4">
               <PageHeadTitle title={t(`ENCOUNTER_TAB__${props.tab}`)} />
-              <SelectedTab encounter={selectedEncounter} patient={patient} />
+              {CareTab && <CareTab />}
+              {PluginTab &&
+                (selectedEncounter ? (
+                  <PluginTab encounter={selectedEncounter} patient={patient} />
+                ) : (
+                  <Loading />
+                ))}
             </div>
           </div>
         </div>
