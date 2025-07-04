@@ -62,7 +62,10 @@ import {
   ProductUpdate,
 } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
-import { ProductKnowledgeStatus } from "@/types/inventory/productKnowledge/productKnowledge";
+import {
+  ProductKnowledgeBase,
+  ProductKnowledgeStatus,
+} from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 
 const formSchema = z.object({
@@ -154,6 +157,7 @@ export function ProductFormContent({
   onCancel = () => navigate(`/facility/${facilityId}/settings/product`),
   disableButtons = false,
   externalSubmitRef,
+  enabled = true,
 }: {
   facilityId: string;
   productId?: string;
@@ -164,6 +168,7 @@ export function ProductFormContent({
   onCancel?: () => void;
   disableButtons?: boolean;
   externalSubmitRef?: React.RefObject<(() => void) | null>;
+  enabled?: boolean;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -181,7 +186,29 @@ export function ProductFormContent({
         status: ProductKnowledgeStatus.active,
       },
     }),
+    enabled,
   });
+
+  const { data: existingProductKnowledge } = useQuery({
+    queryKey: ["productKnowledge", productKnowledgeId],
+    queryFn: query(productKnowledgeApi.retrieveProductKnowledge, {
+      pathParams: {
+        productKnowledgeId: productKnowledgeId!,
+      },
+    }),
+    enabled: !!productKnowledgeId && enabled,
+  });
+
+  // Add selected product knowledge to the product knowledge list if it's not already there
+  const productKnowledgeData: ProductKnowledgeBase[] =
+    productKnowledgeResponse?.results.find(
+      (pk) => pk.id === existingProductKnowledge?.id,
+    )
+      ? productKnowledgeResponse?.results
+      : [
+          ...(productKnowledgeResponse?.results || []),
+          ...(existingProductKnowledge ? [existingProductKnowledge] : []),
+        ];
 
   // Get charge item definition list for the dropdown with search
   const { data: chargeItemDefinitionResponse, isLoading: isLoadingCID } =
@@ -324,7 +351,7 @@ export function ProductFormContent({
               )}
             />
 
-            {!isEditMode && (
+            {!isEditMode && !existingProductKnowledge && (
               <FormField
                 control={form.control}
                 name="product_knowledge"
@@ -335,7 +362,7 @@ export function ProductFormContent({
                     </FormLabel>
                     <FormControl>
                       <ProductKnowledgeSelect
-                        value={productKnowledgeResponse?.results.find(
+                        value={productKnowledgeData?.find(
                           (pk) => pk.id === field.value,
                         )}
                         onChange={(selected) => field.onChange(selected.id)}

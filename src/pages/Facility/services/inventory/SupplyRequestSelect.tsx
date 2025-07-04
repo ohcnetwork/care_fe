@@ -49,12 +49,12 @@ export function SupplyRequestSelect({
 
   const options = mergeAutocompleteOptions(
     requests?.results.map((request) => ({
-      label: `${request.item.name}`,
+      label: `${request.item.name} - (Qty: ${request.quantity})`,
       value: request.id,
     })) || [],
     value
       ? {
-          label: `${value.item.name}`,
+          label: `${value.item.name} - (Qty: ${value.quantity})`,
           value: value.id,
         }
       : undefined,

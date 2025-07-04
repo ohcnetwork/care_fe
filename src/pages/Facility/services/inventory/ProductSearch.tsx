@@ -146,7 +146,7 @@ export function ProductSearch({
       {isCreatingProduct && (
         <ProductFormContent
           facilityId={facilityId}
-          productKnowledgeId={selectedProduct?.product_knowledge.id}
+          productKnowledgeId={productKnowledgeId}
           onSuccess={(product) => {
             setIsCreatingProduct(false);
             hasSetSubmitFunction.current = false;
@@ -161,6 +161,7 @@ export function ProductSearch({
           }}
           disableButtons
           externalSubmitRef={productFormSubmitRef}
+          enabled={enabled && isCreatingProduct}
         />
       )}
     </div>

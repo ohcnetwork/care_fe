@@ -3,7 +3,7 @@ import { LocationList } from "@/types/location/location";
 // import { Code } from "@/types/questionnaire/code";
 
 export interface StylingMetadata {
-  careIcon: string;
+  careIcon?: string;
 }
 
 export enum InternalType {
@@ -15,7 +15,7 @@ export interface BaseHealthcareServiceSpec {
   id: string;
   //   service_type: Code
   name: string;
-  styling_metadata: StylingMetadata | null;
+  styling_metadata: StylingMetadata;
   extra_details: string;
   internal_type?: InternalType;
 }

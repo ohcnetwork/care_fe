@@ -32,6 +32,7 @@ export interface ReceiveStockTableProps {
   setEditingItem: (item: any) => void;
   handleAddItem: () => void;
   handleDeleteItem: (index: number) => void;
+  buttonDisabled: boolean;
 }
 
 export function ReceiveStockTable({
@@ -40,6 +41,7 @@ export function ReceiveStockTable({
   setEditingItem,
   handleAddItem,
   handleDeleteItem,
+  buttonDisabled,
 }: ReceiveStockTableProps) {
   const { t } = useTranslation();
 
@@ -221,7 +223,11 @@ export function ReceiveStockTable({
             {t("no_items_added_yet")}
           </p>
           <p className="mb-4 text-sm">{t("receive_stock_empty_hint")}</p>
-          <Button variant="outline" onClick={handleAddItem}>
+          <Button
+            variant="outline"
+            onClick={handleAddItem}
+            disabled={buttonDisabled}
+          >
             <Plus className="size-4 mr-2" />
             {t("add_item")}
           </Button>

@@ -206,6 +206,7 @@ export function ReceiveStock({
                 e.preventDefault();
                 handleAddItem();
               }}
+              disabled={batchRequest.isPending || !supplier}
             >
               <Plus className="size-4" />
               {t("add_item")}
@@ -233,6 +234,7 @@ export function ReceiveStock({
           setEditingItem={setEditingItem}
           handleAddItem={handleAddItem}
           handleDeleteItem={handleDeleteItem}
+          buttonDisabled={batchRequest.isPending || !supplier}
         />
       </div>
       {editingItem && (
@@ -415,6 +417,7 @@ function AddItemForm({
               </div>
             </Tabs>
             <ProductSearch
+              key={`${activeTab}-product-search`}
               facilityId={facilityId}
               value={currentEntry.supplied_item || undefined}
               onChange={(product: ProductRead) => {

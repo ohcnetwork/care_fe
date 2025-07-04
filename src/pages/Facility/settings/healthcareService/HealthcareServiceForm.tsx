@@ -52,9 +52,10 @@ const formSchema = z.object({
   //   }),
   styling_metadata: z
     .object({
-      careIcon: z.string(),
+      careIcon: z.string().optional(),
     })
-    .nullable(),
+    .nullable()
+    .optional(),
   extra_details: z.string(),
   internal_type: z.nativeEnum(InternalType).optional(),
   locations: z.array(z.string()).min(1, "At least one location is required"),
@@ -147,7 +148,7 @@ function HealthcareServiceFormContent({
             locations: existingData.locations.map((loc) => loc.id),
           }
         : {
-            styling_metadata: null,
+            styling_metadata: { careIcon: "" },
             extra_details: "",
             locations: [],
           },
@@ -188,6 +189,11 @@ function HealthcareServiceFormContent({
   const isPending = isCreating || isUpdating;
 
   function onSubmit(data: FormValues) {
+    // Prepare styling_metadata - only include if careIcon has a value
+    const styling_metadata = data.styling_metadata?.careIcon
+      ? { careIcon: data.styling_metadata.careIcon }
+      : {};
+
     if (isEditMode && healthcareServiceId) {
       updateHealthcareService({
         ...data,
@@ -197,6 +203,7 @@ function HealthcareServiceFormContent({
       const payload: HealthcareServiceCreateSpec = {
         ...data,
         facility: facilityId,
+        styling_metadata,
       };
       createHealthcareService(payload);
     }
