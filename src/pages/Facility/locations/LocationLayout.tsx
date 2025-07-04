@@ -6,7 +6,6 @@ import BedsList from "@/pages/Facility/locations/BedsList";
 import { InventoryList } from "@/pages/Facility/services/inventory/InventoryList";
 import { ReceiveStock } from "@/pages/Facility/services/inventory/ReceiveStock";
 import SupplyRequestForm from "@/pages/Facility/services/inventory/SupplyRequestForm";
-import { ApproveExternalSupplyDelivery } from "@/pages/Facility/services/inventory/externalSupply/ApproveDeliveries";
 import { IncomingDeliveries } from "@/pages/Facility/services/inventory/externalSupply/IncomingDeliveries";
 import { PurchaseOrders } from "@/pages/Facility/services/inventory/externalSupply/PurchaseOrders";
 import PurchaseOrdersBySupplier from "@/pages/Facility/services/inventory/externalSupply/PurchaseOrdersBySupplier";
@@ -239,12 +238,6 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   ),
   "/external_supply/inward_entry/receive": () => (
     <ReceiveStock facilityId={facilityId} locationId={locationId} />
-  ),
-  "/external_supply/inward_entry/approve": () => (
-    <ApproveExternalSupplyDelivery
-      facilityId={facilityId}
-      locationId={locationId}
-    />
   ),
 
   "/medication_requests/patient/:patientId": ({

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { CheckCircleIcon, TruckIcon } from "lucide-react";
+import { TruckIcon } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -96,15 +96,6 @@ export function IncomingDeliveries({ facilityId, locationId }: Props) {
                 >
                   <TruckIcon />
                   {t("receive_stock")}
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild>
-                <Link
-                  href="/external_supply/inward_entry/approve"
-                  className="flex items-center gap-2"
-                >
-                  <CheckCircleIcon />
-                  {t("approve_deliveries")}
                 </Link>
               </Button>
             </div>
