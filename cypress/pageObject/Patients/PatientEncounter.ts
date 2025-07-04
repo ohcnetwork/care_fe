@@ -97,16 +97,16 @@ export class PatientEncounter {
       })
       .first()
       .should("be.visible")
-      .then(() => {
+      .within(() => {
         cy.get("[data-slot='dropdown-menu-trigger']")
           .first()
           .scrollIntoView()
           .click();
-        cy.get("[data-slot='dropdown-menu-item']")
-          .contains("Remove Allergy")
-          .should("be.visible")
-          .click();
       });
+    cy.get("[data-slot='dropdown-menu-item']")
+      .contains("Remove Allergy")
+      .should("be.visible")
+      .click();
 
     return this;
   }
@@ -206,16 +206,16 @@ export class PatientEncounter {
         );
       })
       .first()
-      .then(() => {
+      .within(() => {
         cy.get("[data-slot='dropdown-menu-trigger']")
           .first()
           .scrollIntoView()
           .click();
-        cy.get("[data-slot='dropdown-menu-item']")
-          .contains("Remove Symptom")
-          .should("be.visible")
-          .click();
       });
+    cy.get("[data-slot='dropdown-menu-item']")
+      .contains("Remove Symptom")
+      .should("be.visible")
+      .click();
 
     return this;
   }
@@ -295,16 +295,16 @@ export class PatientEncounter {
       })
       .first()
       .should("be.visible")
-      .then(() => {
+      .within(() => {
         cy.get("[data-slot='dropdown-menu-trigger']")
           .first()
           .scrollIntoView()
           .click();
-        cy.get("[data-slot='dropdown-menu-item']")
-          .contains("Remove Diagnosis")
-          .should("be.visible")
-          .click();
       });
+    cy.get("[data-slot='dropdown-menu-item']")
+      .contains("Remove Diagnosis")
+      .should("be.visible")
+      .click();
 
     return this;
   }
