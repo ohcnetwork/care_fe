@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import { Check, RotateCcw, SwitchCamera, X } from "lucide-react";
+import { Check, Loader2, RotateCcw, SwitchCamera, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Webcam from "react-webcam";
@@ -53,7 +53,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       ? { deviceId: selectedDeviceId }
       : { facingMode: cameraFacingMode };
 
-  const { startStream, stopStream, devices } = useMediaStream({
+  const { startStream, stopStream, devices, state } = useMediaStream({
     constraints: {
       video: videoConstraints,
     },
@@ -122,20 +122,66 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   };
 
   return (
-    <Sheet open={open} onOpenChange={handleClose}>
+    <Sheet open={open} onOpenChange={() => onOpenChange(false)}>
       <SheetContent side="bottom" className="h-[100vh] w-full p-0">
         <div className="relative h-full">
           {!previewImage ? (
             <div className="h-full">
-              <Webcam
-                className="h-full w-full object-cover"
-                forceScreenshotSourceSize
-                screenshotQuality={1}
-                audio={false}
-                screenshotFormat="image/jpeg"
-                ref={webRef}
-                videoConstraints={videoConstraints as MediaTrackConstraints}
-              />
+              {state === "loading" && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-gray-50">
+                  <div className="text-primary-500">
+                    <Loader2 className="size-10 animate-spin" />
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-lg font-semibold">
+                      {t("requesting_camera_access")}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {t("allow_camera_access")}
+                    </span>
+                  </div>
+                </div>
+              )}
+              {state === "denied" && (
+                <div className="fixed inset-0 flex items-center justify-center">
+                  <div className="bg-white rounded-2xl border border-gray-200 flex flex-row items-center p-6 gap-4 mx-4">
+                    <div>
+                      <img
+                        src="/images/camera_block.svg"
+                        alt="Camera blocked"
+                        className="w-60 object-contain"
+                      />
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <h2 className="text-xl font-semibold text-gray-800 mb-6">
+                        {t("camera_permission_denied")}
+                      </h2>
+
+                      <ol className="space-y-4 text-gray-600">
+                        <li className="flex items-start gap-2">
+                          <span className="font-medium">1.</span>
+                          {t("click_the_settings_icon_in_browser_address_bar")}
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="font-medium">2.</span>
+                          <span>{t("clear_blocked_camera_permissions")}</span>
+                        </li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {state === "accepted" && (
+                <Webcam
+                  className="h-full w-full object-cover"
+                  forceScreenshotSourceSize
+                  screenshotQuality={1}
+                  audio={false}
+                  screenshotFormat="image/jpeg"
+                  ref={webRef}
+                  videoConstraints={videoConstraints as MediaTrackConstraints}
+                />
+              )}
 
               <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center mb-4 h-20">
                 <div className="flex items-center justify-between gap-8">
@@ -147,14 +193,14 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="secondary"
-                          className="rounded-full w-13 h-13"
+                          className="rounded-full size-13"
                         >
                           <SwitchCamera className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="w-full" align="start">
                         <DropdownMenuLabel className="flex items-center gap-2 text-md font-medium">
-                          <SwitchCamera className="w-4 h-4" />
+                          <SwitchCamera className="size-4" />
                           {t("select_camera")}
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
@@ -173,7 +219,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                               }}
                             >
                               <div className="flex items-center gap-3">
-                                <CareIcon icon="l-camera" className="w-4 h-4" />
+                                <CareIcon icon="l-camera" className="size-4" />
                                 <div className="flex-1">
                                   <div className="font-medium text-sm">
                                     {camera.label}
@@ -189,13 +235,13 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                                     className="text-xs"
                                   >
                                     {selectedDeviceId === camera.deviceId
-                                      ? "Selected"
+                                      ? t("selected")
                                       : camera.kind === "videoinput"
-                                        ? "Built-in"
-                                        : "External"}
+                                        ? t("built_in")
+                                        : t("external")}
                                   </Badge>
                                   {selectedDeviceId === camera.deviceId && (
-                                    <div className="w-2 h-2 bg-green-500 rounded-full" />
+                                    <div className="size-2 bg-green-500 rounded-full" />
                                   )}
                                 </div>
                               </div>
@@ -208,9 +254,9 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                     <Button
                       variant="secondary"
                       onClick={handleSwitchCamera}
-                      className="rounded-full w-12 h-12"
+                      className="rounded-full size-12"
                     >
-                      <SwitchCamera className="w-4 h-4" />
+                      <SwitchCamera className="size-4" />
                     </Button>
                   )}
                   <Button
@@ -219,17 +265,17 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       captureImage();
                       setPreview?.(true);
                     }}
-                    className="bg-white rounded-full w-18 h-18 flex items-center justify-center cursor-pointer [&_svg]:px-0 !p-0"
+                    className="bg-white rounded-full size-18 flex items-center justify-center cursor-pointer [&_svg]:px-0 !p-0"
                   >
-                    <div className="w-16 h-16 rounded-full bg-white border-2 border-black flex items-center justify-center"></div>
+                    <div className="size-16 rounded-full bg-white border-2 border-black flex items-center justify-center"></div>
                   </Button>
 
                   <Button
                     variant="secondary"
                     onClick={handleClose}
-                    className="rounded-full w-13 h-13"
+                    className="rounded-full size-13"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="size-5" />
                   </Button>
                 </div>
               </div>
@@ -254,9 +300,9 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       setPreview?.(false);
                     }}
                     data-cy="retake-button"
-                    className="rounded-full w-13 h-13"
+                    className="rounded-full size-13"
                   >
-                    <RotateCcw className="w-6 h-6" />
+                    <RotateCcw className="size-6" />
                   </Button>
 
                   <Button
@@ -267,16 +313,16 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       setPreview?.(false);
                     }}
                     data-cy="capture-submit-button"
-                    className="w-18 h-18 rounded-full flex items-center justify-center [&_svg]:size-7"
+                    className="size-18 rounded-full flex items-center justify-center [&_svg]:size-7"
                   >
                     <Check className="text-white" />
                   </Button>
                   <Button
                     variant="secondary"
                     onClick={handleClose}
-                    className="rounded-full w-13 h-13"
+                    className="rounded-full size-13"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="size-5" />
                   </Button>
                 </div>
               </div>

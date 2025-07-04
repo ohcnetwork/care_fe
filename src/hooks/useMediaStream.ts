@@ -7,6 +7,8 @@ interface useMediaStreamProps {
   onError?: () => void;
 }
 
+type MediaStreamState = "accepted" | "denied" | "loading";
+
 const loadCameraDevices = async () => {
   return await navigator.mediaDevices.enumerateDevices();
 };
@@ -18,6 +20,7 @@ export const useMediaStream = ({
   const streamRef = useRef<MediaStream | null>(null);
   const { requestPermission } = useMediaDevicePermission();
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [state, setState] = useState<MediaStreamState>("loading");
 
   useEffect(() => {
     navigator.mediaDevices.addEventListener("devicechange", loadCameraDevices);
@@ -32,16 +35,18 @@ export const useMediaStream = ({
 
   const startStream = useCallback(async () => {
     try {
+      setState("loading");
       const { hasPermission, mediaStream } =
         await requestPermission(constraints);
 
       if (!hasPermission || !mediaStream) {
+        setState("denied");
         onError?.();
         return;
       }
 
       setDevices(await loadCameraDevices());
-
+      setState("accepted");
       streamRef.current = mediaStream;
 
       return mediaStream;
@@ -66,5 +71,6 @@ export const useMediaStream = ({
     stopStream,
     stream: streamRef.current,
     devices,
+    state,
   };
 };
