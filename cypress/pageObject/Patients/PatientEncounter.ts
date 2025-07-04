@@ -166,7 +166,6 @@ export class PatientEncounter {
       .should("be.visible")
       .find('[data-slot="select-item"]')
       .contains(value)
-      .should("be.visible")
       .click();
 
     return this;
