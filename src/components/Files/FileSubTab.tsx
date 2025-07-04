@@ -345,7 +345,7 @@ export const FilesPage = ({
     if (!canEdit) return null;
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger asChild className="">
+        <DropdownMenuTrigger asChild>
           <Button
             variant="outline_primary"
             className="w-full sm:w-auto flex flex-row items-center mr-2"
