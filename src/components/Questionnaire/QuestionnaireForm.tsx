@@ -334,7 +334,7 @@ export function QuestionnaireForm({
   >([]);
   const [serverErrors, setServerErrors] = useState<ServerValidationError[]>();
   const [activeQuestionnaireId] = useState<string>();
-  const [activeGroupId] = useState<string>();
+  const [activeGroupId, setActiveGroupId] = useState<string>();
   const [activeQuestionId, setActiveQuestionId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -753,7 +753,16 @@ export function QuestionnaireForm({
                           "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
                           activeGroupId === question.id && "text-green-600",
                         )}
-                        disabled
+                        onClick={() => {
+                          const el = document.getElementById(
+                            `question-${question.id}`,
+                          );
+                          if (el)
+                            el.scrollIntoView({
+                              behavior: "smooth",
+                              block: "start",
+                            });
+                        }}
                       >
                         {`${index + 1}. ${question.text}`}
                       </button>
@@ -769,7 +778,18 @@ export function QuestionnaireForm({
                                 activeQuestionId === sub.id &&
                                   "border border-green-600 text-green-600 bg-white shadow-sm",
                               )}
-                              disabled
+                              onClick={() => {
+                                const el = document.getElementById(
+                                  `question-${sub.id}`,
+                                );
+                                if (el)
+                                  el.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "start",
+                                  });
+                                setActiveQuestionId(sub.id);
+                                setActiveGroupId(undefined);
+                              }}
                             >
                               {`${index + 1}.${subIndex + 1} ${sub.text}`}
                             </button>
@@ -789,7 +809,18 @@ export function QuestionnaireForm({
                       activeQuestionId === question.id &&
                         "border border-green-600 text-green-600 bg-white shadow-sm",
                     )}
-                    disabled
+                    onClick={() => {
+                      const el = document.getElementById(
+                        `question-${question.id}`,
+                      );
+                      if (el)
+                        el.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        });
+                      setActiveQuestionId(question.id);
+                      setActiveGroupId(undefined);
+                    }}
                   >
                     {`${index + 1}. ${question.text}`}
                   </button>
