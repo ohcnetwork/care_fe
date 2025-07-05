@@ -1,5 +1,13 @@
+import { DotFilledIcon } from "@radix-ui/react-icons";
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { Building, ChevronDown, ChevronRight, Loader2, X } from "lucide-react";
+import {
+  ArrowRight,
+  Building,
+  ChevronDown,
+  ChevronRight,
+  Loader2,
+  X,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -51,8 +59,9 @@ export default function FacilityOrganizationSelector(
   } = props;
 
   const [selectedOrganizations, setSelectedOrganizations] = useState<
-    FacilityOrganization[]
+    FacilityOrganization[][]
   >([]);
+
   const [currentSelection, setCurrentSelection] =
     useState<FacilityOrganization | null>(null);
   const [navigationLevels, setNavigationLevels] = useState<
@@ -63,6 +72,9 @@ export default function FacilityOrganizationSelector(
   const [open, setOpen] = useState(false);
   const [alreadySelected, setAlreadySelected] = useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
+  const [pendingSelection, setPendingSelection] =
+    useState<FacilityOrganization | null>(null);
+
   const { data: rootOrganizations, isLoading: isLoadingRoot } = useQuery({
     queryKey: ["facilityOrganization", facilityOrgSearch, showAllOrgs],
     queryFn: query.debounced(
@@ -97,38 +109,57 @@ export default function FacilityOrganizationSelector(
     const isAlreadySelected = !!currentOrganizations?.find(
       (o) => o.id === org.id,
     );
-    if (isAlreadySelected) {
-      setAlreadySelected(true);
-      setCurrentSelection(org);
-      setFacilityOrgSearch("");
-      return;
-    }
+
+    setAlreadySelected(isAlreadySelected);
+    setCurrentSelection(org);
+    setPendingSelection(org);
+
     if (org.has_children) {
       setNavigationLevels([...navigationLevels, org]);
-    } else {
-      handleConfirmSelection(org);
     }
-    setCurrentSelection(org);
+
     setFacilityOrgSearch("");
   };
 
-  const handleConfirmSelection = (org: FacilityOrganization) => {
-    if (!selectedOrganizations.includes(org)) {
-      const newSelection = [...selectedOrganizations, org];
-      setSelectedOrganizations(newSelection);
-      onChange(newSelection.map((org) => org.id));
-      setAlreadySelected(true);
+  const handleConfirmSelection = () => {
+    if (!pendingSelection) return;
+
+    const path = [...navigationLevels];
+    if (!path.find((org) => org.id === pendingSelection.id)) {
+      path.push(pendingSelection);
     }
+
+    if (
+      !selectedOrganizations.some(
+        (selPath) => selPath[selPath.length - 1].id === pendingSelection.id,
+      )
+    ) {
+      const newSelection = [...selectedOrganizations, path];
+      setSelectedOrganizations(newSelection);
+      onChange(newSelection.map((sel) => sel[sel.length - 1].id));
+    }
+
     setCurrentSelection(null);
+    setPendingSelection(null);
     setNavigationLevels([]);
     setOpen(false);
+  };
+
+  const handleCancelSelection = () => {
+    if (navigationLevels.length > 0) {
+      setNavigationLevels(navigationLevels.slice(0, -1));
+    }
+    setCurrentSelection(null);
+    setPendingSelection(null);
   };
 
   const handleRemoveOrganization = (index: number) => {
     const newSelection = selectedOrganizations.filter((_, i) => i !== index);
     setSelectedOrganizations(newSelection);
     onChange(
-      newSelection.length > 0 ? newSelection.map((org) => org.id) : null,
+      newSelection.length > 0
+        ? newSelection.map((sel) => sel[sel.length - 1].id)
+        : null,
     );
   };
 
@@ -156,30 +187,56 @@ export default function FacilityOrganizationSelector(
     return lastQuery?.data?.results || [];
   };
 
-  const renderNavigationPath = () => {
+  // const renderNavigationPath = () => {
+  //   return (
+  //     <div className="flex items-center gap-2 flex-wrap">
+  //       {/* Clear button */}
+  //       <button
+  //         type="button"
+  //         onClick={() => setNavigationLevels([])}
+  //         className="text-sm font-medium text-gray-700 hover:text-primary-600 cursor-pointer"
+  //       >
+  //         <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
+  //       </button>
+  //       {navigationLevels.map((org, index) => (
+  //         <div key={org.id} className="flex items-center gap-2">
+  //           <button
+  //             type="button"
+  //             onClick={() => {
+  //               setNavigationLevels(navigationLevels.slice(0, index + 1));
+  //               setFacilityOrgSearch("");
+  //             }}
+  //             className="text-sm font-medium text-gray-700 hover:text-primary-600 cursor-pointer"
+  //           >
+  //             {org.name}
+  //           </button>
+  //           {/* <ChevronRight className="h-3 w-3 text-gray-400 flex-shrink-0" /> */}
+  //         </div>
+  //       ))}
+  //     </div>
+  //   );
+  // };
+
+  const getCurrentSelectionPathLabel = () => {
+    const path = [...navigationLevels];
+
+    if (
+      currentSelection &&
+      (!path.length || path[path.length - 1].id !== currentSelection.id)
+    ) {
+      path.push(currentSelection);
+    }
+
+    if (path.length === 0) return t("select_department");
+
     return (
-      <div className="flex items-center gap-2 flex-wrap">
-        {/* Clear button */}
-        <button
-          type="button"
-          onClick={() => setNavigationLevels([])}
-          className="text-sm font-medium text-gray-700 hover:text-primary-600 cursor-pointer"
-        >
-          <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
-        </button>
-        {navigationLevels.map((org, index) => (
-          <div key={org.id} className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setNavigationLevels(navigationLevels.slice(0, index + 1));
-                setFacilityOrgSearch("");
-              }}
-              className="text-sm font-medium text-gray-700 hover:text-primary-600 cursor-pointer"
-            >
-              {org.name}
-            </button>
-            <ChevronRight className="h-3 w-3 text-gray-400 flex-shrink-0" />
+      <div className="flex items-center gap-1 flex-wrap">
+        {path.map((org, index) => (
+          <div key={org.id} className="flex items-center">
+            <span className="truncate">{org.name}</span>
+            {index !== path.length - 1 && (
+              <ArrowRight className="mx-1 h-4 w-4 text-gray-400" />
+            )}
           </div>
         ))}
       </div>
@@ -189,24 +246,7 @@ export default function FacilityOrganizationSelector(
   const renderOrganizationPopover = (className?: string) => {
     return (
       <Command className={className}>
-        <div className="flex flex-col px-3 py-2 border-b sticky top-0 bg-white z-10">
-          <span className="font-semibold text-base text-gray-900">
-            {t("select_department")}
-          </span>
-          <span className="text-sm text-gray-500 mt-0.5">
-            {t("select_department_description")}
-          </span>
-        </div>
-        <div className="flex items-center px-3 py-2 border-b sticky top-[48px] bg-white z-10">
-          {navigationLevels.length > 0 ? (
-            renderNavigationPath()
-          ) : (
-            <span className="text-sm text-gray-500">
-              {t("select_from_list")}
-            </span>
-          )}
-        </div>
-        <div className="flex items-center border-b px-3 sticky top-[96px] bg-white z-10">
+        <div className="flex items-center border-b px-3 bg-white z-10">
           <CommandInput
             placeholder={t("search_organizations")}
             onValueChange={setFacilityOrgSearch}
@@ -215,7 +255,7 @@ export default function FacilityOrganizationSelector(
           />
         </div>
         <CommandList
-          className="max-h-[calc(100vh-30rem)]"
+          className="max-h-[calc(100vh-40rem)] overflow-y-scroll"
           onWheel={(e) => e.stopPropagation()}
         >
           <CommandEmpty>
@@ -257,8 +297,10 @@ export default function FacilityOrganizationSelector(
                         />
                       )}
                     </div>
-                    {org.has_children && (
-                      <ChevronRight className="h-4 w-4 opacity-50" />
+                    {org.has_children ? (
+                      <ChevronRight className="h-4 w-4 font-bold" />
+                    ) : (
+                      <DotFilledIcon className="h-4 w-4 font-bold" />
                     )}
                   </CommandItem>
                 );
@@ -272,7 +314,7 @@ export default function FacilityOrganizationSelector(
                 {t("selected")}
               </span>
               <span className="font-medium text-sm text-sky-900">
-                {currentSelection.name}
+                {getCurrentSelectionPathLabel()}
               </span>
             </div>
             {alreadySelected && !currentSelection.has_children && (
@@ -287,27 +329,38 @@ export default function FacilityOrganizationSelector(
                 <CareIcon icon="l-multiply" className="h-4 w-4" />
               </Button>
             )}
-            {currentSelection.has_children && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 gap-2"
-                onClick={() => handleConfirmSelection(currentSelection)}
-                disabled={isDisabled}
-                data-cy="confirm-organization"
-              >
-                {isDisabled ? (
-                  <>
-                    <span>{t("already_selected")}</span>
-                    <CareIcon icon="l-multiply" className="h-4 w-4" />
-                  </>
-                ) : (
-                  <>
-                    <span>{t("confirm")}</span>
-                    <CareIcon icon="l-check" className="h-4 w-4" />
-                  </>
-                )}
-              </Button>
+            {pendingSelection && (
+              <div className="flex items-center justify-between px-3 py-2 border-sky-200 rounded-md">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="white"
+                    size="sm"
+                    className="h-8"
+                    onClick={handleCancelSelection}
+                  >
+                    {t("cancel")}
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="h-8"
+                    onClick={handleConfirmSelection}
+                    disabled={isDisabled}
+                  >
+                    {isDisabled ? (
+                      <>
+                        <span>{t("already_selected")}</span>
+                        <CareIcon icon="l-multiply" className="h-4 w-4" />
+                      </>
+                    ) : (
+                      <>
+                        <span>{t("confirm")}</span>
+                        <CareIcon icon="l-check" className="h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
             )}
           </div>
         )}
@@ -316,24 +369,18 @@ export default function FacilityOrganizationSelector(
   };
 
   const isDisabled = useMemo(() => {
-    return (
-      selectedOrganizations.some((org) => org.id === currentSelection?.id) ||
-      (!!currentOrganizations &&
-        currentOrganizations.some((org) => org.id === currentSelection?.id))
+    const selectedIds = selectedOrganizations.map(
+      (path) => path[path.length - 1].id,
     );
-  }, [currentSelection, currentOrganizations, selectedOrganizations]);
+    return (
+      selectedIds.includes(pendingSelection?.id || "") ||
+      (!!currentOrganizations &&
+        currentOrganizations.some((org) => org.id === pendingSelection?.id))
+    );
+  }, [pendingSelection, currentOrganizations, selectedOrganizations]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="space-y-1">
-          <Label>
-            {t("select_department")}
-            <span className="text-red-500 ml-0.5">*</span>
-          </Label>
-        </div>
-      </div>
-
+    <div className="space-y-2">
       <Tabs
         value={showAllOrgs ? "all" : "mine"}
         onValueChange={handleOrganizationViewChange}
@@ -348,32 +395,10 @@ export default function FacilityOrganizationSelector(
           </TabsTrigger>
         </TabsList>
       </Tabs>
-
-      <div className="space-y-3">
-        <div className="space-y-3">
+      <div className="mt-6">
+        <Label className="font-medium mb-2">{t("select_department")}</Label>
+        <div className="space-y-4">
           <div className="flex flex-col gap-2">
-            {selectedOrganizations.map((org, index) => (
-              <div
-                key={index}
-                className="flex-1 flex items-center gap-3 rounded-md border border-sky-100 bg-sky-50/50 p-2.5"
-              >
-                <Building className="size-4 text-sky-600 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm text-sky-900 truncate">
-                    {org.name}
-                  </p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="size-8 p-0 text-gray-500 hover:text-gray-900"
-                  onClick={() => handleRemoveOrganization(index)}
-                >
-                  <X className="size-4" />
-                  <span className="sr-only">{t("remove_organization")}</span>
-                </Button>
-              </div>
-            ))}
             {(!singleSelection ||
               (singleSelection && selectedOrganizations.length < 1)) &&
               (isMobile ? (
@@ -387,17 +412,19 @@ export default function FacilityOrganizationSelector(
                         className="w-full justify-between border-dashed"
                         data-cy="facility-organization"
                         onClick={() => setOpen(true)}
-                        type="button" // Prevents unintended form submission
+                        type="button"
                       >
                         <span className="truncate text-gray-500">
-                          {currentSelection
-                            ? currentSelection.name
-                            : t("select_department")}
+                          {getCurrentSelectionPathLabel()}
                         </span>
                         <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </SheetTrigger>
-                    <SheetContent className="p-0" side="bottom">
+
+                    <SheetContent
+                      className="p-0 h-1/3 overflow-auto"
+                      side="bottom"
+                    >
                       {renderOrganizationPopover("mb-12")}
                     </SheetContent>
                   </Sheet>
@@ -413,22 +440,65 @@ export default function FacilityOrganizationSelector(
                       data-cy="facility-organization"
                     >
                       <span className="truncate text-gray-500">
-                        {currentSelection
-                          ? currentSelection.name
-                          : t("select_department")}
+                        {getCurrentSelectionPathLabel()}
                       </span>
-                      <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      <ChevronRight className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
                     align="start"
                     sideOffset={4}
-                    className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-auto"
+                    className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh]"
                   >
                     {renderOrganizationPopover()}
                   </PopoverContent>
                 </Popover>
               ))}
+            {selectedOrganizations.length > 0 && (
+              <div className="mt-6">
+                <span className="font-semibold">
+                  Newly Selected Organization
+                </span>
+                {selectedOrganizations.map((path, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className="flex-1 flex items-center gap-3 rounded-md border border-sky-100 bg-blue-300 p-2.5 my-2"
+                    >
+                      <Building className="size-4 text-sky-600 shrink-0" />
+                      <div className="flex-1 min-w-0 overflow-hidden">
+                        <div className="font-medium text-sm text-sky-900 flex items-center flex-wrap gap-1 truncate">
+                          {path.map((org, idx) => (
+                            <div
+                              key={org.id}
+                              className="flex items-center truncate"
+                            >
+                              <span className="truncate font-medium">
+                                {org.name}
+                              </span>
+                              {idx !== path.length - 1 && (
+                                <ArrowRight className="mx-1 h-4 w-4 font-bold shrink-0" />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="size-8 p-0 text-gray-500 hover:text-gray-900"
+                        onClick={() => handleRemoveOrganization(index)}
+                      >
+                        <X className="size-4" />
+                        <span className="sr-only">
+                          {t("remove_organization")}
+                        </span>
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>

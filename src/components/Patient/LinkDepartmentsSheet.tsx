@@ -230,7 +230,6 @@ export default function LinkDepartmentsSheet({
 
   const handleAddOrganizations = () => {
     if (!selectedOrgs?.length) return;
-
     const { route, pathParams } = getMutationParams(
       entityType,
       entityId,
@@ -277,64 +276,47 @@ export default function LinkDepartmentsSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="w-full overflow-y-scroll sm:max-w-3xl space-y-4">
         <SheetHeader>
           <SheetTitle>
-            {t("manage_organization", {
-              count: entityType === "device" ? 1 : 0,
-            })}
+            <h4 className="font-semibold">
+              {t("manage_organization", {
+                count: entityType === "device" ? 1 : 0,
+              })}
+            </h4>
           </SheetTitle>
           <SheetDescription>
-            {t("manage_organization_description", {
-              entityType,
-              count: entityType === "device" ? 1 : 0,
-            })}
+            <span className="size-2.5 text-gray-500">
+              {t("manage_organization_description", {
+                entityType,
+                count: entityType === "device" ? 1 : 0,
+              })}
+            </span>
           </SheetDescription>
         </SheetHeader>
 
-        <div className="space-y-6 py-4">
-          <div className="space-y-4">
-            <div className="space-y-4">
-              <FacilityOrganizationSelector
-                facilityId={facilityId}
-                value={selectedOrgs}
-                onChange={setSelectedOrgs}
-                currentOrganizations={currentOrganizations}
-                singleSelection={entityType === "device"}
-              />
-
-              <Button
-                className="w-full"
-                data-cy="add-organization"
-                onClick={handleAddOrganizations}
-                disabled={!selectedOrgs?.length || isAdding}
-              >
-                {isAdding && <Loader2 className="mr-2 size-4 animate-spin" />}
-                {t("add_organization", {
-                  count: entityType === "device" ? 1 : 0,
-                })}
-              </Button>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium">
+        <div className="scroll-auto">
+          {currentOrganizations.length > 0 ? (
+            <div className="space-y-2">
+              <span className="size-2.5 font-semibold">
                 {t("current_organization", {
                   count: entityType === "device" ? 1 : 0,
                 })}
-              </h3>
-              <div className="space-y-2">
+              </span>
+              <div className=" space-y-2 mt-2">
                 {currentOrganizations.map((org) => (
                   <div
                     key={org.id}
-                    className="flex items-center justify-between rounded-md border border-gray-200 p-2"
+                    className="flex items-center justify-between rounded-md bg-gray-100 border border-gray-300 p-2"
                   >
                     <div className="flex items-center space-x-2">
-                      <Building className="size-4 text-blue-400" />
+                      <Building className="size-4 text-gray-700" />
                       <div className="flex flex-col">
                         <span
                           className="font-medium"
                           data-cy="link-organisation-name"
                         >
+                          {/* show whole path here */}
                           {org.name}
                         </span>
                         {org.description && (
@@ -360,6 +342,40 @@ export default function LinkDepartmentsSheet({
                     })}
                   </p>
                 )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col justify-center items-center w-full bg-white py-24 px-12 gap-4 mt-4">
+              <Building className="size-4 shrink-0" />
+              <p className="font-medium">No organization added yet</p>
+              <p className="text-sm ml-6">
+                Start by adding organization from your Organizations.
+              </p>
+            </div>
+          )}
+
+          <div className="border-t-2 border-dashed border-gray-500 h-2 mt-8"></div>
+          <div className="h-full flex flex-col mt-4">
+            <div className="mt-4">
+              <FacilityOrganizationSelector
+                facilityId={facilityId}
+                value={selectedOrgs}
+                onChange={setSelectedOrgs}
+                currentOrganizations={currentOrganizations}
+                singleSelection={entityType === "device"}
+              />
+              <div className="flex justify-end mt-4">
+                <Button
+                  className="w-fit"
+                  data-cy="add-organization"
+                  onClick={handleAddOrganizations}
+                  disabled={!selectedOrgs?.length || isAdding}
+                >
+                  {isAdding && <Loader2 className="mr-2 size-4 animate-spin" />}
+                  {t("add_organization", {
+                    count: entityType === "device" ? 1 : 0,
+                  })}
+                </Button>
               </div>
             </div>
           </div>
