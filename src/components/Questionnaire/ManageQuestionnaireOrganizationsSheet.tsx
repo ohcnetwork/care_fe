@@ -152,6 +152,9 @@ export default function ManageQuestionnaireOrganizationsSheet({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedOrgDetails, setSelectedOrgDetails] = useState<
+    { id: string; name: string; description?: string }[]
+  >([]);
 
   const { data: organizations, isLoading } = useQuery({
     queryKey: ["questionnaire", questionnaireId, "organizations"],
@@ -204,16 +207,22 @@ export default function ManageQuestionnaireOrganizationsSheet({
   const handleSave = () => {
     setOrganizations({ organizations: selectedIds });
   };
-
-  const selectedOrganizations = [
-    ...(organizations?.results ?? []),
-    ...(availableOrganizations?.results ?? []),
-  ].filter((org, idx, arr) => {
-    return (
-      selectedIds.includes(org.id) &&
-      arr.findIndex((o) => o.id === org.id) === idx // de-duplication
+  useEffect(() => {
+    const allOrgs = [
+      ...(organizations?.results ?? []),
+      ...(availableOrganizations?.results ?? []),
+    ];
+    setSelectedOrgDetails((prev) =>
+      selectedIds.map((id) => {
+        return (
+          allOrgs.find((org) => org.id === id) ||
+          prev.find((org) => org.id === id) || { id, name: id }
+        );
+      }),
     );
-  });
+  }, [selectedIds, organizations?.results, availableOrganizations?.results]);
+
+  const selectedOrganizations = selectedOrgDetails;
 
   const hasChanges = !organizations?.results
     ? false
