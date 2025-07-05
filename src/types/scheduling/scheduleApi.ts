@@ -6,6 +6,7 @@ import {
   AppointmentUpdateRequest,
   AvailabilityHeatmapRequest,
   AvailabilityHeatmapResponse,
+  GetSlotsForDayResponse,
   ScheduleAvailability,
   ScheduleAvailabilityCreateRequest,
   ScheduleException,
@@ -13,7 +14,6 @@ import {
   ScheduleTemplate,
   ScheduleTemplateCreateRequest,
   ScheduleTemplateUpdateRequest,
-  TokenSlot,
 } from "@/types/scheduling/schedule";
 import { UserBase } from "@/types/user/user";
 
@@ -100,7 +100,7 @@ export default {
     getSlotsForDay: {
       path: "/api/v1/facility/{facility_id}/slots/get_slots_for_day/",
       method: HttpMethod.POST,
-      TRes: Type<{ results: TokenSlot[] }>(),
+      TRes: Type<GetSlotsForDayResponse>(),
       TBody: Type<{ user: string; day: string }>(),
     },
     availabilityStats: {

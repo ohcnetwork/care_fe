@@ -1,5 +1,7 @@
 import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
 
+import { Badge } from "@/components/ui/badge";
+
 import { Time } from "@/Utils/types";
 import { Patient } from "@/types/emr/patient";
 import { FacilityBareMinimum } from "@/types/facility/facility";
@@ -89,6 +91,10 @@ export interface TokenSlot {
   allocated: number;
 }
 
+export interface GetSlotsForDayResponse {
+  results: TokenSlot[];
+}
+
 export interface AvailabilityHeatmapRequest {
   from_date: string;
   to_date: string;
@@ -142,7 +148,10 @@ export const APPOINTMENT_STATUS_COLORS = {
   cancelled: "destructive",
   entered_in_error: "destructive",
   rescheduled: "yellow",
-} as const satisfies Record<AppointmentStatus, string>;
+} as const satisfies Record<
+  AppointmentStatus,
+  React.ComponentProps<typeof Badge>["variant"]
+>;
 
 export type AppointmentNonCancelledStatus =
   (typeof AppointmentNonCancelledStatuses)[number];
