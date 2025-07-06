@@ -177,14 +177,16 @@ function DeleteOrganizationButton({
   );
 }
 
-function buildOrgPath(org: any): JSX.Element {
+function buildOrgPath(
+  org: FacilityOrganization | null | undefined,
+): JSX.Element {
   if (!org) return <></>;
 
   const path: string[] = [];
-  let currentOrg = org;
-  while (currentOrg && currentOrg.name) {
+  let currentOrg: FacilityOrganization | undefined = org;
+  while (currentOrg?.name) {
     path.unshift(currentOrg.name);
-    currentOrg = currentOrg.parent;
+    currentOrg = currentOrg.parent as FacilityOrganization | undefined;
   }
   return (
     <>

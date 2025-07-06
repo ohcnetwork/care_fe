@@ -212,6 +212,16 @@ export default function FacilityOrganizationSelector(
       </div>
     );
   };
+  const isDisabled = useMemo(() => {
+    const selectedIds = selectedOrganizations.map(
+      (path) => path[path.length - 1].id,
+    );
+    return (
+      selectedIds.includes(pendingSelection?.id || "") ||
+      (!!currentOrganizations &&
+        currentOrganizations.some((org) => org.id === pendingSelection?.id))
+    );
+  }, [pendingSelection, currentOrganizations, selectedOrganizations]);
 
   const renderOrganizationPopover = (className?: string) => {
     return (
@@ -337,17 +347,6 @@ export default function FacilityOrganizationSelector(
       </Command>
     );
   };
-
-  const isDisabled = useMemo(() => {
-    const selectedIds = selectedOrganizations.map(
-      (path) => path[path.length - 1].id,
-    );
-    return (
-      selectedIds.includes(pendingSelection?.id || "") ||
-      (!!currentOrganizations &&
-        currentOrganizations.some((org) => org.id === pendingSelection?.id))
-    );
-  }, [pendingSelection, currentOrganizations, selectedOrganizations]);
 
   return (
     <div className="space-y-2">
