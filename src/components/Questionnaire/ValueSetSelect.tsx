@@ -481,6 +481,7 @@ export default function ValueSetSelect({
           <PopoverTrigger asChild disabled={disabled}>
             <div className={cn(value?.display ? "w-full" : "mr-11")}>
               <Button
+                type="button"
                 variant="outline"
                 role="combobox"
                 className={cn(
