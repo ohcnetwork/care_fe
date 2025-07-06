@@ -178,19 +178,24 @@ function DeleteOrganizationButton({
 }
 
 function buildOrgPath(org: any): JSX.Element {
-  if (!org || !org.name) return <></>;
+  if (!org) return <></>;
 
-  if (!org.parent || org.parent === "") {
-    return <span>{org.name}</span>;
-  }
-
-  const parentPath = buildOrgPath(org.parent);
-  if (!org.parent) {
-    return <span>{org.name}</span>;
+  const path: string[] = [];
+  let currentOrg = org;
+  while (currentOrg && currentOrg.name) {
+    path.unshift(currentOrg.name);
+    currentOrg = currentOrg.parent;
   }
   return (
     <>
-      {parentPath} <ArrowRight className="inline mx-1" /> {org.name}
+      {path.map((name, index) => (
+        <span key={name}>
+          {name}
+          {index < path.length - 1 && (
+            <ArrowRight className="inline size-4 mx-1" />
+          )}
+        </span>
+      ))}
     </>
   );
 }
@@ -356,27 +361,26 @@ export default function LinkDepartmentsSheet({
                     </div>
                   );
                 })}
-
-                {currentOrganizations.length === 0 && (
-                  <p className="text-sm text-gray-500">
-                    {t("no_organization_added_yet", {
-                      count: entityType === "device" ? 1 : 0,
-                    })}
-                  </p>
-                )}
               </div>
             </div>
           ) : (
-            <div className="flex flex-col justify-center items-center w-full bg-white py-24 px-12 gap-4 mt-4">
+            <div className="flex flex-col justify-center items-center w-full bg-gray-50 py-24 px-12 gap-4 mt-4 border rounded-md">
               <Building className="size-4 shrink-0" />
-              <p className="font-medium">No organization added yet</p>
-              <p className="text-sm ml-6">
-                Start by adding an organization from your Organizations.
+              <p className="font-medium text-center">
+                {t("no_organization_added_yet", {
+                  count: entityType === "device" ? 1 : 0,
+                })}
+              </p>
+              <p className="text-sm ml-6 text-center">
+                {t("add_organizations_for_organization")}
               </p>
             </div>
           )}
-
-          <div className="border-t-2 border-dashed border-gray-500 h-2 mt-8"></div>
+          <div className="mt-8 space-y-0.5">
+            <div className="border-t-1 border-dotted border-gray-500"></div>
+            <div className="border-t-1 border-dotted border-gray-500"></div>
+            <div className="border-t-1 border-dotted border-gray-500"></div>
+          </div>
           <div className="h-full flex flex-col mt-4">
             <div className="mt-4">
               <FacilityOrganizationSelector

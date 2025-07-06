@@ -187,36 +187,6 @@ export default function FacilityOrganizationSelector(
     return lastQuery?.data?.results || [];
   };
 
-  // const renderNavigationPath = () => {
-  //   return (
-  //     <div className="flex items-center gap-2 flex-wrap">
-  //       {/* Clear button */}
-  //       <button
-  //         type="button"
-  //         onClick={() => setNavigationLevels([])}
-  //         className="text-sm font-medium text-gray-700 hover:text-primary-600 cursor-pointer"
-  //       >
-  //         <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
-  //       </button>
-  //       {navigationLevels.map((org, index) => (
-  //         <div key={org.id} className="flex items-center gap-2">
-  //           <button
-  //             type="button"
-  //             onClick={() => {
-  //               setNavigationLevels(navigationLevels.slice(0, index + 1));
-  //               setFacilityOrgSearch("");
-  //             }}
-  //             className="text-sm font-medium text-gray-700 hover:text-primary-600 cursor-pointer"
-  //           >
-  //             {org.name}
-  //           </button>
-  //           {/* <ChevronRight className="h-3 w-3 text-gray-400 flex-shrink-0" /> */}
-  //         </div>
-  //       ))}
-  //     </div>
-  //   );
-  // };
-
   const getCurrentSelectionPathLabel = () => {
     const path = [...navigationLevels];
 
@@ -417,7 +387,7 @@ export default function FacilityOrganizationSelector(
                         <span className="truncate text-gray-500">
                           {getCurrentSelectionPathLabel()}
                         </span>
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        <ChevronDown className="ml-2 size-4 shrink-0 opacity-50" />
                       </Button>
                     </SheetTrigger>
 
@@ -442,7 +412,7 @@ export default function FacilityOrganizationSelector(
                       <span className="truncate text-gray-500">
                         {getCurrentSelectionPathLabel()}
                       </span>
-                      <ChevronRight className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      <ChevronRight className="ml-2 size-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
@@ -457,7 +427,7 @@ export default function FacilityOrganizationSelector(
             {selectedOrganizations.length > 0 && (
               <div className="mt-6">
                 <span className="font-semibold">
-                  Newly Selected Organization
+                  {t("new_added_organization")}
                 </span>
                 {selectedOrganizations.map((path, index) => {
                   return (
@@ -467,17 +437,14 @@ export default function FacilityOrganizationSelector(
                     >
                       <Building className="size-4 text-sky-600 shrink-0" />
                       <div className="flex-1 min-w-0 overflow-hidden">
-                        <div className="font-medium text-sm text-sky-900 flex items-center flex-wrap gap-1 truncate">
+                        <div className="font-medium text-sm text-sky-900 flex items-center flex-wrap gap-1">
                           {path.map((org, idx) => (
-                            <div
-                              key={org.id}
-                              className="flex items-center truncate"
-                            >
+                            <div key={org.id} className="flex items-center">
                               <span className="truncate font-medium">
                                 {org.name}
                               </span>
                               {idx !== path.length - 1 && (
-                                <ArrowRight className="mx-1 h-4 w-4 font-bold shrink-0" />
+                                <ArrowRight className="mx-1 size-4 font-bold shrink-0" />
                               )}
                             </div>
                           ))}
