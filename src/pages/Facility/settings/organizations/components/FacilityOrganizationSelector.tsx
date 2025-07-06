@@ -463,7 +463,7 @@ export default function FacilityOrganizationSelector(
                   return (
                     <div
                       key={index}
-                      className="flex-1 flex items-center gap-3 rounded-md border border-sky-100 bg-blue-300 p-2.5 my-2"
+                      className="flex-1 flex items-center gap-3 rounded-md border border-sky-100 bg-blue-200 p-2.5 my-2"
                     >
                       <Building className="size-4 text-sky-600 shrink-0" />
                       <div className="flex-1 min-w-0 overflow-hidden">

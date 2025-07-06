@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Building, Loader2, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight, Building, Loader2, Trash2 } from "lucide-react";
+import { JSX, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -177,6 +177,24 @@ function DeleteOrganizationButton({
   );
 }
 
+function buildOrgPath(org: any): JSX.Element {
+  if (!org || !org.name) return <></>;
+
+  if (!org.parent || org.parent === "") {
+    return <span>{org.name}</span>;
+  }
+
+  const parentPath = buildOrgPath(org.parent);
+  if (!org.parent) {
+    return <span>{org.name}</span>;
+  }
+  return (
+    <>
+      {parentPath} <ArrowRight className="inline mx-1" /> {org.name}
+    </>
+  );
+}
+
 export default function LinkDepartmentsSheet({
   entityType,
   entityId,
@@ -264,6 +282,7 @@ export default function LinkDepartmentsSheet({
 
     submitBatch(batchRequest);
   };
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -304,37 +323,40 @@ export default function LinkDepartmentsSheet({
                 })}
               </span>
               <div className=" space-y-2 mt-2">
-                {currentOrganizations.map((org) => (
-                  <div
-                    key={org.id}
-                    className="flex items-center justify-between rounded-md bg-gray-100 border border-gray-300 p-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <Building className="size-4 text-gray-700" />
-                      <div className="flex flex-col">
-                        <span
-                          className="font-medium"
-                          data-cy="link-organisation-name"
-                        >
-                          {/* show whole path here */}
-                          {org.name}
-                        </span>
-                        {org.description && (
-                          <span className="text-xs text-gray-500">
-                            {org.description}
+                {currentOrganizations.map((org) => {
+                  const orgPath = buildOrgPath(org);
+                  return (
+                    <div
+                      key={org.id}
+                      className="flex items-center justify-between rounded-md bg-gray-100 border border-gray-300 p-2"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <Building className="size-4 text-gray-700" />
+                        <div className="flex flex-col">
+                          <span
+                            className="font-medium"
+                            data-cy="link-organisation-name"
+                          >
+                            {orgPath}
                           </span>
-                        )}
+                          {org.description && (
+                            <span className="text-xs text-gray-500">
+                              {org.description}
+                            </span>
+                          )}
+                        </div>
                       </div>
+                      <DeleteOrganizationButton
+                        organizationId={org.id}
+                        entityType={entityType}
+                        entityId={entityId}
+                        facilityId={facilityId}
+                        onSuccess={onUpdate}
+                      />
                     </div>
-                    <DeleteOrganizationButton
-                      organizationId={org.id}
-                      entityType={entityType}
-                      entityId={entityId}
-                      facilityId={facilityId}
-                      onSuccess={onUpdate}
-                    />
-                  </div>
-                ))}
+                  );
+                })}
+
                 {currentOrganizations.length === 0 && (
                   <p className="text-sm text-gray-500">
                     {t("no_organization_added_yet", {
@@ -349,7 +371,7 @@ export default function LinkDepartmentsSheet({
               <Building className="size-4 shrink-0" />
               <p className="font-medium">No organization added yet</p>
               <p className="text-sm ml-6">
-                Start by adding organization from your Organizations.
+                Start by adding an organization from your Organizations.
               </p>
             </div>
           )}
