@@ -1,4 +1,9 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  onlineManager,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useNavigationPrompt } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,6 +19,13 @@ import { Button } from "@/components/ui/button";
 import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
+import {
+  cacheQuestionnairResponse,
+  isOfflineId,
+  saveOfflineWrite,
+} from "@/OfflineSupport/offlineWriteHelpers";
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -23,6 +35,7 @@ import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { FileUploadQuestion } from "@/types/files/files";
 import {
+  BatchRequestBody,
   DetailedValidationError,
   QuestionValidationError,
   ValidationErrorResponse,
@@ -327,7 +340,8 @@ export function QuestionnaireForm({
   facilityId,
 }: QuestionnaireFormProps) {
   const { t } = useTranslation();
-
+  const authUser = useAuthUser();
+  const queryClient = useQueryClient();
   const [isDirty, setIsDirty] = useState(false);
   const [questionnaireForms, setQuestionnaireForms] = useState<
     QuestionnaireFormState[]
@@ -543,6 +557,45 @@ export function QuestionnaireForm({
 
   const hasErrors = questionnaireForms.some((form) => form.errors.length > 0);
 
+  const queueQuestionnairBatchrequest = async (
+    questionnairPaylod: BatchRequestBody,
+  ) => {
+    const generatedId = `offline-${crypto.randomUUID()}`;
+    const parentID = encounterId ? encounterId : patientId;
+
+    const offlineEntry = {
+      id: generatedId,
+      userId: authUser.external_id,
+      mutationSyncrouteKey: "submitQuestionnaire",
+      type: "submitQuestionnaire",
+      resourceType: "Questionnaire",
+      payload: questionnairPaylod,
+      parentMutationIds: isOfflineId(parentID) ? [parentID] : [],
+    };
+
+    try {
+      const saveResult = await saveOfflineWrite(offlineEntry);
+      if (!saveResult.success) {
+        toast.error(saveResult.error);
+      }
+
+      cacheQuestionnairResponse(
+        queryClient,
+        questionnairPaylod,
+        authUser,
+        patientId,
+        encounterId,
+        subjectType,
+      );
+
+      setServerErrors(undefined);
+      toast.success(t("questionnaire_submitted_successfully"));
+      onSubmit?.();
+    } catch (error) {
+      console.error("Error while submit Questionnaire", error);
+      toast.error(t("fail_to_submit_Questionnai_offline"));
+    }
+  };
   const handleSubmit = async () => {
     setIsDirty(false);
 
@@ -723,6 +776,13 @@ export function QuestionnaireForm({
         });
       }
     });
+
+    if (!onlineManager.isOnline()) {
+      const questionnairPaylod = { requests };
+      await queueQuestionnairBatchrequest(questionnairPaylod);
+      return;
+    }
+
     submitBatch({ requests });
   };
 

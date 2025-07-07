@@ -17,11 +17,12 @@ export interface QuestionnaireResponse {
   questionnaire?: QuestionnaireDetail;
   subject_id: string;
   responses: Response[];
-  encounter: string;
+  encounter: string | null;
   patient: string;
   structured_responses?: Record<
     StructuredQuestionType,
     StructuredResponseValue
   >;
   created_by: UserBase;
+  is_updated_offline?: boolean;
 }

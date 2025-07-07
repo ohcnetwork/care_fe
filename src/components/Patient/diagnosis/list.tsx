@@ -37,7 +37,7 @@ export function DiagnosisList({
     meta: { persist: true },
     networkMode: "online",
   });
-
+  console.log("key:", ["encounter_diagnosis", patientId, encounterId]);
   if (!diagnoses?.results.length) {
     return null;
   }

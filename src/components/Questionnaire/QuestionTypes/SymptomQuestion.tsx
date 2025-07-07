@@ -669,7 +669,7 @@ export function SymptomQuestion({
     onset: { onset_datetime: dateQueryString(new Date()) },
   });
   const isMobile = useBreakpoints({ default: true, md: false });
-
+  console.log("key ques : ", ["symptoms", patientId, encounterId]);
   const { data: patientSymptoms } = useQuery({
     queryKey: ["symptoms", patientId, encounterId],
     queryFn: query(symptomApi.listSymptoms, {

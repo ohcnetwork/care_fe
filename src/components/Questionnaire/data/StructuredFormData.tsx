@@ -1,5 +1,17 @@
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 
+export const FIXED_QUESTIONNAIRE_REFERENCE_IDS = new Set([
+  "allergy_intolerance",
+  "medication_request",
+  "medication_statement",
+  "symptom",
+  "diagnosis",
+  "encounter",
+  "time_of_death",
+  "appointment",
+  "files",
+]);
+
 const encounterQuestionnaire: QuestionnaireDetail = {
   id: "encounter",
   slug: "encounter",

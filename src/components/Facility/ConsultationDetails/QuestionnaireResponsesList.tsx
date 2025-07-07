@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { onlineManager, useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { Printer } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
@@ -28,6 +28,7 @@ import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordio
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
+import { PendingSyncBadge } from "@/OfflineSupport/pendingSyncbadge";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, properCase } from "@/Utils/utils";
@@ -477,6 +478,9 @@ function ResponseCard({
   ) : (
     <EncounterAccordionLayout
       title={isStructured && structuredType ? structuredType : title}
+      headerExtras={
+        item.is_updated_offline === true ? <PendingSyncBadge /> : undefined
+      }
       actionButton={<PrintButton item={item} />}
     >
       <ResponseCardContent item={item} />
@@ -493,7 +497,6 @@ export default function QuestionnaireResponsesList({
 }: Props) {
   const { t } = useTranslation();
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
-
   const { data: questionnarieResponses, isLoading } = useQuery({
     queryKey: ["questionnaireResponses", patientId, qParams],
     queryFn: query.paginated(routes.getQuestionnaireResponses, {
@@ -514,6 +517,14 @@ export default function QuestionnaireResponsesList({
     networkMode: "online",
     enabled: canAccess,
   });
+  const { data: offlineResponses = [] } = useQuery({
+    queryKey: [
+      "offlineCreatedQuestionnaireResponses",
+      encounter ? encounter.id : patientId,
+    ],
+    queryFn: async () => [],
+    enabled: false,
+  });
   return (
     <div className="gap-4">
       <div className="max-w-full">
@@ -523,7 +534,12 @@ export default function QuestionnaireResponsesList({
           </div>
         ) : (
           <div>
-            {questionnarieResponses?.results?.length === 0 ? (
+            {(
+              onlineManager.isOnline()
+                ? questionnarieResponses?.results?.length === 0
+                : offlineResponses.length === 0 &&
+                  questionnarieResponses?.results?.length === 0
+            ) ? (
               <Card
                 className={cn(
                   "p-6",
@@ -536,6 +552,16 @@ export default function QuestionnaireResponsesList({
               </Card>
             ) : (
               <ul className="grid gap-4">
+                {!onlineManager.isOnline() &&
+                  offlineResponses.map((item: QuestionnaireResponse) => (
+                    <li key={item.id} className="w-full">
+                      <ResponseCard
+                        item={item}
+                        isPrintPreview={isPrintPreview}
+                      />
+                    </li>
+                  ))}
+
                 {questionnarieResponses?.results?.map(
                   (item: QuestionnaireResponse) => (
                     <li key={item.id} className="w-full">
@@ -547,6 +573,7 @@ export default function QuestionnaireResponsesList({
                     </li>
                   ),
                 )}
+
                 {!isPrintPreview && (
                   <div className="flex w-full items-center justify-center mt-4">
                     <div

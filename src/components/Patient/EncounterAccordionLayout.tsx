@@ -20,6 +20,7 @@ interface EncounterAccordionLayoutProps {
   className?: string;
   readOnly?: boolean;
   title: string;
+  headerExtras?: React.ReactNode; // 👈
   editLink?: string;
   actionButton?: ReactNode;
 }
@@ -31,6 +32,7 @@ export function EncounterAccordionLayout({
   actionButton,
   title,
   editLink,
+  headerExtras,
 }: EncounterAccordionLayoutProps) {
   const { t } = useTranslation();
 
@@ -42,6 +44,7 @@ export function EncounterAccordionLayout({
             <CardHeader className="w-full flex flex-row justify-between p-0 m-0 translate-y-0.5">
               <CardTitle className="text-base font-semibold">
                 {t(title)}
+                {headerExtras}
               </CardTitle>
               {!readOnly && editLink ? (
                 <Button variant="outline" size="xs">
