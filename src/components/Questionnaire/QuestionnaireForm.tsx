@@ -333,7 +333,6 @@ export function QuestionnaireForm({
     QuestionnaireFormState[]
   >([]);
   const [serverErrors, setServerErrors] = useState<ServerValidationError[]>();
-  const [activeQuestionnaireId] = useState<string>();
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [activeQuestionId, setActiveQuestionId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
@@ -734,7 +733,7 @@ export function QuestionnaireForm({
             <button
               className={cn(
                 "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
-                activeQuestionnaireId === form.questionnaire.id &&
+                activeQuestionId === form.questionnaire.id &&
                   "bg-gray-100 text-green-600",
               )}
               disabled
