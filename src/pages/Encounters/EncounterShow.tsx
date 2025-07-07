@@ -131,52 +131,50 @@ export const EncounterShow = (props: Props) => {
   const PluginTab = pluginTabs[props.tab as keyof typeof pluginTabs];
 
   return (
-    <Page title={t("encounter")} className="block">
-      <div className="mt-4 w-full">
-        <EncounterHeader encounter={currentEncounter} />
-        <div className="flex gap-6 mt-4">
-          <EncounterHistorySelector />
-          <div className="w-full">
-            <div className="w-full border-b-2 border-secondary-200">
-              <div className="overflow-x-auto sm:flex sm:items-baseline">
-                <div className="mt-4 sm:mt-0">
-                  <nav
-                    className="flex space-x-6 overflow-x-auto pb-2 pl-2"
-                    id="encounter_tab_nav"
-                  >
-                    {availableTabs.map((tab) => (
-                      <Link
-                        key={tab}
-                        data-cy={`tab-${tab}`}
-                        className={cn(
-                          "capitalize min-w-max-content cursor-pointer font-bold whitespace-nowrap",
-                          props.tab === tab
-                            ? "border-primary-500 hover:border-secondary-300 text-primary-600 border-b-2"
-                            : "text-secondary-700 hover:text-secondary-700",
-                        )}
-                        href={
-                          currentEncounterId === selectedEncounterId
-                            ? `${tab}`
-                            : `${tab}?selectedEncounter=${selectedEncounterId}`
-                        }
-                      >
-                        {t(`ENCOUNTER_TAB__${tab}`)}
-                      </Link>
-                    ))}
-                  </nav>
-                </div>
+    <Page title={t("encounter")} className="block" hideTitleOnPage>
+      <EncounterHeader encounter={currentEncounter} />
+      <div className="flex gap-6 mt-4">
+        <EncounterHistorySelector />
+        <div className="w-full">
+          <div className="w-full border-b-2 border-secondary-200">
+            <div className="overflow-x-auto sm:flex sm:items-baseline">
+              <div className="mt-4 sm:mt-0">
+                <nav
+                  className="flex space-x-6 overflow-x-auto pb-2 pl-2"
+                  id="encounter_tab_nav"
+                >
+                  {availableTabs.map((tab) => (
+                    <Link
+                      key={tab}
+                      data-cy={`tab-${tab}`}
+                      className={cn(
+                        "capitalize min-w-max-content cursor-pointer font-bold whitespace-nowrap",
+                        props.tab === tab
+                          ? "border-primary-500 hover:border-secondary-300 text-primary-600 border-b-2"
+                          : "text-secondary-700 hover:text-secondary-700",
+                      )}
+                      href={
+                        currentEncounterId === selectedEncounterId
+                          ? `${tab}`
+                          : `${tab}?selectedEncounter=${selectedEncounterId}`
+                      }
+                    >
+                      {t(`ENCOUNTER_TAB__${tab}`)}
+                    </Link>
+                  ))}
+                </nav>
               </div>
             </div>
-            <div className="mt-4">
-              <PageHeadTitle title={t(`ENCOUNTER_TAB__${props.tab}`)} />
-              {CareTab && <CareTab />}
-              {PluginTab &&
-                (selectedEncounter ? (
-                  <PluginTab encounter={selectedEncounter} patient={patient} />
-                ) : (
-                  <Loading />
-                ))}
-            </div>
+          </div>
+          <div className="mt-4">
+            <PageHeadTitle title={t(`ENCOUNTER_TAB__${props.tab}`)} />
+            {CareTab && <CareTab />}
+            {PluginTab &&
+              (selectedEncounter ? (
+                <PluginTab encounter={selectedEncounter} patient={patient} />
+              ) : (
+                <Loading />
+              ))}
           </div>
         </div>
       </div>

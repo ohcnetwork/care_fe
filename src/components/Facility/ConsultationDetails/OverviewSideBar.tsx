@@ -1,19 +1,23 @@
-import { EditIcon, NotebookPen } from "lucide-react";
+import { Building, EditIcon, NotebookPen } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
+import { CareTeamSheet } from "@/components/CareTeam/CareTeamSheet";
 import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
+import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
 import EncounterProperties from "@/pages/Encounters/EncounterProperties";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { Encounter } from "@/types/emr/encounter";
 
 interface Props {
@@ -28,44 +32,16 @@ export default function SideOverview({ encounter, canEdit }: Props) {
       <EncounterProperties encounter={encounter} canEdit={canEdit} />
       <div className="flex flex-col gap-8 mt-6">
         <Separator className="bg-slate-200" />
-        <EncounterActions />
-        <EncounterQuestionnaire canEdit={canEdit} encounter={encounter} />
-        <EncounterLocation canEdit={canEdit} encounter={encounter} />
+        <Actions />
+        {canEdit && <Questionnaires encounter={encounter} />}
+        <Locations canEdit={canEdit} encounter={encounter} />
+        <DepartmentsAndTeams canEdit={canEdit} encounter={encounter} />
       </div>
     </div>
   );
-
-  // return (
-  //   <div className="mt-4 flex w-full h-auto flex-col gap-4 text-sm">
-  //     <Tabs defaultValue="quick_access" className="w-full">
-  //       <div className="px-2">
-  //         <TabsList className="h-9">
-  //           <TabsTrigger value="quick_access" className="font-semibold">
-  //             {t("quick_access")}
-  //           </TabsTrigger>
-  //           <TabsTrigger value="observations" className="font-semibold">
-  //             {t("observations")}
-  //           </TabsTrigger>
-  //         </TabsList>
-  //       </div>
-
-  //       <div>
-  //         <TabsContent value="quick_access" className="p-2">
-  //           <QuickAccess encounter={props.encounter} canEdit={props.canEdit} />
-  //         </TabsContent>
-  //         <TabsContent value="observations" className="p-2">
-  //           <ObservationsList
-  //             encounter={props.encounter}
-  //             canAccess={props.canAccess}
-  //           />
-  //         </TabsContent>
-  //       </div>
-  //     </Tabs>
-  //   </div>
-  // );
 }
 
-const EncounterActions = () => {
+const Actions = () => {
   const { t } = useTranslation();
   return (
     <div>
@@ -81,15 +57,22 @@ const EncounterActions = () => {
           <NotebookPen />
           {t("manage_consents")}
         </Button>
-        <Button variant="outline" className="justify-start">
-          <NotebookPen />
-          {t("manage_care_team")}
-        </Button>
-        <Button variant="outline" className="justify-start">
+
+        <ManageCareTeamButton />
+
+        <Button
+          variant="outline"
+          className="justify-start"
+          onClick={() => navigate("treatment_summary")}
+        >
           <NotebookPen />
           {t("treatment_summary")}
         </Button>
-        <Button variant="outline" className="justify-start">
+        <Button
+          variant="outline"
+          className="justify-start"
+          onClick={() => navigate("files?file=discharge_summary")}
+        >
           <NotebookPen />
           {t("discharge_summary")}
         </Button>
@@ -98,19 +81,40 @@ const EncounterActions = () => {
   );
 };
 
-const EncounterQuestionnaire = ({
-  canEdit,
-  encounter,
-}: {
-  canEdit: boolean;
-  encounter: Encounter;
-}) => {
+const ManageCareTeamButton = () => {
+  const { t } = useTranslation();
+  const {
+    selectedEncounter: encounter,
+    selectedEncounterPermissions: { canWriteEncounter: canWrite },
+  } = useEncounter();
+
+  if (!encounter) {
+    return (
+      <Button disabled variant="outline" className="justify-start">
+        <NotebookPen />
+        {t("manage_care_team")}
+      </Button>
+    );
+  }
+
+  return (
+    <CareTeamSheet
+      encounter={encounter}
+      trigger={
+        <Button variant="outline" className="justify-start">
+          <NotebookPen />
+          {canWrite ? t("manage_care_team") : t("view_care_team")}
+        </Button>
+      }
+      canWrite={canWrite}
+    />
+  );
+};
+
+const Questionnaires = ({ encounter }: { encounter: Encounter }) => {
   const { t } = useTranslation();
 
-  const questionnaireOptions = useQuestionnaireOptions(
-    "encounter_actions",
-    canEdit,
-  );
+  const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
 
   return (
     <div>
@@ -140,7 +144,7 @@ const EncounterQuestionnaire = ({
   );
 };
 
-const EncounterLocation = ({
+const Locations = ({
   canEdit,
   encounter,
 }: {
@@ -185,6 +189,53 @@ const EncounterLocation = ({
                 {encounter.current_location
                   ? t("update_location")
                   : t("add_location")}
+              </Button>
+            }
+          />
+        )}
+      </div>
+    </div>
+  );
+};
+
+const DepartmentsAndTeams = ({
+  canEdit,
+  encounter,
+}: {
+  canEdit: boolean;
+  encounter: Encounter;
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <div>
+      <h6 className="text-black font-semibold mb-2">
+        {t("departments_and_teams")}
+      </h6>
+      <div className="space-y-2 bg-gray-100 border border-gray-200 rounded-lg mt-2 p-2">
+        {encounter.organizations.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {encounter.organizations.map((org) => (
+              <Badge key={org.id} variant="blue" className="capitalize">
+                {org.name}
+              </Badge>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500">
+            {t("no_departments_assigned")}
+          </p>
+        )}
+        {canEdit && (
+          <LinkDepartmentsSheet
+            entityType="encounter"
+            entityId={encounter.id}
+            currentOrganizations={encounter.organizations}
+            facilityId={encounter.facility.id}
+            trigger={
+              <Button variant="outline" size="sm" className="w-full">
+                <Building className="size-4 mr-2" />
+                {t("update_department")}
               </Button>
             }
           />
