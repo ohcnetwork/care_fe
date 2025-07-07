@@ -167,6 +167,7 @@ export default function CreateScheduleExceptionSheet({
     if (unavailableAllDay) {
       form.setValue("start_time", "00:00");
       form.setValue("end_time", "23:59");
+      form.clearErrors(["start_time", "end_time"]);
     } else {
       form.resetField("start_time");
       form.resetField("end_time");
