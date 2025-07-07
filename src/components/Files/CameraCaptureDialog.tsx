@@ -123,7 +123,10 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
 
   return (
     <Sheet open={open} onOpenChange={() => onOpenChange(false)}>
-      <SheetContent side="bottom" className="h-[100vh] w-full p-0">
+      <SheetContent
+        side="bottom"
+        className="[&>button:first-of-type]:hidden h-[100vh] w-full p-0"
+      >
         <div className="relative h-full">
           {!previewImage ? (
             <div className="h-full">
