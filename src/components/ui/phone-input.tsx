@@ -104,7 +104,14 @@ const CountrySelect = ({
   const [searchValue, setSearchValue] = React.useState("");
 
   return (
-    <Popover modal>
+    <Popover
+      modal
+      onOpenChange={(open) => {
+        if (!open) {
+          setSearchValue("");
+        }
+      }}
+    >
       <PopoverTrigger asChild>
         <Button
           type="button"
