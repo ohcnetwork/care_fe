@@ -10,6 +10,7 @@ import PatientRegistration from "@/components/Patient/PatientRegistration";
 import { AppRoutes } from "@/Routers/AppRouter";
 import { ConsentDetailPage } from "@/pages/Encounters/ConsentDetail";
 import EncountersOverview from "@/pages/Encounters/EncountersOverview";
+import ClinicalHistoryPage from "@/pages/Patient/History";
 import VerifyPatient from "@/pages/Patients/VerifyPatient";
 
 const ExcalidrawEditor = lazy(
@@ -114,6 +115,10 @@ const PatientRoutes: AppRoutes = {
       />
     </Suspense>
   ),
+  "/facility/:facilityId/patient/:patientId/history/*": ({
+    facilityId,
+    patientId,
+  }) => <ClinicalHistoryPage facilityId={facilityId} patientId={patientId} />,
 };
 
 export default PatientRoutes;
