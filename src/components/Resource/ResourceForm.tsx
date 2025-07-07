@@ -9,6 +9,7 @@ import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import RadioInput from "@/components/ui/RadioInput";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,6 @@ import { Textarea } from "@/components/ui/textarea";
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 import UserSelector from "@/components/Common/UserSelector";
-import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";

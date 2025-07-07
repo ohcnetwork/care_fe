@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import RadioInput from "@/components/ui/RadioInput";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -25,7 +26,6 @@ import {
 
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
-import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import { formatName } from "@/Utils/utils";
 import {

@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 
-import RadioInput from "@/components/Questionnaire/RadioInput";
+import RadioInput from "@/components/ui/RadioInput";
 
 import type {
   QuestionnaireResponse,
@@ -38,7 +38,13 @@ export function BooleanQuestion({
       onValueChange={(value) => {
         clearError();
         updateQuestionnaireResponseCB(
-          [{ type: "boolean", value: value === "true" }],
+          [
+            {
+              type: "boolean",
+              value:
+                value === "true" ? true : value === "false" ? false : undefined,
+            },
+          ],
           questionnaireResponse.question_id,
           questionnaireResponse.note,
         );
