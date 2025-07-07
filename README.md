@@ -56,7 +56,7 @@ Create a `.env.local` file in the root directory of the project :
 
 ```env
 # Point the frontend to your local backend
-REACT_CARE_API_URL=http://127.0.0.1:8000
+REACT_CARE_API_URL=http://127.0.0.1:9000
 ```
 
 Once you have the local backend running and loaded dummy data, you can use the following credentials to authenticate:
