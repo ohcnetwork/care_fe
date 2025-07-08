@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { DropletIcon, HandIcon, Plus } from "lucide-react";
-import { usePathParams } from "raviger";
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -36,8 +35,6 @@ const actionLinks = [
 ];
 
 export const EncounterOverviewTab = () => {
-  const subpathMatch = usePathParams("/facility/:facilityId/*");
-  const facilityIdExists = !!subpathMatch?.facilityId;
   const { t } = useTranslation();
 
   const {
@@ -49,14 +46,14 @@ export const EncounterOverviewTab = () => {
       canViewEncounter,
       canSubmitEncounterQuestionnaire,
     },
+    facilityId,
   } = useEncounter();
 
   const canAccess = canViewEncounter || canViewClinicalData;
   const canEdit =
-    facilityIdExists &&
+    !!facilityId &&
     canSubmitEncounterQuestionnaire &&
     !inactiveEncounterStatus.includes(encounter?.status ?? "");
-  const facilityId = usePathParams("/facility/:facilityId/*")!;
 
   return (
     <div className="flex flex-col gap-4">
