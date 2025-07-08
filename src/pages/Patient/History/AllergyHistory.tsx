@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 
-import { DiagnosisList } from "@/components/Patient/diagnosis/list";
+import { AllergyList } from "@/components/Patient/allergy/list";
 
-export const DiagnosesHistory = ({ patientId }: { patientId: string }) => {
+export const AllergyHistory = ({ patientId }: { patientId: string }) => {
   const { t } = useTranslation();
   return (
     <div className="max-w-5xl mx-auto">
@@ -12,9 +12,9 @@ export const DiagnosesHistory = ({ patientId }: { patientId: string }) => {
           alt="diagnosis"
           className="size-9 bg-cyan-200 border border-cyan-400 rounded-md p-1.5"
         />
-        <h4 className="text-xl">{t("past_diagnoses")}</h4>
+        <h4 className="text-xl">{t("past_allergies")}</h4>
       </div>
-      <DiagnosisList patientId={patientId} showTimeline={true} />
+      <AllergyList patientId={patientId} showTimeline={true} />
     </div>
   );
 };

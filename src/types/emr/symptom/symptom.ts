@@ -48,7 +48,7 @@ export interface Symptom {
   updated_by: UserBase;
   category: string;
   encounter: string;
-  created_date?: string;
+  created_date: string;
   updated_date?: string;
 }
 

@@ -61,8 +61,8 @@ export interface Diagnosis {
   created_by: UserBase;
   updated_by: UserBase;
   encounter: string;
-  created_date?: string;
-  updated_date?: string;
+  created_date: string;
+  updated_date?: string; //to-do: discuss with amjith
 }
 
 export type DiagnosisCategory = (typeof DIAGNOSIS_CATEGORY)[number];

@@ -94,7 +94,6 @@ export const EncounterOverviewTab = () => {
 
           {/* Associated Devices Section */}
           {encounter && <EncounterOverviewDevices encounter={encounter} />}
-
           {/* Allergies Section */}
           <div>
             <AllergyList
@@ -104,7 +103,6 @@ export const EncounterOverviewTab = () => {
               encounterStatus={encounter?.status}
             />
           </div>
-
           {/* Symptoms Section */}
           <div>
             <SymptomsList
@@ -113,7 +111,6 @@ export const EncounterOverviewTab = () => {
               readOnly={!canEdit}
             />
           </div>
-
           {/* Diagnoses Section */}
           <div>
             <DiagnosisList
@@ -122,7 +119,6 @@ export const EncounterOverviewTab = () => {
               readOnly={!canEdit}
             />
           </div>
-
           {/* Questionnaire Responses Section */}
           <div>
             <QuestionnaireResponsesList

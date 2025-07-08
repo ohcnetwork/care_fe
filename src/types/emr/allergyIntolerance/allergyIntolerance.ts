@@ -29,6 +29,8 @@ export interface AllergyIntolerance {
   created_by: UserBase;
   encounter: string;
   edited_by?: UserBase;
+  created_date: string;
+  modified_date: string;
 }
 
 // Type for API request, extends base type with required fields
