@@ -46,7 +46,7 @@ export function PrintableQRCodeArea({
             <div className="flex gap-6 p-4 rounded-lg border border-gray-200 print:border-gray-300">
               <div className={cn("shrink-0", !showDetails && "mx-auto")}>
                 <QRCodeSVG
-                  value={specimen.id}
+                  value={specimen.accession_identifier || specimen.id}
                   size={printSize}
                   className="bg-white"
                   imageSettings={{
@@ -72,7 +72,7 @@ export function PrintableQRCodeArea({
                   )}
                   {specimen.id && (
                     <div className="font-semibold uppercase text-sm text-gray-700 print:text-xs">
-                      {specimen.id}
+                      {specimen.accession_identifier || specimen.id}
                     </div>
                   )}
                 </div>

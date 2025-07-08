@@ -170,7 +170,7 @@ export function MultiQRCodePrintSheet({
                 >
                   <div className="flex items-center gap-3">
                     <Checkbox
-                      id={`specimen-${specimen.id}`}
+                      id={`specimen-${specimen.accession_identifier || specimen.id}`}
                       checked={selectedSpecimens.has(specimen.id)}
                       onCheckedChange={() => toggleSpecimen(specimen.id)}
                     />
@@ -186,7 +186,7 @@ export function MultiQRCodePrintSheet({
                           {specimen.specimen_definition?.title}
                         </div>
                         <div className="text-xs text-gray-700 font-medium uppercase mt-1">
-                          {specimen.id}
+                          {specimen.accession_identifier || specimen.id}
                         </div>
                       </div>
                       <Badge
@@ -208,7 +208,7 @@ export function MultiQRCodePrintSheet({
                   >
                     <div className={cn("shrink-0", !showDetails && "mx-auto")}>
                       <QRCodeSVG
-                        value={specimen.id}
+                        value={specimen.accession_identifier || specimen.id}
                         size={qrCodeSize}
                         className="bg-white"
                         imageSettings={{
@@ -229,7 +229,7 @@ export function MultiQRCodePrintSheet({
                           {specimen.specimen_definition?.title}
                         </div>
                         <div className="font-semibold uppercase text-sm text-gray-700">
-                          {specimen.id}
+                          {specimen.accession_identifier || specimen.id}
                         </div>
                       </div>
                     )}
