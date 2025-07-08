@@ -78,7 +78,7 @@ function Avatar({
             setHasError(true);
           }}
           className={cn(
-            "flex h-full w-full select-none items-center justify-center text-center",
+            "flex h-full w-full select-none items-center justify-center text-center transition-opacity duration-150",
             isImageLoaded && !hasError ? "opacity-100" : "opacity-0",
             className,
           )}
@@ -87,7 +87,7 @@ function Avatar({
       <AvatarPrimitive.Fallback
         data-slot="avatar-fallback"
         className={cn(
-          "flex h-full w-full select-none items-center justify-center text-center",
+          "flex h-full w-full select-none items-center justify-center text-center transition-opacity duration-150",
           isImageLoaded && !hasError ? "opacity-0" : "opacity-100",
         )}
       >
