@@ -276,7 +276,6 @@ export function SpecimenForm({
                       value={draftSpecimen.id}
                       title={draftSpecimen.specimen_type?.display}
                       subtitle={draftSpecimen.specimen_definition?.title}
-                      identifier={draftSpecimen.id}
                     />
                   </Card>
                 </>

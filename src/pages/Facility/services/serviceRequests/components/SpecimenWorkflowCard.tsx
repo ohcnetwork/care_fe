@@ -452,10 +452,12 @@ export function SpecimenWorkflowCard({
             {hasCollected && collectedSpecimen && (
               <Card className="p-4 w-full my-2 shadow-none border-none rounded-md">
                 <PrintableQRCode
-                  value={collectedSpecimen.id}
+                  value={
+                    collectedSpecimen.accession_identifier ||
+                    collectedSpecimen.id
+                  }
                   title={collectedSpecimen.specimen_type?.display}
                   subtitle={collectedSpecimen.specimen_definition?.title}
-                  identifier={collectedSpecimen.id}
                 />
               </Card>
             )}

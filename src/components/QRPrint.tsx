@@ -8,7 +8,6 @@ interface QRPrintProps {
   value: string;
   title?: string;
   subtitle?: string;
-  identifier?: string;
   size?: number;
   printSize?: number;
 }
@@ -17,7 +16,6 @@ export function QRPrint({
   value,
   title,
   subtitle,
-  identifier,
   size = 100,
   printSize = 80,
 }: QRPrintProps) {
@@ -69,9 +67,9 @@ export function QRPrint({
               {subtitle && (
                 <div className="text-sm text-gray-600">{subtitle}</div>
               )}
-              {identifier && (
+              {value && (
                 <div className="font-semibold uppercase text-sm text-gray-700">
-                  {identifier}
+                  {value}
                 </div>
               )}
             </div>
