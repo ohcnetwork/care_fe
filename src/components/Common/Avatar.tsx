@@ -49,40 +49,49 @@ function Avatar({
   imageUrl?: string;
   className?: string;
 }) {
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
   const avatarText = name.match(/[a-zA-Z]+/g)?.join(" ");
   const [bgColor, textColor] =
     propColors ||
     (avatarText ? getColorPair(avatarText) : getColorPair("user"));
 
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
-
   return (
     <AvatarPrimitive.Root
       data-slot="avatar"
-      className={cn("aspect-square size-full rounded-md", className)}
-      style={{
-        background: bgColor,
-      }}
+      className={cn(
+        "relative aspect-square size-full rounded-md overflow-hidden",
+        className,
+      )}
+      style={{ background: bgColor }}
       {...props}
     >
       {imageUrl && (
-        <img
+        <AvatarPrimitive.Image
+          data-slot="avatar-image"
           src={imageUrl}
           alt={name}
+          onLoad={() => {
+            setIsImageLoaded(true);
+            setHasError(false);
+          }}
+          onError={() => {
+            setIsImageLoaded(false);
+            setHasError(true);
+          }}
           className={cn(
-            "aspect-square size-full object-cover rounded-md",
+            "absolute inset-0 aspect-square size-full object-cover rounded-md transition-opacity duration-300",
+            isImageLoaded && !hasError ? "opacity-100" : "opacity-0",
             className,
-            "opacity-100",
           )}
-          onLoad={() => setIsImageLoaded(true)}
-          onError={() => setIsImageLoaded(false)}
         />
       )}
       <AvatarPrimitive.Fallback
         data-slot="avatar-fallback"
         className={cn(
-          "flex h-full w-full select-none items-center justify-center text-center",
-          imageUrl && isImageLoaded && "opacity-0",
+          "absolute inset-0 flex h-full w-full select-none items-center justify-center text-center transition-opacity duration-300",
+          isImageLoaded && !hasError ? "opacity-0" : "opacity-100",
         )}
       >
         <svg
