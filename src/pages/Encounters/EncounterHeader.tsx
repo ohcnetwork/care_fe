@@ -57,7 +57,7 @@ export function EncounterHeader({ encounter }: Props) {
             <span className="text-sm font-semibold">
               {encounter.period.end
                 ? formatDateTime(encounter.period.end)
-                : `-- (${t("ongoing")})`}
+                : t("ongoing")}
             </span>
           </div>
           <div className="flex md:flex-col gap-0.5 items-center md:items-start">
