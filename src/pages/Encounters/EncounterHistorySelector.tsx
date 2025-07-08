@@ -29,7 +29,7 @@ function EncounterCard({
   return (
     <Card
       className={cn(
-        "rounded-md relative cursor-pointer transition-colors mb-2 w-80",
+        "rounded-md relative cursor-pointer transition-colors mb-2 w-full md:w-80",
         isSelected
           ? "bg-white border-emerald-600"
           : "bg-gray-100 hover:bg-gray-100 shadow-none",
@@ -54,10 +54,14 @@ function EncounterCard({
               </Badge>
             </div>
             <div className="text-xs text-gray-500 flex flex-wrap text-end justify-end">
-              <span className="whitespace-nowrap">
-                {format(new Date(encounter.period.start!), "dd MMM")}
-              </span>
-              {encounter.period.end && <span>{" - "}</span>}
+              {encounter.period.start && (
+                <span className="whitespace-nowrap">
+                  {format(new Date(encounter.period.start!), "dd MMM")}
+                </span>
+              )}
+              {encounter.period.end && encounter.period.start && (
+                <span>{" - "}</span>
+              )}
               {encounter.period.end ? (
                 <span>{format(new Date(encounter.period.end), "dd MMM")}</span>
               ) : (

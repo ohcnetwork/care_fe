@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/Common/Avatar";
 
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
+import EncounterProperties from "@/pages/Encounters/EncounterProperties";
 import { Encounter } from "@/types/emr/encounter";
 
 interface Props {
@@ -18,8 +19,8 @@ export function EncounterHeader({ encounter }: Props) {
   const { patient, facility } = encounter;
 
   return (
-    <Card className="p-4">
-      <div className="flex gap-8 items-end">
+    <Card className="p-2 md:p-4">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-8 md:items-end">
         <div className="flex gap-3 items-center">
           <div className="size-12">
             <Avatar name={patient.name} />
@@ -38,26 +39,37 @@ export function EncounterHeader({ encounter }: Props) {
             </span>
           </Link>
         </div>
-        <div className="flex flex-col gap-0.5">
-          <span className="text-xs text-gray-600">{t("start_date")}: </span>
-          <span className="text-sm font-semibold">
-            {formatDateTime(encounter.period.start)}
-          </span>
+        <div className="flex flex-col md:flex-row gap-1 md:gap-8 items-start">
+          <div className="flex md:flex-col gap-0.5 items-center md:items-start">
+            <span className="text-xs text-gray-600 w-32 md:w-auto">
+              {t("start_date")}:{" "}
+            </span>
+            <span className="text-sm font-semibold">
+              {encounter.period.start
+                ? formatDateTime(encounter.period.start)
+                : "--"}
+            </span>
+          </div>
+          <div className="flex md:flex-col gap-0.5 items-center md:items-start">
+            <span className="text-xs text-gray-600 w-32 md:w-auto">
+              {t("end_date")}:{" "}
+            </span>
+            <span className="text-sm font-semibold">
+              {encounter.period.end
+                ? formatDateTime(encounter.period.end)
+                : `-- (${t("ongoing")})`}
+            </span>
+          </div>
+          <div className="flex md:flex-col gap-0.5 items-center md:items-start">
+            <span className="text-xs text-gray-600 w-32 md:w-auto">
+              {t("hospital_identifier")}:{" "}
+            </span>
+            {/* TODO: implement this once we have it */}
+            <span className="text-sm font-semibold">--</span>
+          </div>
         </div>
-        <div className="flex flex-col gap-0.5">
-          <span className="text-xs text-gray-600">{t("end_date")}: </span>
-          <span className="text-sm font-semibold">
-            {encounter.period.end
-              ? formatDateTime(encounter.period.end)
-              : `-- (${t("ongoing")})`}
-          </span>
-        </div>
-        <div className="flex flex-col gap-0.5">
-          <span className="text-xs text-gray-600">
-            {t("hospital_identifier")}:{" "}
-          </span>
-          {/* TODO: implement this once we have it */}
-          <span className="text-sm font-semibold">--</span>
+        <div className="md:hidden">
+          <EncounterProperties encounter={encounter} canEdit={false} />
         </div>
       </div>
     </Card>
