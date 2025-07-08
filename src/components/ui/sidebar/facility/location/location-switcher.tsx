@@ -139,7 +139,9 @@ function LocationSelectorDialog({
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
-        parent: currentParentId,
+        ...(currentParentId !== "" && {
+          parent: currentParentId,
+        }),
         ...(currentParentId === "" && {
           mode: "kind",
         }),

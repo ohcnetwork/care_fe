@@ -38,6 +38,7 @@ import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { Status } from "@/types/emr/serviceRequest/serviceRequest";
+import { toServiceRequestUpdateSpec } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import {
   SpecimenRead,
@@ -145,12 +146,10 @@ export default function ServiceRequestShow({
 
   const { mutate: markAsComplete } = useMutation({
     mutationFn: () => {
+      if (!request) return Promise.reject("No request data");
       return mutate(serviceRequestApi.updateServiceRequest, {
         pathParams: { facilityId, serviceRequestId },
-      })({
-        ...request,
-        status: Status.completed,
-      });
+      })(toServiceRequestUpdateSpec(request, { status: Status.completed }));
     },
     onSuccess: () => {
       toast.success(t("service_request_completed"));

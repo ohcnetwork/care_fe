@@ -100,3 +100,30 @@ export interface ServiceRequestReadSpec extends BaseServiceRequestSpec {
   created_date: string;
   updated_at: string;
 }
+
+/**
+ * Helper function to transform a ServiceRequestReadSpec to ServiceRequestUpdateSpec
+ * Useful when updating a service request with modified fields
+ */
+export function toServiceRequestUpdateSpec(
+  request: ServiceRequestReadSpec,
+  updates: Partial<ServiceRequestUpdateSpec> = {},
+): ServiceRequestUpdateSpec {
+  return {
+    id: request.id,
+    title: request.title,
+    status: request.status,
+    intent: request.intent,
+    priority: request.priority,
+    category: request.category,
+    do_not_perform: request.do_not_perform,
+    note: request.note,
+    code: request.code,
+    body_site: request.body_site,
+    occurance: request.occurance,
+    patient_instruction: request.patient_instruction,
+    encounter: request.encounter.id,
+    locations: request.locations.map((loc) => loc.id),
+    ...updates,
+  };
+}

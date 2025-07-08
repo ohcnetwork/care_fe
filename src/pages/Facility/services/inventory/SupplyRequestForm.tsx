@@ -169,7 +169,12 @@ export default function SupplyRequestForm({
     queryKey: ["locations", facilityId, searchDeliveryFrom],
     queryFn: query.debounced(locationApi.list, {
       pathParams: { facility_id: facilityId },
-      queryParams: { search: searchDeliveryFrom, limit: 100 },
+      queryParams: {
+        search: searchDeliveryFrom,
+        limit: 100,
+        mode: "kind",
+        ordering: "sort_index",
+      },
     }),
     select: (data: PaginatedResponse<LocationList>) => {
       // Filter out the current location

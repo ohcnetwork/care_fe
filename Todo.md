@@ -46,7 +46,7 @@ x : Done
 - [ ] Add support to create Observations without Observation definition
 - [ ] Loading skeletons
 - [ ] Disable save if no changes in all forms
-- [ ] Specimen Def - URI validation failing
+- [x] Specimen Def - URI validation failing - Not a bug
 - [x] Definitions - Add Delete button - Manyu
 - [-] Valueset - Wrap long text on mobile - Manyu
 - [x] Observation Def - validation for empty components - Manyu
