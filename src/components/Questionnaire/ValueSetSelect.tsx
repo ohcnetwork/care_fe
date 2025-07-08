@@ -439,7 +439,7 @@ export default function ValueSetSelect({
             variant="outline"
             role="combobox"
             className={cn(
-              "w-full justify-between border border-primary rounded-md px-5",
+              "w-full justify-between border border-primary rounded-md px-2",
               wrapTextForSmallScreen
                 ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
                 : "truncate",
@@ -450,7 +450,7 @@ export default function ValueSetSelect({
             <div className="flex items-center">
               <CareIcon
                 icon="l-plus"
-                className="mr-2 text-5xl text-primary-700 font-normal"
+                className="mr-2 text-primary-700 font-normal"
               />
               <span className="text-primary-700 flex items-center font-semibold text-wrap text-sm md:text-base">
                 {value?.display || placeholder}
