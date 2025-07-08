@@ -54,7 +54,7 @@ export const EncounterOverviewTab = () => {
   return (
     <div className="flex flex-col gap-4">
       {/* Main Content Area */}
-      <div className="flex flex-col-reverse xl:flex-row gap-4">
+      <div className="flex flex-col xl:flex-row gap-4">
         {/* Left Column - Symptoms, Diagnoses, and Questionnaire Responses */}
         <div className="flex-1 space-y-4" data-cy="encounter-overview">
           {canEdit && (

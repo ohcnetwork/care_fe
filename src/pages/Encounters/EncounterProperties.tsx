@@ -32,8 +32,8 @@ export default function EncounterProperties({ encounter, canEdit }: Props) {
   const EncounterClassIcon = ENCOUNTER_CLASS_ICONS[encounter.encounter_class];
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-col gap-1">
+    <div className="flex md:flex-col gap-2">
+      <div className="hidden md:flex flex-col gap-1">
         <span className="text-xs font-medium">{t("status")}: </span>
         <div>
           <StatusBadge encounter={encounter} />
@@ -44,27 +44,33 @@ export default function EncounterProperties({ encounter, canEdit }: Props) {
         <div>
           <Badge variant="teal" size="sm">
             <EncounterClassIcon className="size-3" />
-            {t(`encounter_class__${encounter.encounter_class}`)}
+            <span className="whitespace-nowrap">
+              {t(`encounter_class__${encounter.encounter_class}`)}
+            </span>
           </Badge>
         </div>
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="hidden md:flex flex-col gap-1">
         <span className="text-xs font-medium">{t("start_date")}: </span>
         <div>
           <Badge variant="secondary" size="sm">
-            {formatDateTime(encounter.period.start)}
+            <span className="whitespace-nowrap">
+              {formatDateTime(encounter.period.start)}
+            </span>
           </Badge>
         </div>
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="hidden md:flex flex-col gap-1">
         <span className="text-xs font-medium">{t("end_date")}: </span>
         <div>
           <Badge variant="secondary" size="sm">
-            {encounter.period.end
-              ? formatDateTime(encounter.period.end)
-              : t("ongoing")}
+            <span className="whitespace-nowrap">
+              {encounter.period.end
+                ? formatDateTime(encounter.period.end)
+                : t("ongoing")}
+            </span>
           </Badge>
         </div>
       </div>
@@ -73,7 +79,9 @@ export default function EncounterProperties({ encounter, canEdit }: Props) {
         <span className="text-xs font-medium">{t("priority")}: </span>
         <div>
           <Badge variant="orange" size="sm">
-            {t(`encounter_priority__${encounter.priority}`)}
+            <span className="whitespace-nowrap">
+              {t(`encounter_priority__${encounter.priority}`)}
+            </span>
           </Badge>
         </div>
       </div>
@@ -140,7 +148,7 @@ const LocationPropertyBadge = ({
       return (
         <Badge variant="secondary" size="sm">
           <MapPinIcon className="size-3" />
-          {t("no_location_associated")}
+          {t("none")}
         </Badge>
       );
     }

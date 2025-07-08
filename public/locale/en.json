@@ -2882,6 +2882,7 @@
   "select_weight": "Select Weight",
   "selected": "Selected",
   "selected_bed": "Selected bed",
+  "selected_encounter": "Selected Encounter",
   "selected_organizations": "Selected Organizations",
   "selected_slot_not_found": "Selected Slot Not Found",
   "selected_tags": "Selected Tags",

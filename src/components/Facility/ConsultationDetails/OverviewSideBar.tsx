@@ -28,9 +28,11 @@ interface Props {
 
 export default function SideOverview({ encounter, canEdit }: Props) {
   return (
-    <div className="w-full max-w-[18rem] flex flex-col gap-4">
-      <EncounterProperties encounter={encounter} canEdit={canEdit} />
-      <div className="flex flex-col gap-8 mt-6">
+    <div className="w-full md:max-w-[18rem] flex flex-col gap-4">
+      <div className="hidden md:block">
+        <EncounterProperties encounter={encounter} canEdit={canEdit} />
+      </div>
+      <div className="flex flex-col gap-8 md:mt-6">
         <Separator className="bg-slate-200" />
         <Actions />
         {canEdit && <Questionnaires encounter={encounter} />}
