@@ -111,6 +111,7 @@ export default function SupplyDeliveryTable({
         status: effectiveStatus,
         supplied_inventory_item_product_knowledge: qParams.item,
         origin_isnull: false,
+        ordering: "-created_date",
       },
     }),
   });

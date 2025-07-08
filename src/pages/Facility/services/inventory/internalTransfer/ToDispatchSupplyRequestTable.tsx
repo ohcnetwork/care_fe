@@ -86,6 +86,7 @@ export default function ToDispatchSupplyRequestTable({
         priority: qParams.priority,
         item: qParams.item,
         deliver_to_isnull: false,
+        ordering: "-created_date",
       },
     }),
   });

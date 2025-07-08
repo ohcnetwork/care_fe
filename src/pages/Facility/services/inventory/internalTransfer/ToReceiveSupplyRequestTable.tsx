@@ -87,6 +87,7 @@ export default function ToReceiveSupplyRequestTable({
         priority: qParams.priority, // TODO: add priority filter in backend
         item: qParams.item,
         deliver_from_isnull: false,
+        ordering: "-created_date",
       },
     }),
   });
