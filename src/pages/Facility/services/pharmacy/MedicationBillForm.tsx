@@ -660,7 +660,6 @@ const AddMedicationSheet = ({
                             handleUpdateDosageInstruction({ site });
                           }}
                           placeholder={t("select_site")}
-                          wrapTextForSmallScreen={true}
                         />
                       </div>
                     </div>

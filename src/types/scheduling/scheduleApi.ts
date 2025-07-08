@@ -3,6 +3,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import {
   Appointment,
   AppointmentCreateRequest,
+  AppointmentRead,
   AppointmentUpdateRequest,
   AvailabilityHeatmapRequest,
   AvailabilityHeatmapResponse,
@@ -129,7 +130,7 @@ export default {
     retrieve: {
       path: "/api/v1/facility/{facilityId}/appointments/{id}/",
       method: HttpMethod.GET,
-      TRes: Type<Appointment>(),
+      TRes: Type<AppointmentRead>(),
     },
     update: {
       path: "/api/v1/facility/{facilityId}/appointments/{id}/",

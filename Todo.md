@@ -56,6 +56,9 @@ x : Done
 - [-] SR Details page - Disable the collect specimen for completed SR - Yash
 - [x] Product Knowledge form - Validations - Yash
 - [x] SR Details page - Disable the process step once the report generation is done
+- [ ] Activity Definition - Add Healthcare Services
+- [ ] SR Create - Add Healthcare Services during create
+- [ ] SR Update - Allow all status updates
 
 ## Back End
 

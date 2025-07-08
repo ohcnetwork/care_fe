@@ -71,6 +71,7 @@ import {
   APPOINTMENT_STATUS_COLORS,
   Appointment,
   AppointmentFinalStatuses,
+  AppointmentRead,
   AppointmentUpdateRequest,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -207,7 +208,7 @@ const AppointmentDetails = ({
   appointment,
   facility,
 }: {
-  appointment: Appointment;
+  appointment: AppointmentRead;
   facility: FacilityData;
 }) => {
   const { user } = appointment;
@@ -274,6 +275,19 @@ const AppointmentDetails = ({
               {appointment.reason_for_visit || t("no_reason_provided")}
             </p>
           </div>
+          {appointment.tags?.length > 0 && (
+            <div className="text-sm">
+              <p className="font-medium">{t("tags")}</p>
+              <p className="text-gray-600">
+                {appointment.tags.map((tag) => (
+                  <Badge key={tag.id} variant="secondary">
+                    {tag.parent ? `${tag.parent.display}: ` : ""}
+                    {tag.display}
+                  </Badge>
+                ))}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 

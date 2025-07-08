@@ -1,7 +1,7 @@
+import { BatchSuccessResponse } from "@/types/base/batch/batch";
 import { MonetaryComponent } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
-import { BatchSuccessResponse } from "@/types/questionnaire/batch";
 
 export enum ChargeItemStatus {
   planned = "planned",

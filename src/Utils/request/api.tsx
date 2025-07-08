@@ -13,6 +13,7 @@ import { AuthUserModel, UpdatePasswordForm } from "@/components/Users/models";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { MFAAuthenticationToken } from "@/types/auth/otp";
+import { BatchRequestBody } from "@/types/base/batch/batch";
 import { Code } from "@/types/base/code/code";
 import {
   Encounter,
@@ -35,10 +36,7 @@ import {
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
 import { PlugConfig } from "@/types/plugConfig";
-import {
-  BatchRequestBody,
-  BatchSubmissionResult,
-} from "@/types/questionnaire/batch";
+import { BatchSubmissionResult } from "@/types/questionnaire/batch";
 import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import {
   CreateResourceRequest,

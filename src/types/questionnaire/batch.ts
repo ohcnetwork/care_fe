@@ -1,18 +1,13 @@
-export interface BatchRequestResult<T = unknown> {
-  reference_id: string;
-  data?: T;
-  status_code: number;
-}
+import {
+  BatchErrorData,
+  BatchRequestResult,
+  BatchResponseBase,
+  BatchSuccessResponse,
+} from "@/types/base/batch/batch";
 
-export interface BatchRequestBody {
-  requests: Array<{
-    url: string;
-    method: string;
-    reference_id: string;
-    body: any;
-  }>;
+export interface BatchErrorResponse extends BatchResponseBase {
+  data: BatchErrorData | StructuredDataError[];
 }
-
 // Error types
 export interface QuestionValidationError {
   question_id: string;
@@ -33,17 +28,6 @@ export interface DetailedValidationError {
   };
 }
 
-export interface BatchRequestError {
-  question_id?: string;
-  msg?: string;
-  error?: string;
-  type?: string;
-  loc?: string[];
-  ctx?: {
-    error?: string;
-  };
-}
-
 export interface StructuredDataError {
   errors: Array<{
     type: string;
@@ -53,31 +37,6 @@ export interface StructuredDataError {
       error?: string;
     };
   }>;
-}
-
-// Request/Response types
-export interface BatchRequest {
-  url: string;
-  method: string;
-  reference_id: string;
-  body: any; // Using any since the body type varies based on the request type
-}
-
-export interface BatchErrorData {
-  errors: BatchRequestError[];
-}
-
-export interface BatchResponseBase {
-  reference_id: string;
-  status_code: number;
-}
-
-export interface BatchErrorResponse extends BatchResponseBase {
-  data: BatchErrorData | StructuredDataError[];
-}
-
-export interface BatchSuccessResponse<T = unknown> extends BatchResponseBase {
-  data: T;
 }
 
 export interface ValidationErrorResponse {

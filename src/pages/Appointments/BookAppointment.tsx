@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import Page from "@/components/Common/Page";
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
@@ -18,6 +19,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
@@ -33,7 +35,7 @@ export default function BookAppointment({ patientId }: Props) {
 
   const [resourceId, setResourceId] = useState<string>();
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
-
+  const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
   const [reason, setReason] = useState("");
 
   const resourcesQuery = useQuery({
@@ -79,6 +81,7 @@ export default function BookAppointment({ patientId }: Props) {
       const data = await createAppointment({
         patient: patientId,
         reason_for_visit: reason,
+        tags: selectedTags.map((tag) => tag.id),
       });
       toast.success("Appointment created successfully");
       navigate(
@@ -98,7 +101,15 @@ export default function BookAppointment({ patientId }: Props) {
         </div>
 
         <div className="space-y-8">
-          <div>
+          <div className="max-w-md">
+            <Label className="mb-2">{t("tags")}</Label>
+            <TagSelectorPopover
+              selected={selectedTags}
+              onChange={setSelectedTags}
+              resource={TagResource.APPOINTMENT}
+            />
+          </div>
+          <div className="max-w-md">
             <Label className="mb-2">{t("reason_for_visit")}</Label>
             <Textarea
               placeholder={t("reason_for_visit_placeholder")}

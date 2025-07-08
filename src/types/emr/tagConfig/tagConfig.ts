@@ -27,6 +27,7 @@ export const TAG_STATUS_COLORS = {
 
 export enum TagResource {
   ENCOUNTER = "encounter",
+  APPOINTMENT = "token_booking",
   ACTIVITY_DEFINITION = "activity_definition",
   SERVICE_REQUEST = "service_request",
   CHARGE_ITEM = "charge_item",
