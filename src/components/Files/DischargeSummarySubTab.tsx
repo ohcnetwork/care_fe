@@ -597,7 +597,7 @@ export const DischargeTab = ({
         associatingId={encounter.id}
         type={type}
       />
-      <div className="flex flex-col sm:flex-row flex-wrap sm:items-center gap-2 -mt-2">
+      <div className="flex flex-col sm:flex-row flex-nowrap sm:flex-wrap sm:items-center gap-2 -mt-2">
         <div className="relative flex-1 min-w-72 max-w-96 sm:ml-2">
           <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
           <Input
@@ -611,7 +611,7 @@ export const DischargeTab = ({
           />
         </div>
 
-        <div className="flex flex-col sm:flex-row flex-wrap items-center gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 sm:flex-wrap items-center gap-2">
           <FilterButton />
           <Button
             variant="outline_primary"
@@ -629,19 +629,20 @@ export const DischargeTab = ({
             <CareIcon icon="l-sync" className="mr-2" />
             {t("refresh")}
           </Button>
-          <Button
-            variant="primary"
-            className="w-full sm:w-auto min-w-24 sm:min-w-28"
-            onClick={() => generateDischargeSummary()}
-            disabled={isGenerating}
-          >
-            <CareIcon
-              icon="l-file-medical"
-              className="hidden w-full sm:block mr-2"
-            />
-            {isGenerating ? t("generating") : t("generate_discharge_summary")}
-          </Button>
-          {/* <ReportBuilderSheet
+          <div className="col-span-2 sm:w-auto">
+            <Button
+              variant="primary"
+              className="w-full sm:w-auto min-w-24 sm:min-w-28"
+              onClick={() => generateDischargeSummary()}
+              disabled={isGenerating}
+            >
+              <CareIcon
+                icon="l-file-medical"
+                className="hidden w-full sm:block mr-2"
+              />
+              {isGenerating ? t("generating") : t("generate_discharge_summary")}
+            </Button>
+            {/* <ReportBuilderSheet
             facilityId={facilityId || ""}
             patientId={encounter?.patient.id || ""}
             encounterId={encounter?.id || ""}
@@ -668,6 +669,7 @@ export const DischargeTab = ({
               });
             }}
           /> */}
+          </div>
         </div>
 
         <div className="w-full sm:w-auto ml-auto">
