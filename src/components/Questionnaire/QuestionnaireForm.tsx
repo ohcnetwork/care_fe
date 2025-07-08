@@ -871,7 +871,7 @@ export function QuestionnaireForm({
                 setQuestionnaireForms((prev) =>
                   prev.map((f) =>
                     (f.questionnaire.instanceId || f.questionnaire.id) ===
-                    (f.questionnaire.instanceId || f.questionnaire.id)
+                    (form.questionnaire.instanceId || form.questionnaire.id)
                       ? {
                           ...f,
                           errors: f.errors.filter(
