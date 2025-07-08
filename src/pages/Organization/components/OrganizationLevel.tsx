@@ -58,6 +58,7 @@ export function OrganizationLevel({
       }
       disabled={index > selectedLevels.length}
       align="start"
+      showClearButton={false}
     />
   );
 }

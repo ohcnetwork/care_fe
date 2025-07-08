@@ -163,7 +163,12 @@ export function QuestionInput({
               </span>
             );
           case "allergy_intolerance":
-            return <AllergyQuestion {...commonProps} />;
+            if (encounterId) {
+              return <AllergyQuestion {...commonProps} />;
+            }
+            return (
+              <span>{t("questionnaire_allergy_intolerance_no_encounter")}</span>
+            );
           case "symptom":
             if (encounterId) {
               return (
@@ -228,9 +233,12 @@ export function QuestionInput({
       ? [{ value: "", type: "string" } as ResponseValue]
       : questionnaireResponse.values;
 
-    if (question.type === "choice" && !question.answer_value_set) {
+    if (question.type === "choice") {
       return (
-        <div className="bg-gray-100 md:bg-transparent px-2 py-1.5">
+        <div
+          className="bg-gray-100 md:bg-transparent px-2 py-1.5"
+          id={"question-" + question.id}
+        >
           <div className="px-2 pt-2 bg-gray-100 md:bg-transparent">
             <QuestionLabel
               question={question}
@@ -241,7 +249,13 @@ export function QuestionInput({
               <p className="text-sm text-gray-500">{question.description}</p>
             )}
           </div>
-          <div className="flex flex-col sm:flex-row">
+          <div
+            className={cn(
+              question.answer_value_set
+                ? "flex flex-col gap-4"
+                : "flex flex-row",
+            )}
+          >
             <div className="flex-1 min-w-0">{renderSingleInput(0)}</div>
             <NotesInput
               questionnaireResponse={questionnaireResponse}
@@ -264,7 +278,7 @@ export function QuestionInput({
         {values.map((value, index) => {
           const removeButton = question.repeats &&
             questionnaireResponse.values.length > 1 &&
-            (question.type != "choice" || question.answer_value_set) && (
+            question.type != "choice" && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -283,7 +297,7 @@ export function QuestionInput({
             >
               <div
                 className={cn("space-y-1", { "flex-1": removeButton })}
-                data-question-id={question.id}
+                id={"question-" + question.id}
               >
                 {index === 0 && (
                   <div className="px-2 pt-2 bg-gray-100 md:bg-transparent">

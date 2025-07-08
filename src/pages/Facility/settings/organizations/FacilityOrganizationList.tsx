@@ -215,10 +215,7 @@ export default function FacilityOrganizationList({
                     <div className="flex items-center">
                       <h2 className="text-xl font-semibold">{org.name}</h2>
                       {org.org_type && (
-                        <Badge
-                          variant="outline"
-                          className="ml-2 border border-transparent text-indigo-800 bg-indigo-100 py-1 w-auto"
-                        >
+                        <Badge variant="indigo" className="ml-2 w-auto">
                           {t(`facility_organization_type__${org.org_type}`)}
                         </Badge>
                       )}

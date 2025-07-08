@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -170,7 +169,7 @@ function QuestionGroup({
           className="py-1 pr-0 align-top"
           colSpan={response.note ? 1 : 2}
         >
-          <div className="text-sm font-medium break-words whitespace-normal">
+          <div className="text-sm font-medium break-words whitespace-pre-wrap">
             {values.map((val, idx) => (
               <React.Fragment key={idx}>
                 {idx > 0 && ", "}
@@ -258,36 +257,6 @@ function QuestionGroup({
   );
 }
 
-export function StructuredResponseBadge({
-  type,
-  submitType,
-}: {
-  type: string;
-  submitType: string;
-}) {
-  const { t } = useTranslation();
-
-  const colors = {
-    symptom: "bg-yellow-100 text-yellow-800",
-    diagnosis: "bg-blue-100 text-blue-800",
-    medication_request: "bg-green-100 text-green-800",
-    medication_statement: "bg-purple-100 text-purple-800",
-    follow_up_appointment: "bg-pink-100 text-pink-800",
-  };
-
-  return (
-    <Badge
-      variant="outline"
-      className={`${
-        colors[type as keyof typeof colors] || "bg-gray-100 text-gray-800"
-      } border-none`}
-    >
-      {submitType === "CREATE" ? t("created") : t("updated")}{" "}
-      {properCase(type.replace(/_/g, " "))}
-    </Badge>
-  );
-}
-
 function PrintButton({ item }: { item: QuestionnaireResponse }) {
   const { t } = useTranslation();
 
@@ -369,7 +338,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                           className="py-1 pr-0 align-top"
                           colSpan={response.note ? 1 : 2}
                         >
-                          <div className="text-sm font-medium break-words whitespace-normal">
+                          <div className="text-sm font-medium break-words whitespace-pre-wrap">
                             {values.map((val, idx) => (
                               <React.Fragment key={idx}>
                                 {idx > 0 && ", "}

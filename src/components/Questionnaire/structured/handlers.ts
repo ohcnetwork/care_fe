@@ -8,7 +8,7 @@ import { readFileAsDataURL } from "@/Utils/utils";
 
 interface StructuredHandlerContext {
   patientId: string;
-  encounterId: string;
+  encounterId?: string;
   facilityId?: string;
 }
 
@@ -41,6 +41,10 @@ export const structuredHandlers: {
 } = {
   allergy_intolerance: {
     getRequests: async (allergies, { patientId, encounterId }) => {
+      if (!encounterId) {
+        return [];
+      }
+
       return [
         {
           url: `/api/v1/patient/${patientId}/allergy_intolerance/upsert/`,
@@ -96,6 +100,10 @@ export const structuredHandlers: {
   },
   symptom: {
     getRequests: async (symptoms, { patientId, encounterId }) => {
+      if (!encounterId) {
+        return [];
+      }
+
       return [
         {
           url: `/api/v1/patient/${patientId}/symptom/upsert/`,
@@ -114,6 +122,10 @@ export const structuredHandlers: {
   },
   diagnosis: {
     getRequests: async (diagnoses, { patientId, encounterId }) => {
+      if (!encounterId) {
+        return [];
+      }
+
       return [
         {
           url: `/api/v1/patient/${patientId}/diagnosis/upsert/`,

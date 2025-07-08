@@ -37,7 +37,6 @@ export class PatientCreation {
     dobMonthInput: '[data-cy="dob-month-input"]',
     dobYearInput: '[data-cy="dob-year-input"]',
     ageInput: '[data-cy="age-input"]',
-    genderRadio: '[data-cy="gender-radio-{value}"]',
     bloodGroupSelect: '[data-cy="blood-group-select"]',
     addressInput: '[data-cy="current-address-input"]',
     sameAddressCheckbox: '[data-cy="same-address-checkbox"]',
@@ -111,9 +110,7 @@ export class PatientCreation {
 
   selectGender(gender: string) {
     const lowercaseGender = gender.toLowerCase();
-    cy.get(
-      this.selectors.genderRadio.replace("{value}", lowercaseGender),
-    ).click();
+    cy.get(`#${lowercaseGender}`).click();
     return this;
   }
 
