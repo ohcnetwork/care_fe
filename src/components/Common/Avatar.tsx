@@ -60,10 +60,7 @@ function Avatar({
   return (
     <AvatarPrimitive.Root
       data-slot="avatar"
-      className={cn(
-        "relative aspect-square size-full rounded-md overflow-hidden",
-        className,
-      )}
+      className={cn("aspect-square size-full rounded-md", className)}
       style={{ background: bgColor }}
       {...props}
     >
