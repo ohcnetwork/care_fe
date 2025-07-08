@@ -209,7 +209,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
           >
             <Label
               htmlFor="file_upload_encounter"
-              className="flex items-center w-full text-primary-900 hover:text-black py-1 font-normal"
+              className="flex items-center w-full text-primary-900 hover:text-black py-1 font-medium"
             >
               <CareIcon icon="l-file-upload-alt" />
               <span>{t("choose_files")}</span>
@@ -221,7 +221,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
               fileUpload.handleCameraCapture();
               setDropdownOpen(false);
             }}
-            className="flex items-center text-primary-900 font-normal"
+            className="flex items-center text-primary-900 font-medium"
             aria-label={t("open_camera")}
           >
             <CareIcon icon="l-camera" />
@@ -232,7 +232,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
               fileUpload.handleAudioCapture();
               setDropdownOpen(false);
             }}
-            className="flex items-center text-primary-900 font-normal"
+            className="flex items-center text-primary-900 font-medium"
             aria-label={t("record")}
           >
             <CareIcon icon="l-microphone" />

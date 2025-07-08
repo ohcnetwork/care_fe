@@ -370,7 +370,7 @@ export const FilesPage = ({
             <Label
               htmlFor={`file_upload_${type}`}
               data-cy="choose-file-option"
-              className="flex items-center w-full text-primary-900 hover:text-black py-1 font-normal"
+              className="flex items-center w-full text-primary-900 hover:text-black py-1 font-medium"
             >
               <CareIcon icon="l-file-upload-alt" />
               <span>{t("choose_files")}</span>
@@ -379,7 +379,7 @@ export const FilesPage = ({
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => fileUpload.handleCameraCapture()}
-            className="flex items-center text-primary-900 font-normal"
+            className="flex items-center text-primary-900 font-medium"
             aria-label={t("open_camera")}
           >
             <CareIcon icon="l-camera" />
@@ -387,7 +387,7 @@ export const FilesPage = ({
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => fileUpload.handleAudioCapture()}
-            className="flex items-center text-primary-900 font-normal"
+            className="flex items-center text-primary-900 font-medium"
             data-cy="record-audio-button"
             aria-label={t("record")}
           >
