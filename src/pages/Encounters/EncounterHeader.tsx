@@ -10,6 +10,8 @@ import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 import EncounterProperties from "@/pages/Encounters/EncounterProperties";
 import { Encounter } from "@/types/emr/encounter";
 
+import { BloodGroupAndAllergies } from "./tabs/EncounterOverviewTab";
+
 interface Props {
   encounter: Encounter;
 }
@@ -70,6 +72,11 @@ export function EncounterHeader({ encounter }: Props) {
         </div>
         <div className="md:hidden">
           <EncounterProperties encounter={encounter} canEdit={false} />
+        </div>
+        <div className="sm:hidden border border-gray-200 rounded-lg p-2">
+          <div className="flex flex-row items-center justify-center">
+            <BloodGroupAndAllergies />
+          </div>
         </div>
       </div>
     </Card>
