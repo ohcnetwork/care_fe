@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { PrintableQRCode } from "@/components/PrintableQRCode";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
+import SpecimenIDScanDialog from "@/components/Scan/SpecimenIDScanDialog";
 
 // Change to default import
 import useAuthUser from "@/hooks/useAuthUser";
@@ -55,6 +56,7 @@ export function SpecimenForm({
   const [identifierMode, setIdentifierMode] = useState<"scan" | "generate">(
     "generate",
   );
+  const [isScanDialogOpen, setIsScanDialogOpen] = useState(false);
 
   const [errors, setErrors] = useState<{
     quantityValue?: string;
@@ -109,7 +111,12 @@ export function SpecimenForm({
   });
 
   const handleScanBarcode = () => {
-    toast.info(t("specimen_qrcode_scan_info"));
+    setIsScanDialogOpen(true);
+  };
+
+  const handleScanSuccess = (specimen_id: string) => {
+    handleSpecimenChange("accession_identifier", specimen_id);
+    setIsScanDialogOpen(false);
   };
 
   const handleCollectionChange = (field: keyof CollectionSpec, value: any) => {
@@ -520,6 +527,12 @@ export function SpecimenForm({
           </div>
         </div>
       </form>
+
+      <SpecimenIDScanDialog
+        open={isScanDialogOpen}
+        onOpenChange={setIsScanDialogOpen}
+        onScanSuccess={handleScanSuccess}
+      />
     </div>
   );
 }

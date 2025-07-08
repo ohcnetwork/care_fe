@@ -1,3 +1,4 @@
+// TODO: Make this a generic QR scanner component
 import { Camera, QrCode, X } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -27,8 +28,9 @@ import { SpecimenIDScanSuccessDialog } from "./SpecimenIDScanSuccessDialog";
 interface QRScanDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  facilityId: string;
-  locationId: string;
+  facilityId?: string;
+  locationId?: string;
+  onScanSuccess?: (specimen: string) => void;
 }
 
 export function QRScanDialog({
@@ -36,6 +38,7 @@ export function QRScanDialog({
   onOpenChange,
   facilityId,
   locationId,
+  onScanSuccess,
 }: QRScanDialogProps) {
   const { t } = useTranslation();
   const [specimenId, setSpecimenId] = useState("");
@@ -76,6 +79,16 @@ export function QRScanDialog({
     const idToUse = (scannedId || specimenId).trim();
     if (!idToUse) return;
 
+    // If no facilityId provided, just return the string (simple mode)
+    if (!facilityId) {
+      if (onScanSuccess) {
+        onScanSuccess(idToUse);
+      }
+      onOpenChange(false);
+      return;
+    }
+
+    // Full API mode - make API call and return specimen object
     setLoading(true);
     const signal = new AbortController().signal;
 
