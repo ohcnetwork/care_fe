@@ -34,6 +34,7 @@ export const FacilityMapsLink = ({
       href={getMapUrl(latitude, longitude)}
       target={target}
       rel="noreferrer"
+      aria-label={t("show_on_map")}
     >
       {t("show_on_map")}
       <SquareArrowOutUpRight className="size-3" />
