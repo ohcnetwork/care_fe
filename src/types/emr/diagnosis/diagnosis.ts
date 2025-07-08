@@ -62,7 +62,7 @@ export interface Diagnosis {
   updated_by: UserBase;
   encounter: string;
   created_date: string;
-  updated_date?: string; //to-do: discuss with amjith
+  updated_date?: string;
 }
 
 export type DiagnosisCategory = (typeof DIAGNOSIS_CATEGORY)[number];
