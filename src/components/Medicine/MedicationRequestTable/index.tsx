@@ -80,7 +80,7 @@ export default function MedicationRequestTable() {
     !inactiveEncounterStatus.includes(encounter.status)
   );
   const { data: activeMedications, isLoading: loadingActive } = useQuery({
-    queryKey: ["medication_requests_active", patientId],
+    queryKey: ["medication_requests_active", patientId, encounterId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId: patientId },
       queryParams: {
@@ -93,7 +93,7 @@ export default function MedicationRequestTable() {
   });
 
   const { data: stoppedMedications, isLoading: loadingStopped } = useQuery({
-    queryKey: ["medication_requests_stopped", patientId],
+    queryKey: ["medication_requests_stopped", patientId, encounterId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId: patientId },
       queryParams: {
