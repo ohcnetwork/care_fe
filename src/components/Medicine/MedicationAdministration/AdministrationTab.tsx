@@ -91,7 +91,7 @@ function getAdministrationsForTimeSlot(
 // Types and Interfaces
 interface AdministrationTabProps {
   patientId: string;
-  encounterId: string;
+  encounterId?: string;
   canAccess: boolean;
   canWrite: boolean;
 }
@@ -602,6 +602,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
   const handleAdminister = useCallback(
     (medication: MedicationRequestRead) => {
+      if (!encounterId) {
+        return;
+      }
       setAdministrationRequest(
         createMedicationAdministrationRequest(medication, encounterId),
       );
@@ -883,21 +886,23 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         />
       )}
 
-      <MedicineAdminSheet
-        open={isSheetOpen}
-        onOpenChange={(open) => {
-          setIsSheetOpen(open);
-          if (!open) {
-            queryClient.invalidateQueries({
-              queryKey: ["medication_administrations"],
-            });
-          }
-        }}
-        medications={activeMedications?.results || []}
-        lastAdministeredDates={lastAdministeredDetails?.dates}
-        patientId={patientId}
-        encounterId={encounterId}
-      />
+      {encounterId && (
+        <MedicineAdminSheet
+          open={isSheetOpen}
+          onOpenChange={(open) => {
+            setIsSheetOpen(open);
+            if (!open) {
+              queryClient.invalidateQueries({
+                queryKey: ["medication_administrations"],
+              });
+            }
+          }}
+          medications={activeMedications?.results || []}
+          lastAdministeredDates={lastAdministeredDetails?.dates}
+          patientId={patientId}
+          encounterId={encounterId}
+        />
+      )}
     </div>
   );
 };

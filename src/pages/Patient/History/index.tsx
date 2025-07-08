@@ -2,19 +2,20 @@ import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { MedicationHistory } from "@/pages/Patient/History/MedicationHistory";
+
 import { AllergyHistory } from "./AllergyHistory";
 import { DiagnosesHistory } from "./DiagnosesHistory";
 import { SymptomsHistory } from "./SymptomsHistory";
 
 export function ClinicalHistoryPage({
-  facilityId,
   patientId,
 }: {
   facilityId: string;
   patientId: string;
 }) {
   const { t } = useTranslation();
-  console.log("facilityId", facilityId);
+
   return (
     <section className="p-4">
       <Tabs defaultValue="symptoms" className="w-full">
@@ -35,9 +36,9 @@ export function ClinicalHistoryPage({
         <TabsContent value="allergies">
           <AllergyHistory patientId={patientId} />
         </TabsContent>
-        {/* <TabsContent value="medication-requests">
-          <MedicationRequestsHistory patientId={patientId} />
-        </TabsContent> */}
+        <TabsContent value="medication-requests">
+          <MedicationHistory patientId={patientId} />
+        </TabsContent>
       </Tabs>
     </section>
   );
