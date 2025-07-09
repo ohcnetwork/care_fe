@@ -212,7 +212,7 @@ export const BloodGroupAndAllergies = () => {
         </Badge>
       </div>
 
-      {allergies?.results?.length && (
+      {!!allergies?.results.length && (
         <div className="flex flex-col items-start gap-1">
           <span className="text-sm font-medium text-gray-600">
             {t("allergies")}:
