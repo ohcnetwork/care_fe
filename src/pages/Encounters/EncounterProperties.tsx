@@ -92,6 +92,27 @@ export default function EncounterProperties({ encounter, canEdit }: Props) {
           <LocationPropertyBadge encounter={encounter} canEdit={canEdit} />
         </div>
       </div>
+
+      <div className="flex flex-col gap-1">
+        <span className="text-xs font-medium">
+          {t("departments_and_teams")}:{" "}
+        </span>
+        <div>
+          {encounter.organizations.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {encounter.organizations.map((org) => (
+                <Badge key={org.id} variant="blue" className="capitalize">
+                  {org.name}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">
+              {t("no_departments_assigned")}
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

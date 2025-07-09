@@ -60,7 +60,7 @@ export function EncounterHeader() {
           </Link>
         </div>
         <div className="flex flex-col md:flex-row gap-1 md:gap-8 items-start">
-          <div className="flex md:flex-col gap-0.5 items-center md:items-start">
+          <div className="md:hidden flex md:flex-col gap-0.5 items-center md:items-start">
             <span className="text-xs text-gray-600 w-32 md:w-auto">
               {t("start_date")}:{" "}
             </span>
@@ -70,7 +70,7 @@ export function EncounterHeader() {
                 : "--"}
             </span>
           </div>
-          <div className="flex md:flex-col gap-0.5 items-center md:items-start">
+          <div className="md:hidden flex md:flex-col gap-0.5 items-center md:items-start">
             <span className="text-xs text-gray-600 w-32 md:w-auto">
               {t("end_date")}:{" "}
             </span>
