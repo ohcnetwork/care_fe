@@ -16,7 +16,7 @@ import { getPermissions } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import EncounterOverviewDevices from "@/pages/Facility/settings/devices/components/EncounterOverviewDevices";
-import { inactiveEncounterStatus } from "@/types/emr/encounter";
+import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 
 const actionLinks = [
   {
@@ -30,6 +30,10 @@ const actionLinks = [
   {
     href: "questionnaire/symptom",
     label: "Add Symptoms",
+  },
+  {
+    href: "questionnaire/charge_item",
+    label: "Add Charge Item",
   },
 ];
 
@@ -59,7 +63,7 @@ export const EncounterOverviewTab = ({
         <div className="flex-1 space-y-4" data-cy="encounter-overview">
           {canEdit && (
             <div className="flex justify-between gap-2">
-              <div className="flex flex-wrap gap-2 justify-start">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mx-auto md:mx-0">
                 {actionLinks.map((link) => {
                   return (
                     <Button

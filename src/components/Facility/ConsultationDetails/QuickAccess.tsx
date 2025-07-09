@@ -16,7 +16,7 @@ import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSea
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
 import { stringifyNestedObject } from "@/Utils/utils";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter } from "@/types/emr/encounter/encounter";
 
 interface QuickAccessProps {
   encounter: Encounter;
