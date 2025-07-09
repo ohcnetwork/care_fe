@@ -134,7 +134,8 @@ const Questionnaires = ({ encounter }: { encounter: Encounter }) => {
           <Button
             key={option.slug}
             variant="outline"
-            className="justify-start whitespace-break-spaces text-left"
+            className="justify-start text-left"
+            title={option.title}
             onClick={() =>
               navigate(
                 `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/${option.slug}`,
@@ -142,7 +143,7 @@ const Questionnaires = ({ encounter }: { encounter: Encounter }) => {
             }
           >
             <NotebookPen />
-            {t(option.title)}
+            <span className="truncate">{option.title}</span>
           </Button>
         ))}
         <QuestionnaireSearch
