@@ -64,7 +64,24 @@ export const EncounterOverviewTab = () => {
       {/* Main Content Area */}
       <div className="flex flex-col xl:flex-row gap-4">
         {/* Left Column - Symptoms, Diagnoses, and Questionnaire Responses */}
-        <div className="flex-1 space-y-4" data-cy="encounter-overview">
+        <div className="flex-1 space-y-4">
+          <div className="hidden md:block bg-white rounded-lg p-4 border border-gray-200">
+            <div className="flex flex-row items-center justify-between gap-4">
+              <BloodGroupAndAllergies />
+              <Button asChild variant="outline" size="lg">
+                <Link
+                  href={`/facility/${facilityId}/patient/${patientId}/history/symptoms`}
+                >
+                  <img
+                    src="/images/icons/clinical_history.svg"
+                    alt="Clinical History"
+                    className="size-4"
+                  />
+                  {t("see_clinical_history")}
+                </Link>
+              </Button>
+            </div>
+          </div>
           {!readOnly && canEdit && (
             <div className="flex justify-between gap-2">
               <div className="flex flex-wrap gap-2 justify-start">
@@ -101,23 +118,6 @@ export const EncounterOverviewTab = () => {
           )}
           {/* Associated Devices Section */}
           {encounter && <EncounterOverviewDevices encounter={encounter} />}
-          <div className="hidden md:block bg-white rounded-lg p-4 border border-gray-200">
-            <div className="flex flex-row items-center justify-between gap-4">
-              <BloodGroupAndAllergies />
-              <Button asChild variant="outline" size="lg">
-                <Link
-                  href={`/facility/${facilityId}/patient/${patientId}/history/symptoms`}
-                >
-                  <img
-                    src="/images/icons/clinical_history.svg"
-                    alt="Clinical History"
-                    className="size-4"
-                  />
-                  {t("see_clinical_history")}
-                </Link>
-              </Button>
-            </div>
-          </div>
           <Button
             asChild
             variant="outline"
