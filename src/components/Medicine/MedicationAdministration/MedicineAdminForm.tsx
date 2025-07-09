@@ -63,22 +63,35 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   const [startTimeError, setStartTimeError] = useState("");
   const [endTimeError, setEndTimeError] = useState("");
 
-  const validateDateTime = (date: Date, isStartTime: boolean): string => {
-    const now = new Date();
-    const authoredOn = new Date(medication.authored_on);
-    const startTime = new Date(administrationRequest.occurrence_period_start);
+  const roundToNearestMinute = (date: Date) => {
+    const rounded = new Date(date);
+    rounded.setSeconds(0);
+    rounded.setMilliseconds(0);
+    return rounded;
+  };
 
-    if (date > now) {
+  const validateDateTime = (date: Date, isStartTime: boolean): string => {
+    const now = roundToNearestMinute(new Date());
+    const authoredOn = roundToNearestMinute(new Date(medication.authored_on));
+    const startTime = roundToNearestMinute(
+      new Date(administrationRequest.occurrence_period_start),
+    );
+
+    const roundedDate = roundToNearestMinute(date);
+
+    if (roundedDate > now) {
       return t(
         isStartTime ? "start_time_future_error" : "end_time_future_error",
       );
     }
 
     if (isStartTime) {
-      return date < authoredOn ? t("start_time_before_authored_error") : "";
+      return roundedDate < authoredOn
+        ? t("start_time_before_authored_error")
+        : "";
     }
 
-    return date < startTime ? t("end_time_before_start_error") : "";
+    return roundedDate < startTime ? t("end_time_before_start_error") : "";
   };
 
   // Validate and notify parent whenever times change
