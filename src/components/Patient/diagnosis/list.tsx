@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import query from "@/Utils/request/query";
@@ -35,6 +37,7 @@ export function DiagnosisList({
   readOnly = false,
   showTimeline = false,
 }: DiagnosisListProps) {
+  const { t } = useTranslation();
   const { data: diagnoses, isLoading: isDiagnosesLoading } = useQuery({
     queryKey: ["encounter_diagnosis", patientId, encounterId],
     queryFn: query(diagnosisApi.listDiagnosis, {
@@ -59,6 +62,14 @@ export function DiagnosisList({
   }
 
   if (!diagnoses?.results.length) {
+    if (showTimeline) {
+      return (
+        <EmptyState
+          message={t("no_diagnoses")}
+          description={t("no_diagnoses_recorded_description")}
+        />
+      );
+    }
     return null;
   }
 

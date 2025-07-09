@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
+
 import query from "@/Utils/request/query";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
@@ -59,6 +61,14 @@ export function MedicationStatementList({
   }
 
   if (!medications?.results.length) {
+    if (showTimeLine) {
+      return (
+        <EmptyState
+          message={t("no_medication_statements")}
+          description={t("no_medication_statements_recorded_description")}
+        />
+      );
+    }
     return null;
   }
 
