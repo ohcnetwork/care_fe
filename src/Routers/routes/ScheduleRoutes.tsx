@@ -4,21 +4,15 @@ import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
 import BookAppointment from "@/pages/Appointments/BookAppointment";
 
 const ScheduleRoutes: AppRoutes = {
-  "/facility/:facilityId/appointments": ({ facilityId }) => (
-    <AppointmentsPage facilityId={facilityId} />
-  ),
+  "/facility/:facilityId/appointments": () => <AppointmentsPage />,
 
   "/facility/:facilityId/patient/:patientId/book-appointment": ({
-    facilityId,
     patientId,
-  }) => <BookAppointment facilityId={facilityId} patientId={patientId} />,
+  }) => <BookAppointment patientId={patientId} />,
 
   "/facility/:facilityId/patient/:patientId/appointments/:appointmentId": ({
-    facilityId,
     appointmentId,
-  }) => (
-    <AppointmentDetail facilityId={facilityId} appointmentId={appointmentId} />
-  ),
+  }) => <AppointmentDetail appointmentId={appointmentId} />,
 };
 
 export default ScheduleRoutes;

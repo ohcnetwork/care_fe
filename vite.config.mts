@@ -306,7 +306,7 @@ export default defineConfig(({ mode }) => {
         "X-Frame-Options": "SAMEORIGIN",
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "strict-origin-when-cross-origin",
-        "Permissions-Policy": "geolocation=(self), microphone=()",
+        "Permissions-Policy": "geolocation=(self), microphone=(self)",
       },
     },
     preview: {
