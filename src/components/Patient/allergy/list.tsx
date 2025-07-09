@@ -10,8 +10,8 @@ import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
@@ -75,16 +75,7 @@ export function AllergyList({
   });
 
   if (isLoading) {
-    return (
-      <EncounterAccordionLayout
-        title="allergies"
-        readOnly={readOnly}
-        className={className}
-        editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
-      >
-        <Skeleton className="h-[100px] w-full" />
-      </EncounterAccordionLayout>
-    );
+    return <TableSkeleton count={5} />;
   }
 
   const filteredAllergies = allergies?.results?.filter(

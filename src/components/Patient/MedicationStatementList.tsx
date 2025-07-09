@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 
 import query from "@/Utils/request/query";
@@ -44,10 +44,6 @@ export function MedicationStatementList({
     queryKey: ["medication_statements", patientId, encounterId],
     queryFn: query(medicationStatementApi.list, {
       pathParams: { patientId },
-      queryParams: {
-        encounter: encounterId,
-        ordering: "-created_date",
-      },
     }),
     enabled: canAccess,
   });
@@ -55,12 +51,21 @@ export function MedicationStatementList({
   if (isLoading) {
     return (
       <MedicationStatementListLayout className={className}>
-        <Skeleton className="h-[100px] w-full" />
+        <TableSkeleton count={5} />
       </MedicationStatementListLayout>
     );
   }
 
-  if (!medications?.results.length) {
+  const filteredMedications = medications?.results?.filter(
+    (medication) =>
+      showEnteredInError || medication.status !== "entered_in_error",
+  );
+
+  const hasEnteredInErrorRecords = medications?.results?.some(
+    (medication) => medication.status === "entered_in_error",
+  );
+
+  if (!filteredMedications?.length) {
     if (showTimeLine) {
       return (
         <EmptyState
@@ -69,18 +74,31 @@ export function MedicationStatementList({
         />
       );
     }
-    return null;
+    return (
+      <MedicationStatementListLayout className={className}>
+        <p className="text-gray-500">{t("no_medication_statements")}</p>
+      </MedicationStatementListLayout>
+    );
   }
 
+  const statments = [
+    ...filteredMedications.filter(
+      (medication) => medication.status !== "entered_in_error",
+    ),
+    ...(showEnteredInError
+      ? filteredMedications.filter(
+          (medication) => medication.status === "entered_in_error",
+        )
+      : []),
+  ];
+
   if (showTimeLine) {
-    const groupedByYear = medications.results.reduce((acc, medication) => {
+    const groupedByYear = filteredMedications.reduce((acc, medication) => {
       const dateStr = format(medication.created_date, "dd MMMM, yyyy");
       const year = format(medication.created_date, "yyyy");
       acc[year] ??= {};
       acc[year][dateStr] ??= [];
-      if (medication.status !== "entered_in_error") {
-        acc[year][dateStr].push(medication);
-      }
+      acc[year][dateStr].push(medication);
       return acc;
     }, {} as GroupedMedications);
 
@@ -121,34 +139,6 @@ export function MedicationStatementList({
       </div>
     );
   }
-
-  const filteredMedications = medications?.results?.filter(
-    (medication) =>
-      showEnteredInError || medication.status !== "entered_in_error",
-  );
-
-  const hasEnteredInErrorRecords = medications?.results?.some(
-    (medication) => medication.status === "entered_in_error",
-  );
-
-  if (!filteredMedications?.length) {
-    return (
-      <MedicationStatementListLayout className={className}>
-        <p className="text-gray-500">{t("no_medication_statements")}</p>
-      </MedicationStatementListLayout>
-    );
-  }
-
-  const statments = [
-    ...filteredMedications.filter(
-      (medication) => medication.status !== "entered_in_error",
-    ),
-    ...(showEnteredInError
-      ? filteredMedications.filter(
-          (medication) => medication.status === "entered_in_error",
-        )
-      : []),
-  ];
 
   return (
     <MedicationStatementListLayout
