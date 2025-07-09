@@ -20,6 +20,7 @@ interface MedicationStatementListProps {
   canAccess: boolean;
   className?: string;
   showTimeLine?: boolean;
+  encounterId?: string;
 }
 interface GroupedMedications {
   [year: string]: {
@@ -32,15 +33,17 @@ export function MedicationStatementList({
   canAccess,
   className = "",
   showTimeLine = false,
+  encounterId,
 }: MedicationStatementListProps) {
   const { t } = useTranslation();
   const [showEnteredInError, setShowEnteredInError] = useState(false);
 
   const { data: medications, isLoading } = useQuery({
-    queryKey: ["medication_statements", patientId],
+    queryKey: ["medication_statements", patientId, encounterId],
     queryFn: query(medicationStatementApi.list, {
       pathParams: { patientId },
       queryParams: {
+        encounter: encounterId,
         ordering: "-created_date",
       },
     }),
