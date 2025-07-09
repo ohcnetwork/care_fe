@@ -187,21 +187,14 @@ export const EncounterOverviewTab = () => {
 };
 
 export const BloodGroupAndAllergies = () => {
-  const {
-    selectedEncounterId: encounterId,
-    patientId,
-    patient,
-  } = useEncounter();
+  const { patientId, patient } = useEncounter();
 
   const { t } = useTranslation();
   const { data: allergies } = useQuery({
-    queryKey: ["allergy-intolerance", patientId, encounterId, "confirmed"],
+    queryKey: ["allergy-intolerance", patientId, "confirmed"],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
-      queryParams: {
-        encounter: encounterId,
-        verification_status: "confirmed",
-      },
+      queryParams: { verification_status: "confirmed" },
     }),
   });
 
