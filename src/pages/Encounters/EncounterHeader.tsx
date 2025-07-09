@@ -106,25 +106,26 @@ export function EncounterHeader() {
             className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
           />
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="primary_gradient">
-                {inactiveEncounterStatus.includes(encounter.status) ||
-                  t("update")}
-                <ChevronDown className="ml-2 size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-(--radix-dropdown-menu-trigger-width) sm:w-auto"
-            >
-              <EncounterActions encounter={encounter} layout="dropdown" />
-              <PLUGIN_Component
-                __name="PatientInfoCardActions"
-                encounter={encounter}
-              />
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {!inactiveEncounterStatus.includes(encounter.status) && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="primary_gradient">
+                  {t("update")}
+                  <ChevronDown className="ml-2 size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-(--radix-dropdown-menu-trigger-width) sm:w-auto"
+              >
+                <EncounterActions encounter={encounter} layout="dropdown" />
+                <PLUGIN_Component
+                  __name="PatientInfoCardActions"
+                  encounter={encounter}
+                />
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       )}
     </Card>

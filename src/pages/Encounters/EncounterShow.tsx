@@ -25,7 +25,7 @@ import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicine
 import { EncounterOverviewTab } from "@/pages/Encounters/tabs/EncounterOverviewTab";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/patient";
 
 import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
@@ -134,7 +134,9 @@ export const EncounterShow = (props: Props) => {
     <Page title={t("encounter")} className="block" hideTitleOnPage>
       <EncounterHeader />
       <div className="flex flex-col md:flex-row gap-6 mt-4">
-        <EncounterHistorySelector />
+        {!inactiveEncounterStatus.includes(currentEncounter.status) && (
+          <EncounterHistorySelector />
+        )}
         <div className="w-full">
           <div className="w-full border-b-2 border-secondary-200">
             <div className="overflow-x-auto sm:flex sm:items-baseline">
