@@ -20,11 +20,11 @@ export function ClinicalHistoryPage({
     <section className="p-4">
       <Tabs defaultValue="symptoms" className="w-full">
         <TabsList className="mb-4">
-          <TabsTrigger value="symptoms">{t("symptom")}</TabsTrigger>
-          <TabsTrigger value="diagnoses">{t("diagnoses")}</TabsTrigger>
+          <TabsTrigger value="symptoms">{t("past_symptoms")}</TabsTrigger>
+          <TabsTrigger value="diagnoses">{t("past_diagnoses")}</TabsTrigger>
           <TabsTrigger value="allergies">{t("allergies")}</TabsTrigger>
           <TabsTrigger value="medication-requests">
-            {t("medication_requests")}
+            {t("past_medications")}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="symptoms">

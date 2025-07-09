@@ -12,7 +12,7 @@ export const AllergyHistory = ({ patientId }: { patientId: string }) => {
           alt="diagnosis"
           className="size-9 bg-cyan-200 border border-cyan-400 rounded-md p-1.5"
         />
-        <h4 className="text-xl">{t("past_allergies")}</h4>
+        <h4 className="text-xl">{t("allergies")}</h4>
       </div>
       <AllergyList patientId={patientId} showTimeline={true} />
     </div>

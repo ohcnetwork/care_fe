@@ -143,7 +143,7 @@ export default function MedicationRequestTable() {
                 value="ongoing"
                 className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
               >
-                {t("ongoing_medicines")}
+                {t("medication_statements")}
               </TabsTrigger>
               <TabsTrigger
                 value="administration"

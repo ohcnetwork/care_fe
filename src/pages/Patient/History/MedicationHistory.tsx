@@ -30,7 +30,9 @@ export const MedicationHistory = ({ patientId }: { patientId: string }) => {
       <Tabs defaultValue="prescriptions" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="prescriptions">{t("prescriptions")}</TabsTrigger>
-          <TabsTrigger value="statements">{t("ongoing_medicines")}</TabsTrigger>
+          <TabsTrigger value="statements">
+            {t("medication_statements")}
+          </TabsTrigger>
           <TabsTrigger value="administration">
             {t("medicine_administration")}
           </TabsTrigger>
