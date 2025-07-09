@@ -92,9 +92,7 @@ export function EncounterHeader() {
           <EncounterProperties encounter={encounter} canEdit={false} />
         </div>
         <div className="sm:hidden border border-gray-200 rounded-lg p-2">
-          <div className="flex flex-row items-center justify-center">
-            <BloodGroupAndAllergies />
-          </div>
+          <BloodGroupAndAllergies />
         </div>
       </div>
 
