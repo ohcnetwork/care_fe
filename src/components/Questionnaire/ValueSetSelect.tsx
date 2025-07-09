@@ -50,7 +50,6 @@ interface Props {
   disabled?: boolean;
   count?: number;
   searchPostFix?: string;
-  wrapTextForSmallScreen?: boolean;
   hideTrigger?: boolean;
   controlledOpen?: boolean;
   title?: string;
@@ -101,7 +100,6 @@ export default function ValueSetSelect({
   disabled,
   count = 10,
   searchPostFix = "",
-  wrapTextForSmallScreen = false,
   hideTrigger = false,
   controlledOpen = false,
   closeOnSelect = true,
@@ -409,9 +407,7 @@ export default function ValueSetSelect({
             onClick={() => setInternalOpen(true)}
             className={cn(
               "w-full justify-between",
-              wrapTextForSmallScreen
-                ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
-                : "truncate",
+              "h-auto md:h-9 whitespace-normal text-left md:truncate",
               !value?.display && "text-gray-400",
             )}
             disabled={disabled}
@@ -439,10 +435,7 @@ export default function ValueSetSelect({
             variant="outline"
             role="combobox"
             className={cn(
-              "w-full justify-between border border-primary rounded-md px-5",
-              wrapTextForSmallScreen
-                ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
-                : "truncate",
+              "w-full justify-between border border-primary rounded-md px-2 h-auto whitespace-normal text-left",
               !value?.display && "text-gray-400",
             )}
             disabled={disabled}
@@ -450,7 +443,7 @@ export default function ValueSetSelect({
             <div className="flex items-center">
               <CareIcon
                 icon="l-plus"
-                className="mr-2 text-5xl text-primary-700 font-normal"
+                className="mr-2 text-primary-700 font-normal"
               />
               <span className="text-primary-700 flex items-center font-semibold text-wrap text-sm md:text-base">
                 {value?.display || placeholder}
@@ -485,10 +478,7 @@ export default function ValueSetSelect({
                 variant="outline"
                 role="combobox"
                 className={cn(
-                  "justify-between",
-                  wrapTextForSmallScreen
-                    ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
-                    : "truncate",
+                  "justify-between truncate",
                   !value?.display && "text-gray-400",
                 )}
               >
