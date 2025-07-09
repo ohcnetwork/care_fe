@@ -32,7 +32,7 @@ export default function EncounterProperties({ encounter, canEdit }: Props) {
   const EncounterClassIcon = ENCOUNTER_CLASS_ICONS[encounter.encounter_class];
 
   return (
-    <div className="flex md:flex-col gap-2">
+    <div className="flex flex-wrap md:flex-col gap-2">
       <div className="hidden md:flex flex-col gap-1">
         <span className="text-xs font-medium">{t("status")}: </span>
         <div>
