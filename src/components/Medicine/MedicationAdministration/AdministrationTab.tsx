@@ -881,7 +881,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               size="sm"
               className="text-gray-950 hover:text-gray-700 h-9"
             >
-              <Link href={`medicines/administrations/print`}>
+              <Link href={`../${encounterId}/medicines/administrations/print`}>
                 <CareIcon icon="l-print" className="mr-2" />
                 {t("print")}
               </Link>

@@ -210,7 +210,7 @@ export default function MedicationRequestTable() {
                       size="sm"
                       className="text-gray-950 hover:text-gray-700 h-9"
                     >
-                      <Link href={`prescriptions/print`}>
+                      <Link href={`../${encounterId}/prescriptions/print`}>
                         <CareIcon icon="l-print" className="mr-2" />
                         {t("print")}
                       </Link>
