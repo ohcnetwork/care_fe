@@ -12,7 +12,7 @@ import { MedicationStatementList } from "@/components/Patient/MedicationStatemen
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { MedicationRequestRead } from "@/types/emr/medicationRequest";
+import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
 export const MedicationHistory = ({ patientId }: { patientId: string }) => {

@@ -24,7 +24,12 @@ import { Priority, Status } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 
 export const EncounterServiceRequestTab = () => {
-  const { selectedEncounter: encounter } = useEncounter();
+  const {
+    selectedEncounter: encounter,
+    selectedEncounterId: encounterId,
+    facilityId,
+    patientId,
+  } = useEncounter();
   const { t } = useTranslation();
   const {
     qParams,
@@ -38,14 +43,12 @@ export const EncounterServiceRequestTab = () => {
 
   const maxVisibleTabs = useBreakpoints({ default: 2, md: 3 });
 
-  const facilityId = encounter.facility.id;
-
   const { data, isLoading } = useQuery({
-    queryKey: ["serviceRequests", facilityId, encounter.id, qParams],
+    queryKey: ["serviceRequests", facilityId, encounterId, qParams],
     queryFn: query.debounced(serviceRequestApi.listServiceRequest, {
-      pathParams: { facilityId },
+      pathParams: { facilityId: facilityId || "" },
       queryParams: {
-        encounter: encounter.id,
+        encounter: encounterId,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         limit: resultsPerPage,
         status: qParams.status,
@@ -121,10 +124,10 @@ export const EncounterServiceRequestTab = () => {
             />
           </div>
 
-          {!inactiveEncounterStatus.includes(encounter.status) && (
+          {encounter && !inactiveEncounterStatus.includes(encounter.status) && (
             <Button variant="primary">
               <Link
-                href={`/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/service_request`}
+                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/service_request`}
                 className="flex items-center"
               >
                 <PlusIcon className="size-5 mr-1" />
@@ -144,7 +147,7 @@ export const EncounterServiceRequestTab = () => {
               {data?.results?.length ? (
                 <ServiceRequestTable
                   requests={data.results}
-                  facilityId={facilityId}
+                  facilityId={facilityId || ""}
                   showPatientInfo={false}
                 />
               ) : (

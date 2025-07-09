@@ -77,7 +77,7 @@ export default function MedicationRequestTable() {
   const facilityIdExists = !!subpathMatch?.facilityId;
   const { facilityId } = useCurrentFacility();
   const canWrite =
-    encounter &&
+    !!encounter &&
     encounterId === currentEncounterId &&
     facilityIdExists &&
     canWriteEncounter &&

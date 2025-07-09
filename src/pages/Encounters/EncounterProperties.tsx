@@ -19,7 +19,7 @@ import {
   ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_STATUS_ICONS,
   Encounter,
-} from "@/types/emr/encounter";
+} from "@/types/emr/encounter/encounter";
 
 interface Props {
   encounter: Encounter;

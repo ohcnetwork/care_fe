@@ -21,7 +21,10 @@ import {
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { ENCOUNTER_STATUS_COLORS, Encounter } from "@/types/emr/encounter";
+import {
+  ENCOUNTER_STATUS_COLORS,
+  Encounter,
+} from "@/types/emr/encounter/encounter";
 
 interface EncounterCardProps {
   encounter: Encounter;
