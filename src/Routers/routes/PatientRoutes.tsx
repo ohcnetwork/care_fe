@@ -115,10 +115,17 @@ const PatientRoutes: AppRoutes = {
       />
     </Suspense>
   ),
-  "/facility/:facilityId/patient/:patientId/history/*": ({
+  "/facility/:facilityId/patient/:patientId/history/:tab": ({
     facilityId,
     patientId,
-  }) => <ClinicalHistoryPage facilityId={facilityId} patientId={patientId} />,
+    tab,
+  }) => (
+    <ClinicalHistoryPage
+      facilityId={facilityId}
+      patientId={patientId}
+      tab={tab}
+    />
+  ),
 };
 
 export default PatientRoutes;
