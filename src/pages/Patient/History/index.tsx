@@ -1,3 +1,4 @@
+import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,22 +11,31 @@ import { SymptomsHistory } from "./SymptomsHistory";
 
 export function ClinicalHistoryPage({
   patientId,
+  tab = "symptoms",
+  facilityId,
 }: {
   facilityId: string;
   patientId: string;
+  tab: string;
 }) {
   const { t } = useTranslation();
 
   return (
     <section className="p-4">
-      <Tabs defaultValue="symptoms" className="w-full">
+      <Tabs
+        value={tab}
+        onValueChange={(value) => {
+          navigate(
+            `/facility/${facilityId}/patient/${patientId}/history/${value}`,
+          );
+        }}
+        className="w-full"
+      >
         <TabsList className="mb-4">
           <TabsTrigger value="symptoms">{t("past_symptoms")}</TabsTrigger>
           <TabsTrigger value="diagnoses">{t("past_diagnoses")}</TabsTrigger>
           <TabsTrigger value="allergies">{t("allergies")}</TabsTrigger>
-          <TabsTrigger value="medication-requests">
-            {t("past_medications")}
-          </TabsTrigger>
+          <TabsTrigger value="medications">{t("past_medications")}</TabsTrigger>
         </TabsList>
         <TabsContent value="symptoms">
           <SymptomsHistory patientId={patientId} />
@@ -36,7 +46,7 @@ export function ClinicalHistoryPage({
         <TabsContent value="allergies">
           <AllergyHistory patientId={patientId} />
         </TabsContent>
-        <TabsContent value="medication-requests">
+        <TabsContent value="medications">
           <MedicationHistory patientId={patientId} />
         </TabsContent>
       </Tabs>
