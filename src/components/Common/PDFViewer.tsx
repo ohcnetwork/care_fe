@@ -24,8 +24,8 @@ export default function PDFViewer(
         >
           <Page
             pageNumber={props.pageNumber}
-            scale={props.scale}
             height={650}
+            scale={props.scale}
           />
         </Document>
       </div>
