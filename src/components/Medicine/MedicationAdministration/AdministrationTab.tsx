@@ -94,6 +94,7 @@ interface AdministrationTabProps {
   encounterId?: string;
   canAccess: boolean;
   canWrite: boolean;
+  showTimeLine?: boolean;
 }
 
 interface TimeSlotHeaderProps {
@@ -392,6 +393,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   encounterId,
   canAccess,
   canWrite,
+  showTimeLine = false,
 }) => {
   const { t } = useTranslation();
   const subpathMatch = usePathParams("/facility/:facilityId/*");
@@ -811,53 +813,55 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
   return (
     <div className="flex flex-col gap-2 mt-4 mx-2">
-      <div className="flex justify-start items-center gap-2 flex-wrap">
-        <div className="flex items-center gap-2 flex-1">
+      {!showTimeLine && (
+        <div className="flex justify-start items-center gap-2 flex-wrap">
           <div className="flex items-center gap-2 flex-1">
-            <CareIcon icon="l-search" className="text-lg text-gray-500" />
-            <Input
-              placeholder={t("search_medications")}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 bg-transparent text-sm outline-hidden placeholder:text-gray-500"
-            />
-            {searchQuery && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2 text-gray-500 hover:text-foreground"
-                onClick={() => setSearchQuery("")}
-              >
-                <CareIcon icon="l-times" className="text-lg" />
-              </Button>
-            )}
+            <div className="flex items-center gap-2 flex-1">
+              <CareIcon icon="l-search" className="text-lg text-gray-500" />
+              <Input
+                placeholder={t("search_medications")}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 bg-transparent text-sm outline-hidden placeholder:text-gray-500"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-gray-500 hover:text-foreground"
+                  onClick={() => setSearchQuery("")}
+                >
+                  <CareIcon icon="l-times" className="text-lg" />
+                </Button>
+              )}
+            </div>
           </div>
+          {canWrite && (
+            <Button
+              variant="outline"
+              className="text-emerald-600 border-emerald-600 hover:bg-emerald-50 w-full sm:w-auto"
+              onClick={() => setIsSheetOpen(true)}
+              disabled={!activeMedications?.results.length}
+            >
+              <CareIcon icon="l-plus" className="mr-2 size-4" />
+              {t("administer_medicine")}
+            </Button>
+          )}
+          {facilityIdExists && (
+            <Button
+              variant="outline"
+              disabled={!activeMedications?.results?.length}
+              size="sm"
+              className="text-gray-950 hover:text-gray-700 h-9"
+            >
+              <Link href={`medicines/administrations/print`}>
+                <CareIcon icon="l-print" className="mr-2" />
+                {t("print")}
+              </Link>
+            </Button>
+          )}
         </div>
-        {canWrite && (
-          <Button
-            variant="outline"
-            className="text-emerald-600 border-emerald-600 hover:bg-emerald-50 w-full sm:w-auto"
-            onClick={() => setIsSheetOpen(true)}
-            disabled={!activeMedications?.results.length}
-          >
-            <CareIcon icon="l-plus" className="mr-2 size-4" />
-            {t("administer_medicine")}
-          </Button>
-        )}
-        {facilityIdExists && (
-          <Button
-            variant="outline"
-            disabled={!activeMedications?.results?.length}
-            size="sm"
-            className="text-gray-950 hover:text-gray-700 h-9"
-          >
-            <Link href={`medicines/administrations/print`}>
-              <CareIcon icon="l-print" className="mr-2" />
-              {t("print")}
-            </Link>
-          </Button>
-        )}
-      </div>
+      )}
 
       <div className="mt-4">{content}</div>
 
