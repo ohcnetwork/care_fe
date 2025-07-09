@@ -132,7 +132,7 @@ export const EncounterShow = (props: Props) => {
 
   return (
     <Page title={t("encounter")} className="block" hideTitleOnPage>
-      <EncounterHeader encounter={currentEncounter} />
+      <EncounterHeader />
       <div className="flex flex-col md:flex-row gap-6 mt-4">
         <EncounterHistorySelector />
         <div className="w-full">
