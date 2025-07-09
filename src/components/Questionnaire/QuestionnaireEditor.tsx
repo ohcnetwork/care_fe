@@ -202,7 +202,12 @@ function LayoutOptionCard({
   );
 }
 
-const HIDE_REPEATABLE_QUESTION_TYPES = ["boolean", "group", "display"];
+const HIDE_REPEATABLE_QUESTION_TYPES = [
+  "boolean",
+  "group",
+  "display",
+  "structured",
+];
 
 function findFirstErrorPath(errors: any, path: number[] = []): number[] | null {
   for (let i = 0; i < errors.length; i++) {
