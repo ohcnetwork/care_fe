@@ -33,7 +33,7 @@ import {
   MedicationAdministrationRequest,
   MedicationAdministrationStatus,
 } from "@/types/emr/medicationAdministration/medicationAdministration";
-import { MedicationRequestRead } from "@/types/emr/medicationRequest";
+import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
 
 interface MedicineAdminFormProps {
   medication: MedicationRequestRead;

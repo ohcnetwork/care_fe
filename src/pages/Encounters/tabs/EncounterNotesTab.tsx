@@ -62,7 +62,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
-import { inactiveEncounterStatus } from "@/types/emr/encounter";
+import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
 
