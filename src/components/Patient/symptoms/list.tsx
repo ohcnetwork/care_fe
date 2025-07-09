@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
@@ -51,16 +51,7 @@ export function SymptomsList({
   });
 
   if (isLoading) {
-    return (
-      <EncounterAccordionLayout
-        title="symptoms"
-        readOnly={readOnly}
-        className={className}
-        editLink={!readOnly ? "questionnaire/symptom" : undefined}
-      >
-        <Skeleton className="h-[100px] w-full" />
-      </EncounterAccordionLayout>
-    );
+    return <TableSkeleton count={5} />;
   }
 
   const filteredSymptoms = symptoms?.results?.filter(

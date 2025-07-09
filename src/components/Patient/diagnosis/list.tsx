@@ -2,8 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
-import { Skeleton } from "@/components/ui/skeleton";
-
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
@@ -53,12 +52,7 @@ export function DiagnosisList({
   });
 
   if (isDiagnosesLoading) {
-    return (
-      <div className="space-y-2">
-        <Skeleton className="h-[100px] w-full" />
-        <Skeleton className="h-[100px] w-full" />
-      </div>
-    );
+    return <TableSkeleton count={5} />;
   }
 
   if (!diagnoses?.results.length) {

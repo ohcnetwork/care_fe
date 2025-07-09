@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
-import Loading from "@/components/Common/Loading";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
@@ -432,33 +431,31 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   const queryClient = useQueryClient();
 
   // Queries
-  const { data: activeMedications, isLoading: isLoadingActiveMedications } =
-    useQuery({
-      queryKey: ["medication_requests_active", patientId, encounterId],
-      queryFn: query(medicationRequestApi.list, {
-        pathParams: { patientId },
-        queryParams: {
-          encounter: encounterId,
-          limit: 100,
-          status: ACTIVE_MEDICATION_STATUSES.join(","),
-        },
-      }),
-      enabled: !!patientId && canAccess,
-    });
+  const { data: activeMedications } = useQuery({
+    queryKey: ["medication_requests_active", patientId, encounterId],
+    queryFn: query(medicationRequestApi.list, {
+      pathParams: { patientId },
+      queryParams: {
+        encounter: encounterId,
+        limit: 100,
+        status: ACTIVE_MEDICATION_STATUSES.join(","),
+      },
+    }),
+    enabled: !!patientId && canAccess,
+  });
 
-  const { data: stoppedMedications, isLoading: isLoadingStoppedMedications } =
-    useQuery({
-      queryKey: ["medication_requests_stopped", patientId, encounterId],
-      queryFn: query(medicationRequestApi.list, {
-        pathParams: { patientId },
-        queryParams: {
-          encounter: encounterId,
-          limit: 100,
-          status: INACTIVE_MEDICATION_STATUSES.join(","),
-        },
-      }),
-      enabled: !!patientId && canAccess,
-    });
+  const { data: stoppedMedications } = useQuery({
+    queryKey: ["medication_requests_stopped", patientId, encounterId],
+    queryFn: query(medicationRequestApi.list, {
+      pathParams: { patientId },
+      queryParams: {
+        encounter: encounterId,
+        limit: 100,
+        status: INACTIVE_MEDICATION_STATUSES.join(","),
+      },
+    }),
+    enabled: !!patientId && canAccess,
+  });
 
   const { data: administrations } = useQuery({
     queryKey: [
@@ -658,25 +655,6 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     [discontinueMedication, encounterId],
   );
 
-  if (
-    !activeMedications?.results.length &&
-    !stoppedMedications?.results.length
-  ) {
-    if (showTimeLine) {
-      return (
-        <EmptyState
-          message={t("no_medications")}
-          description={t("no_medications_recorded_description")}
-        />
-      );
-    }
-    return null;
-  }
-
-  if (isLoadingActiveMedications || isLoadingStoppedMedications) {
-    return <TableSkeleton count={10} />;
-  }
-
   const medications = showStopped
     ? [
         ...(activeMedications?.results || []),
@@ -699,7 +677,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   if (!activeMedications || !stoppedMedications) {
     content = (
       <div className="min-h-[200px] flex items-center justify-center">
-        <Loading />
+        <TableSkeleton count={5} />
       </div>
     );
   } else if (
