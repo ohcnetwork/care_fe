@@ -53,7 +53,9 @@ export const EncounterPlotsTab = () => {
     <div className="mt-2">
       <Tabs
         value={currentTabId}
-        onValueChange={(value) => setQParams({ plot: value })}
+        onValueChange={(value) =>
+          setQParams({ plot: value }, { overwrite: false })
+        }
       >
         <div className="overflow-x-scroll w-full">
           <TabsList>
