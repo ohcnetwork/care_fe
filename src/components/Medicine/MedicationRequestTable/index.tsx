@@ -67,6 +67,7 @@ export default function MedicationRequestTable() {
     selectedEncounter: encounter,
     patientPermissions: { canViewClinicalData },
     selectedEncounterPermissions: { canViewEncounter, canWriteEncounter },
+    currentEncounterId,
   } = useEncounter();
   const [searchQuery, setSearchQuery] = useState("");
   const [showStopped, setShowStopped] = useState(false);
@@ -75,6 +76,7 @@ export default function MedicationRequestTable() {
   const facilityIdExists = !!subpathMatch?.facilityId;
   const canWrite = !!(
     encounter &&
+    encounterId === currentEncounterId &&
     facilityIdExists &&
     canWriteEncounter &&
     !inactiveEncounterStatus.includes(encounter.status)

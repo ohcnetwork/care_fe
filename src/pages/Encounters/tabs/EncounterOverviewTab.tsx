@@ -51,11 +51,10 @@ export const EncounterOverviewTab = () => {
     facilityId,
   } = useEncounter();
 
-  const readOnly = encounterId !== currentEncounterId;
-
   const canAccess = canViewEncounter || canViewClinicalData;
   const canEdit =
     !!facilityId &&
+    encounterId === currentEncounterId &&
     canSubmitEncounterQuestionnaire &&
     !inactiveEncounterStatus.includes(encounter?.status ?? "");
 
@@ -82,7 +81,7 @@ export const EncounterOverviewTab = () => {
               </Button>
             </div>
           </div>
-          {!readOnly && canEdit && (
+          {canEdit && (
             <div className="flex justify-between gap-2">
               <div className="flex flex-wrap gap-2 justify-start">
                 {actionLinks.map((link) => {

@@ -183,7 +183,13 @@ function ConsentCard({
 export const EncounterConsentsTab = () => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
-  const { selectedEncounterId: encounterId, patientId } = useEncounter();
+  const {
+    selectedEncounterId: encounterId,
+    patientId,
+    currentEncounterId,
+  } = useEncounter();
+
+  const readOnly = encounterId !== currentEncounterId;
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: CONSENTS_PER_PAGE,
@@ -231,7 +237,9 @@ export const EncounterConsentsTab = () => {
           />
         </div>
 
-        <ConsentFormSheet patientId={patientId} encounterId={encounterId} />
+        {!readOnly && (
+          <ConsentFormSheet patientId={patientId} encounterId={encounterId} />
+        )}
       </div>
 
       {filteredConsents && filteredConsents.length > 0 ? (

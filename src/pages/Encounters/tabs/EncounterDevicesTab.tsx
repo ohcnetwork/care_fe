@@ -42,7 +42,10 @@ export const EncounterDevicesTab = () => {
     selectedEncounterId: encounterId,
     patientId,
     facilityId,
+    currentEncounterId,
   } = useEncounter();
+
+  const readOnly = encounterId !== currentEncounterId;
 
   const limit = RESULTS_PER_PAGE_LIMIT;
 
@@ -118,29 +121,31 @@ export const EncounterDevicesTab = () => {
                             <span>{device.care_type || "-"}</span>
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="text-destructive hover:text-destructive/90 px-2"
-                                      onClick={() =>
-                                        disassociateDevice(device.id)
-                                      }
-                                      disabled={isDisassociating}
-                                    >
-                                      <Unlink className="size-4 mr-1" />
-                                      {t("disassociate")}
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    {t("disassociate_device_from_encounter")}
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
+                            {!readOnly && (
+                              <div className="flex items-center">
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-destructive hover:text-destructive/90 px-2"
+                                        onClick={() =>
+                                          disassociateDevice(device.id)
+                                        }
+                                        disabled={isDisassociating}
+                                      >
+                                        <Unlink className="size-4 mr-1" />
+                                        {t("disassociate")}
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      {t("disassociate_device_from_encounter")}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </div>
+                            )}
                           </TableCell>
                         </TableRow>
                       );
@@ -165,7 +170,7 @@ export const EncounterDevicesTab = () => {
               />
             )}
 
-            {facilityId && (
+            {facilityId && !readOnly && (
               <AssociateDeviceSheet
                 facilityId={facilityId}
                 encounterId={encounterId}
