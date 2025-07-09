@@ -27,6 +27,9 @@ interface Props {
 }
 
 export default function SideOverview({ encounter, canEdit }: Props) {
+  const { selectedEncounterId, currentEncounterId } = useEncounter();
+  const readOnly = selectedEncounterId !== currentEncounterId;
+
   return (
     <div className="w-full md:max-w-[18rem] flex flex-col gap-4">
       <div className="hidden md:block">
@@ -35,7 +38,7 @@ export default function SideOverview({ encounter, canEdit }: Props) {
       <div className="flex flex-col gap-8 md:mt-6">
         <Separator className="bg-slate-200" />
         <Actions />
-        {canEdit && <Questionnaires encounter={encounter} />}
+        {!readOnly && canEdit && <Questionnaires encounter={encounter} />}
         <Locations canEdit={canEdit} encounter={encounter} />
         <DepartmentsAndTeams canEdit={canEdit} encounter={encounter} />
       </div>
@@ -45,22 +48,27 @@ export default function SideOverview({ encounter, canEdit }: Props) {
 
 const Actions = () => {
   const { t } = useTranslation();
+  const { selectedEncounterId, currentEncounterId } = useEncounter();
+  const readOnly = selectedEncounterId !== currentEncounterId;
+
   return (
     <div>
       <h6 className="text-black font-semibold mb-2">{t("actions")}</h6>
       <div className="flex flex-col gap-3">
-        <Button
-          variant="outline"
-          className="justify-start"
-          onClick={() => {
-            navigate("consents");
-          }}
-        >
-          <NotebookPen />
-          {t("manage_consents")}
-        </Button>
+        {!readOnly && (
+          <>
+            <Button
+              variant="outline"
+              className="justify-start"
+              onClick={() => navigate("consents")}
+            >
+              <NotebookPen />
+              {t("manage_consents")}
+            </Button>
 
-        <ManageCareTeamButton />
+            <ManageCareTeamButton />
+          </>
+        )}
 
         <Button
           variant="outline"

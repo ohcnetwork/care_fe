@@ -114,7 +114,7 @@ export function EncounterProvider({
     <encounterContext.Provider
       value={{
         currentEncounterId,
-        facilityId: facilityId ?? currentEncounter?.facility.id,
+        facilityId,
         patientId,
         selectedEncounterId,
         patient,

@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import SideOverview from "@/components/Facility/ConsultationDetails/OverviewSideBar";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { AllergyList } from "@/components/Patient/allergy/list";
@@ -46,8 +47,11 @@ export const EncounterOverviewTab = () => {
       canViewEncounter,
       canSubmitEncounterQuestionnaire,
     },
+    currentEncounterId,
     facilityId,
   } = useEncounter();
+
+  const readOnly = encounterId !== currentEncounterId;
 
   const canAccess = canViewEncounter || canViewClinicalData;
   const canEdit =
@@ -61,7 +65,7 @@ export const EncounterOverviewTab = () => {
       <div className="flex flex-col xl:flex-row gap-4">
         {/* Left Column - Symptoms, Diagnoses, and Questionnaire Responses */}
         <div className="flex-1 space-y-4" data-cy="encounter-overview">
-          {canEdit && (
+          {!readOnly && canEdit && (
             <div className="flex justify-between gap-2">
               <div className="flex flex-wrap gap-2 justify-start">
                 {actionLinks.map((link) => {
@@ -167,12 +171,16 @@ export const EncounterOverviewTab = () => {
         </div>
 
         {/* Right Column */}
-        {encounter && (
+        {encounter ? (
           <SideOverview
             encounter={encounter}
             canAccess={canAccess}
             canEdit={canEdit}
           />
+        ) : (
+          <div className="flex-1 space-y-4 max-w-[18rem]">
+            <CardListSkeleton count={3} />
+          </div>
         )}
       </div>
     </div>
