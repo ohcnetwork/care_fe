@@ -1969,9 +1969,16 @@ function QuestionEditor({
                   value={type}
                   onValueChange={(val: QuestionType) => {
                     if (val !== "group") {
-                      updateField("type", val, { questions: [] });
+                      updateField("type", val, {
+                        questions: [],
+                        repeats: HIDE_REPEATABLE_QUESTION_TYPES.includes(val)
+                          ? false
+                          : question.repeats,
+                      });
                     } else {
-                      updateField("type", val);
+                      updateField("type", val, {
+                        repeats: false,
+                      });
                     }
                   }}
                 >
