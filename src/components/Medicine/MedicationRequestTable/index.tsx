@@ -263,6 +263,7 @@ export default function MedicationRequestTable() {
             <MedicationStatementList
               patientId={patientId}
               canAccess={canAccess}
+              encounterId={encounterId}
             />
           </TabsContent>
 

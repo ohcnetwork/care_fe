@@ -432,7 +432,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
   // Queries
   const { data: activeMedications } = useQuery({
-    queryKey: ["medication_requests_active", patientId],
+    queryKey: ["medication_requests_active", patientId, encounterId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: {
@@ -445,7 +445,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   });
 
   const { data: stoppedMedications } = useQuery({
-    queryKey: ["medication_requests_stopped", patientId],
+    queryKey: ["medication_requests_stopped", patientId, encounterId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: {
@@ -458,7 +458,12 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   });
 
   const { data: administrations } = useQuery({
-    queryKey: ["medication_administrations", patientId, visibleSlots],
+    queryKey: [
+      "medication_administrations",
+      patientId,
+      visibleSlots,
+      encounterId,
+    ],
     queryFn: query(medicationAdministrationApi.list, {
       pathParams: { patientId },
       queryParams: {
