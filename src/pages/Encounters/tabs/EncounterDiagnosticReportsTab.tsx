@@ -34,18 +34,21 @@ import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportAp
 
 export const EncounterDiagnosticReportsTab = () => {
   const { t } = useTranslation();
-  const { selectedEncounter: encounter } = useEncounter();
+  const {
+    selectedEncounterId: encounterId,
+    facilityId,
+    patientId,
+  } = useEncounter();
   const [page, setPage] = useState(1);
 
   const limit = RESULTS_PER_PAGE_LIMIT;
-  const facilityId = encounter.facility.id;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["diagnosticReports", facilityId, encounter.id, page, limit],
+    queryKey: ["diagnosticReports", facilityId, encounterId, page, limit],
     queryFn: query(diagnosticReportApi.listDiagnosticReports, {
-      pathParams: { patient_external_id: encounter.patient.id },
+      pathParams: { patient_external_id: patientId },
       queryParams: {
-        encounter: encounter.id,
+        encounter: encounterId,
         offset: (page - 1) * limit,
         limit,
         status: "final",
@@ -125,7 +128,7 @@ export const EncounterDiagnosticReportsTab = () => {
                                       size="icon"
                                       onClick={() =>
                                         navigate(
-                                          `/facility/${facilityId}/patient/${encounter.patient.id}/diagnostic_reports/${report.id}`,
+                                          `/facility/${facilityId}/patient/${patientId}/diagnostic_reports/${report.id}`,
                                         )
                                       }
                                     >

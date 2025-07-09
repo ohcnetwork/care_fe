@@ -18,7 +18,7 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 import EncounterProperties from "@/pages/Encounters/EncounterProperties";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { inactiveEncounterStatus } from "@/types/emr/encounter";
+import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 
 import { BloodGroupAndAllergies } from "./tabs/EncounterOverviewTab";
 
