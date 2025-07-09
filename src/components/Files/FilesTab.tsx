@@ -69,7 +69,7 @@ export const FilesTab = ({
       <Tabs
         value={tabValue}
         onValueChange={(value) => {
-          setQParams({ file: value as TabType });
+          setQParams({ file: value as TabType }, { overwrite: false });
         }}
       >
         <TabsList className={type != "encounter" ? "mt-2" : ""}>
