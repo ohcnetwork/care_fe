@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import query from "@/Utils/request/query";
@@ -62,10 +63,6 @@ export function SymptomsList({
     );
   }
 
-  if (!symptoms?.results.length) {
-    return null;
-  }
-
   const filteredSymptoms = symptoms?.results?.filter(
     (symptom) =>
       showEnteredInError || symptom.verification_status !== "entered_in_error",
@@ -76,11 +73,19 @@ export function SymptomsList({
   );
 
   if (!filteredSymptoms?.length) {
+    if (showTimeline) {
+      return (
+        <EmptyState
+          message={t("no_symptoms")}
+          description={t("no_symptoms_recorded_description")}
+        />
+      );
+    }
     return null;
   }
 
   if (showTimeline) {
-    const groupedByYear = symptoms?.results.reduce((acc, symptom) => {
+    const groupedByYear = filteredSymptoms.reduce((acc, symptom) => {
       const dateStr = format(symptom.created_date, "yyyy-MM-dd");
       const year = format(symptom.created_date, "yyyy");
       acc[year] ??= {};

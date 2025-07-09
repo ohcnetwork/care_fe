@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { AdministrationTab } from "@/components/Medicine/MedicationAdministration/AdministrationTab";
+import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 import { MedicationStatementList } from "@/components/Patient/MedicationStatementList";
 
@@ -78,6 +79,10 @@ const Prescriptions = ({ patientId }: { patientId: string }) => {
 
   if (isLoading || !medications) {
     return <TableSkeleton count={10} />;
+  }
+
+  if (!medications.length) {
+    return <EmptyState />;
   }
 
   const groupedByYear = medications.reduce((acc, medication) => {

@@ -128,7 +128,7 @@ const StatusBadge = ({ encounter }: { encounter: Encounter }) => {
             icon={
               ENCOUNTER_STATUS_ICONS[
                 encounter.status as keyof typeof ENCOUNTER_STATUS_ICONS
-              ]
+              ] ?? "l-spinner"
             }
             className="size-3"
           />

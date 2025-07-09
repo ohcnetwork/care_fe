@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import query from "@/Utils/request/query";
@@ -73,26 +74,53 @@ export function AllergyList({
     }),
   });
 
-  if (!allergies)
-    if (isLoading) {
+  if (isLoading) {
+    return (
+      <EncounterAccordionLayout
+        title="allergies"
+        readOnly={readOnly}
+        className={className}
+        editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
+      >
+        <Skeleton className="h-[100px] w-full" />
+      </EncounterAccordionLayout>
+    );
+  }
+
+  const filteredAllergies = allergies?.results?.filter(
+    (allergy) =>
+      showEnteredInError || allergy.verification_status !== "entered_in_error",
+  );
+
+  const hasEnteredInErrorRecords = allergies?.results?.some(
+    (allergy) => allergy.verification_status === "entered_in_error",
+  );
+
+  if (!filteredAllergies?.length) {
+    if (showTimeline) {
       return (
-        <EncounterAccordionLayout
-          title="allergies"
-          readOnly={readOnly}
-          className={className}
-          editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
-        >
-          <Skeleton className="h-[100px] w-full" />
-        </EncounterAccordionLayout>
+        <EmptyState
+          message={t("no_allergies")}
+          description={t("no_allergies_recorded_description")}
+        />
       );
     }
-
-  if (!allergies?.results.length) {
     return null;
   }
 
+  const allergiesRows = [
+    ...filteredAllergies.filter(
+      (allergy) => allergy.verification_status !== "entered_in_error",
+    ),
+    ...(showEnteredInError
+      ? filteredAllergies.filter(
+          (allergy) => allergy.verification_status === "entered_in_error",
+        )
+      : []),
+  ];
+
   if (showTimeline) {
-    const groupedByYear = allergies.results.reduce((acc, allergy) => {
+    const groupedByYear = filteredAllergies.reduce((acc, allergy) => {
       const dateStr = format(allergy.created_date, "dd MMMM, yyyy");
       const year = format(allergy.created_date, "yyyy");
       acc[year] ??= {};
@@ -137,30 +165,6 @@ export function AllergyList({
       </div>
     );
   }
-
-  const filteredAllergies = allergies?.results?.filter(
-    (allergy) =>
-      showEnteredInError || allergy.verification_status !== "entered_in_error",
-  );
-
-  const hasEnteredInErrorRecords = allergies?.results?.some(
-    (allergy) => allergy.verification_status === "entered_in_error",
-  );
-
-  if (!filteredAllergies?.length) {
-    return null;
-  }
-
-  const allergiesRows = [
-    ...filteredAllergies.filter(
-      (allergy) => allergy.verification_status !== "entered_in_error",
-    ),
-    ...(showEnteredInError
-      ? filteredAllergies.filter(
-          (allergy) => allergy.verification_status === "entered_in_error",
-        )
-      : []),
-  ];
 
   return (
     <EncounterAccordionLayout
