@@ -280,18 +280,6 @@ export const normaliZedResourcerequestRecord = (
     originFacilityId &&
     queryClient.getQueryData<FacilityData>(["facility", originFacilityId]);
 
-  // const assignFacilityid = payload.assigned_facility;
-  // const assignedFacility =
-  //   assignFacilityid &&
-  //   queryClient.getQueryData<FacilityModel>([
-  //     "assigned_facility",
-  //     assignFacilityid,
-  //   ]);
-
-  // const assignUserId = payload.assigned_to;
-  // const assignedUser =
-  //   assignUserId &&
-  //   queryClient.getQueryData<UserBase>(["assignToUser", assignUserId]);
   return {
     approving_facility: payload.approving_facility ?? null,
     assigned_facility: assigned_facility ?? undefined,
@@ -587,28 +575,41 @@ export const normalizedQuestionnairRequest = (
 
 function mergeAndUpdatePaginatedCache<T>(
   queryClient: QueryClient,
-  baseKey: string,
-  patientID: string,
+  keys: (string | undefined)[][],
+  newEntries: T[],
+) {
+  for (const key of keys) {
+    queryClient.setQueryData(key, (prev?: PaginatedResponse<T>) => {
+      return {
+        ...prev,
+        count: (prev?.count ?? 0) + newEntries.length,
+        results: [...(prev?.results ?? []), ...newEntries],
+      };
+    });
+  }
+}
+
+function replaceEncounterScopedInPaginatedCache<
+  T extends { encounter?: string },
+>(
+  queryClient: QueryClient,
+  key: (string | undefined)[],
   encounterID: string | undefined,
   newEntries: T[],
 ) {
-  const withEncounterKey = [baseKey, patientID, encounterID];
-  const withoutEncounterKey = [baseKey, patientID, undefined];
+  const prevData = queryClient.getQueryData<PaginatedResponse<T>>(key);
 
-  const update = (key: (string | undefined)[]) => {
-    const prev = queryClient.getQueryData<PaginatedResponse<T>>(key);
+  const filteredResults = (prevData?.results ?? []).filter(
+    (entry) => entry.encounter !== encounterID,
+  );
 
-    const merged: PaginatedResponse<T> = {
-      ...prev,
-      count: (prev?.count ?? 0) + newEntries.length,
-      results: [...(prev?.results ?? []), ...newEntries],
-    };
-
-    queryClient.setQueryData(key, merged);
+  const updatedData: PaginatedResponse<T> = {
+    ...prevData,
+    count: filteredResults.length + newEntries.length,
+    results: [...filteredResults, ...newEntries],
   };
 
-  update(withoutEncounterKey);
-  if (encounterID) update(withEncounterKey);
+  queryClient.setQueryData(key, updatedData);
 }
 
 const normalizeAndUpdateDiagnosis = (
@@ -633,7 +634,6 @@ const normalizeAndUpdateDiagnosis = (
           (entry) => entry.id !== d.id,
         );
 
-        // Here we are updating diagonis data belong to patient
         const updatedData: PaginatedResponse<Diagnosis> = {
           ...prev,
           count: updatedResults.length,
@@ -642,25 +642,18 @@ const normalizeAndUpdateDiagnosis = (
 
         queryClient.setQueryData(cacheKey, updatedData);
 
-        // updated diagonisis that  belong to encounter
         queryClient.setQueryData(
           ["diagnoses", patientID, encounterID],
-          (prev: PaginatedResponse<Diagnosis>) => {
+          (prev: PaginatedResponse<Diagnosis> | undefined) => {
             if (!prev) return prev;
 
-            const updatedResults = prev.results.map((entry) => {
-              if (entry.id === d.id) {
-                return {
-                  ...entry,
-                  clinical_status: d.clinical_status,
-                  verification_status: d.verification_status,
-                };
-              }
-              return entry;
-            });
+            const updatedResults = prev.results.filter(
+              (entry) => entry.id !== d.id,
+            );
 
             return {
               ...prev,
+              count: updatedResults.length,
               results: updatedResults,
             };
           },
@@ -688,17 +681,32 @@ const normalizeAndUpdateDiagnosis = (
 
   mergeAndUpdatePaginatedCache<Diagnosis>(
     queryClient,
-    "encounter_diagnosis",
-    patientID,
-    encounterID,
+    [
+      ["encounter_diagnosis", patientID, encounterID],
+      ["diagnoses", patientID, encounterID],
+    ],
     normalizedDiagnosisResult,
   );
+
+  const updatedDiagonisData = queryClient.getQueryData<
+    PaginatedResponse<Diagnosis>
+  >(["encounter_diagnosis", patientID, encounterID]);
+
+  if (updatedDiagonisData) {
+    replaceEncounterScopedInPaginatedCache<Diagnosis>(
+      queryClient,
+      ["encounter_diagnosis", patientID, undefined],
+      encounterID,
+      updatedDiagonisData.results,
+    );
+  }
 };
 
 const normalizeAndUpdateMedication_Request = (
   queryClient: QueryClient,
   q: BatchRequestItem,
   patientID: string,
+  encounterID?: string,
 ) => {
   const normaizedMedication_RequestResult: MedicationRequestRead[] =
     q.body?.datapoints.map((d: any) => {
@@ -722,25 +730,20 @@ const normalizeAndUpdateMedication_Request = (
       };
     });
   queryClient.removeQueries({
-    queryKey: ["medication_requests_active", patientID],
+    queryKey: ["medication_requests", patientID, encounterID],
   });
-  const cacheKey = ["medication_requests_active", patientID];
-  const prevData =
-    queryClient.getQueryData<PaginatedResponse<MedicationRequestRead>>(
-      cacheKey,
-    );
 
-  const updatedMedication_RequestData: PaginatedResponse<MedicationRequestRead> =
-    {
-      ...prevData,
-      count: (prevData?.count ?? 0) + normaizedMedication_RequestResult.length,
-      results: [
-        ...(prevData?.results ?? []),
-        ...normaizedMedication_RequestResult,
-      ],
-    };
-
-  queryClient.setQueryData(cacheKey, updatedMedication_RequestData);
+  mergeAndUpdatePaginatedCache<MedicationRequestRead>(
+    queryClient,
+    [["medication_requests", patientID, encounterID]],
+    normaizedMedication_RequestResult,
+  );
+  replaceEncounterScopedInPaginatedCache<MedicationRequestRead>(
+    queryClient,
+    ["medication_requests_active", patientID],
+    encounterID,
+    normaizedMedication_RequestResult,
+  );
 };
 
 const normalizeAndUpdateSymptom = async (
@@ -776,29 +779,15 @@ const normalizeAndUpdateSymptom = async (
 
   mergeAndUpdatePaginatedCache<Symptom>(
     queryClient,
-    "symptoms",
-    patientID,
+    [["symptoms", patientID, encounterID]],
+    normalizedSymptomResult,
+  );
+  replaceEncounterScopedInPaginatedCache<Symptom>(
+    queryClient,
+    ["symptoms", patientID, undefined],
     encounterID,
     normalizedSymptomResult,
   );
-
-  // Also update ["symptoms", patientID, undefined] (patient-wide view)
-  const baseKey = ["symptoms", patientID, undefined];
-
-  const prevData =
-    queryClient.getQueryData<PaginatedResponse<Symptom>>(baseKey);
-
-  const previousNonEncounterSymptoms = (prevData?.results ?? []).filter(
-    (entry) => entry.encounter !== encounterID,
-  );
-
-  const updatedPatientWideSymptoms: PaginatedResponse<Symptom> = {
-    ...prevData,
-    count: previousNonEncounterSymptoms.length + normalizedSymptomResult.length,
-    results: [...previousNonEncounterSymptoms, ...normalizedSymptomResult],
-  };
-
-  queryClient.setQueryData(baseKey, updatedPatientWideSymptoms);
 };
 
 const normalizeAndUpdateMedication_Statement = (
@@ -827,34 +816,27 @@ const normalizeAndUpdateMedication_Statement = (
       };
     });
 
-  queryClient.removeQueries({ queryKey: ["medication_statements", patientID] });
   queryClient.removeQueries({
     queryKey: ["medication_statements", patientID, encounterID],
   });
-
-  const cacheKey = ["medication_statements", patientID];
-  const prevData =
-    queryClient.getQueryData<PaginatedResponse<MedicationStatementRead>>(
-      cacheKey,
-    );
-
-  const updatedMedication_StatementData: PaginatedResponse<MedicationStatementRead> =
-    {
-      ...prevData,
-      count: (prevData?.count ?? 0) + normalizeMedication_Statement.length,
-      results: [...(prevData?.results ?? []), ...normalizeMedication_Statement],
-    };
-
-  queryClient.setQueryData(cacheKey, updatedMedication_StatementData);
-  queryClient.setQueryData(["medication_statements", patientID, encounterID], {
-    count: normalizeMedication_Statement.length,
-    results: normalizeMedication_Statement,
-  });
+  mergeAndUpdatePaginatedCache<MedicationStatementRead>(
+    queryClient,
+    [["medication_statements", patientID, encounterID]],
+    normalizeMedication_Statement,
+  );
+  replaceEncounterScopedInPaginatedCache<MedicationStatementRead>(
+    queryClient,
+    ["medication_statements", patientID],
+    encounterID,
+    normalizeMedication_Statement,
+  );
 };
 
 const normalizeAndUpdateAllergy_Intolerance = (
+  queryClient: QueryClient,
   q: BatchRequestItem,
   authUser: AuthUserModel,
+  patientID: string,
   encounterID?: string,
 ) => {
   const normalizedAllergyResult: AllergyIntolerance[] = q.body?.datapoints.map(
@@ -877,18 +859,27 @@ const normalizeAndUpdateAllergy_Intolerance = (
       };
     },
   );
-  console.log(normalizedAllergyResult);
+
+  queryClient.removeQueries({
+    queryKey: ["allergies", patientID],
+  });
+
+  mergeAndUpdatePaginatedCache<AllergyIntolerance>(
+    queryClient,
+    [["allergies", patientID]],
+    normalizedAllergyResult,
+  );
 };
 
 const normalizeAndUpdateEncounter = (
   queryClient: QueryClient,
   q: BatchRequestItem,
+  patientID: string,
+  encounterID?: string,
 ) => {
-  const encounterId = q.url.match(/encounter\/([a-f0-9-]+)\//)?.[1];
-
   const PrevEncounterData = queryClient.getQueryData<Encounter>([
     "encounter",
-    encounterId,
+    encounterID,
   ]);
   if (!PrevEncounterData) return;
   const updatedEncounterData: Encounter = {
@@ -903,7 +894,23 @@ const normalizeAndUpdateEncounter = (
     is_updated_offline: true,
   };
 
-  queryClient.setQueryData(["encounter", encounterId], updatedEncounterData);
+  queryClient.setQueryData(["encounter", encounterID], updatedEncounterData);
+
+  if (PrevEncounterData.status !== q.body?.status) {
+    const allergyData = queryClient.getQueryData<
+      PaginatedResponse<AllergyIntolerance>
+    >(["allergies", patientID, encounterID, PrevEncounterData.status]);
+    // set allergy data with new key if status change
+    queryClient.setQueryData(
+      ["allergies", patientID, encounterID, q.body?.status],
+      allergyData,
+    );
+
+    // Remove old key
+    queryClient.removeQueries({
+      queryKey: ["allergies", patientID, encounterID, PrevEncounterData.status],
+    });
+  }
 };
 
 export const cacheQuestionnairResponse = (
@@ -940,10 +947,21 @@ export const cacheQuestionnairResponse = (
         );
         break;
       case "medication_request":
-        normalizeAndUpdateMedication_Request(queryClient, q, patientID);
+        normalizeAndUpdateMedication_Request(
+          queryClient,
+          q,
+          patientID,
+          encounterID,
+        );
         break;
       case "allergy_intolerance":
-        normalizeAndUpdateAllergy_Intolerance(q, authUser, patientID);
+        normalizeAndUpdateAllergy_Intolerance(
+          queryClient,
+          q,
+          authUser,
+          patientID,
+          encounterID,
+        );
         break;
       case "symptom":
         normalizeAndUpdateSymptom(
@@ -964,7 +982,7 @@ export const cacheQuestionnairResponse = (
         );
         break;
       case "encounter":
-        normalizeAndUpdateEncounter(queryClient, q);
+        normalizeAndUpdateEncounter(queryClient, q, patientID, encounterID);
         break;
 
       default:

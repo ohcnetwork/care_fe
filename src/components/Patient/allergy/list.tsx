@@ -70,7 +70,7 @@ export function AllergyList({
   const [showEnteredInError, setShowEnteredInError] = useState(false);
 
   const { data: allergies, isLoading } = useQuery({
-    queryKey: ["allergies", patientId, encounterId, encounterStatus],
+    queryKey: ["allergies", patientId],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
       queryParams: {
