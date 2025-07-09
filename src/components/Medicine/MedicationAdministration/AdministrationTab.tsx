@@ -26,8 +26,9 @@ import { formatDosage } from "@/components/Medicine/utils";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
-  MedicationAdministration,
+  MedicationAdministrationRead,
   MedicationAdministrationRequest,
 } from "@/types/emr/medicationAdministration/medicationAdministration";
 import medicationAdministrationApi from "@/types/emr/medicationAdministration/medicationAdministrationApi";
@@ -35,7 +36,8 @@ import {
   ACTIVE_MEDICATION_STATUSES,
   INACTIVE_MEDICATION_STATUSES,
   MedicationRequestRead,
-} from "@/types/emr/medicationRequest";
+  displayMedicationName,
+} from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
 import { MedicineAdminDialog } from "./MedicineAdminDialog";
@@ -63,12 +65,12 @@ function isTimeInSlot(
 }
 
 function getAdministrationsForTimeSlot(
-  administrations: MedicationAdministration[],
+  administrations: MedicationAdministrationRead[],
   medicationId: string,
   slotDate: Date,
   start: string,
   end: string,
-): MedicationAdministration[] {
+): MedicationAdministrationRead[] {
   return administrations.filter((admin) => {
     const adminDate = new Date(admin.occurrence_period_start);
     const slotStartDate = new Date(slotDate);
@@ -115,11 +117,11 @@ interface MedicationRowProps {
   medication: MedicationRequestRead;
   visibleSlots: ((typeof TIME_SLOTS)[number] & { date: Date })[];
   currentDate: Date;
-  administrations?: MedicationAdministration[];
+  administrations?: MedicationAdministrationRead[];
   onAdminister: (medication: MedicationRequestRead) => void;
   onEditAdministration: (
     medication: MedicationRequestRead,
-    admin: MedicationAdministration,
+    admin: MedicationAdministrationRead,
   ) => void;
   onDiscontinue: (medication: MedicationRequestRead) => void;
   canWrite: boolean;
@@ -241,7 +243,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
             isInactive && medication.status === "ended" && "line-through",
           )}
         >
-          {medication.medication?.display}
+          {displayMedicationName(medication)}
         </div>
         <MedicationBadges medication={medication} />
         <div className="text-xs mt-1 font-medium truncate">
@@ -398,6 +400,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   const { t } = useTranslation();
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;
+  const { facilityId } = useCurrentFacility();
 
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
@@ -439,6 +442,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         encounter: encounterId,
         limit: 100,
         status: ACTIVE_MEDICATION_STATUSES.join(","),
+        facility: facilityId,
       },
     }),
     enabled: !!patientId && canAccess,
@@ -452,6 +456,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         encounter: encounterId,
         limit: 100,
         status: INACTIVE_MEDICATION_STATUSES.join(","),
+        facility: facilityId,
       },
     }),
     enabled: !!patientId && canAccess,
@@ -622,7 +627,10 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   );
 
   const handleEditAdministration = useCallback(
-    (medication: MedicationRequestRead, admin: MedicationAdministration) => {
+    (
+      medication: MedicationRequestRead,
+      admin: MedicationAdministrationRead,
+    ) => {
       setAdministrationRequest({
         id: admin.id,
         request: admin.request,
@@ -631,7 +639,10 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         occurrence_period_start: admin.occurrence_period_start,
         occurrence_period_end: admin.occurrence_period_end,
         status: admin.status,
-        medication: admin.medication,
+        ...(admin.medication && { medication: admin.medication }),
+        ...(admin.administered_product && {
+          administered_product: admin.administered_product.id,
+        }),
         dosage: admin.dosage,
       });
       setSelectedMedication(medication);

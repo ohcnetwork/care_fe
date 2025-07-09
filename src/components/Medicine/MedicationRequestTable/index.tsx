@@ -18,8 +18,9 @@ import { MedicationStatementList } from "@/components/Patient/MedicationStatemen
 
 import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { inactiveEncounterStatus } from "@/types/emr/encounter";
-import { MedicationRequestRead } from "@/types/emr/medicationRequest";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
+import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
 interface EmptyStateProps {
@@ -74,13 +75,14 @@ export default function MedicationRequestTable() {
   const canAccess = canViewClinicalData || canViewEncounter;
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;
-  const canWrite = !!(
+  const { facilityId } = useCurrentFacility();
+  const canWrite =
     encounter &&
     encounterId === currentEncounterId &&
     facilityIdExists &&
     canWriteEncounter &&
-    !inactiveEncounterStatus.includes(encounter.status)
-  );
+    !inactiveEncounterStatus.includes(encounter.status);
+
   const { data: activeMedications, isLoading: loadingActive } = useQuery({
     queryKey: ["medication_requests_active", patientId, encounterId],
     queryFn: query(medicationRequestApi.list, {
@@ -89,6 +91,7 @@ export default function MedicationRequestTable() {
         encounter: encounterId,
         limit: 100,
         status: ["active", "on-hold", "draft", "unknown"].join(","),
+        facility: facilityId,
       },
     }),
     enabled: !!patientId && canAccess,
@@ -101,6 +104,7 @@ export default function MedicationRequestTable() {
       queryParams: {
         encounter: encounterId,
         limit: 100,
+        facility: facilityId,
         status: ["ended", "completed", "cancelled", "entered_in_error"].join(
           ",",
         ),

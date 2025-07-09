@@ -10,8 +10,11 @@ import { FilesPage } from "@/components/Files/FileSubTab";
 import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
-import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/patient";
+import {
+  Encounter,
+  inactiveEncounterStatus,
+} from "@/types/emr/encounter/encounter";
+import { Patient } from "@/types/emr/patient/patient";
 
 interface FilesTabsProps {
   type: "encounter" | "patient";

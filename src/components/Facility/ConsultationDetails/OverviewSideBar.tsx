@@ -18,7 +18,7 @@ import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
 import EncounterProperties from "@/pages/Encounters/EncounterProperties";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter } from "@/types/emr/encounter/encounter";
 
 interface Props {
   encounter: Encounter;

@@ -1,4 +1,4 @@
-import { Code } from "@/types/questionnaire/code";
+import { Code } from "@/types/base/code/code";
 import { UserBase } from "@/types/user/user";
 
 export type AllergyVerificationStatus =

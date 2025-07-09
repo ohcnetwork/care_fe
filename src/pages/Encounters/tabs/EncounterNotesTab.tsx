@@ -59,7 +59,7 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { inactiveEncounterStatus } from "@/types/emr/encounter";
+import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
 

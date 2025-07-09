@@ -54,7 +54,6 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
@@ -66,11 +65,13 @@ import {
 import { usePermissions } from "@/context/PermissionContext";
 import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { FacilityData } from "@/types/facility/facility";
 import {
   APPOINTMENT_STATUS_COLORS,
   Appointment,
   AppointmentFinalStatuses,
+  AppointmentRead,
   AppointmentUpdateRequest,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -78,41 +79,32 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
 
 interface Props {
-  facilityId: string;
   appointmentId: string;
 }
 
 export default function AppointmentDetail(props: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { facility, facilityId } = useCurrentFacility();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
 
-  const { data: facilityData, isLoading: isFacilityLoading } = useQuery({
-    queryKey: ["facility", props.facilityId],
-    queryFn: query(routes.getPermittedFacility, {
-      pathParams: {
-        id: props.facilityId,
-      },
-    }),
-  });
-
   const { canViewAppointments, canUpdateAppointment, canCreateAppointment } =
-    getPermissions(hasPermission, facilityData?.permissions ?? []);
+    getPermissions(hasPermission, facility?.permissions ?? []);
 
   const { data: appointment } = useQuery({
     queryKey: ["appointment", props.appointmentId],
     queryFn: query(scheduleApis.appointments.retrieve, {
       pathParams: {
-        facility_id: props.facilityId,
+        facilityId,
         id: props.appointmentId,
       },
     }),
-    enabled: canViewAppointments,
+    enabled: canViewAppointments && !!facility,
   });
 
   const redirectToPatientPage = () => {
-    navigate(`/facility/${props.facilityId}/patients/verify`, {
+    navigate(`/facility/${facility?.id}/patients/verify`, {
       query: {
         phone_number: patient.phone_number,
         year_of_birth: patient.year_of_birth,
@@ -122,12 +114,12 @@ export default function AppointmentDetail(props: Props) {
   };
 
   useEffect(() => {
-    if (!canViewAppointments && !isFacilityLoading) {
+    if (!canViewAppointments && !facility) {
       toast.error(t("no_permission_to_view_page"));
-      goBack(`/facility/${props.facilityId}/overview`);
+      goBack(`/facility/${facilityId}/overview`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canViewAppointments, isFacilityLoading]);
+  }, [canViewAppointments, facility]);
 
   const { mutate: updateAppointment, isPending } = useMutation<
     Appointment,
@@ -135,10 +127,7 @@ export default function AppointmentDetail(props: Props) {
     AppointmentUpdateRequest
   >({
     mutationFn: mutate(scheduleApis.appointments.update, {
-      pathParams: {
-        facility_id: props.facilityId,
-        id: props.appointmentId,
-      },
+      pathParams: { facilityId, id: props.appointmentId },
     }),
     onSuccess: (_, request) => {
       queryClient.invalidateQueries({
@@ -150,7 +139,7 @@ export default function AppointmentDetail(props: Props) {
     },
   });
 
-  if (!facilityData || !appointment) {
+  if (!facility || !appointment) {
     return <Loading />;
   }
 
@@ -165,16 +154,13 @@ export default function AppointmentDetail(props: Props) {
             isPending && "opacity-50 pointer-events-none animate-pulse",
           )}
         >
-          <AppointmentDetails
-            appointment={appointment}
-            facility={facilityData}
-          />
+          <AppointmentDetails appointment={appointment} facility={facility} />
           <div className="mt-3">
             <div id="section-to-print" className="print:w-[400px] print:pt-4">
               <div id="appointment-token-card" className="bg-gray-50 md:p-4">
                 <AppointmentTokenCard
                   appointment={appointment}
-                  facility={facilityData}
+                  facility={facility}
                 />
               </div>
             </div>
@@ -202,7 +188,7 @@ export default function AppointmentDetail(props: Props) {
                 <Separator className="my-4" />
                 <div className="md:mx-6 mt-10">
                   <AppointmentActions
-                    facilityId={props.facilityId}
+                    facilityId={facilityId}
                     appointment={appointment}
                     onChange={(status) => updateAppointment({ status })}
                     onViewPatient={redirectToPatientPage}
@@ -222,7 +208,7 @@ const AppointmentDetails = ({
   appointment,
   facility,
 }: {
-  appointment: Appointment;
+  appointment: AppointmentRead;
   facility: FacilityData;
 }) => {
   const { user } = appointment;
@@ -289,6 +275,19 @@ const AppointmentDetails = ({
               {appointment.reason_for_visit || t("no_reason_provided")}
             </p>
           </div>
+          {appointment.tags?.length > 0 && (
+            <div className="text-sm">
+              <p className="font-medium">{t("tags")}</p>
+              <p className="text-gray-600">
+                {appointment.tags.map((tag) => (
+                  <Badge key={tag.id} variant="secondary">
+                    {tag.parent ? `${tag.parent.display}: ` : ""}
+                    {tag.display}
+                  </Badge>
+                ))}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -419,10 +418,7 @@ const AppointmentActions = ({
 
   const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
     mutationFn: mutate(scheduleApis.appointments.cancel, {
-      pathParams: {
-        facility_id: facilityId,
-        id: appointment.id,
-      },
+      pathParams: { facilityId, id: appointment.id },
     }),
     onSuccess: () => {
       toast.success(t("appointment_cancelled"));
@@ -435,10 +431,7 @@ const AppointmentActions = ({
   const { mutate: rescheduleAppointment, isPending: isRescheduling } =
     useMutation({
       mutationFn: mutate(scheduleApis.appointments.reschedule, {
-        pathParams: {
-          facility_id: facilityId,
-          id: appointment.id,
-        },
+        pathParams: { facilityId, id: appointment.id },
       }),
       onSuccess: (newAppointment: Appointment) => {
         toast.success(t("appointment_rescheduled"));

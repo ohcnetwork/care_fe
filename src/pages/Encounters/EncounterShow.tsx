@@ -25,10 +25,15 @@ import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicine
 import { EncounterOverviewTab } from "@/pages/Encounters/tabs/EncounterOverviewTab";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/patient";
+import {
+  Encounter,
+  inactiveEncounterStatus,
+} from "@/types/emr/encounter/encounter";
+import { Patient } from "@/types/emr/patient/patient";
 
+import { EncounterDiagnosticReportsTab } from "./tabs/EncounterDiagnosticReportsTab";
 import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
+import { EncounterServiceRequestTab } from "./tabs/EncounterServiceRequestTab";
 
 export interface PluginEncounterTabProps {
   encounter: Encounter;
@@ -46,6 +51,8 @@ const defaultTabs = {
   // nursing: EncounterNursingTab,
   // neurological_monitoring: EncounterNeurologicalMonitoringTab,
   // pressure_sore: EncounterPressureSoreTab,
+  service_requests: EncounterServiceRequestTab,
+  diagnostic_reports: EncounterDiagnosticReportsTab,
 } as const;
 
 interface Props {
@@ -73,14 +80,6 @@ export const EncounterShow = (props: Props) => {
     ...Object.keys(defaultTabs),
     ...Object.keys(pluginTabs),
   ];
-
-  // const { data: facilityData } = useQuery({
-  //   queryKey: ["facility", facilityId],
-  //   queryFn: query(routes.getPermittedFacility, {
-  //     pathParams: { id: facilityId ?? "" },
-  //   }),
-  //   enabled: !!facilityId,
-  // });
 
   const { canViewEncounter } = getPermissions(
     hasPermission,

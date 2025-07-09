@@ -21,7 +21,10 @@ import {
   AllergyIntolerance,
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
-import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
+import {
+  Encounter,
+  completedEncounterStatus,
+} from "@/types/emr/encounter/encounter";
 
 import { AllergyTable } from "./AllergyTable";
 

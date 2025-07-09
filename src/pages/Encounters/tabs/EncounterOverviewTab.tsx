@@ -18,7 +18,7 @@ import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import EncounterOverviewDevices from "@/pages/Facility/settings/devices/components/EncounterOverviewDevices";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
-import { inactiveEncounterStatus } from "@/types/emr/encounter";
+import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 
 const actionLinks = [
   {
@@ -32,6 +32,10 @@ const actionLinks = [
   {
     href: "questionnaire/symptom",
     label: "Add Symptoms",
+  },
+  {
+    href: "questionnaire/charge_item",
+    label: "Add Charge Item",
   },
 ];
 
@@ -83,7 +87,7 @@ export const EncounterOverviewTab = () => {
           </div>
           {canEdit && (
             <div className="flex justify-between gap-2">
-              <div className="flex flex-wrap gap-2 justify-start">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mx-auto md:mx-0">
                 {actionLinks.map((link) => {
                   return (
                     <Button

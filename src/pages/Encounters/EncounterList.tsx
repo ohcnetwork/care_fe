@@ -33,12 +33,11 @@ import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import {
   ENCOUNTER_STATUS_ICONS,
   Encounter,
   EncounterPriority,
-} from "@/types/emr/encounter";
+} from "@/types/emr/encounter/encounter";
 
 interface EncounterListProps {
   encounters?: Encounter[];
@@ -125,9 +124,7 @@ export function EncounterList({
     [status, encounterClass, priority, updateQuery],
   );
 
-  const { data: queryEncounters, isLoading } = useQuery<
-    PaginatedResponse<Encounter>
-  >({
+  const { data: queryEncounters, isLoading } = useQuery({
     queryKey: ["encounters", facilityId, qParams],
     queryFn: query.debounced(routes.encounter.list, {
       queryParams: {
@@ -141,7 +138,7 @@ export function EncounterList({
     enabled: !propEncounters && !encounter_id,
   });
 
-  const { data: queryEncounter } = useQuery<Encounter>({
+  const { data: queryEncounter } = useQuery({
     queryKey: ["encounter", encounter_id],
     queryFn: query(routes.encounter.get, {
       pathParams: { id: encounter_id },
@@ -157,18 +154,21 @@ export function EncounterList({
       type: "text" as const,
       placeholder: t("search_by_patient_name"),
       value: name || "",
+      display: t("name"),
     },
     {
       key: "encounter_id",
       type: "text" as const,
       placeholder: t("search_by_encounter_id"),
       value: encounter_id || "",
+      display: t("encounter_id"),
     },
     {
       key: "external_identifier",
       type: "text" as const,
       placeholder: t("search_by_external_id"),
       value: external_identifier || "",
+      display: t("external_identifier"),
     },
   ];
 

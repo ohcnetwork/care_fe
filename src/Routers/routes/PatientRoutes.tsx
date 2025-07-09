@@ -46,9 +46,7 @@ const PatientRoutes: AppRoutes = {
         consentId={consentId}
       />
     ),
-  "/facility/:facilityId/patients/verify": ({ facilityId }) => (
-    <VerifyPatient facilityId={facilityId} />
-  ),
+  "/facility/:facilityId/patients/verify": () => <VerifyPatient />,
   "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
   "/patient/:id/update": ({ id }) => <PatientRegistration patientId={id} />,
   ...patientTabs.reduce((acc: AppRoutes, tab) => {
