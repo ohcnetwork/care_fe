@@ -817,7 +817,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   }
 
   return (
-    <div className="flex flex-col gap-2 mt-4 mx-2">
+    <div className="flex flex-col gap-2 mx-2">
       {!showTimeLine && (
         <div className="flex justify-start items-center gap-2 flex-wrap">
           <div className="flex items-center gap-2 flex-1">
