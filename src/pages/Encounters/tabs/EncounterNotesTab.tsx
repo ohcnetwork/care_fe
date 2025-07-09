@@ -293,10 +293,12 @@ const MobileNav = ({
   threadsCount,
   onOpenThreads,
   onNewThread,
+  canWrite,
 }: {
   threadsCount: number;
   onOpenThreads: () => void;
   onNewThread: () => void;
+  canWrite: boolean;
 }) => (
   <div className="lg:hidden fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-2 flex items-center justify-around z-50 divide-x">
     <Button
@@ -308,15 +310,17 @@ const MobileNav = ({
       <MessageCircle className="size-5" />
       <span className="text-xs">Threads ({threadsCount})</span>
     </Button>
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={onNewThread}
-      className="flex-1 flex flex-col items-center gap-1 h-auto py-2 rounded-none"
-    >
-      <MessageSquarePlus className="size-5" />
-      <span className="text-xs">New Thread</span>
-    </Button>
+    {canWrite && (
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onNewThread}
+        className="flex-1 flex flex-col items-center gap-1 h-auto py-2 rounded-none"
+      >
+        <MessageSquarePlus className="size-5" />
+        <span className="text-xs">New Thread</span>
+      </Button>
+    )}
   </div>
 );
 
@@ -495,7 +499,7 @@ export const EncounterNotesTab = () => {
   const totalMessages = messagesData?.pages[0]?.count ?? 0;
 
   return (
-    <div className="flex h-[calc(100vh-12rem)] overflow-hidden lg:h-[calc(80vh-12rem)]">
+    <div className="flex h-[calc(100vh-13rem)] overflow-hidden lg:h-[calc(100vh-13rem)]">
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-gray-200">
         <div className="p-4 border-b border-gray-200">
@@ -787,6 +791,7 @@ export const EncounterNotesTab = () => {
         threadsCount={threadsData?.results.length || 0}
         onOpenThreads={() => setIsThreadsExpanded(true)}
         onNewThread={() => setShowNewThreadDialog(true)}
+        canWrite={canWrite}
       />
 
       <NewThreadDialog
