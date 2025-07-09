@@ -337,13 +337,17 @@ export const EncounterNotesTab = () => {
     selectedEncounterPermissions: { canViewEncounter, canWriteEncounter },
     selectedEncounterId: encounterId,
     selectedEncounter: encounter,
+    currentEncounterId,
     patientId,
   } = useEncounter();
   const canAccess = canViewClinicalData || canViewEncounter;
   const inactiveEncounter = !!(
     encounter && inactiveEncounterStatus.includes(encounter.status)
   );
-  const canWriteCurrentEncounter = canWriteEncounter && !inactiveEncounter;
+  const canWrite =
+    canWriteEncounter &&
+    !inactiveEncounter &&
+    encounterId === currentEncounterId;
   const [commentAdded, setCommentAdded] = useState(false);
   const isMobile = useIsMobile();
 
@@ -386,6 +390,11 @@ export const EncounterNotesTab = () => {
     },
     enabled: !!selectedThread && canAccess,
   });
+
+  // reset selected thread when encounter changes
+  useEffect(() => {
+    setSelectedThread(null);
+  }, [encounterId]);
 
   // Create thread mutation
   const createThreadMutation = useMutation({
@@ -497,7 +506,7 @@ export const EncounterNotesTab = () => {
                 {t("encounter_notes__discussions")}
               </h3>
             </div>
-            {canWriteCurrentEncounter && (
+            {canWrite && (
               <Button
                 data-cy="new-thread-button"
                 variant="outline"
@@ -697,7 +706,7 @@ export const EncounterNotesTab = () => {
                   )}
 
                   {/* Message Input */}
-                  {canWriteCurrentEncounter && (
+                  {canWrite && (
                     <div className="border-t border-gray-200 p-3 sm:p-4 bg-white sticky max-sm:bottom-14">
                       <form onSubmit={handleSendMessage}>
                         <div className="flex gap-2">
@@ -748,7 +757,7 @@ export const EncounterNotesTab = () => {
               <Button
                 onClick={() => setShowNewThreadDialog(true)}
                 className="shadow-lg"
-                disabled={!canWriteCurrentEncounter}
+                disabled={!canWrite}
               >
                 <MessageSquarePlus className="size-5 mr-2" />
                 {t("encounter_notes__start_new_discussion")}
