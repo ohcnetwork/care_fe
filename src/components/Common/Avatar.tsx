@@ -1,5 +1,5 @@
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
-import React, { useState } from "react";
+import React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -49,68 +49,70 @@ function Avatar({
   imageUrl?: string;
   className?: string;
 }) {
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const [hasError, setHasError] = useState(false);
-
+  const [imageLoadingStatus, setImageLoadingStatus] = React.useState<
+    "idle" | "loading" | "loaded" | "error"
+  >("idle");
   const avatarText = name.match(/[a-zA-Z]+/g)?.join(" ");
+
   const [bgColor, textColor] =
     propColors ||
     (avatarText ? getColorPair(avatarText) : getColorPair("user"));
 
+  const shouldShowFallback = !imageUrl || imageLoadingStatus === "error";
+
   return (
     <AvatarPrimitive.Root
       data-slot="avatar"
-      className={cn("aspect-square size-full rounded-md", className)}
-      style={{ background: bgColor }}
+      className={cn(
+        "aspect-square size-full rounded-md relative overflow-hidden",
+        !imageUrl && "bg-white",
+        className,
+      )}
+      style={{
+        background: bgColor,
+      }}
       {...props}
     >
-      {imageUrl && (
-        <AvatarPrimitive.Image
-          data-slot="avatar-image"
-          src={imageUrl}
-          alt={name}
-          onLoad={() => {
-            setIsImageLoaded(true);
-            setHasError(false);
-          }}
-          onError={() => {
-            setIsImageLoaded(false);
-            setHasError(true);
-          }}
-          className={cn(
-            "flex h-full w-full select-none items-center justify-center text-center transition-opacity duration-150",
-            isImageLoaded && !hasError ? "opacity-100" : "opacity-0",
-            className,
-          )}
-        />
+      {imageLoadingStatus === "loading" && (
+        <div className="absolute inset-0 bg-white animate-pulse rounded-md" />
       )}
+      <AvatarPrimitive.Image
+        data-slot="avatar-image"
+        src={imageUrl}
+        alt={name}
+        className={cn(
+          "aspect-square size-full object-cover rounded-md transition-opacity duration-300",
+          imageLoadingStatus === "loaded" ? "opacity-100" : "opacity-0",
+          className,
+        )}
+        onLoadingStatusChange={setImageLoadingStatus}
+      />
       <AvatarPrimitive.Fallback
         data-slot="avatar-fallback"
-        className={cn(
-          "flex h-full w-full select-none items-center justify-center text-center transition-opacity duration-150",
-          isImageLoaded && !hasError ? "opacity-0" : "opacity-100",
-        )}
+        className="flex h-full w-full select-none items-center justify-center text-center"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          version="1.1"
-          viewBox="0 0 100 100"
-          className="aspect-square h-full w-full object-cover"
-        >
-          <text
-            fill={textColor}
-            fillOpacity="0.5"
-            fontSize="50"
-            fontWeight="900"
-            x="50"
-            y="54"
-            textAnchor="middle"
-            dominantBaseline="middle"
-            alignmentBaseline="middle"
+        {shouldShowFallback && (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            version="1.1"
+            viewBox="0 0 100 100"
+            className="aspect-square h-full w-full object-cover"
           >
-            {avatarText ? initials(avatarText) : null}
-          </text>
-        </svg>
+            <text
+              fill={textColor}
+              fillOpacity="0.5"
+              fontSize="50"
+              fontWeight="900"
+              x="50"
+              y="54"
+              textAnchor="middle"
+              dominantBaseline="middle"
+              alignmentBaseline="middle"
+            >
+              {avatarText ? initials(avatarText) : null}
+            </text>
+          </svg>
+        )}
       </AvatarPrimitive.Fallback>
     </AvatarPrimitive.Root>
   );
