@@ -1,4 +1,4 @@
-import { format, formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow, startOfMinute } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -63,21 +63,13 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   const [startTimeError, setStartTimeError] = useState("");
   const [endTimeError, setEndTimeError] = useState("");
 
-  const roundToNearestMinute = (date: Date) => {
-    const rounded = new Date(date);
-    rounded.setSeconds(0);
-    rounded.setMilliseconds(0);
-    return rounded;
-  };
-
   const validateDateTime = (date: Date, isStartTime: boolean): string => {
-    const now = roundToNearestMinute(new Date());
-    const authoredOn = roundToNearestMinute(new Date(medication.authored_on));
-    const startTime = roundToNearestMinute(
+    const now = startOfMinute(new Date());
+    const authoredOn = startOfMinute(new Date(medication.authored_on));
+    const startTime = startOfMinute(
       new Date(administrationRequest.occurrence_period_start),
     );
-
-    const roundedDate = roundToNearestMinute(date);
+    const roundedDate = startOfMinute(date);
 
     if (roundedDate > now) {
       return t(
