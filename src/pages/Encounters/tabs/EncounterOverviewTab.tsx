@@ -84,9 +84,9 @@ export const EncounterOverviewTab = () => {
                   <span className="text-sm font-medium text-gray-600">
                     {t("blood_group")}:
                   </span>
-                  <Badge className="flex flex-row items-center gap-2 bg-red-100 p-1 rounded-md border border-none">
-                    <DropletIcon className="size-4 text-red-800" />
-                    <span className="text-sm text-red-800">
+                  <Badge variant="destructive">
+                    <DropletIcon className="size-4" />
+                    <span>
                       {t(`BLOOD_GROUP_LONG__${patient?.blood_group}`)}
                     </span>
                   </Badge>
@@ -97,11 +97,9 @@ export const EncounterOverviewTab = () => {
                     <span className="text-sm font-medium text-gray-600">
                       {t("allergies")}:
                     </span>
-                    <Badge className="flex flex-row items-start gap-2 bg-yellow-100 p-1 rounded-md border border-none">
-                      <div>
-                        <HandIcon className="size-4 text-yellow-800 mt-1" />
-                      </div>
-                      <span className="text-sm text-yellow-800">
+                    <Badge variant="yellow">
+                      <HandIcon />
+                      <span>
                         {allergies?.results
                           .map((allergy) => allergy.code.display)
                           .join(", ")}
