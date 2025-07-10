@@ -1,4 +1,4 @@
-import { ChevronDown, Edit2Icon, MapPinIcon } from "lucide-react";
+import { ChevronDown, Edit2Icon, MapPinIcon, PenIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -13,6 +13,7 @@ import {
 
 import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
+import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import { formatDateTime } from "@/Utils/utils";
 import {
@@ -97,19 +98,32 @@ export default function EncounterProperties({ encounter, canEdit }: Props) {
         <span className="text-xs font-medium">
           {t("departments_and_teams")}:{" "}
         </span>
-        <div>
+        <div className="flex flex-wrap gap-2">
           {encounter.organizations.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
+            <>
               {encounter.organizations.map((org) => (
                 <Badge key={org.id} variant="blue" className="capitalize">
                   {org.name}
                 </Badge>
               ))}
-            </div>
+            </>
           ) : (
             <p className="text-sm text-gray-500">
               {t("no_departments_assigned")}
             </p>
+          )}
+          {canEdit && (
+            <LinkDepartmentsSheet
+              entityType="encounter"
+              entityId={encounter.id}
+              currentOrganizations={encounter.organizations}
+              facilityId={encounter.facility.id}
+              trigger={
+                <Button variant="ghost" size="xs">
+                  <PenIcon className="size-3" />
+                </Button>
+              }
+            />
           )}
         </div>
       </div>
