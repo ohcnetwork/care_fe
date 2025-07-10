@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AArrowDown,
+  AlertTriangle,
   ChevronDown,
   ChevronUp,
   ChevronsDownUp,
@@ -202,7 +203,12 @@ function LayoutOptionCard({
   );
 }
 
-const HIDE_REPEATABLE_QUESTION_TYPES = ["boolean", "group", "display"];
+const HIDE_REPEATABLE_QUESTION_TYPES = [
+  "boolean",
+  "group",
+  "display",
+  "structured",
+];
 
 function findFirstErrorPath(errors: any, path: number[] = []): number[] | null {
   for (let i = 0; i < errors.length; i++) {
@@ -766,7 +772,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     const mappedData: Partial<QuestionnaireDetail> = {
       title: importedData.title,
       description: importedData.description,
-      status: "draft",
+      status: importedData.status,
       version: "1.0",
       subject_type: importedData.subject_type || "encounter",
       questions:
@@ -789,6 +795,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       title: mappedData.title || "",
       slug: mappedData.slug || "",
       description: mappedData.description || "",
+      status: mappedData.status || "draft",
+      version: mappedData.version || "1.0",
+      subject_type: mappedData.subject_type || "encounter",
       questions: mappedData.questions || [],
     });
 
@@ -1323,22 +1332,28 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 />
               </div>
             )}
-            {importedData && (
-              <div className="space-y-2">
-                <Label>{t("preview")}</Label>
-                <div className="p-4 border rounded-lg">
-                  <p className="font-medium">{importedData.title}</p>
-                  <p className="text-sm text-gray-500">
-                    {importedData.description}
-                  </p>
-                  <p className="text-sm mt-2">
-                    {t("questions_count")} :{" "}
-                    {importedData.questions?.length || 0}
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
+          {importedData && (
+            <div className="space-y-2">
+              <Label>{t("preview")}</Label>
+              <div className="p-4 border rounded-lg">
+                <p className="font-medium">{importedData.title}</p>
+                <p className="text-sm text-gray-500">
+                  {importedData.description}
+                </p>
+                <p className="text-sm mt-2">
+                  {t("questions_count")} : {importedData.questions?.length || 0}
+                </p>
+              </div>
+              <Alert variant="destructive" className="mb-4 bg-red-50">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+                <AlertTitle>{t("warning")}</AlertTitle>
+                <AlertDescription>
+                  {t("all_existing_data_will_be_replaced")}
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
           <DialogFooter>
             <Button
               variant="outline"
@@ -1964,9 +1979,16 @@ function QuestionEditor({
                   value={type}
                   onValueChange={(val: QuestionType) => {
                     if (val !== "group") {
-                      updateField("type", val, { questions: [] });
+                      updateField("type", val, {
+                        questions: [],
+                        repeats: HIDE_REPEATABLE_QUESTION_TYPES.includes(val)
+                          ? false
+                          : question.repeats,
+                      });
                     } else {
-                      updateField("type", val);
+                      updateField("type", val, {
+                        repeats: false,
+                      });
                     }
                   }}
                 >
