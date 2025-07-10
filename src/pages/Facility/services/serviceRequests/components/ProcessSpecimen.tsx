@@ -102,7 +102,7 @@ export function ProcessSpecimen({
         <div className="flex-row items-center justify-between space-y-0 pb-2">
           <div className="text-sm font-medium flex items-center gap-1">
             <Settings2 className="h-4 w-4" />
-            {t("process") + " " + t("specimen")}
+            {t("process_specimen")}
             <Badge variant="primary">{existingProcessing.length}</Badge>
           </div>
         </div>
@@ -196,7 +196,7 @@ export function ProcessSpecimen({
             {noteDialog.method && (
               <div className="rounded-md bg-gray-50 p-3">
                 <Label className="text-sm text-gray-600">
-                  {t("processing") + " " + t("method")}
+                  {t("processing_method")}
                 </Label>
                 <div className="font-medium mt-1">
                   {noteDialog.method.display}
