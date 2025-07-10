@@ -1,7 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -68,14 +69,37 @@ interface GroupedPrescription {
 }
 
 const Prescriptions = ({ patientId }: { patientId: string }) => {
-  const { data: medications, isLoading } = useQuery({
+  const { t } = useTranslation();
+
+  const {
+    data: medicationsData,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["activeMedicationRequests", patientId],
-    queryFn: query(medicationRequestApi.list, {
-      pathParams: { patientId: patientId },
-      queryParams: { limit: 100, status: "active", ordering: "-created_date" },
-    }),
-    select: (data: PaginatedResponse<MedicationRequestRead>) => data.results,
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(medicationRequestApi.list, {
+        pathParams: { patientId: patientId },
+        queryParams: {
+          limit: 100,
+          status: "active",
+          ordering: "-created_date",
+          offset: String(pageParam),
+        },
+      })({ signal });
+      return response as PaginatedResponse<MedicationRequestRead>;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * 100;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
   });
+
+  const medications =
+    medicationsData?.pages.flatMap((page) => page.results) ?? [];
 
   if (isLoading || !medications) {
     return <TableSkeleton count={10} />;
@@ -125,6 +149,18 @@ const Prescriptions = ({ patientId }: { patientId: string }) => {
           </div>
         );
       })}
+      {hasNextPage && (
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {t("load_more")}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

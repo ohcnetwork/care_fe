@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -12,6 +12,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 
@@ -40,13 +41,35 @@ export function MedicationStatementList({
   const { t } = useTranslation();
   const [showEnteredInError, setShowEnteredInError] = useState(false);
 
-  const { data: medications, isLoading } = useQuery({
+  const {
+    data: medicationsData,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["medication_statements", patientId, encounterId],
-    queryFn: query(medicationStatementApi.list, {
-      pathParams: { patientId },
-    }),
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(medicationStatementApi.list, {
+        pathParams: { patientId },
+        queryParams: {
+          limit: 100,
+          ordering: "-created_date",
+          offset: String(pageParam),
+        },
+      })({ signal });
+      return response as PaginatedResponse<MedicationStatementRead>;
+    },
     enabled: canAccess,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * 100;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
   });
+
+  const medications =
+    medicationsData?.pages.flatMap((page) => page.results) ?? [];
 
   if (isLoading) {
     return (
@@ -56,12 +79,12 @@ export function MedicationStatementList({
     );
   }
 
-  const filteredMedications = medications?.results?.filter(
+  const filteredMedications = medications?.filter(
     (medication) =>
       showEnteredInError || medication.status !== "entered_in_error",
   );
 
-  const hasEnteredInErrorRecords = medications?.results?.some(
+  const hasEnteredInErrorRecords = medications?.some(
     (medication) => medication.status === "entered_in_error",
   );
 
@@ -164,6 +187,18 @@ export function MedicationStatementList({
               </Button>
             </div>
           </>
+        )}
+        {hasNextPage && (
+          <div className="flex justify-center">
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+            >
+              {t("load_more")}
+            </Button>
+          </div>
         )}
       </>
     </MedicationStatementListLayout>

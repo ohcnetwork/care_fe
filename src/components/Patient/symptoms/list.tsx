@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { Symptom } from "@/types/emr/symptom/symptom";
 import symptomApi from "@/types/emr/symptom/symptomApi";
 
@@ -39,27 +40,46 @@ export function SymptomsList({
   const { t } = useTranslation();
 
   const [showEnteredInError, setShowEnteredInError] = useState(false);
-  const { data: symptoms, isLoading } = useQuery({
+
+  const {
+    data: symptomsData,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["symptoms", patientId, encounterId],
-    queryFn: query(symptomApi.listSymptoms, {
-      pathParams: { patientId },
-      queryParams: {
-        encounter: encounterId,
-        ordering: "-created_date",
-      },
-    }),
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(symptomApi.listSymptoms, {
+        pathParams: { patientId },
+        queryParams: {
+          encounter: encounterId,
+          ordering: "-created_date",
+          limit: showTimeline ? 30 : 14,
+          offset: String(pageParam),
+        },
+      })({ signal });
+      return response as PaginatedResponse<Symptom>;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * 14;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
   });
 
   if (isLoading) {
     return <TableSkeleton count={5} />;
   }
 
-  const filteredSymptoms = symptoms?.results?.filter(
+  const symptoms = symptomsData?.pages.flatMap((page) => page.results) ?? [];
+
+  const filteredSymptoms = symptoms?.filter(
     (symptom) =>
       showEnteredInError || symptom.verification_status !== "entered_in_error",
   );
 
-  const hasEnteredInErrorRecords = symptoms?.results?.some(
+  const hasEnteredInErrorRecords = symptoms?.some(
     (symptom) => symptom.verification_status === "entered_in_error",
   );
 
@@ -116,6 +136,18 @@ export function SymptomsList({
             </div>
           );
         })}
+        {hasNextPage && (
+          <div className="flex justify-center">
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+            >
+              {t("load_more")}
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
@@ -154,6 +186,13 @@ export function SymptomsList({
             </Button>
           </div>
         </>
+      )}
+      {hasNextPage && (
+        <div className="flex justify-center">
+          <Button variant="ghost" size="xs" onClick={() => fetchNextPage()}>
+            {t("load_more")}
+          </Button>
+        </div>
       )}
     </EncounterAccordionLayout>
   );

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
   BeakerIcon,
@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import {
   AllergyCategory,
   AllergyIntolerance,
@@ -64,29 +65,48 @@ export function AllergyList({
 
   const [showEnteredInError, setShowEnteredInError] = useState(false);
 
-  const { data: allergies, isLoading } = useQuery({
+  const {
+    data: allergiesData,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["allergies", patientId, encounterId, encounterStatus],
-    queryFn: query(allergyIntoleranceApi.getAllergy, {
-      pathParams: { patientId },
-      queryParams: {
-        encounter:
-          encounterStatus && completedEncounterStatus.includes(encounterStatus)
-            ? encounterId
-            : undefined,
-      },
-    }),
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(allergyIntoleranceApi.getAllergy, {
+        pathParams: { patientId },
+        queryParams: {
+          encounter:
+            encounterStatus &&
+            completedEncounterStatus.includes(encounterStatus)
+              ? encounterId
+              : undefined,
+          limit: showTimeline ? 30 : 14,
+          offset: String(pageParam),
+        },
+      })({ signal });
+      return response as PaginatedResponse<AllergyIntolerance>;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * 14;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
   });
+
+  const allergies = allergiesData?.pages.flatMap((page) => page.results) ?? [];
 
   if (isLoading) {
     return <TableSkeleton count={5} />;
   }
 
-  const filteredAllergies = allergies?.results?.filter(
+  const filteredAllergies = allergies?.filter(
     (allergy) =>
       showEnteredInError || allergy.verification_status !== "entered_in_error",
   );
 
-  const hasEnteredInErrorRecords = allergies?.results?.some(
+  const hasEnteredInErrorRecords = allergies?.some(
     (allergy) => allergy.verification_status === "entered_in_error",
   );
 
@@ -156,6 +176,18 @@ export function AllergyList({
             </div>
           );
         })}
+        {hasNextPage && (
+          <div className="flex justify-center">
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+            >
+              {t("load_more")}
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
@@ -182,6 +214,18 @@ export function AllergyList({
             </Button>
           </div>
         </>
+      )}
+      {hasNextPage && (
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {t("load_more")}
+          </Button>
+        </div>
       )}
     </EncounterAccordionLayout>
   );
