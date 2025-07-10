@@ -12,7 +12,7 @@ import { MultiSelect } from "@/components/ui/multi-select";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import { properCase } from "@/Utils/utils";
-import { Code } from "@/types/questionnaire/code";
+import { Code } from "@/types/base/code/code";
 import type {
   QuestionnaireResponse,
   ResponseValue,
