@@ -25,7 +25,10 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { usePermissions } from "@/context/PermissionContext";
-import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
+import {
+  Encounter,
+  inactiveEncounterStatus,
+} from "@/types/emr/encounter/encounter";
 
 interface EncounterActionsProps {
   encounter: Encounter;

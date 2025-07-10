@@ -133,7 +133,7 @@ Cypress.Commands.add(
 
 Cypress.Commands.add(
   "verifyAndClickElement",
-  (element: string, reference: string) => {
+  (element: string, reference: string | RegExp) => {
     cy.get(element).scrollIntoView();
     cy.get(element).contains(reference).should("be.visible").click();
   },

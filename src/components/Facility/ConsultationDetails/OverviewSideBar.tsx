@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter } from "@/types/emr/encounter/encounter";
 
 import ObservationsList from "./ObservationsList";
 import QuickAccess from "./QuickAccess";
