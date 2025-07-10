@@ -210,6 +210,17 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   const isVideo = ["mp4", "webm", "avi", "mov", "mkv", "flv"].includes(
     file_state.extension,
   );
+  const getVideoMimeType = (extension: string): string => {
+    const mimeTypes: Record<string, string> = {
+      mp4: "video/mp4",
+      webm: "video/webm",
+      avi: "video/x-msvideo",
+      mov: "video/quicktime",
+      mkv: "video/x-matroska",
+      flv: "video/x-flv",
+    };
+    return mimeTypes[extension] || `video/${extension}`;
+  };
 
   const handleNext = (newIndex: number) => {
     if (
@@ -443,7 +454,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     >
                       <source
                         src={fileUrl}
-                        type={`video/${file_state.extension}`}
+                        type={getVideoMimeType(file_state.extension)}
                       />
                       {t("video_not_supported")}
                     </video>
