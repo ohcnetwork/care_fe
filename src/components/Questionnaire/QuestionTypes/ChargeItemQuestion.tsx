@@ -105,7 +105,7 @@ function ChargeItemForm({
           onChange={(e) =>
             onUpdate?.({
               ...chargeItem,
-              quantity: parseInt(e.target.value, 10),
+              quantity: e.target.value,
             })
           }
           disabled={disabled}
@@ -251,7 +251,7 @@ export function ChargeItemQuestion({
       const newChargeItem: ChargeItemUpsert = {
         title: selectedCID.title,
         status: ChargeItemStatus.billable,
-        quantity: 1,
+        quantity: "1",
         unit_price_components: selectedCID.price_components,
         note: undefined,
         override_reason: undefined,

@@ -12,7 +12,7 @@ export interface MonetaryComponent {
   monetary_component_type: MonetaryComponentType;
   code?: Code | null;
   factor?: number | null;
-  amount?: number | null;
+  amount?: string | null;
 }
 
 export interface MonetaryComponentRead extends MonetaryComponent {

@@ -117,7 +117,7 @@ export default function AddMultipleChargeItemsSheet({
         {
           title: selectedCID.title,
           status: ChargeItemStatus.billable,
-          quantity: 1,
+          quantity: "1",
           unit_price_components: selectedCID.price_components,
           note: "",
           encounter: request.encounter.id,
@@ -133,7 +133,7 @@ export default function AddMultipleChargeItemsSheet({
     setSelectedItems(selectedItems.filter((_, i) => i !== index));
   };
 
-  const handleUpdateQuantity = (index: number, quantity: number) => {
+  const handleUpdateQuantity = (index: number, quantity: string) => {
     setSelectedItems(
       selectedItems.map((item, i) =>
         i === index ? { ...item, quantity } : item,
@@ -218,10 +218,7 @@ export default function AddMultipleChargeItemsSheet({
                               min={1}
                               value={item.quantity}
                               onChange={(e) =>
-                                handleUpdateQuantity(
-                                  index,
-                                  parseInt(e.target.value, 10),
-                                )
+                                handleUpdateQuantity(index, e.target.value)
                               }
                               className="w-24"
                             />
@@ -299,10 +296,7 @@ export default function AddMultipleChargeItemsSheet({
                               min={1}
                               value={item.quantity}
                               onChange={(e) =>
-                                handleUpdateQuantity(
-                                  index,
-                                  parseInt(e.target.value, 10),
-                                )
+                                handleUpdateQuantity(index, e.target.value)
                               }
                               className="w-20"
                             />

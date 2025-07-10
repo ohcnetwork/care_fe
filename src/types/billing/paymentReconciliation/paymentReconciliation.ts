@@ -68,10 +68,10 @@ export interface PaymentReconciliationBase {
   method: PaymentReconciliationPaymentMethod;
   reference_number?: string | null;
   authorization?: string | null;
-  tendered_amount?: number | null;
-  returned_amount?: number | null;
+  tendered_amount?: string | null;
+  returned_amount?: string | null;
   note?: string | null;
-  amount?: number | null;
+  amount?: string | null;
 }
 
 export interface PaymentReconciliationCreate

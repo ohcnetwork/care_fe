@@ -36,7 +36,13 @@ const formSchema = z
     monetary_component_type: z.literal(MonetaryComponentType.discount),
     code: CodeSchema.nullable().optional(),
     factor: z.number().min(0).max(100).nullable().optional(),
-    amount: z.number().min(0).nullable().optional(),
+    amount: z
+      .string()
+      .refine((val) => !val || Number(val) >= 0, {
+        message: "Amount must be greater than or equal to 0",
+      })
+      .nullable()
+      .optional(),
     title: z.string().min(1, { message: "field_required" }),
   })
   .refine((data) => data.factor != null || data.amount != null, {

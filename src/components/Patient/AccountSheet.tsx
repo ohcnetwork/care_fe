@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   Sheet,
   SheetContent,
@@ -216,13 +217,9 @@ export function AccountSheetButton({
                             {t("total_balance")}
                           </span>
                           <span className="text-lg font-semibold text-red-600">
-                            {accounts[0].total_balance.toLocaleString(
-                              undefined,
-                              {
-                                style: "currency",
-                                currency: "INR",
-                              },
-                            )}
+                            <MonetaryDisplay
+                              amount={accounts[0].total_balance}
+                            />
                           </span>
                         </div>
 
@@ -231,10 +228,7 @@ export function AccountSheetButton({
                             {t("total_gross")}
                           </span>
                           <span className="font-medium">
-                            {accounts[0].total_gross.toLocaleString(undefined, {
-                              style: "currency",
-                              currency: "INR",
-                            })}
+                            <MonetaryDisplay amount={accounts[0].total_gross} />
                           </span>
                         </div>
 
@@ -243,10 +237,7 @@ export function AccountSheetButton({
                             {t("total_net")}
                           </span>
                           <span className="font-medium">
-                            {accounts[0].total_net.toLocaleString(undefined, {
-                              style: "currency",
-                              currency: "INR",
-                            })}
+                            <MonetaryDisplay amount={accounts[0].total_net} />
                           </span>
                         </div>
 
@@ -255,10 +246,7 @@ export function AccountSheetButton({
                             {t("total_paid")}
                           </span>
                           <span className="font-medium text-green-600">
-                            {accounts[0].total_paid.toLocaleString(undefined, {
-                              style: "currency",
-                              currency: "INR",
-                            })}
+                            <MonetaryDisplay amount={accounts[0].total_paid} />
                           </span>
                         </div>
                       </div>

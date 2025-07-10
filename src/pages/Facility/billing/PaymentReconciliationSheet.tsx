@@ -69,8 +69,8 @@ export function PaymentReconciliationSheet({
 }: PaymentReconciliationSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [tenderAmount, setTenderAmount] = useState<number>(0);
-  const [returnedAmount, setReturnedAmount] = useState<number>(0);
+  const [tenderAmount, setTenderAmount] = useState<string>("0");
+  const [returnedAmount, setReturnedAmount] = useState<string>("0");
 
   const form = useForm<PaymentReconciliationCreate>({
     defaultValues: {
@@ -81,9 +81,9 @@ export function PaymentReconciliationSheet({
       outcome: PaymentReconciliationOutcome.complete,
       method: PaymentReconciliationPaymentMethod.cash,
       payment_datetime: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-      amount: invoice?.total_gross || 0,
-      tendered_amount: 0,
-      returned_amount: 0,
+      amount: String(invoice?.total_gross || "0"),
+      tendered_amount: "0",
+      returned_amount: "0",
       target_invoice: invoice?.id,
       reference_number: "",
       authorization: "",
@@ -105,8 +105,8 @@ export function PaymentReconciliationSheet({
   useEffect(() => {
     if (invoice) {
       form.setValue("target_invoice", invoice.id);
-      form.setValue("amount", invoice.total_gross);
-      setTenderAmount(invoice.total_gross);
+      form.setValue("amount", String(invoice.total_gross));
+      setTenderAmount(String(invoice.total_gross));
     }
   }, [invoice, form]);
 
@@ -114,15 +114,17 @@ export function PaymentReconciliationSheet({
   useEffect(() => {
     if (isCashPayment) {
       // For cash payments, calculate change to return
-      const returned = Math.max(0, tenderAmount - (amount || 0));
+      const returned = String(
+        Math.max(0, Number(tenderAmount) - (Number(amount) || 0)),
+      );
       setReturnedAmount(returned);
       form.setValue("tendered_amount", tenderAmount);
       form.setValue("returned_amount", returned);
     } else {
       // For non-cash payments, tendered amount equals payment amount and returned is 0
-      form.setValue("tendered_amount", amount || 0);
-      form.setValue("returned_amount", 0);
-      setReturnedAmount(0);
+      form.setValue("tendered_amount", amount || "0");
+      form.setValue("returned_amount", "0");
+      setReturnedAmount("0");
     }
   }, [tenderAmount, amount, isCashPayment, form]);
 
@@ -190,7 +192,7 @@ export function PaymentReconciliationSheet({
                   <div className="text-right">
                     <p className="text-sm text-gray-500">{t("total_amount")}</p>
                     <p className="text-lg font-semibold">
-                      <MonetaryDisplay amount={invoice.total_gross} />
+                      <MonetaryDisplay amount={String(invoice.total_gross)} />
                     </p>
                   </div>
                 )}
@@ -330,8 +332,12 @@ export function PaymentReconciliationSheet({
                             value={tenderAmount || ""}
                             onChange={(e) => {
                               const value = parseFloat(e.target.value);
-                              setTenderAmount(isNaN(value) ? 0 : value);
-                              field.onChange(isNaN(value) ? 0 : value);
+                              setTenderAmount(
+                                isNaN(value) ? "0" : String(value),
+                              );
+                              field.onChange(
+                                isNaN(value) ? "0" : String(value),
+                              );
                             }}
                           />
                         </FormControl>
@@ -343,7 +349,7 @@ export function PaymentReconciliationSheet({
                     )}
                   />
 
-                  {returnedAmount > 0 && (
+                  {Number(returnedAmount) > 0 && (
                     <div className="rounded-md bg-muted p-3">
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">

@@ -17,8 +17,6 @@ export const numberFormatter = new Intl.NumberFormat("en-IN", {
 
 export const numberFormatterWithoutCurrency = new Intl.NumberFormat("en-IN", {
   style: "decimal",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
 });
 
 // Helper function to get currency symbol
@@ -48,9 +46,9 @@ function MonetaryDisplay({
     >
       {amount != null &&
         (hideCurrency
-          ? numberFormatterWithoutCurrency.format(amount)
-          : numberFormatter.format(amount))}
-      {factor != null && `${factor?.toFixed(2)}%`}
+          ? numberFormatterWithoutCurrency.format(Number(amount)).toString()
+          : numberFormatter.format(Number(amount)).toString())}
+      {factor != null && `${factor}%`}
     </data>
   );
 }
