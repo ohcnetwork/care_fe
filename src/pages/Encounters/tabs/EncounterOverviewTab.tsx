@@ -77,8 +77,8 @@ export const EncounterOverviewTab = () => {
       <div className="flex flex-col xl:flex-row gap-4">
         {/* Left Column - Symptoms, Diagnoses, and Questionnaire Responses */}
         <div className="flex-1 space-y-4">
-          <div className="hidden md:block bg-white rounded-lg p-4 border border-gray-200">
-            <div className="flex flex-row items-center justify-between gap-4">
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex flex-row gap-3">
                 <div className="flex flex-col items-start gap-1 whitespace-nowrap">
                   <span className="text-sm font-medium text-gray-600">
@@ -110,7 +110,12 @@ export const EncounterOverviewTab = () => {
                   </div>
                 )}
               </div>
-              <Button asChild variant="outline" size="lg">
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="md:w-auto w-full"
+              >
                 <Link
                   href={`/facility/${facilityId}/patient/${patientId}/history/symptoms`}
                 >
