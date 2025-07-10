@@ -219,10 +219,17 @@ function OccurrencePicker({
   onChange: (date: Date | undefined) => void;
   disabled?: boolean;
 }) {
+  const blockDate = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    date.setHours(0, 0, 0, 0);
+    return date > today;
+  };
   return (
     <CombinedDatePicker
       value={lastOccurrence ? new Date(lastOccurrence) : undefined}
       onChange={onChange}
+      blockDate={blockDate}
       disabled={disabled}
       buttonClassName="h-9 mt-1 lg:h-8 lg:text-sm lg:px-2 lg:justify-start lg:font-normal lg:w-full lg:mt-0"
     />
