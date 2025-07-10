@@ -138,6 +138,7 @@ export default function ValueSetSelect({
             variant="outline"
             role="combobox"
             onClick={() => setInternalOpen(true)}
+            onFocus={onFocus}
             className={cn(
               "w-full justify-between",
               "h-auto md:h-9 whitespace-normal text-left md:truncate",
