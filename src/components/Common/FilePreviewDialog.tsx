@@ -23,6 +23,8 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 import CircularProgress from "@/components/Common/CircularProgress";
 import { FileUploadModel } from "@/components/Patient/models";
 
+import { FILE_EXTENSIONS, getVideoMimeType } from "@/common/constants";
+
 const PDFViewer = lazy(() => import("@/components/Common/PDFViewer"));
 export interface StateInterface {
   open: boolean;
@@ -55,6 +57,10 @@ const previewExtensions = [
   ".pdf",
   ".mp4",
   ".webm",
+  ".avi",
+  ".mov",
+  ".mkv",
+  ".flv",
   ".jpg",
   ".jpeg",
   ".png",
@@ -141,6 +147,20 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
   const handleTouchEnd = () => {
     setTouchStart(null);
   };
+  // Browser detection function
+  const isSafari = () => {
+    const userAgent = navigator.userAgent;
+    return /Safari/.test(userAgent) && !/Chrome/.test(userAgent);
+  };
+
+  // Check if video should be skipped (MOV files in non-Safari browsers)
+  const shouldSkipVideo = () => {
+    return file_state.extension === "mov" && !isSafari();
+  };
+
+  useEffect(() => {
+    dragStateRef.current = dragState;
+  }, [dragState]);
 
   useEffect(() => {
     if (uploadedFiles && show) {
@@ -203,6 +223,10 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
 
   const fileNameTooltip =
     fileName.length > 30 ? fileName.slice(0, 30) + "..." : fileName;
+
+  const isVideo = (FILE_EXTENSIONS.VIDEO as unknown as string[]).includes(
+    file_state.extension,
+  );
 
   const handleNext = (newIndex: number) => {
     if (
@@ -344,6 +368,62 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                       />
                     </Suspense>
                   </div>
+                ) : file_state.extension === "pdf" ? (
+                  <Suspense fallback={<CircularProgress />}>
+                    <PDFViewer
+                      url={fileUrl}
+                      onDocumentLoadSuccess={(numPages: number) => {
+                        setPage(1);
+                        setNumPages(numPages);
+                      }}
+                      pageNumber={page}
+                      scale={scale}
+                      className="max-md:max-w-[50vw]"
+                    />
+                  </Suspense>
+                ) : isVideo ? (
+                  shouldSkipVideo() ? (
+                    <div className="flex h-full w-full flex-col items-center justify-center">
+                      <CareIcon
+                        icon="l-video"
+                        className="mb-4 text-5xl text-secondary-600"
+                      />
+                      <p className="text-lg font-semibold text-gray-800 mb-2">
+                        {t("mov_file_not_supported")}
+                      </p>
+                      <p className="text-sm text-gray-600 text-center max-w-md mb-4">
+                        {t("mov_file_safari_only")}
+                      </p>
+                      {downloadURL && (
+                        <Button variant="primary">
+                          <a
+                            href={downloadURL}
+                            className="text-white flex items-center gap-2"
+                            download={`${file_state.name}.${file_state.extension}`}
+                          >
+                            <CareIcon
+                              icon="l-file-download"
+                              className="size-4"
+                            />
+                            <span>{t("download_to_play")}</span>
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="relative w-full h-full flex items-center justify-center">
+                      <video
+                        controls
+                        className="max-h-full max-w-full object-contain"
+                        preload="metadata"
+                      >
+                        <source
+                          src={fileUrl}
+                          type={getVideoMimeType(file_state.extension)}
+                        />
+                        {t("video_not_supported")}
+                      </video>
+                    </div>
                 ) : previewExtensions.includes(file_state.extension) ? (
                   <iframe
                     sandbox=""
