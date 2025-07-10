@@ -72,6 +72,10 @@ const previewExtensions = [
   ".pdf",
   ".mp4",
   ".webm",
+  ".avi",
+  ".mov",
+  ".mkv",
+  ".flv",
   ".jpg",
   ".jpeg",
   ".png",
@@ -202,6 +206,10 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
 
   const fileNameTooltip =
     fileName.length > 30 ? fileName.slice(0, 30) + "..." : fileName;
+
+  const isVideo = ["mp4", "webm", "avi", "mov", "mkv", "flv"].includes(
+    file_state.extension,
+  );
 
   const handleNext = (newIndex: number) => {
     if (
@@ -426,6 +434,20 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       className="max-md:max-w-[50vw]"
                     />
                   </Suspense>
+                ) : isVideo ? (
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    <video
+                      controls
+                      className="max-h-full max-w-full object-contain"
+                      preload="metadata"
+                    >
+                      <source
+                        src={fileUrl}
+                        type={`video/${file_state.extension}`}
+                      />
+                      {t("video_not_supported")}
+                    </video>
+                  </div>
                 ) : previewExtensions.includes(file_state.extension) ? (
                   <iframe
                     sandbox=""

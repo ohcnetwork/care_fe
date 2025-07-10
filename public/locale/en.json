@@ -4592,6 +4592,7 @@
   "version": "Version",
   "video_call": "Video Call",
   "video_conference_link": "Video Conference Link",
+  "video_not_supported": "Your browser does not support video playback.",
   "view": "View",
   "view_abdm_records": "View ABDM Records",
   "view_account": "View Account",
