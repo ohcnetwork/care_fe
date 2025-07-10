@@ -44,14 +44,16 @@ import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
+import scheduleApis from "@/types/scheduling/scheduleApi";
 
 // Define the entity types that support tags
-export type TagEntityType = "patient" | "encounter";
+export type TagEntityType = "patient" | "encounter" | "appointment";
 
 // Mapping from entity types to tag resources
 const ENTITY_TO_RESOURCE_MAP = {
   patient: TagResource.PATIENT,
   encounter: TagResource.ENCOUNTER,
+  appointment: TagResource.APPOINTMENT,
 } as const;
 
 // Configuration for different entity types using their respective API files
@@ -66,6 +68,11 @@ const ENTITY_CONFIG = {
     setTagsApi: encounterApi.setTags,
     removeTagsApi: encounterApi.removeTags,
     displayName: "encounter",
+  },
+  appointment: {
+    setTagsApi: scheduleApis.appointments.setTags,
+    removeTagsApi: scheduleApis.appointments.removeTags,
+    displayName: "appointment",
   },
   // TODO: Add more entity configurations here
   // service_request: {
@@ -88,6 +95,7 @@ const ENTITY_CONFIG = {
 interface TagAssignmentSheetProps {
   entityType: TagEntityType;
   entityId: string;
+  facilityId?: string;
   currentTags: TagConfig[];
   onUpdate: () => void;
   trigger?: React.ReactNode;
@@ -319,6 +327,7 @@ export function TagSelectorPopover({
 export default function TagAssignmentSheet({
   entityType,
   entityId,
+  facilityId,
   currentTags,
   onUpdate,
   trigger,
@@ -333,7 +342,10 @@ export default function TagAssignmentSheet({
   // Set tags mutation
   const { mutate: setTags, isPending: isSettingTags } = useMutation({
     mutationFn: mutate(entityConfig.setTagsApi, {
-      pathParams: { external_id: entityId },
+      pathParams: {
+        external_id: entityId,
+        facilityId: facilityId,
+      },
     }),
     onSuccess: () => {
       onUpdate();
@@ -348,7 +360,10 @@ export default function TagAssignmentSheet({
   // Remove tags mutation
   const { mutate: removeTags, isPending: isRemovingTags } = useMutation({
     mutationFn: mutate(entityConfig.removeTagsApi, {
-      pathParams: { external_id: entityId },
+      pathParams: {
+        external_id: entityId,
+        facilityId: facilityId,
+      },
     }),
     onSuccess: () => {
       onUpdate();

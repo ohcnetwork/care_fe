@@ -49,6 +49,7 @@ import {
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
@@ -213,6 +214,7 @@ const AppointmentDetails = ({
 }) => {
   const { user } = appointment;
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   return (
     <div className="container md:p-6 max-w-3xl space-y-6">
@@ -277,8 +279,22 @@ const AppointmentDetails = ({
           </div>
           {appointment.tags?.length > 0 && (
             <div className="text-sm">
-              <p className="font-medium">{t("tags")}</p>
-              <p className="text-gray-600">
+              <div className="flex items-center justify-between gap-2">
+                <p className="font-medium">{t("tags")}</p>
+                <TagAssignmentSheet
+                  entityType="appointment"
+                  entityId={appointment.id}
+                  facilityId={facility.id}
+                  currentTags={appointment.tags}
+                  onUpdate={() => {
+                    queryClient.invalidateQueries({
+                      queryKey: ["appointment", appointment.id],
+                    });
+                  }}
+                  canWrite={true}
+                />
+              </div>
+              <p className="text-gray-600 flex flex-wrap gap-1">
                 {appointment.tags.map((tag) => (
                   <Badge key={tag.id} variant="secondary">
                     {tag.parent ? `${tag.parent.display}: ` : ""}
