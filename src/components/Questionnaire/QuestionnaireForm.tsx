@@ -19,7 +19,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
-import { MedicationRequest } from "@/types/emr/medicationRequest";
+import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { FileUploadQuestion } from "@/types/files/files";
 import {

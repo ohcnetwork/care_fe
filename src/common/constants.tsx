@@ -9,7 +9,7 @@ import {
 
 import { IconName } from "@/CAREUI/icons/CareIcon";
 
-import { EncounterClass } from "@/types/emr/encounter";
+import { EncounterClass } from "@/types/emr/encounter/encounter";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 

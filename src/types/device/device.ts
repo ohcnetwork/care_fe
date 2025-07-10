@@ -1,5 +1,5 @@
 import { ContactPoint } from "@/types/common/contactPoint";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter } from "@/types/emr/encounter/encounter";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationList } from "@/types/location/location";
 import { UserBase } from "@/types/user/user";
