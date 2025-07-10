@@ -36,7 +36,6 @@ import {
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 const COMPLETED = ["completed", "rejected", "cancelled"];
@@ -76,9 +75,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
   const defaultStatus = isActive ? "pending" : "completed";
   const currentStatus = status || defaultStatus;
 
-  const { data: queryResources, isLoading } = useQuery<
-    PaginatedResponse<ResourceRequest>
-  >({
+  const { data: queryResources, isLoading } = useQuery({
     queryKey: ["resources", facilityId, qParams],
     queryFn: query.debounced(routes.listResourceRequests, {
       queryParams: {
@@ -123,6 +120,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       type: "text",
                       placeholder: t("search_by_resource_title"),
                       value: title || "",
+                      display: t("title"),
                     },
                   ]}
                   onFieldChange={() => updateQuery({ title: undefined })}

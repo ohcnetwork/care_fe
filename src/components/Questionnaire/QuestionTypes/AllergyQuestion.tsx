@@ -54,6 +54,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
+import type { Code } from "@/types/base/code/code";
 import {
   ALLERGY_VERIFICATION_STATUS,
   type AllergyIntolerance,
@@ -61,7 +62,6 @@ import {
   type AllergyVerificationStatus,
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
-import type { Code } from "@/types/questionnaire/code";
 import type {
   QuestionnaireResponse,
   ResponseValue,

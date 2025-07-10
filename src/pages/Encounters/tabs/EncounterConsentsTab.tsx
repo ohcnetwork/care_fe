@@ -23,7 +23,7 @@ import { formatDateTime } from "@/Utils/utils";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { ConsentModel } from "@/types/consent/consent";
 import consentApi from "@/types/consent/consentApi";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter } from "@/types/emr/encounter/encounter";
 
 const CONSENTS_PER_PAGE = 12;
 
