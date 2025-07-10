@@ -279,7 +279,7 @@ const AppointmentDetails = ({
           </div>
           {appointment.tags?.length > 0 && (
             <div className="text-sm">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
                 <p className="font-medium">{t("tags")}</p>
                 <TagAssignmentSheet
                   entityType="appointment"
