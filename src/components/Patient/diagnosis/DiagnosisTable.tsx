@@ -21,9 +21,10 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 
+import { formatName } from "@/Utils/utils";
 import {
-  DIAGNOSIS_CLINICAL_STATUS_STYLES,
-  DIAGNOSIS_VERIFICATION_STATUS_STYLES,
+  DIAGNOSIS_CLINICAL_STATUS_COLORS,
+  DIAGNOSIS_VERIFICATION_STATUS_COLORS,
   Diagnosis,
 } from "@/types/emr/diagnosis/diagnosis";
 
@@ -79,22 +80,22 @@ export function DiagnosisTable({ diagnoses, title }: DiagnosisTableProps) {
             </TableCell>
             <TableCell className="text-center">
               <Badge
-                variant="outline"
-                className={`whitespace-nowrap ${
-                  DIAGNOSIS_CLINICAL_STATUS_STYLES[diagnosis.clinical_status]
-                }`}
+                variant={
+                  DIAGNOSIS_CLINICAL_STATUS_COLORS[diagnosis.clinical_status]
+                }
+                className="whitespace-nowrap"
               >
                 {t(diagnosis.clinical_status)}
               </Badge>
             </TableCell>
             <TableCell className="text-center">
               <Badge
-                variant="outline"
-                className={`whitespace-nowrap capitalize ${
-                  DIAGNOSIS_VERIFICATION_STATUS_STYLES[
+                variant={
+                  DIAGNOSIS_VERIFICATION_STATUS_COLORS[
                     diagnosis.verification_status
                   ]
-                }`}
+                }
+                className="whitespace-nowrap capitalize"
               >
                 {t(diagnosis.verification_status)}
               </Badge>
@@ -138,7 +139,9 @@ export function DiagnosisTable({ diagnoses, title }: DiagnosisTableProps) {
                   imageUrl={diagnosis.created_by.profile_picture_url}
                 />
 
-                <span className="text-sm">{diagnosis.created_by.username}</span>
+                <span className="text-sm">
+                  {formatName(diagnosis.created_by)}
+                </span>
               </div>
             </TableCell>
           </TableRow>

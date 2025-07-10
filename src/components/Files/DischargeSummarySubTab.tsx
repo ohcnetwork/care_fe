@@ -49,7 +49,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter } from "@/types/emr/encounter/encounter";
 
 interface DischargeTabProps {
   type: "encounter" | "patient";
@@ -103,6 +103,7 @@ export const DischargeTab = ({
         ...(qParams.is_archived !== undefined && {
           is_archived: qParams.is_archived,
         }),
+        ordering: "-modified_date",
       },
     }),
   });
@@ -312,8 +313,8 @@ export const DischargeTab = ({
     return (
       <div className="flex flex-row gap-2 mt-2 mx-2">
         <Badge
-          variant="secondary"
-          className="cursor-pointer border border-gray-300 bg-white"
+          variant="outline"
+          className="cursor-pointer"
           onClick={() => updateQuery({ is_archived: undefined })}
         >
           {t(
@@ -630,6 +631,7 @@ export const DischargeTab = ({
             {t("refresh")}
           </Button>
           <div className="col-span-2 sm:w-auto">
+          {canEdit && (
             <Button
               variant="primary"
               className="w-full sm:w-auto min-w-24 sm:min-w-28"
@@ -642,7 +644,8 @@ export const DischargeTab = ({
               />
               {isGenerating ? t("generating") : t("generate_discharge_summary")}
             </Button>
-            {/* <ReportBuilderSheet
+          )}
+          {/* <ReportBuilderSheet
             facilityId={facilityId || ""}
             patientId={encounter?.patient.id || ""}
             encounterId={encounter?.id || ""}

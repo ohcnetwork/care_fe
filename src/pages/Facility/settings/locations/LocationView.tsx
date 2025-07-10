@@ -211,14 +211,14 @@ export default function LocationView({
               ) : (
                 <>
                   <h2 className="text-xl font-semibold">{location?.name}</h2>
-                  <Badge variant="outline">
+                  <Badge variant="outline" className="whitespace-nowrap">
                     {t(`location_form__${location?.form}`)}
                   </Badge>
                   <Badge
                     variant={
-                      location?.status === "active" ? "default" : "secondary"
+                      location?.status === "active" ? "primary" : "secondary"
                     }
-                    className="capitalize"
+                    className="capitalize whitespace-nowrap"
                   >
                     {location?.status}
                   </Badge>

@@ -1,4 +1,5 @@
-import { Code } from "./code";
+import { Code } from "@/types/base/code/code";
+
 import { Question } from "./question";
 import { QuestionnaireTagModel } from "./tags";
 
@@ -29,3 +30,9 @@ export interface QuestionnaireForms {
   count: number;
   results: QuestionnaireDetail[];
 }
+
+export const QUESTIONNAIRE_STATUS_COLORS = {
+  active: "primary",
+  draft: "yellow",
+  retired: "destructive",
+} as const;

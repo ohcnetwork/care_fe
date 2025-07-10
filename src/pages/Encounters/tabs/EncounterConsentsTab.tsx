@@ -20,10 +20,9 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
-import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { ConsentModel } from "@/types/consent/consent";
 import consentApi from "@/types/consent/consentApi";
-import { Encounter } from "@/types/emr/encounter";
 
 const CONSENTS_PER_PAGE = 12;
 
@@ -50,10 +49,10 @@ export const EmptyState = () => {
 
 function ConsentCard({
   consent,
-  encounter,
+  patientId,
 }: {
   consent: ConsentModel;
-  encounter: Encounter;
+  patientId: string;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -68,17 +67,15 @@ function ConsentCard({
     <Card className="overflow-hidden transition-all h-full flex flex-col">
       <div className="flex flex-wrap gap-2">
         <Badge
-          variant="outline"
-          className="w-fit justify-center border-b border-gray-300 rounded-b-md rounded-t-none px-2.5 py-1 text-center ml-3 bg-indigo-100 text-indigo-900"
+          variant="indigo"
+          className="w-fit border-b rounded-b-md border-t-0 rounded-t-none py-1 ml-3 font-semibold text-xs"
         >
-          <h3 className="font-semibold text-xs text-gray-900 uppercase">
-            {t(`consent_category__${consent.category}`)}
-          </h3>
+          {t(`consent_category__${consent.category}`).toUpperCase()}
         </Badge>
         {consent.period.end && isPast(consent.period.end) && (
           <Badge
-            variant="destructive"
-            className="flex gap-1 items-center text-xs uppercase"
+            variant="danger"
+            className="flex bg-red-500 my-1 border-none items-center font-semibold text-xs uppercase"
           >
             {t("expired")}
           </Badge>
@@ -114,23 +111,12 @@ function ConsentCard({
 
           <div className="flex justify-start items-center flex-wrap w-full gap-1.5">
             {consent.decision === "permit" ? (
-              <Badge
-                className="flex gap-1 items-center text-xs"
-                variant={"primary"}
-              >
-                {t("permitted")}
-              </Badge>
+              <Badge variant="green">{t("permitted")}</Badge>
             ) : (
-              <Badge
-                variant="destructive"
-                className="flex gap-1 items-center text-xs"
-              >
-                {t("denied")}
-              </Badge>
+              <Badge variant="destructive">{t("denied")}</Badge>
             )}
             <Badge
               variant={consent.status === "active" ? "primary" : "secondary"}
-              className="flex gap-1 items-center text-xs"
             >
               {t(`consent_status__${consent.status}`)}
             </Badge>
@@ -181,7 +167,7 @@ function ConsentCard({
           className="w-full justify-center items-center gap-2 rounded-t-none"
           onClick={() =>
             navigate(
-              `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounterId}/consents/${consentId}`,
+              `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/consents/${consentId}`,
             )
           }
         >
@@ -194,20 +180,27 @@ function ConsentCard({
 }
 
 // Main tab component
-export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
+export const EncounterConsentsTab = () => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
+  const {
+    selectedEncounterId: encounterId,
+    patientId,
+    currentEncounterId,
+  } = useEncounter();
+
+  const readOnly = encounterId !== currentEncounterId;
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: CONSENTS_PER_PAGE,
   });
 
   const { data: existingConsents, isLoading } = useQuery({
-    queryKey: ["consents", encounter.patient.id, encounter.id, qParams],
+    queryKey: ["consents", patientId, encounterId, qParams],
     queryFn: query(consentApi.list, {
-      pathParams: { patientId: encounter.patient.id },
+      pathParams: { patientId },
       queryParams: {
-        encounter: encounter.id,
+        encounter: encounterId,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
@@ -244,20 +237,19 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
           />
         </div>
 
-        <ConsentFormSheet
-          patientId={encounter.patient.id}
-          encounterId={encounter.id}
-        />
+        {!readOnly && (
+          <ConsentFormSheet patientId={patientId} encounterId={encounterId} />
+        )}
       </div>
 
       {filteredConsents && filteredConsents.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredConsents.map((consent) => (
               <ConsentCard
                 key={consent.id}
                 consent={consent}
-                encounter={encounter}
+                patientId={patientId}
               />
             ))}
           </div>

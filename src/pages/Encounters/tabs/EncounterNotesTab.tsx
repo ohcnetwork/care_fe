@@ -53,16 +53,13 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { useIsMobile } from "@/hooks/use-mobile";
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { getPermissions } from "@/common/Permissions";
-
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime } from "@/Utils/utils";
-import { usePermissions } from "@/context/PermissionContext";
-import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
-import { inactiveEncounterStatus } from "@/types/emr/encounter";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
 
@@ -215,6 +212,11 @@ const NewThreadDialog = ({
 }) => {
   const { t } = useTranslation();
   const [title, setTitle] = useState("");
+  useEffect(() => {
+    if (isOpen) {
+      setTitle("");
+    }
+  }, [isOpen]);
 
   return (
     <Dialog
@@ -291,10 +293,12 @@ const MobileNav = ({
   threadsCount,
   onOpenThreads,
   onNewThread,
+  canWrite,
 }: {
   threadsCount: number;
   onOpenThreads: () => void;
   onNewThread: () => void;
+  canWrite: boolean;
 }) => (
   <div className="lg:hidden fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-2 flex items-center justify-around z-50 divide-x">
     <Button
@@ -306,23 +310,22 @@ const MobileNav = ({
       <MessageCircle className="size-5" />
       <span className="text-xs">Threads ({threadsCount})</span>
     </Button>
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={onNewThread}
-      className="flex-1 flex flex-col items-center gap-1 h-auto py-2 rounded-none"
-    >
-      <MessageSquarePlus className="size-5" />
-      <span className="text-xs">New Thread</span>
-    </Button>
+    {canWrite && (
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onNewThread}
+        className="flex-1 flex flex-col items-center gap-1 h-auto py-2 rounded-none"
+      >
+        <MessageSquarePlus className="size-5" />
+        <span className="text-xs">New Thread</span>
+      </Button>
+    )}
   </div>
 );
 
 // Main component
-export const EncounterNotesTab = ({
-  encounter,
-  patient,
-}: EncounterTabProps) => {
+export const EncounterNotesTab = () => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedThread, setSelectedThread] = useState<string | null>(null);
@@ -333,27 +336,31 @@ export const EncounterNotesTab = ({
   // points to the first message fetched in the last page or the newly created message
   const recentMessageRef = useRef<HTMLDivElement | null>(null);
   const { ref, inView } = useInView();
-  const { hasPermission } = usePermissions();
-  const { canViewClinicalData } = getPermissions(
-    hasPermission,
-    patient.permissions,
-  );
-  const { canViewEncounter, canWriteEncounter } = getPermissions(
-    hasPermission,
-    encounter.permissions,
-  );
+  const {
+    patientPermissions: { canViewClinicalData },
+    selectedEncounterPermissions: { canViewEncounter, canWriteEncounter },
+    selectedEncounterId: encounterId,
+    selectedEncounter: encounter,
+    currentEncounterId,
+    patientId,
+  } = useEncounter();
   const canAccess = canViewClinicalData || canViewEncounter;
-  const inactiveEncounter = inactiveEncounterStatus.includes(encounter.status);
-  const canWriteCurrentEncounter = canWriteEncounter && !inactiveEncounter;
+  const inactiveEncounter = !!(
+    encounter && inactiveEncounterStatus.includes(encounter.status)
+  );
+  const canWrite =
+    canWriteEncounter &&
+    !inactiveEncounter &&
+    encounterId === currentEncounterId;
   const [commentAdded, setCommentAdded] = useState(false);
   const isMobile = useIsMobile();
 
   // Fetch threads
   const { data: threadsData, isLoading: threadsLoading } = useQuery({
-    queryKey: ["threads", encounter.id],
+    queryKey: ["threads", encounterId],
     queryFn: query(routes.notes.patient.listThreads, {
-      pathParams: { patientId: encounter.patient.id },
-      queryParams: { encounter: encounter.id },
+      pathParams: { patientId: patientId },
+      queryParams: { encounter: encounterId },
     }),
     enabled: canAccess,
   });
@@ -370,7 +377,7 @@ export const EncounterNotesTab = ({
     queryFn: async ({ pageParam = 0 }) => {
       const response = await query(routes.notes.patient.getMessages, {
         pathParams: {
-          patientId: encounter.patient.id,
+          patientId,
           threadId: selectedThread!,
         },
         queryParams: {
@@ -388,10 +395,15 @@ export const EncounterNotesTab = ({
     enabled: !!selectedThread && canAccess,
   });
 
+  // reset selected thread when encounter changes
+  useEffect(() => {
+    setSelectedThread(null);
+  }, [encounterId]);
+
   // Create thread mutation
   const createThreadMutation = useMutation({
     mutationFn: mutate(routes.notes.patient.createThread, {
-      pathParams: { patientId: encounter.patient.id },
+      pathParams: { patientId },
     }),
     onSuccess: (newThread) => {
       queryClient.invalidateQueries({ queryKey: ["threads"] });
@@ -407,10 +419,7 @@ export const EncounterNotesTab = ({
   // Create message mutation
   const createMessageMutation = useMutation({
     mutationFn: mutate(routes.notes.patient.postMessage, {
-      pathParams: {
-        patientId: encounter.patient.id,
-        threadId: selectedThread!,
-      },
+      pathParams: { patientId, threadId: selectedThread! },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["messages", selectedThread] });
@@ -462,14 +471,17 @@ export const EncounterNotesTab = ({
       }
       createThreadMutation.mutate({
         title: title.trim(),
-        encounter: encounter.id,
+        encounter: encounterId,
       });
     }
   };
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newMessage.trim() && selectedThread) {
+    e.stopPropagation();
+    const canSend =
+      newMessage.trim() && selectedThread && !createMessageMutation.isPending;
+    if (canSend) {
       createMessageMutation.mutate({ message: newMessage.trim() });
     }
   };
@@ -487,7 +499,7 @@ export const EncounterNotesTab = ({
   const totalMessages = messagesData?.pages[0]?.count ?? 0;
 
   return (
-    <div className="flex h-[calc(100vh-12rem)] overflow-hidden">
+    <div className="flex h-[calc(100vh-13rem)] overflow-hidden lg:h-[calc(100vh-13rem)]">
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-gray-200">
         <div className="p-4 border-b border-gray-200">
@@ -498,7 +510,7 @@ export const EncounterNotesTab = ({
                 {t("encounter_notes__discussions")}
               </h3>
             </div>
-            {canWriteCurrentEncounter && (
+            {canWrite && (
               <Button
                 data-cy="new-thread-button"
                 variant="outline"
@@ -698,7 +710,7 @@ export const EncounterNotesTab = ({
                   )}
 
                   {/* Message Input */}
-                  {canWriteCurrentEncounter && (
+                  {canWrite && (
                     <div className="border-t border-gray-200 p-3 sm:p-4 bg-white sticky max-sm:bottom-14">
                       <form onSubmit={handleSendMessage}>
                         <div className="flex gap-2">
@@ -709,13 +721,10 @@ export const EncounterNotesTab = ({
                             onChange={(e) => setNewMessage(e.target.value)}
                             onKeyDown={(e) => {
                               if (e.key === "Enter" && e.shiftKey) {
-                                e.preventDefault();
-                                if (newMessage.trim()) {
-                                  handleSendMessage(e);
-                                }
+                                handleSendMessage(e);
                               }
                             }}
-                            className="flex-1 min-h-20 max-h-[50vh]"
+                            className="flex-1 min-h-10 max-h-[50vh]"
                           />
                           <Button
                             data-cy="send-chat-message-button"
@@ -752,7 +761,7 @@ export const EncounterNotesTab = ({
               <Button
                 onClick={() => setShowNewThreadDialog(true)}
                 className="shadow-lg"
-                disabled={!canWriteCurrentEncounter}
+                disabled={!canWrite}
               >
                 <MessageSquarePlus className="size-5 mr-2" />
                 {t("encounter_notes__start_new_discussion")}
@@ -782,6 +791,7 @@ export const EncounterNotesTab = ({
         threadsCount={threadsData?.results.length || 0}
         onOpenThreads={() => setIsThreadsExpanded(true)}
         onNewThread={() => setShowNewThreadDialog(true)}
+        canWrite={canWrite}
       />
 
       <NewThreadDialog

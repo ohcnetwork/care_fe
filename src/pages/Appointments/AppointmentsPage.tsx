@@ -70,7 +70,6 @@ import useFilters, { FilterState } from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
@@ -86,9 +85,13 @@ import {
   formatSlotTimeRange,
   groupSlotsByAvailability,
 } from "@/pages/Appointments/utils";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
 import {
   Appointment,
+  AppointmentCancelledStatus,
+  AppointmentNonCancelledStatus,
+  AppointmentStatus,
   AppointmentStatuses,
   TokenSlot,
 } from "@/types/scheduling/schedule";
@@ -98,6 +101,15 @@ interface DateRangeDisplayProps {
   dateFrom: string | null;
   dateTo: string | null;
 }
+
+const FILTERED_APPOINTMENT_STATUSES: Partial<AppointmentStatus>[] = [
+  "booked",
+  "checked_in",
+  "in_consultation",
+  "fulfilled",
+  "noshow",
+  "cancelled",
+] as const;
 
 function AppointmentsEmptyState() {
   const { t } = useTranslation();
@@ -256,11 +268,7 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
   );
 }
 
-export default function AppointmentsPage({
-  facilityId,
-}: {
-  facilityId: string;
-}) {
+export default function AppointmentsPage() {
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const { qParams, updateQuery, resultsPerPage, Pagination } = useFilters({
@@ -269,27 +277,22 @@ export default function AppointmentsPage({
 
   const [activeTab, setActiveTab] = useView("appointments", "board");
   const { open: isSidebarOpen } = useSidebar();
+  const { facility, facilityId } = useCurrentFacility();
 
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
 
-  const { data: facilityData, isLoading: isFacilityLoading } = useQuery({
-    queryKey: ["facility", facilityId],
-    queryFn: query(routes.getPermittedFacility, {
-      pathParams: { id: facilityId },
-    }),
-  });
-
   const { canViewAppointments } = getPermissions(
     hasPermission,
-    facilityData?.permissions ?? [],
+    facility?.permissions ?? [],
   );
 
   const schedulableUsersQuery = useQuery({
     queryKey: ["practitioners", facilityId],
     queryFn: query(scheduleApis.appointments.availableUsers, {
-      pathParams: { facility_id: facilityId },
+      pathParams: { facilityId },
     }),
+    enabled: !!facility,
   });
 
   const resources = schedulableUsersQuery.data?.users;
@@ -349,7 +352,7 @@ export default function AppointmentsPage({
   const slotsQuery = useQuery({
     queryKey: ["slots", facilityId, qParams.practitioner, qParams.date_from],
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
-      pathParams: { facility_id: facilityId },
+      pathParams: { facilityId },
       body: {
         // voluntarily coalesce to empty string since we know query would be
         // enabled only if practitioner and date_from are present
@@ -364,14 +367,14 @@ export default function AppointmentsPage({
   const slot = slots?.find((s) => s.id === qParams.slot);
 
   useEffect(() => {
-    if (!canViewAppointments && !isFacilityLoading) {
+    if (!canViewAppointments && !facility) {
       toast.error(t("no_permission_to_view_page"));
       goBack("/");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canViewAppointments, isFacilityLoading]);
+  }, [canViewAppointments, facility]);
 
-  if (schedulableUsersQuery.isLoading) {
+  if (schedulableUsersQuery.isLoading || !facility) {
     return <Loading />;
   }
 
@@ -606,19 +609,10 @@ export default function AppointmentsPage({
           )}
         >
           <div className="flex w-max space-x-4">
-            {(
-              [
-                "booked",
-                "checked_in",
-                "in_consultation",
-                "fulfilled",
-                "noshow",
-              ] as const
-            ).map((status) => (
+            {FILTERED_APPOINTMENT_STATUSES.map((status) => (
               <AppointmentColumn
                 key={status}
                 status={status}
-                facilityId={facilityId}
                 slot={slot?.id}
                 practitioner={practitioner?.id ?? null}
                 date_from={qParams.date_from}
@@ -632,7 +626,6 @@ export default function AppointmentsPage({
         </ScrollArea>
       ) : (
         <AppointmentRow
-          facilityId={facilityId}
           updateQuery={updateQuery}
           practitioner={practitioner?.id ?? null}
           slot={qParams.slot}
@@ -651,8 +644,7 @@ export default function AppointmentsPage({
 }
 
 function AppointmentColumn(props: {
-  facilityId: string;
-  status: Appointment["status"];
+  status: AppointmentNonCancelledStatus | AppointmentCancelledStatus;
   practitioner: string | null;
   slot?: string | null;
   date_from: string | null;
@@ -660,12 +652,13 @@ function AppointmentColumn(props: {
   search?: string;
   canViewAppointments: boolean;
 }) {
+  const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
 
   const { data } = useQuery({
     queryKey: [
       "appointments",
-      props.facilityId,
+      facilityId,
       props.status,
       props.practitioner,
       props.slot,
@@ -673,7 +666,7 @@ function AppointmentColumn(props: {
       props.date_to,
     ],
     queryFn: query(scheduleApis.appointments.list, {
-      pathParams: { facility_id: props.facilityId },
+      pathParams: { facilityId },
       queryParams: {
         status: props.status,
         limit: 100,
@@ -681,6 +674,7 @@ function AppointmentColumn(props: {
         user: props.practitioner ?? undefined,
         date_after: props.date_from,
         date_before: props.date_to,
+        ordering: "token_slot__start_datetime",
       },
     }),
     enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
@@ -734,7 +728,7 @@ function AppointmentColumn(props: {
             {appointments.map((appointment) => (
               <li key={appointment.id}>
                 <Link
-                  href={`/facility/${props.facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`}
+                  href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`}
                   className="text-inherit"
                 >
                   <AppointmentCard appointment={appointment} />
@@ -784,7 +778,6 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
 }
 
 function AppointmentRow(props: {
-  facilityId: string;
   page: number | null;
   practitioner: string | null;
   Pagination: ({
@@ -803,12 +796,13 @@ function AppointmentRow(props: {
   search?: string;
   canViewAppointments: boolean;
 }) {
+  const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
 
   const { data, isLoading } = useQuery({
     queryKey: [
       "appointments",
-      props.facilityId,
+      facilityId,
       props.status,
       props.page,
       props.practitioner,
@@ -817,7 +811,7 @@ function AppointmentRow(props: {
       props.date_to,
     ],
     queryFn: query(scheduleApis.appointments.list, {
-      pathParams: { facility_id: props.facilityId },
+      pathParams: { facilityId },
       queryParams: {
         status: props.status ?? "booked",
         slot: props.slot,
@@ -826,6 +820,7 @@ function AppointmentRow(props: {
         date_before: props.date_to,
         limit: props.resultsPerPage,
         offset: ((props.page ?? 1) - 1) * props.resultsPerPage,
+        ordering: "token_slot__start_datetime",
       },
     }),
     enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
@@ -848,13 +843,11 @@ function AppointmentRow(props: {
             onValueChange={(value) => props.updateQuery({ status: value })}
           >
             <TabsList>
-              <TabsTrigger value="booked">{t("booked")}</TabsTrigger>
-              <TabsTrigger value="checked_in">{t("checked_in")}</TabsTrigger>
-              <TabsTrigger value="in_consultation">
-                {t("in_consultation")}
-              </TabsTrigger>
-              <TabsTrigger value="fulfilled">{t("fulfilled")}</TabsTrigger>
-              <TabsTrigger value="noshow">{t("noshow")}</TabsTrigger>
+              {FILTERED_APPOINTMENT_STATUSES.map((status) => (
+                <TabsTrigger key={status} value={status}>
+                  {t(status)}
+                </TabsTrigger>
+              ))}
             </TabsList>
           </Tabs>
         </div>
@@ -869,80 +862,63 @@ function AppointmentRow(props: {
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="booked">
-                <div className="flex items-center">Booked</div>
-              </SelectItem>
-              <SelectItem value="checked_in">
-                <div className="flex items-center">Checked In</div>
-              </SelectItem>
-              <SelectItem value="in_consultation">
-                <div className="flex items-center">In Consultation</div>
-              </SelectItem>
-              <SelectItem value="fulfilled">
-                <div className="flex items-center">Fulfilled</div>
-              </SelectItem>
-              <SelectItem value="noshow">
-                <div className="flex items-center">No Show</div>
-              </SelectItem>
+              {FILTERED_APPOINTMENT_STATUSES.map((status) => (
+                <SelectItem key={status} value={status}>
+                  <div className="flex items-center">{t(status)}</div>
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
 
-        {isLoading ? (
-          <TableSkeleton count={5} />
-        ) : appointments.length === 0 ? (
-          <AppointmentsEmptyState />
-        ) : (
-          <Table className="p-2 border-separate border-gray-200 border-spacing-y-3">
-            <TableHeader>
-              <TableRow>
-                <TableHead className="pl-8 font-semibold text-black text-xs">
-                  {t("patient")}
-                </TableHead>
-                <TableHead className="font-semibold text-black text-xs">
-                  {t("practitioner")}
-                </TableHead>
-                <TableHead className="font-semibold text-black text-xs">
-                  {t("current_status")}
-                </TableHead>
-                <TableHead className="font-semibold text-black text-xs">
-                  {t("token_no")}
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody className="">
-              {appointments.map((appointment) => (
-                <TableRow
-                  key={appointment.id}
-                  className="shadow-sm rounded-lg cursor-pointer group"
-                  onClick={() =>
-                    navigate(
-                      `/facility/${props.facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`,
-                    )
-                  }
-                >
-                  <AppointmentRowItem
-                    appointment={appointment}
-                    facilityId={props.facilityId}
-                  />
+        <div className="mt-2">
+          {isLoading ? (
+            <TableSkeleton count={5} />
+          ) : appointments.length === 0 ? (
+            <AppointmentsEmptyState />
+          ) : (
+            <Table className="p-2 border-separate border-gray-200 border-spacing-y-3">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="pl-8 font-semibold text-black text-xs">
+                    {t("patient")}
+                  </TableHead>
+                  <TableHead className="font-semibold text-black text-xs">
+                    {t("practitioner")}
+                  </TableHead>
+                  <TableHead className="font-semibold text-black text-xs">
+                    {t("current_status")}
+                  </TableHead>
+                  <TableHead className="font-semibold text-black text-xs">
+                    {t("token_no")}
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
+              </TableHeader>
+              <TableBody>
+                {appointments.map((appointment) => (
+                  <TableRow
+                    key={appointment.id}
+                    className="shadow-sm rounded-lg cursor-pointer group"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`,
+                      )
+                    }
+                  >
+                    <AppointmentRowItem appointment={appointment} />
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </div>
         {props.Pagination({ totalCount: data?.count ?? 0 })}
       </div>
     </div>
   );
 }
 
-function AppointmentRowItem({
-  appointment,
-  facilityId,
-}: {
-  appointment: Appointment;
-  facilityId: string;
-}) {
+function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
   const { patient } = appointment;
   const { t } = useTranslation();
 
@@ -968,10 +944,7 @@ function AppointmentRowItem({
         {formatName(appointment.user)}
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        <AppointmentStatusDropdown
-          appointment={appointment}
-          facilityId={facilityId}
-        />
+        <AppointmentStatusDropdown appointment={appointment} />
       </TableCell>
       {/* TODO: replace this with token number once that's ready... */}
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white rounded-r-lg">
@@ -983,22 +956,19 @@ function AppointmentRowItem({
 
 const AppointmentStatusDropdown = ({
   appointment,
-  facilityId,
 }: {
   appointment: Appointment;
-  facilityId: string;
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { facilityId } = useCurrentFacility();
+
   const currentStatus = appointment.status;
   const hasStarted = isPast(appointment.token_slot.start_datetime);
 
   const { mutate: updateAppointment } = useMutation({
     mutationFn: mutate(scheduleApis.appointments.update, {
-      pathParams: {
-        facility_id: facilityId,
-        id: appointment.id,
-      },
+      pathParams: { facilityId, id: appointment.id },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({

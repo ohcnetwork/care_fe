@@ -2,6 +2,7 @@ import { useState } from "react";
 import { UseFormReturn, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import RadioInput from "@/components/ui/RadioInput";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -24,7 +25,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -94,9 +94,7 @@ export default function LayoutBuilder({ form }: LayoutBuilderProps) {
     <Card>
       <CardHeader>
         <CardTitle>{t("layout")}</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          {t("layout_description")}
-        </p>
+        <p className="text-sm">{t("layout_description")}</p>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Page Size */}
@@ -156,20 +154,14 @@ export default function LayoutBuilder({ form }: LayoutBuilderProps) {
             <FormItem>
               <FormLabel>{t("page_margin")}</FormLabel>
               <FormControl>
-                <RadioGroup
-                  value={field.value}
+                <RadioInput
+                  {...field}
                   onValueChange={field.onChange}
-                  className="flex flex-row gap-2 mt-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="uniform" id="uniform" />
-                    <FormLabel htmlFor="uniform">{t("uniform")}</FormLabel>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="custom" id="custom" />
-                    <FormLabel htmlFor="custom">{t("custom")}</FormLabel>
-                  </div>
-                </RadioGroup>
+                  options={[
+                    { value: "uniform", label: t("uniform") },
+                    { value: "custom", label: t("custom") },
+                  ]}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
