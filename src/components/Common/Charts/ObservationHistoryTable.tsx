@@ -16,8 +16,8 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { Code } from "@/types/base/code/code";
 import { ObservationWithUser } from "@/types/emr/observation";
-import { Code } from "@/types/questionnaire/code";
 
 interface PaginatedResponse<T> {
   count: number;

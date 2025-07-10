@@ -98,7 +98,7 @@ const ScheduleExceptionItem = (
     mutationFn: mutate(scheduleApis.exceptions.delete, {
       pathParams: {
         id: props.id,
-        facility_id: props.facilityId,
+        facilityId: props.facilityId,
       },
     }),
     onSuccess: () => {

@@ -10,8 +10,11 @@ import { FilesPage } from "@/components/Files/FileSubTab";
 import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
-import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/patient";
+import {
+  Encounter,
+  inactiveEncounterStatus,
+} from "@/types/emr/encounter/encounter";
+import { Patient } from "@/types/emr/patient/patient";
 
 interface FilesTabsProps {
   type: "encounter" | "patient";
@@ -28,7 +31,7 @@ const allowedTabs = ["all", "discharge_summary", "drawings"] as const;
 type TabType = (typeof allowedTabs)[number];
 
 export const FilesTab = (props: FilesTabsProps) => {
-  const { patient, type, encounter, facilityId } = props;
+  const { patient, type, encounter } = props;
   const [qParams, setQParams] = useQueryParams<QueryParams>();
 
   const { hasPermission } = usePermissions();
@@ -97,7 +100,6 @@ export const FilesTab = (props: FilesTabsProps) => {
             patient={patient}
             associatingId={associatingId}
             canEdit={canEdit}
-            facilityId={facilityId || ""}
           />
         </TabsContent>
 
@@ -105,9 +107,9 @@ export const FilesTab = (props: FilesTabsProps) => {
           <TabsContent value="discharge_summary">
             <DischargeTab
               type={type}
-              facilityId={facilityId || ""}
               encounter={encounter}
               canEdit={canEdit}
+              // facilityId={facilityId || ""}
             />
           </TabsContent>
         )}

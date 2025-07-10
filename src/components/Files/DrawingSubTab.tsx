@@ -1,5 +1,5 @@
 import { exportToSvg } from "@excalidraw/excalidraw";
-import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/excalidraw/element/types";
+import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/element/src/types";
 import { useQuery } from "@tanstack/react-query";
 import { SearchIcon } from "lucide-react";
 import { navigate, usePathParams } from "raviger";
@@ -19,11 +19,14 @@ import useFilters from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
-import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/patient";
+import {
+  Encounter,
+  inactiveEncounterStatus,
+} from "@/types/emr/encounter/encounter";
+import { Patient } from "@/types/emr/patient/patient";
+import patientApi from "@/types/emr/patient/patientApi";
 import metaArtifactApi from "@/types/metaAritifact/metaArtifactApi";
 
 export interface DrawingsTabProps {
@@ -142,7 +145,7 @@ export const DrawingPage = ({
   });
   const { data: patientData } = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(routes.patient.getPatient, {
+    queryFn: query(patientApi.getPatient, {
       pathParams: { id: patientId ?? "" },
     }),
     enabled: !!patient && !!patientId,
@@ -190,7 +193,7 @@ export const DrawingPage = ({
   return (
     <div className="p-4 -ml-4 -mt-2">
       <div className="flex flex-wrap items-center justify-between mb-4 gap-2">
-        <div className="relative flex-1 min-w-72 max-w-96 ml-2">
+        <div className="relative flex-1 min-w-72 max-w-96">
           <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
           <Input
             id="search-by-name"

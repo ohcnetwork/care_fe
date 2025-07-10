@@ -1,6 +1,7 @@
 import { MinusCircledIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import React, { useEffect } from "react";
 import { useState } from "react";
@@ -49,11 +50,13 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
+import { Code } from "@/types/base/code/code";
 import {
   MEDICATION_REQUEST_TIMING_OPTIONS,
   MedicationRequest,
   MedicationRequestRead,
-} from "@/types/emr/medicationRequest";
+  displayMedicationName,
+} from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import {
   MEDICATION_STATEMENT_STATUS,
@@ -64,7 +67,6 @@ import {
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
-import { Code } from "@/types/questionnaire/code";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -114,7 +116,19 @@ const MEDICATION_STATEMENT_FIELDS: FieldDefinitions = {
     required: true,
     validate: (value: unknown) => {
       const period = value as { start?: string; end?: string };
-      return !!period?.start;
+      if (!period?.start) {
+        throw Error(t("start_date_required"));
+      }
+
+      if (period.end) {
+        const startDate = new Date(period.start);
+        const endDate = new Date(period.end);
+        if (endDate < startDate) {
+          throw new Error(t("end_date_after_start"));
+        }
+      }
+
+      return true;
     },
   },
 } as const;
@@ -214,7 +228,7 @@ export function MedicationStatementQuestion({
   };
 
   const handleAddHistoricalMedications = (
-    selected: (MedicationRequest | MedicationStatementRequest)[],
+    selected: (MedicationRequestRead | MedicationStatementRead)[],
   ) => {
     const newMedications = selected.map((record) => {
       if ("dosage_instruction" in record) {
@@ -295,7 +309,12 @@ export function MedicationStatementQuestion({
   });
 
   return (
-    <div className="space-y-4">
+    <div
+      className={cn(
+        "space-y-4",
+        medications.length > 0 ? "md:max-w-fit" : "max-w-4xl",
+      )}
+    >
       <AlertDialog
         open={medicationToDelete !== null}
         onOpenChange={(open) => !open && setMedicationToDelete(null)}
@@ -323,14 +342,15 @@ export function MedicationStatementQuestion({
       </AlertDialog>
 
       <HistoricalRecordSelector<MedicationRequestRead | MedicationStatementRead>
+        title={t("medication_history")}
         structuredTypes={[
           {
             type: t("past_prescriptions"),
             displayFields: [
               {
-                key: "medication",
+                key: "requested_product,code",
                 label: t("medicine"),
-                render: (med) => med?.display,
+                render: (med) => displayMedicationName(med),
               },
               {
                 key: "dosage_instruction",
@@ -564,7 +584,7 @@ export function MedicationStatementQuestion({
                                   <div className="text-sm mt-1 text-gray-600">
                                     <span>
                                       {t(
-                                        `medication_status_${medication.status}`,
+                                        `medication_status__${medication.status}`,
                                       )}
                                       {" · "}
                                     </span>
@@ -596,7 +616,11 @@ export function MedicationStatementQuestion({
                             <CardContent className="p-2 pt-2 space-y-3 rounded-lg bg-gray-50">
                               <MedicationStatementGridRow
                                 medication={medication}
-                                disabled={disabled}
+                                disabled={
+                                  disabled ||
+                                  patientMedications?.results[index]?.status ===
+                                    "entered_in_error"
+                                }
                                 onUpdate={(updates) =>
                                   handleUpdateMedication(index, updates)
                                 }
@@ -612,7 +636,11 @@ export function MedicationStatementQuestion({
                     ) : (
                       <MedicationStatementGridRow
                         medication={medication}
-                        disabled={disabled}
+                        disabled={
+                          disabled ||
+                          patientMedications?.results[index]?.status ===
+                            "entered_in_error"
+                        }
                         onUpdate={(updates) =>
                           handleUpdateMedication(index, updates)
                         }
@@ -713,8 +741,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       className={cn(
         "grid grid-cols-1 lg:grid-cols-[300px_180px_170px_250px_450px_190px_300px_48px] border-b border-gray-200 hover:bg-gray-50/50 space-y-3 lg:space-y-0",
         {
-          "opacity-40 pointer-events-none":
-            medication.status === "entered_in_error",
+          "opacity-40 pointer-events-none": disabled,
         },
       )}
     >
@@ -787,11 +814,14 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {MEDICATION_STATEMENT_STATUS.map((status) => (
-              <SelectItem key={status} value={status}>
-                {t(`medication_status_${status}`)}
-              </SelectItem>
-            ))}
+            {MEDICATION_STATEMENT_STATUS.map(
+              (status) =>
+                (medication.id || status !== "entered_in_error") && (
+                  <SelectItem key={status} value={status}>
+                    {t(`medication_status__${status}`)}
+                  </SelectItem>
+                ),
+            )}
           </SelectContent>
         </Select>
       </div>

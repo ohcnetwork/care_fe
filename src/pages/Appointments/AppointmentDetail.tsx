@@ -1,4 +1,5 @@
 import {
+  AvatarIcon,
   CalendarIcon,
   CheckCircledIcon,
   ClockIcon,
@@ -33,9 +34,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge, BadgeProps } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -52,7 +54,6 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
@@ -63,10 +64,14 @@ import {
 } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
+import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { FacilityData } from "@/types/facility/facility";
 import {
+  APPOINTMENT_STATUS_COLORS,
   Appointment,
   AppointmentFinalStatuses,
+  AppointmentRead,
   AppointmentUpdateRequest,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -74,41 +79,32 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
 
 interface Props {
-  facilityId: string;
   appointmentId: string;
 }
 
 export default function AppointmentDetail(props: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { facility, facilityId } = useCurrentFacility();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
 
-  const { data: facilityData, isLoading: isFacilityLoading } = useQuery({
-    queryKey: ["facility", props.facilityId],
-    queryFn: query(routes.getPermittedFacility, {
-      pathParams: {
-        id: props.facilityId,
-      },
-    }),
-  });
-
   const { canViewAppointments, canUpdateAppointment, canCreateAppointment } =
-    getPermissions(hasPermission, facilityData?.permissions ?? []);
+    getPermissions(hasPermission, facility?.permissions ?? []);
 
   const { data: appointment } = useQuery({
     queryKey: ["appointment", props.appointmentId],
     queryFn: query(scheduleApis.appointments.retrieve, {
       pathParams: {
-        facility_id: props.facilityId,
+        facilityId,
         id: props.appointmentId,
       },
     }),
-    enabled: canViewAppointments,
+    enabled: canViewAppointments && !!facility,
   });
 
   const redirectToPatientPage = () => {
-    navigate(`/facility/${props.facilityId}/patients/verify`, {
+    navigate(`/facility/${facility?.id}/patients/verify`, {
       query: {
         phone_number: patient.phone_number,
         year_of_birth: patient.year_of_birth,
@@ -118,12 +114,12 @@ export default function AppointmentDetail(props: Props) {
   };
 
   useEffect(() => {
-    if (!canViewAppointments && !isFacilityLoading) {
+    if (!canViewAppointments && !facility) {
       toast.error(t("no_permission_to_view_page"));
-      goBack(`/facility/${props.facilityId}/overview`);
+      goBack(`/facility/${facilityId}/overview`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canViewAppointments, isFacilityLoading]);
+  }, [canViewAppointments, facility]);
 
   const { mutate: updateAppointment, isPending } = useMutation<
     Appointment,
@@ -131,10 +127,7 @@ export default function AppointmentDetail(props: Props) {
     AppointmentUpdateRequest
   >({
     mutationFn: mutate(scheduleApis.appointments.update, {
-      pathParams: {
-        facility_id: props.facilityId,
-        id: props.appointmentId,
-      },
+      pathParams: { facilityId, id: props.appointmentId },
     }),
     onSuccess: (_, request) => {
       queryClient.invalidateQueries({
@@ -146,7 +139,7 @@ export default function AppointmentDetail(props: Props) {
     },
   });
 
-  if (!facilityData || !appointment) {
+  if (!facility || !appointment) {
     return <Loading />;
   }
 
@@ -161,16 +154,13 @@ export default function AppointmentDetail(props: Props) {
             isPending && "opacity-50 pointer-events-none animate-pulse",
           )}
         >
-          <AppointmentDetails
-            appointment={appointment}
-            facility={facilityData}
-          />
+          <AppointmentDetails appointment={appointment} facility={facility} />
           <div className="mt-3">
             <div id="section-to-print" className="print:w-[400px] print:pt-4">
               <div id="appointment-token-card" className="bg-gray-50 md:p-4">
                 <AppointmentTokenCard
                   appointment={appointment}
-                  facility={facilityData}
+                  facility={facility}
                 />
               </div>
             </div>
@@ -198,7 +188,7 @@ export default function AppointmentDetail(props: Props) {
                 <Separator className="my-4" />
                 <div className="md:mx-6 mt-10">
                   <AppointmentActions
-                    facilityId={props.facilityId}
+                    facilityId={facilityId}
                     appointment={appointment}
                     onChange={(status) => updateAppointment({ status })}
                     onViewPatient={redirectToPatientPage}
@@ -218,7 +208,7 @@ const AppointmentDetails = ({
   appointment,
   facility,
 }: {
-  appointment: Appointment;
+  appointment: AppointmentRead;
   facility: FacilityData;
 }) => {
   const { user } = appointment;
@@ -232,26 +222,7 @@ const AppointmentDetails = ({
             <span className="mr-3 inline-block mb-2">
               {t("schedule_information")}
             </span>
-            <Badge
-              variant={
-                (
-                  {
-                    booked: "secondary",
-                    checked_in: "primary",
-                    in_consultation: "primary",
-                    pending: "secondary",
-                    arrived: "primary",
-                    fulfilled: "primary",
-                    entered_in_error: "destructive",
-                    cancelled: "destructive",
-                    rescheduled: "secondary",
-                    noshow: "destructive",
-                  } as Partial<
-                    Record<Appointment["status"], BadgeProps["variant"]>
-                  >
-                )[appointment.status] ?? "outline"
-              }
-            >
+            <Badge variant={APPOINTMENT_STATUS_COLORS[appointment.status]}>
               {t(appointment.status)}
             </Badge>
           </CardTitle>
@@ -284,6 +255,19 @@ const AppointmentDetails = ({
               </p>
             </div>
           </div>
+          <div className="flex items-center space-x-4 text-sm">
+            <AvatarIcon className="size-5 text-gray-600" />
+            <div className="text-sm">
+              <p className="font-medium">{t("booked_by")}</p>
+              <p className="text-gray-600">
+                {appointment.booked_by
+                  ? formatName(appointment.booked_by)
+                  : `${appointment.patient.name} (${t("patient")})`}{" "}
+                {t("on")}{" "}
+                {format(appointment.booked_on, "MMMM d, yyyy 'at' h:mm a")}
+              </p>
+            </div>
+          </div>
           <Separator />
           <div className="text-sm">
             <p className="font-medium">{t("reason_for_visit")}</p>
@@ -291,6 +275,19 @@ const AppointmentDetails = ({
               {appointment.reason_for_visit || t("no_reason_provided")}
             </p>
           </div>
+          {appointment.tags?.length > 0 && (
+            <div className="text-sm">
+              <p className="font-medium">{t("tags")}</p>
+              <p className="text-gray-600">
+                {appointment.tags.map((tag) => (
+                  <Badge key={tag.id} variant="secondary">
+                    {tag.parent ? `${tag.parent.display}: ` : ""}
+                    {tag.display}
+                  </Badge>
+                ))}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -388,12 +385,6 @@ const AppointmentDetails = ({
           </div>
         </CardContent>
       </Card>
-
-      <div className="text-sm text-gray-600">
-        {t("booked_by")} {appointment.booked_by?.first_name}{" "}
-        {appointment.booked_by?.last_name} {t("on")}{" "}
-        {format(appointment.booked_on, "MMMM d, yyyy 'at' h:mm a")}
-      </div>
     </div>
   );
 };
@@ -415,7 +406,11 @@ const AppointmentActions = ({
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
+  const [selectedPractitioner, setSelectedPractitioner] = useState(
+    appointment.user,
+  );
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
   const currentStatus = appointment.status;
@@ -423,10 +418,7 @@ const AppointmentActions = ({
 
   const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
     mutationFn: mutate(scheduleApis.appointments.cancel, {
-      pathParams: {
-        facility_id: facilityId,
-        id: appointment.id,
-      },
+      pathParams: { facilityId, id: appointment.id },
     }),
     onSuccess: () => {
       toast.success(t("appointment_cancelled"));
@@ -439,10 +431,7 @@ const AppointmentActions = ({
   const { mutate: rescheduleAppointment, isPending: isRescheduling } =
     useMutation({
       mutationFn: mutate(scheduleApis.appointments.reschedule, {
-        pathParams: {
-          facility_id: facilityId,
-          id: appointment.id,
-        },
+        pathParams: { facilityId, id: appointment.id },
       }),
       onSuccess: (newAppointment: Appointment) => {
         toast.success(t("appointment_rescheduled"));
@@ -484,11 +473,21 @@ const AppointmentActions = ({
             </SheetHeader>
 
             <div className="mt-6">
+              <div className="my-4">
+                <Label className="mb-2">{t("select_practitioner")}</Label>
+                <PractitionerSelector
+                  facilityId={facilityId}
+                  selected={selectedPractitioner}
+                  onSelect={(user) => user && setSelectedPractitioner(user)}
+                  clearSelection={t("show_all")}
+                />
+              </div>
               <AppointmentSlotPicker
                 facilityId={facilityId}
-                resourceId={appointment.user?.id}
+                resourceId={selectedPractitioner?.id}
                 selectedSlotId={selectedSlotId}
                 onSlotSelect={setSelectedSlotId}
+                currentAppointment={appointment}
               />
 
               <div className="flex justify-end gap-2 mt-6">
@@ -548,7 +547,6 @@ const AppointmentActions = ({
 
       {currentStatus === "in_consultation" && (
         <Button
-          disabled={!isToday}
           variant="outline_primary"
           onClick={() => onChange("fulfilled")}
           size="lg"

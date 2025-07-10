@@ -181,10 +181,7 @@ const ScheduleTemplateEditor = ({
 
   const { mutate: updateTemplate, isPending: isUpdating } = useMutation({
     mutationFn: mutate(scheduleApis.templates.update, {
-      pathParams: {
-        facility_id: facilityId,
-        id: template.id,
-      },
+      pathParams: { facilityId, id: template.id },
     }),
     onSuccess: () => {
       toast.success("Schedule template updated successfully");
@@ -196,10 +193,7 @@ const ScheduleTemplateEditor = ({
 
   const { mutate: deleteTemplate, isPending: isDeleting } = useMutation({
     mutationFn: mutate(scheduleApis.templates.delete, {
-      pathParams: {
-        facility_id: facilityId,
-        id: template.id,
-      },
+      pathParams: { facilityId, id: template.id },
     }),
     onSuccess: () => {
       toast.success(t("template_deleted"));
@@ -359,11 +353,7 @@ const AvailabilityEditor = ({
 
   const { mutate: deleteAvailability, isPending: isDeleting } = useMutation({
     mutationFn: mutate(scheduleApis.templates.availabilities.delete, {
-      pathParams: {
-        facility_id: facilityId,
-        schedule_id: scheduleId,
-        id: availability.id,
-      },
+      pathParams: { facilityId, scheduleId, id: availability.id },
     }),
     onSuccess: () => {
       toast.success(t("schedule_availability_deleted_successfully"));
@@ -616,10 +606,7 @@ const NewAvailabilityCard = ({
 
   const { mutate: createAvailability, isPending } = useMutation({
     mutationFn: mutate(scheduleApis.templates.availabilities.create, {
-      pathParams: {
-        facility_id: facilityId,
-        schedule_id: scheduleId,
-      },
+      pathParams: { facilityId, scheduleId },
     }),
     onSuccess: () => {
       toast.success(t("schedule_availability_created_successfully"));
@@ -853,6 +840,8 @@ const NewAvailabilityCard = ({
                             <FormControl>
                               <Input
                                 type="number"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
                                 min={1}
                                 defaultValue={1}
                                 {...field}
@@ -883,6 +872,8 @@ const NewAvailabilityCard = ({
                       <FormControl>
                         <Input
                           type="number"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                           min={0}
                           placeholder="e.g. 10"
                           {...field}
@@ -909,6 +900,8 @@ const NewAvailabilityCard = ({
                       <FormControl>
                         <Input
                           type="number"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                           min={0}
                           placeholder="e.g. 1"
                           {...field}

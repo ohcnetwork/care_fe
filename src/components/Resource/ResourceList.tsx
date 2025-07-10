@@ -36,7 +36,6 @@ import {
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 const COMPLETED = ["completed", "rejected", "cancelled"];
@@ -76,9 +75,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
   const defaultStatus = isActive ? "pending" : "completed";
   const currentStatus = status || defaultStatus;
 
-  const { data: queryResources, isLoading } = useQuery<
-    PaginatedResponse<ResourceRequest>
-  >({
+  const { data: queryResources, isLoading } = useQuery({
     queryKey: ["resources", facilityId, qParams],
     queryFn: query.debounced(routes.listResourceRequests, {
       queryParams: {
@@ -99,10 +96,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
     <Page
       title={t("resource")}
       componentRight={
-        <Badge
-          className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
-          variant="outline"
-        >
+        <Badge className="bg-purple-50 text-purple-700 ml-2 rounded-xl px-3 py-0.5 m-3 w-max border-gray-200">
           {isLoading
             ? t("loading")
             : t("entity_count", {
@@ -126,6 +120,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       type: "text",
                       placeholder: t("search_by_resource_title"),
                       value: title || "",
+                      display: t("title"),
                     },
                   ]}
                   onFieldChange={() => updateQuery({ title: undefined })}
@@ -255,17 +250,9 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                   <CardContent className="flex flex-col space-y-2 px-6 py-0">
                     <div className="flex flex-wrap items-center gap-2">
                       {resource.emergency && (
-                        <Badge
-                          variant="outline"
-                          className="bg-red-100 text-red-800"
-                        >
-                          {t("emergency")}
-                        </Badge>
+                        <Badge variant="destructive">{t("emergency")}</Badge>
                       )}
-                      <Badge
-                        variant="outline"
-                        className="bg-gray-100 text-gray-800"
-                      >
+                      <Badge variant="secondary">
                         {
                           RESOURCE_CATEGORY_CHOICES.find(
                             (o) => o.id === resource.category,
@@ -274,10 +261,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       </Badge>
                     </div>
                     <div className="flex flex-row gap-2">
-                      <Badge
-                        variant="outline"
-                        className="bg-gray-100 text-gray-800"
-                      >
+                      <Badge variant="secondary">
                         {resource.origin_facility?.name}
                         <CareIcon
                           icon="l-arrow-right"
