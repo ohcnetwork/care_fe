@@ -3322,6 +3322,7 @@
   "questionnaire": "Questionnaire",
   "questionnaire_allergy_intolerance_no_encounter": "Allergy Intolerances cannot be recorded without an active encounter",
   "questionnaire_appointment_no_encounter": "Appointment cannot be recorded without an active encounter",
+  "questionnaire_diagnosis_no_encounter": "Diagnosis cannot be recorded without an active encounter",
   "questionnaire_imported_successfully": "Questionnaire Imported Successfully",
   "questionnaire_json_url": "Questionnaire JSON URL",
   "questionnaire_json_url_placeholder": "https://example.com/questionnaire.json",
