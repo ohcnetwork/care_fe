@@ -53,11 +53,13 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       ? { deviceId: selectedDeviceId }
       : { facingMode: cameraFacingMode };
 
-  const { startStream, stopStream, devices, state } = useMediaStream({
-    constraints: {
-      video: videoConstraints,
+  const { startStream, stopStream, devices, cameraPermission } = useMediaStream(
+    {
+      constraints: {
+        video: videoConstraints,
+      },
     },
-  });
+  );
 
   const videoDevices = devices.filter((device) => device.kind === "videoinput");
 
@@ -122,7 +124,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   };
 
   return (
-    <Sheet open={open}>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
         className="[&>button:first-of-type]:hidden h-[100vh] w-full p-0"
@@ -130,51 +132,9 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
         <div className="relative h-full">
           {!previewImage ? (
             <div className="h-full">
-              {state === "loading" && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-gray-50">
-                  <div className="text-primary-500">
-                    <Loader2 className="size-10 animate-spin" />
-                  </div>
-                  <div className="flex flex-col items-center gap-2">
-                    <span className="text-lg font-semibold">
-                      {t("requesting_camera_access")}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {t("allow_camera_access")}
-                    </span>
-                  </div>
-                </div>
-              )}
-              {state === "denied" && (
-                <div className="fixed inset-0 flex items-center justify-center">
-                  <div className="bg-white rounded-2xl border border-gray-200 flex flex-row items-center p-6 gap-4 mx-4">
-                    <div>
-                      <img
-                        src="/images/camera_block.svg"
-                        alt="Camera blocked"
-                        className="w-60 object-contain"
-                      />
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <h2 className="text-xl font-semibold text-gray-800 mb-6">
-                        {t("camera_permission_denied")}
-                      </h2>
-
-                      <ol className="space-y-4 text-gray-600">
-                        <li className="flex items-start gap-2">
-                          <span className="font-medium">1.</span>
-                          {t("click_the_settings_icon_in_browser_address_bar")}
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="font-medium">2.</span>
-                          <span>{t("clear_blocked_camera_permissions")}</span>
-                        </li>
-                      </ol>
-                    </div>
-                  </div>
-                </div>
-              )}
-              {state === "accepted" && (
+              {cameraPermission === "loading" && <CameraPermissionRequesting />}
+              {cameraPermission === "denied" && <CameraPermissionDenied />}
+              {cameraPermission === "accepted" && (
                 <Webcam
                   className="h-full w-full object-cover"
                   forceScreenshotSourceSize
@@ -336,3 +296,57 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     </Sheet>
   );
 }
+
+const CameraPermissionRequesting = () => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-gray-50">
+      <div className="text-primary-500">
+        <Loader2 className="size-10 animate-spin" />
+      </div>
+      <div className="flex flex-col items-center gap-2">
+        <span className="text-lg font-semibold">
+          {t("requesting_camera_access")}
+        </span>
+        <span className="text-sm text-gray-500">
+          {t("allow_camera_access")}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const CameraPermissionDenied = () => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center">
+      <div className="bg-white rounded-2xl border border-gray-200 flex flex-row items-center p-6 gap-4 mx-4">
+        <div>
+          <img
+            src="/images/camera_block.svg"
+            alt="Camera blocked"
+            className="w-60 object-contain"
+          />
+        </div>
+        <div className="flex flex-col items-center">
+          <h2 className="text-xl font-semibold text-gray-800 mb-6">
+            {t("camera_permission_denied")}
+          </h2>
+
+          <ol className="space-y-4 text-gray-600">
+            <li className="flex items-start gap-2">
+              <span className="font-medium">1.</span>
+              {t("click_the_settings_icon_in_browser_address_bar")}
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="font-medium">2.</span>
+              <span>{t("clear_blocked_camera_permissions")}</span>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  );
+};
