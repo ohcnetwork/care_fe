@@ -1,6 +1,6 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { CareTeamRequest } from "@/types/careTeam/careTeam";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter } from "@/types/emr/encounter/encounter";
 
 export default {
   setCareTeam: {
