@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AArrowDown,
+  AlertTriangle,
   ChevronDown,
   ChevronUp,
   ChevronsDownUp,
@@ -100,7 +101,6 @@ import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 import { CodingEditor } from "./CodingEditor";
 import { QuestionActions } from "./QuestionActions";
 import { QuestionnaireForm } from "./QuestionnaireForm";
-import { QuestionnaireImportPreview } from "./QuestionnaireImportPreview";
 import { QuestionnaireProperties } from "./QuestionnaireProperties";
 import { SelectOrCreateValueset } from "./SelectOrCreateValueset";
 import ValueSetSelect from "./ValueSetSelect";
@@ -782,8 +782,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       slug: importedData.slug,
     };
 
-    const existingQuestions = form.getValues("questions") || [];
-
     setQuestionnaire({
       ...form.getValues(),
       ...mappedData,
@@ -795,7 +793,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       status: mappedData.status || "draft",
       version: mappedData.version || "1.0",
       subject_type: mappedData.subject_type || "encounter",
-      questions: [...existingQuestions, ...(mappedData.questions || [])],
+      questions: mappedData.questions || [],
     });
 
     form.trigger();
@@ -1314,14 +1312,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           }
         }}
       >
-        <DialogContent
-          className={cn(importedData && "min-w-full md:min-w-3xl")}
-        >
+        <DialogContent>
           <DialogHeader>
-            <div className="flex items-center gap-2">
-              <CareIcon icon="l-import" className="mr-1 size-4" />
-              <DialogTitle>{t("import_questionnaire")}</DialogTitle>
-            </div>
+            <DialogTitle>{t("import_questionnaire")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             {!importedData && (
@@ -1336,10 +1329,25 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             )}
           </div>
           {importedData && (
-            <QuestionnaireImportPreview
-              existingData={form.getValues()}
-              newData={importedData}
-            />
+            <div className="space-y-2">
+              <Label>{t("preview")}</Label>
+              <div className="p-4 border rounded-lg">
+                <p className="font-medium">{importedData.title}</p>
+                <p className="text-sm text-gray-500">
+                  {importedData.description}
+                </p>
+                <p className="text-sm mt-2">
+                  {t("questions_count")} : {importedData.questions?.length || 0}
+                </p>
+              </div>
+              <Alert variant="destructive" className="mb-4 bg-red-50">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+                <AlertTitle>{t("warning")}</AlertTitle>
+                <AlertDescription>
+                  {t("all_existing_data_will_be_replaced")}
+                </AlertDescription>
+              </Alert>
+            </div>
           )}
           <DialogFooter>
             <Button
