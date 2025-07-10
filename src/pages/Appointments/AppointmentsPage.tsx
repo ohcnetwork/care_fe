@@ -14,7 +14,7 @@ import {
 import dayjs from "dayjs";
 import { Edit3Icon } from "lucide-react";
 import { Link, navigate } from "raviger";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
@@ -63,6 +64,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -87,11 +89,10 @@ import {
 } from "@/pages/Appointments/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import {
   Appointment,
-  AppointmentCancelledStatus,
-  AppointmentNonCancelledStatus,
-  AppointmentStatus,
+  AppointmentRead,
   AppointmentStatuses,
   TokenSlot,
 } from "@/types/scheduling/schedule";
@@ -278,6 +279,7 @@ export default function AppointmentsPage() {
   const [activeTab, setActiveTab] = useView("appointments", "board");
   const { open: isSidebarOpen } = useSidebar();
   const { facility, facilityId } = useCurrentFacility();
+  const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
 
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
@@ -418,6 +420,16 @@ export default function AppointmentsPage() {
             />
           </div>
 
+          {/* Tags Filter */}
+          <div>
+            <Label className="mt-1 text-black">{t("filter_by_tags")}</Label>
+            <TagSelectorPopover
+              asFilter
+              selected={selectedTags}
+              onChange={setSelectedTags}
+              resource={TagResource.APPOINTMENT}
+            />
+          </div>
           <div>
             <div className="flex items-center gap-1 -mt-2">
               <Popover modal>
@@ -478,6 +490,21 @@ export default function AppointmentsPage() {
                         }}
                       >
                         {t("today")}
+                      </Button>
+                      {/* Tomorrow */}
+                      <Button
+                        variant="link"
+                        size="xs"
+                        onClick={() => {
+                          const today = new Date();
+                          updateQuery({
+                            date_from: dateQueryString(addDays(today, 1)),
+                            date_to: dateQueryString(addDays(today, 1)),
+                            slot: null,
+                          });
+                        }}
+                      >
+                        {t("tomorrow")}
                       </Button>
 
                       <Button
@@ -619,6 +646,7 @@ export default function AppointmentsPage() {
                 date_to={qParams.date_to}
                 search={qParams.search?.toLowerCase()}
                 canViewAppointments={canViewAppointments}
+                tags={selectedTags.map((tag) => tag.id)}
               />
             ))}
           </div>
@@ -637,6 +665,7 @@ export default function AppointmentsPage() {
           resultsPerPage={resultsPerPage}
           status={qParams.status}
           Pagination={Pagination}
+          tags={selectedTags.map((tag) => tag.id)}
         />
       )}
     </Page>
@@ -647,6 +676,7 @@ function AppointmentColumn(props: {
   status: AppointmentNonCancelledStatus | AppointmentCancelledStatus;
   practitioner: string | null;
   slot?: string | null;
+  tags?: string[];
   date_from: string | null;
   date_to: string | null;
   search?: string;
@@ -664,11 +694,14 @@ function AppointmentColumn(props: {
       props.slot,
       props.date_from,
       props.date_to,
+      props.tags,
+      props.search,
     ],
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facilityId },
       queryParams: {
         status: props.status,
+        tags: props.tags?.join(","),
         limit: 100,
         slot: props.slot,
         user: props.practitioner ?? undefined,
@@ -742,7 +775,7 @@ function AppointmentColumn(props: {
   );
 }
 
-function AppointmentCard({ appointment }: { appointment: Appointment }) {
+function AppointmentCard({ appointment }: { appointment: AppointmentRead }) {
   const { patient } = appointment;
   const { t } = useTranslation();
 
@@ -763,6 +796,11 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
               "ddd, DD MMM YYYY, HH:mm",
             )}
           </p>
+          {appointment.tags.map((tag) => (
+            <Badge variant="primary" className="text-xs" key={tag.id}>
+              {tag.display}
+            </Badge>
+          ))}
         </div>
 
         <div className="bg-gray-100 px-2 py-1 rounded text-center">
@@ -795,6 +833,7 @@ function AppointmentRow(props: {
   date_to: string | null;
   search?: string;
   canViewAppointments: boolean;
+  tags?: string[];
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -809,6 +848,7 @@ function AppointmentRow(props: {
       props.slot,
       props.date_from,
       props.date_to,
+      props.tags,
     ],
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facilityId },
@@ -818,6 +858,7 @@ function AppointmentRow(props: {
         user: props.practitioner ?? undefined,
         date_after: props.date_from,
         date_before: props.date_to,
+        tags: props.tags,
         limit: props.resultsPerPage,
         offset: ((props.page ?? 1) - 1) * props.resultsPerPage,
         ordering: "token_slot__start_datetime",
