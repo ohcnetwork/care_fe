@@ -602,7 +602,7 @@ export function NoteManager({
       <div className="flex-1 min-w-0 flex flex-col">
         <div className="flex flex-col h-full relative">
           {/* Header */}
-          <div className="p-3 sm:p-4 border-b border-gray-200 bg-white z-10">
+          <div className="p-3 sm:p-4 border-b border-gray-200 bg-white z-1">
             {selectedThread ? (
               <div className="flex items-center gap-3">
                 <h2 className="text-base font-medium truncate flex-1">
