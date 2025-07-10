@@ -33,8 +33,11 @@ import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { Encounter, EncounterPriority } from "@/types/emr/encounter";
+import {
+  ENCOUNTER_STATUS_ICONS,
+  Encounter,
+  EncounterPriority,
+} from "@/types/emr/encounter/encounter";
 
 interface EncounterListProps {
   encounters?: Encounter[];
@@ -121,9 +124,7 @@ export function EncounterList({
     [status, encounterClass, priority, updateQuery],
   );
 
-  const { data: queryEncounters, isLoading } = useQuery<
-    PaginatedResponse<Encounter>
-  >({
+  const { data: queryEncounters, isLoading } = useQuery({
     queryKey: ["encounters", facilityId, qParams],
     queryFn: query.debounced(routes.encounter.list, {
       queryParams: {
@@ -137,7 +138,7 @@ export function EncounterList({
     enabled: !propEncounters && !encounter_id,
   });
 
-  const { data: queryEncounter } = useQuery<Encounter>({
+  const { data: queryEncounter } = useQuery({
     queryKey: ["encounter", encounter_id],
     queryFn: query(routes.encounter.get, {
       pathParams: { id: encounter_id },
@@ -153,18 +154,21 @@ export function EncounterList({
       type: "text" as const,
       placeholder: t("search_by_patient_name"),
       value: name || "",
+      display: t("name"),
     },
     {
       key: "encounter_id",
       type: "text" as const,
       placeholder: t("search_by_encounter_id"),
       value: encounter_id || "",
+      display: t("encounter_id"),
     },
     {
       key: "external_identifier",
       type: "text" as const,
       placeholder: t("search_by_external_id"),
       value: external_identifier || "",
+      display: t("external_identifier"),
     },
   ];
 
@@ -443,73 +447,33 @@ export function EncounterList({
                       >
                         {t("all_status")}
                       </TabsTrigger>
-                      <TabsTrigger
-                        data-cy="planned-filter"
-                        value="planned"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() =>
-                          updateQuery({
-                            ...{ encounter_class: encounterClass, priority },
-                            status: "planned",
-                          })
-                        }
-                      >
-                        <CareIcon icon="l-calender" className="size-4" />
-                        {t("encounter_status__planned")}
-                      </TabsTrigger>
-                      <TabsTrigger
-                        data-cy="in-progress-filter"
-                        value="in_progress"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() =>
-                          updateQuery({
-                            ...{ encounter_class: encounterClass, priority },
-                            status: "in_progress",
-                          })
-                        }
-                      >
-                        <CareIcon icon="l-spinner" className="size-4" />
-                        {t("encounter_class__in_progress")}
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="discharged"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() =>
-                          updateQuery({
-                            ...{ encounter_class: encounterClass, priority },
-                            status: "discharged",
-                          })
-                        }
-                      >
-                        <CareIcon icon="l-home" className="size-4" />
-                        {t("discharge")}
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="completed"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() =>
-                          updateQuery({
-                            ...{ encounter_class: encounterClass, priority },
-                            status: "completed",
-                          })
-                        }
-                      >
-                        <CareIcon icon="l-check" className="size-4" />
-                        {t("completed")}
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="cancelled"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() =>
-                          updateQuery({
-                            ...{ encounter_class: encounterClass, priority },
-                            status: "cancelled",
-                          })
-                        }
-                      >
-                        <CareIcon icon="l-x" className="size-4" />
-                        {t("cancelled")}
-                      </TabsTrigger>
+                      {(
+                        [
+                          "planned",
+                          "in_progress",
+                          "discharged",
+                          "completed",
+                          "cancelled",
+                        ] as const
+                      ).map((status) => (
+                        <TabsTrigger
+                          key={status}
+                          value={status}
+                          className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                          onClick={() =>
+                            updateQuery({
+                              ...{ encounter_class: encounterClass, priority },
+                              status,
+                            })
+                          }
+                        >
+                          <CareIcon
+                            icon={ENCOUNTER_STATUS_ICONS[status]}
+                            className="size-4"
+                          />
+                          {t(`encounter_status__${status}`)}
+                        </TabsTrigger>
+                      ))}
                     </div>
                   </TabsList>
                 </Tabs>
