@@ -94,6 +94,13 @@ export default function PatientRegistration(
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
   const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
+  const [nationalityInput, setNationalityInput] = useState("");
+  const filteredCountries = useMemo(() => {
+    if (!nationalityInput) return countryList;
+    return countryList.filter((c) =>
+      c.toLowerCase().includes(nationalityInput.toLowerCase()),
+    );
+  }, [nationalityInput]);
 
   const formSchema = useMemo(
     () =>
@@ -917,7 +924,7 @@ export default function PatientRegistration(
                       <FormLabel aria-required>{t("nationality")}</FormLabel>
                       <FormControl>
                         <Autocomplete
-                          options={countryList.map((c) => ({
+                          options={filteredCountries.map((c) => ({
                             label: c,
                             value: c,
                           }))}
@@ -927,6 +934,7 @@ export default function PatientRegistration(
                               shouldDirty: true,
                             })
                           }
+                          onSearch={setNationalityInput}
                           data-cy="nationality-input"
                         />
                       </FormControl>
