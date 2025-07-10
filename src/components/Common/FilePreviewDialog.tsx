@@ -306,12 +306,15 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                     doubleClick={{ disabled: false, step: 0.7 }}
                     panning={{ velocityDisabled: true }}
                   >
-                    <TransformComponent>
+                    <TransformComponent
+                      wrapperStyle={{ width: "100%", height: "100%" }}
+                      contentStyle={{ width: "100%", height: "100%" }}
+                    >
                       <img
                         src={fileUrl}
                         alt={fileName}
                         className={cn(
-                          "max-h-full max-w-full select-none object-contain",
+                          "h-full w-full select-none object-contain",
                           getRotationClass(rotation),
                         )}
                         draggable={false}
