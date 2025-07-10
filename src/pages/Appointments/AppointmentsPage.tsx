@@ -70,7 +70,6 @@ import useFilters, { FilterState } from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
@@ -86,6 +85,7 @@ import {
   formatSlotTimeRange,
   groupSlotsByAvailability,
 } from "@/pages/Appointments/utils";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
 import {
   Appointment,
@@ -256,11 +256,7 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
   );
 }
 
-export default function AppointmentsPage({
-  facilityId,
-}: {
-  facilityId: string;
-}) {
+export default function AppointmentsPage() {
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const { qParams, updateQuery, resultsPerPage, Pagination } = useFilters({
@@ -269,27 +265,22 @@ export default function AppointmentsPage({
 
   const [activeTab, setActiveTab] = useView("appointments", "board");
   const { open: isSidebarOpen } = useSidebar();
+  const { facility, facilityId } = useCurrentFacility();
 
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
 
-  const { data: facilityData, isLoading: isFacilityLoading } = useQuery({
-    queryKey: ["facility", facilityId],
-    queryFn: query(routes.getPermittedFacility, {
-      pathParams: { id: facilityId },
-    }),
-  });
-
   const { canViewAppointments } = getPermissions(
     hasPermission,
-    facilityData?.permissions ?? [],
+    facility?.permissions ?? [],
   );
 
   const schedulableUsersQuery = useQuery({
     queryKey: ["practitioners", facilityId],
     queryFn: query(scheduleApis.appointments.availableUsers, {
-      pathParams: { facility_id: facilityId },
+      pathParams: { facilityId },
     }),
+    enabled: !!facility,
   });
 
   const resources = schedulableUsersQuery.data?.users;
@@ -349,7 +340,7 @@ export default function AppointmentsPage({
   const slotsQuery = useQuery({
     queryKey: ["slots", facilityId, qParams.practitioner, qParams.date_from],
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
-      pathParams: { facility_id: facilityId },
+      pathParams: { facilityId },
       body: {
         // voluntarily coalesce to empty string since we know query would be
         // enabled only if practitioner and date_from are present
@@ -364,14 +355,14 @@ export default function AppointmentsPage({
   const slot = slots?.find((s) => s.id === qParams.slot);
 
   useEffect(() => {
-    if (!canViewAppointments && !isFacilityLoading) {
+    if (!canViewAppointments && !facility) {
       toast.error(t("no_permission_to_view_page"));
       goBack("/");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canViewAppointments, isFacilityLoading]);
+  }, [canViewAppointments, facility]);
 
-  if (schedulableUsersQuery.isLoading) {
+  if (schedulableUsersQuery.isLoading || !facility) {
     return <Loading />;
   }
 
@@ -618,7 +609,6 @@ export default function AppointmentsPage({
               <AppointmentColumn
                 key={status}
                 status={status}
-                facilityId={facilityId}
                 slot={slot?.id}
                 practitioner={practitioner?.id ?? null}
                 date_from={qParams.date_from}
@@ -632,7 +622,6 @@ export default function AppointmentsPage({
         </ScrollArea>
       ) : (
         <AppointmentRow
-          facilityId={facilityId}
           updateQuery={updateQuery}
           practitioner={practitioner?.id ?? null}
           slot={qParams.slot}
@@ -651,7 +640,6 @@ export default function AppointmentsPage({
 }
 
 function AppointmentColumn(props: {
-  facilityId: string;
   status: Appointment["status"];
   practitioner: string | null;
   slot?: string | null;
@@ -660,12 +648,13 @@ function AppointmentColumn(props: {
   search?: string;
   canViewAppointments: boolean;
 }) {
+  const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
 
   const { data } = useQuery({
     queryKey: [
       "appointments",
-      props.facilityId,
+      facilityId,
       props.status,
       props.practitioner,
       props.slot,
@@ -673,7 +662,7 @@ function AppointmentColumn(props: {
       props.date_to,
     ],
     queryFn: query(scheduleApis.appointments.list, {
-      pathParams: { facility_id: props.facilityId },
+      pathParams: { facilityId },
       queryParams: {
         status: props.status,
         limit: 100,
@@ -735,7 +724,7 @@ function AppointmentColumn(props: {
             {appointments.map((appointment) => (
               <li key={appointment.id}>
                 <Link
-                  href={`/facility/${props.facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`}
+                  href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`}
                   className="text-inherit"
                 >
                   <AppointmentCard appointment={appointment} />
@@ -785,7 +774,6 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
 }
 
 function AppointmentRow(props: {
-  facilityId: string;
   page: number | null;
   practitioner: string | null;
   Pagination: ({
@@ -804,12 +792,13 @@ function AppointmentRow(props: {
   search?: string;
   canViewAppointments: boolean;
 }) {
+  const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
 
   const { data, isLoading } = useQuery({
     queryKey: [
       "appointments",
-      props.facilityId,
+      facilityId,
       props.status,
       props.page,
       props.practitioner,
@@ -818,7 +807,7 @@ function AppointmentRow(props: {
       props.date_to,
     ],
     queryFn: query(scheduleApis.appointments.list, {
-      pathParams: { facility_id: props.facilityId },
+      pathParams: { facilityId },
       queryParams: {
         status: props.status ?? "booked",
         slot: props.slot,
@@ -919,14 +908,11 @@ function AppointmentRow(props: {
                   className="shadow-sm rounded-lg cursor-pointer group"
                   onClick={() =>
                     navigate(
-                      `/facility/${props.facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`,
+                      `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`,
                     )
                   }
                 >
-                  <AppointmentRowItem
-                    appointment={appointment}
-                    facilityId={props.facilityId}
-                  />
+                  <AppointmentRowItem appointment={appointment} />
                 </TableRow>
               ))}
             </TableBody>
@@ -938,13 +924,7 @@ function AppointmentRow(props: {
   );
 }
 
-function AppointmentRowItem({
-  appointment,
-  facilityId,
-}: {
-  appointment: Appointment;
-  facilityId: string;
-}) {
+function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
   const { patient } = appointment;
   const { t } = useTranslation();
 
@@ -970,10 +950,7 @@ function AppointmentRowItem({
         {formatName(appointment.user)}
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        <AppointmentStatusDropdown
-          appointment={appointment}
-          facilityId={facilityId}
-        />
+        <AppointmentStatusDropdown appointment={appointment} />
       </TableCell>
       {/* TODO: replace this with token number once that's ready... */}
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white rounded-r-lg">
@@ -985,22 +962,19 @@ function AppointmentRowItem({
 
 const AppointmentStatusDropdown = ({
   appointment,
-  facilityId,
 }: {
   appointment: Appointment;
-  facilityId: string;
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { facilityId } = useCurrentFacility();
+
   const currentStatus = appointment.status;
   const hasStarted = isPast(appointment.token_slot.start_datetime);
 
   const { mutate: updateAppointment } = useMutation({
     mutationFn: mutate(scheduleApis.appointments.update, {
-      pathParams: {
-        facility_id: facilityId,
-        id: appointment.id,
-      },
+      pathParams: { facilityId, id: appointment.id },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({

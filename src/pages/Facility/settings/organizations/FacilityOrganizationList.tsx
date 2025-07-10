@@ -15,8 +15,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   FacilityOrganization,
   FacilityOrganizationParent,
@@ -28,13 +28,11 @@ import FacilityOrganizationView from "./FacilityOrganizationView";
 import FacilityOrganizationNavbar from "./components/FacilityOrganizationNavbar";
 
 interface Props {
-  facilityId: string;
   organizationId?: string;
   currentTab?: string;
 }
 
 export default function FacilityOrganizationList({
-  facilityId,
   organizationId,
   currentTab = "departments",
 }: Props) {
@@ -43,14 +41,9 @@ export default function FacilityOrganizationList({
     Set<string>
   >(new Set([]));
 
-  const { data: facilityData } = useQuery({
-    queryKey: ["facility", facilityId],
-    queryFn: query(routes.getPermittedFacility, {
-      pathParams: { id: facilityId },
-    }),
-  });
+  const { facility, facilityId } = useCurrentFacility();
 
-  const { data: org } = useQuery<FacilityOrganization>({
+  const { data: org } = useQuery({
     queryKey: ["facilityOrganization", organizationId],
     queryFn: query(facilityOrganizationApi.get, {
       pathParams: { facilityId, organizationId: organizationId! },
@@ -253,13 +246,13 @@ export default function FacilityOrganizationList({
                     <FacilityOrganizationUsers
                       id={organizationId}
                       facilityId={facilityId}
-                      permissions={facilityData?.permissions ?? []}
+                      permissions={facility?.permissions ?? []}
                     />
                   ) : (
                     <FacilityOrganizationView
                       id={organizationId}
                       facilityId={facilityId}
-                      permissions={facilityData?.permissions ?? []}
+                      permissions={facility?.permissions ?? []}
                     />
                   )}
                 </div>

@@ -19,7 +19,8 @@ import {
   MEDICATION_REQUEST_TIMING_OPTIONS,
   MedicationRequestDosageInstruction,
   MedicationRequestRead,
-} from "@/types/emr/medicationRequest";
+  displayMedicationName,
+} from "@/types/emr/medicationRequest/medicationRequest";
 
 import { formatDosage, formatSig } from "./utils";
 
@@ -89,7 +90,7 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
                 )}
               >
                 <TableCell className="py-2 px-3">
-                  {medication.medication?.display}
+                  {displayMedicationName(medication)}
                 </TableCell>
                 <TableCell className="py-2 px-3">{dosage}</TableCell>
                 <TableCell className="py-2 px-3">
