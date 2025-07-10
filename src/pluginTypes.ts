@@ -3,7 +3,7 @@ import { UseFormReturn } from "react-hook-form";
 
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 
-import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { DeviceDetail } from "@/types/device/device";
 import { Encounter } from "@/types/emr/encounter/encounter";
 import { Patient } from "@/types/emr/patient/patient";
@@ -107,7 +107,10 @@ export type PluginManifest = {
   navItems?: NavigationLink[];
   userNavItems?: NavigationLink[];
   components?: PluginComponentMap;
-  encounterTabs?: Record<string, LazyComponent<React.FC<EncounterTabProps>>>;
+  encounterTabs?: Record<
+    string,
+    LazyComponent<React.FC<PluginEncounterTabProps>>
+  >;
   devices?: readonly PluginDeviceManifest[];
 };
 
