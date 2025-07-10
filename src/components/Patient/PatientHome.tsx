@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Link } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -31,10 +32,13 @@ export const PatientHome = (props: {
   page: (typeof tabs)[0]["route"];
 }) => {
   const { facilityId, id, page } = props;
-
+  const queryClient = useQueryClient();
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-
+  queryClient.setQueryDefaults(["patientPermissions"], {
+    meta: { persist: true },
+    networkMode: "online",
+  });
   const { data: patientData, isLoading } = useQuery<Patient>({
     queryKey: ["patient", id],
     queryFn: query(routes.patient.getPatient, {
@@ -46,6 +50,15 @@ export const PatientHome = (props: {
     networkMode: "online",
     enabled: !!id,
   });
+
+  useEffect(() => {
+    if (patientData?.permissions && facilityId) {
+      queryClient.setQueryData(
+        ["patientPermissions", facilityId],
+        patientData.permissions,
+      );
+    }
+  }, [patientData?.permissions, facilityId]);
 
   const { getPatientTabs } = getTabs(
     patientData?.permissions ?? [],

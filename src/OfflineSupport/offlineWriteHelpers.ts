@@ -3,7 +3,6 @@ import { max, startOfToday } from "date-fns";
 import dayjs from "dayjs";
 
 import { FacilityModel } from "@/components/Facility/models";
-import { FIXED_QUESTIONNAIRE_REFERENCE_IDS } from "@/components/Questionnaire/data/StructuredFormData";
 import { AuthUserModel } from "@/components/Users/models";
 
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -537,12 +536,12 @@ export const updateActiveAndClosedEncounterList = ({
 
 export const normalizedQuestionnairRequest = (
   questionnair: BatchRequestItem,
-  AllQuestionnairsList: QuestionnaireListResponse,
+  allQuestionnairsList: QuestionnaireListResponse,
   authUser: AuthUserModel,
   patientID: string,
   encounterID?: string,
 ): QuestionnaireResponse => {
-  const questionnirMetaData = AllQuestionnairsList.results.find(
+  const questionnaireMeta = allQuestionnairsList.results.find(
     (q) => q.id === questionnair.reference_id,
   );
 
@@ -550,22 +549,22 @@ export const normalizedQuestionnairRequest = (
     id: `offline-${crypto.randomUUID()}`,
     created_date: new Date().toISOString(),
     modified_date: new Date().toISOString(),
-    questionnaire: questionnirMetaData
+    questionnaire: questionnaireMeta
       ? {
-          id: questionnirMetaData.id,
-          slug: questionnirMetaData.slug,
-          version: questionnirMetaData.version,
-          code: questionnirMetaData.code,
-          questions: questionnirMetaData.questions,
-          title: questionnirMetaData.title,
-          description: questionnirMetaData.description,
-          status: questionnirMetaData.status,
-          subject_type: questionnirMetaData.subject_type,
-          tags: questionnirMetaData.tags,
+          id: questionnaireMeta.id,
+          slug: questionnaireMeta.slug,
+          version: questionnaireMeta.version,
+          code: questionnaireMeta.code,
+          questions: questionnaireMeta.questions,
+          title: questionnaireMeta.title,
+          description: questionnaireMeta.description,
+          status: questionnaireMeta.status,
+          subject_type: questionnaireMeta.subject_type,
+          tags: questionnaireMeta.tags,
         }
       : undefined,
     subject_id: encounterID ?? patientID,
-    responses: questionnair.body.results,
+    responses: questionnair.body.results ?? [],
     encounter: encounterID ?? null,
     patient: patientID,
     created_by: normalizeUserBase(authUser),
@@ -612,7 +611,7 @@ function replaceEncounterScopedInPaginatedCache<
   queryClient.setQueryData(key, updatedData);
 }
 
-const normalizeAndUpdateDiagnosis = (
+export const normalizeAndUpdateDiagnosis = (
   queryClient: QueryClient,
   q: BatchRequestItem,
   authUser: AuthUserModel,
@@ -620,89 +619,65 @@ const normalizeAndUpdateDiagnosis = (
   encounterID?: string,
 ) => {
   const normalizedDiagnosisResult: Diagnosis[] = q.body?.datapoints.map(
-    (d: any) => {
-      if (d.id) {
-        const cacheKey: (string | undefined)[] = [
-          "encounter_diagnosis",
-          patientID,
-          encounterID,
-        ];
-        const prev =
-          queryClient.getQueryData<PaginatedResponse<Diagnosis>>(cacheKey);
-        if (!prev) return;
-        const updatedResults = prev.results.filter(
-          (entry) => entry.id !== d.id,
-        );
-
-        const updatedData: PaginatedResponse<Diagnosis> = {
-          ...prev,
-          count: updatedResults.length,
-          results: updatedResults,
-        };
-
-        queryClient.setQueryData(cacheKey, updatedData);
-
-        queryClient.setQueryData(
-          ["diagnoses", patientID, encounterID],
-          (prev: PaginatedResponse<Diagnosis> | undefined) => {
-            if (!prev) return prev;
-
-            const updatedResults = prev.results.filter(
-              (entry) => entry.id !== d.id,
-            );
-
-            return {
-              ...prev,
-              count: updatedResults.length,
-              results: updatedResults,
-            };
-          },
-        );
-      }
-      return {
-        id: d.id ?? `offline-${crypto.randomUUID()}`,
-        code: d.code,
-        clinical_status: d.clinical_status,
-        verification_status: d.verification_status,
-        onset: d.onset,
-        recorded_date: d.recorded_date ?? null,
-        note: d.note,
-        category: d.category,
-        created_by: normalizeUserBase(authUser),
-        updated_by: normalizeUserBase(authUser),
-        encounter: d.encounter,
-        created_date: new Date().toISOString(),
-        updated_date: new Date().toISOString(),
-        severity: d.severity ?? null,
-        abatement: d.abatement ?? {},
-      };
-    },
+    (d: any) => ({
+      id: d.id ?? `offline-${crypto.randomUUID()}`,
+      code: d.code,
+      clinical_status: d.clinical_status,
+      verification_status: d.verification_status,
+      onset: d.onset,
+      recorded_date: d.recorded_date ?? null,
+      note: d.note,
+      category: d.category,
+      created_by: normalizeUserBase(authUser),
+      updated_by: normalizeUserBase(authUser),
+      encounter: d.encounter,
+      created_date: new Date().toISOString(),
+      updated_date: new Date().toISOString(),
+      severity: d.severity ?? null,
+      abatement: d.abatement ?? {},
+    }),
   );
 
-  mergeAndUpdatePaginatedCache<Diagnosis>(
-    queryClient,
-    [
-      ["encounter_diagnosis", patientID, encounterID],
-      ["diagnoses", patientID, encounterID],
-    ],
-    normalizedDiagnosisResult,
-  );
+  const newCodes = new Set(normalizedDiagnosisResult.map((d) => d.code.code));
 
-  const updatedDiagonisData = queryClient.getQueryData<
+  const cacheKeys = [
+    ["encounter_diagnosis", patientID, encounterID],
+    ["diagnoses", patientID, encounterID],
+  ];
+
+  for (const key of cacheKeys) {
+    const prev = queryClient.getQueryData<PaginatedResponse<Diagnosis>>(key);
+    if (prev) {
+      const filteredResults = prev.results.filter(
+        (entry) => !newCodes.has(entry.code.code),
+      );
+
+      const merged = [...filteredResults, ...normalizedDiagnosisResult];
+
+      queryClient.setQueryData<PaginatedResponse<Diagnosis>>(key, {
+        ...prev,
+        count: merged.length,
+        results: merged,
+      });
+    }
+  }
+
+  // Update patietn-scoped cache
+  const updatedDiagnosis = queryClient.getQueryData<
     PaginatedResponse<Diagnosis>
   >(["encounter_diagnosis", patientID, encounterID]);
 
-  if (updatedDiagonisData) {
+  if (updatedDiagnosis) {
     replaceEncounterScopedInPaginatedCache<Diagnosis>(
       queryClient,
       ["encounter_diagnosis", patientID, undefined],
       encounterID,
-      updatedDiagonisData.results,
+      updatedDiagnosis.results,
     );
   }
 };
 
-const normalizeAndUpdateMedication_Request = (
+export const normalizeAndUpdateMedication_Request = (
   queryClient: QueryClient,
   q: BatchRequestItem,
   patientID: string,
@@ -746,7 +721,7 @@ const normalizeAndUpdateMedication_Request = (
   );
 };
 
-const normalizeAndUpdateSymptom = async (
+export const normalizeAndUpdateSymptom = async (
   queryClient: QueryClient,
   q: BatchRequestItem,
   authUser: AuthUserModel,
@@ -790,7 +765,7 @@ const normalizeAndUpdateSymptom = async (
   );
 };
 
-const normalizeAndUpdateMedication_Statement = (
+export const normalizeAndUpdateMedication_Statement = (
   queryClient: QueryClient,
   q: BatchRequestItem,
   authUser: AuthUserModel,
@@ -832,7 +807,7 @@ const normalizeAndUpdateMedication_Statement = (
   );
 };
 
-const normalizeAndUpdateAllergy_Intolerance = (
+export const normalizeAndUpdateAllergy_Intolerance = (
   queryClient: QueryClient,
   q: BatchRequestItem,
   authUser: AuthUserModel,
@@ -842,7 +817,7 @@ const normalizeAndUpdateAllergy_Intolerance = (
   const normalizedAllergyResult: AllergyIntolerance[] = q.body?.datapoints.map(
     (d: any) => {
       return {
-        id: `offline-${crypto.randomUUID()}`,
+        id: d.id ?? `offline-${crypto.randomUUID()}`,
         code: d.code,
         clinical_status: d.clinical_status,
         verification_status: d.verification_status,
@@ -854,7 +829,7 @@ const normalizeAndUpdateAllergy_Intolerance = (
         encounter: encounterID,
         updated_by: normalizeUserBase(authUser),
         allergy_intolerance_type: "allergy",
-        onset: {},
+        onset: d.id ?? {},
         recorded_date: null,
       };
     },
@@ -871,7 +846,7 @@ const normalizeAndUpdateAllergy_Intolerance = (
   );
 };
 
-const normalizeAndUpdateEncounter = (
+export const normalizeAndUpdateEncounter = (
   queryClient: QueryClient,
   q: BatchRequestItem,
   patientID: string,
@@ -931,93 +906,25 @@ export const cacheQuestionnairResponse = (
 
   if (!allQuestionnairsList) return;
 
-  const fixedQuestionnaires = questionnairpaylod.requests.filter((q) =>
-    FIXED_QUESTIONNAIRE_REFERENCE_IDS.has(q.reference_id),
-  );
-
-  fixedQuestionnaires.forEach((q) => {
-    switch (q.reference_id) {
-      case "diagnosis":
-        normalizeAndUpdateDiagnosis(
-          queryClient,
-          q,
-          authUser,
-          patientID,
-          encounterID,
-        );
-        break;
-      case "medication_request":
-        normalizeAndUpdateMedication_Request(
-          queryClient,
-          q,
-          patientID,
-          encounterID,
-        );
-        break;
-      case "allergy_intolerance":
-        normalizeAndUpdateAllergy_Intolerance(
-          queryClient,
-          q,
-          authUser,
-          patientID,
-          encounterID,
-        );
-        break;
-      case "symptom":
-        normalizeAndUpdateSymptom(
-          queryClient,
-          q,
-          authUser,
-          patientID,
-          encounterID,
-        );
-        break;
-      case "medication_statement":
-        normalizeAndUpdateMedication_Statement(
-          queryClient,
-          q,
-          authUser,
-          patientID,
-          encounterID,
-        );
-        break;
-      case "encounter":
-        normalizeAndUpdateEncounter(queryClient, q, patientID, encounterID);
-        break;
-
-      default:
-        break;
-    }
-  });
-
   const normalizedQuestionnairResponse: QuestionnaireResponse[] =
-    questionnairpaylod.requests
-      .filter(
-        (questionnair) =>
-          !FIXED_QUESTIONNAIRE_REFERENCE_IDS.has(questionnair.reference_id),
-      )
-      .map((questionnair) =>
-        normalizedQuestionnairRequest(
-          questionnair,
-          allQuestionnairsList,
-          authUser,
-          patientID,
-          encounterID,
-        ),
-      );
+    questionnairpaylod.requests.map((questionnair) =>
+      normalizedQuestionnairRequest(
+        questionnair,
+        allQuestionnairsList,
+        authUser,
+        patientID,
+        encounterID,
+      ),
+    );
 
-  // Cache the newly offline  submitted   questionnair Responses
-
+  // Cache the newly submitted offline questionnaire responses
   queryClient.setQueryDefaults(["offlineCreatedQuestionnaireResponses"], {
     meta: { persist: true },
     networkMode: "online",
   });
 
   queryClient.setQueryData<QuestionnaireResponse[]>(
-    [
-      "offlineCreatedQuestionnaireResponses",
-      encounterID ? encounterID : patientID,
-    ],
+    ["offlineCreatedQuestionnaireResponses", encounterID ?? patientID],
     (prev = []) => [...prev, ...normalizedQuestionnairResponse],
   );
 };

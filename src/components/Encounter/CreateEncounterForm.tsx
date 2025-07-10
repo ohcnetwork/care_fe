@@ -159,11 +159,16 @@ export default function CreateEncounterForm({
         return;
       }
 
+      const permissions = queryClient.getQueryData<string[]>([
+        "encounterPermissions",
+      ]);
+
       const normalizeEncounter = normalizeOfflineEncounterRecord(
         queryClient,
         saveResult.entry,
         patientData,
         authUser,
+        permissions,
       );
 
       queryClient.setQueryData(

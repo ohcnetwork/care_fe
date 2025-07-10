@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -61,7 +61,16 @@ export const EncounterShow = (props: Props) => {
   const { hasPermission } = usePermissions();
   const pluginTabs = useCareAppEncounterTabs();
   const { goBack } = useAppHistory();
+  const queryClient = useQueryClient();
+  queryClient.setQueryDefaults(["patientPermissions"], {
+    meta: { persist: true },
+    networkMode: "online",
+  });
 
+  queryClient.setQueryDefaults(["encounterPermissions"], {
+    meta: { persist: true },
+    networkMode: "online",
+  });
   const tabs: Record<string, React.FC<EncounterTabProps>> = {
     ...defaultTabs,
     ...pluginTabs,
@@ -95,6 +104,24 @@ export const EncounterShow = (props: Props) => {
     networkMode: "online",
     enabled: !facilityIdFromProps && !!patientId,
   });
+
+  useEffect(() => {
+    if (patient?.permissions && props.facilityId) {
+      queryClient.setQueryData(
+        ["patientPermissions", props.facilityId],
+        patient.permissions,
+      );
+    }
+  }, [patient?.permissions, props.facilityId]);
+
+  useEffect(() => {
+    if (encounterData?.permissions && props.facilityId) {
+      queryClient.setQueryData(
+        ["encounterPermissions", props.facilityId],
+        encounterData.permissions,
+      );
+    }
+  }, [encounterData?.permissions, props.facilityId]);
 
   const facilityId = facilityIdFromProps ?? encounterData?.facility.id;
 

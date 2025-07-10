@@ -342,12 +342,14 @@ export default function PatientRegistration(
         toast.error(saveResult.error);
         return;
       }
-
+      const permissions = queryClient.getQueryData<string[]>([
+        "encounterPermissions",
+      ]);
       const normalizePatient = normalizeOfflinePatientRecord(
         saveResult.entry,
         user,
         selectedOrganization,
-        [],
+        permissions,
       );
 
       queryClient.setQueryData(["patient", generatedId], normalizePatient);

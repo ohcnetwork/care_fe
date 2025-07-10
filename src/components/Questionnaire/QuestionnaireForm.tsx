@@ -1,4 +1,5 @@
 import {
+  QueryClient,
   onlineManager,
   useMutation,
   useQuery,
@@ -18,12 +19,20 @@ import { Button } from "@/components/ui/button";
 
 import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
+import { AuthUserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import {
   cacheQuestionnairResponse,
   isOfflineId,
+  normalizeAndUpdateAllergy_Intolerance,
+  normalizeAndUpdateDiagnosis,
+  normalizeAndUpdateEncounter,
+  normalizeAndUpdateMedication_Request,
+  normalizeAndUpdateMedication_Statement,
+  normalizeAndUpdateSymptom,
   saveOfflineWrite,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -33,6 +42,7 @@ import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
+import { Patient } from "@/types/emr/patient";
 import { FileUploadQuestion } from "@/types/files/files";
 import {
   BatchRequestBody,
@@ -59,7 +69,10 @@ import { validateMedicationRequestQuestion } from "./QuestionTypes/MedicationReq
 import { validateMedicationStatementQuestion } from "./QuestionTypes/MedicationStatementQuestion";
 import { isQuestionEnabled } from "./QuestionTypes/QuestionGroup";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
-import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
+import {
+  FIXED_QUESTIONNAIRES,
+  FIXED_QUESTIONNAIRE_REFERENCE_IDS,
+} from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
 
 export interface QuestionnaireFormState {
@@ -351,7 +364,7 @@ export function QuestionnaireForm({
 
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
-
+  const db = new AppCacheDB();
   const {
     data: questionnaireData,
     isLoading: isQuestionnaireLoading,
@@ -557,31 +570,402 @@ export function QuestionnaireForm({
 
   const hasErrors = questionnaireForms.some((form) => form.errors.length > 0);
 
-  const queueQuestionnairBatchrequest = async (
-    questionnairPaylod: BatchRequestBody,
+  const generateAppendOnlyBatchAndQueue = async (
+    reference_id: string,
+    queryClient: QueryClient,
+    authUser: AuthUserModel,
+    originalPayload: BatchRequestBody,
+    patientID: string,
+    encounterID?: string,
   ) => {
-    const generatedId = `offline-${crypto.randomUUID()}`;
+    const scopeID = encounterID ?? patientID;
+    if (!scopeID) return;
     const parentID = encounterId ? encounterId : patientId;
+    const matchingRequests = originalPayload.requests.filter(
+      (req) => req.reference_id === reference_id,
+    );
+    if (matchingRequests.length === 0) return;
 
-    const offlineEntry = {
-      id: generatedId,
-      userId: authUser.external_id,
-      mutationSyncrouteKey: "submitQuestionnaire",
-      type: "submitQuestionnaire",
-      resourceType: "Questionnaire",
-      payload: questionnairPaylod,
-      parentMutationIds: isOfflineId(parentID) ? [parentID] : [],
+    const generatedId = `offline-${reference_id}-${crypto.randomUUID()}`;
+
+    for (const req of matchingRequests) {
+      const newOfflineEntry = {
+        id: generatedId,
+        userId: authUser.external_id,
+        mutationSyncrouteKey: "submitQuestionnaire",
+        type: reference_id,
+        resourceType: "Questionnaire",
+        payload: {
+          requests: [req],
+        },
+        parentMutationIds: isOfflineId(parentID) ? [parentID] : [],
+      };
+
+      const saveResult = await saveOfflineWrite(newOfflineEntry);
+      if (!saveResult.success) {
+        toast.error(
+          `Failed to queue "${reference_id.replace(/_/g, " ")}" for offline submission.`,
+        );
+        return;
+      }
+
+      if (reference_id === "time_of_death") {
+        const deceasedDatetime = req.body?.deceased_datetime;
+
+        if (deceasedDatetime) {
+          queryClient.setQueryData<Patient>(["patient", patientID], (prev) => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              deceased_datetime: deceasedDatetime,
+            };
+          });
+        }
+      }
+    }
+  };
+
+  const generateDiagnosisBatchAndQueue = async (
+    queryClient: QueryClient,
+    authUser: AuthUserModel,
+    originalPayload: BatchRequestBody,
+    patientID: string,
+    encounterID?: string,
+  ) => {
+    if (!encounterID) return;
+    const parentID = encounterId ? encounterId : patientId;
+    const recordId = `offline-${encounterID}-diagnosis`;
+
+    const matchingRequests = originalPayload.requests.filter(
+      (req) => req.reference_id === "diagnosis",
+    );
+    if (matchingRequests.length === 0) return;
+
+    // Extract new datapoints & remove offline-ids
+    const newDatapoints: any[] = [];
+    matchingRequests.forEach((req) => {
+      req.body?.datapoints?.forEach((dp: any) => {
+        const copy = { ...dp };
+        if (copy.id?.startsWith("offline-")) delete copy.id;
+        newDatapoints.push(copy);
+      });
+    });
+
+    //  Load existing offline record
+    const existing = await db.OfflineWrites.get(recordId);
+    let oldDatapoints: any[] = [];
+    const existingPayload = existing?.payload as BatchRequestBody;
+    if (existingPayload?.requests?.[0]?.body?.datapoints) {
+      oldDatapoints = existingPayload.requests[0].body.datapoints;
+    }
+
+    const newCodes = new Set(newDatapoints.map((dp) => dp.code?.code));
+    const mergedDatapoints = [
+      ...oldDatapoints.filter((dp: any) => !newCodes.has(dp.code?.code)),
+      ...newDatapoints,
+    ];
+
+    if (matchingRequests.length === 0) return; // Early exit if nothing to process
+
+    //  Last submitted request
+    const baseRequest = matchingRequests.at(-1)!;
+
+    const cleanedRequests: BatchRequestBody = {
+      requests: [
+        {
+          url: baseRequest.url,
+          method: baseRequest.method,
+          reference_id: baseRequest.reference_id,
+          body: {
+            ...baseRequest.body,
+            datapoints: mergedDatapoints,
+          },
+        },
+      ],
     };
 
     try {
-      const saveResult = await saveOfflineWrite(offlineEntry);
+      await db.OfflineWrites.delete(recordId);
+
+      const newOfflineEntry = {
+        id: recordId,
+        userId: authUser.external_id,
+        mutationSyncrouteKey: "submitQuestionnaire",
+        type: "diagnosis",
+        resourceType: "Questionnaire",
+        payload: cleanedRequests,
+        parentMutationIds: isOfflineId(parentID) ? [parentID] : [],
+      };
+
+      const saveResult = await saveOfflineWrite(newOfflineEntry);
       if (!saveResult.success) {
-        toast.error(saveResult.error);
+        toast.error("Unable to queue 'diagnosis' for offline submission.");
+        return;
+      }
+      normalizeAndUpdateDiagnosis(
+        queryClient,
+        cleanedRequests.requests[0],
+        authUser,
+        patientID,
+        encounterID,
+      );
+    } catch (err) {
+      console.error("Error saving offline diagnosis", err);
+      toast.error("Unexpected error while saving 'diagnosis' offline.");
+    }
+  };
+
+  const generateFixedDatapointTypeBatchAndQueue = async (
+    reference_id: string,
+    queryClient: QueryClient,
+    authUser: AuthUserModel,
+    originalPayload: BatchRequestBody,
+    patientID: string,
+    encounterID?: string,
+  ) => {
+    if (!encounterID) return;
+    const isPatientScoped = ["allergy_intolerance"].includes(reference_id);
+    const scopeID = isPatientScoped ? patientID : encounterID;
+    if (!scopeID) return;
+    const parentID = encounterId ? encounterId : patientId;
+    const recordId = `offline-${scopeID}-${reference_id}`;
+
+    const matchingRequests = originalPayload.requests.filter(
+      (req) => req.reference_id === reference_id,
+    );
+    if (matchingRequests.length === 0) return;
+
+    const mergedDatapoints: any[] = [];
+    matchingRequests.forEach((req) => {
+      req.body?.datapoints?.forEach((dp: any) => {
+        const copy = { ...dp };
+        if (copy.id?.startsWith("offline-")) delete copy.id;
+        mergedDatapoints.push(copy);
+      });
+    });
+
+    const baseRequest = matchingRequests[0];
+    const cleanedRequests: BatchRequestBody = {
+      requests: [
+        {
+          ...baseRequest,
+          body: {
+            ...baseRequest.body,
+            datapoints: mergedDatapoints,
+          },
+        },
+      ],
+    };
+
+    try {
+      await db.OfflineWrites.delete(recordId);
+
+      const newOfflineEntry = {
+        id: recordId,
+        userId: authUser.external_id,
+        mutationSyncrouteKey: "submitQuestionnaire",
+        type: reference_id,
+        resourceType: "Questionnaire",
+        payload: cleanedRequests,
+        parentMutationIds: isOfflineId(parentID) ? [parentID] : [],
+      };
+
+      const saveResult = await saveOfflineWrite(newOfflineEntry);
+      if (!saveResult.success) {
+        toast.error(
+          `Unable to queue '${reference_id.replace("_", " ")}' for offline submission.`,
+        );
+        return;
       }
 
+      const normalizedRequest = cleanedRequests.requests[0];
+
+      switch (reference_id) {
+        case "allergy_intolerance":
+          normalizeAndUpdateAllergy_Intolerance(
+            queryClient,
+            normalizedRequest,
+            authUser,
+            patientID,
+            encounterID,
+          );
+          break;
+        case "symptom":
+          normalizeAndUpdateSymptom(
+            queryClient,
+            normalizedRequest,
+            authUser,
+            patientID,
+            encounterID,
+          );
+          break;
+        case "medication_request":
+          normalizeAndUpdateMedication_Request(
+            queryClient,
+            normalizedRequest,
+            patientID,
+            encounterID,
+          );
+          break;
+        case "medication_statement":
+          normalizeAndUpdateMedication_Statement(
+            queryClient,
+            normalizedRequest,
+            authUser,
+            patientID,
+            encounterID,
+          );
+          break;
+      }
+    } catch (err) {
+      console.error("Error saving offline datapoint-type questionnaire", err);
+      toast.error(
+        `Unexpected error while saving '${reference_id.replace("_", " ")}' offline.`,
+      );
+    }
+  };
+
+  const generateEncounterBatchAndQueue = async (
+    queryClient: QueryClient,
+    authUser: AuthUserModel,
+    originalPayload: BatchRequestBody,
+    patientID: string,
+    encounterID?: string,
+  ) => {
+    if (!encounterID) return;
+    const parentID = encounterId!; // safe to use ! as already return if no encounter ID
+    const recordId = `offline-${encounterID}-encounter`;
+
+    const matchingRequests = originalPayload.requests.filter(
+      (req) => req.reference_id === "encounter",
+    );
+    if (matchingRequests.length === 0) return;
+
+    const baseRequest = matchingRequests[matchingRequests.length - 1];
+
+    const cleanedRequests: BatchRequestBody = {
+      requests: [baseRequest],
+    };
+
+    try {
+      await db.OfflineWrites.delete(recordId);
+
+      const newOfflineEntry = {
+        id: recordId,
+        userId: authUser.external_id,
+        mutationSyncrouteKey: "submitQuestionnaire",
+        type: "encounter",
+        resourceType: "Questionnaire",
+        payload: cleanedRequests,
+        parentMutationIds: isOfflineId(parentID) ? [parentID] : [],
+      };
+
+      const saveResult = await saveOfflineWrite(newOfflineEntry);
+      if (!saveResult.success) {
+        toast.error("Unable to queue 'encounter' for offline submission.");
+        return;
+      }
+
+      normalizeAndUpdateEncounter(
+        queryClient,
+        baseRequest,
+        patientID,
+        encounterID,
+      );
+    } catch (err) {
+      console.error("Error saving offline encounter questionnaire", err);
+      toast.error("Unexpected error while saving 'encounter' offline.");
+    }
+  };
+
+  const queueQuestionnairBatchrequest = async (
+    questionnairPaylod: BatchRequestBody,
+  ) => {
+    const parentID = encounterId ? encounterId : patientId;
+
+    try {
+      const fixedQuestionnaires = questionnairPaylod.requests.filter((q) =>
+        FIXED_QUESTIONNAIRE_REFERENCE_IDS.has(q.reference_id),
+      );
+      const nonFixedQuestionnaires = questionnairPaylod.requests.filter(
+        (q) => !FIXED_QUESTIONNAIRE_REFERENCE_IDS.has(q.reference_id),
+      );
+
+      for (const fixedQ of fixedQuestionnaires) {
+        switch (fixedQ.reference_id) {
+          case "encounter":
+            await generateEncounterBatchAndQueue(
+              queryClient,
+              authUser,
+              questionnairPaylod,
+              patientId,
+              encounterId,
+            );
+            break;
+
+          case "diagnosis":
+            await generateDiagnosisBatchAndQueue(
+              queryClient,
+              authUser,
+              questionnairPaylod,
+              patientId,
+              encounterId,
+            );
+            break;
+
+          case "files":
+          case "appointment":
+          case "time_of_death":
+            await generateAppendOnlyBatchAndQueue(
+              fixedQ.reference_id,
+              queryClient,
+              authUser,
+              questionnairPaylod,
+              patientId,
+              encounterId,
+            );
+            break;
+
+          default:
+            await generateFixedDatapointTypeBatchAndQueue(
+              fixedQ.reference_id,
+              queryClient,
+              authUser,
+              questionnairPaylod,
+              patientId,
+              encounterId,
+            );
+            break;
+        }
+      }
+
+      if (nonFixedQuestionnaires.length <= 0) {
+        setServerErrors(undefined);
+        toast.success(t("questionnaire_submitted_successfully"));
+        onSubmit?.();
+        return;
+      }
+      // saved non fixed question types
+      const generatedId = `offline-${crypto.randomUUID()}`;
+
+      const offlineEntry = {
+        id: generatedId,
+        userId: authUser.external_id,
+        mutationSyncrouteKey: "submitQuestionnaire",
+        type: "nonFixedQuestionnaire",
+        resourceType: "Questionnaire",
+        payload: { requests: nonFixedQuestionnaires },
+        parentMutationIds: isOfflineId(parentID) ? [parentID] : [],
+      };
+
+      const saveResult = await saveOfflineWrite(offlineEntry);
+      if (!saveResult.success) {
+        toast.error("unale to queue non strucutred type questions");
+      }
+      //  Handle caching & UI for non-fixed questionnaires
       cacheQuestionnairResponse(
         queryClient,
-        questionnairPaylod,
+        { requests: nonFixedQuestionnaires },
         authUser,
         patientId,
         encounterId,
@@ -596,6 +980,7 @@ export function QuestionnaireForm({
       toast.error(t("fail_to_submit_Questionnai_offline"));
     }
   };
+
   const handleSubmit = async () => {
     setIsDirty(false);
 
