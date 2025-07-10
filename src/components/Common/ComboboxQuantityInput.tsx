@@ -17,29 +17,37 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import { Code } from "@/types/base/code/code";
 import {
   DOSAGE_UNITS_CODES,
   DosageQuantity,
-} from "@/types/emr/medicationRequest";
+} from "@/types/emr/medicationRequest/medicationRequest";
+import { QuantitySpec } from "@/types/emr/specimenDefinition/specimenDefinition";
 
 interface Props {
-  quantity?: DosageQuantity;
-  onChange: (quantity: DosageQuantity) => void;
+  quantity?: DosageQuantity | QuantitySpec | null;
+  onChange: (quantity: DosageQuantity | QuantitySpec | null) => void;
   disabled?: boolean;
+  unitDisabled?: boolean;
   placeholder?: string;
   autoFocus?: boolean;
+  units?: readonly Code[];
+  className?: string;
 }
 
 export function ComboboxQuantityInput({
   quantity,
   onChange,
   disabled,
+  unitDisabled,
   placeholder = "Enter a number...",
   autoFocus,
+  units = DOSAGE_UNITS_CODES,
+  className,
 }: Props) {
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState(
-    quantity?.value.toString() || "",
+    quantity?.value?.toString() || "",
   );
   const [selectedUnit, setSelectedUnit] = React.useState(quantity?.unit);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -52,42 +60,43 @@ export function ComboboxQuantityInput({
     const value = e.target.value;
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
       setInputValue(value);
-      setOpen(true);
-      setActiveIndex(0);
-      if (value && selectedUnit && value !== ".") {
+      if (!unitDisabled) {
+        setOpen(true);
+        setActiveIndex(0);
+      }
+      if (value === "") {
+        onChange(null);
+      }
+      if (value && value !== ".") {
         const parsedValue = parseFloat(value);
         if (!isNaN(parsedValue)) {
-          onChange({ value: parsedValue, unit: selectedUnit });
+          onChange({ value: parsedValue, unit: selectedUnit || units[0] });
         }
       }
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (disabled || !showDropdown) return;
+    if (disabled || unitDisabled || !showDropdown) return;
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setOpen(true);
       setActiveIndex((prev) =>
-        prev === -1
-          ? 0
-          : prev < DOSAGE_UNITS_CODES.length - 1
-            ? prev + 1
-            : prev,
+        prev === -1 ? 0 : prev < units.length - 1 ? prev + 1 : prev,
       );
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setActiveIndex((prev) => (prev > 0 ? prev - 1 : prev));
     } else if (e.key === "Enter") {
       e.preventDefault();
-      if (activeIndex >= 0 && activeIndex < DOSAGE_UNITS_CODES.length) {
-        const unit = DOSAGE_UNITS_CODES[activeIndex];
+      if (activeIndex >= 0 && activeIndex < units.length) {
+        const unit = units[activeIndex];
         setSelectedUnit(unit);
         setOpen(false);
         setActiveIndex(-1);
         const parsedValue = parseFloat(inputValue);
-        if (!isNaN(parsedValue)) {
+        if (!isNaN(parsedValue) && inputValue.trim() !== "") {
           onChange({ value: parsedValue, unit });
         }
       }
@@ -95,7 +104,7 @@ export function ComboboxQuantityInput({
   };
 
   React.useEffect(() => {
-    setInputValue(quantity?.value.toString() || "");
+    setInputValue(quantity?.value?.toString() || "");
   }, [quantity?.value]);
 
   React.useEffect(() => {
@@ -103,8 +112,11 @@ export function ComboboxQuantityInput({
   }, [quantity?.unit]);
 
   return (
-    <div className="relative flex w-full lg:max-w-[200px] flex-col gap-1">
-      <Popover open={!disabled && open && showDropdown} onOpenChange={setOpen}>
+    <div className={cn("relative flex w-full flex-col gap-1", className)}>
+      <Popover
+        open={!disabled && !unitDisabled && open && showDropdown}
+        onOpenChange={setOpen}
+      >
         <PopoverTrigger asChild>
           <div className="relative">
             <Input
@@ -121,7 +133,12 @@ export function ComboboxQuantityInput({
               autoFocus={autoFocus}
             />
             {selectedUnit && (
-              <div className="absolute right-4 pr-2 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+              <div
+                className={cn(
+                  "absolute right-4 pr-2 top-1/2 -translate-y-1/2 text-sm text-gray-500",
+                  unitDisabled && "pointer-events-none",
+                )}
+              >
                 {selectedUnit.display}
               </div>
             )}
@@ -139,7 +156,7 @@ export function ComboboxQuantityInput({
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
-                {DOSAGE_UNITS_CODES.map((unit, index) => (
+                {units.map((unit, index) => (
                   <CommandItem
                     key={unit.code}
                     value={unit.code}
@@ -148,7 +165,10 @@ export function ComboboxQuantityInput({
                       setOpen(false);
                       setActiveIndex(-1);
                       inputRef.current?.focus();
-                      onChange({ value: parseFloat(inputValue), unit });
+                      const parsedValue = parseFloat(inputValue);
+                      if (!isNaN(parsedValue) && inputValue.trim() !== "") {
+                        onChange({ value: parsedValue, unit });
+                      }
                     }}
                     className={cn(
                       "flex items-center gap-2",

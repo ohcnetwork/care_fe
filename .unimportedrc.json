@@ -8,7 +8,9 @@
     "src/PluginRegistry.ts",
     "src/pages/Encounters/ReportBuilder/ReportBuilderSheet.tsx",
     "src/pluginTypes.ts",
-    "src/service-worker.ts"
+    "src/service-worker.ts",
+    "src/components/ui/definition-list.tsx",
+    "src/pages/Admin/organizations/components/AdminOrganizationSelector.tsx"
   ],
   "ignoreUnused": [
     "@fontsource/figtree",

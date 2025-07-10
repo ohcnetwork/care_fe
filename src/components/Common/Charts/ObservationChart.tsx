@@ -33,8 +33,7 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { ObservationAnalyzeResponse } from "@/types/emr/observation";
-import { Code } from "@/types/questionnaire/code";
+import { Code } from "@/types/base/code/code";
 
 import { ObservationHistoryTable } from "./ObservationHistoryTable";
 
@@ -118,7 +117,7 @@ export const ObservationVisualizer = ({
   // Flatten all codes for a single API request
   const allCodes = codeGroups.flatMap((group) => group.codes);
 
-  const { data, isLoading } = useQuery<ObservationAnalyzeResponse>({
+  const { data, isLoading } = useQuery({
     queryKey: [
       "observations",
       patientId,
