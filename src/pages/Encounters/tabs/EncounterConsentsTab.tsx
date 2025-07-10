@@ -62,6 +62,17 @@ function ConsentCard({
   const primaryAttachment = consent.source_attachments[0];
   const totalAttachments = consent.source_attachments.length;
 
+  const renderDateTime = (date: Date | undefined | null) => {
+    if (!date) return <span>{t("na")}</span>;
+    return (
+      <>
+        {formatDateTime(date, "DD/MM/YYYY")}
+        <br />
+        {formatDateTime(date, "h:mm A")}
+      </>
+    );
+  };
+
   return (
     <Card className="overflow-hidden transition-all h-full flex flex-col">
       <div className="flex flex-wrap gap-2">
@@ -128,35 +139,16 @@ function ConsentCard({
               {t("consent_given_on")}
             </span>
             <p className="font-medium text-xs">
-              {formatDateTime(consent.date, "DD/MM/YYYY")}
-              <br />
-              {formatDateTime(consent.date, "h:mm A")}
+              {renderDateTime(consent.date)}
             </p>
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-xs text-gray-500">{t("valid_period")}</span>
             <p className="font-medium text-xs">
-              {consent.period.start ? (
-                <>
-                  <span>
-                    {formatDateTime(consent.period.start, "DD/MM/YYYY")}
-                    <br />
-                    {formatDateTime(consent.period.start, "h:mm A")} -
-                  </span>
-                  <br />
-                  {consent.period.end ? (
-                    <span>
-                      {formatDateTime(consent.period.end, "DD/MM/YYYY")}
-                      <br />
-                      {formatDateTime(consent.period.end, "h:mm A")}
-                    </span>
-                  ) : (
-                    <span>{t("na")}</span>
-                  )}
-                </>
-              ) : (
-                <span>{t("na")}</span>
-              )}
+              {renderDateTime(consent.period.start)}
+              {" - "}
+              <br />
+              {renderDateTime(consent.period.end)}
             </p>
           </div>
         </div>
