@@ -488,12 +488,14 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       {
                         label: t("reset"),
                         icon: "l-minus-circle",
-                        action: () =>
+                        action: () => {
                           setFileState((prev) => ({
                             ...prev,
                             rotation: 0,
                             zoom: 4,
-                          })),
+                          }));
+                          setDragState(initialDragState);
+                        },
                         disabled: false,
                       },
                       {
