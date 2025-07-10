@@ -181,12 +181,12 @@ export class PatientEncounter {
           td.textContent.includes(symptomName),
         );
       })
-      .last()
+      .first()
       .should("be.visible")
       .then(() => {
-        this.clickAndSelectOption(-3, status);
-        this.clickAndSelectOption(-2, severity);
-        this.clickAndSelectOption(-1, verification);
+        this.clickAndSelectOption(0, status);
+        this.clickAndSelectOption(1, severity);
+        this.clickAndSelectOption(2, verification);
       });
 
     return this;
@@ -201,10 +201,10 @@ export class PatientEncounter {
           td.textContent.includes(symptomName),
         );
       })
-      .last()
+      .first()
       .within(() => {
         cy.get("[data-slot='dropdown-menu-trigger']")
-          .last()
+          .first()
           .scrollIntoView()
           .click();
       });
@@ -268,11 +268,11 @@ export class PatientEncounter {
           td.textContent.includes(diagnosisName),
         );
       })
-      .last()
+      .first()
       .should("be.visible")
       .then(() => {
-        this.clickAndSelectOption(-2, status);
-        this.clickAndSelectOption(-1, verification);
+        this.clickAndSelectOption(0, status);
+        this.clickAndSelectOption(1, verification);
       });
 
     return this;
@@ -287,11 +287,11 @@ export class PatientEncounter {
           td.textContent.includes(diagnosisName),
         );
       })
-      .last()
+      .first()
       .should("be.visible")
       .within(() => {
         cy.get("[data-slot='dropdown-menu-trigger']")
-          .last()
+          .first()
           .scrollIntoView()
           .click();
       });
