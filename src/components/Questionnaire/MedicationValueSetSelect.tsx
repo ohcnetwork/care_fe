@@ -27,7 +27,7 @@ import ValueSetSearchContent from "@/components/Questionnaire/ValueSetSearchCont
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
@@ -54,7 +54,7 @@ export default function MedicationValueSetSelect({
   wrapTextForSmallScreen = false,
 }: Props) {
   const { t } = useTranslation();
-  const { facilityId } = useCurrentFacility();
+  const { facilityId } = useCurrentFacilitySilently();
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"product" | "valueset">("product");
   const [search, setSearch] = useState("");
