@@ -18,11 +18,10 @@ import {
 import { getPermissions } from "@/common/Permissions";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import { Patient } from "@/types/emr/patient";
+import patientApi from "@/types/emr/patient/patientApi";
 
 export const PatientHome = (props: {
   facilityId?: string;
@@ -34,9 +33,9 @@ export const PatientHome = (props: {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
 
-  const { data: patientData, isLoading } = useQuery<Patient>({
+  const { data: patientData, isLoading } = useQuery({
     queryKey: ["patient", id],
-    queryFn: query(routes.patient.getPatient, {
+    queryFn: query(patientApi.getPatient, {
       pathParams: {
         id,
       },

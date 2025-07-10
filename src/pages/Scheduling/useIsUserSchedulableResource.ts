@@ -11,7 +11,7 @@ export const useIsUserSchedulableResource = (
   return useQuery({
     queryKey: ["is_schedulable_resource", facilityId, userId],
     queryFn: query(scheduleApis.appointments.availableUsers, {
-      pathParams: { facility_id: facilityId },
+      pathParams: { facilityId },
     }),
     select: (data: { users: UserBase[] }) =>
       data.users.some(({ id }) => id === userId),

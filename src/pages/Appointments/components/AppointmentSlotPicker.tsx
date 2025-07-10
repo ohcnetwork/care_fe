@@ -63,7 +63,7 @@ export function AppointmentSlotPicker({
   const slotsQuery = useQuery({
     queryKey: ["slots", facilityId, resourceId, dateQueryString(selectedDate)],
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
-      pathParams: { facility_id: facilityId },
+      pathParams: { facilityId },
       body: {
         user: resourceId ?? "",
         day: dateQueryString(selectedDate),
@@ -83,7 +83,7 @@ export function AppointmentSlotPicker({
   const slotsTodayQuery = useQuery({
     queryKey: ["slots", facilityId, resourceId, dateQueryString(new Date())],
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
-      pathParams: { facility_id: facilityId },
+      pathParams: { facilityId },
       body: {
         user: resourceId ?? "",
         day: dateQueryString(new Date()),

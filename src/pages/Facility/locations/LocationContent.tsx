@@ -206,6 +206,7 @@ interface LocationContentProps {
   onLocationSelect: (location: LocationList) => void;
   onSearchChange: (value: string) => void;
   onPageChange: (page: number) => void;
+  hideBreadcrumbs?: boolean;
 }
 
 export default function LocationContent({
@@ -217,6 +218,7 @@ export default function LocationContent({
   onLocationSelect,
   onSearchChange,
   onPageChange,
+  hideBreadcrumbs = false,
 }: LocationContentProps) {
   const { t } = useTranslation();
   const ITEMS_PER_PAGE = 12;
@@ -248,7 +250,7 @@ export default function LocationContent({
   return (
     <div className="flex-1 p-6 space-y-4 rounded-lg bg-white shadow-lg">
       <div className="flex flex-col gap-4">
-        {selectedLocation && (
+        {!hideBreadcrumbs && selectedLocation && (
           <Breadcrumbs
             location={selectedLocation}
             onSelect={onLocationSelect}
