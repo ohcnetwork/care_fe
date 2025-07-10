@@ -49,7 +49,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter } from "@/types/emr/encounter/encounter";
 
 interface DischargeTabProps {
   type: "encounter" | "patient";
@@ -103,6 +103,7 @@ export const DischargeTab = ({
         ...(qParams.is_archived !== undefined && {
           is_archived: qParams.is_archived,
         }),
+        ordering: "-modified_date",
       },
     }),
   });

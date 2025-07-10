@@ -48,11 +48,12 @@ export const Appointments = (props: PatientProps) => {
         ? scheduleApis.appointments.list
         : scheduleApis.appointments.getAppointments,
       {
-        pathParams: {
-          facility_id: facilityId ?? "",
-          patient_id: patientId,
+        pathParams: { facilityId: facilityId ?? "", patientId },
+        queryParams: {
+          patient: patientId,
+          limit: 100,
+          ordering: "-token_slot__start_datetime",
         },
-        queryParams: { patient: patientId, limit: 100 },
       },
     ),
   });

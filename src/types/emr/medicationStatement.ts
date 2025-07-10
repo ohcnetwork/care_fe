@@ -1,7 +1,9 @@
+import { Badge } from "@/components/ui/badge";
+
 import { UserBareMinimum } from "@/components/Users/models";
 
+import { Code } from "@/types/base/code/code";
 import { Period } from "@/types/questionnaire/base";
-import { Code } from "@/types/questionnaire/code";
 
 export enum MedicationStatementInformationSourceType {
   PATIENT = "patient",
@@ -32,7 +34,10 @@ export const MEDICATION_STATEMENT_STATUS_STYLES = {
   not_taken: "secondary",
   unknown: "secondary",
   entered_in_error: "destructive",
-} as const satisfies Record<MedicationStatementStatus, string>;
+} as const satisfies Record<
+  MedicationStatementStatus,
+  React.ComponentProps<typeof Badge>["variant"]
+>;
 
 export type MedicationStatement = {
   readonly id: string;
