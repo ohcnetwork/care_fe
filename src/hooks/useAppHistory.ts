@@ -1,5 +1,5 @@
 import { navigate } from "raviger";
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 
 import {
   HistoryContext,
@@ -10,15 +10,24 @@ export default function useAppHistory() {
   const history = useContext(HistoryContext);
   const resetHistory = useContext(ResetHistoryContext);
 
-  const goBack = (fallbackUrl?: string) => {
-    if (history.length > 1)
-      // Otherwise, navigate to history present in the app navigation history stack.
-      return navigate(history[1]);
+  // Volunarily extracting the last url from the history stack on mount.
+  // So that `goBack` always yields the previous url at the time of component mount and not when it was last rendered / updated.
+  const lastUrl = useMemo(() => {
+    if (history.length > 1) return history[1];
+  }, []);
 
-    if (fallbackUrl)
-      // use provided fallback url if provided.
+  const goBack = (fallbackUrl?: string) => {
+    // If last url is present, navigate to it.
+    if (lastUrl) {
+      return navigate(lastUrl);
+    }
+
+    // else fallback to using the provided url
+    if (fallbackUrl) {
       return navigate(fallbackUrl);
-    // Otherwise, fallback to browser's go back behaviour.
+    }
+
+    // As a last resort, fallback to browser's go back behaviour.
     window.history.back();
   };
 

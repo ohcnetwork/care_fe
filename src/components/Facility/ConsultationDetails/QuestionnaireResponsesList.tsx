@@ -31,7 +31,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, properCase } from "@/Utils/utils";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter } from "@/types/emr/encounter/encounter";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
@@ -169,7 +169,7 @@ function QuestionGroup({
           className="py-1 pr-0 align-top"
           colSpan={response.note ? 1 : 2}
         >
-          <div className="text-sm font-medium break-words whitespace-normal">
+          <div className="text-sm font-medium break-words whitespace-pre-wrap">
             {values.map((val, idx) => (
               <React.Fragment key={idx}>
                 {idx > 0 && ", "}
@@ -338,7 +338,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                           className="py-1 pr-0 align-top"
                           colSpan={response.note ? 1 : 2}
                         >
-                          <div className="text-sm font-medium break-words whitespace-normal">
+                          <div className="text-sm font-medium break-words whitespace-pre-wrap">
                             {values.map((val, idx) => (
                               <React.Fragment key={idx}>
                                 {idx > 0 && ", "}

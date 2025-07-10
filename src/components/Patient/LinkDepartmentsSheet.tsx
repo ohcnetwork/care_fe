@@ -17,10 +17,10 @@ import {
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import { BatchRequestBody } from "@/types/base/batch/batch";
 import deviceApi from "@/types/device/deviceApi";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import locationApi from "@/types/location/locationApi";
-import type { BatchRequestBody } from "@/types/questionnaire/batch";
 
 interface Props {
   entityType: "encounter" | "location" | "device";

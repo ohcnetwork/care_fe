@@ -87,6 +87,7 @@ export default function OrganizationFacilities({
                     type: "text",
                     placeholder: t("search_by_facility_name"),
                     value: qParams.name || "",
+                    display: t("name"),
                   },
                 ]}
                 onSearch={(key, value) =>
