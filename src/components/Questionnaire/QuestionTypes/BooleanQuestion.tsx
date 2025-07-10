@@ -41,8 +41,7 @@ export function BooleanQuestion({
           [
             {
               type: "boolean",
-              value:
-                value === "true" ? true : value === "false" ? false : undefined,
+              value: { true: true, false: false }[value] ?? undefined,
             },
           ],
           questionnaireResponse.question_id,
