@@ -87,11 +87,12 @@ export const EncounterOverviewTab = () => {
                   <Badge variant="destructive">
                     <DropletIcon className="size-4" />
                     <span>
-                      {t(`BLOOD_GROUP_LONG__${patient?.blood_group}`)}
+                      {t(
+                        `BLOOD_GROUP_LONG__${patient?.blood_group || "unknown"}`,
+                      )}
                     </span>
                   </Badge>
                 </div>
-
                 {!!allergies?.results.length && (
                   <div className="flex flex-col items-start gap-1">
                     <span className="text-sm font-medium text-gray-600">
