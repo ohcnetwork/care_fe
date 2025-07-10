@@ -1,12 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
-import { Search } from "lucide-react";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
@@ -18,7 +16,10 @@ import {
 import mutate from "@/Utils/request/mutate";
 import { MedicationAdministrationRequest } from "@/types/emr/medicationAdministration/medicationAdministration";
 import medicationAdministrationApi from "@/types/emr/medicationAdministration/medicationAdministrationApi";
-import { MedicationRequestRead } from "@/types/emr/medicationRequest";
+import {
+  MedicationRequestRead,
+  displayMedicationName,
+} from "@/types/emr/medicationRequest/medicationRequest";
 
 import { MedicineAdminForm } from "./MedicineAdminForm";
 import { createMedicationAdministrationRequest } from "./utils";
@@ -55,14 +56,14 @@ const MedicineListItem = ({
 }: MedicineListItemProps) => {
   const { t } = useTranslation();
 
-  const medicationDisplay = medicine.medication?.display;
-
   return (
     <div className="border-b border-gray-200 py-4">
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="font-medium">{medicationDisplay}</span>
+            <span className="font-medium">
+              {displayMedicationName(medicine)}
+            </span>
             {medicine.dosage_instruction[0]?.as_needed_boolean && (
               <span className="text-sm text-rose-500">
                 {t("as_needed_prn")}
@@ -120,7 +121,6 @@ export function MedicineAdminSheet({
   const [formValidation, setFormValidation] = useState<Record<string, boolean>>(
     {},
   );
-  const [search, setSearch] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
 
   const { mutate: upsertAdministrations, isPending } = useMutation({
@@ -133,14 +133,6 @@ export function MedicineAdminSheet({
     },
   });
 
-  const filteredMedicines = medications.filter((medicine) => {
-    const display = medicine.medication?.display;
-    return (
-      typeof display === "string" &&
-      display.toLowerCase().includes(search.toLowerCase())
-    );
-  });
-
   const handleSelect = useCallback(
     (id: string, checked: boolean) => {
       setSelectedMedicines((prev) => {
@@ -148,7 +140,7 @@ export function MedicineAdminSheet({
         if (checked) {
           next.add(id);
           const medicine = medications.find((m) => m.id === id);
-          if (medicine?.medication?.display) {
+          if (medicine) {
             setAdministrationRequests((prev) => ({
               ...prev,
               [id]: createMedicationAdministrationRequest(
@@ -184,7 +176,6 @@ export function MedicineAdminSheet({
     onOpenChange(false);
     setSelectedMedicines(new Set());
     setAdministrationRequests({});
-    setSearch("");
   };
 
   const handleAdministrationChange = useCallback(
@@ -228,20 +219,11 @@ export function MedicineAdminSheet({
             <SheetTitle className="text-xl">
               {t("administer_medicines")}
             </SheetTitle>
-            <div className="relative">
-              <Search className="absolute left-2 top-2.5 size-4 text-gray-500" />
-              <Input
-                placeholder={t("search_medicine")}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-8"
-              />
-            </div>
           </SheetHeader>
 
           <div className="flex-1 overflow-y-auto mt-8">
             <div className="space-y-2 pb-4 mr-2">
-              {filteredMedicines.map((medicine) => (
+              {medications.map((medicine) => (
                 <MedicineListItem
                   key={medicine.id}
                   medicine={medicine}
