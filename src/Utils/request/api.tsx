@@ -401,13 +401,13 @@ const routes = {
         path: "/api/v1/patient/{patientId}/thread/",
         method: "GET",
         TRes: Type<PaginatedResponse<Thread>>(),
-        TQuery: Type<{ encounter: string }>(),
+        TQuery: Type<{ encounter?: string }>(),
       },
       createThread: {
         path: "/api/v1/patient/{patientId}/thread/",
         method: "POST",
         TRes: Type<Thread>(),
-        TBody: Type<{ title: string; encounter: string }>(),
+        TBody: Type<{ title: string; encounter?: string }>(),
       },
       getMessages: {
         path: "/api/v1/patient/{patientId}/thread/{threadId}/note/",

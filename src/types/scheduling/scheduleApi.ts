@@ -125,7 +125,7 @@ export default {
     list: {
       path: "/api/v1/facility/{facilityId}/appointments/",
       method: HttpMethod.GET,
-      TRes: Type<PaginatedResponse<Appointment>>(),
+      TRes: Type<PaginatedResponse<AppointmentRead>>(),
     },
     retrieve: {
       path: "/api/v1/facility/{facilityId}/appointments/{id}/",

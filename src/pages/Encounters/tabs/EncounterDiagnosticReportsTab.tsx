@@ -28,25 +28,27 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import query from "@/Utils/request/query";
-import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { DIAGNOSTIC_REPORT_STATUS_COLORS } from "@/types/emr/diagnosticReport/diagnosticReport";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 
-export const EncounterDiagnosticReportsTab = ({
-  encounter,
-}: EncounterTabProps) => {
+export const EncounterDiagnosticReportsTab = () => {
   const { t } = useTranslation();
+  const {
+    selectedEncounterId: encounterId,
+    facilityId,
+    patientId,
+  } = useEncounter();
   const [page, setPage] = useState(1);
 
   const limit = RESULTS_PER_PAGE_LIMIT;
-  const facilityId = encounter.facility.id;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["diagnosticReports", facilityId, encounter.id, page, limit],
+    queryKey: ["diagnosticReports", facilityId, encounterId, page, limit],
     queryFn: query(diagnosticReportApi.listDiagnosticReports, {
-      pathParams: { patient_external_id: encounter.patient.id },
+      pathParams: { patient_external_id: patientId },
       queryParams: {
-        encounter: encounter.id,
+        encounter: encounterId,
         offset: (page - 1) * limit,
         limit,
         status: "final",
@@ -126,7 +128,7 @@ export const EncounterDiagnosticReportsTab = ({
                                       size="icon"
                                       onClick={() =>
                                         navigate(
-                                          `/facility/${facilityId}/patient/${encounter.patient.id}/diagnostic_reports/${report.id}`,
+                                          `/facility/${facilityId}/patient/${patientId}/diagnostic_reports/${report.id}`,
                                         )
                                       }
                                     >
