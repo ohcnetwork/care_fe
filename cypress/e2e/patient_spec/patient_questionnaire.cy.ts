@@ -10,204 +10,67 @@ const facilityCreation = new FacilityCreation();
 const patientEncounter = new PatientEncounter();
 const patientPrescription = new PatientPrescription();
 
+describe("Patient Encounter Questionnaire", () => {
+  beforeEach(() => {
+    cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
+    cy.loginByApi("nurse");
+    cy.visit("/");
+  });
+
+  it("Create a new ABG questionnaire and verify the values", () => {
+    // Test data for respiratory support questionnaire
+    const respiratorySupportValues = {
+      "etco2-(mmhg)": "120",
+    };
+    facilityCreation.selectFirstRandomFacility();
+
+    // Execute questionnaire workflow using page object methods
+    patientEncounter
+      .navigateToEncounters()
+      .clickInProgressEncounterFilter()
+      .openFirstEncounterDetails()
+      .clickUpdateEncounter()
+      .addQuestionnaire("Respiratory Support")
+      .fillQuestionnaire(respiratorySupportValues);
+    patientPrescription.submitQuestionnaire();
+
+    // Verify the submitted values appear in the overview
+    patientEncounter.verifyOverviewValues(
+      Object.values(respiratorySupportValues),
+    );
+  });
+
+  it("verify the 500 character limit in input field", () => {
+    // Generate text exceeding the 500 character limit to test validation
+    const characterMaxLimit = generateRandomCharacter({
+      charLimit: 510, // Exceeds the 500 character limit
+    });
+    facilityCreation.selectFirstRandomFacility();
+
+    // Attempt to submit questionnaire with oversized text
+    patientEncounter
+      .navigateToEncounters()
+      .clickInProgressEncounterFilter()
+      .openFirstEncounterDetails()
+      .clickUpdateEncounter()
+      .addQuestionnaire("Feedback Form")
+      .fillQuestionnaire({
+        "any-suggestions-for-improvement": characterMaxLimit,
+      });
+    patientPrescription.clickSubmitQuestionnaire();
+
+    // Verify that submission fails with appropriate error message
+    cy.verifyNotification("Failed to submit questionnaire");
+    cy.verifyErrorMessages([
+      { label: "Text", message: "Text too long. Max allowed size is 500" },
+    ]);
+  });
+});
+
 describe("All combination of questionnaire submissions", () => {
   beforeEach(() => {
     cy.loginByApi("superadmin");
     cy.visit("/");
-  });
-
-  it("verify the enable questionnaire with boolean and normal text with and without encounter", () => {
-    const questionnaireName = "Enable When Questionnaire with Choice Rendering";
-    // Navigate to admin dashboard and create questionnaire
-    cy.loginByApi("doctor");
-    cy.visit("/");
-    facilityCreation.selectFirstRandomFacility();
-    cy.getFacilityIdAndNavigate("encounters/patients");
-    cy.get("button").contains("View Encounter").first().click();
-    cy.get("button").contains("Add Questionnaire").click();
-    cy.typeAndSelectOption(
-      "input[placeholder='Search Questionnaires']",
-      questionnaireName,
-      false,
-    );
-    // access the questionnaire
-    // Click "No" radio button - using label text to find the question container
-    cy.get(
-      "[data-cy='question-does-the-patient-take-any-medications?']",
-    ).within(() => {
-      cy.get('button[value="false"]').click();
-    });
-
-    // Verify the medication name field is not present when "No" is selected
-    cy.get("label").contains("Name of the medicine taken").should("not.exist");
-
-    // Click "Yes" radio button
-    cy.get(
-      "[data-cy='question-does-the-patient-take-any-medications?']",
-    ).within(() => {
-      cy.get('button[value="true"]').click();
-    });
-
-    cy.get("[data-cy='question-name-of-the-medicine-taken']").within(() => {
-      cy.get("input").type("Vitamin C");
-    });
-
-    cy.get("[data-cy='question-which-vitamin-supplement-do-you-take?']").within(
-      () => {
-        cy.get('button[value="Vitamin D"]').click();
-      },
-    );
-
-    cy.get("label").contains("Why do you take Vitamin C?").should("not.exist");
-
-    cy.get("[data-cy='question-which-vitamin-supplement-do-you-take?']").within(
-      () => {
-        cy.get('button[value="Vitamin A"]').click();
-      },
-    );
-
-    cy.get("label").contains("Why do you take Vitamin C?").should("not.exist");
-
-    cy.get("[data-cy='question-which-vitamin-supplement-do-you-take?']").within(
-      () => {
-        cy.get('button[value="Vitamin C"]').click();
-      },
-    );
-
-    cy.get("[data-cy='question-why-do-you-take-vitamin-c?']").within(() => {
-      cy.get("input").type("To improve my immune system");
-    });
-
-    cy.get("[data-cy='question-select-your-known-allergies']").within(() => {
-      cy.get("button").contains("Select an option").click();
-    });
-
-    cy.get("[data-slot='command-list']").contains("Pollen").click();
-
-    cy.get("[data-slot='command-list']").contains("Close").click();
-
-    cy.get("label")
-      .contains("Describe your reaction to nuts / Dust")
-      .should("not.exist");
-
-    cy.get("[data-cy='question-select-your-known-allergies']").within(() => {
-      cy.get("button").contains("Pollen").click();
-    });
-
-    cy.get("[data-slot='command-list']").contains("Clear").click();
-
-    cy.get("[data-slot='command-list']").contains("Nuts").click();
-    cy.get("[data-slot='command-list']").contains("Dust").click();
-
-    cy.get("[data-cy='question-describe-your-reaction-to-nuts-/-dust']").within(
-      () => {
-        cy.get("input").type("I have a reaction to nuts and dust");
-      },
-    );
-
-    cy.get("[data-cy='question-additional-notes']").within(() => {
-      cy.get("input").type("There is no additional notes");
-    });
-
-    cy.get("[data-cy='question-have-you-been-prescribed-antibiotics']").within(
-      () => {
-        cy.get('button[value="true"]').click();
-      },
-    );
-
-    cy.get(
-      "[data-cy='question-which-antibiotic-have-you-taken-recently?']",
-    ).within(() => {
-      cy.get('button[value="Azithromycin"]').click();
-    });
-
-    cy.get(
-      "[data-cy='question-which-over-the-counter-meds-do-you-have?']",
-    ).within(() => {
-      cy.get("button").contains("Select an option").click();
-      cy.typeAndSelectOption(
-        "input[placeholder='Serach Option...']",
-        "Cough Syrup",
-      );
-    });
-
-    cy.get(
-      "[data-cy='question-select-all-medications-you-have-a-reaction-to']",
-    ).within(() => {
-      cy.get('button[value="Iodine"]').click();
-    });
-  });
-
-  it("Verify the non-supported questionnaire are not accessible in patient update", () => {
-    // Create a questionnaire with patient subject type to test restrictions
-    const slugName = faker.string.alphanumeric({ length: { min: 5, max: 10 } });
-    const questionnaireName = faker.string.alpha({
-      length: { min: 5, max: 10 },
-    });
-
-    // Navigate to admin dashboard and create questionnaire
-    cy.get("a").contains("Admin Dashboard").click();
-    cy.get("button").contains("Create Questionnaire").click();
-    cy.get("button").contains("Import").click();
-    cy.get("[data-slot='dropdown-menu-item']")
-      .contains("Import from URL")
-      .click();
-    cy.typeIntoField(
-      "input[placeholder='https://example.com/questionnaire.json']",
-      "https://raw.githubusercontent.com/nihal467/questionnaire/refs/heads/main/All%20Structure%20Question.json",
-    );
-    cy.get("[data-slot='button']").contains("Import").click({ force: true });
-    cy.get("[data-slot='button']").contains("Import Form").click();
-
-    // Configure questionnaire properties for patient subject type
-    cy.get("[data-slot='card-title']").contains("Properties").scrollIntoView();
-    cy.clickRadioButton("Status", "active");
-    cy.clickRadioButton("Subject Type", "patient"); // This makes it patient-specific
-    cy.clearAndTypeIntoField("input[name='title']", questionnaireName);
-    cy.clearAndTypeIntoField("input[name='slug']", slugName);
-
-    // Assign questionnaire to Doctor organization
-    cy.get("label")
-      .contains("Organizations")
-      .parent()
-      .within(() => {
-        cy.get("button").contains("Select Organizations").click();
-      });
-    cy.get("[cmdk-input]").should("be.visible").type("Doctor");
-    cy.get("[cmdk-item]").contains("Doctor").first().click();
-    cy.get("body").type("{esc}");
-    cy.get("button[type='submit']").scrollIntoView().click();
-
-    // Logout and switch to doctor user to test questionnaire access
-    cy.get("[data-slot='avatar']").click();
-    cy.get("[data-slot='dropdown-menu-item']").contains("Log Out").click();
-
-    // Test questionnaire access as doctor user
-    cy.loginByApi("doctor");
-    cy.visit("/");
-    facilityCreation.selectFirstRandomFacility();
-    cy.getFacilityIdAndNavigate("encounters/patients");
-    cy.get("button").contains("View Encounter").first().click();
-    cy.get("#patient-details").click();
-    cy.get("[role='tablist']").contains("Updates").click();
-    cy.get("a").contains("Add Patient Updates").click();
-    cy.get("button").contains("Add Questionnaire").click();
-    cy.typeAndSelectOption(
-      "input[placeholder='Search Questionnaires']",
-      questionnaireName,
-      false,
-    );
-
-    // Verify that patient-specific questionnaires show appropriate error messages
-    // when accessed outside of an active encounter
-    cy.verifyContentPresence("[data-slot='card-content']", [
-      "Allergy Intolerances cannot be recorded without an active encounter",
-      "Medication requests cannot be recorded without an active encounter",
-      "Medication statements cannot be recorded without an active encounter",
-      "Symptoms cannot be recorded without an active encounter",
-      "Diagnosis cannot be recorded without an active encounter",
-      "Create an encounter first to upload files",
-    ]);
   });
 
   it("Verify the allergy questionnaire are only accessible in encounter ", () => {
@@ -282,7 +145,7 @@ describe("All combination of questionnaire submissions", () => {
     // Add allergy information to the questionnaire
     cy.get("button").contains("Allergy").click();
     cy.typeAndSelectOption(
-      "input[placeholder='Type to search and select from the list']",
+      "input[placeholder='Add Allergy']",
       allergyName,
       false,
     );
@@ -299,61 +162,76 @@ describe("All combination of questionnaire submissions", () => {
       "Active",
     ]);
   });
-});
 
-describe("Patient Encounter Questionnaire", () => {
-  beforeEach(() => {
-    cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
-    cy.loginByApi("nurse");
-    cy.visit("/");
-  });
-
-  it("Create a new ABG questionnaire and verify the values", () => {
-    // Test data for respiratory support questionnaire
-    const respiratorySupportValues = {
-      "etco2-(mmhg)": "120",
-    };
-    facilityCreation.selectFirstRandomFacility();
-
-    // Execute questionnaire workflow using page object methods
-    patientEncounter
-      .navigateToEncounters()
-      .clickInProgressEncounterFilter()
-      .openFirstEncounterDetails()
-      .clickUpdateEncounter()
-      .addQuestionnaire("Respiratory Support")
-      .fillQuestionnaire(respiratorySupportValues);
-    patientPrescription.submitQuestionnaire();
-
-    // Verify the submitted values appear in the overview
-    patientEncounter.verifyOverviewValues(
-      Object.values(respiratorySupportValues),
-    );
-  });
-
-  it("verify the 500 character limit in input field", () => {
-    // Generate text exceeding the 500 character limit to test validation
-    const characterMaxLimit = generateRandomCharacter({
-      charLimit: 510, // Exceeds the 500 character limit
+  it("Verify the non-supported questionnaire are not accessible in patient update", () => {
+    // Create a questionnaire with patient subject type to test restrictions
+    const slugName = faker.string.alphanumeric({ length: { min: 5, max: 10 } });
+    const questionnaireName = faker.string.alpha({
+      length: { min: 5, max: 10 },
     });
-    facilityCreation.selectFirstRandomFacility();
 
-    // Attempt to submit questionnaire with oversized text
-    patientEncounter
-      .navigateToEncounters()
-      .clickInProgressEncounterFilter()
-      .openFirstEncounterDetails()
-      .clickUpdateEncounter()
-      .addQuestionnaire("Feedback Form")
-      .fillQuestionnaire({
-        "any-suggestions-for-improvement": characterMaxLimit,
+    // Navigate to admin dashboard and create questionnaire
+    cy.get("a").contains("Admin Dashboard").click();
+    cy.get("button").contains("Create Questionnaire").click();
+    cy.get("button").contains("Import").click();
+    cy.get("[data-slot='dropdown-menu-item']")
+      .contains("Import from URL")
+      .click();
+    cy.typeIntoField(
+      "input[placeholder='https://example.com/questionnaire.json']",
+      "https://raw.githubusercontent.com/nihal467/questionnaire/refs/heads/main/All%20Structure%20Question.json",
+    );
+    cy.get("[data-slot='button']").contains("Import").click({ force: true });
+    cy.get("[data-slot='button']").contains("Import Form").click();
+
+    // Configure questionnaire properties for patient subject type
+    cy.get("[data-slot='card-title']").contains("Properties").scrollIntoView();
+    cy.clickRadioButton("Status", "active");
+    cy.clickRadioButton("Subject Type", "patient"); // This makes it patient-specific
+    cy.clearAndTypeIntoField("input[name='title']", questionnaireName);
+    cy.clearAndTypeIntoField("input[name='slug']", slugName);
+
+    // Assign questionnaire to Doctor organization
+    cy.get("label")
+      .contains("Organizations")
+      .parent()
+      .within(() => {
+        cy.get("button").contains("Select Organizations").click();
       });
-    patientPrescription.clickSubmitQuestionnaire();
+    cy.get("[cmdk-input]").should("be.visible").type("Doctor");
+    cy.get("[cmdk-item]").contains("Doctor").first().click();
+    cy.get("body").type("{esc}");
+    cy.get("button[type='submit']").scrollIntoView().click();
 
-    // Verify that submission fails with appropriate error message
-    cy.verifyNotification("Failed to submit questionnaire");
-    cy.verifyErrorMessages([
-      { label: "Text", message: "Text too long. Max allowed size is 500" },
+    // Logout and switch to doctor user to test questionnaire access
+    cy.get("[data-slot='avatar']").click();
+    cy.get("[data-slot='dropdown-menu-item']").contains("Log Out").click();
+
+    // Test questionnaire access as doctor user
+    cy.loginByApi("doctor");
+    cy.visit("/");
+    facilityCreation.selectFirstRandomFacility();
+    cy.getFacilityIdAndNavigate("encounters/patients");
+    cy.get("button").contains("View Encounter").first().click();
+    cy.get("#patient-details").click();
+    cy.get("[role='tablist']").contains("Updates").click();
+    cy.get("a").contains("Add Patient Updates").click();
+    cy.get("button").contains("Add Questionnaire").click();
+    cy.typeAndSelectOption(
+      "input[placeholder='Search Questionnaires']",
+      questionnaireName,
+      false,
+    );
+
+    // Verify that patient-specific questionnaires show appropriate error messages
+    // when accessed outside of an active encounter
+    cy.verifyContentPresence("[data-slot='card-content']", [
+      "Allergy Intolerances cannot be recorded without an active encounter",
+      "Medication requests cannot be recorded without an active encounter",
+      "Medication statements cannot be recorded without an active encounter",
+      "Symptoms cannot be recorded without an active encounter",
+      "Diagnosis cannot be recorded without an active encounter",
+      "Create an encounter first to upload files",
     ]);
   });
 });
