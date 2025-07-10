@@ -355,6 +355,7 @@ export default function DispensedMedicationList({
       return med.charge_item.paid_invoice?.status === InvoiceStatus.balanced;
     if (paymentFilter === "unpaid")
       return (
+        !med.charge_item.paid_invoice ||
         med.charge_item.paid_invoice?.status === InvoiceStatus.issued ||
         med.charge_item.paid_invoice?.status === InvoiceStatus.draft
       );
