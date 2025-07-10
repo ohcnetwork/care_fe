@@ -1,15 +1,16 @@
 import { LazyExoticComponent } from "react";
 import { UseFormReturn } from "react-hook-form";
 
+import { NavigationLink } from "@/components/ui/sidebar/nav-main";
+
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { DeviceDetail } from "@/types/device/device";
-import { Encounter } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/patient";
+import { Encounter } from "@/types/emr/encounter/encounter";
+import { Patient } from "@/types/emr/patient/patient";
 import { UserBase } from "@/types/user/user";
 
 import { AppRoutes } from "./Routers/AppRouter";
 import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
-import { NavigationLink } from "./components/ui/sidebar/facility-nav";
 import { pluginMap } from "./pluginMap";
 import { FacilityData } from "./types/facility/facility";
 

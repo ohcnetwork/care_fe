@@ -19,11 +19,14 @@ import useFilters from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
-import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/patient";
+import {
+  Encounter,
+  inactiveEncounterStatus,
+} from "@/types/emr/encounter/encounter";
+import { Patient } from "@/types/emr/patient/patient";
+import patientApi from "@/types/emr/patient/patientApi";
 import metaArtifactApi from "@/types/metaAritifact/metaArtifactApi";
 
 export interface DrawingsTabProps {
@@ -142,7 +145,7 @@ export const DrawingPage = ({
   });
   const { data: patientData } = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(routes.patient.getPatient, {
+    queryFn: query(patientApi.getPatient, {
       pathParams: { id: patientId ?? "" },
     }),
     enabled: !!patient && !!patientId,

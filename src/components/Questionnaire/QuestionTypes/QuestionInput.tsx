@@ -18,6 +18,7 @@ import type { Question } from "@/types/questionnaire/question";
 
 import { AllergyQuestion } from "./AllergyQuestion";
 import { BooleanQuestion } from "./BooleanQuestion";
+import { ChargeItemQuestion } from "./ChargeItemQuestion";
 import { ChoiceQuestion } from "./ChoiceQuestion";
 import { DateQuestion } from "./DateQuestion";
 import { DateTimeQuestion } from "./DateTimeQuestion";
@@ -30,6 +31,7 @@ import { MedicationStatementQuestion } from "./MedicationStatementQuestion";
 import { NotesInput } from "./NotesInput";
 import { NumberQuestion } from "./NumberQuestion";
 import { QuantityQuestion } from "./QuantityQuestion";
+import { ServiceRequestQuestion } from "./ServiceRequestQuestion";
 import { SymptomQuestion } from "./SymptomQuestion";
 import { TextQuestion } from "./TextQuestion";
 import { TimeQuestion } from "./TimeQuestion";
@@ -162,6 +164,30 @@ export function QuestionInput({
                 {t("questionnaire_medication_statement_no_encounter")}
               </span>
             );
+          case "service_request":
+            if (encounterId && facilityId) {
+              return (
+                <ServiceRequestQuestion
+                  {...commonProps}
+                  facilityId={facilityId}
+                  encounterId={encounterId}
+                />
+              );
+            }
+            return (
+              <span>{t("questionnaire_service_request_no_encounter")}</span>
+            );
+          case "charge_item":
+            if (encounterId && facilityId) {
+              return (
+                <ChargeItemQuestion
+                  {...commonProps}
+                  facilityId={facilityId}
+                  encounterId={encounterId}
+                />
+              );
+            }
+            return <span>{t("questionnaire_charge_item_no_encounter")}</span>;
           case "allergy_intolerance":
             if (encounterId) {
               return <AllergyQuestion {...commonProps} />;

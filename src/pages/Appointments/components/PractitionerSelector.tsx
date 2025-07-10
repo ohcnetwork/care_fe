@@ -48,7 +48,7 @@ export const PractitionerSelector = ({
   } = useQuery({
     queryKey: ["practitioners", facilityId],
     queryFn: query(scheduleApi.appointments.availableUsers, {
-      pathParams: { facility_id: facilityId },
+      pathParams: { facilityId },
     }),
   });
 
