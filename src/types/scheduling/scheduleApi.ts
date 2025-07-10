@@ -166,5 +166,19 @@ export default {
       method: HttpMethod.GET,
       TRes: Type<PaginatedResponse<Appointment>>(),
     },
+
+    // Tag-related endpoints
+    setTags: {
+      path: "/api/v1/facility/{facilityId}/appointments/{external_id}/set_tags/",
+      method: HttpMethod.POST,
+      TRes: Type<unknown>(),
+      TBody: Type<{ tags: string[] }>(),
+    },
+    removeTags: {
+      path: "/api/v1/facility/{facilityId}/appointments/{external_id}/remove_tags/",
+      method: HttpMethod.POST,
+      TRes: Type<unknown>(),
+      TBody: Type<{ tags: string[] }>(),
+    },
   },
 } as const;
