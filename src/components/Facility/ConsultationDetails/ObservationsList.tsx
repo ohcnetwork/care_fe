@@ -11,7 +11,7 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter } from "@/types/emr/encounter/encounter";
 import { Observation } from "@/types/emr/observation";
 
 const LIMIT = 20;
