@@ -48,7 +48,7 @@ import {
   Encounter,
   EncounterClass,
   EncounterRequest,
-} from "@/types/emr/encounter";
+} from "@/types/emr/encounter/encounter";
 
 interface Props {
   patientId: string;

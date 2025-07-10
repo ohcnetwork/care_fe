@@ -44,7 +44,7 @@ import {
   type EncounterPriority,
   type EncounterStatus,
   Hospitalization,
-} from "@/types/emr/encounter";
+} from "@/types/emr/encounter/encounter";
 import type {
   QuestionnaireResponse,
   ResponseValue,
