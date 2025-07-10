@@ -92,7 +92,10 @@ import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import {
   Appointment,
+  AppointmentCancelledStatus,
+  AppointmentNonCancelledStatus,
   AppointmentRead,
+  AppointmentStatus,
   AppointmentStatuses,
   TokenSlot,
 } from "@/types/scheduling/schedule";
