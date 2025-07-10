@@ -612,7 +612,7 @@ export const DischargeTab = ({
           />
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 sm:flex-wrap items-center gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 items-center gap-2">
           <FilterButton />
           <Button
             variant="outline_primary"
@@ -630,20 +630,23 @@ export const DischargeTab = ({
             <CareIcon icon="l-sync" className="mr-2" />
             {t("refresh")}
           </Button>
-          <div className="col-span-2 sm:w-auto">
           {canEdit && (
-            <Button
-              variant="primary"
-              className="w-full sm:w-auto min-w-24 sm:min-w-28"
-              onClick={() => generateDischargeSummary()}
-              disabled={isGenerating}
-            >
-              <CareIcon
-                icon="l-file-medical"
-                className="hidden w-full sm:block mr-2"
-              />
-              {isGenerating ? t("generating") : t("generate_discharge_summary")}
-            </Button>
+            <div className="col-span-2 sm:w-auto">
+              <Button
+                variant="primary"
+                className="w-full sm:w-auto min-w-24 sm:min-w-28"
+                onClick={() => generateDischargeSummary()}
+                disabled={isGenerating}
+              >
+                <CareIcon
+                  icon="l-file-medical"
+                  className="hidden w-full sm:block mr-2"
+                />
+                {isGenerating
+                  ? t("generating")
+                  : t("generate_discharge_summary")}
+              </Button>
+            </div>
           )}
           {/* <ReportBuilderSheet
             facilityId={facilityId || ""}
@@ -672,7 +675,6 @@ export const DischargeTab = ({
               });
             }}
           /> */}
-          </div>
         </div>
 
         <div className="w-full sm:w-auto ml-auto">
