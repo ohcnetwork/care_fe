@@ -89,6 +89,9 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
 import {
   Appointment,
+  AppointmentCancelledStatus,
+  AppointmentNonCancelledStatus,
+  AppointmentStatus,
   AppointmentStatuses,
   TokenSlot,
 } from "@/types/scheduling/schedule";
@@ -98,6 +101,15 @@ interface DateRangeDisplayProps {
   dateFrom: string | null;
   dateTo: string | null;
 }
+
+const FILTERED_APPOINTMENT_STATUSES: Partial<AppointmentStatus>[] = [
+  "booked",
+  "checked_in",
+  "in_consultation",
+  "fulfilled",
+  "noshow",
+  "cancelled",
+] as const;
 
 function AppointmentsEmptyState() {
   const { t } = useTranslation();
@@ -597,15 +609,7 @@ export default function AppointmentsPage() {
           )}
         >
           <div className="flex w-max space-x-4">
-            {(
-              [
-                "booked",
-                "checked_in",
-                "in_consultation",
-                "fulfilled",
-                "noshow",
-              ] as const
-            ).map((status) => (
+            {FILTERED_APPOINTMENT_STATUSES.map((status) => (
               <AppointmentColumn
                 key={status}
                 status={status}
@@ -640,7 +644,7 @@ export default function AppointmentsPage() {
 }
 
 function AppointmentColumn(props: {
-  status: Appointment["status"];
+  status: AppointmentNonCancelledStatus | AppointmentCancelledStatus;
   practitioner: string | null;
   slot?: string | null;
   date_from: string | null;
@@ -839,13 +843,11 @@ function AppointmentRow(props: {
             onValueChange={(value) => props.updateQuery({ status: value })}
           >
             <TabsList>
-              <TabsTrigger value="booked">{t("booked")}</TabsTrigger>
-              <TabsTrigger value="checked_in">{t("checked_in")}</TabsTrigger>
-              <TabsTrigger value="in_consultation">
-                {t("in_consultation")}
-              </TabsTrigger>
-              <TabsTrigger value="fulfilled">{t("fulfilled")}</TabsTrigger>
-              <TabsTrigger value="noshow">{t("noshow")}</TabsTrigger>
+              {FILTERED_APPOINTMENT_STATUSES.map((status) => (
+                <TabsTrigger key={status} value={status}>
+                  {t(status)}
+                </TabsTrigger>
+              ))}
             </TabsList>
           </Tabs>
         </div>
@@ -860,64 +862,56 @@ function AppointmentRow(props: {
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="booked">
-                <div className="flex items-center">Booked</div>
-              </SelectItem>
-              <SelectItem value="checked_in">
-                <div className="flex items-center">Checked In</div>
-              </SelectItem>
-              <SelectItem value="in_consultation">
-                <div className="flex items-center">In Consultation</div>
-              </SelectItem>
-              <SelectItem value="fulfilled">
-                <div className="flex items-center">Fulfilled</div>
-              </SelectItem>
-              <SelectItem value="noshow">
-                <div className="flex items-center">No Show</div>
-              </SelectItem>
+              {FILTERED_APPOINTMENT_STATUSES.map((status) => (
+                <SelectItem key={status} value={status}>
+                  <div className="flex items-center">{t(status)}</div>
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
 
-        {isLoading ? (
-          <TableSkeleton count={5} />
-        ) : appointments.length === 0 ? (
-          <AppointmentsEmptyState />
-        ) : (
-          <Table className="p-2 border-separate border-gray-200 border-spacing-y-3">
-            <TableHeader>
-              <TableRow>
-                <TableHead className="pl-8 font-semibold text-black text-xs">
-                  {t("patient")}
-                </TableHead>
-                <TableHead className="font-semibold text-black text-xs">
-                  {t("practitioner")}
-                </TableHead>
-                <TableHead className="font-semibold text-black text-xs">
-                  {t("current_status")}
-                </TableHead>
-                <TableHead className="font-semibold text-black text-xs">
-                  {t("token_no")}
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody className="">
-              {appointments.map((appointment) => (
-                <TableRow
-                  key={appointment.id}
-                  className="shadow-sm rounded-lg cursor-pointer group"
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`,
-                    )
-                  }
-                >
-                  <AppointmentRowItem appointment={appointment} />
+        <div className="mt-2">
+          {isLoading ? (
+            <TableSkeleton count={5} />
+          ) : appointments.length === 0 ? (
+            <AppointmentsEmptyState />
+          ) : (
+            <Table className="p-2 border-separate border-gray-200 border-spacing-y-3">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="pl-8 font-semibold text-black text-xs">
+                    {t("patient")}
+                  </TableHead>
+                  <TableHead className="font-semibold text-black text-xs">
+                    {t("practitioner")}
+                  </TableHead>
+                  <TableHead className="font-semibold text-black text-xs">
+                    {t("current_status")}
+                  </TableHead>
+                  <TableHead className="font-semibold text-black text-xs">
+                    {t("token_no")}
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
+              </TableHeader>
+              <TableBody>
+                {appointments.map((appointment) => (
+                  <TableRow
+                    key={appointment.id}
+                    className="shadow-sm rounded-lg cursor-pointer group"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`,
+                      )
+                    }
+                  >
+                    <AppointmentRowItem appointment={appointment} />
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </div>
         {props.Pagination({ totalCount: data?.count ?? 0 })}
       </div>
     </div>
