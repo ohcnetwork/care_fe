@@ -159,10 +159,6 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
   };
 
   useEffect(() => {
-    dragStateRef.current = dragState;
-  }, [dragState]);
-
-  useEffect(() => {
     if (uploadedFiles && show) {
       setIndex(currentIndex);
     }
@@ -424,6 +420,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                         {t("video_not_supported")}
                       </video>
                     </div>
+                  )
                 ) : previewExtensions.includes(file_state.extension) ? (
                   <iframe
                     sandbox=""
