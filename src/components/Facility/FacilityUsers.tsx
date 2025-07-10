@@ -92,6 +92,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
               type: "text",
               placeholder: t("search_by_username"),
               value: qParams.username || "",
+              display: t("username"),
             },
           ]}
           onSearch={(key, value) =>

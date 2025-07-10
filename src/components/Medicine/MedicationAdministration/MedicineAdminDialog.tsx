@@ -15,7 +15,7 @@ import {
 import mutate from "@/Utils/request/mutate";
 import { MedicationAdministrationRequest } from "@/types/emr/medicationAdministration/medicationAdministration";
 import medicationAdministrationApi from "@/types/emr/medicationAdministration/medicationAdministrationApi";
-import { MedicationRequestRead } from "@/types/emr/medicationRequest";
+import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
 
 import { MedicineAdminForm } from "./MedicineAdminForm";
 

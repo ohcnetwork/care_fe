@@ -21,13 +21,12 @@ import {
 import Loading from "@/components/Common/Loading";
 import PrintTable from "@/components/Common/PrintTable";
 
-import api from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import {
   formatPatientAge,
   getWeeklyIntervalsFromTodayTill,
 } from "@/Utils/utils";
-import { Encounter } from "@/types/emr/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
 import medicationAdministrationApi from "@/types/emr/medicationAdministration/medicationAdministrationApi";
 
@@ -39,9 +38,9 @@ export const PrintMedicationAdministration = (props: {
   const { facilityId, encounterId, patientId } = props;
   const { t } = useTranslation();
 
-  const { data: encounter } = useQuery<Encounter>({
+  const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId],
-    queryFn: query(api.encounter.get, {
+    queryFn: query(encounterApi.getEncounter, {
       pathParams: { id: encounterId },
       queryParams: { facility: facilityId },
     }),
@@ -277,9 +276,10 @@ export const PrintMedicationAdministration = (props: {
                 )
                 .map((administration) => {
                   return {
-                    medicine:
-                      administration.medication.display ??
-                      administration.medication.code,
+                    medicine: administration.medication?.code
+                      ? (administration.medication.display ??
+                        administration.medication.code)
+                      : administration.administered_product?.name,
                     administered_at: format(
                       new Date(administration.occurrence_period_start),
                       "dd MMM yyyy, hh:mm a",
@@ -398,7 +398,10 @@ const MedicationAdministrationTable = ({
     return (
       <div className="flex flex-col items-center gap-2">
         <h5>
-          {administration.medication.display ?? administration.medication.code}
+          {administration.medication?.code
+            ? (administration.medication.display ??
+              administration.medication.code)
+            : administration.administered_product?.name}
         </h5>
         <p className="text-sm flex items-center justify-center gap-1 flex-wrap">
           <span>

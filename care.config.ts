@@ -1,6 +1,6 @@
 import { CountryCode } from "libphonenumber-js/types.cjs";
 
-import { EncounterClass } from "@/types/emr/encounter";
+import { EncounterClass } from "@/types/emr/encounter/encounter";
 
 const env = import.meta.env;
 
