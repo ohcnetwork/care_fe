@@ -98,7 +98,7 @@ export const EncounterOverviewTab = () => {
                       {t("allergies")}:
                     </span>
                     <Badge variant="yellow">
-                      <HandIcon />
+                      <HandIcon className="size-4" />
                       <span>
                         {allergies?.results
                           .map((allergy) => allergy.code.display)
