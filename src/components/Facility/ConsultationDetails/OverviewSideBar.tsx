@@ -73,7 +73,9 @@ const Actions = () => {
         <Button
           variant="outline"
           className="justify-start"
-          onClick={() => navigate("treatment_summary")}
+          onClick={() =>
+            navigate(`../${selectedEncounterId}/treatment_summary`)
+          }
         >
           <NotebookPen />
           {t("treatment_summary")}
@@ -81,7 +83,14 @@ const Actions = () => {
         <Button
           variant="outline"
           className="justify-start"
-          onClick={() => navigate("files?file=discharge_summary")}
+          onClick={() =>
+            navigate("files", {
+              query: {
+                file: "discharge_summary",
+                selectedEncounter: selectedEncounterId,
+              },
+            })
+          }
         >
           <NotebookPen />
           {t("discharge_summary")}
