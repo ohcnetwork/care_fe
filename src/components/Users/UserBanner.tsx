@@ -38,7 +38,7 @@ export default function UserBanner({ userData }: { userData: UserBase }) {
           <TooltipComponent content={userData.username} side="bottom">
             <p
               id="username"
-              className="text-sm font-light leading-relaxed text-secondary-600 truncate"
+              className="text-sm font-light leading-relaxed text-secondary-600 w-fit"
             >
               {userData.username}
             </p>

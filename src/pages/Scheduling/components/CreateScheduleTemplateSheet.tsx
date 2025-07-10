@@ -181,7 +181,7 @@ export default function CreateScheduleTemplateSheet({
 
   const { mutate: createTemplate, isPending } = useMutation({
     mutationFn: mutate(scheduleApis.templates.create, {
-      pathParams: { facility_id: facilityId },
+      pathParams: { facilityId },
     }),
     onSuccess: () => {
       toast.success("Schedule template created successfully");
@@ -277,7 +277,7 @@ export default function CreateScheduleTemplateSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-fit ">
+      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-fit">
         <SheetHeader>
           <SheetTitle>{t("create_schedule_template")}</SheetTitle>
           <SheetDescription className="sr-only">
