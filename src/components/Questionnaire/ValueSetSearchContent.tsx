@@ -144,15 +144,20 @@ export default function ValueSetSearchContent({
   });
 
   // Combine recents and search results, but only show each result once
+  const filteredRecents =
+    recentsQuery.data?.filter((recent) =>
+      search.length < 3
+        ? true
+        : recent.display?.toLowerCase().includes(search.toLowerCase()) ||
+          recent.code?.toLowerCase().includes(search.toLowerCase()),
+    ) || [];
+
   const resultsWithRecents = [
-    ...(recentsQuery.data?.filter((recent) =>
-      recent.display?.toLowerCase().includes(search.toLowerCase()),
-    ) || []),
+    ...filteredRecents,
     ...(searchQuery.data?.results?.filter(
-      (r) => !recentsQuery.data?.find((recent) => recent.code === r.code),
+      (r) => !filteredRecents.find((recent) => recent.code === r.code),
     ) || []),
   ];
-
   // Filter favourites based on search
   const favourites = favouritesQuery.data?.filter((favourite) =>
     favourite.display?.toLowerCase().includes(search.toLowerCase()),
