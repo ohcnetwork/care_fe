@@ -364,19 +364,6 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                       />
                     </Suspense>
                   </div>
-                ) : file_state.extension === "pdf" ? (
-                  <Suspense fallback={<CircularProgress />}>
-                    <PDFViewer
-                      url={fileUrl}
-                      onDocumentLoadSuccess={(numPages: number) => {
-                        setPage(1);
-                        setNumPages(numPages);
-                      }}
-                      pageNumber={page}
-                      scale={scale}
-                      className="max-md:max-w-[50vw]"
-                    />
-                  </Suspense>
                 ) : isVideo ? (
                   shouldSkipVideo() ? (
                     <div className="flex h-full w-full flex-col items-center justify-center">
