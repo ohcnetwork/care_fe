@@ -22,6 +22,7 @@ import { EncounterConsentsTab } from "@/pages/Encounters/tabs/EncounterConsentsT
 import { EncounterDevicesTab } from "@/pages/Encounters/tabs/EncounterDevicesTab";
 import { EncounterFilesTab } from "@/pages/Encounters/tabs/EncounterFilesTab";
 import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicinesTab";
+import { EncounterObservationsTab } from "@/pages/Encounters/tabs/EncounterObservationsTab";
 import { EncounterOverviewTab } from "@/pages/Encounters/tabs/EncounterOverviewTab";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
@@ -43,6 +44,7 @@ export interface PluginEncounterTabProps {
 const defaultTabs = {
   updates: EncounterOverviewTab,
   plots: EncounterPlotsTab,
+  observations: EncounterObservationsTab,
   medicines: EncounterMedicinesTab,
   files: EncounterFilesTab,
   notes: EncounterNotesTab,
