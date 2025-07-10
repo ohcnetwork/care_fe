@@ -45,6 +45,7 @@ export const EncounterOverviewTab = () => {
   const {
     selectedEncounter: encounter,
     patientId,
+    patient,
     selectedEncounterId: encounterId,
     selectedEncounterPermissions: {
       canViewClinicalData,
@@ -54,6 +55,14 @@ export const EncounterOverviewTab = () => {
     currentEncounterId,
     facilityId,
   } = useEncounter();
+
+  const { data: allergies } = useQuery({
+    queryKey: ["allergy-intolerance", patientId, "confirmed"],
+    queryFn: query(allergyIntoleranceApi.getAllergy, {
+      pathParams: { patientId },
+      queryParams: { verification_status: "confirmed" },
+    }),
+  });
 
   const canAccess = canViewEncounter || canViewClinicalData;
   const canEdit =
@@ -70,7 +79,37 @@ export const EncounterOverviewTab = () => {
         <div className="flex-1 space-y-4">
           <div className="hidden md:block bg-white rounded-lg p-4 border border-gray-200">
             <div className="flex flex-row items-center justify-between gap-4">
-              <BloodGroupAndAllergies />
+              <div className="flex flex-row gap-3">
+                <div className="flex flex-col items-start gap-1 whitespace-nowrap">
+                  <span className="text-sm font-medium text-gray-600">
+                    {t("blood_group")}:
+                  </span>
+                  <Badge className="flex flex-row items-center gap-2 bg-red-100 p-1 rounded-md border border-none">
+                    <DropletIcon className="size-4 text-red-800" />
+                    <span className="text-sm text-red-800">
+                      {t(`BLOOD_GROUP_LONG__${patient?.blood_group}`)}
+                    </span>
+                  </Badge>
+                </div>
+
+                {!!allergies?.results.length && (
+                  <div className="flex flex-col items-start gap-1">
+                    <span className="text-sm font-medium text-gray-600">
+                      {t("allergies")}:
+                    </span>
+                    <Badge className="flex flex-row items-start gap-2 bg-yellow-100 p-1 rounded-md border border-none">
+                      <div>
+                        <HandIcon className="size-4 text-yellow-800 mt-1" />
+                      </div>
+                      <span className="text-sm text-yellow-800">
+                        {allergies?.results
+                          .map((allergy) => allergy.code.display)
+                          .join(", ")}
+                      </span>
+                    </Badge>
+                  </div>
+                )}
+              </div>
               <Button asChild variant="outline" size="lg">
                 <Link
                   href={`/facility/${facilityId}/patient/${patientId}/history/symptoms`}
@@ -186,53 +225,6 @@ export const EncounterOverviewTab = () => {
           </div>
         )}
       </div>
-    </div>
-  );
-};
-
-export const BloodGroupAndAllergies = () => {
-  const { patientId, patient } = useEncounter();
-
-  const { t } = useTranslation();
-  const { data: allergies } = useQuery({
-    queryKey: ["allergy-intolerance", patientId, "confirmed"],
-    queryFn: query(allergyIntoleranceApi.getAllergy, {
-      pathParams: { patientId },
-      queryParams: { verification_status: "confirmed" },
-    }),
-  });
-
-  return (
-    <div className="flex flex-row gap-3">
-      <div className="flex flex-col items-start gap-1 whitespace-nowrap">
-        <span className="text-sm font-medium text-gray-600">
-          {t("blood_group")}:
-        </span>
-        <Badge className="flex flex-row items-center gap-2 bg-red-100 p-1 rounded-md border border-none">
-          <DropletIcon className="size-4 text-red-800" />
-          <span className="text-sm text-red-800">
-            {t(`BLOOD_GROUP_LONG__${patient?.blood_group}`)}
-          </span>
-        </Badge>
-      </div>
-
-      {!!allergies?.results.length && (
-        <div className="flex flex-col items-start gap-1">
-          <span className="text-sm font-medium text-gray-600">
-            {t("allergies")}:
-          </span>
-          <Badge className="flex flex-row items-start gap-2 bg-yellow-100 p-1 rounded-md border border-none">
-            <div>
-              <HandIcon className="size-4 text-yellow-800 mt-1" />
-            </div>
-            <span className="text-sm text-yellow-800">
-              {allergies?.results
-                .map((allergy) => allergy.code.display)
-                .join(", ")}
-            </span>
-          </Badge>
-        </div>
-      )}
     </div>
   );
 };

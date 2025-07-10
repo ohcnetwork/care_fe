@@ -20,8 +20,6 @@ import EncounterProperties from "@/pages/Encounters/EncounterProperties";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 
-import { BloodGroupAndAllergies } from "./tabs/EncounterOverviewTab";
-
 export function EncounterHeader() {
   const { t } = useTranslation();
   const {
@@ -90,9 +88,6 @@ export function EncounterHeader() {
         </div>
         <div className="md:hidden">
           <EncounterProperties encounter={encounter} canEdit={false} />
-        </div>
-        <div className="sm:hidden border border-gray-200 rounded-lg p-2">
-          <BloodGroupAndAllergies />
         </div>
       </div>
 
