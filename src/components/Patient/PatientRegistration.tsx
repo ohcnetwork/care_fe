@@ -929,9 +929,11 @@ export default function PatientRegistration(
                             value: countryList.indexOf(c).toString(),
                           }))}
                           {...field}
+                          value={countryList.indexOf(field.value).toString()}
                           onChange={(value) => {
                             const selectedCountry =
                               countryList[parseInt(value)];
+
                             form.setValue("nationality", selectedCountry, {
                               shouldDirty: true,
                             });
