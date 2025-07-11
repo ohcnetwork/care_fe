@@ -27,7 +27,11 @@ export default function RadioInput({ options, ...props }: RadioInputProps) {
           key={`${option.value}-${props.value}`} // to prevent race condition
           onClick={() => {
             if (!props.disabled) {
-              props.onValueChange?.(option.value.toString());
+              if (props.value === option.value) {
+                props.onValueChange?.("");
+              } else {
+                props.onValueChange?.(option.value.toString());
+              }
             }
           }}
         >
