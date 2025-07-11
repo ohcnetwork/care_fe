@@ -15,17 +15,25 @@ import {
 } from "@/types/emr/encounter/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
-import { Patient } from "@/types/emr/patient/patient";
+import {
+  Patient,
+  PatientRead,
+  PatientUpdate,
+} from "@/types/emr/patient/patient";
 import { Symptom } from "@/types/emr/symptom/symptom";
 import { FacilityBareMinimum, FacilityData } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
 import { BatchRequestBody } from "@/types/questionnaire/batch";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
-import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 import {
-  Appointment,
+  ResourceRequest,
+  UpdateResourceRequest,
+} from "@/types/resourceRequest/resourceRequest";
+import {
+  AppointmentCreateRequest,
   AppointmentNonCancelledStatus,
+  AppointmentRead,
   AvailabilityHeatmapResponse,
   TokenSlot,
 } from "@/types/scheduling/schedule";
@@ -139,8 +147,8 @@ export const normalizeOfflinePatientRecord = (
   permissions?: string[],
   created_date?: string,
   modified_date?: string,
-): Patient => {
-  const payload = entry?.payload as any;
+): PatientRead => {
+  const payload = entry?.payload as PatientUpdate;
   const nowIso = new Date(entry.clientTimestamp).toISOString();
 
   const yob = getYearOfBirth(payload.date_of_birth, payload.age);
@@ -154,13 +162,16 @@ export const normalizeOfflinePatientRecord = (
     address: payload.address ?? "",
     permanent_address: payload.permanent_address ?? "",
     pincode: payload.pincode ?? undefined,
-    blood_group: payload.blood_group ?? null,
-    date_of_birth: payload.date_of_birth ?? null,
+    blood_group: payload.blood_group ?? undefined,
+    date_of_birth: payload.date_of_birth ?? undefined,
     year_of_birth: yob ?? 0,
     deceased_datetime: payload.deceased_datetime,
 
     created_date: created_date ? created_date : nowIso,
     modified_date: modified_date ? modified_date : nowIso,
+    instance_tags: [], // change needed
+    facility_tags: [], // change needed
+    instance_identifiers: [], // change needed
 
     geo_organization: selectedGeoLocation ?? {
       id: payload.geo_organization ?? "unknown",
@@ -274,29 +285,34 @@ export const normaliZedResourcerequestRecord = (
   user: AuthUserModel,
   created_date?: string,
   modified_date?: string,
+  approving_facility?: FacilityModel,
 ): ResourceRequest => {
-  const payload = entry.payload as any;
+  const payload = entry.payload as UpdateResourceRequest;
 
   const nowIso = new Date(entry.clientTimestamp).toISOString();
   const originFacilityId = payload.origin_facility;
-  const originfacility =
-    originFacilityId &&
-    queryClient.getQueryData<FacilityData>(["facility", originFacilityId]);
+  let originfacility: FacilityModel | undefined;
 
+  if (originFacilityId && originFacilityId !== "") {
+    originfacility = queryClient.getQueryData<FacilityModel>([
+      "facility",
+      originFacilityId,
+    ]);
+  }
   return {
-    approving_facility: payload.approving_facility ?? null,
+    approving_facility: approving_facility ?? null,
     assigned_facility: assigned_facility ?? undefined,
     category: payload.category ?? "-",
     emergency: payload.emergency ?? null,
     id: entry?.id,
-    origin_facility: originfacility,
+    origin_facility: originfacility!,
     priority: payload.priority ?? null,
     reason: payload.reason ?? null,
     referring_facility_contact_name:
       payload.referring_facility_contact_name ?? "unknown(offline)",
     referring_facility_contact_number:
       payload.referring_facility_contact_number ?? "unknown(offline)",
-    requested_quantity: payload.requested_quantity ?? null,
+    requested_quantity: 1,
     status: payload.status ?? "unknown(offline)",
     title: payload.title ?? "unknown(offline)",
     assigned_to: assignToUser ?? null,
@@ -317,8 +333,8 @@ export const normalizedAppointmentRecord = (
   status: AppointmentNonCancelledStatus,
   practitioner: UserBase,
   facility: FacilityBareMinimum,
-): Appointment => {
-  const payload = entry.payload as any;
+): AppointmentRead => {
+  const payload = entry.payload as AppointmentCreateRequest;
   const nowIso = new Date(entry.clientTimestamp).toISOString();
   return {
     id: entry.id,
@@ -332,6 +348,7 @@ export const normalizedAppointmentRecord = (
     facility: facility,
     is_updated_offline: true,
     modified_date: nowIso,
+    tags: [], // have to done changes here
   };
 };
 
