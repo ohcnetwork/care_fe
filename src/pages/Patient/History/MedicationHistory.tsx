@@ -6,8 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { AdministrationTab } from "@/components/Medicine/MedicationAdministration/AdministrationTab";
-import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
+import { EmptyState } from "@/components/Patient/MedicationPrescriptionTab";
 import { MedicationStatementList } from "@/components/Patient/MedicationStatementList";
 
 import query from "@/Utils/request/query";

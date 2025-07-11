@@ -611,35 +611,39 @@ export const DischargeTab = ({
 
         <div className="flex flex-wrap items-center gap-2">
           <FilterButton />
-          <Button
-            variant="outline_primary"
-            className="min-w-24 sm:min-w-28"
-            onClick={async () => {
-              await queryClient.invalidateQueries({
-                queryKey: ["discharge_files"],
-              });
-              await queryClient.invalidateQueries({
-                queryKey: ["files"],
-              });
-              toast.success(t("refreshed"));
-            }}
-          >
-            <CareIcon icon="l-sync" className="mr-2" />
-            {t("refresh")}
-          </Button>
           {canEdit && (
-            <Button
-              variant="primary"
-              className="min-w-24 sm:min-w-28"
-              onClick={() => generateDischargeSummary()}
-              disabled={isGenerating}
-            >
-              <CareIcon
-                icon="l-file-medical"
-                className="hidden sm:block mr-2"
-              />
-              {isGenerating ? t("generating") : t("generate_discharge_summary")}
-            </Button>
+            <>
+              <Button
+                variant="outline_primary"
+                className="min-w-24 sm:min-w-28"
+                onClick={async () => {
+                  await queryClient.invalidateQueries({
+                    queryKey: ["discharge_files"],
+                  });
+                  await queryClient.invalidateQueries({
+                    queryKey: ["files"],
+                  });
+                  toast.success(t("refreshed"));
+                }}
+              >
+                <CareIcon icon="l-sync" className="mr-2" />
+                {t("refresh")}
+              </Button>
+              <Button
+                variant="primary"
+                className="min-w-24 sm:min-w-28"
+                onClick={() => generateDischargeSummary()}
+                disabled={isGenerating}
+              >
+                <CareIcon
+                  icon="l-file-medical"
+                  className="hidden sm:block mr-2"
+                />
+                {isGenerating
+                  ? t("generating")
+                  : t("generate_discharge_summary")}
+              </Button>
+            </>
           )}
           {/* <ReportBuilderSheet
             facilityId={facilityId || ""}

@@ -19,9 +19,9 @@ import {
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
+import { EmptyState } from "@/components/Patient/MedicationPrescriptionTab";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
+import { EmptyState } from "@/components/Patient/MedicationPrescriptionTab";
 
 import query from "@/Utils/request/query";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
