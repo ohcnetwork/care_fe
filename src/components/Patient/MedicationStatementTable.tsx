@@ -26,10 +26,8 @@ import {
 
 export const MedicationStatementTable = ({
   statements,
-  isEnteredInError,
 }: {
   statements: MedicationStatementRead[];
-  isEnteredInError?: boolean;
 }) => {
   const { t } = useTranslation();
   return (
@@ -63,9 +61,7 @@ export const MedicationStatementTable = ({
         {statements.map((statement) => (
           <TableRow
             key={statement.id}
-            className={`rounded-md overflow-hidden bg-gray-50 ${
-              isEnteredInError ? "opacity-50" : ""
-            }`}
+            className={`rounded-md overflow-hidden bg-gray-50`}
           >
             <TableCell className="font-medium first:rounded-l-md">
               {statement.medication.display ?? statement.medication.code}

@@ -1,6 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
+
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import query from "@/Utils/request/query";
 import { Symptom } from "@/types/emr/symptom/symptom";
@@ -38,32 +39,40 @@ export function SymptomsList({
 }: SymptomsListProps) {
   const { t } = useTranslation();
 
-  const [showEnteredInError, setShowEnteredInError] = useState(false);
-  const { data: symptoms, isLoading } = useQuery({
+  const {
+    data: symptomsData,
+    isLoading: isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["symptoms", patientId, encounterId],
-    queryFn: query(symptomApi.listSymptoms, {
-      pathParams: { patientId },
-      queryParams: {
-        encounter: encounterId,
-        ordering: "-created_date",
-      },
-    }),
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(symptomApi.listSymptoms, {
+        pathParams: { patientId },
+        queryParams: {
+          limit: String(RESULTS_PER_PAGE_LIMIT),
+          offset: String(pageParam),
+          encounter: encounterId,
+          ordering: "-created_date",
+        },
+      })({ signal });
+      return response;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * RESULTS_PER_PAGE_LIMIT;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
   });
 
   if (isLoading) {
     return <TableSkeleton count={5} />;
   }
 
-  const filteredSymptoms = symptoms?.results?.filter(
-    (symptom) =>
-      showEnteredInError || symptom.verification_status !== "entered_in_error",
-  );
+  const symptoms = symptomsData?.pages?.flatMap((page) => page.results) ?? [];
 
-  const hasEnteredInErrorRecords = symptoms?.results?.some(
-    (symptom) => symptom.verification_status === "entered_in_error",
-  );
-
-  if (!filteredSymptoms?.length) {
+  if (!symptoms?.length) {
     if (showTimeline) {
       return (
         <EmptyState
@@ -76,7 +85,7 @@ export function SymptomsList({
   }
 
   if (showTimeline) {
-    const groupedByYear = filteredSymptoms.reduce((acc, symptom) => {
+    const groupedByYear = symptoms.reduce((acc, symptom) => {
       const dateStr = format(symptom.created_date, "yyyy-MM-dd");
       const year = format(symptom.created_date, "yyyy");
       acc[year] ??= {};
@@ -127,30 +136,21 @@ export function SymptomsList({
       className={className}
       editLink={!readOnly ? "questionnaire/symptom" : undefined}
     >
-      <SymptomTable
-        symptoms={[
-          ...filteredSymptoms.filter(
-            (symptom) => symptom.verification_status !== "entered_in_error",
-          ),
-          ...(showEnteredInError
-            ? filteredSymptoms.filter(
-                (symptom) => symptom.verification_status === "entered_in_error",
-              )
-            : []),
-        ]}
-      />
-
-      {hasEnteredInErrorRecords && !showEnteredInError && (
+      <div className="space-y-2">
+        {symptoms?.length ? <SymptomTable symptoms={symptoms} /> : null}
+      </div>
+      {hasNextPage && (
         <>
           <div className="border-b border-dashed border-gray-200 my-2" />
-          <div className="flex justify-center ">
+          <div className="mt-4 flex justify-center">
             <Button
               variant="ghost"
               size="xs"
-              onClick={() => setShowEnteredInError(true)}
+              onClick={() => fetchNextPage()}
               className="text-xs underline text-gray-950"
+              disabled={isLoading || isFetchingNextPage}
             >
-              {t("view_all")}
+              {isFetchingNextPage ? t("loading_more") : t("view_all")}
             </Button>
           </div>
         </>

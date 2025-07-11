@@ -1,10 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
+
+import { Button } from "@/components/ui/button";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
+
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import query from "@/Utils/request/query";
 import {
@@ -37,25 +41,44 @@ export function DiagnosisList({
   showTimeline = false,
 }: DiagnosisListProps) {
   const { t } = useTranslation();
-  const { data: diagnoses, isLoading: isDiagnosesLoading } = useQuery({
+
+  const {
+    data: diagnosesData,
+    isLoading: isDiagnosesLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["encounter_diagnosis", patientId, encounterId],
-    queryFn: query(diagnosisApi.listDiagnosis, {
-      pathParams: { patientId },
-      queryParams: {
-        category: "encounter_diagnosis,chronic_condition",
-        clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
-        exclude_verification_status: "entered_in_error",
-        ...(encounterId ? { encounter: encounterId } : {}),
-        ordering: "-created_date",
-      },
-    }),
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(diagnosisApi.listDiagnosis, {
+        pathParams: { patientId },
+        queryParams: {
+          limit: String(RESULTS_PER_PAGE_LIMIT),
+          offset: String(pageParam),
+          category: "encounter_diagnosis,chronic_condition",
+          clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
+          exclude_verification_status: "entered_in_error",
+          ...(encounterId ? { encounter: encounterId } : {}),
+          ordering: "-created_date",
+        },
+      })({ signal });
+      return response;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * RESULTS_PER_PAGE_LIMIT;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
   });
+
+  const diagnoses = diagnosesData?.pages?.flatMap((page) => page.results) || [];
 
   if (isDiagnosesLoading) {
     return <TableSkeleton count={5} />;
   }
 
-  if (!diagnoses?.results.length) {
+  if (!diagnoses?.length) {
     if (showTimeline) {
       return (
         <EmptyState
@@ -68,7 +91,7 @@ export function DiagnosisList({
   }
 
   if (showTimeline) {
-    const groupedByYear = diagnoses.results.reduce((acc, diagnosis) => {
+    const groupedByYear = diagnoses.reduce((acc, diagnosis) => {
       const dateStr = format(diagnosis.created_date, "dd MMMM, yyyy");
       const year = format(diagnosis.created_date, "yyyy");
       acc[year] ??= {};
@@ -120,10 +143,24 @@ export function DiagnosisList({
       editLink={!readOnly ? "questionnaire/diagnosis" : undefined}
     >
       <div className="space-y-2">
-        {diagnoses?.results?.length ? (
-          <DiagnosisTable diagnoses={diagnoses.results} />
-        ) : null}
+        {diagnoses?.length ? <DiagnosisTable diagnoses={diagnoses} /> : null}
       </div>
+      {hasNextPage && (
+        <>
+          <div className="border-b border-dashed border-gray-200 my-2" />
+          <div className="mt-4 flex justify-center">
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => fetchNextPage()}
+              className="text-xs underline text-gray-950"
+              disabled={isDiagnosesLoading || isFetchingNextPage}
+            >
+              {isFetchingNextPage ? t("loading_more") : t("view_all")}
+            </Button>
+          </div>
+        </>
+      )}
     </EncounterAccordionLayout>
   );
 }
