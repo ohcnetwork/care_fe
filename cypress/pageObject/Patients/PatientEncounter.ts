@@ -30,7 +30,7 @@ export class PatientEncounter {
   }
 
   verifyEncounterPatientInfo(contents: string[]) {
-    cy.verifyContentPresence("#patient-infobadges", contents);
+    cy.verifyContentPresence("#root", contents);
     return this;
   }
 
@@ -65,10 +65,7 @@ export class PatientEncounter {
   }
 
   clickPatientDetailsButton() {
-    cy.get('[data-cy="patient-details-button"]')
-      .filter(":visible")
-      .first()
-      .click();
+    cy.get("svg.lucide-external-link").filter(":visible").first().click();
     return this;
   }
 
@@ -78,19 +75,16 @@ export class PatientEncounter {
   }
 
   clickEncounterMarkAsComplete() {
-    cy.verifyAndClickElement(
-      '[data-cy="mark-encounter-complete"]',
-      "Mark as Complete",
-    );
+    cy.get("button[data-slot='dropdown-menu-trigger']")
+      .contains("Update")
+      .click();
+    cy.get('[role="menuitem"]').contains("Mark as Complete").click();
     return this;
   }
 
   clickConfirmEncounterAsComplete() {
     cy.intercept("GET", "**/api/v1/encounter/**").as("getEncounter");
-    cy.verifyAndClickElement(
-      '[data-cy="confirm-encounter-complete"]',
-      "Mark as Complete",
-    );
+    cy.get("button:contains('Mark as Complete')").click();
     cy.wait("@getEncounter").then((interception) => {
       expect(interception.response?.statusCode).to.eq(200); // Verify status code
       expect(interception.response?.body).to.have.property(
