@@ -1,4 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -9,24 +10,16 @@ import { formatValue } from "@/components/Facility/ConsultationDetails/Questionn
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { HTTPError } from "@/Utils/request/types";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { Observation } from "@/types/emr/observation";
-
-const LIMIT = 20;
-
-interface Props {
-  encounter: Encounter;
-  canAccess: boolean;
-}
 
 interface GroupedObservations {
   [key: string]: Observation[];
 }
 
 function getDateKey(date: string) {
-  return new Date(date).toISOString().split("T")[0];
+  return format(new Date(date), "yyyy-MM-dd");
 }
 
 function formatDisplayDate(dateStr: string) {
@@ -74,10 +67,13 @@ function groupObservationsByDate(
   }, {});
 }
 
-export default function ObservationsList(props: Props) {
+export const EncounterObservationsTab = () => {
   const { t } = useTranslation();
-  const patientId = props.encounter.patient.id;
-  const encounterId = props.encounter.id;
+  const {
+    selectedEncounterId: encounterId,
+    patientId,
+    selectedEncounterPermissions: { canViewEncounter, canViewClinicalData },
+  } = useEncounter();
   const { ref, inView } = useInView();
 
   const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
@@ -89,7 +85,7 @@ export default function ObservationsList(props: Props) {
           queryParams: {
             encounter: encounterId,
             ignore_group: true,
-            limit: String(LIMIT),
+            limit: 20,
             offset: String(pageParam),
           },
         })({ signal: new AbortController().signal });
@@ -97,10 +93,10 @@ export default function ObservationsList(props: Props) {
       },
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * LIMIT;
+        const currentOffset = allPages.length * 20;
         return currentOffset < lastPage.count ? currentOffset : null;
       },
-      enabled: props.canAccess,
+      enabled: canViewClinicalData || canViewEncounter,
     });
 
   useEffect(() => {
@@ -197,4 +193,4 @@ export default function ObservationsList(props: Props) {
       </div>
     </div>
   );
-}
+};
