@@ -104,10 +104,10 @@ export const PractitionerSelector = ({
                   </div>
                 </CommandItem>
               )}
-              {practitioners?.users.map((user) => (
+              {practitioners?.users.map((user, index) => (
                 <CommandItem
                   key={user.id}
-                  value={user.id.toString()}
+                  value={formatName(user) + " - " + index}
                   onSelect={() => {
                     onSelect(user);
                     setOpen(false);
