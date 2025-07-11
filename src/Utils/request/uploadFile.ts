@@ -70,7 +70,7 @@ const uploadFile = async (
     xhr.send(file);
   });
 };
-// upload
+
 export const uploadMultipleFiles = async (
   files: File[],
   createUploadFn: (file: File, index: number) => Promise<any>,
