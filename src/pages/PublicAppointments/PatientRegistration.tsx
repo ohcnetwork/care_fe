@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import RadioInput from "@/components/ui/RadioInput";
 import { Button } from "@/components/ui/button";
 import DateField from "@/components/ui/date-field";
 import {
@@ -18,8 +19,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-
-import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 

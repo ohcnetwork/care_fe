@@ -74,9 +74,7 @@ function MedicationTable({
             <TableHead className="text-gray-700">{t("dosage")}</TableHead>
             <TableHead className="text-gray-700">{t("frequency")}</TableHead>
             <TableHead className="text-gray-700">{t("duration")}</TableHead>
-            <TableHead className="text-gray-700">
-              {t("total") + " " + t("units")}
-            </TableHead>
+            <TableHead className="text-gray-700">{t("total_units")}</TableHead>
             <TableHead className="text-gray-700">{t("priority")}</TableHead>
             <TableHead className="text-gray-700">{t("status")}</TableHead>
             {medications.some(

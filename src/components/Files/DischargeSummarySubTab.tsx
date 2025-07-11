@@ -627,15 +627,20 @@ export const DischargeTab = ({
             <CareIcon icon="l-sync" className="mr-2" />
             {t("refresh")}
           </Button>
-          <Button
-            variant="primary"
-            className="min-w-24 sm:min-w-28"
-            onClick={() => generateDischargeSummary()}
-            disabled={isGenerating}
-          >
-            <CareIcon icon="l-file-medical" className="hidden sm:block mr-2" />
-            {isGenerating ? t("generating") : t("generate_discharge_summary")}
-          </Button>
+          {canEdit && (
+            <Button
+              variant="primary"
+              className="min-w-24 sm:min-w-28"
+              onClick={() => generateDischargeSummary()}
+              disabled={isGenerating}
+            >
+              <CareIcon
+                icon="l-file-medical"
+                className="hidden sm:block mr-2"
+              />
+              {isGenerating ? t("generating") : t("generate_discharge_summary")}
+            </Button>
+          )}
           {/* <ReportBuilderSheet
             facilityId={facilityId || ""}
             patientId={encounter?.patient.id || ""}
