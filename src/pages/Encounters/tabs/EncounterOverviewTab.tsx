@@ -120,7 +120,7 @@ export const EncounterOverviewTab = () => {
                 className="md:w-auto w-full"
               >
                 <Link
-                  href={`/facility/${facilityId}/patient/${patientId}/history/symptoms`}
+                  href={`/facility/${facilityId}/patient/${patientId}/history/symptoms?sourceUrl=${encodeURIComponent(`/facility/${facilityId}/patient/${patientId}/encounter/${currentEncounterId}/updates`)}`}
                 >
                   <img
                     src="/images/icons/clinical_history.svg"
