@@ -1187,7 +1187,7 @@ export function DiagnosticReportForm({
                       <textarea
                         id="conclusion"
                         className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-lg border border-gray-300 p-2"
-                        placeholder={t("enter") + " " + t("conclusion")}
+                        placeholder={t("enter_conclusion")}
                         value={conclusion}
                         onChange={(e) => setConclusion(e.target.value)}
                         rows={3}
@@ -1257,7 +1257,7 @@ export function DiagnosticReportForm({
                                       ? fileUpload.files
                                           .map((file) => file.name)
                                           .join(", ")
-                                      : t("select") + " " + t("files")}
+                                      : t("select_files")}
                                   </span>
                                   {fileUpload.Input({ className: "hidden" })}
                                 </Label>

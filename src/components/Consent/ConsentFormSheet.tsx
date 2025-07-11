@@ -302,9 +302,7 @@ export default function ConsentFormSheet({
       <SheetContent className="overflow-y-auto sm:max-w-lg">
         <SheetHeader className="mb-6">
           <SheetTitle>
-            {isEdit
-              ? t("edit") + " " + t("consent")
-              : t("add") + " " + t("consent")}
+            {isEdit ? t("edit_consent") : t("add_consent")}
           </SheetTitle>
           <SheetDescription>
             {isEdit
