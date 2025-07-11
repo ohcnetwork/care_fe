@@ -246,7 +246,7 @@ export function DiagnosticReportReview({
                   <CardContent className="p-4">
                     {fullReport.observations.length == 0 && (
                       <p className="text-gray-800 whitespace-pre-wrap p-2 rounded-lg bg-white border cursor-default text-center">
-                        {t("no") + " " + t("observations") + " " + t("entered")}
+                        {t("no_observations_entered")}
                       </p>
                     )}
                     <DiagnosticReportResultsTable
@@ -265,14 +265,13 @@ export function DiagnosticReportReview({
                     </Label>
                     {fullReport?.status === DiagnosticReportStatus.final ? (
                       <p className="text-gray-800 whitespace-pre-wrap p-2 rounded-lg bg-white border border-gray-200 cursor-default">
-                        {fullReport?.conclusion ||
-                          t("no") + " " + t("conclusion") + " " + t("entered")}
+                        {fullReport?.conclusion || t("no_conclusion_entered")}
                       </p>
                     ) : (
                       <textarea
                         id="conclusion"
                         className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-lg"
-                        placeholder={t("enter") + " " + t("conclusion")}
+                        placeholder={t("enter_conclusion")}
                         value={conclusion || fullReport?.conclusion || ""}
                         onChange={(e) => setConclusion(e.target.value)}
                       />
@@ -312,7 +311,7 @@ export function DiagnosticReportReview({
                       }
                     >
                       <ExternalLink className="h-4 w-4" />
-                      {t("view") + " " + t("report")}
+                      {t("view_report")}
                     </Button>
                   </div>
                 )}
