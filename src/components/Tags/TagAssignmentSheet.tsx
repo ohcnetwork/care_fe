@@ -106,11 +106,13 @@ interface TagSelectorProps {
   selected: TagConfig[];
   onChange: (tags: TagConfig[]) => void;
   resource: TagResource;
+  asFilter?: boolean;
 }
 
 export function TagSelectorPopover({
   selected,
   onChange,
+  asFilter = false,
   resource,
 }: TagSelectorProps) {
   const [open, setOpen] = useState(false);
@@ -256,13 +258,9 @@ export function TagSelectorPopover({
   return (
     <div>
       {/* Selected tags */}
-      <div className="mb-2 flex flex-wrap gap-2">
-        {selected.length === 0 ? (
-          <span className="text-muted-foreground text-sm">
-            No tags selected
-          </span>
-        ) : (
-          selected.map((tag) => (
+      {selected.length > 0 && !asFilter && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {selected.map((tag) => (
             <Badge
               key={tag.id}
               variant="secondary"
@@ -277,20 +275,31 @@ export function TagSelectorPopover({
                 <X className="h-3 w-3" />
               </button>
             </Badge>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
+
       {/* Tag selector popover */}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="w-full justify-between bg-transparent"
+            className="mt-2 w-full justify-between bg-transparent"
           >
-            <div className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Select tags or browse groups...
-            </div>
+            {asFilter ? (
+              <div className="flex items-center gap-2">
+                {selected.length === 0
+                  ? "No filters selected"
+                  : selected.length === 1
+                    ? `Filtering by ${selected[0].display}`
+                    : `${selected.length} filters selected`}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Select tags or browse groups...
+              </div>
+            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[320px] p-0" align="start">
