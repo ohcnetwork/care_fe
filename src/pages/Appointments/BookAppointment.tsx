@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import Page from "@/components/Common/Page";
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 import { AuthUserModel } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -31,7 +32,9 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
-import { Patient } from "@/types/emr/patient";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { Patient } from "@/types/emr/patient/patient";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityData } from "@/types/facility/facility";
 import {
   Appointment,
@@ -44,17 +47,16 @@ import { UserBase } from "@/types/user/user";
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
 
 interface Props {
-  facilityId: string;
   patientId: string;
 }
 
-export default function BookAppointment(props: Props) {
+export default function BookAppointment({ patientId }: Props) {
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
+
   const authUser = useAuthUser();
   const queryClient = useQueryClient();
-  const [resourceId, setResourceId] = useState<string>();
-  const [selectedSlotId, setSelectedSlotId] = useState<string>();
+
   const [selectedPracticioner, setSelectedPracticioner] =
     useState<UserBase | null>(null);
   const [OfflineSelectedSlot, setOfflineSelectedSlot] = useState<
@@ -63,14 +65,17 @@ export default function BookAppointment(props: Props) {
   const [selectedMonthOffline, setSelectedMonthOffline] = useState(new Date());
   const [selectedDateOffline, setSelectedDateOffline] = useState(new Date());
 
+  const { facilityId } = useCurrentFacility();
+
+  const [resourceId, setResourceId] = useState<string>();
+  const [selectedSlotId, setSelectedSlotId] = useState<string>();
+  const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
   const [reason, setReason] = useState("");
 
   const resourcesQuery = useQuery({
-    queryKey: ["practitioners", props.facilityId],
+    queryKey: ["practitioners", facilityId],
     queryFn: query(scheduleApis.appointments.availableUsers, {
-      pathParams: {
-        facility_id: props.facilityId,
-      },
+      pathParams: { facilityId },
     }),
     meta: { persist: true },
     networkMode: "online",
@@ -95,10 +100,7 @@ export default function BookAppointment(props: Props) {
 
   const { mutateAsync: createAppointment } = useMutation({
     mutationFn: mutate(scheduleApis.slots.createAppointment, {
-      pathParams: {
-        facility_id: props.facilityId,
-        slot_id: selectedSlotId ?? "",
-      },
+      pathParams: { facilityId, slotId: selectedSlotId ?? "" },
     }),
   });
 
@@ -124,15 +126,13 @@ export default function BookAppointment(props: Props) {
         userId: authUser?.external_id,
         mutationSyncrouteKey: "createAppointment",
         mutationPathParams: {
-          facility_id: props.facilityId,
+          facility_id: facilityId,
           slot_id: selectedSlotId ?? "",
         },
         type: "createAppointment",
         resourceType: "Appointment",
         payload: createAppointmentData,
-        parentMutationIds: isOfflineId(props.patientId)
-          ? [props.patientId]
-          : [],
+        parentMutationIds: isOfflineId(patientId) ? [patientId] : [],
       };
 
       const saveResult = await saveOfflineWrite(offlineEntry);
@@ -144,7 +144,7 @@ export default function BookAppointment(props: Props) {
 
       const facilityData = queryClient.getQueryData<FacilityData>([
         "facility",
-        props.facilityId,
+        facilityId,
       ]);
 
       const FacilityBareMinimumData = {
@@ -154,7 +154,7 @@ export default function BookAppointment(props: Props) {
 
       const Patientdata = queryClient.getQueryData<Patient>([
         "patient",
-        props.patientId,
+        patientId,
       ]);
 
       if (!Patientdata) {
@@ -182,7 +182,7 @@ export default function BookAppointment(props: Props) {
         queryClient: queryClient,
         selectedSlot: selectedSlot,
         selectedPracticioner: selectedPracticioner,
-        facilityId: props.facilityId,
+        facilityId: facilityId,
         selectedDate: selectedDateOffline,
         selectedMonth: selectedMonthOffline,
         action: "booked",
@@ -190,7 +190,7 @@ export default function BookAppointment(props: Props) {
 
       const prevAppointmentList = queryClient.getQueryData<
         PaginatedResponse<Appointment>
-      >(["patient-appointments", props.patientId]);
+      >(["patient-appointments", patientId]);
 
       const updatedAppointmentList: PaginatedResponse<Appointment> =
         prevAppointmentList?.results
@@ -207,13 +207,13 @@ export default function BookAppointment(props: Props) {
             };
 
       queryClient.setQueryData(
-        ["patient-appointments", props.patientId],
+        ["patient-appointments", patientId],
         updatedAppointmentList,
       );
 
       toast.success("Appointment created successfully");
       navigate(
-        `/facility/${props.facilityId}/patient/${props.patientId}/appointments/${generatedId}`,
+        `/facility/${facilityId}/patient/${patientId}/appointments/${generatedId}`,
       );
     } catch (error) {
       console.error("Error while scheduling appointment", error);
@@ -232,8 +232,9 @@ export default function BookAppointment(props: Props) {
 
     try {
       const createAppointmentData = {
-        patient: props.patientId,
+        patient: patientId,
         reason_for_visit: reason,
+        tags: selectedTags.map((tag) => tag.id),
       };
 
       if (!onlineManager.isOnline()) {
@@ -250,9 +251,10 @@ export default function BookAppointment(props: Props) {
       }
 
       const data = await createAppointment(createAppointmentData);
+
       toast.success("Appointment created successfully");
       navigate(
-        `/facility/${props.facilityId}/patient/${props.patientId}/appointments/${data.id}`,
+        `/facility/${facilityId}/patient/${patientId}/appointments/${data.id}`,
       );
     } catch {
       toast.error("Failed to create appointment");
@@ -268,7 +270,15 @@ export default function BookAppointment(props: Props) {
         </div>
 
         <div className="space-y-8">
-          <div>
+          <div className="max-w-md">
+            <Label className="mb-2">{t("tags")}</Label>
+            <TagSelectorPopover
+              selected={selectedTags}
+              onChange={setSelectedTags}
+              resource={TagResource.APPOINTMENT}
+            />
+          </div>
+          <div className="max-w-md">
             <Label className="mb-2">{t("reason_for_visit")}</Label>
             <Textarea
               placeholder={t("reason_for_visit_placeholder")}
@@ -281,7 +291,7 @@ export default function BookAppointment(props: Props) {
             <div>
               <Label className="block mb-2">{t("select_practitioner")}</Label>
               <PractitionerSelector
-                facilityId={props.facilityId}
+                facilityId={facilityId}
                 selected={resource ?? null}
                 onSelect={(user) => {
                   setResourceId(user?.id ?? undefined);
@@ -299,7 +309,7 @@ export default function BookAppointment(props: Props) {
             )}
           >
             <AppointmentSlotPicker
-              facilityId={props.facilityId}
+              facilityId={facilityId}
               resourceId={resourceId}
               selectedSlotId={selectedSlotId}
               onSlotSelect={setSelectedSlotId}
@@ -315,7 +325,7 @@ export default function BookAppointment(props: Props) {
               type="button"
               onClick={() =>
                 goBack(
-                  `/facility/${props.facilityId}/patient/${props.patientId}/appointments`,
+                  `/facility/${facilityId}/patient/${patientId}/appointments`,
                 )
               }
             >

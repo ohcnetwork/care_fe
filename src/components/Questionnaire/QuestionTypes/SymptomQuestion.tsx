@@ -52,6 +52,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
 import { dateQueryString, formatName } from "@/Utils/utils";
+import { Code } from "@/types/base/code/code";
 import {
   Onset,
   SYMPTOM_CLINICAL_STATUS,
@@ -61,7 +62,6 @@ import {
   SymptomRequest,
 } from "@/types/emr/symptom/symptom";
 import symptomApi from "@/types/emr/symptom/symptomApi";
-import { Code } from "@/types/questionnaire/code";
 import {
   QuestionnaireResponse,
   ResponseValue,

@@ -50,11 +50,13 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
+import { Code } from "@/types/base/code/code";
 import {
   MEDICATION_REQUEST_TIMING_OPTIONS,
   MedicationRequest,
   MedicationRequestRead,
-} from "@/types/emr/medicationRequest";
+  displayMedicationName,
+} from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import {
   MEDICATION_STATEMENT_STATUS,
@@ -65,7 +67,6 @@ import {
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
-import { Code } from "@/types/questionnaire/code";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -229,7 +230,7 @@ export function MedicationStatementQuestion({
   };
 
   const handleAddHistoricalMedications = (
-    selected: (MedicationRequest | MedicationStatementRequest)[],
+    selected: (MedicationRequestRead | MedicationStatementRead)[],
   ) => {
     const newMedications = selected.map((record) => {
       if ("dosage_instruction" in record) {
@@ -310,7 +311,12 @@ export function MedicationStatementQuestion({
   });
 
   return (
-    <div className="space-y-4">
+    <div
+      className={cn(
+        "space-y-4",
+        medications.length > 0 ? "md:max-w-fit" : "max-w-4xl",
+      )}
+    >
       <AlertDialog
         open={medicationToDelete !== null}
         onOpenChange={(open) => !open && setMedicationToDelete(null)}
@@ -344,9 +350,9 @@ export function MedicationStatementQuestion({
             type: t("past_prescriptions"),
             displayFields: [
               {
-                key: "medication",
+                key: "requested_product,code",
                 label: t("medicine"),
-                render: (med) => med?.display,
+                render: (med) => displayMedicationName(med),
               },
               {
                 key: "dosage_instruction",

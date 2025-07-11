@@ -26,7 +26,11 @@ import {
   groupSlotsByAvailability,
   useAvailabilityHeatmap,
 } from "@/pages/Appointments/utils";
-import { TokenSlot } from "@/types/scheduling/schedule";
+import {
+  Appointment,
+  GetSlotsForDayResponse,
+  TokenSlot,
+} from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface AppointmentSlotPickerProps {
@@ -38,6 +42,7 @@ interface AppointmentSlotPickerProps {
   setSelectedDateOffline?: (month: Date) => void;
   selectedSlotId?: string;
   onSlotDetailsChange?: (slot: TokenSlot) => void;
+  currentAppointment?: Appointment;
 }
 
 export function AppointmentSlotPicker({
@@ -49,6 +54,7 @@ export function AppointmentSlotPicker({
   onSlotDetailsChange,
   setSelectedMonthOffline,
   setSelectedDateOffline,
+  currentAppointment,
 }: AppointmentSlotPickerProps) {
   const { t } = useTranslation();
   const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -63,7 +69,7 @@ export function AppointmentSlotPicker({
   const slotsQuery = useQuery({
     queryKey: ["slots", facilityId, resourceId, dateQueryString(selectedDate)],
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
-      pathParams: { facility_id: facilityId },
+      pathParams: { facilityId },
       body: {
         user: resourceId ?? "",
         day: dateQueryString(selectedDate),
@@ -72,12 +78,20 @@ export function AppointmentSlotPicker({
     meta: { persist: true },
     networkMode: "online",
     enabled: !!resourceId && !!selectedDate,
+    select: (data: GetSlotsForDayResponse) => {
+      if (currentAppointment) {
+        return data.results.filter(
+          (slot) => slot.id !== currentAppointment.token_slot.id,
+        );
+      }
+      return data.results;
+    },
   });
 
   const slotsTodayQuery = useQuery({
     queryKey: ["slots", facilityId, resourceId, dateQueryString(new Date())],
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
-      pathParams: { facility_id: facilityId },
+      pathParams: { facilityId },
       body: {
         user: resourceId ?? "",
         day: dateQueryString(new Date()),
@@ -86,6 +100,14 @@ export function AppointmentSlotPicker({
     meta: { persist: true },
     networkMode: "online",
     enabled: !!resourceId,
+    select: (data: GetSlotsForDayResponse) => {
+      if (currentAppointment) {
+        return data.results.filter(
+          (slot) => slot.id !== currentAppointment.token_slot.id,
+        );
+      }
+      return data.results;
+    },
   });
 
   // Update slot details when a slot is selected
@@ -93,7 +115,7 @@ export function AppointmentSlotPicker({
     onSlotSelect(slotId);
 
     if (slotId && onSlotDetailsChange) {
-      const allSlots = slotsQuery.data?.results || [];
+      const allSlots = slotsQuery.data || [];
       const selectedSlot = allSlots.find((slot) => slot.id === slotId);
 
       if (selectedSlot) {
@@ -112,7 +134,7 @@ export function AppointmentSlotPicker({
       // the availability for the day based on the slots that are currently
       // available
       if (isToday(date) && slotsTodayQuery.data) {
-        const slots = slotsTodayQuery.data.results.filter(
+        const slots = slotsTodayQuery.data.filter(
           (slot) => !isPast(slot.end_datetime),
         );
         return {
@@ -244,15 +266,15 @@ export function AppointmentSlotPicker({
                   </p>
                 </div>
               )}
-              {slotsQuery.data?.results.length === 0 && (
+              {slotsQuery.data?.length === 0 && (
                 <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
                   <p className="text-gray-400">
                     {t("no_slots_available_for_this_date")}
                   </p>
                 </div>
               )}
-              {!!slotsQuery.data?.results.length &&
-                groupSlotsByAvailability(slotsQuery.data.results).map(
+              {!!slotsQuery.data?.length &&
+                groupSlotsByAvailability(slotsQuery.data).map(
                   ({ availability, slots }) => (
                     <div key={availability.name}>
                       <h4 className="text-lg font-semibold mb-3">

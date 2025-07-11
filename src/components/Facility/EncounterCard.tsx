@@ -13,7 +13,10 @@ import { encounterIcons } from "@/common/constants";
 import { PendingSyncBadge } from "@/OfflineSupport/pendingSyncbadge";
 import { formatDateTime } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
+import {
+  Encounter,
+  completedEncounterStatus,
+} from "@/types/emr/encounter/encounter";
 
 interface EncounterCardProps {
   encounter: Encounter;

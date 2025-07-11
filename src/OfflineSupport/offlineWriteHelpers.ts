@@ -9,10 +9,13 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { dateQueryString, getMonthStartAndEnd } from "@/Utils/utils";
 import { AllergyIntolerance } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
-import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
+import {
+  Encounter,
+  EncounterEditRequest,
+} from "@/types/emr/encounter/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
-import { Patient } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/patient/patient";
 import { Symptom } from "@/types/emr/symptom/symptom";
 import { FacilityBareMinimum, FacilityData } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
@@ -258,6 +261,7 @@ export const normalizeOfflineEncounterRecord = (
     care_team: [],
     discharge_summary_advice: payload?.discharge_summary_advice ?? undefined,
     is_updated_offline: true,
+    tags: [],
   };
 };
 

@@ -42,7 +42,7 @@ import {
   EncounterEditRequest,
   EncounterStatus,
   inactiveEncounterStatus,
-} from "@/types/emr/encounter";
+} from "@/types/emr/encounter/encounter";
 
 interface EncounterActionsProps {
   encounter: Encounter;
@@ -196,10 +196,7 @@ export default function EncounterActions({
           {canWrite && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <DropdownMenuItem
-                  onSelect={(e) => e.preventDefault()}
-                  data-cy="mark-encounter-as-complete"
-                >
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                   {t("mark_as_complete")}
                 </DropdownMenuItem>
               </AlertDialogTrigger>
@@ -221,7 +218,6 @@ export default function EncounterActions({
                   <AlertDialogAction
                     className={buttonVariants({ variant: "primary" })}
                     onClick={handleMarkAsComplete}
-                    data-cy="encounter-complete-dropdown"
                   >
                     {t("mark_as_complete")}
                   </AlertDialogAction>

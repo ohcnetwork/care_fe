@@ -1,6 +1,6 @@
 import { CountryCode } from "libphonenumber-js/types.cjs";
 
-import { EncounterClass } from "@/types/emr/encounter";
+import { EncounterClass } from "@/types/emr/encounter/encounter";
 
 const env = import.meta.env;
 
@@ -58,9 +58,6 @@ const careConfig = {
   mapFallbackUrlTemplate:
     env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
     "https://www.openstreetmap.org/?mlat={lat}&mlon={long}&zoom=15",
-
-  gmapsApiKey:
-    env.REACT_GMAPS_API_KEY || "AIzaSyDsBAc3y7deI5ZO3NtK5GuzKwtUzQNJNUk",
 
   reCaptchaSiteKey: env.REACT_RECAPTCHA_SITE_KEY,
 

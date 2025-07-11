@@ -64,13 +64,13 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
   ENCOUNTER_CLASS,
-  ENCOUNTER_CLASSES_ICONS,
+  ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_PRIORITY,
   Encounter,
   EncounterClass,
   EncounterRequest,
-} from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/patient";
+} from "@/types/emr/encounter/encounter";
+import { Patient } from "@/types/emr/patient/patient";
 
 interface Props {
   patientId: string;
@@ -329,7 +329,7 @@ export default function CreateEncounterForm({
                   <FormLabel>{t("type_of_encounter")}</FormLabel>
                   <div className="grid grid-cols-2 gap-3">
                     {ENCOUNTER_CLASS.map((value) => {
-                      const Icon = ENCOUNTER_CLASSES_ICONS[value];
+                      const Icon = ENCOUNTER_CLASS_ICONS[value];
                       return (
                         <Button
                           key={value}

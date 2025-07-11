@@ -73,7 +73,7 @@ export const useAvailabilityHeatmap = ({
   const toDate = dateQueryString(max([fromDate, end]));
 
   let queryFn = query(scheduleApis.slots.availabilityStats, {
-    pathParams: { facility_id: facilityId },
+    pathParams: { facilityId },
     body: {
       // voluntarily coalesce to empty string since we know query would be
       // enabled only if userId is present

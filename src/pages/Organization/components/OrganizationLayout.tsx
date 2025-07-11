@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
-import { NavigationLink } from "@/components/ui/sidebar/facility-nav";
+import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 
 import Page from "@/components/Common/Page";
 
@@ -59,7 +59,7 @@ export default function OrganizationLayout({
     ? `/organization/${navOrganizationId}/children`
     : `/organization`;
 
-  const { data: org, isLoading } = useQuery<Organization>({
+  const { data: org, isLoading } = useQuery({
     queryKey: ["organization", id],
     queryFn: query(organizationApi.get, {
       pathParams: { id },
