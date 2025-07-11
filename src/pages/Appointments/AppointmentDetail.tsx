@@ -596,7 +596,7 @@ const AppointmentActions = ({
               <AlertDialogTitle>{t("cancel_appointment")}</AlertDialogTitle>
               <Label>{t("reason_for_cancellation")}</Label>
               <Textarea
-                placeholder={t("reason_for_cancellation_placholder")}
+                placeholder={t("reason_for_cancellation_placeholder")}
                 value={reasonForCancellation}
                 onChange={(e) => setReasonForCancellation(e.target.value)}
               />
