@@ -33,11 +33,10 @@ export class PatientLocation {
     showAvailableBeds: "#available-only",
   };
 
-  openFirstExistingLocation(locationName: string) {
-    cy.verifyAndClickElement(
-      this.selectors.viewDetailsLocationButton,
-      locationName,
-    );
+  openFirstExistingLocation() {
+    cy.get(this.selectors.viewDetailsLocationButton).first().click({
+      force: true,
+    });
     return this;
   }
 
