@@ -448,6 +448,15 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                         disabled: false,
                       },
                       {
+                        label: t("reset"),
+                        icon: "l-minus-circle",
+                        action: () => {
+                          setRotation(0);
+                          transformRef.current?.resetTransform();
+                        },
+                        disabled: false,
+                      },
+                      {
                         label: t("zoom_out"),
                         icon: "l-search-minus",
                         action: handleZoomOut,
@@ -457,16 +466,6 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                         label: t("rotate_left"),
                         icon: "l-corner-up-left",
                         action: () => handleRotate(-90),
-                        disabled: false,
-                      },
-                      {
-                        label: t("reset"),
-                        icon: "l-minus-circle",
-                        action: () => {
-                          setRotation(0);
-                          setScale(0.75);
-                          transformRef.current?.resetTransform();
-                        },
                         disabled: false,
                       },
                       {
@@ -480,7 +479,11 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                         variant="ghost"
                         key={index}
                         onClick={button.action}
-                        className="z-50 rounded bg-white/60 text-black backdrop-blur-sm transition hover:bg-white/70"
+                        className={cn(
+                          "z-50 rounded bg-white/60 text-black backdrop-blur-sm transition hover:bg-white/70",
+                          index == 3 && "col-start-1 md:col-auto",
+                          index == 4 && "col-start-3 md:col-auto",
+                        )}
                         disabled={button.disabled}
                       >
                         <div>
@@ -506,10 +509,12 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                         disabled: scale >= 2,
                       },
                       {
-                        label: `${Math.round(scale * 100)}%`,
-                        icon: null,
-                        action: () => {},
-                        disabled: false,
+                        label: t("reset"),
+                        icon: "l-minus-circle",
+                        action: () => {
+                          setScale(0.75);
+                        },
+                        disabled: scale == 0.75,
                       },
                       {
                         label: t("zoom_out"),
