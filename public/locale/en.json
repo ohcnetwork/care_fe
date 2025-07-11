@@ -3397,8 +3397,6 @@
   "readmission": "Re-admission",
   "ready_for_admission": "Ready For Admission",
   "reason": "Reason",
-  "reason_for_cancellation": "Reason for cancellation",
-  "reason_for_cancellation_placeholder": "Please enter the reason for cancellation",
   "reason_for_discontinuation": "Reason for discontinuation",
   "reason_for_edit": "Reason for edit",
   "reason_for_medication": "Enter reason for Medication",
