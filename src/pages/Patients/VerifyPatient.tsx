@@ -35,7 +35,6 @@ import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { Encounter } from "@/types/emr/encounter/encounter";
 import patientApi from "@/types/emr/patient/patientApi";
 
 export default function VerifyPatient() {
@@ -238,7 +237,7 @@ export default function VerifyPatient() {
               <CardContent className="flex flex-col gap-3 pt-2">
                 {encounters?.results && encounters.results.length > 0 ? (
                   <>
-                    {encounters.results.map((encounter: Encounter) => (
+                    {encounters.results.map((encounter) => (
                       <EncounterCard
                         encounter={encounter}
                         key={encounter.id}

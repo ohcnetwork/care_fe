@@ -195,3 +195,8 @@ export interface CreateAppointmentQuestion {
   reason_for_visit: string;
   slot_id: string;
 }
+
+export interface AppointmentCancelRequest {
+  reason: "cancelled" | "entered_in_error";
+  reason_for_visit?: string;
+}
