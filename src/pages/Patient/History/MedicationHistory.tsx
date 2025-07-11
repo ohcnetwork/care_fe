@@ -30,15 +30,19 @@ export const MedicationHistory = ({ patientId }: { patientId: string }) => {
         <h4 className="text-xl">{t("past_medications")}</h4>
       </div>
       <Tabs defaultValue="prescriptions" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="prescriptions">{t("prescriptions")}</TabsTrigger>
-          <TabsTrigger value="statements">
-            {t("medication_statements")}
-          </TabsTrigger>
-          <TabsTrigger value="administration">
-            {t("medicine_administration")}
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto">
+          <TabsList className="mb-4">
+            <TabsTrigger value="prescriptions">
+              {t("prescriptions")}
+            </TabsTrigger>
+            <TabsTrigger value="statements">
+              {t("medication_statements")}
+            </TabsTrigger>
+            <TabsTrigger value="administration">
+              {t("medicine_administration")}
+            </TabsTrigger>
+          </TabsList>
+        </div>
         <TabsContent value="prescriptions">
           <Prescriptions patientId={patientId} />
         </TabsContent>

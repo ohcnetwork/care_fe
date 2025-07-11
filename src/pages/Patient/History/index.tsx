@@ -31,12 +31,16 @@ export function ClinicalHistoryPage({
         }}
         className="w-full"
       >
-        <TabsList className="mb-4">
-          <TabsTrigger value="symptoms">{t("past_symptoms")}</TabsTrigger>
-          <TabsTrigger value="diagnoses">{t("past_diagnoses")}</TabsTrigger>
-          <TabsTrigger value="allergies">{t("allergies")}</TabsTrigger>
-          <TabsTrigger value="medications">{t("past_medications")}</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto">
+          <TabsList className="mb-4">
+            <TabsTrigger value="symptoms">{t("past_symptoms")}</TabsTrigger>
+            <TabsTrigger value="diagnoses">{t("past_diagnoses")}</TabsTrigger>
+            <TabsTrigger value="allergies">{t("allergies")}</TabsTrigger>
+            <TabsTrigger value="medications">
+              {t("past_medications")}
+            </TabsTrigger>
+          </TabsList>
+        </div>
         <TabsContent value="symptoms">
           <SymptomsHistory patientId={patientId} />
         </TabsContent>
