@@ -46,7 +46,7 @@ export function SymptomsList({
     fetchNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["symptoms", patientId, encounterId],
+    queryKey: ["encounter_symptoms", patientId, encounterId],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(symptomApi.listSymptoms, {
         pathParams: { patientId },
