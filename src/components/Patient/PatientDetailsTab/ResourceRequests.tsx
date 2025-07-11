@@ -20,7 +20,7 @@ import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
-import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
+import { RESOURCE_REQUEST_STATUS_COLORS } from "@/types/resourceRequest/resourceRequest";
 
 import { PatientProps } from ".";
 
@@ -38,26 +38,6 @@ export const ResourceRequests = (props: PatientProps) => {
     }),
     enabled: !!patientId,
   });
-
-  const getStatusBadge = (status: ResourceRequest["status"]) => {
-    const statusColors: Record<ResourceRequest["status"], string> = {
-      PENDING:
-        "bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900",
-      APPROVED:
-        "bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-900",
-      REJECTED: "bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900",
-      COMPLETED:
-        "bg-blue-100 text-blue-800 hover:bg-blue-200 hover:text-blue-900",
-      DEFAULT:
-        "bg-gray-100 text-gray-800 hover:bg-gray-200 hover:text-gray-900",
-    };
-
-    return (
-      <Badge className={statusColors[status] || statusColors.DEFAULT}>
-        {status}
-      </Badge>
-    );
-  };
 
   return (
     <div className="mt-4 px-3 md:px-0">
@@ -109,7 +89,17 @@ export const ResourceRequests = (props: PatientProps) => {
                     )?.text || "--"}
                   </TableCell>
                   <TableCell>{request.title}</TableCell>
-                  <TableCell>{getStatusBadge(t(request.status))}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        RESOURCE_REQUEST_STATUS_COLORS[
+                          request.status as keyof typeof RESOURCE_REQUEST_STATUS_COLORS
+                        ]
+                      }
+                    >
+                      {t(request.status)}
+                    </Badge>
+                  </TableCell>
                   <TableCell>{formatDateTime(request.created_date)}</TableCell>
                   <TableCell>{formatDateTime(request.modified_date)}</TableCell>
                   <TableCell className="text-right">

@@ -37,9 +37,8 @@ export class FacilityDevices {
     partNumber?: string;
   }) {
     if (registeredName) {
-      cy.typeIntoField('[data-cy="registered-name-input"]', registeredName, {
-        clearBeforeTyping: true,
-      });
+      cy.get('[data-cy="registered-name-input"]').clear();
+      cy.get('[data-cy="registered-name-input"]').click().type(registeredName);
     }
 
     if (userFriendlyName) {

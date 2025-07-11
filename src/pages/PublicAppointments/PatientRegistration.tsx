@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import RadioInput from "@/components/ui/RadioInput";
 import { Button } from "@/components/ui/button";
 import DateField from "@/components/ui/date-field";
 import {
@@ -17,8 +18,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
@@ -32,7 +31,7 @@ import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
-import { Patient } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/patient/patient";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
@@ -244,29 +243,17 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 control={form.control}
                 name="gender"
                 render={({ field }) => (
-                  <FormItem className="space-y-3">
+                  <FormItem className="flex flex-col">
                     <FormLabel aria-required>{t("sex")}</FormLabel>
                     <FormControl>
-                      <RadioGroup
+                      <RadioInput
                         {...field}
                         onValueChange={field.onChange}
-                        value={field.value}
-                        className="flex gap-5 flex-wrap"
-                      >
-                        {GENDER_TYPES.map((g) => (
-                          <FormItem key={g.id} className="flex">
-                            <FormControl>
-                              <RadioGroupItem
-                                value={g.id}
-                                data-cy={`gender-radio-${g.id.toLowerCase()}`}
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal">
-                              {t(`GENDER__${g.id}`)}
-                            </FormLabel>
-                          </FormItem>
-                        ))}
-                      </RadioGroup>
+                        options={GENDER_TYPES.map((g) => ({
+                          value: g.id,
+                          label: t(`GENDER__${g.id}`),
+                        }))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -283,25 +270,17 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                         {t("date_of_birth_or_age")}
                       </FormLabel>
                       <FormControl>
-                        <RadioGroup
-                          value={field.value}
+                        <RadioInput
+                          {...field}
                           onValueChange={field.onChange}
-                          className="flex items-center divide-x divide-secondary-400 bg-white rounded-md w-fit border border-secondary-400"
-                        >
-                          <div className="flex items-center gap-2 px-4 py-2">
-                            <RadioGroupItem
-                              id="dob-option"
-                              value="date_of_birth"
-                            />
-                            <Label htmlFor="dob-option">
-                              {t("date_of_birth")}
-                            </Label>
-                          </div>
-                          <div className="flex items-center gap-2 px-4 py-2">
-                            <RadioGroupItem id="age-option" value="age" />
-                            <Label htmlFor="age-option">{t("age")}</Label>
-                          </div>
-                        </RadioGroup>
+                          options={[
+                            {
+                              value: "date_of_birth",
+                              label: t("date_of_birth"),
+                            },
+                            { value: "age", label: t("age") },
+                          ]}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -338,12 +317,15 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   <FormField
                     control={form.control}
                     name="age"
-                    render={() => (
+                    render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel aria-required>{t("age")}</FormLabel>
                         <FormControl>
                           <Input
-                            {...form.register("age")}
+                            type="number"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            {...field}
                             placeholder={t("type_patient_age")}
                           />
                         </FormControl>
@@ -409,6 +391,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   <FormItem className="flex flex-col">
                     <FormControl>
                       <GovtOrganizationSelector
+                        {...field}
                         required
                         authToken={tokenData.token}
                         onChange={(value) => {

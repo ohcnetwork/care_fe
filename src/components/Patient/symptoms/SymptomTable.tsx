@@ -19,10 +19,11 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 
+import { formatName } from "@/Utils/utils";
 import {
-  SYMPTOM_CLINICAL_STATUS_STYLES,
-  SYMPTOM_SEVERITY_STYLES,
-  SYMPTOM_VERIFICATION_STATUS_STYLES,
+  SYMPTOM_CLINICAL_STATUS_COLORS,
+  SYMPTOM_SEVERITY_COLORS,
+  SYMPTOM_VERIFICATION_STATUS_COLORS,
   Symptom,
 } from "@/types/emr/symptom/symptom";
 
@@ -75,12 +76,7 @@ export function SymptomTable({ symptoms }: SymptomTableProps) {
             </TableCell>
             <TableCell>
               {symptom.severity ? (
-                <Badge
-                  variant="outline"
-                  className={`whitespace-nowrap ${
-                    SYMPTOM_SEVERITY_STYLES[symptom.severity]
-                  }`}
-                >
+                <Badge variant={SYMPTOM_SEVERITY_COLORS[symptom.severity]}>
                   {t(symptom.severity)}
                 </Badge>
               ) : (
@@ -89,22 +85,22 @@ export function SymptomTable({ symptoms }: SymptomTableProps) {
             </TableCell>
             <TableCell>
               <Badge
-                variant="outline"
-                className={`whitespace-nowrap ${
-                  SYMPTOM_CLINICAL_STATUS_STYLES[symptom.clinical_status]
-                }`}
+                variant={
+                  SYMPTOM_CLINICAL_STATUS_COLORS[symptom.clinical_status]
+                }
+                className="whitespace-nowrap"
               >
                 {t(symptom.clinical_status)}
               </Badge>
             </TableCell>
             <TableCell>
               <Badge
-                variant="outline"
-                className={`whitespace-nowrap capitalize ${
-                  SYMPTOM_VERIFICATION_STATUS_STYLES[
+                variant={
+                  SYMPTOM_VERIFICATION_STATUS_COLORS[
                     symptom.verification_status
                   ]
-                }`}
+                }
+                className="whitespace-nowrap capitalize"
               >
                 {t(symptom.verification_status)}
               </Badge>
@@ -148,7 +144,9 @@ export function SymptomTable({ symptoms }: SymptomTableProps) {
                   imageUrl={symptom.created_by.profile_picture_url}
                 />
 
-                <span className="text-sm">{symptom.created_by.username}</span>
+                <span className="text-sm">
+                  {formatName(symptom.created_by)}
+                </span>
               </div>
             </TableCell>
           </TableRow>

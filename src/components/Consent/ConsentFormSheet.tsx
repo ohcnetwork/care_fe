@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { t } from "i18next";
 import { Edit, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -9,8 +8,11 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { tzAwareDateTime } from "@/lib/validators";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import RadioInput from "@/components/ui/RadioInput";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -23,7 +25,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -39,6 +40,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+
+import { DateTimeInput } from "@/components/Common/DateTimeInput";
 
 import useFileUpload from "@/hooks/useFileUpload";
 
@@ -63,10 +66,10 @@ const consentFormSchema = (isEdit: boolean) =>
       decision: z.enum(CONSENT_DECISIONS).default("permit"),
       category: z.enum(CONSENT_CATEGORIES).default("treatment"),
       status: z.enum(CONSENT_STATUSES).default("active"),
-      date: z.date(),
+      date: tzAwareDateTime,
       period: z.object({
-        start: z.date().nullable().optional(),
-        end: z.date().nullable().optional(),
+        start: tzAwareDateTime.optional(),
+        end: tzAwareDateTime.optional(),
       }),
       note: z.string().optional(),
       fileEntries: z
@@ -92,7 +95,10 @@ const consentFormSchema = (isEdit: boolean) =>
         });
       }
 
-      if (data.period.start && data.period.start < data.date) {
+      if (
+        data.period.start &&
+        new Date(data.period.start) < new Date(data.date)
+      ) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("consent_period_start_before_consent_date_validation"),
@@ -137,10 +143,10 @@ export default function ConsentFormSheet({
       decision: "permit",
       category: "treatment",
       status: "active",
-      date: new Date(),
+      date: new Date().toISOString(),
       period: {
-        start: new Date(),
-        end: null,
+        start: new Date().toISOString(),
+        end: undefined,
       },
       note: "",
       fileEntries: [],
@@ -220,14 +226,14 @@ export default function ConsentFormSheet({
         decision: existingConsent!.decision,
         category: existingConsent!.category,
         status: existingConsent!.status,
-        date: new Date(existingConsent!.date),
+        date: new Date(existingConsent!.date).toISOString(),
         period: {
           start: existingConsent!.period.start
-            ? new Date(existingConsent!.period.start)
-            : null,
+            ? new Date(existingConsent!.period.start).toISOString()
+            : undefined,
           end: existingConsent!.period.end
-            ? new Date(existingConsent!.period.end)
-            : null,
+            ? new Date(existingConsent!.period.end).toISOString()
+            : undefined,
         },
         note: existingConsent!.note || "",
         fileEntries: [],
@@ -248,7 +254,7 @@ export default function ConsentFormSheet({
     const consentData: CreateConsentRequest = {
       status: values.status,
       category: isEdit ? existingConsent!.category : values.category,
-      date: isEdit ? new Date(existingConsent!.date) : values.date,
+      date: isEdit ? new Date(existingConsent!.date) : new Date(values.date),
       decision: isEdit ? existingConsent!.decision : values.decision,
       period: isEdit
         ? {
@@ -260,8 +266,8 @@ export default function ConsentFormSheet({
               : null,
           }
         : {
-            start: values.period.start ?? null,
-            end: values.period.end ?? null,
+            start: values.period.start ? new Date(values.period.start) : null,
+            end: values.period.end ? new Date(values.period.end) : null,
           },
       encounter: encounterId,
       source_attachments: [],
@@ -319,48 +325,28 @@ export default function ConsentFormSheet({
                       <FormLabel aria-required>
                         {t("consent_given_on")}
                       </FormLabel>
-                      <Input
-                        type="datetime-local"
+                      <DateTimeInput
                         {...field}
-                        value={
-                          field.value
-                            ? format(
-                                new Date(field.value),
-                                "yyyy-MM-dd'T'HH:mm",
-                              )
-                            : undefined
-                        }
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          field.onChange(value ? new Date(value) : null);
-                        }}
+                        value={field.value}
+                        onDateChange={(val) => field.onChange(val)}
                       />
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="period.start"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("consent_valid_from")}</FormLabel>
-                        <Input
-                          type="datetime-local"
+                        <DateTimeInput
                           {...field}
-                          value={
-                            field.value
-                              ? format(
-                                  new Date(field.value),
-                                  "yyyy-MM-dd'T'HH:mm",
-                                )
-                              : undefined
-                          }
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            field.onChange(value ? new Date(value) : null);
+                          value={field.value ?? ""}
+                          onDateChange={(val) => {
+                            field.onChange(val ?? null);
                           }}
                         />
                         <FormMessage />
@@ -374,20 +360,11 @@ export default function ConsentFormSheet({
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("consent_valid_until")}</FormLabel>
-                        <Input
-                          type="datetime-local"
+                        <DateTimeInput
                           {...field}
-                          value={
-                            field.value
-                              ? format(
-                                  new Date(field.value),
-                                  "yyyy-MM-dd'T'HH:mm",
-                                )
-                              : undefined
-                          }
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            field.onChange(value ? new Date(value) : null);
+                          value={field.value ?? ""}
+                          onDateChange={(val) => {
+                            field.onChange(val ?? null);
                           }}
                         />
                         <FormMessage />
@@ -400,27 +377,16 @@ export default function ConsentFormSheet({
                   control={form.control}
                   name="decision"
                   render={({ field }) => (
-                    <FormItem className="space-y-2">
+                    <FormItem>
                       <FormLabel>{t("consent_decision")}</FormLabel>
-                      <RadioGroup
+                      <RadioInput
+                        {...field}
+                        options={CONSENT_DECISIONS.map((decision) => ({
+                          label: t(`consent_decision__${decision}`),
+                          value: decision,
+                        }))}
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        value={field.value}
-                        className="flex gap-4"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="permit" id="permit" />
-                          <Label htmlFor="permit">
-                            {t("consent_decision__permit")}
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="deny" id="deny" />
-                          <Label htmlFor="deny">
-                            {t("consent_decision__deny")}
-                          </Label>
-                        </div>
-                      </RadioGroup>
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
@@ -438,7 +404,7 @@ export default function ConsentFormSheet({
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger ref={field.ref}>
                             <SelectValue
                               placeholder={t("select_category")}
                               className="flex justify-start items-center w-full"
@@ -492,7 +458,7 @@ export default function ConsentFormSheet({
                     value={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger ref={field.ref}>
                         <SelectValue placeholder={t("select_status")} />
                       </SelectTrigger>
                     </FormControl>
@@ -595,11 +561,12 @@ export default function ConsentFormSheet({
             <div className="flex justify-end mt-6 space-x-2">
               <Button
                 type="button"
+                variant="outline"
                 onClick={() => {
                   setIsOpen(false);
                   form.reset();
                 }}
-                className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
+                disabled={isPending}
               >
                 {t("cancel")}
               </Button>

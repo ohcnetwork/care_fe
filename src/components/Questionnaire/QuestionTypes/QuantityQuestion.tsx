@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import { Code } from "@/types/questionnaire/code";
+import { Code } from "@/types/base/code/code";
 import type {
   QuestionnaireResponse,
   ResponseValue,
@@ -92,11 +92,11 @@ export const QuantityQuestion = memo(function QuantityQuestion({
   };
 
   return (
-    <div className="flex gap-4">
+    <div className="flex flex-col sm:flex-row gap-4 sm:flex-wrap">
       {question.answer_value_set && (
         <div className="space-y-2">
           <Label htmlFor={`${question.id}-coding`}>Type</Label>
-          <div className="w-[200px]">
+          <div className="w-full sm:w-[200px]">
             <ValueSetSelect
               system={question.answer_value_set}
               value={currentCoding}
@@ -110,6 +110,8 @@ export const QuantityQuestion = memo(function QuantityQuestion({
         <Input
           id={`${question.id}-value`}
           type="number"
+          inputMode="decimal"
+          pattern="[0-9]*[.]?[0-9]*"
           value={currentValue?.toString() || ""}
           onChange={(e) => handleValueChange(e.target.value)}
           step="0.01"

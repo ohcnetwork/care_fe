@@ -18,6 +18,7 @@ import type { Question } from "@/types/questionnaire/question";
 
 import { AllergyQuestion } from "./AllergyQuestion";
 import { BooleanQuestion } from "./BooleanQuestion";
+import { ChargeItemQuestion } from "./ChargeItemQuestion";
 import { ChoiceQuestion } from "./ChoiceQuestion";
 import { DateQuestion } from "./DateQuestion";
 import { DateTimeQuestion } from "./DateTimeQuestion";
@@ -30,6 +31,7 @@ import { MedicationStatementQuestion } from "./MedicationStatementQuestion";
 import { NotesInput } from "./NotesInput";
 import { NumberQuestion } from "./NumberQuestion";
 import { QuantityQuestion } from "./QuantityQuestion";
+import { ServiceRequestQuestion } from "./ServiceRequestQuestion";
 import { SymptomQuestion } from "./SymptomQuestion";
 import { TextQuestion } from "./TextQuestion";
 import { TimeQuestion } from "./TimeQuestion";
@@ -73,8 +75,13 @@ export function QuestionInput({
   }
 
   const handleAddValue = () => {
+    const newValues = [...questionnaireResponse.values];
+    if (newValues.length === 0) {
+      newValues.push({ type: "string", value: "" });
+    }
+    newValues.push({ type: "string", value: "" });
     updateQuestionnaireResponseCB(
-      [...questionnaireResponse.values, { type: "string", value: "" }],
+      newValues,
       questionnaireResponse.question_id,
       questionnaireResponse.note,
     );
@@ -157,8 +164,37 @@ export function QuestionInput({
                 {t("questionnaire_medication_statement_no_encounter")}
               </span>
             );
+          case "service_request":
+            if (encounterId && facilityId) {
+              return (
+                <ServiceRequestQuestion
+                  {...commonProps}
+                  facilityId={facilityId}
+                  encounterId={encounterId}
+                />
+              );
+            }
+            return (
+              <span>{t("questionnaire_service_request_no_encounter")}</span>
+            );
+          case "charge_item":
+            if (encounterId && facilityId) {
+              return (
+                <ChargeItemQuestion
+                  {...commonProps}
+                  facilityId={facilityId}
+                  encounterId={encounterId}
+                />
+              );
+            }
+            return <span>{t("questionnaire_charge_item_no_encounter")}</span>;
           case "allergy_intolerance":
-            return <AllergyQuestion {...commonProps} />;
+            if (encounterId) {
+              return <AllergyQuestion {...commonProps} />;
+            }
+            return (
+              <span>{t("questionnaire_allergy_intolerance_no_encounter")}</span>
+            );
           case "symptom":
             if (encounterId) {
               return (
@@ -223,11 +259,52 @@ export function QuestionInput({
       ? [{ value: "", type: "string" } as ResponseValue]
       : questionnaireResponse.values;
 
+    if (question.type === "choice") {
+      return (
+        <div
+          className="bg-gray-100 md:bg-transparent px-2 py-1.5"
+          id={"question-" + question.id}
+        >
+          <div className="px-2 pt-2 bg-gray-100 md:bg-transparent">
+            <QuestionLabel
+              question={question}
+              isSubQuestion={isSubQuestion}
+              className="mb-2 text-md"
+            />
+            {question.description && (
+              <p className="text-sm text-gray-500">{question.description}</p>
+            )}
+          </div>
+          <div
+            className={cn(
+              question.answer_value_set
+                ? "flex flex-col gap-4"
+                : "flex flex-row",
+            )}
+          >
+            <div className="flex-1 min-w-0">{renderSingleInput(0)}</div>
+            <NotesInput
+              questionnaireResponse={questionnaireResponse}
+              handleUpdateNote={(note) => {
+                updateQuestionnaireResponseCB(
+                  [...questionnaireResponse.values],
+                  questionnaireResponse.question_id,
+                  note,
+                );
+              }}
+              disabled={disabled}
+            />
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="bg-gray-100 md:bg-transparent px-2 py-1.5">
         {values.map((value, index) => {
           const removeButton = question.repeats &&
-            questionnaireResponse.values.length > 1 && (
+            questionnaireResponse.values.length > 1 &&
+            question.type != "choice" && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -246,7 +323,7 @@ export function QuestionInput({
             >
               <div
                 className={cn("space-y-1", { "flex-1": removeButton })}
-                data-question-id={question.id}
+                id={"question-" + question.id}
               >
                 {index === 0 && (
                   <div className="px-2 pt-2 bg-gray-100 md:bg-transparent">

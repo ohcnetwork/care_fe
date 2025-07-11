@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import RadioInput from "@/components/ui/RadioInput";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -15,7 +16,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -33,7 +33,7 @@ import {
   MedicationAdministrationRequest,
   MedicationAdministrationStatus,
 } from "@/types/emr/medicationAdministration/medicationAdministration";
-import { MedicationRequestRead } from "@/types/emr/medicationRequest";
+import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
 
 interface MedicineAdminFormProps {
   medication: MedicationRequestRead;
@@ -289,10 +289,10 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
       {!administrationRequest.id && (
         <div className="space-y-2">
           <Label>{t("is_this_administration_for_a_past_time")}?</Label>
-          <RadioGroup
+          <RadioInput
             name={`${formId}isPastTime`}
             value={isPastTime ? "yes" : "no"}
-            onValueChange={(newValue) => {
+            onValueChange={(newValue: string) => {
               setIsPastTime(newValue === "yes");
               if (newValue === "no") {
                 const now = new Date().toISOString();
@@ -313,17 +313,11 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                 onChange(newRequest);
               }
             }}
-            className="flex gap-4"
-          >
-            <div className="flex gap-1">
-              <RadioGroupItem value="yes" id={`yes-${formId}`} />
-              <Label htmlFor={`yes-${formId}`}>{t("yes")}</Label>
-            </div>
-            <div className="flex gap-1">
-              <RadioGroupItem value="no" id={`no-${formId}`} />
-              <Label htmlFor={`no-${formId}`}>{t("no")}</Label>
-            </div>
-          </RadioGroup>
+            options={[
+              { value: "yes", label: t("yes") },
+              { value: "no", label: t("no") },
+            ]}
+          />
         </div>
       )}
 

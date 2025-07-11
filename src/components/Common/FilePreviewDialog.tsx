@@ -5,6 +5,7 @@ import {
   Suspense,
   lazy,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -25,6 +26,8 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import CircularProgress from "@/components/Common/CircularProgress";
 import { FileUploadModel } from "@/components/Patient/models";
+
+import { FILE_EXTENSIONS, getVideoMimeType } from "@/common/constants";
 
 const PDFViewer = lazy(() => import("@/components/Common/PDFViewer"));
 export const zoom_values = [
@@ -71,6 +74,10 @@ const previewExtensions = [
   ".pdf",
   ".mp4",
   ".webm",
+  ".avi",
+  ".mov",
+  ".mkv",
+  ".flv",
   ".jpg",
   ".jpeg",
   ".png",
@@ -124,6 +131,23 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   const [index, setIndex] = useState<number>(currentIndex);
   const [scale, setScale] = useState(0.75);
   const [dragState, setDragState] = useState<DragState>(initialDragState);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragStateRef = useRef(dragState);
+
+  // Browser detection function
+  const isSafari = () => {
+    const userAgent = navigator.userAgent;
+    return /Safari/.test(userAgent) && !/Chrome/.test(userAgent);
+  };
+
+  // Check if video should be skipped (MOV files in non-Safari browsers)
+  const shouldSkipVideo = () => {
+    return file_state.extension === "mov" && !isSafari();
+  };
+
+  useEffect(() => {
+    dragStateRef.current = dragState;
+  }, [dragState]);
 
   useEffect(() => {
     if (uploadedFiles && show) {
@@ -134,6 +158,20 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   useEffect(() => {
     setDragState(initialDragState);
   }, [index, show]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const handler = (e: TouchEvent) => {
+      if (dragStateRef.current.isDragging) {
+        handleTouchMove(e as unknown as React.TouchEvent);
+      }
+    };
+    container.addEventListener("touchmove", handler, { passive: false });
+    return () => {
+      container.removeEventListener("touchmove", handler);
+    };
+  }, []);
 
   const handleZoomIn = () => {
     const checkFull = file_state.zoom === zoom_values.length;
@@ -181,6 +219,10 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
 
   const fileNameTooltip =
     fileName.length > 30 ? fileName.slice(0, 30) + "..." : fileName;
+
+  const isVideo = (FILE_EXTENSIONS.VIDEO as unknown as string[]).includes(
+    file_state.extension,
+  );
 
   const handleNext = (newIndex: number) => {
     if (
@@ -357,6 +399,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 </Button>
               )}
               <div
+                ref={containerRef}
                 className={cn(
                   "flex h-[50vh] md:h-[70vh] w-full items-center justify-center overflow-hidden rounded-lg border border-secondary-200 touch-none",
                   dragState.isDragging ? "cursor-grabbing" : "cursor-grab",
@@ -366,7 +409,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
                 onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
               >
                 {file_state.isImage ? (
@@ -381,13 +423,15 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   >
                     <img
                       src={fileUrl}
-                      alt="file"
+                      alt={fileName}
                       className={cn(
                         "max-h-full max-w-full select-none object-contain",
                         zoom_values[file_state.zoom - 1],
                         getRotationClass(file_state.rotation),
                       )}
                       draggable={false}
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 ) : file_state.extension === "pdf" ? (
@@ -403,6 +447,50 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       className="max-md:max-w-[50vw]"
                     />
                   </Suspense>
+                ) : isVideo ? (
+                  shouldSkipVideo() ? (
+                    <div className="flex h-full w-full flex-col items-center justify-center">
+                      <CareIcon
+                        icon="l-video"
+                        className="mb-4 text-5xl text-secondary-600"
+                      />
+                      <p className="text-lg font-semibold text-gray-800 mb-2">
+                        {t("mov_file_not_supported")}
+                      </p>
+                      <p className="text-sm text-gray-600 text-center max-w-md mb-4">
+                        {t("mov_file_safari_only")}
+                      </p>
+                      {downloadURL && (
+                        <Button variant="primary">
+                          <a
+                            href={downloadURL}
+                            className="text-white flex items-center gap-2"
+                            download={`${file_state.name}.${file_state.extension}`}
+                          >
+                            <CareIcon
+                              icon="l-file-download"
+                              className="size-4"
+                            />
+                            <span>{t("download_to_play")}</span>
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="relative w-full h-full flex items-center justify-center">
+                      <video
+                        controls
+                        className="max-h-full max-w-full object-contain"
+                        preload="metadata"
+                      >
+                        <source
+                          src={fileUrl}
+                          type={getVideoMimeType(file_state.extension)}
+                        />
+                        {t("video_not_supported")}
+                      </video>
+                    </div>
+                  )
                 ) : previewExtensions.includes(file_state.extension) ? (
                   <iframe
                     sandbox=""

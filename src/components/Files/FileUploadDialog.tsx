@@ -28,7 +28,12 @@ export default function FileUploadDialog({
   onOpenChange: (open: boolean) => void;
   fileUpload: FileUploadReturn;
   associatingId: string;
-  type: "patient" | "consent" | "encounter";
+  type:
+    | "patient"
+    | "consent"
+    | "encounter"
+    | "diagnostic_report"
+    | "service_request";
 }) {
   const { t } = useTranslation();
   const [isPdf, setIsPdf] = useState(false);
