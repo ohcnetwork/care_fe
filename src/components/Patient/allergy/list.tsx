@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import {
   BeakerIcon,
   CookingPotIcon,
@@ -8,32 +9,14 @@ import {
 import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
-import { Avatar } from "@/components/Common/Avatar";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
 import {
-  ALLERGY_CLINICAL_STATUS_COLORS,
-  ALLERGY_CRITICALITY_COLORS,
-  ALLERGY_VERIFICATION_STATUS_COLORS,
   AllergyCategory,
   AllergyIntolerance,
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
@@ -43,6 +26,8 @@ import {
   completedEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 
+import { AllergyTable } from "./AllergyTable";
+
 interface AllergyListProps {
   facilityId?: string;
   patientId: string;
@@ -50,6 +35,12 @@ interface AllergyListProps {
   className?: string;
   readOnly?: boolean;
   encounterStatus?: Encounter["status"];
+  showTimeline?: boolean;
+}
+interface GroupedAllergies {
+  [year: string]: {
+    [date: string]: AllergyIntolerance[];
+  };
 }
 
 export const CATEGORY_ICONS: Record<AllergyCategory, ReactNode> = {
@@ -67,6 +58,7 @@ export function AllergyList({
   className = "",
   readOnly = false,
   encounterStatus,
+  showTimeline = false,
 }: AllergyListProps) {
   const { t } = useTranslation();
 
@@ -77,24 +69,16 @@ export function AllergyList({
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
       queryParams: {
-        encounter: completedEncounterStatus.includes(encounterStatus as string)
-          ? encounterId
-          : undefined,
+        encounter:
+          encounterStatus && completedEncounterStatus.includes(encounterStatus)
+            ? encounterId
+            : undefined,
       },
     }),
   });
 
   if (isLoading) {
-    return (
-      <EncounterAccordionLayout
-        title="allergies"
-        readOnly={readOnly}
-        className={className}
-        editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
-      >
-        <Skeleton className="h-[100px] w-full" />
-      </EncounterAccordionLayout>
-    );
+    return <TableSkeleton count={5} />;
   }
 
   const filteredAllergies = allergies?.results?.filter(
@@ -107,87 +91,72 @@ export function AllergyList({
   );
 
   if (!filteredAllergies?.length) {
+    if (showTimeline) {
+      return (
+        <EmptyState
+          message={t("no_allergies")}
+          description={t("no_allergies_recorded_description")}
+        />
+      );
+    }
     return null;
   }
 
-  interface AllergyRowProps {
-    allergy: AllergyIntolerance;
-  }
+  const allergiesRows = [
+    ...filteredAllergies.filter(
+      (allergy) => allergy.verification_status !== "entered_in_error",
+    ),
+    ...(showEnteredInError
+      ? filteredAllergies.filter(
+          (allergy) => allergy.verification_status === "entered_in_error",
+        )
+      : []),
+  ];
 
-  function AllergyRow({ allergy }: AllergyRowProps) {
+  if (showTimeline) {
+    const groupedByYear = filteredAllergies.reduce((acc, allergy) => {
+      const dateStr = format(allergy.created_date, "dd MMMM, yyyy");
+      const year = format(allergy.created_date, "yyyy");
+      acc[year] ??= {};
+      acc[year][dateStr] ??= [];
+      if (allergy.verification_status !== "entered_in_error") {
+        acc[year][dateStr].push(allergy);
+      }
+      return acc;
+    }, {} as GroupedAllergies);
+
     return (
-      <TableRow
-        className={`rounded-md overflow-hidden bg-gray-50 ${
-          allergy.verification_status === "entered_in_error" ? "opacity-50" : ""
-        }`}
-      >
-        <TableCell className="first:rounded-l-md">
-          <div className="flex items-center">
-            {CATEGORY_ICONS[allergy.category ?? ""]}
-          </div>
-        </TableCell>
-        <TableCell className="font-medium pl-0 md:whitespace-normal">
-          {allergy.code.display}
-        </TableCell>
-        <TableCell>
-          <Badge
-            variant={ALLERGY_CLINICAL_STATUS_COLORS[allergy.clinical_status]}
-            className="whitespace-nowrap"
-          >
-            {t(allergy.clinical_status)}
-          </Badge>
-        </TableCell>
-        <TableCell>
-          <Badge
-            variant={ALLERGY_CRITICALITY_COLORS[allergy.criticality]}
-            className="whitespace-nowrap"
-          >
-            {t(allergy.criticality)}
-          </Badge>
-        </TableCell>
-        <TableCell>
-          <Badge
-            variant={
-              ALLERGY_VERIFICATION_STATUS_COLORS[allergy.verification_status]
-            }
-            className="whitespace-nowrap capitalize"
-          >
-            {t(allergy.verification_status)}
-          </Badge>
-        </TableCell>
-        <TableCell className="text-sm text-gray-950">
-          {allergy.note && (
-            <div className="flex items-center gap-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-xs shrink-0"
-                  >
-                    {t("see_note")}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80 p-4">
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                    {allergy.note}
-                  </p>
-                </PopoverContent>
-              </Popover>
+      <div className="space-y-8">
+        {Object.entries(groupedByYear).map(([year, groupedByDate]) => {
+          return (
+            <div key={year}>
+              <h2 className="text-sm font-medium text-indigo-700 border-y border-gray-300 py-2 w-fit pr-10">
+                {year}
+              </h2>
+              <div className="border-l border-gray-300 pt-5 ml-4">
+                {Object.entries(groupedByDate).map(([date, allergies]) => {
+                  return (
+                    <div key={date} className="pb-6">
+                      <div className="flex items-start gap-4">
+                        <div className="flex flex-col items-center h-full">
+                          <div className="size-3 bg-cyan-300 ring-1 ring-cyan-700 rounded-full flex-shrink-0 -ml-1.5 mt-1"></div>
+                        </div>
+
+                        <div className="space-y-3 overflow-auto w-full">
+                          <h3 className="text-sm font-medium text-indigo-700">
+                            {format(date, "dd MMMM, yyyy")}
+                          </h3>
+                          <AllergyTable allergies={allergies} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          )}
-        </TableCell>
-        <TableCell className="last:rounded-r-md">
-          <div className="flex items-center gap-2">
-            <Avatar
-              name={allergy.created_by.username}
-              className="size-4"
-              imageUrl={allergy.created_by.profile_picture_url}
-            />
-            <span className="text-sm">{formatName(allergy.created_by)}</span>
-          </div>
-        </TableCell>
-      </TableRow>
+          );
+        })}
+      </div>
     );
   }
 
@@ -198,51 +167,7 @@ export function AllergyList({
       className={className}
       editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
     >
-      <Table className="border-separate border-spacing-y-0.5">
-        <TableHeader>
-          <TableRow className="rounded-md overflow-hidden bg-gray-100">
-            <TableHead className="first:rounded-l-md h-auto py-1 pl-1 pr-0 text-gray-600"></TableHead>
-            <TableHead className="h-auto py-1 pl-1 pr-2 text-gray-600">
-              {t("allergen")}
-            </TableHead>
-            <TableHead className="h-auto py-1 px-2 text-gray-600">
-              {t("status")}
-            </TableHead>
-            <TableHead className="h-auto py-1 px-2 text-gray-600">
-              {t("criticality")}
-            </TableHead>
-            <TableHead className="h-auto py-1 px-2 text-gray-600">
-              {t("verification")}
-            </TableHead>
-            <TableHead className="h-auto py-1 px-2 text-gray-600">
-              {t("notes")}
-            </TableHead>
-            <TableHead className="last:rounded-r-md h-auto py-1 px-2 text-gray-600">
-              {t("logged_by")}
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {/* Valid entries */}
-          {filteredAllergies
-            .filter(
-              (allergy) => allergy.verification_status !== "entered_in_error",
-            )
-            .map((allergy) => (
-              <AllergyRow key={allergy.id} allergy={allergy} />
-            ))}
-
-          {/* Entered in error entries */}
-          {showEnteredInError &&
-            filteredAllergies
-              .filter(
-                (allergy) => allergy.verification_status === "entered_in_error",
-              )
-              .map((allergy) => (
-                <AllergyRow key={allergy.id} allergy={allergy} />
-              ))}
-        </TableBody>
-      </Table>
+      <AllergyTable allergies={allergiesRows} />
       {hasEnteredInErrorRecords && !showEnteredInError && (
         <>
           <div className="border-b border-dashed border-gray-200 my-2" />

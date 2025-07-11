@@ -1,6 +1,6 @@
 import { Suspense, createContext, useContext } from "react";
 
-import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { PluginManifest } from "@/pluginTypes";
 
 export const CareAppsContext = createContext<PluginManifest[]>([]);
@@ -23,9 +23,11 @@ export const useCareApps = () => {
 //   return navItems;
 // };
 
-const withSuspense = (Component: React.ComponentType<EncounterTabProps>) => {
+const withSuspense = (
+  Component: React.ComponentType<PluginEncounterTabProps>,
+) => {
   // eslint-disable-next-line react/display-name
-  return (props: EncounterTabProps) => {
+  return (props: PluginEncounterTabProps) => {
     return (
       <Suspense fallback={<div>Loading...</div>}>
         <Component {...props} />
@@ -37,16 +39,19 @@ const withSuspense = (Component: React.ComponentType<EncounterTabProps>) => {
 export const useCareAppEncounterTabs = () => {
   const careApps = useCareApps();
 
-  return careApps.reduce((acc, app) => {
-    const appTabs = Object.entries(app.encounterTabs ?? {}).reduce(
-      (acc, [key, Component]) => {
-        return { ...acc, [key]: withSuspense(Component) };
-      },
-      {},
-    );
+  return careApps.reduce<Record<string, React.FC<PluginEncounterTabProps>>>(
+    (acc, app) => {
+      const appTabs = Object.entries(app.encounterTabs ?? {}).reduce(
+        (acc, [key, Component]) => {
+          return { ...acc, [key]: withSuspense(Component) };
+        },
+        {},
+      );
 
-    return { ...acc, ...appTabs };
-  }, {});
+      return { ...acc, ...appTabs };
+    },
+    {},
+  );
 };
 
 // If required; Reduce plugin.routes to a single pluginRoutes object of type Record<string, () => React.ReactNode>

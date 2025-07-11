@@ -11,6 +11,7 @@ import TreatmentSummary from "@/components/Patient/TreatmentSummary";
 import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
 import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
+import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 
 const ExcalidrawEditor = lazy(
   () => import("@/components/Common/Drawings/ExcalidrawEditor"),
@@ -136,12 +137,13 @@ const consultationRoutes: AppRoutes = {
   ...["facility", "organization"].reduce((acc: AppRoutes, identifier) => {
     acc[`/${identifier}/:id/patient/:patientId/encounter/:encounterId/:tab`] =
       ({ id, encounterId, tab, patientId }) => (
-        <EncounterShow
-          patientId={patientId}
+        <EncounterProvider
           encounterId={encounterId}
-          tab={tab}
+          patientId={patientId}
           facilityId={identifier === "facility" ? id : undefined}
-        />
+        >
+          <EncounterShow tab={tab} />
+        </EncounterProvider>
       );
     return acc;
   }, {}),
