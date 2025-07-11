@@ -926,14 +926,16 @@ export default function PatientRegistration(
                         <Autocomplete
                           options={filteredCountries.map((c) => ({
                             label: c,
-                            value: c,
+                            value: countryList.indexOf(c).toString(),
                           }))}
                           {...field}
-                          onChange={(value) =>
-                            form.setValue("nationality", value, {
+                          onChange={(value) => {
+                            const selectedCountry =
+                              countryList[parseInt(value)];
+                            form.setValue("nationality", selectedCountry, {
                               shouldDirty: true,
-                            })
-                          }
+                            });
+                          }}
                           onSearch={setNationalityInput}
                           data-cy="nationality-input"
                         />
