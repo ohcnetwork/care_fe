@@ -289,7 +289,7 @@ const AppointmentDetails = ({
           <Separator />
           <div className="text-sm">
             <p className="font-medium">{t("reason")}</p>
-            <p className="text-gray-600">
+            <p className="text-gray-600 whitespace-pre-wrap">
               {appointment.reason_for_visit || t("no_reason_provided")}
             </p>
           </div>
