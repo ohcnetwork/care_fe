@@ -601,7 +601,7 @@ const AppointmentActions = ({
                 onChange={(e) => setReasonForCancellation(e.target.value)}
               />
               <AlertDialogDescription>
-                <Alert variant="destructive" className="mt-4">
+                <Alert variant="destructive">
                   <AlertTitle>{t("warning")}</AlertTitle>
                   <AlertDescription>
                     {t("cancel_appointment_warning")}
