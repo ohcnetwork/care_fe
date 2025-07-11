@@ -60,7 +60,7 @@ const METHODS = [
 
 const UNITS = [
   "percent",
-  "percent /100(WBC)",
+  "percent /100",
   "percent of slope",
   "percent 0to3Hours",
   "percent Abnormal",
@@ -70,7 +70,7 @@ const UNITS = [
   "percent Blockade",
 ] as const;
 
-const generateUniqueSlug = () => faker.string.uuid();
+const generateUniqueSlug = () => faker.string.alphanumeric(8);
 
 const generateObservationDefinitionFields = () => ({
   title: faker.lorem.words(3),
@@ -92,101 +92,20 @@ describe("Observation basic workflow", () => {
     cy.visit("/");
   });
 
-  it("Create observation definition with all fields and verify modification", () => {
-    facilityCreation.selectFirstRandomFacility();
-    cy.getFacilityIdAndNavigate("settings/observation_definitions");
-    cy.get("button").contains("Add Definition").click();
-    const testData = generateObservationDefinitionFields();
-    cy.typeIntoField('input[name="title"]', testData.title);
-    cy.typeIntoField('input[name="slug"]', testData.slug);
-    cy.typeIntoField('textarea[name="description"]', testData.description);
-    cy.clickAndSelectOptionV2("Category", testData.category);
-    cy.clickAndSelectOptionV2("Data Type", testData.dataType);
-    cy.clickAndSelectOptionV2("Status", testData.status);
-    cy.typeAndSelectOptionV2("LOINC Code", testData.loincCode);
-    cy.typeAndSelectOptionV2("Body Site", testData.bodySite);
-    cy.typeAndSelectOptionV2("Method", testData.method);
-    cy.typeAndSelectOptionV2("Unit", testData.unit);
-    cy.get("button").contains("Add your first component").click();
-    cy.typeAndSelectOption(
-      "button:contains('Search for observation codes')",
-      testData.observationCode,
-      false,
-    );
-    cy.clickAndSelectOption("button:contains('Quantity')", testData.dataType);
-    cy.typeAndSelectOption(
-      "button:contains('Search for units')",
-      testData.unit,
-      false,
-    );
-    cy.get("button").contains("Create").click();
-    cy.verifyNotification("observation_definition_created_successfully");
-
-    cy.typeIntoField("input[placeholder='Search definitions']", testData.title);
-    cy.verifyContentPresence('[data-slot="table"]', [testData.title]);
-    cy.get('[data-slot="table-cell"]').contains("See Details").first().click();
-
-    cy.verifyContentPresence('[data-slot="card"]', [
-      testData.description,
-      testData.loincCode,
-      testData.bodySite,
-      testData.method,
-      testData.unit,
-      testData.observationCode,
-    ]);
-
-    // Edit specimen
-    cy.get("button").contains("Edit").click();
-
-    // Update fields with new test data
-    const updatedData = generateObservationDefinitionFields();
-    cy.clearAndTypeIntoField('input[name="title"]', updatedData.title);
-    cy.clearAndTypeIntoField(
-      'textarea[name="description"]',
-      updatedData.description,
-    );
-    cy.clickAndSelectOptionV2("Category", updatedData.category);
-    cy.clickAndSelectOptionV2("Data Type", updatedData.dataType);
-    cy.clickAndSelectOptionV2("Status", updatedData.status);
-    cy.typeAndSelectOptionV2("Body Site", updatedData.bodySite);
-    cy.typeAndSelectOptionV2("Method", updatedData.method);
-    cy.typeAndSelectOptionV2("Unit", updatedData.unit);
-
-    // Save the changes
-    cy.get("button").contains("Save").click();
-    cy.verifyNotification("observation_definition_updated_successfully");
-
-    // Search for the updated definition
-    cy.typeIntoField(
-      "input[placeholder='Search definitions']",
-      updatedData.title,
-    );
-    cy.verifyContentPresence('[data-slot="table"]', [updatedData.title]);
-    cy.get('[data-slot="table-cell"]').contains("See Details").first().click();
-
-    // Verify updated content
-    cy.verifyContentPresence('[data-slot="card"]', [
-      updatedData.description,
-      updatedData.bodySite,
-      updatedData.method,
-      updatedData.unit,
-    ]);
-  });
-
   it("Create observation definition with mandatory fields and verify filters", () => {
     facilityCreation.selectFirstRandomFacility();
     cy.getFacilityIdAndNavigate("settings/observation_definitions");
     cy.get("button").contains("Add Definition").click();
     const testData = generateObservationDefinitionFields();
     cy.typeIntoField('input[name="title"]', testData.title);
-    cy.typeIntoField('input[name="slug"]', testData.slug);
+    cy.clearAndTypeIntoField('input[name="slug"]', testData.slug);
     cy.typeIntoField('textarea[name="description"]', testData.description);
     cy.clickAndSelectOptionV2("Category", testData.category);
     cy.clickAndSelectOptionV2("Data Type", testData.dataType);
     cy.clickAndSelectOptionV2("Status", testData.status);
     cy.typeAndSelectOptionV2("LOINC Code", testData.loincCode);
     cy.get("button").contains("Create").click();
-    cy.verifyNotification("observation_definition_created_successfully");
+    cy.verifyNotification("Observation definition created");
 
     // Verify by Status filter
     cy.clickAndSelectOption("button:contains('Status')", testData.status);
@@ -232,6 +151,91 @@ describe("Observation basic workflow", () => {
         label: "LOINC Code",
         message: "Required",
       },
+    ]);
+  });
+
+  it("Create observation definition with all fields and verify modification", () => {
+    facilityCreation.selectFirstRandomFacility();
+    cy.getFacilityIdAndNavigate("settings/observation_definitions");
+    cy.get("button").contains("Add Definition").click();
+    const testData = generateObservationDefinitionFields();
+    cy.typeIntoField('input[name="title"]', testData.title);
+    cy.clearAndTypeIntoField('input[name="slug"]', testData.slug);
+    cy.typeIntoField('textarea[name="description"]', testData.description);
+    cy.clickAndSelectOptionV2("Category", testData.category);
+    cy.clickAndSelectOptionV2("Data Type", testData.dataType);
+    cy.clickAndSelectOptionV2("Status", testData.status);
+    cy.typeAndSelectOptionV2("LOINC Code", testData.loincCode);
+    cy.typeAndSelectOptionV2("Body Site", testData.bodySite);
+    cy.typeAndSelectOptionV2("Method", testData.method);
+    cy.typeAndSelectOptionV2("Unit", testData.unit);
+    cy.get("button").contains("Add your first component").click();
+    cy.typeAndSelectOption(
+      "button:contains('Search for observation codes')",
+      testData.observationCode,
+      false,
+    );
+    cy.clickAndSelectOption("button:contains('Quantity')", testData.dataType);
+    cy.typeAndSelectOption(
+      "button:contains('Search for units')",
+      testData.unit,
+      false,
+    );
+    cy.get("button").contains("Create").click();
+    cy.verifyNotification("Observation definition created");
+
+    // Filter by status before searching
+    cy.clickAndSelectOption("button:contains('Status')", testData.status);
+    cy.typeIntoField("input[placeholder='Search definitions']", testData.title);
+    cy.verifyContentPresence('[data-slot="table"]', [testData.title]);
+    cy.get('[data-slot="table-cell"]').contains("See Details").first().click();
+
+    cy.verifyContentPresence('[data-slot="card"]', [
+      testData.description,
+      testData.loincCode,
+      testData.bodySite,
+      testData.method,
+      testData.unit,
+      testData.observationCode,
+    ]);
+
+    // Edit specimen
+    cy.get("button").contains("Edit").click();
+
+    // Update fields with new test data
+    const updatedData = generateObservationDefinitionFields();
+    cy.clearAndTypeIntoField('input[name="title"]', updatedData.title);
+    cy.clearAndTypeIntoField(
+      'textarea[name="description"]',
+      updatedData.description,
+    );
+    cy.clickAndSelectOptionV2("Category", updatedData.category);
+    cy.clickAndSelectOptionV2("Data Type", updatedData.dataType);
+    cy.clickAndSelectOptionV2("Status", updatedData.status);
+    cy.typeAndSelectOptionV2("Body Site", updatedData.bodySite);
+    cy.typeAndSelectOptionV2("Method", updatedData.method);
+    cy.typeAndSelectOptionV2("Unit", updatedData.unit);
+
+    // Save the changes
+    cy.get("button").contains("Save").click();
+    cy.verifyNotification("Observation definition updated");
+
+    // Filter by status before searching for the updated definition
+    cy.get("button").contains("Back").click();
+    cy.clickAndSelectOption("button:contains('Status')", updatedData.status);
+    cy.typeIntoField(
+      "input[placeholder='Search definitions']",
+      updatedData.title,
+    );
+    cy.verifyContentPresence('[data-slot="table"]', [updatedData.title]);
+    cy.get('[data-slot="table-cell"]').contains("See Details").first().click();
+
+    // Verify updated content
+    cy.verifyContentPresence('[data-slot="card"]', [
+      updatedData.description,
+      updatedData.bodySite,
+      updatedData.method,
+      updatedData.unit,
     ]);
   });
 });
