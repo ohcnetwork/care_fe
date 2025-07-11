@@ -108,7 +108,7 @@ export class PatientEncounter {
 
   clickInProgressEncounterFilter() {
     cy.intercept("GET", "**/api/v1/encounter/**").as("getEncounters");
-    cy.verifyAndClickElement('[data-cy="in-progress-filter"]', "In Progress");
+    cy.get('button:contains("In Progress")').click();
     cy.wait("@getEncounters").its("response.statusCode").should("eq", 200);
     return this;
   }
