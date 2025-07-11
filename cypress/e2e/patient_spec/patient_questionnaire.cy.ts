@@ -10,63 +10,6 @@ const facilityCreation = new FacilityCreation();
 const patientEncounter = new PatientEncounter();
 const patientPrescription = new PatientPrescription();
 
-describe("Patient Encounter Questionnaire", () => {
-  beforeEach(() => {
-    cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
-    cy.loginByApi("nurse");
-    cy.visit("/");
-  });
-
-  it("Create a new ABG questionnaire and verify the values", () => {
-    // Test data for respiratory support questionnaire
-    const respiratorySupportValues = {
-      "etco2-(mmhg)": "120",
-    };
-    facilityCreation.selectFirstRandomFacility();
-
-    // Execute questionnaire workflow using page object methods
-    patientEncounter
-      .navigateToEncounters()
-      .clickInProgressEncounterFilter()
-      .openFirstEncounterDetails()
-      .clickUpdateEncounter()
-      .addQuestionnaire("Respiratory Support")
-      .fillQuestionnaire(respiratorySupportValues);
-    patientPrescription.submitQuestionnaire();
-
-    // Verify the submitted values appear in the overview
-    patientEncounter.verifyOverviewValues(
-      Object.values(respiratorySupportValues),
-    );
-  });
-
-  it("verify the 500 character limit in input field", () => {
-    // Generate text exceeding the 500 character limit to test validation
-    const characterMaxLimit = generateRandomCharacter({
-      charLimit: 510, // Exceeds the 500 character limit
-    });
-    facilityCreation.selectFirstRandomFacility();
-
-    // Attempt to submit questionnaire with oversized text
-    patientEncounter
-      .navigateToEncounters()
-      .clickInProgressEncounterFilter()
-      .openFirstEncounterDetails()
-      .clickUpdateEncounter()
-      .addQuestionnaire("Feedback Form")
-      .fillQuestionnaire({
-        "any-suggestions-for-improvement": characterMaxLimit,
-      });
-    patientPrescription.clickSubmitQuestionnaire();
-
-    // Verify that submission fails with appropriate error message
-    cy.verifyNotification("Failed to submit questionnaire");
-    cy.verifyErrorMessages([
-      { label: "Text", message: "Text too long. Max allowed size is 500" },
-    ]);
-  });
-});
-
 describe("All combination of questionnaire submissions", () => {
   beforeEach(() => {
     cy.loginByApi("superadmin");
@@ -213,7 +156,7 @@ describe("All combination of questionnaire submissions", () => {
     facilityCreation.selectFirstRandomFacility();
     cy.getFacilityIdAndNavigate("encounters/patients");
     cy.get("button").contains("View Encounter").first().click();
-    cy.get("#patient-details").click();
+    cy.get("svg.lucide-external-link").filter(":visible").first().click();
     cy.get("[role='tablist']").contains("Updates").click();
     cy.get("a").contains("Add Patient Updates").click();
     cy.get("button").contains("Add Questionnaire").click();
@@ -232,6 +175,63 @@ describe("All combination of questionnaire submissions", () => {
       "Symptoms cannot be recorded without an active encounter",
       "Diagnosis cannot be recorded without an active encounter",
       "Create an encounter first to upload files",
+    ]);
+  });
+});
+
+describe("Patient Encounter Questionnaire", () => {
+  beforeEach(() => {
+    cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
+    cy.loginByApi("nurse");
+    cy.visit("/");
+  });
+
+  it("Create a new ABG questionnaire and verify the values", () => {
+    // Test data for respiratory support questionnaire
+    const respiratorySupportValues = {
+      "etco2-(mmhg)": "120",
+    };
+    facilityCreation.selectFirstRandomFacility();
+
+    // Execute questionnaire workflow using page object methods
+    patientEncounter
+      .navigateToEncounters()
+      .clickInProgressEncounterFilter()
+      .openFirstEncounterDetails()
+      .clickUpdateEncounter()
+      .addQuestionnaire("Respiratory Support")
+      .fillQuestionnaire(respiratorySupportValues);
+    patientPrescription.submitQuestionnaire();
+
+    // Verify the submitted values appear in the overview
+    patientEncounter.verifyOverviewValues(
+      Object.values(respiratorySupportValues),
+    );
+  });
+
+  it("verify the 500 character limit in input field", () => {
+    // Generate text exceeding the 500 character limit to test validation
+    const characterMaxLimit = generateRandomCharacter({
+      charLimit: 510, // Exceeds the 500 character limit
+    });
+    facilityCreation.selectFirstRandomFacility();
+
+    // Attempt to submit questionnaire with oversized text
+    patientEncounter
+      .navigateToEncounters()
+      .clickInProgressEncounterFilter()
+      .openFirstEncounterDetails()
+      .clickUpdateEncounter()
+      .addQuestionnaire("Feedback Form")
+      .fillQuestionnaire({
+        "any-suggestions-for-improvement": characterMaxLimit,
+      });
+    patientPrescription.clickSubmitQuestionnaire();
+
+    // Verify that submission fails with appropriate error message
+    cy.verifyNotification("Failed to submit questionnaire");
+    cy.verifyErrorMessages([
+      { label: "Text", message: "Text too long. Max allowed size is 500" },
     ]);
   });
 });

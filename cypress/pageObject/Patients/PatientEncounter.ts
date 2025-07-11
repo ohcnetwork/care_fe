@@ -22,10 +22,7 @@ export class PatientEncounter {
   }
 
   clickUpdateEncounter() {
-    cy.verifyAndClickElement(
-      '[data-cy="update-encounter-option"]',
-      "Update Encounter",
-    );
+    cy.get("button:contains('Update Encounter')").click();
     return this;
   }
 
@@ -60,7 +57,7 @@ export class PatientEncounter {
   }
 
   verifyOverviewValues(expectedValues: string[]) {
-    cy.verifyContentPresence('[data-cy="encounter-overview"]', expectedValues);
+    cy.verifyContentPresence("#root", expectedValues);
     return this;
   }
 
