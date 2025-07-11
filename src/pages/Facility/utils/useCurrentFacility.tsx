@@ -28,6 +28,8 @@ export default function useCurrentFacility() {
     queryFn: query(routes.getPermittedFacility, {
       pathParams: { id: facilityId ?? "" },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     staleTime: 1000 * 60 * 30, // cache for 30 minutes
   });
 

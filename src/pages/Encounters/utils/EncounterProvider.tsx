@@ -56,6 +56,8 @@ export function EncounterProvider({
     queryFn: query(patientApi.getPatient, {
       pathParams: { id: patientId },
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   const { data: currentEncounter, isLoading: isCurrentEncounterLoading } =
@@ -67,6 +69,8 @@ export function EncounterProvider({
           ? { facility: facilityId }
           : { patient: patientId },
       }),
+      meta: { persist: true },
+      networkMode: "online",
     });
 
   const { data: selectedEncounter, isLoading: isSelectedEncounterLoading } =
@@ -78,6 +82,8 @@ export function EncounterProvider({
           ? { facility: facilityId }
           : { patient: patientId },
       }),
+      meta: { persist: true },
+      networkMode: "online",
     });
 
   const { data: encounters, isLoading: isPastEncountersLoading } = useQuery({
@@ -85,6 +91,8 @@ export function EncounterProvider({
     queryFn: query(routes.encounter.list, {
       queryParams: { patient: patientId },
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   const setSelectedEncounter = (encounterId: string | null) => {
