@@ -56,13 +56,10 @@ function EncounterCard({
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="text-xs font-semibold">
+              <div className="text-sm font-semibold">
                 {t(`encounter_class__${encounter.encounter_class}`)}
               </div>
-              <Badge
-                variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
-                className="text-xs px-1.5"
-              >
+              <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]}>
                 {t(`encounter_status__${encounter.status}`)}
               </Badge>
             </div>
@@ -191,7 +188,7 @@ export default function EncounterHistorySelector() {
   return (
     <>
       <div className="md:hidden">
-        <h2 className="px-4 mb-2 text-xs font-medium text-gray-600">
+        <h2 className="px-2 mb-2 text-xs font-medium text-gray-600 uppercase">
           {t("selected_encounter")}
         </h2>
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -231,13 +228,10 @@ const EncounterSheetTrigger = () => {
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="text-xs font-semibold">
+                <div className="text-base font-semibold">
                   {t(`encounter_class__${encounter.encounter_class}`)}
                 </div>
-                <Badge
-                  variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
-                  className="text-xs px-1.5"
-                >
+                <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]}>
                   {t(`encounter_status__${encounter.status}`)}
                 </Badge>
               </div>
