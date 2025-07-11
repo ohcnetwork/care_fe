@@ -20,7 +20,7 @@ interface FilesTabsProps {
   type: "encounter" | "patient";
   encounter?: Encounter;
   patient?: Patient;
-  facilityId?: string;
+  readOnly?: boolean;
 }
 
 type QueryParams = {
@@ -30,8 +30,12 @@ type QueryParams = {
 const allowedTabs = ["all", "discharge_summary", "drawings"] as const;
 type TabType = (typeof allowedTabs)[number];
 
-export const FilesTab = (props: FilesTabsProps) => {
-  const { patient, type, encounter } = props;
+export const FilesTab = ({
+  patient,
+  type,
+  encounter,
+  readOnly,
+}: FilesTabsProps) => {
   const [qParams, setQParams] = useQueryParams<QueryParams>();
 
   const { hasPermission } = usePermissions();
@@ -54,7 +58,8 @@ export const FilesTab = (props: FilesTabsProps) => {
     !inactiveEncounterStatus.includes(encounter.status);
 
   const canEdit =
-    type === "encounter" ? canWriteCurrentEncounter : canWritePatient;
+    !readOnly &&
+    (type === "encounter" ? canWriteCurrentEncounter : canWritePatient);
 
   const associatingId =
     {
@@ -67,7 +72,7 @@ export const FilesTab = (props: FilesTabsProps) => {
       <Tabs
         value={tabValue}
         onValueChange={(value) => {
-          setQParams({ file: value as TabType });
+          setQParams({ file: value as TabType }, { overwrite: false });
         }}
       >
         <TabsList className={type != "encounter" ? "mt-2" : ""}>
@@ -117,10 +122,11 @@ export const FilesTab = (props: FilesTabsProps) => {
         <TabsContent value="drawings">
           <div>
             <DrawingPage
-              type={props.type}
-              {...(props.type === "patient"
-                ? { patientId: props.patient?.id }
-                : { encounter: props.encounter })}
+              type={type}
+              {...(type === "patient"
+                ? { patientId: patient?.id }
+                : { encounter: encounter })}
+              readOnly={readOnly}
             />
           </div>
         </TabsContent>

@@ -387,10 +387,37 @@ export const FILE_EXTENSIONS = {
     "qt",
     "flv",
     "swf",
+    "mkv",
   ],
   PRESENTATION: ["pptx"],
   DOCUMENT: ["pdf", "docx"],
 } as const;
+
+export const getVideoMimeType = (extension: string): string => {
+  const mimeTypes: Record<string, string> = {
+    mp4: "video/mp4",
+    webm: "video/webm",
+    avi: "video/x-msvideo",
+    mov: "video/quicktime",
+    mkv: "video/x-matroska",
+    flv: "video/x-flv",
+    mpg: "video/mpeg",
+    mp2: "video/mpeg",
+    mpeg: "video/mpeg",
+    mpe: "video/mpeg",
+    mpv: "video/mpeg",
+    ogg: "video/ogg",
+    swf: "video/x-shockwave-flash",
+    wmv: "video/x-ms-wmv",
+    m4v: "video/mp4",
+    m4a: "audio/mp4",
+    m4b: "audio/mp4",
+    m4p: "audio/mp4",
+  };
+
+  return mimeTypes[extension] || `video/${extension}`;
+};
+
 export const encounterIcons = {
   imp: <BedDouble />,
   amb: <Ambulance />,
@@ -404,13 +431,12 @@ export const PREVIEWABLE_FILE_EXTENSIONS = [
   "html",
   "htm",
   "pdf",
-  "mp4",
-  "webm",
   "jpg",
   "jpeg",
   "png",
   "gif",
   "webp",
+  ...FILE_EXTENSIONS.VIDEO,
 ] as const;
 
 export const NAME_PREFIXES = ["Dr.", "Mr.", "Mrs.", "Ms.", "Miss", "Prof."];
