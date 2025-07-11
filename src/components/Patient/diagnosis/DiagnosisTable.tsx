@@ -21,6 +21,7 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 
+import { formatName } from "@/Utils/utils";
 import {
   DIAGNOSIS_CLINICAL_STATUS_COLORS,
   DIAGNOSIS_VERIFICATION_STATUS_COLORS,
@@ -138,7 +139,9 @@ export function DiagnosisTable({ diagnoses, title }: DiagnosisTableProps) {
                   imageUrl={diagnosis.created_by.profile_picture_url}
                 />
 
-                <span className="text-sm">{diagnosis.created_by.username}</span>
+                <span className="text-sm">
+                  {formatName(diagnosis.created_by)}
+                </span>
               </div>
             </TableCell>
           </TableRow>

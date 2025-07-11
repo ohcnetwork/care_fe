@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { LocationHistory } from "@/types/emr/encounter";
+import { LocationHistory } from "@/types/emr/encounter/encounter";
 import { LocationAssociationStatus } from "@/types/location/association";
 
 interface LocationActionButtonsProps {

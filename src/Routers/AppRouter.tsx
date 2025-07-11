@@ -28,8 +28,21 @@ import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import UserDashboard from "@/pages/UserDashboard";
 
-// List of paths where the sidebar should be hidden
-const PATHS_WITHOUT_SIDEBAR = ["/", "/session-expired"];
+// List of paths and patterns where the sidebar should be hidden
+const PATHS_WITHOUT_SIDEBAR = [
+  // Exact matches
+  "/",
+  "/session-expired",
+  // Pattern matches (using regex)
+  /^\/facility\/[^/]+\/services_requests\/[^/]+$/,
+  /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/to_receive\/[^/]+$/,
+  /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/to_dispatch\/[^/]+$/,
+  /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/requests\/[^/]+$/,
+  /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/requests\/[^/]+\/edit$/,
+  /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/purchase_orders\/new$/,
+  /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/purchase_orders\/[^/]+\/edit$/,
+  /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/deliveries\/[^/]+$/,
+];
 
 export type RouteParams<T extends string> =
   T extends `${string}:${infer Param}/${infer Rest}`
@@ -48,7 +61,6 @@ export type AppRoutes = {
 
 const Routes: AppRoutes = {
   "/": () => <UserDashboard />,
-  // ...AssetRoutes,
   ...ConsultationRoutes,
   ...FacilityRoutes,
   ...PatientRoutes,
@@ -94,7 +106,11 @@ export default function AppRouter() {
 
   const user = useAuthUser();
   const currentPath = window.location.pathname;
-  const shouldShowSidebar = !PATHS_WITHOUT_SIDEBAR.includes(currentPath);
+
+  // Check if the current path matches any of the paths without sidebar
+  const shouldShowSidebar = !PATHS_WITHOUT_SIDEBAR.some((path) =>
+    typeof path === "string" ? path === currentPath : path.test(currentPath),
+  );
 
   const sidebarOpen = useSidebarState();
 

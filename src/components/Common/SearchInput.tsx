@@ -30,6 +30,7 @@ interface SearchOption {
   placeholder: string;
   value: string;
   component?: React.ComponentType<HTMLDivElement>;
+  display: string;
 }
 
 interface SearchInputProps
@@ -290,7 +291,7 @@ export default function SearchInput({
                             className="bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
                           >
                             <CareIcon icon="l-check" className="mr-1" />
-                            {t(options[selectedOptionIndex].key)}
+                            {t(options[selectedOptionIndex].display)}
                           </Button>
                         </div>
                       </div>
@@ -326,7 +327,7 @@ export default function SearchInput({
                                 onMouseLeave={() => setFocusedIndex(-1)}
                               >
                                 <span className="flex-1 text-sm">
-                                  {t(option.key)}
+                                  {t(option.display)}
                                 </span>
                                 {focusedIndex === index && (
                                   <kbd
@@ -382,7 +383,7 @@ export default function SearchInput({
                 buttonClassName,
               )}
             >
-              {t(option.key)}
+              {t(option.display)}
             </Button>
           ))}
         </div>
