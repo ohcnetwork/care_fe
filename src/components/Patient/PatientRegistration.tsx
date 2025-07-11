@@ -343,7 +343,8 @@ export default function PatientRegistration(
         return;
       }
       const permissions = queryClient.getQueryData<string[]>([
-        "encounterPermissions",
+        "patientPermissions",
+        facilityId,
       ]);
       const normalizePatient = normalizeOfflinePatientRecord(
         saveResult.entry,

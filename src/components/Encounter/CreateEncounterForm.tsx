@@ -60,6 +60,7 @@ import {
 } from "@/OfflineSupport/offlineWriteHelpers";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
+import { PaginatedResponse } from "@/Utils/request/types";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
   ENCOUNTER_CLASS,
@@ -161,6 +162,7 @@ export default function CreateEncounterForm({
 
       const permissions = queryClient.getQueryData<string[]>([
         "encounterPermissions",
+        facilityId,
       ]);
 
       const normalizeEncounter = normalizeOfflineEncounterRecord(
@@ -171,11 +173,30 @@ export default function CreateEncounterForm({
         permissions,
       );
 
+      // update the encounter list at encounterhistory on patient profile page
       queryClient.setQueryData(
         ["encounter", normalizeEncounter.id],
         normalizeEncounter,
       );
 
+      const encounterListKey = ["encounterHistory", patientId, {}];
+      console.log(encounterListKey);
+      const prevEncounterList =
+        queryClient.getQueryData<PaginatedResponse<Encounter>>(
+          encounterListKey,
+        );
+
+      if (prevEncounterList) {
+        const updatedList: PaginatedResponse<Encounter> = {
+          ...prevEncounterList,
+          count: prevEncounterList.count + 1,
+          results: [normalizeEncounter, ...prevEncounterList.results],
+        };
+
+        queryClient.setQueryData(encounterListKey, updatedList);
+      }
+
+      // update active and close encounter on verify page
       updateActiveAndClosedEncounterList({
         queryClient: queryClient,
         action: "createEncounter",

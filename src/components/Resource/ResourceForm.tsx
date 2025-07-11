@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  QueryClient,
   onlineManager,
   useMutation,
   useQuery,
@@ -226,6 +227,24 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       toast.error(t("resource_id_missing"));
       return;
     }
+    const updatePaginatedResourceCache = <T extends { id: string }>(
+      queryClient: QueryClient,
+      queryKey: unknown[],
+      updatedResource: T,
+    ) => {
+      const prevList = queryClient.getQueryData<PaginatedResponse<T>>(queryKey);
+
+      if (prevList?.results?.length) {
+        const updatedList: PaginatedResponse<T> = {
+          ...prevList,
+          results: prevList.results.map((entry) =>
+            entry.id === updatedResource.id ? updatedResource : entry,
+          ),
+        };
+
+        queryClient.setQueryData(queryKey, updatedList);
+      }
+    };
     try {
       const entry = await db.OfflineWrites.get(resourceId);
 
@@ -256,7 +275,11 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           queryClient,
           authUser,
         );
-
+        updatePaginatedResourceCache(
+          queryClient,
+          ["resourceRequests", cache_related_patient],
+          normalizedResource,
+        );
         queryClient.setQueryData(
           ["resource_request", resourceId],
           normalizedResource,
@@ -288,30 +311,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           authUser,
         );
 
-        const prevResourceRequestList = queryClient.getQueryData<
-          PaginatedResponse<ResourceRequest>
-        >(["resourceRequests", related_patient]);
-
-        const updatedResourceRequestList: PaginatedResponse<ResourceRequest> =
-          prevResourceRequestList?.results
-            ? {
-                ...prevResourceRequestList,
-                results: [
-                  ...prevResourceRequestList.results,
-                  normalizedResource,
-                ],
-                count:
-                  (prevResourceRequestList.count ??
-                    prevResourceRequestList.results.length) + 1,
-              }
-            : {
-                count: 1,
-                results: [normalizedResource],
-              };
-
-        queryClient.setQueryData(
+        updatePaginatedResourceCache(
+          queryClient,
           ["resourceRequests", related_patient],
-          updatedResourceRequestList,
+          normalizedResource,
         );
 
         queryClient.setQueryData(
@@ -359,6 +362,29 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         assignedToUser,
         queryClient,
         authUser,
+      );
+
+      const prevResourceRequestList = queryClient.getQueryData<
+        PaginatedResponse<ResourceRequest>
+      >(["resourceRequests", related_patient]);
+
+      const updatedResourceRequestList: PaginatedResponse<ResourceRequest> =
+        prevResourceRequestList?.results
+          ? {
+              ...prevResourceRequestList,
+              results: [...prevResourceRequestList.results, normalizedResource],
+              count:
+                (prevResourceRequestList.count ??
+                  prevResourceRequestList.results.length) + 1,
+            }
+          : {
+              count: 1,
+              results: [normalizedResource],
+            };
+
+      queryClient.setQueryData(
+        ["resourceRequests", related_patient],
+        updatedResourceRequestList,
       );
 
       queryClient.setQueryData(

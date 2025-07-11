@@ -122,9 +122,7 @@ export const EncounterShow = (props: Props) => {
       );
     }
   }, [encounterData?.permissions, props.facilityId]);
-
   const facilityId = facilityIdFromProps ?? encounterData?.facility.id;
-
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
     queryFn: query(routes.getPermittedFacility, {

@@ -37,7 +37,11 @@ const EncounterHistory = (props: PatientProps) => {
     patientData.permissions,
   );
   const { goBack } = useAppHistory();
-
+  console.log("key o qparams encoutnerlist : ", [
+    "encounterHistory",
+    patientId,
+    qParams,
+  ]);
   const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounterHistory", patientId, qParams],
     queryFn: query(routes.encounter.list, {
