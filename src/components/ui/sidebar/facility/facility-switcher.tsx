@@ -1,6 +1,6 @@
 import { CaretSortIcon, DashboardIcon } from "@radix-ui/react-icons";
 import { Hospital } from "lucide-react";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -59,9 +59,11 @@ export function FacilitySwitcher({
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            <DropdownMenuItem onClick={() => navigate("/")}>
-              <DashboardIcon className="size-4" />
-              {t("view_dashboard")}
+            <DropdownMenuItem asChild>
+              <Link className="flex items-center gap-2 cursor-pointer" href="/">
+                <DashboardIcon className="size-4" />
+                {t("view_dashboard")}
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel>{t("facilities")}</DropdownMenuLabel>
@@ -69,19 +71,19 @@ export function FacilitySwitcher({
             {facilities.map((facility, index) => (
               <DropdownMenuItem
                 key={index}
-                onClick={() => {
-                  navigate(`/facility/${facility.id}/overview`);
-                }}
+                asChild
                 className={cn(
                   "gap-2 p-2",
                   facility.name === selectedFacility?.name &&
                     "bg-primary-500 text-white focus:bg-primary-600 focus:text-white",
                 )}
               >
-                <div className="flex size-6 items-center justify-center rounded-sm border border-gray-200">
-                  <Hospital className="size-4 shrink-0 text-current" />
-                </div>
-                {facility.name}
+                <Link href={`/facility/${facility.id}/overview`}>
+                  <div className="flex size-6 items-center justify-center rounded-sm border border-gray-200">
+                    <Hospital className="size-4 shrink-0 text-current" />
+                  </div>
+                  {facility.name}
+                </Link>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
