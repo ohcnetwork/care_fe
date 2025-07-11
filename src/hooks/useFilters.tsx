@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 
 import GenericFilterBadge from "@/CAREUI/display/FilterBadge";
 
+import { Badge } from "@/components/ui/badge";
+
 import PaginationComponent from "@/components/Common/Pagination";
 
 import FiltersCache from "@/Utils/FiltersCache";
@@ -223,7 +225,7 @@ export default function useFilters({
   }) => {
     if (!hasPagination) {
       const errorMsg = "Do not render Pagination component, when limit is <= 0";
-      return <span className="bg-red-500 text-white">{errorMsg}</span>;
+      return <Badge variant="destructive">{errorMsg}</Badge>;
     }
     return (
       <div

@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import DateField from "@/components/ui/date-field";
 import {
@@ -222,10 +223,10 @@ export function PatientRegistration(props: PatientRegistrationProps) {
             </h2>
 
             <div className="mt-4 space-y-6 flex flex-col bg-white border border-gray-200/50 rounded-md p-8 shadow-md">
-              <span className="inline-block bg-primary-100 p-4 rounded-md w-full mb-4 text-primary-600 text-sm">
+              <Badge variant="primary">
                 {t("phone_number_verified")}:{" "}
                 <span className="font-bold">{tokenData.phoneNumber}</span>
-              </span>
+              </Badge>
 
               <FormField
                 control={form.control}

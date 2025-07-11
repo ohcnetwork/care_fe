@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -413,9 +414,9 @@ const AvailabilityEditor = ({
         <div className="flex items-center gap-3">
           <CareIcon icon="l-clock" className="text-lg text-blue-600" />
           <span className="font-semibold">{availability.name}</span>
-          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+          <Badge variant="blue">
             {t(`SCHEDULE_AVAILABILITY_TYPE__${availability.slot_type}`)}
-          </span>
+          </Badge>
         </div>
 
         <AlertDialog

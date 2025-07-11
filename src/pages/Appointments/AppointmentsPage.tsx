@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
@@ -705,7 +706,7 @@ function AppointmentColumn(props: {
         <h2 className="font-semibold capitalize text-base px-1">
           {t(props.status)}
         </h2>
-        <span className="bg-gray-200 px-2 py-1 rounded-md text-xs font-medium">
+        <Badge variant="secondary">
           {data?.count == null ? (
             "..."
           ) : data.count === appointments.length ? (
@@ -722,7 +723,7 @@ function AppointmentColumn(props: {
               }}
             />
           )}
-        </span>
+        </Badge>
       </div>
       {appointments.length === 0 ? (
         <div className="flex justify-center items-center h-[calc(100vh-18rem)]">
