@@ -17,6 +17,7 @@ export default function useNetworkStatus() {
   const isRestoring = useIsRestoring();
   const queryClient = useQueryClient();
   const persistor = createUserPersister();
+
   const cancelNonSuccessQueries = async () => {
     queryClient
       .getQueryCache()
@@ -35,6 +36,7 @@ export default function useNetworkStatus() {
       hydrate(queryClient, restored.clientState as DehydratedState);
     }
   };
+
   const checkConnection = async () => {
     if (isRestoring) return;
     try {

@@ -31,7 +31,7 @@ import { PubSubProvider } from "./Utils/pubsubContext";
 onlineManager.setEventListener(() => {
   return () => {};
 });
-console.log("netwrk", onlineManager.isOnline());
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

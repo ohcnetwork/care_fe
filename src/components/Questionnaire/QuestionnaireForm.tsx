@@ -40,12 +40,12 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
+import { BatchRequestBody } from "@/types/base/batch/batch";
 import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { Patient } from "@/types/emr/patient";
 import { FileUploadQuestion } from "@/types/files/files";
 import {
-  BatchRequestBody,
   DetailedValidationError,
   QuestionValidationError,
   ValidationErrorResponse,

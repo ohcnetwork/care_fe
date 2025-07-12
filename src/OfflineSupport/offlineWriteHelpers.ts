@@ -7,13 +7,14 @@ import { AuthUserModel } from "@/components/Users/models";
 
 import { PaginatedResponse } from "@/Utils/request/types";
 import { dateQueryString, getMonthStartAndEnd } from "@/Utils/utils";
+import { BatchRequestBody } from "@/types/base/batch/batch";
 import { AllergyIntolerance } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
 import {
   Encounter,
   EncounterEditRequest,
 } from "@/types/emr/encounter/encounter";
-import { MedicationRequestRead } from "@/types/emr/medicationRequest";
+import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 import {
   Patient,
@@ -23,7 +24,6 @@ import {
 import { Symptom } from "@/types/emr/symptom/symptom";
 import { FacilityBareMinimum, FacilityData } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
-import { BatchRequestBody } from "@/types/questionnaire/batch";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import {
