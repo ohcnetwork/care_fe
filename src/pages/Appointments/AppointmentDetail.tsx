@@ -436,10 +436,25 @@ const AppointmentDetails = ({
               </p>
             </div>
           </div>
+          <div className="flex items-center space-x-4 text-sm">
+            <AvatarIcon className="size-5 text-gray-600" />
+            <div className="text-sm">
+              <p className="font-medium">{t("last_updated_by")}</p>
+              <p className="text-gray-600">
+                {appointment.updated_by
+                  ? formatName(appointment.updated_by)
+                  : appointment.created_by === null
+                    ? t("unknown")
+                    : formatName(appointment.created_by)}{" "}
+                {t("on")}{" "}
+                {format(appointment.modified_date, "MMMM d, yyyy 'at' h:mm a")}
+              </p>
+            </div>
+          </div>
           <Separator />
           <div className="text-sm">
-            <p className="font-medium">{t("reason_for_visit")}</p>
-            <p className="text-gray-600">
+            <p className="font-medium">{t("reason")}</p>
+            <p className="text-gray-600 whitespace-pre-wrap">
               {appointment.reason_for_visit || t("no_reason_provided")}
             </p>
           </div>

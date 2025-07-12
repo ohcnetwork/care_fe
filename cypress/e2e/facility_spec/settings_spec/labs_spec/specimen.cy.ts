@@ -19,7 +19,7 @@ const TESTED_PREFERENCES = ["Preferred", "Alternate"] as const;
 const CAP_COLORS = ["black", "red", "blue", "green"] as const;
 
 // Test data generators
-const generateUniqueSlug = () => faker.string.uuid();
+const generateUniqueSlug = () => faker.string.alphanumeric(8);
 
 const generateMandatoryFields = () => ({
   title: faker.science.chemicalElement().name,
@@ -55,11 +55,8 @@ describe("Facility Specimen Management", () => {
     cy.visit("/");
   });
 
-  it("Create specimen and verify status filter functionality", () => {
+  it("Verify the error messages for all fields in the specimen definition form", () => {
     facilityCreation.selectFirstRandomFacility();
-
-    // Generate test data with mandatory fields only
-    const specimenData = generateTestData().mandatoryOnly;
 
     // Navigate to specimen definitions
     cy.url().then((url) => {
@@ -67,12 +64,42 @@ describe("Facility Specimen Management", () => {
       cy.visit(`/facility/${facilityId}/settings/specimen_definitions`);
     });
 
-    // Create new specimen definition
+    // Attempt to save empty form and verify error messages
+    cy.get("button").contains("Add Definition").click();
+    cy.get("button").contains("Save").click();
+
+    cy.verifyErrorMessages([
+      { message: "Required", label: "Title" },
+      { message: "Required", label: "Slug" },
+      {
+        message: "Required",
+        label: "Description",
+      },
+      { message: "Required", label: "Type Collected" },
+    ]);
+  });
+
+  it("Create specimen with mandatory fields and confirm deletion of specimen", () => {
+    facilityCreation.selectFirstRandomFacility();
+
+    // Generate test data with Active status
+    const specimenData = {
+      ...generateTestData().mandatoryOnly,
+      status: "Active",
+    };
+
+    // Navigate to specimen definitions
+    cy.url().then((url) => {
+      const facilityId = url.split("/facility/")[1].split("/")[0];
+      cy.visit(`/facility/${facilityId}/settings/specimen_definitions`);
+    });
+
+    // Create new specimen
     cy.get("button").contains("Add Definition").click();
 
     // Fill mandatory fields
     cy.typeIntoField('input[name="title"]', specimenData.title);
-    cy.typeIntoField('input[name="slug"]', specimenData.slug);
+    cy.clearAndTypeIntoField('input[name="slug"]', specimenData.slug);
     cy.typeIntoField('textarea[name="description"]', specimenData.description);
     cy.clickAndSelectOptionV2("Status", specimenData.status);
     cy.typeAndSelectOptionV2("Type Collected", specimenData.typeCollected);
@@ -85,21 +112,22 @@ describe("Facility Specimen Management", () => {
     cy.wait("@createSpecimen").its("response.statusCode").should("eq", 200);
     cy.verifyNotification("Specimen definition created");
 
-    // Test status filter functionality
+    // Navigate to specimen details
     cy.typeIntoField(
       "input[placeholder='Search definitions']",
       specimenData.title,
     );
-    cy.clickAndSelectOption("button:contains('Status')", specimenData.status);
     cy.verifyContentPresence('[data-slot="table"]', [specimenData.title]);
-
-    // Verify specimen details
     cy.get('[data-slot="table-cell"]').contains("See Details").first().click();
-    cy.verifyContentPresence('[data-slot="card"]', [
-      specimenData.description,
-      specimenData.status,
-      specimenData.typeCollected,
-    ]);
+
+    // Delete specimen
+    cy.get("button").contains("Delete").click();
+    cy.intercept("PUT", "**/api/v1/facility/**/specimen_definition/**").as(
+      "deleteSpecimen",
+    );
+    cy.get("button").contains("Confirm").click();
+    cy.wait("@deleteSpecimen").its("response.statusCode").should("eq", 200);
+    cy.verifyNotification("Specimen definition retired successfully");
   });
 
   it("Create specimen with all fields and verify edit functionality", () => {
@@ -119,7 +147,7 @@ describe("Facility Specimen Management", () => {
 
     // Fill all available fields
     cy.typeIntoField('input[name="title"]', specimenData.title);
-    cy.typeIntoField('input[name="slug"]', specimenData.slug);
+    cy.clearAndTypeIntoField('input[name="slug"]', specimenData.slug);
     cy.typeIntoField('textarea[name="description"]', specimenData.description);
     cy.clickAndSelectOptionV2("Status", specimenData.status);
     cy.typeIntoField(
@@ -167,6 +195,7 @@ describe("Facility Specimen Management", () => {
       "input[placeholder='Search definitions']",
       specimenData.title,
     );
+    cy.clickAndSelectOption("button:contains('Status')", specimenData.status);
     cy.verifyContentPresence('[data-slot="table"]', [specimenData.title]);
     cy.get('[data-slot="table-cell"]').contains("See Details").first().click();
 
@@ -205,8 +234,12 @@ describe("Facility Specimen Management", () => {
     cy.wait("@updateSpecimen").its("response.statusCode").should("eq", 200);
     cy.verifyNotification("Specimen Definition updated");
 
+    // Navigate to specimen list page
+    cy.get("button").contains("Back").click();
+
     // Verify updated specimen details
     cy.typeIntoField("input[placeholder='Search definitions']", updatedTitle);
+    cy.clickAndSelectOption("button:contains('Status')", updatedStatus);
     cy.verifyContentPresence('[data-slot="table"]', [updatedTitle]);
     cy.get('[data-slot="table-cell"]').contains("See Details").first().click();
     cy.verifyContentPresence('[data-slot="card"]', [
@@ -218,14 +251,11 @@ describe("Facility Specimen Management", () => {
     ]);
   });
 
-  it("Create specimen with mandatory fields and confirm deletion of specimen", () => {
+  it("Create specimen and verify status filter functionality", () => {
     facilityCreation.selectFirstRandomFacility();
 
-    // Generate test data with Active status
-    const specimenData = {
-      ...generateTestData().mandatoryOnly,
-      status: "Active",
-    };
+    // Generate test data with mandatory fields only
+    const specimenData = generateTestData().mandatoryOnly;
 
     // Navigate to specimen definitions
     cy.url().then((url) => {
@@ -233,12 +263,12 @@ describe("Facility Specimen Management", () => {
       cy.visit(`/facility/${facilityId}/settings/specimen_definitions`);
     });
 
-    // Create new specimen
+    // Create new specimen definition
     cy.get("button").contains("Add Definition").click();
 
     // Fill mandatory fields
     cy.typeIntoField('input[name="title"]', specimenData.title);
-    cy.typeIntoField('input[name="slug"]', specimenData.slug);
+    cy.clearAndTypeIntoField('input[name="slug"]', specimenData.slug);
     cy.typeIntoField('textarea[name="description"]', specimenData.description);
     cy.clickAndSelectOptionV2("Status", specimenData.status);
     cy.typeAndSelectOptionV2("Type Collected", specimenData.typeCollected);
@@ -251,45 +281,20 @@ describe("Facility Specimen Management", () => {
     cy.wait("@createSpecimen").its("response.statusCode").should("eq", 200);
     cy.verifyNotification("Specimen definition created");
 
-    // Navigate to specimen details
+    // Test status filter functionality
     cy.typeIntoField(
       "input[placeholder='Search definitions']",
       specimenData.title,
     );
+    cy.clickAndSelectOption("button:contains('Status')", specimenData.status);
     cy.verifyContentPresence('[data-slot="table"]', [specimenData.title]);
+
+    // Verify specimen details
     cy.get('[data-slot="table-cell"]').contains("See Details").first().click();
-
-    // Delete specimen
-    cy.get("button").contains("Delete").click();
-    cy.intercept("PUT", "**/api/v1/facility/**/specimen_definition/**").as(
-      "deleteSpecimen",
-    );
-    cy.get("button").contains("Confirm").click();
-    cy.wait("@deleteSpecimen").its("response.statusCode").should("eq", 200);
-    cy.verifyNotification("Specimen definition retired successfully");
-  });
-
-  it("Verify the error messages for all fields in the specimen definition form", () => {
-    facilityCreation.selectFirstRandomFacility();
-
-    // Navigate to specimen definitions
-    cy.url().then((url) => {
-      const facilityId = url.split("/facility/")[1].split("/")[0];
-      cy.visit(`/facility/${facilityId}/settings/specimen_definitions`);
-    });
-
-    // Attempt to save empty form and verify error messages
-    cy.get("button").contains("Add Definition").click();
-    cy.get("button").contains("Save").click();
-
-    cy.verifyErrorMessages([
-      { message: "Title is required", label: "Title" },
-      { message: "Slug is required", label: "Slug" },
-      {
-        message: "String must contain at least 1 character(s)",
-        label: "Description",
-      },
-      { message: "Required", label: "Type Collected" },
+    cy.verifyContentPresence('[data-slot="card"]', [
+      specimenData.description,
+      specimenData.status,
+      specimenData.typeCollected,
     ]);
   });
 });
