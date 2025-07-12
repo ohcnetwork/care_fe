@@ -40,7 +40,9 @@ const AllergyRow = ({
         <div className="grid grid-cols-13 divide-x">
           <div className="col-span-6 px-2 py-1 bg-gray-100 break-words whitespace-normal text-base font-semibold text-gray-900">
             {allergy.code.display}{" "}
-            <span className="text-gray-500 text-sm">({allergy.category})</span>
+            <span className="text-gray-500 text-sm">
+              ({t(allergy.category)})
+            </span>
           </div>
           <div className="col-span-2 p-1 flex items-center justify-center">
             <Badge
