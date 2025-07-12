@@ -104,12 +104,11 @@ export default function ActivityDefinitionView({
   const handleDelete = () => {
     if (!definition) return;
 
-    const payload = {
+    updateActivityDefinition({
       ...definition,
       status: "retired",
       diagnostic_report_codes: definition.diagnostic_report_codes || [],
-    };
-    updateActivityDefinition(payload);
+    });
   };
 
   if (isLoading) {

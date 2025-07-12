@@ -286,7 +286,7 @@ function ActivityDefinitionFormContent({
             kind: existingData.kind,
             code: existingData.code,
             body_site: existingData.body_site,
-            diagnostic_report_codes: existingData.diagnostic_report_codes,
+            diagnostic_report_codes: existingData.diagnostic_report_codes || [],
             specimen_requirements:
               existingData.specimen_requirements?.map((s) => ({
                 value: s.id,
