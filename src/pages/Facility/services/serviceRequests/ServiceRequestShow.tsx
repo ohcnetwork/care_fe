@@ -392,7 +392,7 @@ export default function ServiceRequestShow({
                       )
                     }
                   >
-                    {t("view") + " " + t("report")}
+                    {t("view_report")}
                   </Button>
                 </div>
               )}
