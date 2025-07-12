@@ -1,7 +1,17 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Info, X } from "lucide-react";
+import { navigate, usePathParams } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Popover,
   PopoverContent,
@@ -32,119 +42,160 @@ interface AllergyTableProps {
   allergies: AllergyIntolerance[];
 }
 
-export function AllergyTable({ allergies }: AllergyTableProps) {
+const AllergyRow = ({
+  allergy,
+  patientId,
+  facilityId,
+}: {
+  allergy: AllergyIntolerance;
+  patientId: string;
+  facilityId?: string;
+}) => {
+  const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
 
   return (
-    <Table className="border-separate border-spacing-y-0.5">
-      <TableHeader>
-        <TableRow className="rounded-md overflow-hidden bg-gray-100">
-          <TableHead className="first:rounded-l-md h-auto py-1 pl-1 pr-0 text-gray-600"></TableHead>
-          <TableHead className="h-auto py-1 pl-1 pr-2 text-gray-600">
-            {t("allergen")}
-          </TableHead>
-          <TableHead className="h-auto py-1 px-2 text-gray-600">
-            {t("status")}
-          </TableHead>
-          <TableHead className="h-auto py-1 px-2 text-gray-600">
-            {t("criticality")}
-          </TableHead>
-          <TableHead className="h-auto py-1 px-2 text-gray-600">
-            {t("verification")}
-          </TableHead>
-          <TableHead className="h-auto py-1 px-2 text-gray-600">
-            {t("notes")}
-          </TableHead>
-          <TableHead className="last:rounded-r-md h-auto py-1 px-2 text-gray-600">
-            {t("logged_by")}
-          </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {allergies.map((allergy) => (
-          <TableRow
-            key={allergy.id}
-            className={`rounded-md overflow-hidden bg-gray-50 ${
-              allergy.verification_status === "entered_in_error"
-                ? "opacity-50"
-                : ""
-            }`}
+    <>
+      <div className="bg-white rounded border border-gray-200 mb-3">
+        <div className="grid grid-cols-13 divide-x">
+          <div className="col-span-6 px-2 py-1 bg-gray-100 break-words whitespace-normal text-base font-semibold text-gray-900">
+            {allergy.code.display}
+          </div>
+          <div className="col-span-2 p-1 flex items-center justify-center">
+            <Badge
+              variant={ALLERGY_CLINICAL_STATUS_COLORS[allergy.clinical_status]}
+              className="whitespace-nowrap text-xs md:text-sm"
+            >
+              {t(allergy.clinical_status)}
+            </Badge>
+          </div>
+          <div className="col-span-2 p-1 flex items-center justify-center">
+            <Badge
+              variant={ALLERGY_CRITICALITY_COLORS[allergy.criticality]}
+              className="capitalize text-xs md:text-sm break-words"
+            >
+              {t(allergy.criticality)}
+            </Badge>
+          </div>
+          <div className="col-span-2 p-1 flex items-center justify-center">
+            <Badge
+              variant={
+                ALLERGY_VERIFICATION_STATUS_COLORS[allergy.verification_status]
+              }
+              className="capitalize text-xs md:text-sm break-words"
+            >
+              {t(allergy.verification_status)}
+            </Badge>
+          </div>
+          <div className="col-span-1 flex justify-between">
+            <div className="flex-1 flex items-center justify-center px-2 py-1">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="link"
+                    className="text-gray-500 hover:text-gray-700 p-1 md:p-2"
+                  >
+                    <Info size={16} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <div className="px-3 py-2 text-sm text-gray-500 border-b">
+                    <div className="font-medium text-gray-700">
+                      {t("reported_by")}
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Avatar
+                        name={formatName(allergy.created_by)}
+                        className="size-5"
+                        imageUrl={allergy.created_by.profile_picture_url}
+                      />
+                      <span className="text-sm">
+                        {formatName(allergy.created_by)}
+                      </span>
+                    </div>
+                  </div>
+                  <DropdownMenuItem
+                    onClick={() =>
+                      navigate(
+                        facilityId
+                          ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
+                          : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
+                      )
+                    }
+                  >
+                    {t("view_encounter")}
+                  </DropdownMenuItem>
+                  {allergy.note && (
+                    <DropdownMenuItem onClick={() => setShowNote(!showNote)}>
+                      {showNote ? t("hide_note") : t("see_note")}
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </div>
+      </div>
+      {showNote && allergy.note && (
+        <div className="border border-gray-200 rounded-md p-3 md:p-4 bg-gray-50 relative mb-3 mx-2 md:mx-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute top-2 right-2 size-6 p-0"
+            onClick={() => setShowNote(false)}
           >
-            <TableCell className="first:rounded-l-md">
-              <div className="flex items-center">
-                {CATEGORY_ICONS[allergy.category ?? ""]}
-              </div>
-            </TableCell>
-            <TableCell className="font-medium pl-0 md:whitespace-normal">
-              {allergy.code.display}
-            </TableCell>
-            <TableCell>
-              <Badge
-                variant={
-                  ALLERGY_CLINICAL_STATUS_COLORS[allergy.clinical_status]
-                }
-                className="whitespace-nowrap"
-              >
-                {t(allergy.clinical_status)}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Badge
-                variant={ALLERGY_CRITICALITY_COLORS[allergy.criticality]}
-                className="whitespace-nowrap"
-              >
-                {t(allergy.criticality)}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Badge
-                variant={
-                  ALLERGY_VERIFICATION_STATUS_COLORS[
-                    allergy.verification_status
-                  ]
-                }
-                className="whitespace-nowrap capitalize"
-              >
-                {t(allergy.verification_status)}
-              </Badge>
-            </TableCell>
-            <TableCell className="text-sm text-gray-950">
-              {allergy.note && (
-                <div className="flex items-center gap-2">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-7 text-xs shrink-0"
-                      >
-                        {t("see_note")}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-80 p-4">
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                        {allergy.note}
-                      </p>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              )}
-            </TableCell>
-            <TableCell className="last:rounded-r-md">
-              <div className="flex items-center gap-2">
-                <Avatar
-                  name={allergy.created_by.username}
-                  className="size-4"
-                  imageUrl={allergy.created_by.profile_picture_url}
-                />
-                <span className="text-sm">
-                  {formatName(allergy.created_by)}
-                </span>
-              </div>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+            <X size={14} />
+            <span className="sr-only">{t("close")}</span>
+          </Button>
+          <p className="text-xs md:text-sm text-gray-700 whitespace-pre-wrap pr-8">
+            {allergy.note}
+          </p>
+        </div>
+      )}
+    </>
   );
-}
+};
+
+export const AllergyTable = ({
+  allergies,
+  patientId,
+}: {
+  allergies: AllergyIntolerance[];
+  patientId: string;
+}) => {
+  const { t } = useTranslation();
+  const subpathMatch = usePathParams("/facility/:facilityId/*");
+  const facilityId = subpathMatch?.facilityId;
+
+  return (
+    <div className="max-w-6xl mx-auto mb-4">
+      <div className="overflow-x-auto pb-2">
+        <div className="">
+          <div className="grid grid-cols-13 font-semibold mb-3">
+            <div className="col-span-6 text-base">{t("allergen")}</div>
+            <div className="col-span-2 text-center text-base">
+              {t("status")}
+            </div>
+            <div className="col-span-2 text-center text-base">
+              {t("criticality")}
+            </div>
+            <div className="col-span-2 text-center text-base">
+              {t("verification")}
+            </div>
+            <div className="col-span-1 text-center"></div>
+          </div>
+          <div>
+            {allergies.map((allergy) => (
+              <AllergyRow
+                key={allergy.id}
+                allergy={allergy}
+                patientId={patientId}
+                facilityId={facilityId}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

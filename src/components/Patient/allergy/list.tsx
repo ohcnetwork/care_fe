@@ -146,7 +146,10 @@ export function AllergyList({
                           <h3 className="text-sm font-medium text-indigo-700">
                             {format(date, "dd MMMM, yyyy")}
                           </h3>
-                          <AllergyTable allergies={allergies} />
+                          <AllergyTable
+                            patientId={patientId}
+                            allergies={allergies}
+                          />
                         </div>
                       </div>
                     </div>
@@ -167,7 +170,7 @@ export function AllergyList({
       className={className}
       editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
     >
-      <AllergyTable allergies={allergiesRows} />
+      <AllergyTable allergies={allergiesRows} patientId={patientId} />
       {hasEnteredInErrorRecords && !showEnteredInError && (
         <>
           <div className="border-b border-dashed border-gray-200 my-2" />
