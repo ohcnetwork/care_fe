@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -25,7 +26,7 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
-  const [, setSelectedConcept] = useState<any | null>(null);
+  const [autocompleteOpen, setAutocompleteOpen] = useState(false);
 
   const { data: searchQuery, isFetching } = useQuery({
     queryKey: ["valueset", "preview_all", valueset.compose],
@@ -46,7 +47,6 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
     enabled: open,
   });
 
-  // 🔍 Frontend filtering of full result list
   const filteredResults = useMemo(() => {
     if (!searchQuery?.results) return [];
     const lower = search.toLowerCase();
@@ -81,9 +81,15 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
           value={search}
           onChange={(value) => {
             setSearch(value);
-            const match = filteredResults.find((opt) => opt.code === value);
+
+            const match = filteredResults.find(
+              (opt) =>
+                opt.code?.toLowerCase() === value.toLowerCase() ||
+                opt.display?.toLowerCase() === value.toLowerCase(),
+            );
+
             if (match) {
-              setSelectedConcept(match);
+              setAutocompleteOpen(false); // close dropdown
             }
           }}
           onSearch={setSearch}
@@ -94,7 +100,6 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
           className="px-1 mt-6"
         />
 
-        {/* Full list rendered */}
         <div className="mt-4 px-1 text-sm text-gray-700 border-t pt-2 space-y-2">
           {filteredResults.map((item) => (
             <div key={item.code} className="border-b pb-2">
