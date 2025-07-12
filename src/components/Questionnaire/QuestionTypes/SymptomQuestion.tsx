@@ -101,10 +101,17 @@ function DatePickerField({
   isSymptomInSheet: boolean;
   hasId: boolean;
 }) {
+  const blockDate = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    date.setHours(0, 0, 0, 0);
+    return date > today;
+  };
   return (
     <CombinedDatePicker
       value={onsetDatetime ? new Date(onsetDatetime) : undefined}
       onChange={onChange}
+      blockDate={blockDate}
       disabled={disabled || (!isSymptomInSheet && hasId)}
       dateFormat="P"
       buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
