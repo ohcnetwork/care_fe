@@ -43,7 +43,7 @@ import { dateQueryString } from "@/Utils/utils";
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
-import { Patient } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/patient/patient";
 import { FileUploadQuestion } from "@/types/files/files";
 import {
   DetailedValidationError,
@@ -592,7 +592,7 @@ export function QuestionnaireForm({
       const newOfflineEntry = {
         id: generatedId,
         userId: authUser.external_id,
-        mutationSyncrouteKey: "submitQuestionnaire",
+        mutationSyncRouteKey: "submitQuestionnaire",
         type: reference_id,
         resourceType: "Questionnaire",
         payload: {
@@ -604,7 +604,9 @@ export function QuestionnaireForm({
       const saveResult = await saveOfflineWrite(newOfflineEntry);
       if (!saveResult.success) {
         toast.error(
-          `Failed to queue "${reference_id.replace(/_/g, " ")}" for offline submission.`,
+          t("failed_to_queue_for_offline_submission", {
+            reference: reference_id.replace(/_/g, " "),
+          }),
         );
         return;
       }
@@ -690,7 +692,7 @@ export function QuestionnaireForm({
       const newOfflineEntry = {
         id: recordId,
         userId: authUser.external_id,
-        mutationSyncrouteKey: "submitQuestionnaire",
+        mutationSyncRouteKey: "submitQuestionnaire",
         type: "diagnosis",
         resourceType: "Questionnaire",
         payload: cleanedRequests,
@@ -699,7 +701,11 @@ export function QuestionnaireForm({
 
       const saveResult = await saveOfflineWrite(newOfflineEntry);
       if (!saveResult.success) {
-        toast.error("Unable to queue 'diagnosis' for offline submission.");
+        toast.error(
+          t("failed_to_queue_item_for_offline_submission", {
+            item: "diagnosis",
+          }),
+        );
         return;
       }
       normalizeAndUpdateDiagnosis(
@@ -711,7 +717,9 @@ export function QuestionnaireForm({
       );
     } catch (err) {
       console.error("Error saving offline diagnosis", err);
-      toast.error("Unexpected error while saving 'diagnosis' offline.");
+      toast.error(
+        t("unexpected_error_while_saving_offline", { item: "diagnosis" }),
+      );
     }
   };
 
@@ -763,7 +771,7 @@ export function QuestionnaireForm({
       const newOfflineEntry = {
         id: recordId,
         userId: authUser.external_id,
-        mutationSyncrouteKey: "submitQuestionnaire",
+        mutationSyncRouteKey: "submitQuestionnaire",
         type: reference_id,
         resourceType: "Questionnaire",
         payload: cleanedRequests,
@@ -773,7 +781,11 @@ export function QuestionnaireForm({
       const saveResult = await saveOfflineWrite(newOfflineEntry);
       if (!saveResult.success) {
         toast.error(
-          `Unable to queue '${reference_id.replace("_", " ")}' for offline submission.`,
+          toast.error(
+            t("failed_to_queue_for_offline_submission", {
+              reference: reference_id.replace("_", " "),
+            }),
+          ),
         );
         return;
       }
@@ -820,7 +832,7 @@ export function QuestionnaireForm({
     } catch (err) {
       console.error("Error saving offline datapoint-type questionnaire", err);
       toast.error(
-        `Unexpected error while saving '${reference_id.replace("_", " ")}' offline.`,
+        t("unexpected_error_while_saving_offline", { item: reference_id }),
       );
     }
   };
@@ -853,7 +865,7 @@ export function QuestionnaireForm({
       const newOfflineEntry = {
         id: recordId,
         userId: authUser.external_id,
-        mutationSyncrouteKey: "submitQuestionnaire",
+        mutationSyncRouteKey: "submitQuestionnaire",
         type: "encounter",
         resourceType: "Questionnaire",
         payload: cleanedRequests,
@@ -862,7 +874,11 @@ export function QuestionnaireForm({
 
       const saveResult = await saveOfflineWrite(newOfflineEntry);
       if (!saveResult.success) {
-        toast.error("Unable to queue 'encounter' for offline submission.");
+        toast.error(
+          t("failed_to_queue_item_for_offline_submission", {
+            item: "encounter",
+          }),
+        );
         return;
       }
 
@@ -874,7 +890,9 @@ export function QuestionnaireForm({
       );
     } catch (err) {
       console.error("Error saving offline encounter questionnaire", err);
-      toast.error("Unexpected error while saving 'encounter' offline.");
+      toast.error(
+        t("unexpected_error_while_saving_offline", { item: "encounter" }),
+      );
     }
   };
 
@@ -951,7 +969,7 @@ export function QuestionnaireForm({
       const offlineEntry = {
         id: generatedId,
         userId: authUser.external_id,
-        mutationSyncrouteKey: "submitQuestionnaire",
+        mutationSyncRouteKey: "submitQuestionnaire",
         type: "nonFixedQuestionnaire",
         resourceType: "Questionnaire",
         payload: { requests: nonFixedQuestionnaires },
@@ -960,7 +978,7 @@ export function QuestionnaireForm({
 
       const saveResult = await saveOfflineWrite(offlineEntry);
       if (!saveResult.success) {
-        toast.error("unale to queue non strucutred type questions");
+        toast.error(t("unable_to_queue_non_structured_questions"));
       }
       //  Handle caching & UI for non-fixed questionnaires
       cacheQuestionnairResponse(
@@ -977,7 +995,9 @@ export function QuestionnaireForm({
       onSubmit?.();
     } catch (error) {
       console.error("Error while submit Questionnaire", error);
-      toast.error(t("fail_to_submit_Questionnai_offline"));
+      toast.error(
+        t("unexpected_error_while_saving_offline", { item: "questionnair" }),
+      );
     }
   };
 

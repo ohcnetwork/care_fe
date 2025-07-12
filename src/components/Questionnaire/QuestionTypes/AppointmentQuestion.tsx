@@ -87,10 +87,6 @@ export function AppointmentQuestion({
   const [resource, setResource] = useState<UserBase>();
   const [open, setOpen] = useState(false);
   const { hasError } = useFieldError(question.id, errors);
-  const [OfflineSelectedSlot, setOfflineSelectedSlot] = useState<
-    TokenSlot | undefined
-  >();
-  console.log(OfflineSelectedSlot);
   const values =
     (questionnaireResponse.values?.[0]?.value as CreateAppointmentQuestion[]) ||
     [];
@@ -236,7 +232,6 @@ export function AppointmentQuestion({
                     facilityId={facilityId}
                     resourceId={resource.id}
                     onSlotSelect={handleSlotSelect}
-                    setOfflineSelectedSlot={setOfflineSelectedSlot}
                     selectedSlotId={value.slot_id}
                     onSlotDetailsChange={setSelectedSlot}
                   />

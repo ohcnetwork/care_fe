@@ -45,7 +45,7 @@ const OfflinePatientWarningDialog = ({
         <div className="grid grid-cols-1 gap-4">
           <div>
             <p className="text-sm leading-relaxed">
-              {t("offline_patient_create _records_warning")}
+              {t("offline_patient_create_records_warning")}
             </p>
           </div>
 

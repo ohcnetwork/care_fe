@@ -74,8 +74,10 @@ import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrgani
 import {
   BloodGroupChoices,
   Patient,
+  PatientCreate,
   PatientIdentifierCreate,
   PatientRead,
+  PatientUpdate,
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
@@ -300,9 +302,11 @@ export default function PatientRegistration(
     },
   });
 
-  const queuePatientUpdateOffline = async (updatePatientData: any) => {
+  const queuePatientUpdateOffline = async (
+    updatePatientData: PatientUpdate,
+  ) => {
     if (!patientId) {
-      toast.error("Patient ID is missing");
+      toast.error(t("patient_id_missing_cannot_able_to_update_patient"));
       return;
     }
     try {
@@ -330,13 +334,13 @@ export default function PatientRegistration(
         const offlineWrite = {
           id: patientId,
           userId: user.external_id,
-          mutationSyncrouteKey: "updatePatient",
+          mutationSyncRouteKey: "updatePatient",
           type: "updatePatient",
           resourceType: "patient",
           mutationPathParams: { id: patientId || "" },
           payload: updatePatientData,
           serverTimestamp: patientQuery?.data?.modified_date,
-          useQueryrouteKey: "getPatient",
+          useQueryRouteKey: "getPatient",
           useQueryPathParams: { id: patientId || "" },
         };
         const saveResult = await saveOfflineWrite(offlineWrite);
@@ -358,23 +362,23 @@ export default function PatientRegistration(
 
         queryClient.setQueryData(["patient", patientId], normalizePatient);
       }
-      toast.success(t("offline_patient_update_success"));
+      toast.success(t("patient_update_success"));
       setNavTarget("back");
     } catch (error) {
       console.error("Error updating unsynced patient:", error);
-      toast.error(t("offline_patient_update_error"));
+      toast.error(t("patient_update_error"));
       return;
     }
   };
 
-  const queueNewPatientOffline = async (createPatientData: any) => {
+  const queueNewPatientOffline = async (createPatientData: PatientCreate) => {
     try {
       const generatedId = `offline-${crypto.randomUUID()}`;
 
       const offlineWrite = {
         id: generatedId,
         userId: user.external_id,
-        mutationSyncrouteKey: "addPatient",
+        mutationSyncRouteKey: "addPatient",
         type: "createPatient",
         resourceType: "patient",
         payload: createPatientData,
@@ -413,10 +417,10 @@ export default function PatientRegistration(
           },
         },
       });
-      toast.success(t("offline_patient_update_success"));
+      toast.success(t("patient_update_success"));
     } catch (error) {
       console.error("Error saving offline patient:", error);
-      toast.error(t("offline_patient_update_error"));
+      toast.error(t("patient_update_error"));
     }
   };
 
@@ -448,9 +452,7 @@ export default function PatientRegistration(
         await queuePatientUpdateOffline(updatePatientData);
       } else updatePatient(updatePatientData);
       return;
-    }
-
-    if (facilityId) {
+    } else if (facilityId) {
       const createPatientData = {
         ...values,
         emergency_phone_number: values.same_phone_number
@@ -463,8 +465,6 @@ export default function PatientRegistration(
         pincode: String(values.pincode) || undefined,
         tags: selectedTags.map((tag) => tag.id),
         identifiers: editableIdentifiers,
-
-        ward_old: undefined,
       };
       if (!onlineManager.isOnline() && userConfirmedOfflineDuplicateRisk) {
         await queueNewPatientOffline(createPatientData);

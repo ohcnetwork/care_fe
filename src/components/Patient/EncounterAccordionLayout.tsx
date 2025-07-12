@@ -20,7 +20,7 @@ interface EncounterAccordionLayoutProps {
   className?: string;
   readOnly?: boolean;
   title: string;
-  headerExtras?: React.ReactNode; // 👈
+  headerExtras?: React.ReactNode;
   editLink?: string;
   actionButton?: ReactNode;
 }

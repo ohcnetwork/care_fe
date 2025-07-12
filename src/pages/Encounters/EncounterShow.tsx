@@ -118,7 +118,7 @@ export const EncounterShow = (props: Props) => {
   );
   const { canViewClinicalData } = getPermissions(
     hasPermission,
-    currentEncounter?.permissions ?? [],
+    patient?.permissions ?? [],
   );
 
   // const { canWriteEncounter } = getPermissions(

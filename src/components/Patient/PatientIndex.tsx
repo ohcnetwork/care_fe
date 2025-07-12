@@ -223,7 +223,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         setPartialOfflinePatients(partialOfflinePatients);
       } catch (error) {
         console.error("Error while fetch offline Patient : ", error);
-        toast.error("Offline_Patient_fetch_error");
+        toast.error(t("offline_patient_fetch_error"));
       }
     };
     if (!onlineManager.isOnline()) {
@@ -326,10 +326,10 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                     <>
                       <div className="mt-4">
                         <h2 className="text-lg font-semibold">
-                          {t("newly_Offline_Patient")}
+                          {t("newly_offline_patient")}
                         </h2>
                         <div className="text-sm mb-4">
-                          {t("general_info_Newly_offline_Patient")}
+                          {t("general_info_newly_offline_patient")}
                         </div>
                       </div>
                       <div className="rounded-lg border border-gray-200">

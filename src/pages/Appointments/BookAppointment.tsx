@@ -26,6 +26,7 @@ import {
   isOfflineId,
   normalizedAppointmentRecord,
   saveOfflineWrite,
+  saveOfflineWriteData,
   updateSlotCacheAfterOfflineAppointment,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import mutate from "@/Utils/request/mutate";
@@ -38,6 +39,7 @@ import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityData } from "@/types/facility/facility";
 import {
   Appointment,
+  AppointmentCreateRequest,
   AppointmentNonCancelledStatus,
   TokenSlot,
 } from "@/types/scheduling/schedule";
@@ -105,7 +107,7 @@ export default function BookAppointment({ patientId }: Props) {
   });
 
   const queueAppointmentRecordOffline = async (
-    createAppointmentData: any,
+    createAppointmentData: AppointmentCreateRequest,
     selectedSlot: TokenSlot | undefined,
     selectedPracticioner: UserBase | null,
     authUser: AuthUserModel,
@@ -121,10 +123,10 @@ export default function BookAppointment({ patientId }: Props) {
     }
     try {
       const generatedId = `offline-${crypto.randomUUID()}`;
-      const offlineEntry = {
+      const offlineEntry: saveOfflineWriteData = {
         id: generatedId,
         userId: authUser?.external_id,
-        mutationSyncrouteKey: "createAppointment",
+        mutationSyncRouteKey: "createAppointment",
         mutationPathParams: {
           facility_id: facilityId,
           slot_id: selectedSlotId ?? "",
@@ -158,9 +160,7 @@ export default function BookAppointment({ patientId }: Props) {
       ]);
 
       if (!Patientdata) {
-        toast.error(
-          t("eror_while_appointment_schedule1_patient_missin_offline"),
-        );
+        toast.error(t("appointment_display_failed_missing_patient"));
         return;
       }
       const normalizeAppointment = normalizedAppointmentRecord(
@@ -211,22 +211,22 @@ export default function BookAppointment({ patientId }: Props) {
         updatedAppointmentList,
       );
 
-      toast.success("Appointment created successfully");
+      toast.success(t("appointment_booking_success"));
       navigate(
         `/facility/${facilityId}/patient/${patientId}/appointments/${generatedId}`,
       );
     } catch (error) {
       console.error("Error while scheduling appointment", error);
-      toast.error(t("eror_while_appointment_schedule"));
+      toast.error(t("unexpected_error_while_booking_appointment"));
     }
   };
   const handleSubmit = async () => {
     if (!resourceId) {
-      toast.error("Please select a practitioner");
+      toast.error(t("practicioner_is_not_selected"));
       return;
     }
     if (!selectedSlotId) {
-      toast.error("Please select a slot");
+      toast.error(t("slot_is_not_selected"));
       return;
     }
 

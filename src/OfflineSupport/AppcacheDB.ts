@@ -9,7 +9,7 @@ export interface QueryCacheEntry {
 export interface OfflineWritesEntry {
   id: string;
   userId: string;
-  mutationSyncrouteKey: string;
+  mutationSyncRouteKey: string;
   type?: string;
   resourceType?: string;
   mutationPathParams?: Record<string, any>;
@@ -17,11 +17,6 @@ export interface OfflineWritesEntry {
   payload: unknown;
   response?: unknown;
   parentMutationIds?: string[];
-  dependentFields?: Array<{
-    parentId: string;
-    childField: string;
-    parentField: string;
-  }>;
   clientTimestamp: number;
   serverTimestamp?: string;
   lastAttemptAt?: number;
@@ -29,7 +24,7 @@ export interface OfflineWritesEntry {
   lastError?: string;
   retries?: number;
   conflictData?: unknown;
-  useQueryrouteKey?: string;
+  useQueryRouteKey?: string;
   useQueryPathParams?: Record<string, any>;
   useQueryParams?: Record<string, any>;
 }
@@ -42,7 +37,7 @@ export class AppCacheDB extends Dexie {
     this.version(2).stores({
       querycache: "cacheKey, timestamp",
       OfflineWrites:
-        "id, userId, type , resourceType, syncrouteKey, syncStatus, clientTimestamp , retries ",
+        "id, userId, type, resourceType, mutationSyncRouteKey, syncStatus, clientTimestamp, retries",
     });
   }
 }

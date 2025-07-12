@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -25,14 +25,10 @@ import { RESOURCE_REQUEST_STATUS_COLORS } from "@/types/resourceRequest/resource
 import { PatientProps } from ".";
 
 export const ResourceRequests = (props: PatientProps) => {
-  const queryClient = useQueryClient();
   const { patientData, facilityId } = props;
   const patientId = patientData.id;
   const { t } = useTranslation();
 
-  queryClient.setQueryDefaults(["resourceAssignedFacility"], {
-    meta: { persist: true },
-  });
   const { data: resourceRequests, isLoading: loading } = useQuery({
     queryKey: ["resourceRequests", patientId],
     queryFn: query(routes.listResourceRequests, {
@@ -87,7 +83,7 @@ export const ResourceRequests = (props: PatientProps) => {
                 </TableCell>
               </TableRow>
             ) : resourceRequests?.results.length ? (
-              resourceRequests.results.map((request, index) => (
+              resourceRequests?.results?.map((request, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">
                     {RESOURCE_CATEGORY_CHOICES.find(

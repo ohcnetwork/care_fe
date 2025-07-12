@@ -99,7 +99,7 @@ function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
       queryClient.invalidateQueries({
         queryKey: ["patientUsers", patientId],
       });
-      toast.success("User added to patient successfully");
+      toast.success(t("user_added_to_patient_successfully"));
       setOpen(false);
       setSelectedUser(undefined);
       setSelectedRole("");
@@ -113,7 +113,7 @@ function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
   });
 
   const queueNewAssignUseroffline = async (
-    assignUserData: any,
+    assignUserData: { user: string; role: string },
     selectedUser: UserBase,
     users: PaginatedResponse<UserBase> | undefined,
   ) => {
@@ -123,14 +123,14 @@ function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
       );
 
       if (!canAddUser) {
-        toast.error("User_already_assigned_to_this_patient");
+        toast.error(t("user_already_assigned_to_this_patient"));
         return;
       }
       const generatedId = `offline-${crypto.randomUUID()}`;
       const offlineWrite = {
         id: generatedId,
         userId: authUser.external_id,
-        mutationSyncrouteKey: "assignUser",
+        mutationSyncRouteKey: "assignUser",
         mutationPathParams: { patientId },
         type: "assignUser",
         resourceType: "patient",
@@ -160,19 +160,19 @@ function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
 
       queryClient.setQueryData(["patientUsers", patientId], updatedUserList);
 
-      toast.success("User added to patient successfully");
+      toast.success(t("user_added_to_patient_successfully"));
       setOpen(false);
       setSelectedUser(undefined);
       setSelectedRole("");
     } catch (error) {
       console.error("Error while queueing assign user offline:", error);
-      toast.error("Error_while_queueing_assign_user_offline");
+      toast.error(t("error_while_queueing_assign_user_offline"));
     }
   };
 
   const handleAddUser = async () => {
     if (!selectedUser || !selectedRole) {
-      toast.error("Please select both user and role");
+      toast.error(t("please_select_both_user_and_role"));
       return;
     }
 
@@ -336,7 +336,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
       const offlineWrite = {
         id: generatedId,
         userId: authUser.external_id,
-        mutationSyncrouteKey: "removeAssignUser",
+        mutationSyncRouteKey: "removeAssignUser",
         mutationPathParams: { patientId },
         type: "removeAssignUser",
         resourceType: "patient",
@@ -377,10 +377,10 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
 
       queryClient.setQueryData(["patientUsers", patientId], updatedUserList);
 
-      toast.success("User removal queued offline");
+      toast.success(t("user_removed_successfully"));
     } catch (err) {
       console.error("Error queuing remove user offline:", err);
-      toast.error("Error queuing remove user offline");
+      toast.error("error_while_remove_user_offline");
     }
   };
 
@@ -394,7 +394,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
       queryClient.invalidateQueries({
         queryKey: ["patientUsers", patientId],
       });
-      toast.success("User removed successfully");
+      toast.success(t("user_removed_successfully"));
     },
     onError: (error) => {
       const errorData = error.cause as { errors: { msg: string }[] };

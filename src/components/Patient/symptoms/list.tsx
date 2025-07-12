@@ -39,7 +39,6 @@ export function SymptomsList({
   const { t } = useTranslation();
 
   const [showEnteredInError, setShowEnteredInError] = useState(false);
-  console.log("show ques : ", ["symptoms", patientId, encounterId]);
   const { data: symptoms, isLoading } = useQuery({
     queryKey: ["symptoms", patientId, encounterId],
     queryFn: query(symptomApi.listSymptoms, {

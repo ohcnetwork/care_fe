@@ -179,7 +179,7 @@ export interface Appointment {
 export interface AppointmentRead extends Appointment {
   tags: TagConfig[];
   updated_by: UserBase | null;
-  created_by: UserBase;
+  created_by: UserBase | null;
   modified_date: string;
 }
 

@@ -31,7 +31,7 @@ import {
   isOfflineId,
   normalizeUserBase,
   saveOfflineWrite,
-  updateActiveAndClosedEncounterList,
+  updateActiveEncounterList,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
@@ -91,19 +91,19 @@ export default function EncounterActions({
     encounterUpdatedData: EncounterEditRequest,
   ) => {
     if (isOfflineId(encounter.id)) {
-      toast.error("you_can't_mark_offline _created_encounter_as_mark");
+      toast.error(t("cannot_mark_offline_created_encounter_as_complete"));
       return;
     }
     const offlineWrite = {
       id: encounter.id,
       userId: authUser.external_id,
-      mutationSyncrouteKey: "updateEncounter",
+      mutationSyncRouteKey: "updateEncounter",
       type: "markAsCompleteEncounter",
       resourceType: "Encounter",
       mutationPathParams: { id: encounter.id },
       payload: encounterUpdatedData,
       serverTimestamp: encounter.modified_date,
-      useQueryrouteKey: "getEncounter",
+      useQueryRouteKey: "getEncounter",
       useQueryPathParams: { id: encounter.id },
       useQueryParams: encounter.id
         ? {
@@ -128,7 +128,7 @@ export default function EncounterActions({
         is_updated_offline: true,
       };
 
-      updateActiveAndClosedEncounterList({
+      updateActiveEncounterList({
         queryClient,
         action: "markAsCompleteEncounter",
         patientID: encounter.patient.id,
@@ -137,10 +137,10 @@ export default function EncounterActions({
 
       queryClient.setQueryData(["encounter", encounter.id], updatedEncounter);
 
-      toast.success("encounter_mark_as_completed_offline");
+      toast.success(t("encounter_marked_as_complete"));
     } catch (error) {
       console.error("Error while Marking Encounter as Complete : ", error);
-      toast.error("error_while_updating_encounter_offline");
+      toast.error(t("error_updating_encounter"));
     }
   };
 

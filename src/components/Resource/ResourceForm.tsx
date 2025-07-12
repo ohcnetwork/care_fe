@@ -51,7 +51,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 
-import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import {
   isOfflineId,
   normaliZedResourcerequestRecord,
@@ -66,7 +66,11 @@ import validators from "@/Utils/validators";
 import patientApi from "@/types/emr/patient/patientApi";
 import { FacilityData } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
-import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
+import {
+  CreateResourceRequest,
+  ResourceRequest,
+  UpdateResourceRequest,
+} from "@/types/resourceRequest/resourceRequest";
 import { UserBase } from "@/types/user/user";
 
 interface ResourceProps {
@@ -84,7 +88,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const authUser = useAuthUser();
   const queryClient = useQueryClient();
   const db = new AppCacheDB();
-  // const persister = createUserPersister();
   const resourceFormSchema = z.object({
     status: z.string().min(1, { message: t("field_required") }),
     category: z.string().min(1, { message: t("field_required") }),
@@ -102,12 +105,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     priority: z.number().default(1),
     assigned_to: z.string().optional(),
   });
-  queryClient.setQueryDefaults(["assigned_facility"], {
-    meta: { persist: true },
-  });
-  queryClient.setQueryDefaults(["assignToUser"], {
-    meta: { persist: true },
-  });
+
   type ResourceFormValues = z.infer<typeof resourceFormSchema>;
 
   const { data: patientData } = useQuery({
@@ -221,7 +219,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   });
 
   const queueUpdatedResourceRequest = async (
-    resourcePayload: any,
+    resourcePayload: UpdateResourceRequest,
     resourceId: string,
   ) => {
     if (!resourceId) {
@@ -250,21 +248,36 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       const entry = await db.OfflineWrites.get(resourceId);
 
       if (entry) {
-        const cache_related_patient = (entry.payload as ResourceRequest)
-          .related_patient;
+        const isCreate = entry.type === "createResourceRequest";
+
+        // Narrow the payload type based on the type field
+        const existingPayload = isCreate
+          ? (entry.payload as CreateResourceRequest)
+          : (entry.payload as UpdateResourceRequest);
 
         // only assign if resourcePayload.related_patient is undefined/null,
         //  it will happen when updating un-synced resource req
         if (resourcePayload.related_patient == null) {
-          resourcePayload.related_patient = cache_related_patient;
+          resourcePayload.related_patient = existingPayload.related_patient;
+        }
+        let updatedPayload: CreateResourceRequest | UpdateResourceRequest;
+
+        if (isCreate) {
+          const { id: _id, ...rest } = resourcePayload; // remove id to match this of type `createresourcereuest`
+          updatedPayload = {
+            ...existingPayload,
+            ...rest,
+          };
+        } else {
+          updatedPayload = {
+            ...existingPayload,
+            ...resourcePayload,
+          };
         }
 
-        const updatedEntry = {
+        const updatedEntry: OfflineWritesEntry = {
           ...entry,
-          payload: {
-            ...(entry.payload as ResourceRequest),
-            ...resourcePayload,
-          },
+          payload: updatedPayload,
         };
 
         await db.OfflineWrites.update(resourceId, updatedEntry);
@@ -278,7 +291,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         );
         updatePaginatedResourceCache(
           queryClient,
-          ["resourceRequests", cache_related_patient],
+          ["resourceRequests", existingPayload.related_patient],
           normalizedResource,
         );
         queryClient.setQueryData(
@@ -289,12 +302,12 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         const offlineEntry = {
           id: resourceId,
           userId: authUser.external_id,
-          mutationSyncrouteKey: "updateResource",
+          mutationSyncRouteKey: "updateResource",
           type: "updateResourceRequest",
           resourceType: "resourceRequest",
           payload: resourcePayload,
           serverTimestamp: resourceData?.modified_date,
-          useQueryrouteKey: "getResourceDetails",
+          useQueryRouteKey: "getResourceDetails",
           useQueryPathParams: { id: String(id) },
         };
         const saveResult = await saveOfflineWrite(offlineEntry);
@@ -329,19 +342,21 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       navigate(`/facility/${facilityId}/resource/${resourceId}`);
     } catch (error) {
       console.error("Error while queuing resource update:", error);
-      toast.error(t("error_while_queuing_resource_update"));
+      toast.error(t("unexpected_error_while_updating_resource"));
       return;
     }
   };
 
-  const queueNewResourceRequest = async (resourcePayload: any) => {
+  const queueNewResourceRequest = async (
+    resourcePayload: CreateResourceRequest,
+  ) => {
     try {
       const generatedId = `offline-${crypto.randomUUID()}`;
 
       const offlineEntry = {
         id: generatedId,
         userId: authUser.external_id,
-        mutationSyncrouteKey: "createResource",
+        mutationSyncRouteKey: "createResource",
         type: "createResourceRequest",
         resourceType: "resourceRequest",
         payload: resourcePayload,
@@ -393,11 +408,11 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         normalizedResource,
       );
 
-      toast.success(t("resource_updated_successfully"));
+      toast.success(t("resource_created_successfully"));
       navigate(`/facility/${facilityId}/resource/${generatedId}`);
     } catch (error) {
       console.error("Error while queuing resource request:", error);
-      toast.error(t("error_while_queuing_resource_request"));
+      toast.error(t("unexpected_error_while_creating_resource"));
       return;
     }
   };
@@ -421,7 +436,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
     if (id) {
       if (!onlineManager.isOnline()) {
-        queueUpdatedResourceRequest(resourcePayload, id);
+        queueUpdatedResourceRequest({ ...resourcePayload, id }, id);
         return;
       } else updateResource({ ...resourcePayload, id });
     } else {

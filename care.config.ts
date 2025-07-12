@@ -27,6 +27,21 @@ const logo = (value?: string, fallback?: ILogo) => {
   }
 };
 
+// ===== Enforce max_age <= gctime =====
+const queryGcTime = import.meta.env.VITE_QUERY_GC_TIME
+  ? Number(import.meta.env.VITE_QUERY_GC_TIME)
+  : 1000 * 60 * 60 * 24 * 2; // 2 days
+
+const queryPersistMaxAge = import.meta.env.VITE_QUERY_PERSIST_MAX_AGE
+  ? Number(import.meta.env.VITE_QUERY_PERSIST_MAX_AGE)
+  : 1000 * 60 * 60 * 24 * 2; // 2 days
+
+if (queryPersistMaxAge > queryGcTime) {
+  throw new Error(
+    "queryPersistMaxAge must be less than or equal to queryGcTime",
+  );
+}
+
 const careConfig = {
   apiUrl: env.REACT_CARE_API_URL,
   sbomBaseUrl: env.REACT_SBOM_BASE_URL || "https://sbom.ohc.network",
@@ -141,13 +156,9 @@ const careConfig = {
   imageUploadMaxSizeInMB: env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB
     ? parseInt(env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB, 10)
     : 2,
-  queryGcTime: import.meta.env.VITE_QUERY_GC_TIME
-    ? Number(import.meta.env.VITE_QUERY_GC_TIME)
-    : 1000 * 60 * 60 * 24 * 2, // 2 days
 
-  queryPersistMaxAge: import.meta.env.VITE_QUERY_PERSIST_MAX_AGE
-    ? Number(import.meta.env.VITE_QUERY_PERSIST_MAX_AGE)
-    : 1000 * 60 * 60 * 24 * 2, // 2 days , max_age <= gctime
+  queryGcTime,
+  queryPersistMaxAge,
 } as const;
 
 export default careConfig;

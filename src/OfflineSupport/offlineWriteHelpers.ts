@@ -54,7 +54,7 @@ export type SaveOfflineWriteResult =
 export type saveOfflineWriteData = {
   id: string;
   userId: string;
-  mutationSyncrouteKey: string;
+  mutationSyncRouteKey: string;
   mutationPathParams?: Record<string, any>;
   mutationQueryParams?: Record<string, any>;
   type?: string;
@@ -67,7 +67,7 @@ export type saveOfflineWriteData = {
     parentField: string;
   }>;
   serverTimestamp?: string;
-  useQueryrouteKey?: string;
+  useQueryRouteKey?: string;
   useQueryPathParams?: Record<string, any>;
   useQueryParams?: Record<string, any>;
 };
@@ -75,7 +75,7 @@ const db = new AppCacheDB();
 export const saveOfflineWrite = async ({
   id,
   userId,
-  mutationSyncrouteKey,
+  mutationSyncRouteKey,
   type,
   resourceType,
   mutationPathParams,
@@ -84,14 +84,14 @@ export const saveOfflineWrite = async ({
   parentMutationIds,
   dependentFields,
   serverTimestamp,
-  useQueryrouteKey,
+  useQueryRouteKey,
   useQueryPathParams,
   useQueryParams,
 }: saveOfflineWriteData): Promise<SaveOfflineWriteResult> => {
   const writeEntry = {
     id,
     userId,
-    mutationSyncrouteKey,
+    mutationSyncRouteKey,
     type,
     resourceType,
     mutationPathParams,
@@ -103,7 +103,7 @@ export const saveOfflineWrite = async ({
     serverTimestamp,
     syncStatus: "pending" as const,
     retries: 0,
-    useQueryrouteKey,
+    useQueryRouteKey,
     useQueryPathParams,
     useQueryParams,
   };
@@ -348,6 +348,8 @@ export const normalizedAppointmentRecord = (
     facility: facility,
     is_updated_offline: true,
     modified_date: nowIso,
+    updated_by: bookedBy ? normalizeUserBase(bookedBy) : null,
+    created_by: bookedBy ? normalizeUserBase(bookedBy) : null,
     tags: [], // have to done changes here
   };
 };
@@ -484,7 +486,7 @@ export function normalizeUserBase(authUser: AuthUserModel): UserBase {
   };
 }
 
-export const updateActiveAndClosedEncounterList = ({
+export const updateActiveEncounterList = ({
   queryClient,
   action,
   patientID,
@@ -544,14 +546,6 @@ export const updateActiveAndClosedEncounterList = ({
       ["encounters", "live", patientID],
       UpdatedActiveEncounterList,
     );
-
-    const closedEncoutnerList = queryClient.getQueryData<
-      PaginatedResponse<Encounter>
-    >(["encounters", "closed", patientID]);
-
-    const newList = addEncounterToList(closedEncoutnerList, normalizeEncounter);
-
-    queryClient.setQueryData(["encounters", "closed", patientID], newList);
   }
 };
 

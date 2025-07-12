@@ -56,7 +56,7 @@ import {
   isOfflineId,
   normalizeOfflineEncounterRecord,
   saveOfflineWrite,
-  updateActiveAndClosedEncounterList,
+  updateActiveEncounterList,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -68,6 +68,7 @@ import {
   ENCOUNTER_PRIORITY,
   Encounter,
   EncounterClass,
+  EncounterEditRequest,
   EncounterRequest,
 } from "@/types/emr/encounter/encounter";
 import { Patient } from "@/types/emr/patient/patient";
@@ -131,14 +132,16 @@ export default function CreateEncounterForm({
     },
   });
 
-  const queueNewEncounterOffline = async (encounterRequestData: any) => {
+  const queueNewEncounterOffline = async (
+    encounterRequestData: EncounterEditRequest,
+  ) => {
     try {
       const generatedId = `offline-${crypto.randomUUID()}`;
 
       const offlineWrite = {
         id: generatedId,
         userId: authUser.external_id,
-        mutationSyncrouteKey: "createEncounter",
+        mutationSyncRouteKey: "createEncounter",
         type: "createEncounter",
         resourceType: "Encounter",
         payload: encounterRequestData,
@@ -156,7 +159,7 @@ export default function CreateEncounterForm({
         patientId,
       ]);
       if (!patientData) {
-        toast.error("encounter_created_but you_dont_full_cache_patient");
+        toast.error(t("encounter_created_but_patient_cache_missing"));
         return;
       }
 
@@ -197,7 +200,7 @@ export default function CreateEncounterForm({
       }
 
       // update active and close encounter on verify page
-      updateActiveAndClosedEncounterList({
+      updateActiveEncounterList({
         queryClient: queryClient,
         action: "createEncounter",
         patientID: patientId,
