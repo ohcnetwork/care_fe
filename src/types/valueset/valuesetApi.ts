@@ -1,6 +1,6 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { Code } from "@/types/questionnaire/code";
+import { Code } from "@/types/base/code/code";
 
 import {
   CreateValuesetModel,

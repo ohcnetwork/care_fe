@@ -19,10 +19,11 @@ import {
 } from "@/components/ui/card";
 
 import {
+  ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
   ENCOUNTER_STATUS_COLORS,
   Encounter,
-} from "@/types/emr/encounter";
+} from "@/types/emr/encounter/encounter";
 
 export interface EncounterInfoCardProps {
   encounter: Encounter;
@@ -73,7 +74,9 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
             >
               {t(`encounter_status__${encounter.status}`)}
             </Badge>
-            <Badge className="bg-gray-100 text-gray-800" variant="outline">
+            <Badge
+              variant={ENCOUNTER_CLASSES_COLORS[encounter.encounter_class]}
+            >
               {t(`encounter_class__${encounter.encounter_class}`)}
             </Badge>
             <Badge variant={ENCOUNTER_PRIORITY_COLORS[encounter.priority]}>
