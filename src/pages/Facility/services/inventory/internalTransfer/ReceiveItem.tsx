@@ -471,7 +471,7 @@ export default function ReceiveItem({
 
               <div>
                 <Label className="text-sm font-medium text-gray-700">
-                  {t("expiry") + " " + t("date")}:
+                  {t("expiry_date")}:
                 </Label>
                 <div className="text-gray-950 text-normal font-semibold">
                   {delivery.supplied_item?.expiration_date
@@ -522,7 +522,7 @@ export default function ReceiveItem({
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-700">
-                    {t("lot") + "/" + t("batch") + " " + t("no")}:
+                    {t("lot_batch_no")}:
                   </Label>
                   <div className="text-gray-950 text-normal font-semibold break-all">
                     {delivery.supplied_item?.batch?.lot_number ||
@@ -899,8 +899,7 @@ export default function ReceiveItem({
                   )
                 }
               >
-                {t("view") + " " + t("request")}{" "}
-                <ArrowRightIcon className="size-4" />
+                {t("view_request")} <ArrowRightIcon className="size-4" />
               </Button>
             </div>
           </div>
