@@ -84,44 +84,10 @@ export const EncounterShow = (props: Props) => {
     networkMode: "online",
   });
 
-  // <<<<<<< HEAD
   queryClient.setQueryDefaults(["encounterPermissions"], {
     meta: { persist: true },
     networkMode: "online",
   });
-  // const tabs: Record<string, React.FC<EncounterTabProps>> = {
-  //   ...defaultTabs,
-  //   ...pluginTabs,
-  // };
-
-  // const { data: encounterData, isLoading } = useQuery({
-  //   queryKey: ["encounter", encounterId],
-  //   queryFn: query(routes.encounter.get, {
-  //     pathParams: { id: encounterId },
-  //     queryParams: facilityIdFromProps
-  //       ? {
-  //           facility: facilityIdFromProps,
-  //         }
-  //       : {
-  //           patient: patientId,
-  //         },
-  //   }),
-  //   meta: { persist: true },
-  //   networkMode: "online",
-  //   enabled: !!encounterId,
-  // });
-
-  // const { data: patient, isLoading: isPatientLoading } = useQuery({
-  //   queryKey: ["patient", patientId],
-  //   queryFn: query(routes.patient.getPatient, {
-  //     pathParams: {
-  //       id: patientId,
-  //     },
-  //   }),
-  //   meta: { persist: true },
-  //   networkMode: "online",
-  //   enabled: !facilityIdFromProps && !!patientId,
-  // });
 
   useEffect(() => {
     if (patient?.permissions && facilityId) {
@@ -140,22 +106,11 @@ export const EncounterShow = (props: Props) => {
       );
     }
   }, [currentEncounter?.permissions, facilityId]);
-  //   const facilityId = facilityIdFromProps ?? encounterData?.facility.id;
-  //   const { data: facilityData } = useQuery({
-  //     queryKey: ["facility", facilityId],
-  //     queryFn: query(routes.getPermittedFacility, {
-  //       pathParams: { id: facilityId ?? "" },
-  //     }),
-  //     meta: { persist: true },
-  //     networkMode: "online",
-  //     enabled: !!facilityId,
-  //   });
-  // =======
+
   const availableTabs = [
     ...Object.keys(defaultTabs),
     ...Object.keys(pluginTabs),
   ];
-  // >>>>>>> develop
 
   const { canViewEncounter } = getPermissions(
     hasPermission,

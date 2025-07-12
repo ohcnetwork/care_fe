@@ -39,22 +39,6 @@ const actionLinks = [
   },
 ];
 
-// <<<<<<< HEAD
-// export const EncounterOverviewTab = ({
-//   encounter,
-//   patient,
-// }: EncounterTabProps) => {
-//   const { hasPermission } = usePermissions();
-
-//   const {
-//     canViewClinicalData,
-//     canViewEncounter,
-//     canSubmitEncounterQuestionnaire,
-//   } = getPermissions(hasPermission, encounter.permissions);
-
-//   const subpathMatch = usePathParams("/facility/:facilityId/*");
-//   const facilityIdExists = !!subpathMatch?.facilityId;
-// =======
 export const EncounterOverviewTab = () => {
   const { t } = useTranslation();
 
@@ -80,7 +64,6 @@ export const EncounterOverviewTab = () => {
     }),
   });
 
-  // >>>>>>> develop
   const canAccess = canViewEncounter || canViewClinicalData;
   const canEdit =
     !!facilityId &&

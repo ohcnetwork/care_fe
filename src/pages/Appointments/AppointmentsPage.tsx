@@ -287,18 +287,6 @@ export default function AppointmentsPage() {
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
 
-  // <<<<<<< HEAD
-  //   const { data: facilityData, isLoading: isFacilityLoading } = useQuery({
-  //     queryKey: ["facility", facilityId],
-  //     queryFn: query(routes.getPermittedFacility, {
-  //       pathParams: { id: facilityId },
-  //     }),
-  //     meta: { persist: true },
-  //     networkMode: "online",
-  //   });
-
-  // =======
-  // >>>>>>> develop
   const { canViewAppointments } = getPermissions(
     hasPermission,
     facility?.permissions ?? [],

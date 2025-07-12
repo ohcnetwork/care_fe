@@ -74,18 +74,6 @@ export default function VerifyPatient() {
     enabled: false,
   });
 
-  // <<<<<<< HEAD
-  //   const { data: facilityData, isLoading: facilityLoading } = useQuery({
-  //     queryKey: ["facility", props.facilityId],
-  //     queryFn: query(routes.getPermittedFacility, {
-  //       pathParams: { id: props.facilityId },
-  //     }),
-  //     meta: { persist: true },
-  //     networkMode: "online",
-  //   });
-
-  // =======
-  // >>>>>>> develop
   const { canCreateAppointment, canCreateEncounter, canListEncounters } =
     getPermissions(hasPermission, facility?.permissions ?? []);
 
@@ -141,29 +129,12 @@ export default function VerifyPatient() {
     enabled: !!patientData?.id && canListEncounters,
   });
 
-  // <<<<<<< HEAD
   useEffect(() => {
     if (encounters && encounters.results.length >= 5) {
       setHasReachedEncounterLimitOffline(true);
     }
   }, [encounters]);
 
-  //   const { data: closedEncounters } = useQuery({
-  //     queryKey: ["encounters", "closed", patientData?.id],
-  //     queryFn: query(routes.encounter.list, {
-  //       queryParams: {
-  //         patient: patientData?.id,
-  //         live: true,
-  //       },
-  //       silent: true,
-  //     }),
-  //     enabled: !!patientData?.id && canListEncounters,
-  //     meta: { persist: true },
-  //     networkMode: "online",
-  //   });
-
-  // =======
-  // >>>>>>> develop
   useEffect(() => {
     // Here we are verifying newly offline created patiend by using it id
     const loadOfflineCreatedPatient = async () => {

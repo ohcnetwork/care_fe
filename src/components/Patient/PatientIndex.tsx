@@ -65,16 +65,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
 
-  // <<<<<<< HEAD
-  //   const { data: facilityData } = useQuery({
-  //     queryKey: ["facility", facilityId],
-  //     queryFn: query(routes.getPermittedFacility, {
-  //       pathParams: { id: facilityId },
-  //     }),
-  //     meta: { persist: true },
-  //     networkMode: "online",
-  //   });
-  // =======
   const { facility } = useCurrentFacility();
 
   const { canCreatePatient } = getPermissions(

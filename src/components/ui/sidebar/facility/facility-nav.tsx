@@ -189,19 +189,7 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     .filter((c) => !!c.navItems)
     .flatMap((c) => c.navItems) as NavigationLink[];
 
-  // <<<<<<< HEAD:src/components/ui/sidebar/facility-nav.tsx
-  //   const { data: facilityData } = useQuery({
-  //     queryKey: ["facility", selectedFacility?.id],
-  //     queryFn: query(routes.getPermittedFacility, {
-  //       pathParams: { id: selectedFacility?.id ?? "" },
-  //     }),
-  //     meta: { persist: true },
-  //     networkMode: "online",
-  //     enabled: !!selectedFacility?.id,
-  //   });
-  // =======
   const { facility } = useCurrentFacility();
-  // >>>>>>> develop:src/components/ui/sidebar/facility/facility-nav.tsx
 
   const {
     canViewAppointments,
