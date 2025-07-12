@@ -38,18 +38,18 @@ const AllergyRow = ({
 
   return (
     <>
-      <div className="bg-white rounded border border-gray-200 mb-3 overflow-x-auto w-full">
+      <div className="bg-white rounded border border-gray-200 mb-3 w-full">
         <div className="grid grid-cols-13 divide-x w-full">
           <div className="col-span-6 px-2 py-1 bg-gray-100 break-words whitespace-normal text-base font-semibold text-gray-900">
             {allergy.code.display}{" "}
-            <span className="text-gray-500 text-sm">
+            <span className="italic text-gray-500 text-sm">
               ({t(allergy.category)})
             </span>
           </div>
           <div className="col-span-2 p-1 flex items-center justify-center">
             <Badge
               variant={ALLERGY_CLINICAL_STATUS_COLORS[allergy.clinical_status]}
-              className="whitespace-nowrap text-xs md:text-sm"
+              className="whitespace-nowrap text-sm"
             >
               {t(allergy.clinical_status)}
             </Badge>
@@ -57,7 +57,7 @@ const AllergyRow = ({
           <div className="col-span-2 p-1 flex items-center justify-center">
             <Badge
               variant={ALLERGY_CRITICALITY_COLORS[allergy.criticality]}
-              className="capitalize text-xs md:text-sm break-words"
+              className="capitalize text-sm break-words"
             >
               {t(allergy.criticality)}
             </Badge>
@@ -67,7 +67,7 @@ const AllergyRow = ({
               variant={
                 ALLERGY_VERIFICATION_STATUS_COLORS[allergy.verification_status]
               }
-              className="capitalize text-xs md:text-sm break-words"
+              className="capitalize text-sm break-words"
             >
               {t(allergy.verification_status)}
             </Badge>
@@ -78,7 +78,7 @@ const AllergyRow = ({
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="link"
-                    className="text-gray-500 hover:text-gray-700 p-1 md:p-2"
+                    className="text-gray-500 hover:text-gray-700 p-2"
                   >
                     <Info size={16} />
                   </Button>
@@ -122,7 +122,7 @@ const AllergyRow = ({
         </div>
       </div>
       {showNote && allergy.note && (
-        <div className="border border-gray-200 rounded-md p-3 md:p-4 bg-gray-50 relative mb-3 mx-2 md:mx-4">
+        <div className="border border-gray-200 rounded-md p-4 bg-gray-50 relative mb-3 mx-4">
           <Button
             variant="ghost"
             size="sm"
@@ -132,7 +132,7 @@ const AllergyRow = ({
             <X size={14} />
             <span className="sr-only">{t("close")}</span>
           </Button>
-          <p className="text-sm text-gray-700 whitespace-pre-wrap break-words pr-8">
+          <p className="text-sm text-gray-700 whitespace-pre-wrap break-words break-all pr-8 max-w-full">
             {allergy.note}
           </p>
         </div>
@@ -165,7 +165,7 @@ const AllergyCard = ({
         <div className="flex items-center gap-2">
           <Badge
             variant={ALLERGY_CLINICAL_STATUS_COLORS[allergy.clinical_status]}
-            className="whitespace-nowrap text-xs md:text-sm"
+            className="whitespace-nowrap"
           >
             {t(allergy.clinical_status)}
           </Badge>
@@ -173,7 +173,7 @@ const AllergyCard = ({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="link"
-                className="text-gray-500 hover:text-gray-700 p-1 md:p-2"
+                className="text-gray-500 hover:text-gray-700 p-1"
               >
                 <Info size={16} />
               </Button>
@@ -219,7 +219,7 @@ const AllergyCard = ({
           <div className="text-sm text-gray-600 mb-1">{t("criticality")}</div>
           <Badge
             variant={ALLERGY_CRITICALITY_COLORS[allergy.criticality]}
-            className="capitalize text-xs md:text-sm break-words"
+            className="capitalize break-words"
           >
             {t(allergy.criticality)}
           </Badge>
@@ -230,7 +230,7 @@ const AllergyCard = ({
             variant={
               ALLERGY_VERIFICATION_STATUS_COLORS[allergy.verification_status]
             }
-            className="capitalize text-xs md:text-sm break-words"
+            className="capitalize break-words"
           >
             {t(allergy.verification_status)}
           </Badge>
@@ -279,32 +279,28 @@ export const AllergyTable = ({
       ))}
     </div>
   ) : (
-    <div className="max-w-6xl mx-auto mb-4">
-      <div className="overflow-x-auto pb-2">
-        <div className="">
-          <div className="grid grid-cols-13 font-semibold mb-3">
-            <div className="col-span-6 text-base">{t("allergen")}</div>
-            <div className="col-span-2 text-center text-base">
-              {t("status")}
-            </div>
-            <div className="col-span-2 text-center text-base">
-              {t("criticality")}
-            </div>
-            <div className="col-span-2 text-center text-base">
-              {t("verification")}
-            </div>
-            <div className="col-span-1 text-center"></div>
+    <div className="max-w-6xl mb-4 overflow-x-auto">
+      <div className="min-w-2xl pb-2">
+        <div className="grid grid-cols-13 font-semibold mb-3">
+          <div className="col-span-6 text-base">{t("allergen")}</div>
+          <div className="col-span-2 text-center text-base">{t("status")}</div>
+          <div className="col-span-2 text-center text-base">
+            {t("criticality")}
           </div>
-          <div>
-            {allergies.map((allergy) => (
-              <AllergyRow
-                key={allergy.id}
-                allergy={allergy}
-                patientId={patientId}
-                facilityId={facilityId}
-              />
-            ))}
+          <div className="col-span-2 text-center text-base">
+            {t("verification")}
           </div>
+          <div className="col-span-1 text-center"></div>
+        </div>
+        <div>
+          {allergies.map((allergy) => (
+            <AllergyRow
+              key={allergy.id}
+              allergy={allergy}
+              patientId={patientId}
+              facilityId={facilityId}
+            />
+          ))}
         </div>
       </div>
     </div>
