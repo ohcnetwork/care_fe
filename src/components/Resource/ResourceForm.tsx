@@ -291,9 +291,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         );
         updatePaginatedResourceCache(
           queryClient,
-          ["resourceRequests", existingPayload.related_patient],
+          ["resourceRequests", resourceData?.related_patient?.id],
           normalizedResource,
         );
+
         queryClient.setQueryData(
           ["resource_request", resourceId],
           normalizedResource,
@@ -327,7 +328,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
         updatePaginatedResourceCache(
           queryClient,
-          ["resourceRequests", related_patient],
+          ["resourceRequests", resourceData?.related_patient?.id],
           normalizedResource,
         );
 

@@ -662,34 +662,33 @@ export const normalizeAndUpdateDiagnosis = (
 
   for (const key of cacheKeys) {
     const prev = queryClient.getQueryData<PaginatedResponse<Diagnosis>>(key);
-    if (prev) {
-      const filteredResults = prev.results.filter(
-        (entry) => !newCodes.has(entry.code.code),
-      );
 
-      const merged = [...filteredResults, ...normalizedDiagnosisResult];
+    const filteredResults = prev
+      ? prev.results.filter((entry) => !newCodes.has(entry.code.code))
+      : [];
 
-      queryClient.setQueryData<PaginatedResponse<Diagnosis>>(key, {
-        ...prev,
-        count: merged.length,
-        results: merged,
-      });
-    }
+    const merged = [...filteredResults, ...normalizedDiagnosisResult];
+
+    queryClient.setQueryData<PaginatedResponse<Diagnosis>>(key, {
+      count: merged.length,
+      results: merged,
+      ...prev,
+    });
   }
-
   // Update patietn-scoped cache
-  const updatedDiagnosis = queryClient.getQueryData<
-    PaginatedResponse<Diagnosis>
-  >(["encounter_diagnosis", patientID, encounterID]);
-
-  if (updatedDiagnosis) {
-    replaceEncounterScopedInPaginatedCache<Diagnosis>(
-      queryClient,
-      ["encounter_diagnosis", patientID, undefined],
+  const encounterDiagnosisResults =
+    queryClient.getQueryData<PaginatedResponse<Diagnosis>>([
+      "encounter_diagnosis",
+      patientID,
       encounterID,
-      updatedDiagnosis.results,
-    );
-  }
+    ])?.results ?? normalizedDiagnosisResult;
+
+  replaceEncounterScopedInPaginatedCache<Diagnosis>(
+    queryClient,
+    ["encounter_diagnosis", patientID, undefined],
+    encounterID,
+    encounterDiagnosisResults,
+  );
 };
 
 export const normalizeAndUpdateMedication_Request = (
@@ -725,15 +724,21 @@ export const normalizeAndUpdateMedication_Request = (
 
   mergeAndUpdatePaginatedCache<MedicationRequestRead>(
     queryClient,
-    [["medication_requests", patientID, encounterID]],
+    [
+      ["medication_requests", patientID, encounterID],
+      ["medication_requests_active", patientID, encounterID],
+    ],
     normaizedMedication_RequestResult,
   );
+
+  /* No need for replce as we dont show medication request per patient
   replaceEncounterScopedInPaginatedCache<MedicationRequestRead>(
     queryClient,
-    ["medication_requests_active", patientID],
+    ["medication_requests_active", patientID, encounterID],
     encounterID,
     normaizedMedication_RequestResult,
   );
+  **/
 };
 
 export const normalizeAndUpdateSymptom = async (

@@ -6,6 +6,8 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { createUserPersister } from "@/OfflineSupport/createUserPersister";
 
@@ -17,7 +19,7 @@ export default function useNetworkStatus() {
   const isRestoring = useIsRestoring();
   const queryClient = useQueryClient();
   const persistor = createUserPersister();
-
+  const { t } = useTranslation();
   const cancelNonSuccessQueries = async () => {
     queryClient
       .getQueryCache()
@@ -57,13 +59,12 @@ export default function useNetworkStatus() {
 
       setIsOnline(online);
       onlineManager.setOnline(online);
-      console.log("inavlidate user refrsh toker befoe");
       await queryClient.invalidateQueries({ queryKey: ["user-refresh-token"] });
-      console.log("inavlidate user refrsh toker after");
     } catch {
       setIsOnline(false);
-      console.log("❌ HEAD fetch failed:");
+      console.log(" HEAD fetch failed:");
       onlineManager.setOnline(false);
+      toast.info(t("you_are_offline"));
       await restorePersistedCache();
     } finally {
       setIsChecked(true);
@@ -80,11 +81,11 @@ export default function useNetworkStatus() {
       onlineManager.setOnline(false);
       setIsChecked(true);
       await restorePersistedCache();
-      console.log("❌ Browser says: offline");
+      console.log(" Browser says: offline");
     };
 
     const handleOnline = () => {
-      console.log("🌐 Browser says: online — verifying...");
+      console.log(" Browser says: online — verifying...");
       checkConnection();
     };
 

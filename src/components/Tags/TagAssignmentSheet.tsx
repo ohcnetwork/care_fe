@@ -129,6 +129,8 @@ export function TagSelectorPopover({
         ...(search ? { search } : {}),
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
   });
 
   // Helper to fetch children for a tag
@@ -139,6 +141,8 @@ export function TagSelectorPopover({
         queryParams: { resource, parent: parentId },
       }),
       enabled: expanded.has(parentId),
+      meta: { persist: true },
+      networkMode: "online",
     });
   }
 

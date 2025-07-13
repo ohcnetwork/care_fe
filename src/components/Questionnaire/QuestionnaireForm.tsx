@@ -708,6 +708,7 @@ export function QuestionnaireForm({
         );
         return;
       }
+
       normalizeAndUpdateDiagnosis(
         queryClient,
         cleanedRequests.requests[0],

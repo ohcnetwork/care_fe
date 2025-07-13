@@ -183,23 +183,26 @@ export default function CreateEncounterForm({
       );
 
       const encounterListKey = ["encounterHistory", patientId, {}];
-      console.log(encounterListKey);
+
       const prevEncounterList =
         queryClient.getQueryData<PaginatedResponse<Encounter>>(
           encounterListKey,
         );
 
-      if (prevEncounterList) {
-        const updatedList: PaginatedResponse<Encounter> = {
-          ...prevEncounterList,
-          count: prevEncounterList.count + 1,
-          results: [normalizeEncounter, ...prevEncounterList.results],
-        };
+      const updatedList: PaginatedResponse<Encounter> = prevEncounterList
+        ? {
+            ...prevEncounterList,
+            count: prevEncounterList.count + 1,
+            results: [normalizeEncounter, ...prevEncounterList.results],
+          }
+        : {
+            count: 1,
+            results: [normalizeEncounter],
+          };
 
-        queryClient.setQueryData(encounterListKey, updatedList);
-      }
+      queryClient.setQueryData(encounterListKey, updatedList);
 
-      // update active and close encounter on verify page
+      // update active encounter on verify page
       updateActiveEncounterList({
         queryClient: queryClient,
         action: "createEncounter",

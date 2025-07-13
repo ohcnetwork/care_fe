@@ -98,7 +98,6 @@ export default function MedicationRequestTable() {
     networkMode: "online",
     enabled: !!patientId && canAccess,
   });
-
   const { data: stoppedMedications, isLoading: loadingStopped } = useQuery({
     queryKey: ["medication_requests_stopped", patientId, encounterId],
     queryFn: query(medicationRequestApi.list, {
@@ -134,7 +133,6 @@ export default function MedicationRequestTable() {
           ?.toLowerCase()
           .includes(searchQuery.toLowerCase().trim()),
       );
-
   const isLoading = loadingActive || loadingStopped;
 
   return (

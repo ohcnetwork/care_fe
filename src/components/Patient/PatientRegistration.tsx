@@ -466,7 +466,7 @@ export default function PatientRegistration(
         tags: selectedTags.map((tag) => tag.id),
         identifiers: editableIdentifiers,
       };
-      if (!onlineManager.isOnline() && userConfirmedOfflineDuplicateRisk) {
+      if (!onlineManager.isOnline()) {
         await queueNewPatientOffline(createPatientData);
         return;
       } else {
@@ -550,7 +550,7 @@ export default function PatientRegistration(
             : undefined,
         address: patientQuery.data.address || "",
         permanent_address: patientQuery.data.permanent_address || "",
-        pincode: patientQuery.data.pincode || undefined,
+        pincode: Number(patientQuery.data.pincode) || undefined,
         nationality: patientQuery.data.nationality || defaultCountry,
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization

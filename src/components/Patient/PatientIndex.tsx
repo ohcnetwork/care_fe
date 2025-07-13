@@ -39,6 +39,7 @@ import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { isOfflineId } from "@/OfflineSupport/offlineWriteHelpers";
 import { PendingSyncBadge } from "@/OfflineSupport/pendingSyncbadge";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -165,12 +166,19 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       (!!identifierSearch.config && !!identifierSearch.value),
   });
 
-  const handlePatientSelect = (index: number) => {
-    const patient = patientList?.results[index];
+  const handlePatientSelect = (index: number, source: "online" | "offline") => {
+    const patient =
+      source === "online"
+        ? patientList?.results[index]
+        : partialOfflinePatients[index];
+
     if (!patient) {
       return;
     }
-    if (patientList && patientList.partial) {
+    if (
+      (patientList && patientList.partial) ||
+      (source === "offline" && partialOfflinePatients)
+    ) {
       setSelectedPatient(patient);
       setVerificationOpen(true);
       setYearOfBirth("");
@@ -195,7 +203,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       query: {
         phone_number: selectedPatient.phone_number,
         year_of_birth: yearOfBirth,
-        partial_id: getPartialId(selectedPatient),
+        partial_id: !isOfflineId(selectedPatient.id)
+          ? getPartialId(selectedPatient)
+          : selectedPatient.id, // if offline send full id
       },
     });
   };
@@ -298,7 +308,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                               <TableRow
                                 key={patient.id}
                                 className="cursor-pointer"
-                                onClick={() => handlePatientSelect(index)}
+                                onClick={() =>
+                                  handlePatientSelect(index, "online")
+                                }
                               >
                                 <TableCell className="font-medium">
                                   {patient.name}
@@ -349,7 +361,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                               <TableRow
                                 key={patient.id}
                                 className="cursor-pointer"
-                                onClick={() => handlePatientSelect(index)}
+                                onClick={() =>
+                                  handlePatientSelect(index, "offline")
+                                }
                               >
                                 <TableCell className="font-medium">
                                   {patient.name}

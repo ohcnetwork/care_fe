@@ -668,43 +668,15 @@ const AppointmentActions = ({
         const existingCreateEntry = await db.OfflineWrites.get(appointment.id);
         if (existingCreateEntry?.type === "createAppointment") {
           await db.OfflineWrites.delete(appointment.id);
-          queryClient.removeQueries({
-            queryKey: ["appointment", appointment.id],
-          });
+          // queryClient.removeQueries({
+          //   queryKey: ["appointment", appointment.id],
+          // });
           toast.success(t("unsynced_appointment_cancelled"));
         }
       } else {
         const saveResult = await saveOfflineWrite(offlineEntry);
         if (!saveResult.success) {
           toast.error(saveResult.error);
-        }
-
-        const updatedAppointment = {
-          ...appointment,
-          status,
-          is_updated_offline: true,
-        };
-        queryClient.setQueryData(
-          ["appointment", appointment.id],
-          updatedAppointment,
-        );
-
-        const prevAppointmentList = queryClient.getQueryData<
-          PaginatedResponse<Appointment>
-        >(["patient-appointments", appointment.patient.id]);
-
-        if (prevAppointmentList?.results?.length) {
-          const updatedAppointmentList = {
-            ...prevAppointmentList,
-            results: prevAppointmentList.results.map((entry) =>
-              entry.id === appointment.id ? updatedAppointment : entry,
-            ),
-          };
-
-          queryClient.setQueryData(
-            ["patient-appointments", appointment.patient.id],
-            updatedAppointmentList,
-          );
         }
       }
       const statusUpdateID = isOfflineId(appointment.id)
@@ -719,6 +691,34 @@ const AppointmentActions = ({
         db.OfflineWrites.delete(statusUpdateID),
         db.OfflineWrites.delete(rescheduleID),
       ]);
+
+      const updatedAppointment = {
+        ...appointment,
+        status,
+        is_updated_offline: true,
+      };
+      queryClient.setQueryData(
+        ["appointment", appointment.id],
+        updatedAppointment,
+      );
+
+      const prevAppointmentList = queryClient.getQueryData<
+        PaginatedResponse<Appointment>
+      >(["patient-appointments", appointment.patient.id]);
+
+      if (prevAppointmentList?.results?.length) {
+        const updatedAppointmentList = {
+          ...prevAppointmentList,
+          results: prevAppointmentList.results.map((entry) =>
+            entry.id === appointment.id ? updatedAppointment : entry,
+          ),
+        };
+
+        queryClient.setQueryData(
+          ["patient-appointments", appointment.patient.id],
+          updatedAppointmentList,
+        );
+      }
 
       updateSlotCacheAfterOfflineAppointment({
         queryClient: queryClient,

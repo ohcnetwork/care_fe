@@ -1,6 +1,5 @@
 import careConfig from "@careConfig";
 import {
-  onlineManager,
   useIsRestoring,
   useMutation,
   useQuery,
@@ -50,7 +49,6 @@ export default function AuthUserProvider({
   unauthorized,
   otpAuthorized,
 }: Props) {
-  const isrestoring = useIsRestoring();
   const queryClient = useQueryClient();
   const [accessToken, setAccessToken] = useState(
     localStorage.getItem(LocalStorageKeys.accessToken),
@@ -61,44 +59,21 @@ export default function AuthUserProvider({
     ),
   );
   const { isChecked } = useNetworkStatus();
-  const { data: onlineuser, isLoading } = useQuery({
+  const userPersister = createUserPersister();
+  const { data: user, isLoading } = useQuery({
     queryKey: ["currentUser", accessToken],
     queryFn: query(routes.currentUser, { silent: true }),
     retry: false,
-    networkMode: "online",
-    meta: { persist: true },
     enabled:
       !!localStorage.getItem(LocalStorageKeys.accessToken) && !!isChecked,
-  });
-
-  const { data: offlineUser } = useQuery({
-    queryKey: ["offlineCurrentUser"],
-    queryFn: async () => {
-      throw new Error("Should not fetch online");
-    },
     meta: { persist: true },
     networkMode: "online",
-    enabled: false,
   });
-
-  useEffect(() => {
-    if (onlineuser) {
-      queryClient.setQueryData(["offlineCurrentUser"], onlineuser);
-    }
-  }, [onlineuser, queryClient]);
 
   const setUser = useSetAtom(userAtom);
   useEffect(() => {
-    if (
-      !onlineManager.isOnline() &&
-      localStorage.getItem(LocalStorageKeys.accessToken) &&
-      offlineUser
-    ) {
-      setUser(offlineUser);
-    } else {
-      setUser(onlineuser);
-    }
-  }, [onlineuser, offlineUser, setUser]);
+    setUser(user);
+  }, [user, setUser]);
   const refreshToken = localStorage.getItem(LocalStorageKeys.refreshToken);
 
   const tokenRefreshQuery = useQuery({
@@ -110,7 +85,7 @@ export default function AuthUserProvider({
     networkMode: "online",
     refetchIntervalInBackground: true,
     refetchInterval: careConfig.auth.tokenRefreshInterval,
-    enabled: !!refreshToken && !!onlineuser && !!isChecked,
+    enabled: !!refreshToken && !!user && !!isChecked,
   });
 
   useEffect(() => {
@@ -119,11 +94,23 @@ export default function AuthUserProvider({
       localStorage.removeItem(LocalStorageKeys.refreshToken);
       return;
     }
-
+    queryClient.setQueryDefaults(["currentUser"], {
+      meta: { persist: true },
+    });
     if (tokenRefreshQuery.data) {
       const { access, refresh } = tokenRefreshQuery.data;
       localStorage.setItem(LocalStorageKeys.accessToken, access);
       localStorage.setItem(LocalStorageKeys.refreshToken, refresh);
+
+      // for offline case, prevent losing  cache user
+      const previousUser = queryClient.getQueryData([
+        "currentUser",
+        accessToken,
+      ]); // old key
+      if (previousUser) {
+        queryClient.setQueryData(["currentUser", access], previousUser); // new key
+        queryClient.setQueryData(["currentUser", accessToken], undefined);
+      }
     }
   }, [tokenRefreshQuery.data, tokenRefreshQuery.isError]);
 
@@ -178,9 +165,8 @@ export default function AuthUserProvider({
   const signOut = useCallback(async () => {
     const accessToken = localStorage.getItem(LocalStorageKeys.accessToken);
     const refreshToken = localStorage.getItem(LocalStorageKeys.refreshToken);
-    await createUserPersister().removeClient();
-    await queryClient.resetQueries({ queryKey: ["offlineCurrentUser"] });
-
+    queryClient.clear();
+    await userPersister.removeClient();
     if (accessToken && refreshToken) {
       try {
         await mutate({
@@ -191,14 +177,15 @@ export default function AuthUserProvider({
         console.error("Error during logout:", error);
       }
     }
-    await queryClient.resetQueries({ queryKey: ["currentUser"] });
-    queryClient.clear();
 
     localStorage.removeItem(LocalStorageKeys.accessToken);
     localStorage.removeItem(LocalStorageKeys.refreshToken);
     localStorage.removeItem(LocalStorageKeys.patientTokenKey);
     setAccessToken(null);
     setPatientToken(null);
+
+    queryClient.clear();
+    await userPersister.removeClient();
 
     const redirectURL = getRedirectURL();
     navigate(redirectURL ? `/login?redirect=${redirectURL}` : "/login");
@@ -226,8 +213,10 @@ export default function AuthUserProvider({
       removeEventListener("storage", listener);
     };
   }, [signOut]);
+  const isRestoring = useIsRestoring();
+  console.log(isLoading, !isRestoring, !isChecked);
 
-  if (isLoading || isrestoring || !isChecked) {
+  if (isLoading || isRestoring || !isChecked) {
     return <Loading />;
   }
 
@@ -239,16 +228,12 @@ export default function AuthUserProvider({
         verifyMFA,
         isAuthenticating,
         isVerifyingMFA,
-        user: onlineuser ? onlineuser : offlineUser,
+        user,
         patientLogin,
         patientToken,
       }}
     >
-      {(onlineuser ? onlineuser : offlineUser)
-        ? children
-        : patientToken?.token
-          ? otpAuthorized
-          : unauthorized}
+      {user ? children : patientToken?.token ? otpAuthorized : unauthorized}
     </AuthUserContext.Provider>
   );
 }
