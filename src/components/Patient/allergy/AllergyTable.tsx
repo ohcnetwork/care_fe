@@ -46,7 +46,7 @@ const AllergyRow = ({
               ({t(allergy.category)})
             </span>
           </div>
-          <div className="col-span-2 p-1 flex items-center justify-center">
+          <div className="col-span-2 flex items-center justify-center">
             <Badge
               variant={ALLERGY_CLINICAL_STATUS_COLORS[allergy.clinical_status]}
               className="whitespace-nowrap text-sm"
@@ -54,70 +54,68 @@ const AllergyRow = ({
               {t(allergy.clinical_status)}
             </Badge>
           </div>
-          <div className="col-span-2 p-1 flex items-center justify-center">
+          <div className="col-span-2 flex items-center justify-center">
             <Badge
               variant={ALLERGY_CRITICALITY_COLORS[allergy.criticality]}
-              className="capitalize text-sm break-words"
+              className="text-sm break-words"
             >
               {t(allergy.criticality)}
             </Badge>
           </div>
-          <div className="col-span-2 p-1 flex items-center justify-center">
+          <div className="col-span-2 flex items-center justify-center">
             <Badge
               variant={
                 ALLERGY_VERIFICATION_STATUS_COLORS[allergy.verification_status]
               }
-              className="capitalize text-sm break-words"
+              className="text-sm break-words"
             >
               {t(allergy.verification_status)}
             </Badge>
           </div>
-          <div className="col-span-1 flex justify-between">
-            <div className="flex-1 flex items-center justify-center px-2 py-1">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="link"
-                    className="text-gray-500 hover:text-gray-700 p-2"
-                  >
-                    <Info size={16} />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  <div className="px-3 py-2 text-sm text-gray-500 border-b">
-                    <div className="font-medium text-gray-700">
-                      {t("reported_by")}
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Avatar
-                        name={formatName(allergy.created_by)}
-                        className="size-5"
-                        imageUrl={allergy.created_by.profile_picture_url}
-                      />
-                      <span className="text-sm">
-                        {formatName(allergy.created_by)}
-                      </span>
-                    </div>
+          <div className="col-span-1 flex items-center justify-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="link"
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <Info size={16} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <div className="px-3 py-2 text-sm text-gray-500 border-b">
+                  <div className="font-medium text-gray-700">
+                    {t("reported_by")}
                   </div>
-                  <DropdownMenuItem
-                    onClick={() =>
-                      navigate(
-                        facilityId
-                          ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
-                          : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
-                      )
-                    }
-                  >
-                    {t("view_encounter")}
+                  <div className="flex items-center gap-2 mt-1">
+                    <Avatar
+                      name={formatName(allergy.created_by)}
+                      className="size-5"
+                      imageUrl={allergy.created_by.profile_picture_url}
+                    />
+                    <span className="text-sm">
+                      {formatName(allergy.created_by)}
+                    </span>
+                  </div>
+                </div>
+                <DropdownMenuItem
+                  onClick={() =>
+                    navigate(
+                      facilityId
+                        ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
+                        : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
+                    )
+                  }
+                >
+                  {t("view_encounter")}
+                </DropdownMenuItem>
+                {allergy.note && (
+                  <DropdownMenuItem onClick={() => setShowNote(!showNote)}>
+                    {showNote ? t("hide_note") : t("see_note")}
                   </DropdownMenuItem>
-                  {allergy.note && (
-                    <DropdownMenuItem onClick={() => setShowNote(!showNote)}>
-                      {showNote ? t("hide_note") : t("see_note")}
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
@@ -219,7 +217,7 @@ const AllergyCard = ({
           <div className="text-sm text-gray-600 mb-1">{t("criticality")}</div>
           <Badge
             variant={ALLERGY_CRITICALITY_COLORS[allergy.criticality]}
-            className="capitalize break-words"
+            className="break-words"
           >
             {t(allergy.criticality)}
           </Badge>
@@ -230,7 +228,7 @@ const AllergyCard = ({
             variant={
               ALLERGY_VERIFICATION_STATUS_COLORS[allergy.verification_status]
             }
-            className="capitalize break-words"
+            className="break-words"
           >
             {t(allergy.verification_status)}
           </Badge>
@@ -280,7 +278,7 @@ export const AllergyTable = ({
     </div>
   ) : (
     <div className="max-w-6xl mb-4 overflow-x-auto">
-      <div className="min-w-2xl pb-2">
+      <div className="min-w-xl pb-2">
         <div className="grid grid-cols-13 font-semibold mb-3">
           <div className="col-span-6 text-base">{t("allergen")}</div>
           <div className="col-span-2 text-center text-base">{t("status")}</div>

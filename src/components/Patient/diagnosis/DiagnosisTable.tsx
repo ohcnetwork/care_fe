@@ -43,7 +43,7 @@ const DiagnosisRow = ({
           <div className="col-span-6 px-2 py-1 bg-gray-100 break-words whitespace-normal text-base font-semibold text-gray-900">
             {diagnosis.code.display}
           </div>
-          <div className="col-span-2 p-1 flex items-center justify-center">
+          <div className="col-span-2 flex items-center justify-center">
             <Badge
               variant={
                 DIAGNOSIS_CLINICAL_STATUS_COLORS[diagnosis.clinical_status]
@@ -53,14 +53,14 @@ const DiagnosisRow = ({
               {t(diagnosis.clinical_status)}
             </Badge>
           </div>
-          <div className="col-span-2 p-1 flex items-center justify-center">
+          <div className="col-span-2 flex items-center justify-center">
             <Badge
               variant={
                 DIAGNOSIS_VERIFICATION_STATUS_COLORS[
                   diagnosis.verification_status
                 ]
               }
-              className="whitespace-nowrap capitalize text-sm"
+              className="whitespace-nowrap text-sm"
             >
               {t(diagnosis.verification_status)}
             </Badge>
@@ -72,52 +72,50 @@ const DiagnosisRow = ({
               "-"
             )}
           </div>
-          <div className="col-span-1 flex justify-between">
-            <div className="flex-1 flex items-center justify-center px-2 py-1">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="link"
-                    className="text-gray-500 hover:text-gray-700 p-2"
-                  >
-                    <Info size={16} />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  <div className="px-3 py-2 text-sm text-gray-500 border-b">
-                    <div className="font-medium text-gray-700">
-                      {t("reported_by")}
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Avatar
-                        name={formatName(diagnosis.created_by)}
-                        className="size-5"
-                        imageUrl={diagnosis.created_by.profile_picture_url}
-                      />
-                      <span className="text-sm">
-                        {formatName(diagnosis.created_by)}
-                      </span>
-                    </div>
+          <div className="col-span-1 flex items-center justify-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="link"
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <Info size={16} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <div className="px-3 py-2 text-sm text-gray-500 border-b">
+                  <div className="font-medium text-gray-700">
+                    {t("reported_by")}
                   </div>
-                  <DropdownMenuItem
-                    onClick={() =>
-                      navigate(
-                        facilityId
-                          ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
-                          : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
-                      )
-                    }
-                  >
-                    {t("view_encounter")}
+                  <div className="flex items-center gap-2 mt-1">
+                    <Avatar
+                      name={formatName(diagnosis.created_by)}
+                      className="size-5"
+                      imageUrl={diagnosis.created_by.profile_picture_url}
+                    />
+                    <span className="text-sm">
+                      {formatName(diagnosis.created_by)}
+                    </span>
+                  </div>
+                </div>
+                <DropdownMenuItem
+                  onClick={() =>
+                    navigate(
+                      facilityId
+                        ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
+                        : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
+                    )
+                  }
+                >
+                  {t("view_encounter")}
+                </DropdownMenuItem>
+                {diagnosis.note && (
+                  <DropdownMenuItem onClick={() => setShowNote(!showNote)}>
+                    {showNote ? t("hide_note") : t("see_note")}
                   </DropdownMenuItem>
-                  {diagnosis.note && (
-                    <DropdownMenuItem onClick={() => setShowNote(!showNote)}>
-                      {showNote ? t("hide_note") : t("see_note")}
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
@@ -222,7 +220,7 @@ const DiagnosisCard = ({
                 diagnosis.verification_status
               ]
             }
-            className="capitalize break-words"
+            className="break-words"
           >
             {t(diagnosis.verification_status)}
           </Badge>
@@ -280,7 +278,7 @@ export const DiagnosisTable = ({
     </div>
   ) : (
     <div className="max-w-6xl mx-auto mb-4 overflow-x-auto">
-      <div className="min-w-2xl pb-2">
+      <div className="min-w-xl pb-2">
         <div className="min-w-full">
           <div className="grid grid-cols-13 px-4 font-semibold mb-3">
             <div className="col-span-6 text-base">{t("diagnosis")}</div>
@@ -294,10 +292,10 @@ export const DiagnosisTable = ({
             <div className="col-span-1 text-center"></div>
           </div>
           <div>
-            {diagnoses.map((diag) => (
+            {diagnoses.map((diagnosis) => (
               <DiagnosisRow
-                key={diag.id}
-                diagnosis={diag}
+                key={diagnosis.id}
+                diagnosis={diagnosis}
                 patientId={patientId}
                 facilityId={facilityId}
               />

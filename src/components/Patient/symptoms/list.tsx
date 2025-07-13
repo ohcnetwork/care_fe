@@ -106,7 +106,10 @@ export function SymptomsList({
                           <h3 className="text-sm font-medium text-indigo-700">
                             {format(date, "dd MMMM, yyyy")}
                           </h3>
-                          <SymptomTable symptoms={symptoms} />
+                          <SymptomTable
+                            patientId={patientId}
+                            symptoms={symptoms}
+                          />
                         </div>
                       </div>
                     </div>
@@ -128,6 +131,7 @@ export function SymptomsList({
       editLink={!readOnly ? "questionnaire/symptom" : undefined}
     >
       <SymptomTable
+        patientId={patientId}
         symptoms={[
           ...filteredSymptoms.filter(
             (symptom) => symptom.verification_status !== "entered_in_error",
