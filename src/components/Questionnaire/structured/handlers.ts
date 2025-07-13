@@ -207,6 +207,36 @@ export const structuredHandlers: {
       }));
     },
   },
+  charge_item: {
+    getRequests: async (chargeItems, { facilityId, encounterId }) => {
+      if (!encounterId) return [];
+      return [
+        {
+          url: `/api/v1/facility/${facilityId}/charge_item/upsert/`,
+          method: "POST",
+          body: {
+            datapoints: chargeItems.map((chargeItem) => ({
+              ...chargeItem,
+              encounter: encounterId,
+            })),
+          },
+          reference_id: "charge_item",
+        },
+      ];
+    },
+  },
+  service_request: {
+    getRequests: async (serviceRequests, { facilityId }) => {
+      return serviceRequests.map((serviceRequest) => ({
+        url: `/api/v1/facility/${facilityId}/service_request/apply_activity_definition/`,
+        method: "POST",
+        body: {
+          ...serviceRequest,
+        },
+        reference_id: "service_request",
+      }));
+    },
+  },
 };
 
 export const getStructuredRequests = async <T extends StructuredQuestionType>(

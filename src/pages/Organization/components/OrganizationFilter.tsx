@@ -48,7 +48,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
     enabled: !!selected,
   });
 
-  const { data: rootOrgs } = useQuery<{ results: Organization[] }>({
+  const { data: rootOrgs } = useQuery({
     queryKey: ["root-organization", selected],
     queryFn: query(organizationApi.getPublicOrganizations, {
       queryParams: { level_cache: 1 },

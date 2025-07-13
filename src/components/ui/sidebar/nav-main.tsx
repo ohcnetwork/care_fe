@@ -1,34 +1,24 @@
 import { ChevronRight } from "lucide-react";
-import { ActiveLink, usePath } from "raviger";
-import { useState } from "react";
-import React from "react";
+import { ActiveLink, useFullPath, usePath } from "raviger";
+import { Fragment, ReactNode, useMemo, useState } from "react";
+
+
 
 import { cn } from "@/lib/utils";
 
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  SidebarGroup,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
+
+
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { SidebarGroup, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from "@/components/ui/sidebar";
+
+
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import { NavigationLink } from "./facility-nav";
+
+
+
 
 /* Converts a route pattern like '/path/:id' to a RegExp to match dynamic segments in URLs.
 Helps in checking if the current path matches a pattern for active link detection. */
@@ -77,9 +67,33 @@ const MultiActiveLink = ({
   );
 };
 
+export interface NavigationLink {
+  header?: string;
+  headerIcon?: ReactNode;
+  name: string;
+  url: string;
+  icon?: ReactNode;
+  visibility?: boolean;
+  matchPaths?: string[];
+  children?: NavigationLink[];
+}
+
 export function NavMain({ links }: { links: NavigationLink[] }) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+
+  const fullPath = useFullPath();
+  const fullPathMap = useMemo(
+    () =>
+      fullPath.split("/").reduce(
+        (acc, part) => ({
+          ...acc,
+          [part]: true,
+        }),
+        {} as Record<string, boolean>,
+      ),
+    [fullPath],
+  );
   const path = usePath();
   const [open, setIsOpen] = useState<string | null>(null);
 
@@ -89,7 +103,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
         {links
           .filter((link) => link.visibility !== false)
           .map((link) => (
-            <React.Fragment key={link.name}>
+            <Fragment key={link.name}>
               {link.children ? (
                 isCollapsed ? (
                   <PopoverMenu link={link} />
@@ -132,26 +146,41 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                         </SidebarMenuButton>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
-                        <SidebarMenuSub>
+                        <SidebarMenuSub className="border-l border-gray-300">
                           {link.children.map((subItem) => (
-                            <SidebarMenuSubItem key={subItem.name}>
-                              <SidebarMenuSubButton
-                                asChild
-                                data-cy={`nav-${subItem.name.toLowerCase().replace(/\s+/g, "-")}`}
-                                className={
-                                  "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
-                                }
-                              >
-                                <MultiActiveLink
-                                  href={subItem.url}
-                                  matchPaths={subItem.matchPaths}
-                                  className="w-full"
-                                  activeClass="bg-white text-green-700 shadow"
+                            <>
+                              {subItem.header && (
+                                <div className="flex items-center gap-2 mt-2">
+                                  {subItem.headerIcon}
+                                  <span className="text-gray-400 uppercase text-xs font-bold">
+                                    {subItem.header}
+                                  </span>
+                                </div>
+                              )}
+                              <SidebarMenuSubItem key={subItem.name}>
+                                <SidebarMenuSubButton
+                                  asChild
+                                  data-cy={`nav-${subItem.name.toLowerCase().replace(/\s+/g, "-")}`}
+                                  className={
+                                    "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
+                                  }
                                 >
-                                  {subItem.name}
-                                </MultiActiveLink>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
+                                  <MultiActiveLink
+                                    href={subItem.url}
+                                    matchPaths={subItem.matchPaths}
+                                    className="w-full"
+                                    activeClass={cn(
+                                      subItem.url
+                                        .split("/")
+                                        .every((part) => fullPathMap[part]) &&
+                                        "bg-white text-green-700 shadow",
+                                    )}
+                                  >
+                                    {subItem.name}
+                                  </MultiActiveLink>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            </>
                           ))}
                         </SidebarMenuSub>
                       </CollapsibleContent>
@@ -159,7 +188,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                   </Collapsible>
                 )
               ) : (
-                <SidebarMenuItem key={link.name}>
+                <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
                     tooltip={link.name}
@@ -197,7 +226,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
-            </React.Fragment>
+            </Fragment>
           ))}
       </SidebarMenu>
     </SidebarGroup>

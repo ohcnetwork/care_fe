@@ -13,12 +13,21 @@ import { AuthUserModel, UpdatePasswordForm } from "@/components/Users/models";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { MFAAuthenticationToken } from "@/types/auth/otp";
-import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
+import { BatchRequestBody } from "@/types/base/batch/batch";
+import { Code } from "@/types/base/code/code";
+import {
+  Encounter,
+  EncounterEditRequest,
+} from "@/types/emr/encounter/encounter";
 import {
   Observation,
   ObservationAnalyzeResponse,
 } from "@/types/emr/observation";
-import { PartialPatientModel, Patient } from "@/types/emr/patient";
+import {
+  Patient,
+  PatientRead,
+  PatientSearchResponse,
+} from "@/types/emr/patient/patient";
 import {
   BaseFacility,
   CreateFacility,
@@ -27,11 +36,7 @@ import {
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
 import { PlugConfig } from "@/types/plugConfig";
-import {
-  BatchRequestBody,
-  BatchSubmissionResult,
-} from "@/types/questionnaire/batch";
-import { Code } from "@/types/questionnaire/code";
+import { BatchSubmissionResult } from "@/types/questionnaire/batch";
 import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import {
   CreateResourceRequest,
@@ -80,6 +85,9 @@ export const API = <TResponse, TBody = undefined>(
   };
 };
 
+/**
+ * @deprecated use object specific api instead
+ */
 const routes = {
   // Auth Endpoints
   login: {
@@ -201,24 +209,18 @@ const routes = {
   searchPatient: {
     path: "/api/v1/patient/search/",
     method: "POST",
-    TRes: Type<PaginatedResponse<PartialPatientModel>>(),
-  },
-
-  addPatient: {
-    path: "/api/v1/patient/",
-    method: "POST",
-    TRes: Type<Patient>(),
+    TRes: Type<PatientSearchResponse>(),
+    TBody: Type<{
+      phone_number?: string;
+      config?: string;
+      value?: string;
+    }>(),
   },
   getPatient: {
     path: "/api/v1/patient/{id}/",
     method: "GET",
     TBody: Type<Patient>(),
-    TRes: Type<Patient>(),
-  },
-  updatePatient: {
-    path: "/api/v1/patient/{id}/",
-    method: "PUT",
-    TRes: Type<Patient>(),
+    TRes: Type<PatientRead>(),
   },
 
   //Profile
@@ -399,13 +401,13 @@ const routes = {
         path: "/api/v1/patient/{patientId}/thread/",
         method: "GET",
         TRes: Type<PaginatedResponse<Thread>>(),
-        TQuery: Type<{ encounter: string }>(),
+        TQuery: Type<{ encounter?: string }>(),
       },
       createThread: {
         path: "/api/v1/patient/{patientId}/thread/",
         method: "POST",
         TRes: Type<Thread>(),
-        TBody: Type<{ title: string; encounter: string }>(),
+        TBody: Type<{ title: string; encounter?: string }>(),
       },
       getMessages: {
         path: "/api/v1/patient/{patientId}/thread/{threadId}/note/",
@@ -467,18 +469,6 @@ const routes = {
   // New Patient Routes
 
   patient: {
-    getPatient: {
-      path: "/api/v1/patient/{id}/",
-      method: "GET",
-      TBody: Type<Patient>(),
-      TRes: Type<Patient>(),
-    },
-    allergyIntolerance: {
-      create: {
-        method: "POST",
-        path: "/api/v1/patient/:patientId/allergy_intolerance/",
-      },
-    },
     users: {
       addUser: {
         method: "POST",
