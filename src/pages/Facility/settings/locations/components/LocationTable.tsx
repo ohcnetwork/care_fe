@@ -8,7 +8,6 @@ import {
   PenLine,
   Trash,
 } from "lucide-react";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -23,6 +22,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -75,7 +75,6 @@ export function LocationTable({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [openDialogFor, setOpenDialogFor] = useState<string | null>(null);
 
   const deleteLocation = useMutation({
     mutationFn: (locationId: string) => {
@@ -262,65 +261,56 @@ export function LocationTable({
                           <div className="size-9"></div>
                         )}
 
+                        {/* Delete button or spacer */}
                         {!location.has_children &&
                         !location.current_encounter ? (
-                          <>
+                          <AlertDialog>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="text-destructive hover:text-destructive"
-                                  data-cy="delete-location-button"
-                                  onClick={() => setOpenDialogFor(location.id)}
-                                >
-                                  <Trash className="size-4" />
-                                </Button>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="text-destructive hover:text-destructive"
+                                    data-cy="delete-location-button"
+                                  >
+                                    <Trash className="size-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
                               </TooltipTrigger>
                               <TooltipContent>{t("delete")}</TooltipContent>
                             </Tooltip>
-
-                            <AlertDialog
-                              open={openDialogFor === location.id}
-                              onOpenChange={(open) => {
-                                if (!open) setOpenDialogFor(null);
-                              }}
-                            >
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    {t("remove_location", {
-                                      name: location.name,
-                                    })}
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    {t("are_you_sure_want_to_delete", {
-                                      name: location.name,
-                                    })}
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel
-                                    onClick={() => setOpenDialogFor(null)}
-                                  >
-                                    {t("cancel")}
-                                  </AlertDialogCancel>
-                                  <AlertDialogAction
-                                    data-cy="remove-location-button"
-                                    onClick={() => {
-                                      deleteLocation.mutate(location.id);
-                                      setOpenDialogFor(null);
-                                    }}
-                                    className={buttonVariants({
-                                      variant: "destructive",
-                                    })}
-                                  >
-                                    {t("remove")}
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  {t("remove_location", {
+                                    name: location.name,
+                                  })}
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  {t("are_you_sure_want_to_delete", {
+                                    name: location.name,
+                                  })}
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>
+                                  {t("cancel")}
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  data-cy="remove-location-button"
+                                  onClick={() =>
+                                    deleteLocation.mutate(location.id)
+                                  }
+                                  className={buttonVariants({
+                                    variant: "destructive",
+                                  })}
+                                >
+                                  {t("remove")}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         ) : (
                           <div className="size-9"></div>
                         )}
