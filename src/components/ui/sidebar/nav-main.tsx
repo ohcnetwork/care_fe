@@ -1,6 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import { ActiveLink, useFullPath } from "raviger";
-import { Fragment, ReactNode, useMemo, useState } from "react";
+import { Fragment, ReactNode, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -30,7 +30,7 @@ import { Avatar } from "@/components/Common/Avatar";
 const isChildActive = (link: NavigationLink) => {
   if (!link.children) return false;
   const currentPath = window.location.pathname;
-  return link.children.some((child) => currentPath.startsWith(child.url));
+  return link.children.some((child) => currentPath === child.url);
 };
 
 export interface NavigationLink {
@@ -46,19 +46,7 @@ export interface NavigationLink {
 export function NavMain({ links }: { links: NavigationLink[] }) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
-
   const fullPath = useFullPath();
-  const fullPathMap = useMemo(
-    () =>
-      fullPath.split("/").reduce(
-        (acc, part) => ({
-          ...acc,
-          [part]: true,
-        }),
-        {} as Record<string, boolean>,
-      ),
-    [fullPath],
-  );
 
   return (
     <SidebarGroup>
@@ -69,7 +57,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
             <Fragment key={link.name}>
               {link.children ? (
                 isCollapsed ? (
-                  <PopoverMenu link={link} />
+                  <PopoverMenu link={link} fullPath={fullPath} />
                 ) : (
                   <Collapsible
                     asChild
@@ -100,7 +88,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                       <CollapsibleContent>
                         <SidebarMenuSub className="border-l border-gray-300">
                           {link.children.map((subItem) => (
-                            <>
+                            <Fragment key={subItem.name}>
                               {subItem.header && (
                                 <div className="flex items-center gap-2 mt-2">
                                   {subItem.headerIcon}
@@ -113,26 +101,23 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                                 <SidebarMenuSubButton
                                   asChild
                                   data-cy={`nav-${subItem.name.toLowerCase().replace(/\s+/g, "-")}`}
-                                  className={
-                                    "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
-                                  }
+                                  className="text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
                                 >
                                   <ActiveLink
                                     href={subItem.url}
                                     className="w-full"
-                                    activeClass={cn(
-                                      subItem.url
-                                        .split("/")
-                                        .every((part) => fullPathMap[part]) &&
-                                        "bg-white text-green-700 shadow",
-                                    )}
+                                    activeClass={
+                                      fullPath === subItem.url
+                                        ? "bg-white text-green-700 shadow"
+                                        : ""
+                                    }
                                     exactActiveClass="bg-white text-green-700 shadow"
                                   >
                                     {subItem.name}
                                   </ActiveLink>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
-                            </>
+                            </Fragment>
                           ))}
                         </SidebarMenuSub>
                       </CollapsibleContent>
@@ -144,9 +129,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                   <SidebarMenuButton
                     asChild
                     tooltip={link.name}
-                    className={
-                      "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
-                    }
+                    className="text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
                     data-cy={`nav-${link.name.toLowerCase().replace(/\s+/g, "-")}`}
                   >
                     <ActiveLink
@@ -177,7 +160,13 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
   );
 }
 
-function PopoverMenu({ link }: { link: NavigationLink }) {
+function PopoverMenu({
+  link,
+  fullPath,
+}: {
+  link: NavigationLink;
+  fullPath: string;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -212,7 +201,9 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
               href={subItem.url}
               onClick={() => setOpen(false)}
               className="w-full rounded-md px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100"
-              activeClass="bg-gray-100 text-green-700"
+              activeClass={
+                fullPath === subItem.url ? "bg-gray-100 text-green-700" : ""
+              }
               exactActiveClass="bg-gray-100 text-green-700"
             >
               {subItem.name}
