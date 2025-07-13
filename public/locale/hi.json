@@ -799,5 +799,8 @@
   "yet_to_be_decided": "अभी निर्णय होना बाकी",
   "you_need_at_least_a_location_to_create_an_assest": "संपत्ति बनाने के लिए आपको कम से कम एक स्थान की आवश्यकता होगी।",
   "zoom_in": "ज़ूम इन",
-  "zoom_out": "ज़ूम आउट"
+  "zoom_out": "ज़ूम आउट",
+  "invalid_otp": "अमान्य OTP, कृपया OTP की जाँच करें और पुनः प्रयास करें",
+  "send_otp_error": "OTP भेजने में विफल। कृपया बाद में पुनः प्रयास करें।",
+  "send_otp_success": "संबंधित मोबाइल नंबर पर OTP भेजा गया है"
 }

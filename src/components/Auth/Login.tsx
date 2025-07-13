@@ -52,22 +52,6 @@ interface OtpLoginData {
   otp: string;
 }
 
-interface OtpError {
-  type: string;
-  loc: string[];
-  msg: string;
-  input: string;
-  ctx: {
-    error: string;
-  };
-  url: string;
-}
-
-interface OtpValidationError {
-  otp?: string;
-  [key: string]: string | undefined;
-}
-
 type LoginMode = "staff" | "patient";
 
 interface LoginProps {
@@ -103,7 +87,7 @@ const Login = (props: LoginProps) => {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
-  const [otpError, setOtpError] = useState<string>("");
+  const [otpError, setOtpError] = useState<boolean>(false);
   const [otpValidationError, setOtpValidationError] = useState<string>("");
   const [resendOtpCountdown, setResendOtpCountdown] =
     useState(resendOtpTimeout);
@@ -131,16 +115,16 @@ const Login = (props: LoginProps) => {
     mutationFn: mutate(routes.otp.sendOtp),
     onSuccess: () => {
       setIsOtpSent(true);
-      setOtpError("");
+      setOtpError(false);
       toast.success(t("send_otp_success"));
     },
     onError: (error: any) => {
       const errors = error?.data || [];
       if (Array.isArray(errors) && errors.length > 0) {
-        const firstError = errors[0] as OtpError;
-        setOtpError(firstError.msg);
+        // Use translated error message instead of raw server message
+        setOtpError(true);
       } else {
-        setOtpError(t("send_otp_error"));
+        setOtpError(true);
       }
     },
   });
@@ -168,22 +152,9 @@ const Login = (props: LoginProps) => {
         patientLogin(tokenData, `/patient/home`);
       }
     },
-    onError: (error: any) => {
-      let errorMessage = t("invalid_otp");
-      if (
-        error.cause &&
-        Array.isArray(error.cause.errors) &&
-        error.cause.errors.length > 0
-      ) {
-        const otpError = error.cause.errors.find(
-          (e: OtpValidationError) => e.otp,
-        );
-        if (otpError && otpError.otp) {
-          errorMessage = otpError.otp;
-        }
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
+    onError: (_error: any) => {
+      // Always use translated error message for consistency
+      const errorMessage = t("invalid_otp");
       setOtpValidationError(errorMessage);
       toast.error(errorMessage);
     },
@@ -308,7 +279,7 @@ const Login = (props: LoginProps) => {
     setIsOtpSent(false);
     setPhone("");
     setOtp("");
-    setOtpError("");
+    setOtpError(false);
     setOtpValidationError("");
   };
 
@@ -535,14 +506,16 @@ const Login = (props: LoginProps) => {
                           value={phone}
                           onChange={(value) => {
                             setPhone(value ?? "");
-                            setOtpError("");
+                            setOtpError(false);
                             setOtpValidationError("");
                           }}
                           disabled={isOtpSent}
                           placeholder={t("enter_phone_number")}
                         />
                         {otpError && (
-                          <p className="text-sm text-red-500">{otpError}</p>
+                          <p className="text-sm text-red-500">
+                            {t("send_otp_error")}
+                          </p>
                         )}
                       </div>
 
@@ -632,7 +605,7 @@ const Login = (props: LoginProps) => {
                               className="h-auto p-0 text-primary-600"
                               onClick={() => {
                                 setIsOtpSent(false);
-                                setOtpError("");
+                                setOtpError(false);
                                 setOtpValidationError("");
                               }}
                             >

@@ -92,5 +92,8 @@
   "present_health": "सध्याचे आरोग्य",
   "ongoing_medications": "चालू औषधे",
   "allergies": "अॅलर्जी",
-  "is_pregnant": "गर्भवती आहे"
+  "is_pregnant": "गर्भवती आहे",
+  "invalid_otp": "अवैध OTP, कृपया OTP तपासा आणि पुन्हा प्रयत्न करा",
+  "send_otp_error": "OTP पाठवण्यात अपयश. कृपया नंतर पुन्हा प्रयत्न करा.",
+  "send_otp_success": "संबंधित मोबाइल नंबरवर OTP पाठवण्यात आला आहे"
 }
