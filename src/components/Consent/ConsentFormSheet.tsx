@@ -12,6 +12,7 @@ import { tzAwareDateTime } from "@/lib/validators";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import RadioInput from "@/components/ui/RadioInput";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -41,7 +42,6 @@ import {
 } from "@/components/ui/sheet";
 
 import { DateTimeInput } from "@/components/Common/DateTimeInput";
-import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import useFileUpload from "@/hooks/useFileUpload";
 
@@ -302,9 +302,7 @@ export default function ConsentFormSheet({
       <SheetContent className="overflow-y-auto sm:max-w-lg">
         <SheetHeader className="mb-6">
           <SheetTitle>
-            {isEdit
-              ? t("edit") + " " + t("consent")
-              : t("add") + " " + t("consent")}
+            {isEdit ? t("edit_consent") : t("add_consent")}
           </SheetTitle>
           <SheetDescription>
             {isEdit
@@ -404,7 +402,7 @@ export default function ConsentFormSheet({
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger ref={field.ref}>
                             <SelectValue
                               placeholder={t("select_category")}
                               className="flex justify-start items-center w-full"
@@ -458,7 +456,7 @@ export default function ConsentFormSheet({
                     value={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger ref={field.ref}>
                         <SelectValue placeholder={t("select_status")} />
                       </SelectTrigger>
                     </FormControl>

@@ -1,7 +1,10 @@
 import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
 
+import { Badge } from "@/components/ui/badge";
+
 import { Time } from "@/Utils/types";
-import { Patient } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/patient/patient";
+import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { UserBase } from "@/types/user/user";
 
@@ -89,6 +92,10 @@ export interface TokenSlot {
   allocated: number;
 }
 
+export interface GetSlotsForDayResponse {
+  results: TokenSlot[];
+}
+
 export interface AvailabilityHeatmapRequest {
   from_date: string;
   to_date: string;
@@ -142,7 +149,10 @@ export const APPOINTMENT_STATUS_COLORS = {
   cancelled: "destructive",
   entered_in_error: "destructive",
   rescheduled: "yellow",
-} as const satisfies Record<AppointmentStatus, string>;
+} as const satisfies Record<
+  AppointmentStatus,
+  React.ComponentProps<typeof Badge>["variant"]
+>;
 
 export type AppointmentNonCancelledStatus =
   (typeof AppointmentNonCancelledStatuses)[number];
@@ -164,9 +174,17 @@ export interface Appointment {
   facility: FacilityBareMinimum;
 }
 
+export interface AppointmentRead extends Appointment {
+  tags: TagConfig[];
+  updated_by: UserBase | null;
+  created_by: UserBase;
+  modified_date: string;
+}
+
 export interface AppointmentCreateRequest {
   patient: string;
   reason_for_visit: string;
+  tags?: string[];
 }
 
 export interface AppointmentUpdateRequest {
@@ -176,4 +194,9 @@ export interface AppointmentUpdateRequest {
 export interface CreateAppointmentQuestion {
   reason_for_visit: string;
   slot_id: string;
+}
+
+export interface AppointmentCancelRequest {
+  reason: "cancelled" | "entered_in_error";
+  reason_for_visit?: string;
 }

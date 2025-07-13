@@ -9,6 +9,7 @@ import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import RadioInput from "@/components/ui/RadioInput";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,6 @@ import { Textarea } from "@/components/ui/textarea";
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 import UserSelector from "@/components/Common/UserSelector";
-import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -49,6 +49,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
 import validators from "@/Utils/validators";
+import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 import { UserBase } from "@/types/user/user";
@@ -88,7 +89,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
   const { data: patientData } = useQuery({
     queryKey: ["patient", related_patient],
-    queryFn: query(routes.patient.getPatient, {
+    queryFn: query(patientApi.getPatient, {
       pathParams: { id: String(related_patient) },
     }),
     enabled: !!related_patient,
@@ -276,6 +277,8 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     </FormLabel>
                     <FormControl>
                       <Autocomplete
+                        {...field}
+                        showClearButton={!id}
                         data-cy="select-facility"
                         options={mergeAutocompleteOptions(
                           facilityOptions ?? [],
@@ -350,7 +353,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     <FormLabel aria-required>{t("status")}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger data-cy="select-status-dropdown">
+                        <SelectTrigger
+                          data-cy="select-status-dropdown"
+                          ref={field.ref}
+                        >
                           <SelectValue placeholder={t("select_status")} />
                         </SelectTrigger>
                       </FormControl>
@@ -375,7 +381,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     <FormLabel aria-required>{t("category")}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger data-cy="select-category-dropdown">
+                        <SelectTrigger
+                          data-cy="select-category-dropdown"
+                          ref={field.ref}
+                        >
                           <SelectValue
                             placeholder={t("category_description")}
                           />

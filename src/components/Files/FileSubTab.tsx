@@ -49,8 +49,8 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import { Encounter } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/patient";
+import { Encounter } from "@/types/emr/encounter/encounter";
+import { Patient } from "@/types/emr/patient/patient";
 
 interface FilesTabProps {
   type: "encounter" | "patient";
@@ -111,6 +111,7 @@ export const FilesPage = ({
         ...(qParams.file !== "all" && {
           file_category: qParams.file,
         }),
+        ordering: "-modified_date",
       },
     }),
     enabled: canAccess,

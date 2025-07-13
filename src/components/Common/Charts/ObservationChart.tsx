@@ -33,8 +33,7 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { ObservationAnalyzeResponse } from "@/types/emr/observation";
-import { Code } from "@/types/questionnaire/code";
+import { Code } from "@/types/base/code/code";
 
 import { ObservationHistoryTable } from "./ObservationHistoryTable";
 
@@ -118,7 +117,7 @@ export const ObservationVisualizer = ({
   // Flatten all codes for a single API request
   const allCodes = codeGroups.flatMap((group) => group.codes);
 
-  const { data, isLoading } = useQuery<ObservationAnalyzeResponse>({
+  const { data, isLoading } = useQuery({
     queryKey: [
       "observations",
       patientId,
@@ -250,7 +249,7 @@ export const ObservationVisualizer = ({
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-medium">{group.title}</h3>
               <Popover>
-                <PopoverTrigger asChild>
+                <PopoverTrigger>
                   <Info className="size-4 text-gray-500 hover:text-gray-700 cursor-pointer" />
                 </PopoverTrigger>
                 <PopoverContent

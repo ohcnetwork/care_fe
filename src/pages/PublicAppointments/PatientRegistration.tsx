@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import RadioInput from "@/components/ui/RadioInput";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import DateField from "@/components/ui/date-field";
@@ -20,8 +21,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-import RadioInput from "@/components/Questionnaire/RadioInput";
-
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { GENDERS, GENDER_TYPES } from "@/common/constants";
@@ -33,7 +32,7 @@ import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
-import { Patient } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/patient/patient";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
@@ -393,6 +392,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   <FormItem className="flex flex-col">
                     <FormControl>
                       <GovtOrganizationSelector
+                        {...field}
                         required
                         authToken={tokenData.token}
                         onChange={(value) => {
