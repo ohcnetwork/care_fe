@@ -880,7 +880,7 @@
   "cgst": "CGST",
   "change": "Change",
   "change_avatar": "Change Avatar",
-  "change_avatar_note": "JPG, GIF or PNG. {{maxSize}}MB max.",
+  "change_avatar_note": "JPG or PNG. {{maxSize}}MB max.",
   "change_file": "Change File",
   "change_location": "Change Location",
   "change_phone_number": "Change Phone Number",
