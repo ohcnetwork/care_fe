@@ -110,7 +110,7 @@ export default function PatientRegistration(
           age_or_dob: z.enum(["dob", "age"]),
           date_of_birth: z
             .string()
-            .regex(/^\d{4}-\d{2}-\d{2}$/, t("date_of_birth_format"))
+            .regex(/^\d{4}-\d{2}-\d{2}$/, t("date_of_birth_must_be_present"))
             .refine((date) => {
               const parsedDate = dayjs(date);
               return parsedDate.isValid() && !parsedDate.isAfter(dayjs());
