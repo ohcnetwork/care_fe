@@ -34,6 +34,7 @@ export function DiscountCodeForm({
   const { t } = useTranslation();
 
   const form = useForm({
+    mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: {
       code: defaultValues?.code || "",
@@ -59,7 +60,7 @@ export function DiscountCodeForm({
             <FormItem>
               <FormLabel>{t("name")}</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} aria-required />
               </FormControl>
               <FormDescription>
                 {t("discount_code_name_description")}
@@ -76,7 +77,7 @@ export function DiscountCodeForm({
             <FormItem>
               <FormLabel>{t("code")}</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} aria-required />
               </FormControl>
               <FormDescription>
                 {t("discount_code_code_description")}
@@ -87,7 +88,11 @@ export function DiscountCodeForm({
         />
 
         <div className="pt-2">
-          <Button type="submit" className="w-full">
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={!form.formState.isDirty || !form.formState.isValid}
+          >
             {t("save")}
           </Button>
         </div>
