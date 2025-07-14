@@ -175,7 +175,7 @@ export default function AdminOrganizationFormSheet({
               name="name"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>{t("name")}</FormLabel>
+                  <FormLabel aria-required>{t("name")}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}

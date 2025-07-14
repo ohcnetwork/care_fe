@@ -46,6 +46,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Textarea } from "@/components/ui/textarea";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -270,10 +271,25 @@ const AppointmentDetails = ({
               </p>
             </div>
           </div>
+          <div className="flex items-center space-x-4 text-sm">
+            <AvatarIcon className="size-5 text-gray-600" />
+            <div className="text-sm">
+              <p className="font-medium">{t("last_updated_by")}</p>
+              <p className="text-gray-600">
+                {appointment.updated_by
+                  ? formatName(appointment.updated_by)
+                  : appointment.created_by === null
+                    ? t("unknown")
+                    : formatName(appointment.created_by)}{" "}
+                {t("on")}{" "}
+                {format(appointment.modified_date, "MMMM d, yyyy 'at' h:mm a")}
+              </p>
+            </div>
+          </div>
           <Separator />
           <div className="text-sm">
-            <p className="font-medium">{t("reason_for_visit")}</p>
-            <p className="text-gray-600">
+            <p className="font-medium">{t("reason")}</p>
+            <p className="text-gray-600 whitespace-pre-wrap">
               {appointment.reason_for_visit || t("no_reason_provided")}
             </p>
           </div>
@@ -431,6 +447,9 @@ const AppointmentActions = ({
 
   const currentStatus = appointment.status;
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
+  const [reasonForCancellation, setReasonForCancellation] = useState(
+    appointment.reason_for_visit,
+  );
 
   const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
     mutationFn: mutate(scheduleApis.appointments.cancel, {
@@ -590,8 +609,13 @@ const AppointmentActions = ({
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>{t("cancel_appointment")}</AlertDialogTitle>
+              <Label>{t("note")}</Label>
+              <Textarea
+                value={reasonForCancellation}
+                onChange={(e) => setReasonForCancellation(e.target.value)}
+              />
               <AlertDialogDescription>
-                <Alert variant="destructive" className="mt-4">
+                <Alert variant="destructive">
                   <AlertTitle>{t("warning")}</AlertTitle>
                   <AlertDescription>
                     {t("cancel_appointment_warning")}
@@ -602,7 +626,12 @@ const AppointmentActions = ({
             <AlertDialogFooter>
               <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
               <AlertDialogAction
-                onClick={() => cancelAppointment({ reason: "cancelled" })}
+                onClick={() =>
+                  cancelAppointment({
+                    reason: "cancelled",
+                    reason_for_visit: reasonForCancellation,
+                  })
+                }
                 className={cn(buttonVariants({ variant: "destructive" }))}
               >
                 {isCancelling ? (

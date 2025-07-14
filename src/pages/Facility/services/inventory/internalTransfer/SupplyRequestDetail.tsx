@@ -352,12 +352,14 @@ export default function SupplyRequestDetail({
       <div className="flex items-center justify-between">
         <div>
           <h5 className="text-lg font-bold text-gray-950">
-            {t("request") + " " + t("raised")}
+            {t("request_raised")}
           </h5>
           <p className="text-gray-600">
             {t("request_raised_by")} {supplyRequest.deliver_to?.name}
             {", "}
-            {`${deliveries.length} ${t("deliveries") + " " + t("have") + " " + t("been") + " " + t("received")}`}
+            {t("service_request_detail_page_description_prefix", {
+              count: deliveries.length,
+            })}
           </p>
         </div>
         {hasCompletedDelivery &&
@@ -384,7 +386,7 @@ export default function SupplyRequestDetail({
             </div>
             <div>
               <p className="text-sm text-gray-700 font-medium">
-                {t("requested") + " " + t("quantity")}
+                {t("requested_quantity")}
               </p>
               <p className="font-semibold text-lg">
                 {supplyRequest.quantity}{" "}
@@ -435,10 +437,10 @@ export default function SupplyRequestDetail({
               <TableHeader className="bg-gray-100 text-gray-700 text-sm">
                 <TableRow className="divide-x">
                   <TableHead className="text-gray-700">
-                    {t("item") + " " + t("received")}
+                    {t("item_received")}
                   </TableHead>
                   <TableHead className="text-gray-700">
-                    {t("quantity") + " " + t("received")}
+                    {t("quantity_received")}
                   </TableHead>
                   <TableHead className="text-gray-700">{t("lot")}</TableHead>
                   <TableHead className="text-gray-700">{t("expiry")}</TableHead>
