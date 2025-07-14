@@ -448,7 +448,7 @@ export default function useFileManager(
             className="flex w-full flex-col"
           >
             <div>
-              <Label>{t("enter_the_file_name")}</Label>
+              <Label className="mb-3">{t("enter_the_file_name")}</Label>
               <Input
                 name="editFileName"
                 id="edit-file-name"
