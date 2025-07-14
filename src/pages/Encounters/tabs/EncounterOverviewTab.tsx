@@ -82,7 +82,7 @@ export const EncounterOverviewTab = () => {
         {/* Left Column - Symptoms, Diagnoses, and Questionnaire Responses */}
         <div className="flex-1 space-y-4">
           <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <div className="flex flex-col md:flex-row items-start justify-between gap-4">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex flex-row gap-3">
                 <div className="flex flex-col items-start gap-1 whitespace-nowrap">
                   <span className="text-sm font-medium text-gray-600">
