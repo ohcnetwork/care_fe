@@ -254,8 +254,8 @@ export default function TagConfigForm({
               >
                 <FormControl>
                   <SelectTrigger className="capitalize">
-                    <SelectValue>
-                      {field.value ? t(field.value) : t("select_category")}
+                    <SelectValue placeholder={t("select_category")}>
+                      {t(field.value)}
                     </SelectValue>
                   </SelectTrigger>
                 </FormControl>
@@ -285,8 +285,8 @@ export default function TagConfigForm({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue>
-                      {field.value ? t(field.value) : t("select_resource")}
+                    <SelectValue placeholder={t("select_resource")}>
+                      {t(field.value)}
                     </SelectValue>
                   </SelectTrigger>
                 </FormControl>
@@ -338,8 +338,8 @@ export default function TagConfigForm({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue>
-                      {field.value ? t(field.value) : t("select_status")}
+                    <SelectValue placeholder={t("select_status")}>
+                      {t(field.value)}
                     </SelectValue>
                   </SelectTrigger>
                 </FormControl>
