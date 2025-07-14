@@ -37,105 +37,108 @@ const DiagnosisRow = ({
   const { t } = useTranslation();
 
   return (
-    <>
-      <div className="bg-white rounded border border-gray-200 mb-3">
-        <div className="grid grid-cols-13 divide-x">
-          <div className="col-span-6 px-2 py-1 bg-gray-100 break-words whitespace-normal text-base font-semibold text-gray-900">
-            {diagnosis.code.display}
-          </div>
-          <div className="col-span-2 flex items-center justify-center">
-            <Badge
-              variant={
-                DIAGNOSIS_CLINICAL_STATUS_COLORS[diagnosis.clinical_status]
-              }
-              className="whitespace-nowrap text-sm"
-            >
-              {t(diagnosis.clinical_status)}
-            </Badge>
-          </div>
-          <div className="col-span-2 flex items-center justify-center">
-            <Badge
-              variant={
-                DIAGNOSIS_VERIFICATION_STATUS_COLORS[
-                  diagnosis.verification_status
-                ]
-              }
-              className="whitespace-nowrap text-sm"
-            >
-              {t(diagnosis.verification_status)}
-            </Badge>
-          </div>
-          <div className="col-span-2 bg-gray-100 flex items-center justify-center">
-            {diagnosis.onset?.onset_datetime ? (
-              <RelativeDateTooltip date={diagnosis.onset.onset_datetime} />
-            ) : (
-              "-"
-            )}
-          </div>
-          <div className="col-span-1 flex items-center justify-center">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="link"
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <Info size={16} />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <div className="px-3 py-2 text-sm text-gray-500 border-b">
-                  <div className="font-medium text-gray-700">
-                    {t("reported_by")}
-                  </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Avatar
-                      name={formatName(diagnosis.created_by)}
-                      className="size-5"
-                      imageUrl={diagnosis.created_by.profile_picture_url}
-                    />
-                    <span className="text-sm">
-                      {formatName(diagnosis.created_by)}
-                    </span>
-                  </div>
+    <div className="bg-white rounded border border-gray-200 mb-3">
+      <div className="grid grid-cols-13 divide-x">
+        <div className="col-span-6 px-2 py-1 bg-gray-100 break-words whitespace-normal text-base font-semibold text-gray-900">
+          {diagnosis.code.display}
+        </div>
+        <div className="col-span-2 flex items-center justify-center">
+          <Badge
+            variant={
+              DIAGNOSIS_CLINICAL_STATUS_COLORS[diagnosis.clinical_status]
+            }
+            className="whitespace-nowrap text-sm"
+          >
+            {t(diagnosis.clinical_status)}
+          </Badge>
+        </div>
+        <div className="col-span-2 flex items-center justify-center">
+          <Badge
+            variant={
+              DIAGNOSIS_VERIFICATION_STATUS_COLORS[
+                diagnosis.verification_status
+              ]
+            }
+            className="whitespace-nowrap text-sm"
+          >
+            {t(diagnosis.verification_status)}
+          </Badge>
+        </div>
+        <div className="col-span-2 bg-gray-100 flex items-center justify-center">
+          {diagnosis.onset?.onset_datetime ? (
+            <RelativeDateTooltip date={diagnosis.onset.onset_datetime} />
+          ) : (
+            "-"
+          )}
+        </div>
+        <div className="col-span-1 flex items-center justify-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="link"
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <Info size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <div className="px-3 py-2 text-sm text-gray-500 border-b">
+                <div className="font-medium text-gray-700">
+                  {t("reported_by")}
                 </div>
-                <DropdownMenuItem
-                  onClick={() =>
-                    navigate(
-                      facilityId
-                        ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
-                        : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
-                    )
-                  }
-                >
-                  {t("view_encounter")}
+                <div className="flex items-center gap-2 mt-1">
+                  <Avatar
+                    name={formatName(diagnosis.created_by)}
+                    className="size-5"
+                    imageUrl={diagnosis.created_by.profile_picture_url}
+                  />
+                  <span className="text-sm">
+                    {formatName(diagnosis.created_by)}
+                  </span>
+                </div>
+              </div>
+              <DropdownMenuItem
+                onClick={() =>
+                  navigate(
+                    facilityId
+                      ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
+                      : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
+                  )
+                }
+              >
+                {t("view_encounter")}
+              </DropdownMenuItem>
+              {diagnosis.note && (
+                <DropdownMenuItem onClick={() => setShowNote(!showNote)}>
+                  {showNote ? t("hide_note") : t("see_note")}
                 </DropdownMenuItem>
-                {diagnosis.note && (
-                  <DropdownMenuItem onClick={() => setShowNote(!showNote)}>
-                    {showNote ? t("hide_note") : t("see_note")}
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       {showNote && diagnosis.note && (
-        <div className="border border-gray-200 rounded-md p-4 bg-gray-50 relative mb-3 mx-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="absolute top-2 right-2 size-6 p-0"
-            onClick={() => setShowNote(false)}
-          >
-            <X size={14} />
-            <span className="sr-only">{t("close")}</span>
-          </Button>
+        <div className="border-t border-gray-200 p-4 bg-gray-50">
+          <div className="flex flex-row w-full justify-between">
+            <div className="text-sm font-semibold text-gray-800">
+              {t("note")} :
+            </div>
+            <Button
+              variant="ghost"
+              className="size-6 p-0"
+              onClick={() => setShowNote(false)}
+            >
+              <X size={14} />
+              <span className="sr-only">{t("close")}</span>
+            </Button>
+          </div>
+
           <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8 max-w-full break-words break-all">
             {diagnosis.note}
           </p>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
