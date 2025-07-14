@@ -327,6 +327,7 @@ interface NoteManagerProps {
   canWrite: boolean;
   encounterId?: string;
   patientId: string;
+  hideEncounterNotes: boolean;
 }
 
 export function NoteManager({
@@ -334,6 +335,7 @@ export function NoteManager({
   canWrite,
   encounterId,
   patientId,
+  hideEncounterNotes = false,
 }: NoteManagerProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -353,7 +355,10 @@ export function NoteManager({
     queryKey: ["threads", encounterId],
     queryFn: query(routes.notes.patient.listThreads, {
       pathParams: { patientId: patientId },
-      queryParams: { encounter: encounterId },
+      queryParams: {
+        encounter: encounterId,
+        ...(hideEncounterNotes && { encounter_isnull: "true" }),
+      },
     }),
     enabled: canAccess,
   });
