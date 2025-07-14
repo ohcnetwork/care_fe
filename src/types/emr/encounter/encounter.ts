@@ -194,7 +194,7 @@ export type StatusHistory = {
 
 export type LocationHistory = {
   id: string;
-  start_datetime: string;
+  start_datetime?: string;
   location: LocationList;
   status: LocationAssociationStatus;
   end_datetime?: string;
