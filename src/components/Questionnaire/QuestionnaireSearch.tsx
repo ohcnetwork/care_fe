@@ -66,6 +66,7 @@ export function QuestionnaireSearch({
         status: "active",
       },
     }),
+    enabled: isOpen,
   });
 
   useEffect(() => {
