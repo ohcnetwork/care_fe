@@ -1,6 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -39,8 +38,6 @@ export function SymptomsList({
 }: SymptomsListProps) {
   const { t } = useTranslation();
 
-  const [showEnteredInError, setShowEnteredInError] = useState(false);
-
   const {
     data: symptomsData,
     isLoading,
@@ -57,6 +54,7 @@ export function SymptomsList({
           ordering: "-created_date",
           limit: showTimeline ? 30 : 14,
           offset: String(pageParam),
+          exclude_verification_status: "entered_in_error",
         },
       })({ signal });
       return response as PaginatedResponse<Symptom>;
@@ -74,16 +72,7 @@ export function SymptomsList({
 
   const symptoms = symptomsData?.pages.flatMap((page) => page.results) ?? [];
 
-  const filteredSymptoms = symptoms?.filter(
-    (symptom) =>
-      showEnteredInError || symptom.verification_status !== "entered_in_error",
-  );
-
-  const hasEnteredInErrorRecords = symptoms?.some(
-    (symptom) => symptom.verification_status === "entered_in_error",
-  );
-
-  if (!filteredSymptoms?.length) {
+  if (!symptoms?.length) {
     if (showTimeline) {
       return (
         <EmptyState
@@ -96,7 +85,7 @@ export function SymptomsList({
   }
 
   if (showTimeline) {
-    const groupedByYear = filteredSymptoms.reduce((acc, symptom) => {
+    const groupedByYear = symptoms.reduce((acc, symptom) => {
       const dateStr = format(symptom.created_date, "yyyy-MM-dd");
       const year = format(symptom.created_date, "yyyy");
       acc[year] ??= {};
@@ -159,34 +148,7 @@ export function SymptomsList({
       className={className}
       editLink={!readOnly ? "questionnaire/symptom" : undefined}
     >
-      <SymptomTable
-        symptoms={[
-          ...filteredSymptoms.filter(
-            (symptom) => symptom.verification_status !== "entered_in_error",
-          ),
-          ...(showEnteredInError
-            ? filteredSymptoms.filter(
-                (symptom) => symptom.verification_status === "entered_in_error",
-              )
-            : []),
-        ]}
-      />
-
-      {hasEnteredInErrorRecords && !showEnteredInError && (
-        <>
-          <div className="border-b border-dashed border-gray-200 my-2" />
-          <div className="flex justify-center ">
-            <Button
-              variant="ghost"
-              size="xs"
-              onClick={() => setShowEnteredInError(true)}
-              className="text-xs underline text-gray-950"
-            >
-              {t("view_all")}
-            </Button>
-          </div>
-        </>
-      )}
+      <SymptomTable symptoms={symptoms} />
       {hasNextPage && (
         <div className="flex justify-center">
           <Button variant="ghost" size="xs" onClick={() => fetchNextPage()}>

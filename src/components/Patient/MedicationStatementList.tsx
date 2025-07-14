@@ -13,7 +13,11 @@ import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { MedicationStatementRead } from "@/types/emr/medicationStatement";
+import {
+  MEDICATION_STATEMENT_STATUS,
+  MedicationStatementRead,
+  MedicationStatementStatus,
+} from "@/types/emr/medicationStatement";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 
 import { MedicationStatementTable } from "./MedicationStatementTable";
@@ -24,7 +28,9 @@ interface MedicationStatementListProps {
   className?: string;
   showTimeLine?: boolean;
   encounterId?: string;
+  status?: MedicationStatementStatus[];
 }
+
 interface GroupedMedications {
   [year: string]: {
     [date: string]: MedicationStatementRead[];
@@ -37,6 +43,9 @@ export function MedicationStatementList({
   className = "",
   showTimeLine = false,
   encounterId,
+  status = MEDICATION_STATEMENT_STATUS.filter(
+    (status) => status !== "entered_in_error",
+  ),
 }: MedicationStatementListProps) {
   const { t } = useTranslation();
   const [showEnteredInError, setShowEnteredInError] = useState(false);
@@ -56,6 +65,7 @@ export function MedicationStatementList({
           limit: 100,
           ordering: "-created_date",
           offset: String(pageParam),
+          status: status.join(","),
         },
       })({ signal });
       return response as PaginatedResponse<MedicationStatementRead>;

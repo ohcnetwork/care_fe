@@ -84,6 +84,7 @@ export function AllergyList({
               : undefined,
           limit: showTimeline ? 30 : 14,
           offset: String(pageParam),
+          exclude_verification_status: "entered_in_error",
         },
       })({ signal });
       return response as PaginatedResponse<AllergyIntolerance>;

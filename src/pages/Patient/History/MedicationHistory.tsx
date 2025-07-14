@@ -131,7 +131,7 @@ const Prescriptions = ({ patientId }: { patientId: string }) => {
               {year}
             </h2>
             <div className="border-l border-gray-300 pt-5 ml-4">
-              {Object.entries(groupedByDate).map(([date, symptoms]) => {
+              {Object.entries(groupedByDate).map(([date, items]) => {
                 return (
                   <div key={date} className="pb-6">
                     <div className="flex items-start gap-4">
@@ -143,7 +143,7 @@ const Prescriptions = ({ patientId }: { patientId: string }) => {
                         <h3 className="text-sm font-medium text-indigo-700">
                           {format(date, "dd MMMM, yyyy")}
                         </h3>
-                        <MedicationsTable medications={symptoms} />
+                        <MedicationsTable medications={items} />
                       </div>
                     </div>
                   </div>
