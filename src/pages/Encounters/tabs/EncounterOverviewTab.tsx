@@ -162,6 +162,7 @@ export const EncounterOverviewTab = () => {
                   onSelect={(selected) =>
                     navigate(`questionnaire/${selected.slug}`)
                   }
+                  subjectType="encounter"
                 />
               </div>
             </div>
