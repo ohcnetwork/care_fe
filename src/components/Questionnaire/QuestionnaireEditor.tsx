@@ -875,10 +875,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         <div>
           <h1 className="text-2xl font-bold">
             {id
-              ? t("edit") + " " + form.watch("title")
+              ? activeTab === "edit"
+                ? t("edit") + " " + form.watch("title")
+                : t("preview") + " " + form.watch("title")
               : t("create_questionnaire")}
           </h1>
-          <p className="text-sm text-gray-500">{form.watch("description")}</p>
+          {activeTab === "edit" && (
+            <p className="text-sm text-gray-500">{form.watch("description")}</p>
+          )}
         </div>
         <div className="flex gap-2">
           <Button
@@ -1256,7 +1260,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             <div className="space-y-4 flex-1">
               <Card>
                 <CardContent>
-                  <div className="flex justify-between items-center max-w-4xl">
+                  <div className="flex justify-between items-center max-w-4xl m-2 ">
                     <div className="space-y-5 w-full p-2">
                       <p className="text-sm text-gray-500 font-medium">
                         {t("questionnaire_title_and_description")}
@@ -1267,7 +1271,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                             {questionnaire.title}
                           </h2>
                           {questionnaire.description && (
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm font-normal text-gray-500">
                               {questionnaire.description}
                             </p>
                           )}
