@@ -155,11 +155,8 @@ export class PatientEncounter {
       .scrollIntoView()
       .click();
 
-    cy.get('[data-slot="select-content"]')
-      .should("be.visible")
-      .find('[data-slot="select-item"]')
-      .contains(value)
-      .click();
+    cy.get('[data-slot="select-content"]').should("be.visible");
+    cy.find('[data-slot="select-item"]').contains(value).click();
 
     return this;
   }
