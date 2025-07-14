@@ -48,7 +48,7 @@ const AllergyRow = ({
       <div className="flex items-center justify-center px-2 border-t border-b border-gray-200">
         <Badge
           variant={ALLERGY_CLINICAL_STATUS_COLORS[allergy.clinical_status]}
-          className="whitespace-nowrap text-sm max-w-full truncate px-1"
+          className="whitespace-nowrap text-sm px-1"
         >
           {t(allergy.clinical_status)}
         </Badge>
@@ -57,7 +57,7 @@ const AllergyRow = ({
       <div className="flex items-center justify-center px-2 border border-gray-200">
         <Badge
           variant={ALLERGY_CRITICALITY_COLORS[allergy.criticality]}
-          className="whitespace-nowrap text-sm max-w-full truncate px-1"
+          className="whitespace-nowrap text-sm px-1"
         >
           {t(allergy.criticality)}
         </Badge>
@@ -68,7 +68,7 @@ const AllergyRow = ({
           variant={
             ALLERGY_VERIFICATION_STATUS_COLORS[allergy.verification_status]
           }
-          className="whitespace-pre-wrap truncate text-sm max-w-full px-1"
+          className="whitespace-nowrap text-sm px-1"
         >
           {t(allergy.verification_status)}
         </Badge>
@@ -121,14 +121,14 @@ const AllergyRow = ({
       </div>
 
       {showNote && allergy.note && (
-        <div className="col-span-full border border-gray-200 p-4 bg-gray-50 rounded -mt-2.5 rounded-t-none">
+        <div className="col-span-full border border-gray-200 p-2 bg-gray-50 rounded -mt-2.5 rounded-t-none pt-4">
           <div className="flex flex-row w-full justify-between">
             <div className="text-sm font-semibold text-gray-800">
               {t("note")} :
             </div>
             <Button
-              variant="ghost"
-              className="size-6 p-0"
+              variant={null}
+              className="size-6"
               onClick={() => setShowNote(false)}
             >
               <X size={14} />
@@ -242,7 +242,7 @@ const AllergyCard = ({
       {showNote && allergy.note && (
         <div className="relative border border-gray-200 rounded-md p-3 bg-gray-50 mt-3">
           <Button
-            variant="ghost"
+            variant={null}
             size="sm"
             className="absolute top-2 right-2 size-6 p-0"
             onClick={() => setShowNote(false)}

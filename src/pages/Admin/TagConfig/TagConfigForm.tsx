@@ -104,7 +104,7 @@ export default function TagConfigForm({
     const subscription = form.watch((value, { name }) => {
       if (name === "display") {
         form.setValue("slug", generateSlug(value.display || ""), {
-          shouldValidate: true,
+          shouldValidate: false,
         });
       }
     });
@@ -249,12 +249,14 @@ export default function TagConfigForm({
               <FormLabel>{t("category")}</FormLabel>
               <Select
                 onValueChange={field.onChange}
-                defaultValue={field.value}
+                value={field.value}
                 disabled={isLoading}
               >
                 <FormControl>
                   <SelectTrigger className="capitalize">
-                    <SelectValue placeholder={t("select_category")} />
+                    <SelectValue placeholder={t("select_category")}>
+                      {t(field.value)}
+                    </SelectValue>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent className="capitalize">
@@ -278,12 +280,14 @@ export default function TagConfigForm({
               <FormLabel>{t("resource")}</FormLabel>
               <Select
                 onValueChange={field.onChange}
-                defaultValue={field.value}
-                disabled={isLoading}
+                value={field.value}
+                disabled={isLoading || isEditing}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder={t("select_resource")} />
+                    <SelectValue placeholder={t("select_resource")}>
+                      {t(field.value)}
+                    </SelectValue>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -329,12 +333,14 @@ export default function TagConfigForm({
               <FormLabel>{t("status")}</FormLabel>
               <Select
                 onValueChange={field.onChange}
-                defaultValue={field.value}
+                value={field.value}
                 disabled={isLoading}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder={t("select_status")} />
+                    <SelectValue placeholder={t("select_status")}>
+                      {t(field.value)}
+                    </SelectValue>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>

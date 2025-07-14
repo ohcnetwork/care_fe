@@ -44,7 +44,7 @@ const SymptomRow = ({
       <div className="flex items-center justify-center px-2 border-t border-b border-gray-200">
         <Badge
           variant={SYMPTOM_SEVERITY_COLORS[symptom.severity]}
-          className="whitespace-nowrap text-sm max-w-full truncate px-1"
+          className="whitespace-nowrap text-sm px-1"
         >
           {t(symptom.severity)}
         </Badge>
@@ -53,7 +53,7 @@ const SymptomRow = ({
       <div className="flex items-center justify-center px-2 border border-gray-200">
         <Badge
           variant={SYMPTOM_CLINICAL_STATUS_COLORS[symptom.clinical_status]}
-          className="whitespace-nowrap text-sm max-w-full truncate px-1"
+          className="whitespace-nowrap text-sm px-1"
         >
           {t(symptom.clinical_status)}
         </Badge>
@@ -64,7 +64,7 @@ const SymptomRow = ({
           variant={
             SYMPTOM_VERIFICATION_STATUS_COLORS[symptom.verification_status]
           }
-          className="whitespace-pre-wrap truncate text-sm max-w-full px-1"
+          className="whitespace-nowrap text-sm px-1"
         >
           {t(symptom.verification_status)}
         </Badge>
@@ -125,13 +125,13 @@ const SymptomRow = ({
       </div>
 
       {showNote && symptom.note && (
-        <div className="col-span-full border border-gray-200 p-4 bg-gray-50 rounded -mt-3 rounded-t-none">
+        <div className="col-span-full border border-gray-200 p-2 pt-4 bg-gray-50 rounded -mt-3 rounded-t-none">
           <div className="flex flex-row w-full justify-between">
             <div className="text-sm font-semibold text-gray-800">
               {t("note")} :
             </div>
             <Button
-              variant="ghost"
+              variant={null}
               className="size-6 p-0"
               onClick={() => setShowNote(false)}
             >
