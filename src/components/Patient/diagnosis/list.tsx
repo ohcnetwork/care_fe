@@ -1,12 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
+
+import { Button } from "@/components/ui/button";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import {
   ACTIVE_DIAGNOSIS_CLINICAL_STATUS,
   Diagnosis,
@@ -37,25 +40,41 @@ export function DiagnosisList({
   showTimeline = false,
 }: DiagnosisListProps) {
   const { t } = useTranslation();
-  const { data: diagnoses, isLoading: isDiagnosesLoading } = useQuery({
-    queryKey: ["encounter_diagnosis", patientId, encounterId],
-    queryFn: query(diagnosisApi.listDiagnosis, {
-      pathParams: { patientId },
-      queryParams: {
-        category: "encounter_diagnosis,chronic_condition",
-        clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
-        exclude_verification_status: "entered_in_error",
-        ...(encounterId ? { encounter: encounterId } : {}),
-        ordering: "-created_date",
-      },
-    }),
-  });
 
-  if (isDiagnosesLoading) {
+  const LIMIT = showTimeline ? 30 : 14;
+
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["infinite-encounter_diagnosis", patientId, encounterId],
+      queryFn: async ({ pageParam = 0, signal }) => {
+        const response = await query(diagnosisApi.listDiagnosis, {
+          pathParams: { patientId },
+          queryParams: {
+            category: "encounter_diagnosis,chronic_condition",
+            clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
+            exclude_verification_status: "entered_in_error",
+            ...(encounterId ? { encounter: encounterId } : {}),
+            ordering: "-created_date",
+            limit: LIMIT,
+            offset: String(pageParam),
+          },
+        })({ signal });
+        return response as PaginatedResponse<Diagnosis>;
+      },
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) => {
+        const currentOffset = allPages.length * LIMIT;
+        return currentOffset < lastPage.count ? currentOffset : null;
+      },
+    });
+
+  const diagnoses = data?.pages.flatMap((page) => page.results) ?? [];
+
+  if (isLoading) {
     return <TableSkeleton count={5} />;
   }
 
-  if (!diagnoses?.results.length) {
+  if (!diagnoses.length) {
     if (showTimeline) {
       return (
         <EmptyState
@@ -68,7 +87,7 @@ export function DiagnosisList({
   }
 
   if (showTimeline) {
-    const groupedByYear = diagnoses.results.reduce((acc, diagnosis) => {
+    const groupedByYear = diagnoses.reduce((acc, diagnosis) => {
       const dateStr = format(diagnosis.created_date, "dd MMMM, yyyy");
       const year = format(diagnosis.created_date, "yyyy");
       acc[year] ??= {};
@@ -108,6 +127,18 @@ export function DiagnosisList({
             </div>
           );
         })}
+        {hasNextPage && (
+          <div className="flex justify-center">
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+            >
+              {t("load_more")}
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
@@ -120,10 +151,15 @@ export function DiagnosisList({
       editLink={!readOnly ? "questionnaire/diagnosis" : undefined}
     >
       <div className="space-y-2">
-        {diagnoses?.results?.length ? (
-          <DiagnosisTable diagnoses={diagnoses.results} />
-        ) : null}
+        {diagnoses.length ? <DiagnosisTable diagnoses={diagnoses} /> : null}
       </div>
+      {hasNextPage && (
+        <div className="flex justify-center">
+          <Button variant="ghost" size="xs" onClick={() => fetchNextPage()}>
+            {t("load_more")}
+          </Button>
+        </div>
+      )}
     </EncounterAccordionLayout>
   );
 }
