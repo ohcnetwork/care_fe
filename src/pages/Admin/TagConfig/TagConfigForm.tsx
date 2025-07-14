@@ -249,12 +249,14 @@ export default function TagConfigForm({
               <FormLabel>{t("category")}</FormLabel>
               <Select
                 onValueChange={field.onChange}
-                defaultValue={field.value}
+                value={field.value}
                 disabled={isLoading}
               >
                 <FormControl>
                   <SelectTrigger className="capitalize">
-                    <SelectValue placeholder={t("select_category")} />
+                    <SelectValue>
+                      {field.value ? t(field.value) : t("select_category")}
+                    </SelectValue>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent className="capitalize">
@@ -278,12 +280,14 @@ export default function TagConfigForm({
               <FormLabel>{t("resource")}</FormLabel>
               <Select
                 onValueChange={field.onChange}
-                defaultValue={field.value}
+                value={field.value}
                 disabled={isLoading || isEditing}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder={t("select_resource")} />
+                    <SelectValue>
+                      {field.value ? t(field.value) : t("select_resource")}
+                    </SelectValue>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -329,12 +333,14 @@ export default function TagConfigForm({
               <FormLabel>{t("status")}</FormLabel>
               <Select
                 onValueChange={field.onChange}
-                defaultValue={field.value}
+                value={field.value}
                 disabled={isLoading}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder={t("select_status")} />
+                    <SelectValue>
+                      {field.value ? t(field.value) : t("select_status")}
+                    </SelectValue>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
