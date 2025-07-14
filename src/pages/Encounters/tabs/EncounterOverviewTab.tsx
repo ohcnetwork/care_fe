@@ -14,6 +14,8 @@ import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 
+import { useIsMobile } from "@/hooks/use-mobile";
+
 import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import EncounterOverviewDevices from "@/pages/Facility/settings/devices/components/EncounterOverviewDevices";
@@ -71,6 +73,8 @@ export const EncounterOverviewTab = () => {
     canSubmitEncounterQuestionnaire &&
     !inactiveEncounterStatus.includes(encounter?.status ?? "");
 
+  const isMobile = useIsMobile();
+
   return (
     <div className="flex flex-col gap-4">
       {/* Main Content Area */}
@@ -78,7 +82,7 @@ export const EncounterOverviewTab = () => {
         {/* Left Column - Symptoms, Diagnoses, and Questionnaire Responses */}
         <div className="flex-1 space-y-4">
           <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex flex-row gap-3">
                 <div className="flex flex-col items-start gap-1 whitespace-nowrap">
                   <span className="text-sm font-medium text-gray-600">
@@ -116,7 +120,7 @@ export const EncounterOverviewTab = () => {
                 className="md:w-auto w-full"
               >
                 <Link
-                  href={`/facility/${facilityId}/patient/${patientId}/history/symptoms`}
+                  href={`/facility/${facilityId}/patient/${patientId}/history/symptoms?sourceUrl=${encodeURIComponent(`/facility/${facilityId}/patient/${patientId}/encounter/${currentEncounterId}/updates`)}`}
                 >
                   <img
                     src="/images/icons/clinical_history.svg"
@@ -129,12 +133,12 @@ export const EncounterOverviewTab = () => {
             </div>
           </div>
           {canEdit && (
-            <div className="flex justify-between gap-2">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mx-auto md:mx-0">
+            <div className="flex flex-col md:flex-row justify-between gap-2">
+              <div className="grid grid-cols-2 w-full sm:grid-cols-4 md:grid-cols-5  gap-2 mx-auto md:mx-0">
                 {actionLinks.map((link) => {
                   return (
                     <Button
-                      size="sm"
+                      size={isMobile ? "md" : "sm"}
                       variant="outline"
                       asChild
                       key={link.href}
@@ -151,37 +155,21 @@ export const EncounterOverviewTab = () => {
                     </Button>
                   );
                 })}
-              </div>
-              <div className=" md:block hidden">
-                <QuestionnaireSearch
-                  size="sm"
-                  onSelect={(selected) =>
-                    navigate(`questionnaire/${selected.slug}`)
-                  }
-                  subjectType="encounter"
-                />
+                <div className="col-span-2 sm:col-span-4 md:col-span-1">
+                  <QuestionnaireSearch
+                    size={isMobile ? "md" : "sm"}
+                    onSelect={(selected) =>
+                      navigate(`questionnaire/${selected.slug}`)
+                    }
+                    subjectType="encounter"
+                  />
+                </div>
               </div>
             </div>
           )}
           {/* Associated Devices Section */}
           {encounter && <EncounterOverviewDevices encounter={encounter} />}
-          <Button
-            asChild
-            variant="outline"
-            size="lg"
-            className="md:hidden w-full"
-          >
-            <Link
-              href={`/facility/${facilityId}/patient/${patientId}/history/symptoms`}
-            >
-              <img
-                src="/images/icons/clinical_history.svg"
-                alt="Clinical History"
-                className="size-4"
-              />
-              {t("see_clinical_history")}
-            </Link>
-          </Button>
+
           {/* Allergies Section */}
           <div>
             <AllergyList

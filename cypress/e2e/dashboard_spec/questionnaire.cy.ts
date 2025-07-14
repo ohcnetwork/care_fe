@@ -1,6 +1,7 @@
 import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
 import { Questionnaire } from "@/pageObject/dashboard/Questionnaire";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
+import { viewPort } from "@/utils/viewPort";
 
 const facilityCreation = new FacilityCreation();
 const patientEncounter = new PatientEncounter();
@@ -10,6 +11,7 @@ describe("Operation on Questionnaire", () => {
   beforeEach(() => {
     cy.loginByApi("superadmin");
     cy.visit("/");
+    cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
   });
 
   it("verify questionnaire status functionality in encounter", () => {
