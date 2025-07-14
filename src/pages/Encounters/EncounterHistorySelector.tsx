@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -258,9 +258,9 @@ const EncounterSheetTrigger = () => {
               )}
             </div>
           </div>
-          <Button variant="outline" size="icon">
+          <div className={buttonVariants({ variant: "outline", size: "icon" })}>
             <CareIcon icon="l-history" />
-          </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
