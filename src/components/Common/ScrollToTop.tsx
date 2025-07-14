@@ -27,7 +27,7 @@ export function ScrollToTopButton({ className }: { className?: string }) {
     <Button
       onClick={scrollToTop}
       className={cn(
-        "fixed z-50 rounded-full shadow-md  hover:border-primary-700 hover:text-primary-700 hover:bg-primary-100",
+        "rounded-full shadow-lg  hover:border-primary-700 hover:text-primary-700 hover:bg-primary-100",
         className,
       )}
       variant="outline"

@@ -850,7 +850,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <ScrollToTopButton className="right-8 bottom-6" />
+      <ScrollToTopButton className="fixed z-50 right-8 bottom-6" />
       <div className="mb-4 flex flex-col md:flex-row items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold">
