@@ -25,58 +25,6 @@ beforeEach(() => {
   cy.visit("/");
 });
 
-describe("Patient Search and Encounter Creation", () => {
-  it("Search patient with phone number and create a new encounter", () => {
-    // open a random encounter and get the patient details
-    facilityCreation.selectFirstRandomFacility();
-    patientEncounter
-      .navigateToEncounters()
-      .clickInProgressEncounterFilter()
-      .openFirstEncounterDetails()
-      .clickPatientDetailsButton()
-      .clickPatientEditButton()
-      .getPatientPhone()
-      .getPatientName()
-      .getPatientYear();
-
-    // use that patient details to search and create a new encounter
-    cy.get("@patientPhone").then((phoneNumber) => {
-      cy.get("@patientName").then((name) => {
-        cy.get("@patientYear").then((year) => {
-          patientCreation
-            .clickSearchPatients()
-            .searchPatient(String(phoneNumber))
-            .verifySearchResults(String(name))
-            .selectPatientFromResults(String(name))
-            .enterYearOfBirth(String(year))
-            .clickVerifyButton();
-
-          patientVerify
-            .verifyPatientName(String(name))
-            .verifyCreateEncounterButton()
-            .clickCreateEncounter()
-            .selectEncounterType(ENCOUNTER_TYPE)
-            .selectEncounterStatus(ENCOUNTER_STATUS)
-            .selectEncounterPriority(ENCOUNTER_PRIORITY)
-            .selectOrganization()
-            .clickSubmitEncounter()
-            .assertEncounterCreationSuccess();
-        });
-      });
-    });
-
-    patientEncounter
-      .verifyEncounterPatientInfo([
-        ENCOUNTER_TYPE,
-        ENCOUNTER_STATUS,
-        ENCOUNTER_PRIORITY,
-      ])
-      .clickEncounterMarkAsComplete()
-      .clickConfirmEncounterAsComplete()
-      .verifyEncounterPatientInfo(["Completed"]);
-  });
-});
-
 describe("Patient Creation and modification", () => {
   const basePatientData: Partial<PatientFormData> = {
     pincode: "682001",
@@ -204,5 +152,57 @@ describe("Patient Creation and modification", () => {
       updatedPatientData.gender,
       updatedPatientData.address,
     ]);
+  });
+});
+
+describe("Patient Search and Encounter Creation", () => {
+  it("Search patient with phone number and create a new encounter", () => {
+    // open a random encounter and get the patient details
+    facilityCreation.selectFirstRandomFacility();
+    patientEncounter
+      .navigateToEncounters()
+      .clickInProgressEncounterFilter()
+      .openFirstEncounterDetails()
+      .clickPatientDetailsButton()
+      .clickPatientEditButton()
+      .getPatientPhone()
+      .getPatientName()
+      .getPatientYear();
+
+    // use that patient details to search and create a new encounter
+    cy.get("@patientPhone").then((phoneNumber) => {
+      cy.get("@patientName").then((name) => {
+        cy.get("@patientYear").then((year) => {
+          patientCreation
+            .clickSearchPatients()
+            .searchPatient(String(phoneNumber))
+            .verifySearchResults(String(name))
+            .selectPatientFromResults(String(name))
+            .enterYearOfBirth(String(year))
+            .clickVerifyButton();
+
+          patientVerify
+            .verifyPatientName(String(name))
+            .verifyCreateEncounterButton()
+            .clickCreateEncounter()
+            .selectEncounterType(ENCOUNTER_TYPE)
+            .selectEncounterStatus(ENCOUNTER_STATUS)
+            .selectEncounterPriority(ENCOUNTER_PRIORITY)
+            .selectOrganization()
+            .clickSubmitEncounter()
+            .assertEncounterCreationSuccess();
+        });
+      });
+    });
+
+    patientEncounter
+      .verifyEncounterPatientInfo([
+        ENCOUNTER_TYPE,
+        ENCOUNTER_STATUS,
+        ENCOUNTER_PRIORITY,
+      ])
+      .clickEncounterMarkAsComplete()
+      .clickConfirmEncounterAsComplete()
+      .verifyEncounterPatientInfo(["Completed"]);
   });
 });

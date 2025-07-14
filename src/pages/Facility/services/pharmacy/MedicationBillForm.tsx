@@ -2701,7 +2701,7 @@ export const DispensedItemsSheet = ({
                     <TableHead>{t("lot_number")}</TableHead>
                     <TableHead>{t("dispensed_on")}</TableHead>
                     <TableHead>{t("status")}</TableHead>
-                    <TableHead>{t("total") + " " + t("price")}</TableHead>
+                    <TableHead>{t("total_price")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
