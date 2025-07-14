@@ -58,9 +58,9 @@ export function DiscountCodeForm({
           name="display"
           render={({ field }) => (
             <FormItem>
-              <FormLabel aria-required>{t("name")}</FormLabel>
+               <FormLabel aria-required>{t("name")}</FormLabel>
               <FormControl>
-                <Input {...field}/>
+                 <Input {...field} />
               </FormControl>
               <FormDescription>
                 {t("discount_code_name_description")}
@@ -77,7 +77,7 @@ export function DiscountCodeForm({
             <FormItem>
               <FormLabel aria-required>{t("code")}</FormLabel>
               <FormControl>
-                <Input {...field}/>
+                <Input {...field} />
               </FormControl>
               <FormDescription>
                 {t("discount_code_code_description")}
