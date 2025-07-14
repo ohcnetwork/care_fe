@@ -160,8 +160,6 @@ export default function AvatarEditModal({
               type: blob.type,
             });
             setSelectedFile(myFile);
-            setCrop({ x: 0, y: 0 });
-            setZoom(1);
           } else {
             toast.error(t("failed_to_capture_image"));
           }
