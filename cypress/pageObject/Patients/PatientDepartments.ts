@@ -266,7 +266,10 @@ export class PatientDepartments {
   }
 
   clickAddOrganization() {
-    cy.get('[data-cy="add-organization-badge"]').first().click();
+    cy.get('button[aria-haspopup="dialog"]')
+      .find("svg.lucide-pen")
+      .parent()
+      .click();
     return this;
   }
 
