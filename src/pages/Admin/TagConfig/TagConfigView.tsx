@@ -296,8 +296,8 @@ export default function TagConfigView({
               onArchive={handleArchiveChild}
               showChildrenColumn={false}
               showArchiveAction={true}
-              emptyStateTitle="no_child_tags_found"
-              emptyStateDescription="add_child_tags_to_organize_better"
+              emptyStateTitle={t("no_child_tags_found")}
+              emptyStateDescription={t("add_child_tags_to_organize_better")}
               emptyStateIcon={"l-sitemap" as IconName}
             />
           </CardContent>
