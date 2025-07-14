@@ -1,11 +1,6 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
-import { usePathParams } from "raviger";
-        
-import { useQuery } from "@tanstack/react-query";
 import { DropletIcon, HandIcon, Plus } from "lucide-react";
-        
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -14,7 +9,6 @@ import { Button } from "@/components/ui/button";
 
 import { ObservationPlotConfig } from "@/components/Common/Charts/ObservationChart";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-        
 import SideOverview from "@/components/Facility/ConsultationDetails/OverviewSideBar";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { AllergyList } from "@/components/Patient/allergy/list";
@@ -224,12 +218,12 @@ export const EncounterOverviewTab = () => {
               readOnly={!canEdit}
             />
           </div>
-          
+
           {/* Vitals Section */}
           <div>
             <VitalsList
-              patientId={patient.id}
-              encounterId={encounter.id}
+              patientId={patientId}
+              encounterId={encounterId}
               codeGroups={vitalGroups}
             />
           </div>

@@ -7,8 +7,8 @@ import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordio
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { Code } from "@/types/base/code/code";
 import { Observation } from "@/types/emr/observation";
-import { Code } from "@/types/questionnaire/code";
 
 import { VitalsObservation, VitalsTable } from "./VitalsTable";
 

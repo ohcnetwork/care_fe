@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { Code } from "@/types/questionnaire/code";
+import { Code } from "@/types/base/code/code";
 
 export interface VitalsObservation {
   value: string | undefined;
