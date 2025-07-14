@@ -87,7 +87,7 @@ const Login = (props: LoginProps) => {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
-  const [otpError, setOtpError] = useState<boolean>(false);
+  const [otpError, setOtpError] = useState<string>("");
   const [otpValidationError, setOtpValidationError] = useState<string>("");
   const [resendOtpCountdown, setResendOtpCountdown] =
     useState(resendOtpTimeout);
@@ -115,16 +115,16 @@ const Login = (props: LoginProps) => {
     mutationFn: mutate(routes.otp.sendOtp),
     onSuccess: () => {
       setIsOtpSent(true);
-      setOtpError(false);
+      setOtpError("");
       toast.success(t("send_otp_success"));
     },
     onError: (error: any) => {
       const errors = error?.data || [];
       if (Array.isArray(errors) && errors.length > 0) {
         // Use translated error message instead of raw server message
-        setOtpError(true);
+        setOtpError("send_otp_error");
       } else {
-        setOtpError(true);
+        setOtpError("send_otp_error");
       }
     },
   });
@@ -279,7 +279,7 @@ const Login = (props: LoginProps) => {
     setIsOtpSent(false);
     setPhone("");
     setOtp("");
-    setOtpError(false);
+    setOtpError("");
     setOtpValidationError("");
   };
 
@@ -506,16 +506,14 @@ const Login = (props: LoginProps) => {
                           value={phone}
                           onChange={(value) => {
                             setPhone(value ?? "");
-                            setOtpError(false);
+                            setOtpError("");
                             setOtpValidationError("");
                           }}
                           disabled={isOtpSent}
                           placeholder={t("enter_phone_number")}
                         />
                         {otpError && (
-                          <p className="text-sm text-red-500">
-                            {t("send_otp_error")}
-                          </p>
+                          <p className="text-sm text-red-500">{t(otpError)}</p>
                         )}
                       </div>
 
@@ -605,7 +603,7 @@ const Login = (props: LoginProps) => {
                               className="h-auto p-0 text-primary-600"
                               onClick={() => {
                                 setIsOtpSent(false);
-                                setOtpError(false);
+                                setOtpError("");
                                 setOtpValidationError("");
                               }}
                             >
