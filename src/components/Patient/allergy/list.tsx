@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
   BeakerIcon,
@@ -6,7 +6,7 @@ import {
   HeartPulseIcon,
   LeafIcon,
 } from "lucide-react";
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import {
   AllergyCategory,
   AllergyIntolerance,
@@ -62,35 +63,41 @@ export function AllergyList({
 }: AllergyListProps) {
   const { t } = useTranslation();
 
-  const [showEnteredInError, setShowEnteredInError] = useState(false);
+  const LIMIT = showTimeline ? 30 : 14;
 
-  const { data: allergies, isLoading } = useQuery({
-    queryKey: ["allergies", patientId, encounterId, encounterStatus],
-    queryFn: query(allergyIntoleranceApi.getAllergy, {
-      pathParams: { patientId },
-      queryParams: {
-        encounter:
-          encounterStatus && completedEncounterStatus.includes(encounterStatus)
-            ? encounterId
-            : undefined,
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["infinite-allergies", patientId, encounterId, encounterStatus],
+      queryFn: async ({ pageParam = 0, signal }) => {
+        const response = await query(allergyIntoleranceApi.getAllergy, {
+          pathParams: { patientId },
+          queryParams: {
+            encounter:
+              encounterStatus &&
+              completedEncounterStatus.includes(encounterStatus)
+                ? encounterId
+                : undefined,
+            limit: LIMIT,
+            offset: String(pageParam),
+            exclude_verification_status: "entered_in_error",
+          },
+        })({ signal });
+        return response as PaginatedResponse<AllergyIntolerance>;
       },
-    }),
-  });
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) => {
+        const currentOffset = allPages.length * LIMIT;
+        return currentOffset < lastPage.count ? currentOffset : null;
+      },
+    });
+
+  const allergies = data?.pages.flatMap((page) => page.results) ?? [];
 
   if (isLoading) {
     return <TableSkeleton count={5} />;
   }
 
-  const filteredAllergies = allergies?.results?.filter(
-    (allergy) =>
-      showEnteredInError || allergy.verification_status !== "entered_in_error",
-  );
-
-  const hasEnteredInErrorRecords = allergies?.results?.some(
-    (allergy) => allergy.verification_status === "entered_in_error",
-  );
-
-  if (!filteredAllergies?.length) {
+  if (!allergies?.length) {
     if (showTimeline) {
       return (
         <EmptyState
@@ -102,26 +109,12 @@ export function AllergyList({
     return null;
   }
 
-  const allergiesRows = [
-    ...filteredAllergies.filter(
-      (allergy) => allergy.verification_status !== "entered_in_error",
-    ),
-    ...(showEnteredInError
-      ? filteredAllergies.filter(
-          (allergy) => allergy.verification_status === "entered_in_error",
-        )
-      : []),
-  ];
-
   if (showTimeline) {
-    const groupedByYear = filteredAllergies.reduce((acc, allergy) => {
+    const groupedByYear = allergies.reduce((acc, allergy) => {
       const dateStr = format(allergy.created_date, "dd MMMM, yyyy");
       const year = format(allergy.created_date, "yyyy");
       acc[year] ??= {};
       acc[year][dateStr] ??= [];
-      if (allergy.verification_status !== "entered_in_error") {
-        acc[year][dateStr].push(allergy);
-      }
       return acc;
     }, {} as GroupedAllergies);
 
@@ -156,6 +149,18 @@ export function AllergyList({
             </div>
           );
         })}
+        {hasNextPage && (
+          <div className="flex justify-center">
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+            >
+              {t("load_more")}
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
@@ -167,21 +172,18 @@ export function AllergyList({
       className={className}
       editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
     >
-      <AllergyTable allergies={allergiesRows} />
-      {hasEnteredInErrorRecords && !showEnteredInError && (
-        <>
-          <div className="border-b border-dashed border-gray-200 my-2" />
-          <div className="flex justify-center">
-            <Button
-              variant="ghost"
-              size="xs"
-              onClick={() => setShowEnteredInError(true)}
-              className="text-xs underline text-gray-950"
-            >
-              {t("view_all")}
-            </Button>
-          </div>
-        </>
+      <AllergyTable allergies={allergies} />
+      {hasNextPage && (
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {t("load_more")}
+          </Button>
+        </div>
       )}
     </EncounterAccordionLayout>
   );
