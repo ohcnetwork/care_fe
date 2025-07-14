@@ -38,39 +38,36 @@ export function SymptomsList({
 }: SymptomsListProps) {
   const { t } = useTranslation();
 
-  const {
-    data: symptomsData,
-    isLoading,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["symptoms", patientId, encounterId],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(symptomApi.listSymptoms, {
-        pathParams: { patientId },
-        queryParams: {
-          encounter: encounterId,
-          ordering: "-created_date",
-          limit: showTimeline ? 30 : 14,
-          offset: String(pageParam),
-          exclude_verification_status: "entered_in_error",
-        },
-      })({ signal });
-      return response as PaginatedResponse<Symptom>;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * 14;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
-  });
+  const LIMIT = showTimeline ? 30 : 14;
+
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["symptoms", patientId, encounterId],
+      queryFn: async ({ pageParam = 0, signal }) => {
+        const response = await query(symptomApi.listSymptoms, {
+          pathParams: { patientId },
+          queryParams: {
+            encounter: encounterId,
+            ordering: "-created_date",
+            limit: LIMIT,
+            offset: String(pageParam),
+            exclude_verification_status: "entered_in_error",
+          },
+        })({ signal });
+        return response as PaginatedResponse<Symptom>;
+      },
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) => {
+        const currentOffset = allPages.length * LIMIT;
+        return currentOffset < lastPage.count ? currentOffset : null;
+      },
+    });
 
   if (isLoading) {
     return <TableSkeleton count={5} />;
   }
 
-  const symptoms = symptomsData?.pages.flatMap((page) => page.results) ?? [];
+  const symptoms = data?.pages.flatMap((page) => page.results) ?? [];
 
   if (!symptoms?.length) {
     if (showTimeline) {

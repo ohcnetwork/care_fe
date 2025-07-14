@@ -75,37 +75,31 @@ interface GroupedPrescription {
 const Prescriptions = ({ patientId }: { patientId: string }) => {
   const { t } = useTranslation();
 
-  const {
-    data: medicationsData,
-    isLoading,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["activeMedicationRequests", patientId],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(medicationRequestApi.list, {
-        pathParams: { patientId: patientId },
-        queryParams: {
-          limit: 100,
-          status: "active",
-          ordering: "-created_date",
-          offset: String(pageParam),
-        },
-      })({ signal });
-      return response as PaginatedResponse<MedicationRequestRead>;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * 100;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
-  });
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["activeMedicationRequests", patientId],
+      queryFn: async ({ pageParam = 0, signal }) => {
+        const response = await query(medicationRequestApi.list, {
+          pathParams: { patientId: patientId },
+          queryParams: {
+            limit: 100,
+            status: "active",
+            ordering: "-created_date",
+            offset: String(pageParam),
+          },
+        })({ signal });
+        return response as PaginatedResponse<MedicationRequestRead>;
+      },
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) => {
+        const currentOffset = allPages.length * 100;
+        return currentOffset < lastPage.count ? currentOffset : null;
+      },
+    });
 
-  const medications =
-    medicationsData?.pages.flatMap((page) => page.results) ?? [];
+  const medications = data?.pages.flatMap((page) => page.results) ?? [];
 
-  if (isLoading || !medications) {
+  if (isLoading) {
     return <TableSkeleton count={10} />;
   }
 

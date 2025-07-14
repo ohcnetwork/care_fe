@@ -40,39 +40,37 @@ export function DiagnosisList({
   showTimeline = false,
 }: DiagnosisListProps) {
   const { t } = useTranslation();
-  const {
-    data: diagnosesData,
-    isLoading: isDiagnosesLoading,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["encounter_diagnosis", patientId, encounterId],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(diagnosisApi.listDiagnosis, {
-        pathParams: { patientId },
-        queryParams: {
-          category: "encounter_diagnosis,chronic_condition",
-          clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
-          exclude_verification_status: "entered_in_error",
-          ...(encounterId ? { encounter: encounterId } : {}),
-          ordering: "-created_date",
-          limit: showTimeline ? 30 : 14,
-          offset: String(pageParam),
-        },
-      })({ signal });
-      return response as PaginatedResponse<Diagnosis>;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * 14;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
-  });
 
-  const diagnoses = diagnosesData?.pages.flatMap((page) => page.results) ?? [];
+  const LIMIT = showTimeline ? 30 : 14;
 
-  if (isDiagnosesLoading) {
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["encounter_diagnosis", patientId, encounterId],
+      queryFn: async ({ pageParam = 0, signal }) => {
+        const response = await query(diagnosisApi.listDiagnosis, {
+          pathParams: { patientId },
+          queryParams: {
+            category: "encounter_diagnosis,chronic_condition",
+            clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
+            exclude_verification_status: "entered_in_error",
+            ...(encounterId ? { encounter: encounterId } : {}),
+            ordering: "-created_date",
+            limit: LIMIT,
+            offset: String(pageParam),
+          },
+        })({ signal });
+        return response as PaginatedResponse<Diagnosis>;
+      },
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) => {
+        const currentOffset = allPages.length * LIMIT;
+        return currentOffset < lastPage.count ? currentOffset : null;
+      },
+    });
+
+  const diagnoses = data?.pages.flatMap((page) => page.results) ?? [];
+
+  if (isLoading) {
     return <TableSkeleton count={5} />;
   }
 
