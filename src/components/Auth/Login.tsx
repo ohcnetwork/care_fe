@@ -97,9 +97,6 @@ const Login = (props: LoginProps) => {
   const [isCaptchaEnabled, setCaptcha] = useState(false);
   const { t } = useTranslation();
   const [forgotPassword, setForgotPassword] = useState(forgot);
-  const [loginMode, setLoginMode] = useState<LoginMode>(
-    mode === "patient" ? "patient" : "staff",
-  );
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -123,8 +120,8 @@ const Login = (props: LoginProps) => {
 
   // Remember the last login mode
   useEffect(() => {
-    localStorage.setItem(LocalStorageKeys.loginPreference, loginMode);
-  }, [loginMode]);
+    localStorage.setItem(LocalStorageKeys.loginPreference, mode);
+  }, [mode]);
 
   // Send OTP Mutation
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
@@ -367,9 +364,8 @@ const Login = (props: LoginProps) => {
               <CardContent>
                 <Tabs
                   defaultValue="staff"
-                  value={loginMode}
+                  value={mode}
                   onValueChange={(value) => {
-                    setLoginMode(value as LoginMode);
                     setQueryParams({ mode: value as LoginMode });
                     if (value === "staff") {
                       resetPatientLogin();
