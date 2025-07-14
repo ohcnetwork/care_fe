@@ -52,6 +52,11 @@ interface OtpLoginData {
   otp: string;
 }
 
+interface OtpValidationError {
+  otp?: string;
+  [key: string]: string | undefined;
+}
+
 type LoginMode = "staff" | "patient";
 
 interface LoginProps {
@@ -152,9 +157,23 @@ const Login = (props: LoginProps) => {
         patientLogin(tokenData, `/patient/home`);
       }
     },
-    onError: (_error: any) => {
-      // Always use translated error message for consistency
-      const errorMessage = t("invalid_otp");
+    onError: (error: any) => {
+      let errorMessage = "invalid_otp";
+      if (
+        error.cause &&
+        Array.isArray(error.cause.errors) &&
+        error.cause.errors.length > 0
+      ) {
+        const otpError = error.cause.errors.find(
+          (e: OtpValidationError) => e.otp,
+        );
+        if (otpError && otpError.otp) {
+          errorMessage = otpError.otp;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       setOtpValidationError(errorMessage);
       toast.error(errorMessage);
     },
@@ -551,7 +570,9 @@ const Login = (props: LoginProps) => {
                           </div>
                           {otpValidationError && (
                             <p className="text-sm text-red-500 text-center">
-                              {otpValidationError}
+                              {otpValidationError === "invalid_otp"
+                                ? t(otpValidationError)
+                                : otpValidationError}
                             </p>
                           )}
                         </div>
