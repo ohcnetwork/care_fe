@@ -133,7 +133,7 @@ export const EncounterOverviewTab = () => {
             </div>
           </div>
           {canEdit && (
-            <div className="flex justify-between gap-2">
+            <div className="flex flex-col md:flex-row justify-between gap-2">
               <div className="grid grid-cols-2 w-full sm:grid-cols-4 gap-2 mx-auto md:mx-0">
                 {actionLinks.map((link) => {
                   return (
@@ -156,7 +156,8 @@ export const EncounterOverviewTab = () => {
                   );
                 })}
               </div>
-              <div className=" md:block hidden">
+
+              <div>
                 <QuestionnaireSearch
                   size="sm"
                   onSelect={(selected) =>
