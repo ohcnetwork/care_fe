@@ -19,6 +19,7 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 
+import { formatName } from "@/Utils/utils";
 import {
   SYMPTOM_CLINICAL_STATUS_COLORS,
   SYMPTOM_SEVERITY_COLORS,
@@ -143,7 +144,9 @@ export function SymptomTable({ symptoms }: SymptomTableProps) {
                   imageUrl={symptom.created_by.profile_picture_url}
                 />
 
-                <span className="text-sm">{symptom.created_by.username}</span>
+                <span className="text-sm">
+                  {formatName(symptom.created_by)}
+                </span>
               </div>
             </TableCell>
           </TableRow>
