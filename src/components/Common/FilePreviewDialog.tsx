@@ -437,129 +437,123 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
               )}
             </div>
             <div className="flex items-center justify-center">
-              <div className="mt-2 grid grid-cols-3 md:grid-cols-6 gap-4">
-                {file_state.isImage && (
-                  <>
-                    {[
-                      {
-                        label: t("zoom_in"),
-                        icon: "l-search-plus",
-                        action: handleZoomIn,
-                        disabled: false,
+              {file_state.isImage && (
+                <div className="mt-2 grid grid-cols-3 md:grid-cols-5 gap-4">
+                  {[
+                    {
+                      label: t("zoom_in"),
+                      icon: "l-search-plus",
+                      action: handleZoomIn,
+                      disabled: false,
+                    },
+                    {
+                      label: t("reset"),
+                      icon: "l-refresh",
+                      action: () => {
+                        setRotation(0);
+                        transformRef.current?.resetTransform();
                       },
-                      {
-                        label: t("reset"),
-                        icon: "l-minus-circle",
-                        action: () => {
-                          setRotation(0);
-                          transformRef.current?.resetTransform();
-                        },
-                        disabled: false,
-                      },
-                      {
-                        label: t("zoom_out"),
-                        icon: "l-search-minus",
-                        action: handleZoomOut,
-                        disabled: false,
-                      },
-                      {
-                        label: t("rotate_left"),
-                        icon: "l-corner-up-left",
-                        action: () => handleRotate(-90),
-                        disabled: false,
-                      },
-                      {
-                        label: t("rotate_right"),
-                        icon: "l-corner-up-right",
-                        action: () => handleRotate(90),
-                        disabled: false,
-                      },
-                    ].map((button, index) => (
-                      <Button
-                        variant="ghost"
-                        key={index}
-                        onClick={button.action}
-                        className={cn(
-                          "z-50 rounded bg-white/60 text-black backdrop-blur-sm transition hover:bg-white/70",
-                          index == 3 && "col-start-1 md:col-auto",
-                          index == 4 && "col-start-3 md:col-auto",
-                        )}
-                        disabled={button.disabled}
-                      >
-                        <div>
-                          {button.icon && (
-                            <CareIcon
-                              icon={button.icon as IconName}
-                              className="text-lg"
-                            />
-                          )}
-                          <div>{button.label}</div>
-                        </div>
-                      </Button>
-                    ))}
-                  </>
-                )}
-                {file_state.extension === "pdf" && (
-                  <>
-                    {[
-                      {
-                        label: t("zoom_in"),
-                        icon: "l-search-plus",
-                        action: handleZoomIn,
-                        disabled: scale >= 2,
-                      },
-                      {
-                        label: t("reset"),
-                        icon: "l-minus-circle",
-                        action: () => {
-                          setScale(0.75);
-                        },
-                        disabled: scale == 0.75,
-                      },
-                      {
-                        label: t("zoom_out"),
-                        icon: "l-search-minus",
-                        action: handleZoomOut,
-                        disabled: scale <= 0.5,
-                      },
-                      {
-                        label: t("previous"),
-                        icon: "l-arrow-left",
-                        action: () => setPage((prev) => prev - 1),
-                        disabled: page === 1,
-                      },
-                      {
-                        label: `${page}/${numPages}`,
-                        icon: null,
-                        action: () => {},
-                        disabled: false,
-                      },
-                      {
-                        label: t("next"),
-                        icon: "l-arrow-right",
-                        action: () => setPage((prev) => prev + 1),
-                        disabled: page === numPages,
-                      },
-                    ].map((button, index) => (
-                      <Button
-                        variant="ghost"
-                        key={index}
-                        onClick={button.action}
-                        className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
-                        disabled={button.disabled}
-                      >
-                        {button.icon && (
-                          <CareIcon
-                            icon={button.icon as IconName}
-                            className="mr-2 text-lg"
-                          />
-                        )}
-                        {button.label}
-                      </Button>
-                    ))}
-                  </>
-                )}
-              </div>
+                      disabled: false,
+                    },
+                    {
+                      label: t("zoom_out"),
+                      icon: "l-search-minus",
+                      action: handleZoomOut,
+                      disabled: false,
+                    },
+                    {
+                      label: t("rotate_left"),
+                      icon: "l-corner-up-left",
+                      action: () => handleRotate(-90),
+                      disabled: false,
+                    },
+                    {
+                      label: t("rotate_right"),
+                      icon: "l-corner-up-right",
+                      action: () => handleRotate(90),
+                      disabled: false,
+                    },
+                  ].map((button, index) => (
+                    <Button
+                      variant="ghost"
+                      key={index}
+                      onClick={button.action}
+                      className={cn(
+                        "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70",
+                        index == 3 && "col-start-1 md:col-auto",
+                        index == 4 && "col-start-3 md:col-auto",
+                      )}
+                      disabled={button.disabled}
+                    >
+                      {button.icon && (
+                        <CareIcon
+                          icon={button.icon as IconName}
+                          className="mr-2 text-lg"
+                        />
+                      )}
+                      {button.label}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              {file_state.extension === "pdf" && (
+                <div className="mt-2 grid grid-cols-3 md:grid-cols-6 gap-4">
+                  {[
+                    {
+                      label: t("zoom_in"),
+                      icon: "l-search-plus",
+                      action: handleZoomIn,
+                      disabled: scale >= 2,
+                    },
+                    {
+                      label: `${Math.round(scale * 100)}%`,
+                      icon: null,
+                      action: () => {},
+                      disabled: false,
+                    },
+                    {
+                      label: t("zoom_out"),
+                      icon: "l-search-minus",
+                      action: handleZoomOut,
+                      disabled: scale <= 0.5,
+                    },
+                    {
+                      label: t("previous"),
+                      icon: "l-arrow-left",
+                      action: () => setPage((prev) => prev - 1),
+                      disabled: page === 1,
+                    },
+                    {
+                      label: `${page}/${numPages}`,
+                      icon: null,
+                      action: () => {},
+                      disabled: false,
+                    },
+                    {
+                      label: t("next"),
+                      icon: "l-arrow-right",
+                      action: () => setPage((prev) => prev + 1),
+                      disabled: page === numPages,
+                    },
+                  ].map((button, index) => (
+                    <Button
+                      variant="ghost"
+                      key={index}
+                      onClick={button.action}
+                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
+                      disabled={button.disabled}
+                    >
+                      {button.icon && (
+                        <CareIcon
+                          icon={button.icon as IconName}
+                          className="mr-2 text-lg"
+                        />
+                      )}
+                      {button.label}
+                    </Button>
+                  ))}
+                </div>
+              )}
             </div>
           </>
         ) : (
