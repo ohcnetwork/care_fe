@@ -93,7 +93,7 @@ export const EncounterObservationsTab = () => {
       },
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * 20;
+        const currentOffset = (allPages ?? []).length * 20;
         return currentOffset < lastPage.count ? currentOffset : null;
       },
       enabled: canViewClinicalData || canViewEncounter,

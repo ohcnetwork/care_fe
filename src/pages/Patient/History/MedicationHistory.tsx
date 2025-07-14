@@ -92,7 +92,7 @@ const Prescriptions = ({ patientId }: { patientId: string }) => {
       },
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * 100;
+        const currentOffset = (allPages ?? []).length * 100;
         return currentOffset < lastPage.count ? currentOffset : null;
       },
     });

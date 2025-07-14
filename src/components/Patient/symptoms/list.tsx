@@ -58,7 +58,7 @@ export function SymptomsList({
       },
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * LIMIT;
+        const currentOffset = (allPages ?? []).length * LIMIT;
         return currentOffset < lastPage.count ? currentOffset : null;
       },
     });
