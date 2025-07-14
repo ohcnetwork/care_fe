@@ -255,7 +255,7 @@ const DepartmentsAndTeams = ({
             currentOrganizations={encounter.organizations}
             facilityId={encounter.facility.id}
             trigger={
-              <Button variant="outline" size="sm" className="w-full">
+              <Button variant="outline" className="w-full">
                 <Building className="size-4 mr-2" />
                 {t("update_department")}
               </Button>
