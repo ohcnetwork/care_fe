@@ -266,10 +266,7 @@ export class PatientDepartments {
   }
 
   clickAddOrganization() {
-    cy.contains("Departments and Teams")
-      .parent()
-      .find("svg.lucide-pen")
-      .click();
+    cy.verifyAndClickElement("#root", "Update Department");
     return this;
   }
 
