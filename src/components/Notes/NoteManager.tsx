@@ -327,7 +327,7 @@ interface NoteManagerProps {
   canWrite: boolean;
   encounterId?: string;
   patientId: string;
-  hideEncounterNotes: boolean;
+  hideEncounterNotes?: boolean;
 }
 
 export function NoteManager({
