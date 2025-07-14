@@ -54,14 +54,14 @@ export default function WeekdayCheckbox({
 
   return (
     <div className="flex gap-2 md:gap-4">
-      {dayOfWeekKeys.map((day) => {
+      {dayOfWeekKeys.map((day, index) => {
         const dow = DayOfWeek[day as keyof typeof DayOfWeek];
         const isSelected = selectedDays.includes(dow);
 
         return (
           <Button
             key={dow}
-            ref={ref}
+            ref={index == 0 ? ref : undefined}
             aria-invalid={props["aria-invalid"]}
             type="button"
             variant={isSelected ? "primary" : "outline"}
