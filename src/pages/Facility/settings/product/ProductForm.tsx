@@ -477,7 +477,6 @@ export function ProductFormContent({
                         isLoading={isLoadingCID}
                         noOptionsMessage={t("no_charge_item_definitions_found")}
                         data-cy="charge-item-definition-search"
-                        className="flex justify-center md:justify-center lg:justify-start"
                       />
                     </FormControl>
                     <Sheet open={createCidOpen} onOpenChange={setCreateCidOpen}>
