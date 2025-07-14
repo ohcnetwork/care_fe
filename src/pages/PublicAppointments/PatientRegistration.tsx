@@ -47,9 +47,7 @@ type PatientRegistrationProps = {
 export function PatientRegistration(props: PatientRegistrationProps) {
   const { staffId } = props;
   const { t } = useTranslation();
-  const [params] = useQueryParams();
-  const slotId = params.slotId;
-  const reason = params.reason || "";
+  const [{ slotId, reason }] = useQueryParams();
 
   const queryClient = useQueryClient();
 

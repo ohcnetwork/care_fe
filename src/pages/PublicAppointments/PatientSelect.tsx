@@ -110,9 +110,7 @@ export default function PatientSelect({
   staffId: string;
 }) {
   const { t } = useTranslation();
-  const [params] = useQueryParams();
-  const slotId = params.slotId;
-  const reason = params.reason || "";
+  const [{ slotId, reason }] = useQueryParams();
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
 
   const patientUserContext = usePatientContext();
