@@ -317,7 +317,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                 {file_state.isImage ? (
                   <TransformWrapper
                     ref={transformRef}
-                    initialScale={0.5}
+                    initialScale={1}
                     minScale={0.25}
                     maxScale={2}
                     centerOnInit
