@@ -104,7 +104,7 @@ export default function TagConfigForm({
     const subscription = form.watch((value, { name }) => {
       if (name === "display") {
         form.setValue("slug", generateSlug(value.display || ""), {
-          shouldValidate: true,
+          shouldValidate: false,
         });
       }
     });
@@ -279,7 +279,7 @@ export default function TagConfigForm({
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value}
-                disabled={isLoading}
+                disabled={isLoading || isEditing}
               >
                 <FormControl>
                   <SelectTrigger>
