@@ -94,11 +94,11 @@ export class PatientEncounter {
           td.textContent.includes(allergyName),
         );
       })
-      .first()
+      .last()
       .should("be.visible")
       .within(() => {
         cy.get("[data-slot='dropdown-menu-trigger']")
-          .first()
+          .last()
           .scrollIntoView()
           .click();
       });
@@ -113,14 +113,7 @@ export class PatientEncounter {
     const { allergyName, criticality, status } = details;
     const texts = [allergyName, criticality, status];
 
-    cy.get("table").first().scrollIntoView();
-    cy.get("table")
-      .first()
-      .then(($el) => {
-        texts.forEach((text) => {
-          cy.wrap($el).should("contain", text);
-        });
-      });
+    cy.verifyContentPresence("[data-slot='table']", texts);
 
     return this;
   }
@@ -217,13 +210,8 @@ export class PatientEncounter {
 
   verifySymptom(details: SymptomDetails) {
     const { symptomName, severity, status } = details;
-    cy.get("table").first().scrollIntoView();
-    cy.get("table").then(($el) => {
-      const texts = [symptomName, severity, status];
-      texts.forEach((text) => {
-        cy.wrap($el).should("contain", text);
-      });
-    });
+    const texts = [symptomName, severity, status];
+    cy.verifyContentPresence("[data-slot='table']", texts);
 
     return this;
   }
@@ -314,13 +302,8 @@ export class PatientEncounter {
 
   verifyDiagnoses(details: DiagnosisDetails) {
     const { diagnosisName, verification, status } = details;
-    cy.get("table").first().scrollIntoView();
-    cy.get("table").then(($el) => {
-      const texts = [diagnosisName, verification, status];
-      texts.forEach((text) => {
-        cy.wrap($el).should("contain", text);
-      });
-    });
+    const texts = [diagnosisName, verification, status];
+    cy.verifyContentPresence("[data-slot='table']", texts);
 
     return this;
   }
