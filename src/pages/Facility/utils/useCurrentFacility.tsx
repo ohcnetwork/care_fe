@@ -37,7 +37,7 @@ export default function useCurrentFacility() {
 export function useCurrentFacilitySilently() {
   try {
     return useCurrentFacility();
-  } catch (_) {
+  } catch {
     return { facilityId: undefined, facility: undefined };
   }
 }

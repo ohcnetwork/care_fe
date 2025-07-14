@@ -39,7 +39,7 @@ export default function useCurrentLocation() {
 export function useCurrentLocationSilently() {
   try {
     return useCurrentLocation();
-  } catch (_) {
+  } catch {
     return {
       facilityId: undefined,
       locationId: undefined,
