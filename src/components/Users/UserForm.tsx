@@ -88,7 +88,7 @@ export default function UserForm({
               t("username_not_valid"),
             ),
       password_setup_method: z.enum(["immediate", "email"]).optional(),
-      password: z.string().optional(),
+      password: isEditMode ? z.string().optional() : z.string().min(8),
       c_password: z.string().optional(),
       first_name: z.string().min(1, t("field_required")),
       last_name: z.string().min(1, t("field_required")),
