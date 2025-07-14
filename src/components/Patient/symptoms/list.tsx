@@ -42,7 +42,7 @@ export function SymptomsList({
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: ["symptoms", patientId, encounterId],
+      queryKey: ["infinite-symptoms", patientId, encounterId],
       queryFn: async ({ pageParam = 0, signal }) => {
         const response = await query(symptomApi.listSymptoms, {
           pathParams: { patientId },
@@ -58,7 +58,7 @@ export function SymptomsList({
       },
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = (allPages ?? []).length * LIMIT;
+        const currentOffset = allPages.length * LIMIT;
         return currentOffset < lastPage.count ? currentOffset : null;
       },
     });

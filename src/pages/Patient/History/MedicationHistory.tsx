@@ -77,7 +77,7 @@ const Prescriptions = ({ patientId }: { patientId: string }) => {
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: ["activeMedicationRequests", patientId],
+      queryKey: ["infinite-activeMedicationRequests", patientId],
       queryFn: async ({ pageParam = 0, signal }) => {
         const response = await query(medicationRequestApi.list, {
           pathParams: { patientId: patientId },
@@ -92,7 +92,7 @@ const Prescriptions = ({ patientId }: { patientId: string }) => {
       },
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = (allPages ?? []).length * 100;
+        const currentOffset = allPages.length * 100;
         return currentOffset < lastPage.count ? currentOffset : null;
       },
     });

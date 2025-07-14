@@ -52,7 +52,7 @@ export function MedicationStatementList({
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: ["medication_statements", patientId, encounterId],
+      queryKey: ["infinite-medication_statements", patientId, encounterId],
       queryFn: async ({ pageParam = 0, signal }) => {
         const response = await query(medicationStatementApi.list, {
           pathParams: { patientId },
@@ -68,7 +68,7 @@ export function MedicationStatementList({
       enabled: canAccess,
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = (allPages ?? []).length * 100;
+        const currentOffset = allPages.length * 100;
         return currentOffset < lastPage.count ? currentOffset : null;
       },
     });

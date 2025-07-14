@@ -45,7 +45,7 @@ export function DiagnosisList({
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: ["encounter_diagnosis", patientId, encounterId],
+      queryKey: ["infinite-encounter_diagnosis", patientId, encounterId],
       queryFn: async ({ pageParam = 0, signal }) => {
         const response = await query(diagnosisApi.listDiagnosis, {
           pathParams: { patientId },
@@ -63,7 +63,7 @@ export function DiagnosisList({
       },
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = (allPages ?? []).length * LIMIT;
+        const currentOffset = allPages.length * LIMIT;
         return currentOffset < lastPage.count ? currentOffset : null;
       },
     });

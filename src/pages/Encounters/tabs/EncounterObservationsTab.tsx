@@ -78,7 +78,7 @@ export const EncounterObservationsTab = () => {
 
   const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
     useInfiniteQuery<PaginatedResponse<Observation>, HTTPError>({
-      queryKey: ["observations", patientId, encounterId],
+      queryKey: ["infinite-observations", patientId, encounterId],
       queryFn: async ({ pageParam = 0 }) => {
         const response = await query(routes.listObservations, {
           pathParams: { patientId },
@@ -93,7 +93,7 @@ export const EncounterObservationsTab = () => {
       },
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = (allPages ?? []).length * 20;
+        const currentOffset = allPages.length * 20;
         return currentOffset < lastPage.count ? currentOffset : null;
       },
       enabled: canViewClinicalData || canViewEncounter,

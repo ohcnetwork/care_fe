@@ -67,7 +67,7 @@ export function AllergyList({
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: ["allergies", patientId, encounterId, encounterStatus],
+      queryKey: ["infinite-allergies", patientId, encounterId, encounterStatus],
       queryFn: async ({ pageParam = 0, signal }) => {
         const response = await query(allergyIntoleranceApi.getAllergy, {
           pathParams: { patientId },
@@ -86,7 +86,7 @@ export function AllergyList({
       },
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = (allPages ?? []).length * LIMIT;
+        const currentOffset = allPages.length * LIMIT;
         return currentOffset < lastPage.count ? currentOffset : null;
       },
     });
