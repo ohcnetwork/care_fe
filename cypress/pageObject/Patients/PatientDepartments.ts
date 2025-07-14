@@ -266,9 +266,9 @@ export class PatientDepartments {
   }
 
   clickAddOrganization() {
-    cy.get('button[aria-haspopup="dialog"]')
-      .find("svg.lucide-pen")
+    cy.contains("Departments and Teams")
       .parent()
+      .find("svg.lucide-pen")
       .click();
     return this;
   }
