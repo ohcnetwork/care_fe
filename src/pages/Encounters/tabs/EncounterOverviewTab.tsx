@@ -134,7 +134,7 @@ export const EncounterOverviewTab = () => {
           </div>
           {canEdit && (
             <div className="flex flex-col md:flex-row justify-between gap-2">
-              <div className="grid grid-cols-2 w-full sm:grid-cols-4 gap-2 mx-auto md:mx-0">
+              <div className="grid grid-cols-2 w-full sm:grid-cols-4 md:grid-cols-5  gap-2 mx-auto md:mx-0">
                 {actionLinks.map((link) => {
                   return (
                     <Button
@@ -155,16 +155,15 @@ export const EncounterOverviewTab = () => {
                     </Button>
                   );
                 })}
-              </div>
-
-              <div>
-                <QuestionnaireSearch
-                  size="sm"
-                  onSelect={(selected) =>
-                    navigate(`questionnaire/${selected.slug}`)
-                  }
-                  subjectType="encounter"
-                />
+                <div className="col-span-2 sm:col-span-4 md:col-span-1">
+                  <QuestionnaireSearch
+                    size={isMobile ? "md" : "sm"}
+                    onSelect={(selected) =>
+                      navigate(`questionnaire/${selected.slug}`)
+                    }
+                    subjectType="encounter"
+                  />
+                </div>
               </div>
             </div>
           )}

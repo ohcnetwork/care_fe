@@ -40,7 +40,7 @@ interface QuestionnaireSearchProps {
   onSelect?: (questionnaire: QuestionnaireDetail) => void;
   subjectType?: string;
   disabled?: boolean;
-  size?: "default" | "sm" | "xs" | "lg";
+  size?: React.ComponentProps<typeof Button>["size"];
 }
 
 export function QuestionnaireSearch({
