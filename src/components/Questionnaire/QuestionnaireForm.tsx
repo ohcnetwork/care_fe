@@ -787,12 +787,9 @@ export function QuestionnaireForm({
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto w-full pb-8 space-y-2">
         {/* Questionnaire Forms */}
-        {questionnaireForms.map((form, index) => (
+        {questionnaireForms.map((form) => (
           <div
-            key={
-              form.questionnaire.instanceId ||
-              `${form.questionnaire.id}-${index}`
-            }
+            key={form.questionnaire.instanceId}
             className="rounded-lg py-6 space-y-6"
             data-questionnaire-id={form.questionnaire.id}
           >
@@ -814,14 +811,11 @@ export function QuestionnaireForm({
                   size="sm"
                   onClick={() => {
                     setQuestionnaireForms((prev) =>
-                      prev.filter((f) => {
-                        const fId =
-                          f.questionnaire.instanceId || f.questionnaire.id;
-                        const formId =
-                          form.questionnaire.instanceId ||
-                          form.questionnaire.id;
-                        return fId !== formId;
-                      }),
+                      prev.filter(
+                        (f) =>
+                          f.questionnaire.instanceId !==
+                          form.questionnaire.instanceId,
+                      ),
                     );
                   }}
                   disabled={isPending}
@@ -844,9 +838,8 @@ export function QuestionnaireForm({
               ) => {
                 setQuestionnaireForms((existingForms) =>
                   existingForms.map((formItem) =>
-                    (formItem.questionnaire.instanceId ||
-                      formItem.questionnaire.id) ===
-                    (form.questionnaire.instanceId || form.questionnaire.id)
+                    formItem.questionnaire.instanceId ===
+                    form.questionnaire.instanceId
                       ? {
                           ...formItem,
                           responses: formItem.responses.map((r) =>
@@ -870,8 +863,7 @@ export function QuestionnaireForm({
               clearError={(questionId: string) => {
                 setQuestionnaireForms((prev) =>
                   prev.map((f) =>
-                    (f.questionnaire.instanceId || f.questionnaire.id) ===
-                    (form.questionnaire.instanceId || form.questionnaire.id)
+                    f.questionnaire.instanceId === form.questionnaire.instanceId
                       ? {
                           ...f,
                           errors: f.errors.filter(
