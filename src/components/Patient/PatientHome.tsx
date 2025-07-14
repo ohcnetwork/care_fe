@@ -23,6 +23,8 @@ import { formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import patientApi from "@/types/emr/patient/patientApi";
 
+import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
+
 export const PatientHome = (props: {
   facilityId?: string;
   id: string;
@@ -173,69 +175,71 @@ export const PatientHome = (props: {
               />
             )}
           </div>
-          <div className="sticky top-20 mt-8 mx-4 md:mx-0 h-full lg:basis-1/6">
-            <section className="mb-4 space-y-2 md:flex">
-              <div className="w-full lg:mx-0">
-                <div className="font-semibold text-secondary-900">
-                  {t("actions")}
-                </div>
-                <div className="mt-2 h-full space-y-2">
-                  <div className="space-y-3 text-left text-lg font-semibold text-secondary-900">
-                    <div className="space-y-2">
-                      <PLUGIN_Component
-                        __name="PatientHomeActions"
-                        patient={patientData}
-                        facilityId={facilityId}
-                        className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
-                      />
+          {Tab !== PatientNotesTab && (
+            <div className="sticky top-20 mt-8 mx-4 md:mx-0 h-full lg:basis-1/6">
+              <section className="mb-4 space-y-2 md:flex">
+                <div className="w-full lg:mx-0">
+                  <div className="font-semibold text-secondary-900">
+                    {t("actions")}
+                  </div>
+                  <div className="mt-2 h-full space-y-2">
+                    <div className="space-y-3 text-left text-lg font-semibold text-secondary-900">
+                      <div className="space-y-2">
+                        <PLUGIN_Component
+                          __name="PatientHomeActions"
+                          patient={patientData}
+                          facilityId={facilityId}
+                          className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </section>
-            <hr className="border-gray-200" />
-            <div
-              id="actions"
-              className="my-2 flex h-full flex-col justify-between space-y-2"
-            >
-              <div className="my-1 rounded-sm py-2">
-                <div>
-                  <div className="text-xs font-normal leading-5 text-gray-600">
-                    {t("last_updated_by")}
-                    <div className="font-semibold text-gray-900">
-                      {patientData.updated_by?.first_name}{" "}
-                      {patientData.updated_by?.last_name}
+              </section>
+              <hr className="border-gray-200" />
+              <div
+                id="actions"
+                className="my-2 flex h-full flex-col justify-between space-y-2"
+              >
+                <div className="my-1 rounded-sm py-2">
+                  <div>
+                    <div className="text-xs font-normal leading-5 text-gray-600">
+                      {t("last_updated_by")}
+                      <div className="font-semibold text-gray-900">
+                        {patientData.updated_by?.first_name}{" "}
+                        {patientData.updated_by?.last_name}
+                      </div>
+                    </div>
+
+                    <div className="whitespace-normal text-xs font-normal text-gray-900">
+                      {patientData.modified_date ? (
+                        <RelativeDateTooltip date={patientData.modified_date} />
+                      ) : (
+                        "--:--"
+                      )}
                     </div>
                   </div>
 
-                  <div className="whitespace-normal text-xs font-normal text-gray-900">
-                    {patientData.modified_date ? (
-                      <RelativeDateTooltip date={patientData.modified_date} />
-                    ) : (
-                      "--:--"
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <div className="text-xs font-normal leading-5 text-gray-600">
-                    {t("patient_profile_created_by")}
-                    <div className="font-semibold text-gray-900">
-                      {patientData.created_by?.first_name}{" "}
-                      {patientData.created_by?.last_name}
+                  <div className="mt-4">
+                    <div className="text-xs font-normal leading-5 text-gray-600">
+                      {t("patient_profile_created_by")}
+                      <div className="font-semibold text-gray-900">
+                        {patientData.created_by?.first_name}{" "}
+                        {patientData.created_by?.last_name}
+                      </div>
                     </div>
-                  </div>
-                  <div className="whitespace-normal text-xs font-normal text-gray-900">
-                    {patientData.created_date ? (
-                      <RelativeDateTooltip date={patientData.created_date} />
-                    ) : (
-                      "--:--"
-                    )}
+                    <div className="whitespace-normal text-xs font-normal text-gray-900">
+                      {patientData.created_date ? (
+                        <RelativeDateTooltip date={patientData.created_date} />
+                      ) : (
+                        "--:--"
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </Page>

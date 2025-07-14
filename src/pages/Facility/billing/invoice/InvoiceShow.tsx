@@ -956,7 +956,7 @@ export function InvoiceShow({
                     title:
                       invoice.status === InvoiceStatus.cancelled
                         ? t("invoice_cancelled")
-                        : t("invoice") + " " + t("entered_in_error"),
+                        : t("invoice_entered_in_error"),
                   });
                 }
 
