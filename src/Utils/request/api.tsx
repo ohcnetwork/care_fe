@@ -484,6 +484,7 @@ const routes = {
       removeUser: {
         method: "POST",
         path: "/api/v1/patient/{patientId}/delete_user/",
+        TBody: Type<{ user: string }>(),
         TRes: Type<{ user: string }>(),
       },
     },

@@ -56,6 +56,7 @@ import {
   isOfflineId,
   normalizeOfflineEncounterRecord,
   saveOfflineWrite,
+  saveOfflineWriteData,
   updateActiveEncounterList,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import routes from "@/Utils/request/api";
@@ -69,7 +70,6 @@ import {
   Encounter,
   EncounterClass,
   EncounterEditRequest,
-  EncounterRequest,
 } from "@/types/emr/encounter/encounter";
 import { Patient } from "@/types/emr/patient/patient";
 
@@ -138,7 +138,7 @@ export default function CreateEncounterForm({
     try {
       const generatedId = `offline-${crypto.randomUUID()}`;
 
-      const offlineWrite = {
+      const offlineWrite: saveOfflineWriteData = {
         id: generatedId,
         userId: authUser.external_id,
         mutationSyncRouteKey: "createEncounter",
@@ -223,7 +223,7 @@ export default function CreateEncounterForm({
   };
 
   async function onSubmit(data: z.infer<typeof encounterFormSchema>) {
-    const encounterRequest: EncounterRequest = {
+    const encounterRequest: EncounterEditRequest = {
       ...data,
       patient: patientId,
       facility: facilityId,

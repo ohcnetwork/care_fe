@@ -668,9 +668,7 @@ const AppointmentActions = ({
         const existingCreateEntry = await db.OfflineWrites.get(appointment.id);
         if (existingCreateEntry?.type === "createAppointment") {
           await db.OfflineWrites.delete(appointment.id);
-          // queryClient.removeQueries({
-          //   queryKey: ["appointment", appointment.id],
-          // });
+
           toast.success(t("unsynced_appointment_cancelled"));
         }
       } else {
@@ -748,7 +746,7 @@ const AppointmentActions = ({
 
     if (!onlineManager.isOnline()) {
       queueCancelAppointmentRecord(
-        { reason: reason },
+        { reason: reason, reason_for_visit: reason_for_visit },
         appointment,
         authUser,
         reason,

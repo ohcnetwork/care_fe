@@ -13,20 +13,24 @@ import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
 import {
   Encounter,
   EncounterEditRequest,
+  EncounterRequest,
 } from "@/types/emr/encounter/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 import {
   Patient,
+  PatientCreate,
   PatientRead,
   PatientUpdate,
 } from "@/types/emr/patient/patient";
 import { Symptom } from "@/types/emr/symptom/symptom";
+import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum, FacilityData } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import {
+  CreateResourceRequest,
   ResourceRequest,
   UpdateResourceRequest,
 } from "@/types/resourceRequest/resourceRequest";
@@ -61,11 +65,6 @@ export type saveOfflineWriteData = {
   resourceType?: string;
   payload: unknown;
   parentMutationIds?: string[];
-  dependentFields?: Array<{
-    parentId: string;
-    childField: string;
-    parentField: string;
-  }>;
   serverTimestamp?: string;
   useQueryRouteKey?: string;
   useQueryPathParams?: Record<string, any>;
@@ -82,7 +81,6 @@ export const saveOfflineWrite = async ({
   mutationQueryParams,
   payload,
   parentMutationIds,
-  dependentFields,
   serverTimestamp,
   useQueryRouteKey,
   useQueryPathParams,
@@ -98,7 +96,7 @@ export const saveOfflineWrite = async ({
     mutationQueryParams,
     payload,
     parentMutationIds,
-    dependentFields,
+
     clientTimestamp: Date.now(),
     serverTimestamp,
     syncStatus: "pending" as const,
@@ -140,6 +138,29 @@ export const getYearOfBirth = (
   return undefined;
 };
 
+// Its use when updating newly created unsynced patient
+export const pickPatientCreateFields = (
+  data: PatientCreate & PatientUpdate,
+): PatientCreate => ({
+  name: data.name,
+  gender: data.gender,
+  phone_number: data.phone_number,
+  emergency_phone_number: data.emergency_phone_number,
+  address: data.address,
+  permanent_address: data.permanent_address,
+  pincode: data.pincode,
+  date_of_birth: data.date_of_birth,
+  deceased_datetime: data.deceased_datetime,
+  blood_group: data.blood_group,
+  nationality: data.nationality,
+  is_updated_offline: data.is_updated_offline,
+  age: data.age,
+  identifiers: data.identifiers,
+  geo_organization: data.geo_organization,
+  facility: data.facility,
+  tags: data.tags,
+});
+
 export const normalizeOfflinePatientRecord = (
   entry: OfflineWritesEntry,
   user: AuthUserModel,
@@ -148,7 +169,7 @@ export const normalizeOfflinePatientRecord = (
   created_date?: string,
   modified_date?: string,
 ): PatientRead => {
-  const payload = entry?.payload as PatientUpdate;
+  const payload = entry?.payload as PatientUpdate | PatientCreate;
   const nowIso = new Date(entry.clientTimestamp).toISOString();
 
   const yob = getYearOfBirth(payload.date_of_birth, payload.age);
@@ -229,7 +250,7 @@ export const normalizeOfflineEncounterRecord = (
   created_date?: string,
   modified_date?: string,
 ): Encounter => {
-  const payload = entry.payload as EncounterEditRequest;
+  const payload = entry.payload as EncounterEditRequest | EncounterRequest; // Encounter Request in case use normalizing function after updating encounter
 
   const facilityData = queryClient.getQueryData<FacilityData>([
     "facility",
@@ -287,7 +308,9 @@ export const normaliZedResourcerequestRecord = (
   modified_date?: string,
   approving_facility?: FacilityModel,
 ): ResourceRequest => {
-  const payload = entry.payload as UpdateResourceRequest;
+  const payload = entry.payload as
+    | UpdateResourceRequest
+    | CreateResourceRequest;
 
   const nowIso = new Date(entry.clientTimestamp).toISOString();
   const originFacilityId = payload.origin_facility;
@@ -333,6 +356,7 @@ export const normalizedAppointmentRecord = (
   status: AppointmentNonCancelledStatus,
   practitioner: UserBase,
   facility: FacilityBareMinimum,
+  selectedTags: TagConfig[],
 ): AppointmentRead => {
   const payload = entry.payload as AppointmentCreateRequest;
   const nowIso = new Date(entry.clientTimestamp).toISOString();
@@ -350,7 +374,7 @@ export const normalizedAppointmentRecord = (
     modified_date: nowIso,
     updated_by: bookedBy ? normalizeUserBase(bookedBy) : null,
     created_by: bookedBy ? normalizeUserBase(bookedBy) : null,
-    tags: [], // have to done changes here
+    tags: selectedTags, // have to done changes here
   };
 };
 

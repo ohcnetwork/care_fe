@@ -31,6 +31,7 @@ import {
   isOfflineId,
   normalizeUserBase,
   saveOfflineWrite,
+  saveOfflineWriteData,
   updateActiveEncounterList,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -94,7 +95,7 @@ export default function EncounterActions({
       toast.error(t("cannot_mark_offline_created_encounter_as_complete"));
       return;
     }
-    const offlineWrite = {
+    const offlineWrite: saveOfflineWriteData = {
       id: encounter.id,
       userId: authUser.external_id,
       mutationSyncRouteKey: "updateEncounter",

@@ -54,6 +54,7 @@ import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import {
   isOfflineId,
   saveOfflineWrite,
+  saveOfflineWriteData,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -127,7 +128,7 @@ function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
         return;
       }
       const generatedId = `offline-${crypto.randomUUID()}`;
-      const offlineWrite = {
+      const offlineWrite: saveOfflineWriteData = {
         id: generatedId,
         userId: authUser.external_id,
         mutationSyncRouteKey: "assignUser",
@@ -176,7 +177,7 @@ function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
       return;
     }
 
-    const assignUserData = {
+    const assignUserData: { user: string; role: string } = {
       user: selectedUser.id,
       role: selectedRole,
     };

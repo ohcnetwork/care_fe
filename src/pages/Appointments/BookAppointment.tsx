@@ -171,6 +171,7 @@ export default function BookAppointment({ patientId }: Props) {
         status,
         selectedPracticioner,
         FacilityBareMinimumData,
+        selectedTags,
       );
 
       queryClient.setQueryData(
@@ -231,12 +232,12 @@ export default function BookAppointment({ patientId }: Props) {
     }
 
     try {
-      const createAppointmentData = {
+      const createAppointmentData: AppointmentCreateRequest = {
         patient: patientId,
         reason_for_visit: reason,
         tags: selectedTags.map((tag) => tag.id),
       };
-
+      console.log("selectedtag: ", selectedTags);
       if (!onlineManager.isOnline()) {
         const status = "booked";
         await queueAppointmentRecordOffline(

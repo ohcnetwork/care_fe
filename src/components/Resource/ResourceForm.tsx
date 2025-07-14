@@ -56,6 +56,7 @@ import {
   isOfflineId,
   normaliZedResourcerequestRecord,
   saveOfflineWrite,
+  saveOfflineWriteData,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -300,7 +301,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           normalizedResource,
         );
       } else {
-        const offlineEntry = {
+        const offlineEntry: saveOfflineWriteData = {
           id: resourceId,
           userId: authUser.external_id,
           mutationSyncRouteKey: "updateResource",
@@ -354,7 +355,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     try {
       const generatedId = `offline-${crypto.randomUUID()}`;
 
-      const offlineEntry = {
+      const offlineEntry: saveOfflineWriteData = {
         id: generatedId,
         userId: authUser.external_id,
         mutationSyncRouteKey: "createResource",

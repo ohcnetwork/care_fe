@@ -60,7 +60,9 @@ import OfflinePatientWarningDialog from "@/OfflineSupport/OfflinePatientCreateWa
 import {
   getYearOfBirth,
   normalizeOfflinePatientRecord,
+  pickPatientCreateFields,
   saveOfflineWrite,
+  saveOfflineWriteData,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import { PLUGIN_Component } from "@/PluginEngine";
 import dayjs from "@/Utils/dayjs";
@@ -73,7 +75,6 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import {
   BloodGroupChoices,
-  Patient,
   PatientCreate,
   PatientIdentifierCreate,
   PatientRead,
@@ -311,14 +312,24 @@ export default function PatientRegistration(
     }
     try {
       const entry = await db.OfflineWrites.get(patientId);
+      const permissions = patientQuery.data?.permissions ?? [];
       if (entry) {
-        const updatedEntry = {
-          ...entry,
-          payload: {
-            ...(entry.payload as Patient),
-            ...updatePatientData,
-          },
-        };
+        const isCreateType = entry.type === "createPatient";
+        const updatedEntry = isCreateType
+          ? {
+              ...entry,
+              payload: pickPatientCreateFields({
+                ...(entry.payload as PatientCreate),
+                ...updatePatientData,
+              }),
+            }
+          : {
+              ...entry,
+              payload: {
+                ...(entry.payload as PatientUpdate),
+                ...updatePatientData,
+              },
+            };
         await db.OfflineWrites.update(patientId, updatedEntry);
         const permissions = patientQuery.data?.permissions || [];
 
@@ -331,7 +342,7 @@ export default function PatientRegistration(
 
         queryClient.setQueryData(["patient", patientId], normalizePatient);
       } else {
-        const offlineWrite = {
+        const offlineWrite: saveOfflineWriteData = {
           id: patientId,
           userId: user.external_id,
           mutationSyncRouteKey: "updatePatient",
@@ -348,8 +359,6 @@ export default function PatientRegistration(
           toast.error(saveResult.error);
           return;
         }
-
-        const permissions = patientQuery.data?.permissions || [];
 
         const normalizePatient = normalizeOfflinePatientRecord(
           saveResult.entry,
@@ -375,7 +384,7 @@ export default function PatientRegistration(
     try {
       const generatedId = `offline-${crypto.randomUUID()}`;
 
-      const offlineWrite = {
+      const offlineWrite: saveOfflineWriteData = {
         id: generatedId,
         userId: user.external_id,
         mutationSyncRouteKey: "addPatient",
@@ -433,7 +442,7 @@ export default function PatientRegistration(
     }) as PatientIdentifierCreate[];
 
     if (patientId) {
-      const updatePatientData = {
+      const updatePatientData: PatientUpdate = {
         ...values,
         age: values.age_or_dob === "age" ? values.age : undefined,
         date_of_birth:
@@ -453,7 +462,7 @@ export default function PatientRegistration(
       } else updatePatient(updatePatientData);
       return;
     } else if (facilityId) {
-      const createPatientData = {
+      const createPatientData: PatientCreate = {
         ...values,
         emergency_phone_number: values.same_phone_number
           ? values.phone_number
