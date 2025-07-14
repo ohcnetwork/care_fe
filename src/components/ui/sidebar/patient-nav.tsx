@@ -3,14 +3,12 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { NavMain } from "@/components/ui/sidebar/nav-main";
+import { NavMain, NavigationLink } from "@/components/ui/sidebar/nav-main";
 import { PatientSwitcher } from "@/components/ui/sidebar/patient-switcher";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
-import { Patient } from "@/types/emr/patient";
-
-import { NavigationLink } from "./facility-nav";
+import { Patient } from "@/types/emr/patient/patient";
 
 function generatePatientLinks(
   selectedUser: Patient | null,

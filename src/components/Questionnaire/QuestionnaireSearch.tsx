@@ -43,11 +43,6 @@ interface QuestionnaireSearchProps {
   size?: "default" | "sm" | "xs" | "lg";
 }
 
-interface QuestionnaireListResponse {
-  results: QuestionnaireDetail[];
-  count: number;
-}
-
 export function QuestionnaireSearch({
   placeholder,
   size = "default",
@@ -60,19 +55,18 @@ export function QuestionnaireSearch({
   const [search, setSearch] = useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
 
-  const { data: questionnaires, isLoading } =
-    useQuery<QuestionnaireListResponse>({
-      queryKey: ["questionnaires", "list", search, subjectType],
-      queryFn: query.debounced(questionnaireApi.list, {
-        queryParams: {
-          title: search,
-          ...conditionalAttribute(!!subjectType, {
-            subject_type: subjectType,
-          }),
-          status: "active",
-        },
-      }),
-    });
+  const { data: questionnaires, isLoading } = useQuery({
+    queryKey: ["questionnaires", "list", search, subjectType],
+    queryFn: query.debounced(questionnaireApi.list, {
+      queryParams: {
+        title: search,
+        ...conditionalAttribute(!!subjectType, {
+          subject_type: subjectType,
+        }),
+        status: "active",
+      },
+    }),
+  });
 
   useEffect(() => {
     if (isOpen) {
