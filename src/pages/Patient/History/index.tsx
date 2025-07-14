@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -21,8 +21,7 @@ export function ClinicalHistoryPage({
   tab: string;
 }) {
   const { t } = useTranslation();
-  const params = new URLSearchParams(window.location.search);
-  const sourceUrl = params.get("sourceUrl");
+  const [{ sourceUrl }] = useQueryParams();
 
   const handleClose = () => {
     navigate(sourceUrl || `/facility/${facilityId}/patient/${patientId}`);
