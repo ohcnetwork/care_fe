@@ -89,7 +89,7 @@ function TagConfigCard({
             </div>
             <h3 className="font-medium text-gray-900">{config.display}</h3>
             <p className="mt-1 text-sm text-gray-500 capitalize">
-              {config.resource} | Priority: {config.priority}
+              {t(config.resource)} | {t("priority")}: {config.priority}
             </p>
             {config.description && (
               <p className="mt-2 text-sm text-gray-600">{config.description}</p>
