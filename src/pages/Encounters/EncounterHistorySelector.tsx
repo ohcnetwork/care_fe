@@ -42,7 +42,7 @@ function EncounterCard({
   return (
     <Card
       className={cn(
-        "rounded-md relative cursor-pointer transition-colors mb-2 w-full md:w-80",
+        "rounded-md relative cursor-pointer transition-colors mb-2 w-full lg:w-80",
         isSelected
           ? "bg-white border-emerald-600"
           : "bg-gray-100 hover:bg-gray-100 shadow-none",
@@ -187,7 +187,7 @@ export default function EncounterHistorySelector() {
 
   return (
     <>
-      <div className="md:hidden">
+      <div className="lg:hidden">
         <h2 className="px-2 mb-2 text-xs font-medium text-gray-600 uppercase">
           {t("selected_encounter")}
         </h2>
@@ -205,7 +205,7 @@ export default function EncounterHistorySelector() {
           </SheetContent>
         </Sheet>
       </div>
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
         <EncounterHistoryList />
       </div>
     </>
@@ -222,7 +222,7 @@ const EncounterSheetTrigger = () => {
   }
 
   return (
-    <Card className="rounded-md relative cursor-pointer mb-2 w-full md:w-80 bg-white border-emerald-600">
+    <Card className="rounded-md relative cursor-pointer mb-2 w-full lg:w-80 bg-white border-emerald-600">
       <CardContent className="px-4 py-3">
         <div className="flex justify-between items-center">
           <div className="flex flex-col gap-1">
