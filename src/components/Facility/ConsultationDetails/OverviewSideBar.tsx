@@ -16,6 +16,7 @@ import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSea
 
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
+import { formatDateTime, formatName } from "@/Utils/utils";
 import EncounterProperties from "@/pages/Encounters/EncounterProperties";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { Encounter } from "@/types/emr/encounter/encounter";
@@ -41,6 +42,7 @@ export default function SideOverview({ encounter, canEdit }: Props) {
         {!readOnly && canEdit && <Questionnaires encounter={encounter} />}
         <Locations canEdit={canEdit} encounter={encounter} />
         <DepartmentsAndTeams canEdit={canEdit} encounter={encounter} />
+        <AuditLogs encounter={encounter} />
       </div>
     </div>
   );
@@ -253,13 +255,38 @@ const DepartmentsAndTeams = ({
             currentOrganizations={encounter.organizations}
             facilityId={encounter.facility.id}
             trigger={
-              <Button variant="outline" size="sm" className="w-full">
+              <Button variant="outline" className="w-full">
                 <Building className="size-4 mr-2" />
                 {t("update_department")}
               </Button>
             }
           />
         )}
+      </div>
+    </div>
+  );
+};
+
+const AuditLogs = ({ encounter }: { encounter: Encounter }) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="bg-gray-100 border border-gray-200 rounded-lg p-2">
+      <div className="space-y-2">
+        <div>
+          <p className="text-sm text-gray-500">{t("created_by")}</p>
+          <p className="text-sm">{formatName(encounter.created_by)}</p>
+          <p className="text-xs text-gray-500">
+            {formatDateTime(encounter.created_date)}
+          </p>
+        </div>
+        <div>
+          <p className="text-sm text-gray-500">{t("last_modified_by")}</p>
+          <p className="text-sm">{formatName(encounter.updated_by)}</p>
+          <p className="text-xs text-gray-500">
+            {formatDateTime(encounter.modified_date)}
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -293,23 +293,23 @@ const AppointmentDetails = ({
               {appointment.reason_for_visit || t("no_reason_provided")}
             </p>
           </div>
-          {appointment.tags?.length > 0 && (
-            <div className="text-sm">
-              <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
-                <p className="font-medium">{t("tags")}</p>
-                <TagAssignmentSheet
-                  entityType="appointment"
-                  entityId={appointment.id}
-                  facilityId={facility.id}
-                  currentTags={appointment.tags}
-                  onUpdate={() => {
-                    queryClient.invalidateQueries({
-                      queryKey: ["appointment", appointment.id],
-                    });
-                  }}
-                  canWrite={true}
-                />
-              </div>
+          <div className="text-sm">
+            <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
+              <p className="font-medium">{t("tags")}</p>
+              <TagAssignmentSheet
+                entityType="appointment"
+                entityId={appointment.id}
+                facilityId={facility.id}
+                currentTags={appointment.tags}
+                onUpdate={() => {
+                  queryClient.invalidateQueries({
+                    queryKey: ["appointment", appointment.id],
+                  });
+                }}
+                canWrite={true}
+              />
+            </div>
+            {appointment.tags?.length > 0 ? (
               <p className="text-gray-600 flex flex-wrap gap-1">
                 {appointment.tags.map((tag) => (
                   <Badge key={tag.id} variant="secondary">
@@ -318,8 +318,10 @@ const AppointmentDetails = ({
                   </Badge>
                 ))}
               </p>
-            </div>
-          )}
+            ) : (
+              <p className="text-gray-600 md:-mt-2">{t("no_tags_assigned")}</p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
