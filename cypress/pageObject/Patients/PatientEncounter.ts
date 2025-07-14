@@ -296,6 +296,7 @@ export class PatientEncounter {
   }
 
   verifyItemDelete(name: string) {
+    cy.wait(500); // Wait for the deletion to reflect in the UI
     cy.get("body").should("not.contain", name);
     return this;
   }
