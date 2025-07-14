@@ -18,7 +18,6 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
-import { FacilityModel } from "@/components/Facility/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import { usePatientContext } from "@/hooks/usePatientUser";
@@ -63,12 +62,10 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);
   }
 
-  const { data: appointmentData } = useQuery<{ results: Appointment[] }>({
+  const { data: appointmentData } = useQuery({
     queryKey: ["appointment", tokenData?.phoneNumber],
     queryFn: query(PublicAppointmentApi.getAppointments, {
-      headers: {
-        Authorization: `Bearer ${tokenData?.token}`,
-      },
+      headers: { Authorization: `Bearer ${tokenData?.token}` },
     }),
     enabled: !!appointmentId && !!tokenData?.token,
   });
@@ -83,14 +80,13 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     }
   }, [appointment]);
 
-  const { data: facilityResponse, error: facilityError } =
-    useQuery<FacilityModel>({
-      queryKey: ["facility", facilityId],
-      queryFn: query(routes.getAnyFacility, {
-        pathParams: { id: facilityId },
-        silent: true,
-      }),
-    });
+  const { data: facilityResponse, error: facilityError } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getAnyFacility, {
+      pathParams: { id: facilityId },
+      silent: true,
+    }),
+  });
 
   if (facilityError) {
     toast.error(t("error_fetching_facility_data"));

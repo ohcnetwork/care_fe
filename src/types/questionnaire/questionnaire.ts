@@ -1,4 +1,5 @@
-import { Code } from "./code";
+import { Code } from "@/types/base/code/code";
+
 import { Question } from "./question";
 import { QuestionnaireTagModel } from "./tags";
 

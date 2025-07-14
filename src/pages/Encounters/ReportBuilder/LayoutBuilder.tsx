@@ -2,6 +2,7 @@ import { useState } from "react";
 import { UseFormReturn, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import RadioInput from "@/components/ui/RadioInput";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -32,8 +33,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-
-import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import { ReportTemplateFormData } from "@/pages/Encounters/ReportBuilder/schema";
 import {
@@ -95,9 +94,7 @@ export default function LayoutBuilder({ form }: LayoutBuilderProps) {
     <Card>
       <CardHeader>
         <CardTitle>{t("layout")}</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          {t("layout_description")}
-        </p>
+        <p className="text-sm">{t("layout_description")}</p>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Page Size */}
