@@ -24,7 +24,21 @@ fs.writeFileSync(
   JSON.stringify(namespaceMapping, null, 2),
 );
 
-export default [
+const isPreCommit = process.env.PRE_COMMIT === "true";
+const DEFAULT = true;
+
+const dynamicRules = (ruleset) => {
+  const appliedRule = Object.entries(ruleset).find(([rule, condition]) => {
+    return condition === true;
+  });
+  if (appliedRule) {
+    const [rule] = appliedRule;
+    return rule;
+  }
+  return "off";
+};
+
+const config = [
   // Base configuration
   {
     ignores: [
@@ -94,6 +108,10 @@ export default [
         { allowShortCircuit: true, allowTernary: true },
       ],
       "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-deprecated": dynamicRules({
+        error: isPreCommit,
+        warn: DEFAULT,
+      }),
       "no-undef": "off",
     },
   },
@@ -177,3 +195,7 @@ export default [
   // Add prettier recommended config last
   eslintPluginPrettierRecommended,
 ];
+
+// console.log(config);
+
+export default config;
