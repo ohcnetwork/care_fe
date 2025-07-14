@@ -12,6 +12,7 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
+import { useSidebarAutoCollapse } from "@/hooks/useSidebarAutoCollapse";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -50,9 +51,6 @@ const defaultTabs = {
   notes: EncounterNotesTab,
   devices: EncounterDevicesTab,
   consents: EncounterConsentsTab,
-  // nursing: EncounterNursingTab,
-  // neurological_monitoring: EncounterNeurologicalMonitoringTab,
-  // pressure_sore: EncounterPressureSoreTab,
   service_requests: EncounterServiceRequestTab,
   diagnostic_reports: EncounterDiagnosticReportsTab,
 } as const;
@@ -72,6 +70,8 @@ export const EncounterShow = (props: Props) => {
     patient,
     isPatientLoading,
   } = useEncounter();
+
+  useSidebarAutoCollapse({ restore: false });
 
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -93,16 +93,7 @@ export const EncounterShow = (props: Props) => {
     patient?.permissions ?? [],
   );
 
-  // const { canWriteEncounter } = getPermissions(
-  //   hasPermission,
-  //   facilityData?.permissions ?? [],
-  // );
-
   const canAccess = canViewClinicalData || canViewEncounter;
-
-  // const canWrite =
-  //   canWriteEncounter &&
-  //   !inactiveEncounterStatus.includes(currentEncounter?.status ?? "");
 
   useEffect(() => {
     if (!isCurrentEncounterLoading && !isPatientLoading && !canAccess) {
@@ -134,11 +125,11 @@ export const EncounterShow = (props: Props) => {
   return (
     <Page title={t("encounter")} className="block" hideTitleOnPage>
       <EncounterHeader />
-      <div className="flex flex-col md:flex-row gap-6 mt-4">
+      <div className="flex flex-col lg:flex-row gap-6 mt-4">
         {!inactiveEncounterStatus.includes(currentEncounter.status) && (
           <EncounterHistorySelector />
         )}
-        <div className="w-full">
+        <div className="w-full overflow-x-auto">
           <div className="w-full border-b-2 border-secondary-200">
             <div className="overflow-x-auto sm:flex sm:items-baseline">
               <div className="mt-4 sm:mt-0">
