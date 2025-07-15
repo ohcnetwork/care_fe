@@ -62,11 +62,7 @@ function Avatar({
   return (
     <AvatarPrimitive.Root
       data-slot="avatar"
-      className={cn(
-        "aspect-square size-full rounded-md relative overflow-hidden",
-        !imageUrl && "bg-white",
-        className,
-      )}
+      className={cn("aspect-square size-full rounded-md", className)}
       style={{
         background: bgColor,
       }}
@@ -77,7 +73,7 @@ function Avatar({
         src={imageUrl}
         alt={name}
         className={cn(
-          "aspect-square size-full object-cover rounded-md transition-opacity duration-300",
+          "aspect-square size-full object-cover rounded-md",
           !hasImageError ? "opacity-100" : "opacity-0",
           className,
         )}
