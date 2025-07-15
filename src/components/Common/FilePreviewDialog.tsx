@@ -106,6 +106,8 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
     scale: number;
   } | null>(null);
 
+  const [isPanning, setIsPanning] = useState(false);
+
   const getTouchDistance = (touches: TouchList) => {
     if (touches.length < 2) return 0;
     const touch1 = touches[0];
@@ -325,11 +327,15 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                     pinch={{ step: 5 }}
                     doubleClick={{ disabled: false, step: 0.7 }}
                     panning={{ velocityDisabled: true }}
+                    onPanning={() => setIsPanning(true)}
+                    onPanningStop={() => setIsPanning(false)}
                   >
                     <TransformComponent
                       wrapperStyle={{ width: "100%", height: "100%" }}
                       contentStyle={{ width: "100%", height: "100%" }}
-                      wrapperClass="cursor-grab"
+                      wrapperClass={
+                        isPanning ? "cursor-grabbing" : "cursor-grab"
+                      }
                     >
                       <img
                         src={fileUrl}
