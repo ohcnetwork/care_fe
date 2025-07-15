@@ -1,7 +1,9 @@
-import { Info, X } from "lucide-react";
+import { BadgeInfo, X } from "lucide-react";
 import { navigate, usePathParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,7 +47,7 @@ const DiagnosisRow = ({
       <div className="flex items-center justify-center px-2  border border-gray-200">
         <Badge
           variant={DIAGNOSIS_CLINICAL_STATUS_COLORS[diagnosis.clinical_status]}
-          className="whitespace-nowrap text-sm px-1"
+          className="whitespace-nowrap"
         >
           {t(diagnosis.clinical_status)}
         </Badge>
@@ -56,7 +58,7 @@ const DiagnosisRow = ({
           variant={
             DIAGNOSIS_VERIFICATION_STATUS_COLORS[diagnosis.verification_status]
           }
-          className="whitespace-nowrap text-sm px-1"
+          className="whitespace-nowrap"
         >
           {t(diagnosis.verification_status)}
         </Badge>
@@ -77,7 +79,7 @@ const DiagnosisRow = ({
               variant="link"
               className="text-gray-500 hover:text-gray-700"
             >
-              <Info size={16} />
+              <BadgeInfo size={16} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56">
@@ -117,21 +119,19 @@ const DiagnosisRow = ({
       </div>
 
       {showNote && diagnosis.note && (
-        <div className="col-span-full border border-gray-200 p-2 pt-4 bg-gray-50 rounded -mt-3 rounded-t-none">
-          <div className="flex flex-row w-full justify-between">
-            <div className="text-sm font-semibold text-gray-800">
-              {t("note")} :
-            </div>
-            <Button
-              variant={null}
-              className="size-6 p-0"
-              onClick={() => setShowNote(false)}
-            >
-              <X size={14} />
-              <span className="sr-only">{t("close")}</span>
-            </Button>
-          </div>
-          <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8 max-w-full break-words break-all">
+        <div className="col-span-full relative border border-gray-200 p-2 pt-4 bg-gray-50 rounded -mt-3 rounded-t-none">
+          <div className="font-semibold text-gray-800">{t("note")}:</div>
+
+          <Button
+            variant={null}
+            className="absolute top-2 right-4 flex items-center gap-1 p-0 text-sm"
+            onClick={() => setShowNote(false)}
+          >
+            <X size={14} />
+            <span className="underline">{t("hide_note")}</span>
+          </Button>
+
+          <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8 max-w-full break-words mt-2">
             {diagnosis.note}
           </p>
         </div>
@@ -153,7 +153,7 @@ const DiagnosisCard = ({
   const { t } = useTranslation();
   return (
     <div className="border rounded-md p-4 bg-white">
-      <div className="flex justify-between items-start flex-wrap gap-2">
+      <div className="flex justify-between items-start flex-wrap gap-3">
         <div className="flex-1 font-semibold text-gray-900 break-words">
           {diagnosis.code.display}
         </div>
@@ -173,7 +173,7 @@ const DiagnosisCard = ({
                 variant="link"
                 className="text-gray-500 hover:text-gray-700 p-1"
               >
-                <Info size={16} />
+                <BadgeInfo size={16} />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
@@ -236,17 +236,21 @@ const DiagnosisCard = ({
         </div>
       </div>
       {showNote && diagnosis.note && (
-        <div className="relative border border-gray-200 rounded-md p-3 bg-gray-50 mt-3">
-          <Button
-            variant={null}
-            size="sm"
-            className="absolute top-2 right-2 size-6 p-0"
-            onClick={() => setShowNote(false)}
-          >
-            <X size={14} />
-            <span className="sr-only">{t("close")}</span>
-          </Button>
-          <p className="break-words whitespace-pre-wrap pr-8 text-sm text-gray-700">
+        <div className="col-span-full border border-gray-200 p-2 bg-white rounded mt-2">
+          <div className="flex flex-row w-full justify-between">
+            <div className="text-sm font-semibold text-gray-800">
+              {t("note")} :
+            </div>
+            <Button
+              variant={null}
+              className="size-6"
+              onClick={() => setShowNote(false)}
+            >
+              <X size={14} />
+              <span className="sr-only">{t("close")}</span>
+            </Button>
+          </div>
+          <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8 max-w-full break-words">
             {diagnosis.note}
           </p>
         </div>
@@ -265,6 +269,8 @@ export const DiagnosisTable = ({
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityId = subpathMatch?.facilityId;
   const isMobile = useIsMobile();
+  const baseHeaderClasses =
+    "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700";
 
   return isMobile ? (
     <div className="space-y-2">
@@ -281,11 +287,21 @@ export const DiagnosisTable = ({
     <div className="max-w-6xl mx-auto mb-4 overflow-x-auto">
       <div className="min-w-xl pb-2">
         <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-y-2">
-          <div className="px-2 text-base">{t("diagnosis")}</div>
-          <div className="px-2 text-center text-base">{t("status")}</div>
-          <div className="px-2 text-center text-base">{t("verification")}</div>
-          <div className="px-2 text-center text-base">{t("onset")}</div>
-          <div className="px-2 text-center"></div>
+          <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700">
+            {t("diagnosis")}
+          </div>
+
+          <div className={cn(baseHeaderClasses, "border-r")}>{t("status")}</div>
+
+          <div className={cn(baseHeaderClasses)}>{t("verification")}</div>
+
+          <div className={cn(baseHeaderClasses, "border-l")}>{t("onset")}</div>
+
+          <div
+            className={cn(
+              "text-center border border-l-0 border-gray-200 rounded-tr-lg bg-gray-50",
+            )}
+          ></div>
 
           {diagnoses.map((diagnosis) => (
             <DiagnosisRow

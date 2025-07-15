@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { DropletIcon, HandIcon, Plus } from "lucide-react";
+import { DropletIcon, Plus } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -102,13 +102,21 @@ export const EncounterOverviewTab = () => {
                     <span className="text-sm font-medium text-gray-600">
                       {t("allergies")}:
                     </span>
-                    <Badge variant="yellow">
-                      <HandIcon className="size-4" />
-                      <span>
+                    <Badge variant="yellow" className="flex items-start">
+                      <img
+                        src="/images/Allergic-hand.svg"
+                        alt="allergic hand"
+                        className="size-5 m-0.5"
+                      />
+                      <div>
                         {allergies?.results
+                          .slice(0, 3)
                           .map((allergy) => allergy.code.display)
                           .join(", ")}
-                      </span>
+                        {allergies && allergies.results.length > 3 && (
+                          <> + {allergies.results.length - 3}</>
+                        )}
+                      </div>
                     </Badge>
                   </div>
                 )}

@@ -1,7 +1,9 @@
-import { Info, X } from "lucide-react";
+import { BadgeInfo, X } from "lucide-react";
 import { navigate, usePathParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,7 +46,7 @@ const SymptomRow = ({
       <div className="flex items-center justify-center px-2 border-t border-b border-gray-200">
         <Badge
           variant={SYMPTOM_SEVERITY_COLORS[symptom.severity]}
-          className="whitespace-nowrap text-sm px-1"
+          className="whitespace-nowrap"
         >
           {t(symptom.severity)}
         </Badge>
@@ -53,7 +55,7 @@ const SymptomRow = ({
       <div className="flex items-center justify-center px-2 border border-gray-200">
         <Badge
           variant={SYMPTOM_CLINICAL_STATUS_COLORS[symptom.clinical_status]}
-          className="whitespace-nowrap text-sm px-1"
+          className="whitespace-nowrap"
         >
           {t(symptom.clinical_status)}
         </Badge>
@@ -64,7 +66,7 @@ const SymptomRow = ({
           variant={
             SYMPTOM_VERIFICATION_STATUS_COLORS[symptom.verification_status]
           }
-          className="whitespace-nowrap text-sm px-1"
+          className="whitespace-nowrap"
         >
           {t(symptom.verification_status)}
         </Badge>
@@ -85,7 +87,7 @@ const SymptomRow = ({
               variant="link"
               className="text-gray-500 hover:text-gray-700"
             >
-              <Info size={16} />
+              <BadgeInfo size={16} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56">
@@ -125,21 +127,19 @@ const SymptomRow = ({
       </div>
 
       {showNote && symptom.note && (
-        <div className="col-span-full border border-gray-200 p-2 pt-4 bg-gray-50 rounded -mt-3 rounded-t-none">
-          <div className="flex flex-row w-full justify-between">
-            <div className="text-sm font-semibold text-gray-800">
-              {t("note")} :
-            </div>
-            <Button
-              variant={null}
-              className="size-6 p-0"
-              onClick={() => setShowNote(false)}
-            >
-              <X size={14} />
-              <span className="sr-only">{t("close")}</span>
-            </Button>
-          </div>
-          <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8 max-w-full break-words break-all">
+        <div className="col-span-full relative border border-gray-200 p-2 pt-4 bg-gray-50 rounded -mt-3 rounded-t-none">
+          <div className="font-semibold text-gray-800">{t("note")}:</div>
+
+          <Button
+            variant={null}
+            className="absolute top-2 right-4 flex items-center gap-1 p-0 text-sm"
+            onClick={() => setShowNote(false)}
+          >
+            <X size={14} />
+            <span className="underline">{t("hide_note")}</span>
+          </Button>
+
+          <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8 max-w-full break-words mt-2">
             {symptom.note}
           </p>
         </div>
@@ -158,17 +158,29 @@ export const SymptomTable = ({
   const { t } = useTranslation();
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityId = subpathMatch?.facilityId;
-
+  const baseHeaderClasses =
+    "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700";
   return (
     <div className="max-w-6xl overflow-x-auto">
       <div className="min-w-xxl pb-2">
         <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-y-2">
-          <div className="px-2 text-base">{t("symptom")}</div>
-          <div className="px-2 text-center text-base">{t("severity")}</div>
-          <div className="px-2 text-center text-base">{t("status")}</div>
-          <div className="px-2 text-center text-base">{t("verification")}</div>
-          <div className="px-2 text-center text-base">{t("onset")}</div>
-          <div className="px-2 text-center"></div>
+          <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700">
+            {t("symptom")}
+          </div>
+
+          <div className={cn(baseHeaderClasses)}>{t("severity")}</div>
+
+          <div className={cn(baseHeaderClasses, "border-x")}>{t("status")}</div>
+
+          <div className={cn(baseHeaderClasses)}>{t("verification")}</div>
+
+          <div className={cn(baseHeaderClasses, "border-l")}>{t("onset")}</div>
+
+          <div
+            className={cn(
+              "text-center border border-l-0 border-gray-200 rounded-tr-lg bg-gray-50",
+            )}
+          ></div>
 
           {symptoms.map((symptom) => (
             <SymptomRow
