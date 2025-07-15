@@ -78,13 +78,6 @@ export function EncounterHeader() {
                 : t("ongoing")}
             </span>
           </div>
-          <div className="flex md:flex-col gap-0.5 items-center md:items-start">
-            <span className="text-xs text-gray-600 w-32 md:w-auto">
-              {t("hospital_identifier")}:{" "}
-            </span>
-            {/* TODO: implement this once we have it */}
-            <span className="text-sm font-semibold">--</span>
-          </div>
         </div>
         <div className="md:hidden">
           <EncounterProperties encounter={encounter} canEdit={false} />
