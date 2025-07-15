@@ -139,7 +139,9 @@ export default function AppointmentDetail(props: Props) {
       query: {
         phone_number: patient.phone_number,
         year_of_birth: patient.year_of_birth,
-        partial_id: patient.id.slice(0, 5),
+        partial_id: !isOfflineId(patient.id)
+          ? patient.id.slice(0, 5)
+          : patient.id,
       },
     });
   };

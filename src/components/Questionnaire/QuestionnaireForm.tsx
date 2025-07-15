@@ -71,7 +71,8 @@ import { isQuestionEnabled } from "./QuestionTypes/QuestionGroup";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import {
   FIXED_QUESTIONNAIRES,
-  FIXED_QUESTIONNAIRE_REFERENCE_IDS,
+  STRUCTURED_QUESTIONS,
+  StructuredQuestionnaireReferenceId,
 } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
 
@@ -365,6 +366,7 @@ export function QuestionnaireForm({
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
   const db = new AppCacheDB();
+
   const {
     data: questionnaireData,
     isLoading: isQuestionnaireLoading,
@@ -570,6 +572,21 @@ export function QuestionnaireForm({
 
   const hasErrors = questionnaireForms.some((form) => form.errors.length > 0);
 
+  const assertNever = (x: never): never => {
+    throw new Error(`Unhandled structured questionnaire: ${x}`);
+  };
+
+  function cleanForCreate<T extends Record<string, any>>(entry: T): T {
+    const cleaned = { ...entry };
+    delete cleaned.id;
+    delete cleaned.created_date;
+    delete cleaned.updated_date;
+    delete cleaned.created_by;
+    delete cleaned.modified_date;
+    delete cleaned.updated_by;
+    return cleaned;
+  }
+  // for files/appointment/timeof death types question
   const generateAppendOnlyBatchAndQueue = async (
     reference_id: string,
     queryClient: QueryClient,
@@ -647,8 +664,11 @@ export function QuestionnaireForm({
     const newDatapoints: any[] = [];
     matchingRequests.forEach((req) => {
       req.body?.datapoints?.forEach((dp: any) => {
-        const copy = { ...dp };
-        if (copy.id?.startsWith("offline-")) delete copy.id;
+        let copy = { ...dp };
+        if (copy.id?.startsWith("offline-")) {
+          // Remove id and metadata from offline-created items to avoid backend treating them as updates instead of create.
+          copy = cleanForCreate(copy);
+        }
         newDatapoints.push(copy);
       });
     });
@@ -747,8 +767,12 @@ export function QuestionnaireForm({
     const mergedDatapoints: any[] = [];
     matchingRequests.forEach((req) => {
       req.body?.datapoints?.forEach((dp: any) => {
-        const copy = { ...dp };
-        if (copy.id?.startsWith("offline-")) delete copy.id;
+        let copy = { ...dp };
+
+        if (copy.id?.startsWith("offline-")) {
+          // Remove id and metadata from offline-created items to avoid backend treating them as updates.
+          copy = cleanForCreate(copy);
+        }
         mergedDatapoints.push(copy);
       });
     });
@@ -903,14 +927,18 @@ export function QuestionnaireForm({
     const parentID = encounterId ? encounterId : patientId;
 
     try {
-      const fixedQuestionnaires = questionnairPaylod.requests.filter((q) =>
-        FIXED_QUESTIONNAIRE_REFERENCE_IDS.has(q.reference_id),
+      const structuredQuestionnaires = questionnairPaylod.requests.filter(
+        (
+          q,
+        ): q is (typeof questionnairPaylod.requests)[number] & {
+          reference_id: StructuredQuestionnaireReferenceId;
+        } => STRUCTURED_QUESTIONS.some((s) => s.value === q.reference_id),
       );
-      const nonFixedQuestionnaires = questionnairPaylod.requests.filter(
-        (q) => !FIXED_QUESTIONNAIRE_REFERENCE_IDS.has(q.reference_id),
+      const nonStructuredQuestionnaires = questionnairPaylod.requests.filter(
+        (q) => !STRUCTURED_QUESTIONS.some((s) => s.value === q.reference_id),
       );
 
-      for (const fixedQ of fixedQuestionnaires) {
+      for (const fixedQ of structuredQuestionnaires) {
         switch (fixedQ.reference_id) {
           case "encounter":
             await generateEncounterBatchAndQueue(
@@ -945,7 +973,12 @@ export function QuestionnaireForm({
             );
             break;
 
-          default:
+          case "allergy_intolerance":
+          case "medication_request":
+          case "symptom":
+          case "medication_statement":
+          case "charge_item":
+          case "service_request":
             await generateFixedDatapointTypeBatchAndQueue(
               fixedQ.reference_id,
               queryClient,
@@ -955,10 +988,17 @@ export function QuestionnaireForm({
               encounterId,
             );
             break;
+
+          default:
+            assertNever(fixedQ.reference_id);
+          /* if compile error is : Argument of type 'any' is not assignable to parameter of type 'never'
+            then you have not handle all the strucured Questionnair properly either added new one or removed
+            It help us to sync offline code path whenver something change  in questionnair that affect offline func
+            **/
         }
       }
 
-      if (nonFixedQuestionnaires.length <= 0) {
+      if (nonStructuredQuestionnaires.length <= 0) {
         setServerErrors(undefined);
         toast.success(t("questionnaire_submitted_successfully"));
         onSubmit?.();
@@ -973,7 +1013,7 @@ export function QuestionnaireForm({
         mutationSyncRouteKey: "submitQuestionnaire",
         type: "nonFixedQuestionnaire",
         resourceType: "Questionnaire",
-        payload: { requests: nonFixedQuestionnaires },
+        payload: { requests: nonStructuredQuestionnaires },
         parentMutationIds: isOfflineId(parentID) ? [parentID] : [],
       };
 
@@ -981,10 +1021,10 @@ export function QuestionnaireForm({
       if (!saveResult.success) {
         toast.error(t("unable_to_queue_non_structured_questions"));
       }
-      //  Handle caching & UI for non-fixed questionnaires
+      //  Handle caching & updating UI for non-fixed questionnaires
       cacheQuestionnairResponse(
         queryClient,
-        { requests: nonFixedQuestionnaires },
+        { requests: nonStructuredQuestionnaires },
         authUser,
         patientId,
         encounterId,

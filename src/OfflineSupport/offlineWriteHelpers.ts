@@ -695,12 +695,13 @@ export const normalizeAndUpdateDiagnosis = (
       : [];
 
     const merged = [...filteredResults, ...normalizedDiagnosisResult];
-
+    console.log("merged : ", key, merged);
     queryClient.setQueryData<PaginatedResponse<Diagnosis>>(key, {
+      ...prev,
       count: merged.length,
       results: merged,
-      ...prev,
     });
+    console.log(key, queryClient.getQueryData(key));
   }
   // Update patietn-scoped cache
   const encounterDiagnosisResults =
@@ -747,6 +748,9 @@ export const normalizeAndUpdateMedication_Request = (
     });
   queryClient.removeQueries({
     queryKey: ["medication_requests", patientID, encounterID],
+  });
+  queryClient.removeQueries({
+    queryKey: ["medication_requests_active", patientID, encounterID],
   });
 
   mergeAndUpdatePaginatedCache<MedicationRequestRead>(

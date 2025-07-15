@@ -258,6 +258,9 @@ export const STRUCTURED_QUESTIONS = [
   },
 ] as const;
 
+export type StructuredQuestionnaireReferenceId =
+  (typeof STRUCTURED_QUESTIONS)[number]["value"];
+
 export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireDetail> =
   STRUCTURED_QUESTIONS.reduce(
     (acc, question) => {
