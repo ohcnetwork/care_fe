@@ -1,7 +1,7 @@
 import { CheckIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { XIcon } from "lucide-react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -74,7 +74,7 @@ export const MultiPractitionerSelector = ({
         {selected && selected.length > 0 && (
           <div className="flex items-center gap-1">
             {selected.map((user) => (
-              <>
+              <Fragment key={user.id}>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -94,7 +94,7 @@ export const MultiPractitionerSelector = ({
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-              </>
+              </Fragment>
             ))}
           </div>
         )}

@@ -303,8 +303,9 @@ export default function AppointmentsPage() {
   });
 
   const resources = schedulableUsersQuery.data?.users;
+  const practitionerIds = qParams.practitioners?.split(",") ?? [];
   const practitioners = resources?.filter((r) =>
-    qParams.practitioners?.split(",").includes(r.id),
+    practitionerIds.includes(r.id),
   );
 
   useEffect(() => {
@@ -355,7 +356,7 @@ export default function AppointmentsPage() {
   const slotsFilterEnabled =
     !!qParams.date_from &&
     !!practitioners &&
-    practitioners.length > 0 &&
+    practitioners.length === 1 &&
     (qParams.date_from === qParams.date_to || !qParams.date_to);
 
   const slotsQuery = useQuery({
@@ -411,7 +412,9 @@ export default function AppointmentsPage() {
       <div className="mt-4 py-4 flex flex-col lg:flex-row gap-4 justify-between border-t border-gray-200">
         <div className="flex flex-col xl:flex-row gap-4 items-start md:items-start md:w-xs">
           <div className="mt-1 w-full">
-            <Label className="mb-2 text-black">{t("practitioner")}</Label>
+            <Label className="mb-2 text-black">
+              {t("practitioner", { count: 2 })}
+            </Label>
             <MultiPractitionerSelector
               facilityId={facilityId}
               selected={practitioners ?? null}
@@ -937,7 +940,7 @@ function AppointmentRow(props: {
                     {t("patient")}
                   </TableHead>
                   <TableHead className="font-semibold text-black text-xs">
-                    {t("practitioner")}
+                    {t("practitioner", { count: 1 })}
                   </TableHead>
                   <TableHead className="font-semibold text-black text-xs">
                     {t("current_status")}
