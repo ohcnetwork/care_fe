@@ -329,6 +329,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                     <TransformComponent
                       wrapperStyle={{ width: "100%", height: "100%" }}
                       contentStyle={{ width: "100%", height: "100%" }}
+                      wrapperClass="cursor-grab"
                     >
                       <img
                         src={fileUrl}
