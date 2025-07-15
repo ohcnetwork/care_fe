@@ -353,7 +353,7 @@ export default function TagAssignmentSheet({
     mutationFn: mutate(entityConfig.setTagsApi, {
       pathParams: {
         external_id: entityId,
-        facilityId: facilityId,
+        facilityId: facilityId || "",
       },
     }),
     onSuccess: () => {
@@ -371,7 +371,7 @@ export default function TagAssignmentSheet({
     mutationFn: mutate(entityConfig.removeTagsApi, {
       pathParams: {
         external_id: entityId,
-        facilityId: facilityId,
+        facilityId: facilityId || "",
       },
     }),
     onSuccess: () => {
