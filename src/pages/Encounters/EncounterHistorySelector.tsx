@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -42,7 +42,7 @@ function EncounterCard({
   return (
     <Card
       className={cn(
-        "rounded-md relative cursor-pointer transition-colors mb-2 w-full md:w-80",
+        "rounded-md relative cursor-pointer transition-colors mb-2 w-full lg:w-80",
         isSelected
           ? "bg-white border-emerald-600"
           : "bg-gray-100 hover:bg-gray-100 shadow-none",
@@ -56,13 +56,10 @@ function EncounterCard({
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="text-xs font-semibold">
+              <div className="text-sm font-semibold">
                 {t(`encounter_class__${encounter.encounter_class}`)}
               </div>
-              <Badge
-                variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
-                className="text-xs px-1.5"
-              >
+              <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]}>
                 {t(`encounter_status__${encounter.status}`)}
               </Badge>
             </div>
@@ -190,8 +187,8 @@ export default function EncounterHistorySelector() {
 
   return (
     <>
-      <div className="md:hidden">
-        <h2 className="px-4 mb-2 text-xs font-medium text-gray-600">
+      <div className="lg:hidden">
+        <h2 className="px-2 mb-2 text-xs font-medium text-gray-600 uppercase">
           {t("selected_encounter")}
         </h2>
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -208,7 +205,7 @@ export default function EncounterHistorySelector() {
           </SheetContent>
         </Sheet>
       </div>
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
         <EncounterHistoryList />
       </div>
     </>
@@ -225,19 +222,16 @@ const EncounterSheetTrigger = () => {
   }
 
   return (
-    <Card className="rounded-md relative cursor-pointer mb-2 w-full md:w-80 bg-white border-emerald-600">
+    <Card className="rounded-md relative cursor-pointer mb-2 w-full lg:w-80 bg-white border-emerald-600">
       <CardContent className="px-4 py-3">
         <div className="flex justify-between items-center">
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="text-xs font-semibold">
+                <div className="text-base font-semibold">
                   {t(`encounter_class__${encounter.encounter_class}`)}
                 </div>
-                <Badge
-                  variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
-                  className="text-xs px-1.5"
-                >
+                <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]}>
                   {t(`encounter_status__${encounter.status}`)}
                 </Badge>
               </div>
@@ -264,9 +258,9 @@ const EncounterSheetTrigger = () => {
               )}
             </div>
           </div>
-          <Button variant="outline" size="icon">
+          <div className={buttonVariants({ variant: "outline", size: "icon" })}>
             <CareIcon icon="l-history" />
-          </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

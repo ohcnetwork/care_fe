@@ -1,6 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -12,7 +11,12 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 
 import query from "@/Utils/request/query";
-import { MedicationStatementRead } from "@/types/emr/medicationStatement";
+import { PaginatedResponse } from "@/Utils/request/types";
+import {
+  MEDICATION_STATEMENT_STATUS,
+  MedicationStatementRead,
+  MedicationStatementStatus,
+} from "@/types/emr/medicationStatement";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 
 import { MedicationStatementTable } from "./MedicationStatementTable";
@@ -23,7 +27,9 @@ interface MedicationStatementListProps {
   className?: string;
   showTimeLine?: boolean;
   encounterId?: string;
+  status?: MedicationStatementStatus[];
 }
+
 interface GroupedMedications {
   [year: string]: {
     [date: string]: MedicationStatementRead[];
@@ -36,17 +42,38 @@ export function MedicationStatementList({
   className = "",
   showTimeLine = false,
   encounterId,
+  status = MEDICATION_STATEMENT_STATUS.filter(
+    (status) => status !== "entered_in_error",
+  ),
 }: MedicationStatementListProps) {
   const { t } = useTranslation();
-  const [showEnteredInError, setShowEnteredInError] = useState(false);
 
-  const { data: medications, isLoading } = useQuery({
-    queryKey: ["medication_statements", patientId, encounterId],
-    queryFn: query(medicationStatementApi.list, {
-      pathParams: { patientId },
-    }),
-    enabled: canAccess,
-  });
+  const LIMIT = showTimeLine ? 30 : 14;
+
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["infinite-medication_statements", patientId, encounterId],
+      queryFn: async ({ pageParam = 0, signal }) => {
+        const response = await query(medicationStatementApi.list, {
+          pathParams: { patientId },
+          queryParams: {
+            limit: LIMIT,
+            ordering: "-created_date",
+            offset: String(pageParam),
+            status: status.join(","),
+          },
+        })({ signal });
+        return response as PaginatedResponse<MedicationStatementRead>;
+      },
+      enabled: canAccess,
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) => {
+        const currentOffset = allPages.length * 100;
+        return currentOffset < lastPage.count ? currentOffset : null;
+      },
+    });
+
+  const medications = data?.pages.flatMap((page) => page.results) ?? [];
 
   if (isLoading) {
     return (
@@ -56,16 +83,7 @@ export function MedicationStatementList({
     );
   }
 
-  const filteredMedications = medications?.results?.filter(
-    (medication) =>
-      showEnteredInError || medication.status !== "entered_in_error",
-  );
-
-  const hasEnteredInErrorRecords = medications?.results?.some(
-    (medication) => medication.status === "entered_in_error",
-  );
-
-  if (!filteredMedications?.length) {
+  if (!medications?.length) {
     if (showTimeLine) {
       return (
         <EmptyState
@@ -81,19 +99,8 @@ export function MedicationStatementList({
     );
   }
 
-  const statments = [
-    ...filteredMedications.filter(
-      (medication) => medication.status !== "entered_in_error",
-    ),
-    ...(showEnteredInError
-      ? filteredMedications.filter(
-          (medication) => medication.status === "entered_in_error",
-        )
-      : []),
-  ];
-
   if (showTimeLine) {
-    const groupedByYear = filteredMedications.reduce((acc, medication) => {
+    const groupedByYear = medications.reduce((acc, medication) => {
       const dateStr = format(medication.created_date, "dd MMMM, yyyy");
       const year = format(medication.created_date, "yyyy");
       acc[year] ??= {};
@@ -123,10 +130,7 @@ export function MedicationStatementList({
                           <h3 className="text-sm font-medium text-indigo-700">
                             {format(date, "dd MMMM, yyyy")}
                           </h3>
-                          <MedicationStatementTable
-                            statements={medications}
-                            isEnteredInError={showEnteredInError}
-                          />
+                          <MedicationStatementTable statements={medications} />
                         </div>
                       </div>
                     </div>
@@ -142,30 +146,22 @@ export function MedicationStatementList({
 
   return (
     <MedicationStatementListLayout
-      medicationsCount={filteredMedications.length}
+      medicationsCount={medications.length}
       className={className}
     >
-      <MedicationStatementTable
-        statements={statments}
-        isEnteredInError={showEnteredInError}
-      />
-      <>
-        {hasEnteredInErrorRecords && !showEnteredInError && (
-          <>
-            <div className="border-b border-dashed border-gray-200 my-2" />
-            <div className="flex justify-center">
-              <Button
-                variant="ghost"
-                size="xs"
-                onClick={() => setShowEnteredInError(true)}
-                className="text-xs underline text-gray-500"
-              >
-                {t("view_all")}
-              </Button>
-            </div>
-          </>
-        )}
-      </>
+      <MedicationStatementTable statements={medications} />
+      {hasNextPage && (
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {t("load_more")}
+          </Button>
+        </div>
+      )}
     </MedicationStatementListLayout>
   );
 }
