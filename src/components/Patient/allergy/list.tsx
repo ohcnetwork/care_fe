@@ -115,6 +115,7 @@ export function AllergyList({
       const year = format(allergy.created_date, "yyyy");
       acc[year] ??= {};
       acc[year][dateStr] ??= [];
+      acc[year][dateStr].push(allergy);
       return acc;
     }, {} as GroupedAllergies);
 
