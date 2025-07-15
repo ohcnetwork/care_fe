@@ -67,7 +67,7 @@ export function ClinicalHistoryPage({
           </Button>
         </div>
       </div>
-      <section className="">
+      <section>
         <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto mb-4">
             <TabsTrigger
