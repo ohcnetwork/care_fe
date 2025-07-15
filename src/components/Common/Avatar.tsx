@@ -49,16 +49,15 @@ function Avatar({
   imageUrl?: string;
   className?: string;
 }) {
-  const [imageLoadingStatus, setImageLoadingStatus] = React.useState<
-    "idle" | "loading" | "loaded" | "error"
-  >("idle");
+  const [hasImageError, setHasImageError] = React.useState(false);
+
   const avatarText = name.match(/[a-zA-Z]+/g)?.join(" ");
 
   const [bgColor, textColor] =
     propColors ||
     (avatarText ? getColorPair(avatarText) : getColorPair("user"));
 
-  const shouldShowFallback = !imageUrl || imageLoadingStatus === "error";
+  const shouldShowFallback = !imageUrl || hasImageError;
 
   return (
     <AvatarPrimitive.Root
@@ -73,19 +72,19 @@ function Avatar({
       }}
       {...props}
     >
-      {imageLoadingStatus === "loading" && (
-        <div className="absolute inset-0 bg-white animate-pulse rounded-md" />
-      )}
       <AvatarPrimitive.Image
         data-slot="avatar-image"
         src={imageUrl}
         alt={name}
         className={cn(
           "aspect-square size-full object-cover rounded-md transition-opacity duration-300",
-          imageLoadingStatus === "loaded" ? "opacity-100" : "opacity-0",
+          !hasImageError ? "opacity-100" : "opacity-0",
           className,
         )}
-        onLoadingStatusChange={setImageLoadingStatus}
+        onLoadingStatusChange={(status) => {
+          if (status === "error") setHasImageError(true);
+          if (status === "loaded") setHasImageError(false);
+        }}
       />
       <AvatarPrimitive.Fallback
         data-slot="avatar-fallback"
