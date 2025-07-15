@@ -73,22 +73,17 @@ export interface TagConfigRequest {
   facility?: string;
 }
 
-export const getTagHierarchyDisplay = (tag: TagConfig): string => {
-  const hierarchy: string[] = [];
+export function getTagHierarchyDisplay(tag: TagConfig): string {
+  // Build hierarchy iteratively to avoid stack overflow
+  let currentTag: TagConfigParent | undefined = tag.parent;
+  const tempHierarchy: string[] = [];
 
-  // Build hierarchy from parent to child
-  const buildHierarchy = (currentTag: TagConfigParent) => {
-    if (currentTag.parent) {
-      buildHierarchy(currentTag.parent);
-    }
+  while (currentTag) {
     if (currentTag.display) {
-      hierarchy.push(currentTag.display);
+      tempHierarchy.unshift(currentTag.display);
     }
-  };
-
-  if (tag.parent) {
-    buildHierarchy(tag.parent);
+    currentTag = currentTag.parent;
   }
 
-  return [...hierarchy, tag.display].join(" > ");
-};
+  return [...tempHierarchy, tag.display].join(" > ");
+}
