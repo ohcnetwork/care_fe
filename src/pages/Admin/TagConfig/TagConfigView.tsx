@@ -20,6 +20,8 @@ import {
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
+import useAppHistory from "@/hooks/useAppHistory";
+
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
@@ -43,6 +45,7 @@ export default function TagConfigView({
 }: TagConfigViewProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { goBack } = useAppHistory();
 
   const [isEditSheetOpen, setIsEditSheetOpen] = React.useState(false);
   const [isAddChildSheetOpen, setIsAddChildSheetOpen] = React.useState(false);
@@ -159,6 +162,18 @@ export default function TagConfigView({
   return (
     <Page title={tagConfig.display} hideTitleOnPage>
       <div className="container mx-auto space-y-6">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={(e) => {
+            e.preventDefault();
+            goBack();
+          }}
+          className="shrink-0"
+        >
+          <CareIcon icon="l-arrow-left" className="size-5" />
+          {t("back")}
+        </Button>
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -189,7 +204,7 @@ export default function TagConfigView({
                 <label className="text-sm font-medium text-gray-600">
                   {t("category")}
                 </label>
-                <div className="mt-1">
+                <div className="mt-1 capitalize">
                   <Badge variant="secondary">{t(tagConfig.category)}</Badge>
                 </div>
               </div>
@@ -239,7 +254,7 @@ export default function TagConfigView({
                 <label className="text-sm font-medium text-gray-600">
                   {t("description")}
                 </label>
-                <div className="mt-1 text-sm text-gray-900">
+                <div className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">
                   {tagConfig.description}
                 </div>
               </div>
@@ -282,6 +297,7 @@ export default function TagConfigView({
                 variant="outline"
                 size="sm"
                 onClick={() => setIsAddChildSheetOpen(true)}
+                disabled={!!tagConfig.parent}
               >
                 <CareIcon icon="l-plus" className="size-4 mr-2" />
                 {t("add_child_tag")}
@@ -297,7 +313,7 @@ export default function TagConfigView({
               showChildrenColumn={false}
               showArchiveAction={true}
               emptyStateTitle={t("no_child_tags_found")}
-              emptyStateDescription={t("add_child_tags_to_organize_better")}
+              emptyStateDescription={t("no_child_tags_found_description")}
               emptyStateIcon={"l-sitemap" as IconName}
             />
           </CardContent>
