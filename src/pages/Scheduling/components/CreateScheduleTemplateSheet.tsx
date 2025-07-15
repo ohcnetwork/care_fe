@@ -100,7 +100,7 @@ export default function CreateScheduleTemplateSheet({
               z.object({
                 slot_type: z.literal("appointment"),
                 name: z.string().min(1, t("field_required")),
-                reason: z.string(),
+                reason: z.string().trim(),
                 start_time: z
                   .string()
                   .min(1, t("field_required")) as unknown as z.ZodType<Time>,
@@ -122,7 +122,7 @@ export default function CreateScheduleTemplateSheet({
               z.object({
                 slot_type: z.enum(["open", "closed"]),
                 name: z.string().min(1, t("field_required")),
-                reason: z.string(),
+                reason: z.string().trim(),
                 start_time: z
                   .string()
                   .min(1, t("field_required")) as unknown as z.ZodType<Time>,
@@ -206,7 +206,7 @@ export default function CreateScheduleTemplateSheet({
             slot_type: availability.slot_type,
             slot_size_in_minutes: availability.slot_size_in_minutes,
             tokens_per_slot: availability.tokens_per_slot,
-            reason: availability.reason?.trim() ?? "",
+            reason: availability.reason,
             availability: values.weekdays.map((day) => ({
               day_of_week: day,
               start_time: availability.start_time,
