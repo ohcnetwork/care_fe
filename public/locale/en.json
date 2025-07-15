@@ -778,6 +778,7 @@
   "bed_number": "Bed Number {{number}}",
   "bed_occupied": "Bed Occupied",
   "bed_planned_cancelled": "Planned bed assignment has been cancelled.",
+  "bed_requires_parent_location": "Beds can only be created under a parent location",
   "bed_search_placeholder": "Search by beds name",
   "bed_type": "Bed Type",
   "bed_type__100": "ICU Bed",
