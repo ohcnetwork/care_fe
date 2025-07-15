@@ -5,17 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { Question } from "@/types/questionnaire/question";
 
+import { scrollToQuestion } from "./utils";
+
 export default function QuestionnaireNavigation({
-  scrollToQuestion,
   toggleQuestionExpanded,
   expandedQuestions,
   rootQuestions,
-  isPreview = false,
 }: {
   rootQuestions: Question[];
   toggleQuestionExpanded?: (questionId: string) => void;
-  expandedQuestions?: Set<string>;
-  scrollToQuestion: (questionId: string) => void;
+  expandedQuestions: Set<string>;
   isPreview?: boolean;
 }) {
   const { t } = useTranslation();
@@ -34,16 +33,14 @@ export default function QuestionnaireNavigation({
             return (
               <div key={question.link_id} className="space-y-1">
                 <Button
-                  variant={null}
+                  variant="ghost"
                   onClick={() => {
-                    scrollToQuestion(
-                      isPreview ? question.id : question.link_id,
-                    );
-                    if (toggleQuestionExpanded)
+                    scrollToQuestion(question.link_id);
+                    toggleQuestionExpanded &&
                       toggleQuestionExpanded(question.link_id);
                   }}
                   className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
-                    expandedQuestions?.has(question.link_id) ? "bg-accent" : ""
+                    expandedQuestions.has(question.link_id) ? "bg-accent" : ""
                   }`}
                 >
                   <span className="font-medium text-gray-500">
@@ -57,21 +54,17 @@ export default function QuestionnaireNavigation({
                   <div className="ml-6 border-l-2 border-gray-200 pl-2 space-y-1">
                     {question.questions.map((subQuestion, subIndex) => (
                       <Button
-                        key={subQuestion.link_id}
-                        variant={null}
+                        variant="ghost"
+                        key={subQuestion.id}
                         onClick={() => {
-                          if (
-                            !expandedQuestions?.has(question.link_id) &&
-                            toggleQuestionExpanded
-                          ) {
-                            toggleQuestionExpanded(question.link_id);
+                          if (!expandedQuestions.has(question.link_id)) {
+                            toggleQuestionExpanded &&
+                              toggleQuestionExpanded(question.link_id);
                             setTimeout(() => {
                               scrollToQuestion(subQuestion.link_id);
                             }, 100);
                           } else {
-                            scrollToQuestion(
-                              isPreview ? subQuestion.id : subQuestion.link_id,
-                            );
+                            scrollToQuestion(subQuestion.link_id);
                           }
                         }}
                         className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "

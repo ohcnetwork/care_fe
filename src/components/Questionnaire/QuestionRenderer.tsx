@@ -62,9 +62,9 @@ export function QuestionRenderer({
   return (
     <div className="space-y-8 bg-white md:space-y-3">
       {isPreview && (
-        <div className="flex flex-col gap-3 md:flex-row md:justify-between md:ml-5">
+        <div className="flex flex-col gap-3 md:flex-row md:justify-between md:ml-4">
           <span className="text-sm text-slate-700 font-medium">
-            {questions.length.toString()} Questions
+            {questions.length.toString()} {t("questions")}
           </span>
           <div className="flex gap-4">
             <div className="flex gap-1 items-center">
@@ -86,7 +86,6 @@ export function QuestionRenderer({
       )}
       {questions.map((question) => (
         <div
-          data-question-id={question.id}
           key={question.id}
           ref={(el) => {
             questionRefs.current[question.id] = el;

@@ -264,7 +264,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [structuredTypeErrors, setStructuredTypeErrors] = useState<
     Record<string, string | undefined>
   >({});
-  const [previewGroupId, setPreviewGroupId] = useState<string>();
   const { dragOver, onDragOver, onDragLeave } = useDragAndDrop();
   const [enableWhenDependencies, setEnableWhenDependencies] = useState<
     Map<string, Set<{ question: Question; path: string[] }>>
@@ -858,17 +857,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     setSelectedTags((current) => [...current, tag]);
   };
 
-  const scrollToPreviewQuestion = (groupId?: string) => {
-    setPreviewGroupId(groupId);
-    const element = document.querySelector(
-      `[data-preview-question-id="${groupId}"]`,
-    );
-
-    if (element) {
-      element.scrollIntoView({ block: "start" });
-    }
-  };
-
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="mb-4 flex flex-col md:flex-row items-center justify-between gap-2">
@@ -957,7 +945,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 rootQuestions={rootQuestions}
                 toggleQuestionExpanded={toggleQuestionExpanded}
                 expandedQuestions={expandedQuestions}
-                scrollToQuestion={scrollToQuestion}
               />
               <div className="space-y-4 max-w-sm lg:hidden">
                 <QuestionnaireProperties
@@ -1248,10 +1235,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             <div className="space-y-4 lg:w-60 top-4 self-start h-fit max-h-screen overflow-y-auto lg:sticky">
               <QuestionnaireNavigation
                 rootQuestions={rootQuestions}
-                toggleQuestionExpanded={toggleQuestionExpanded}
                 expandedQuestions={expandedQuestions}
-                isPreview={true}
-                scrollToQuestion={scrollToPreviewQuestion}
               />
               <div className="space-y-4 max-w-sm lg:hidden">
                 <QuestionnairePreviewProperties questionnaire={questionnaire} />
@@ -1265,7 +1249,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                       <p className="text-sm text-gray-500 font-medium">
                         {t("questionnaire_title_and_description")}
                       </p>
-                      <div className="flex flex-col gap-4 ml-6">
+                      <div className="flex flex-col gap-5 ml-6">
                         <div className="space-y-2">
                           <h2 className="text-xl font-semibold">
                             {questionnaire.title}
@@ -1308,7 +1292,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     subjectType={form.watch("subject_type")}
                     encounterId="preview"
                     facilityId="preview"
-                    previewGroupId={previewGroupId}
                   />
                 </CardContent>
               </Card>

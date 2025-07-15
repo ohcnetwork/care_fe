@@ -69,7 +69,6 @@ interface ServerValidationError {
 }
 
 export interface QuestionnaireFormProps {
-  previewGroupId?: string;
   questionnaireSlug?: string;
   patientId: string;
   encounterId?: string;
@@ -326,7 +325,6 @@ export function QuestionnaireForm({
   onSubmit,
   onCancel,
   facilityId,
-  previewGroupId,
 }: QuestionnaireFormProps) {
   const { t } = useTranslation();
 
@@ -850,7 +848,7 @@ export function QuestionnaireForm({
                 }
               }}
               disabled={isPending}
-              activeGroupId={activeGroupId || previewGroupId}
+              activeGroupId={activeGroupId}
               errors={form.errors}
               patientId={patientId}
               clearError={(questionId: string) => {
