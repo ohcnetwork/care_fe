@@ -20,6 +20,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 
@@ -43,8 +48,6 @@ export const MultiPractitionerSelector = ({
 }: MultiPractitionerSelectorProps) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [hoveredUser, setHoveredUser] = useState<string | null>(null);
-  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const {
     data: practitioners,
     isLoading,
@@ -71,48 +74,23 @@ export const MultiPractitionerSelector = ({
           <div className="flex items-center gap-1">
             {selected.map((user) => (
               <Fragment key={user.id}>
-                <Popover
-                  open={hoveredUser === user.id}
-                  onOpenChange={(isOpen) =>
-                    setHoveredUser(isOpen ? user.id : null)
-                  }
-                >
-                  <PopoverTrigger asChild className="p-0!">
+                <Tooltip>
+                  <TooltipTrigger asChild>
                     <Avatar
                       imageUrl={user.profile_picture_url}
                       name={formatName(user, true)}
                       className="size-8 rounded-full cursor-pointer"
-                      onMouseEnter={() => {
-                        if (hoverTimeout) {
-                          clearTimeout(hoverTimeout);
-                          setHoverTimeout(null);
-                        }
-                        setHoveredUser(user.id);
-                      }}
-                      onMouseLeave={() => {
-                        const timeout = setTimeout(() => {
-                          setHoveredUser(null);
-                        }, 150);
-                        setHoverTimeout(timeout);
-                      }}
                     />
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="p-2 w-fit bg-gray-900 text-gray-50 border-0 shadow-lg"
-                    align="start"
-                    side="bottom"
-                    sideOffset={5}
-                  >
-                    <div className="flex flex-col gap-0">
-                      <span className="text-sm font-medium">
-                        {formatName(user)}
-                      </span>
-                      <span className="text-xs text-gray-300 truncate">
-                        {user.username}
-                      </span>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                  </TooltipTrigger>
+                  <TooltipContent className="flex flex-col gap-0">
+                    <span className="text-sm font-medium">
+                      {formatName(user)}
+                    </span>
+                    <span className="text-xs text-gray-300 truncate">
+                      {user.username}
+                    </span>
+                  </TooltipContent>
+                </Tooltip>
               </Fragment>
             ))}
           </div>
