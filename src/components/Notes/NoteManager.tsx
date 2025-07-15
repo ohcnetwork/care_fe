@@ -358,8 +358,7 @@ export function NoteManager({
       queryParams: {
         ...(hideEncounterNotes
           ? { encounter_isnull: "true" }
-          : encounterId && { encounter: encounterId }
-        ),
+          : encounterId && { encounter: encounterId }),
       },
     }),
     enabled: canAccess,
