@@ -259,29 +259,32 @@ export default function TagConfigView({
                 </div>
               </div>
             )}
-            {tagConfig.parent &&
-              typeof tagConfig.parent === "object" &&
-              tagConfig.parent.id && (
-                <div>
-                  <label className="text-sm font-medium text-gray-600">
-                    {t("parent_tag")}
-                  </label>
-                  <div className="mt-1">
-                    <Button
-                      variant="link"
-                      className="p-0 h-auto text-blue-600"
-                      onClick={() =>
-                        handleViewChild({
-                          ...tagConfig.parent,
-                          id: tagConfig.parent.id!,
-                        } as TagConfig)
-                      }
-                    >
-                      {tagConfig.parent.display}
-                    </Button>
-                  </div>
+            {tagConfig.parent && tagConfig.parent.id && (
+              <div>
+                <label className="text-sm font-medium text-gray-600">
+                  {t("parent_tag")}
+                </label>
+                <div className="mt-1">
+                  <Button
+                    variant="link"
+                    className="p-0 h-auto text-blue-600"
+                    onClick={() =>
+                      handleViewChild(
+                        // TODO: This is a hack to get the parent navigation to work, this needs to be fixed
+                        tagConfig.parent
+                          ? ({
+                              ...tagConfig,
+                              id: tagConfig.parent.id,
+                            } as TagConfig)
+                          : tagConfig,
+                      )
+                    }
+                  >
+                    {tagConfig.parent.display}
+                  </Button>
                 </div>
-              )}
+              </div>
+            )}
           </CardContent>
         </Card>
 
