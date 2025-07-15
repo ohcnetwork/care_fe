@@ -6,7 +6,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { formatName } from "@/Utils/utils";
 import { DeviceEncounterHistory } from "@/types/device/device";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter } from "@/types/emr/encounter/encounter";
 import { UserBase } from "@/types/user/user";
 
 interface EncounterCardProps {

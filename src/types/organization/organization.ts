@@ -3,7 +3,21 @@ import { t } from "i18next";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { UserBase } from "@/types/user/user";
 
-type org_type = "team" | "govt" | "role" | "other";
+type org_type =
+  | "team"
+  | "govt"
+  | "role"
+  | "product_supplier"
+  | "other"
+  | "product_supplier";
+
+export enum OrgType {
+  TEAM = "team",
+  GOVT = "govt",
+  ROLE = "role",
+  PRODUCT_SUPPLIER = "product_supplier",
+  OTHER = "other",
+}
 
 export type Metadata = {
   govt_org_children_type?: string;
@@ -20,6 +34,12 @@ export interface OrganizationParent {
   parent?: OrganizationParent;
 }
 
+export interface OrganizationEdit {
+  name?: string;
+  description?: string;
+  org_type?: OrgType;
+  parent_id?: string;
+}
 export interface Organization {
   id: string;
   name: string;
@@ -33,6 +53,13 @@ export interface Organization {
   updated_at: string;
   metadata: Metadata | null;
   permissions: string[];
+}
+
+export interface OrganizationCreate {
+  name: string;
+  description?: string;
+  org_type: OrgType;
+  parent_id?: string;
 }
 
 export interface OrganizationUserRole {

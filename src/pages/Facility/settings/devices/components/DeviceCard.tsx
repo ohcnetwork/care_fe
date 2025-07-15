@@ -15,7 +15,7 @@ import {
   DEVICE_AVAILABILITY_STATUS_COLORS,
   DeviceList,
 } from "@/types/device/device";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter } from "@/types/emr/encounter/encounter";
 
 interface Props {
   device: DeviceList;
