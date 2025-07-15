@@ -74,7 +74,6 @@ function Avatar({
         alt={name}
         className={cn(
           "aspect-square size-full object-cover rounded-md",
-          !hasImageError ? "opacity-100" : "opacity-0",
           className,
         )}
         onLoadingStatusChange={(status) => {
