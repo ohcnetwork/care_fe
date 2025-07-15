@@ -356,8 +356,10 @@ export function NoteManager({
     queryFn: query(routes.notes.patient.listThreads, {
       pathParams: { patientId: patientId },
       queryParams: {
-        encounter: encounterId,
-        ...(hideEncounterNotes && { encounter_isnull: "true" }),
+        ...(hideEncounterNotes
+          ? { encounter_isnull: "true" }
+          : encounterId && { encounter: encounterId }
+        ),
       },
     }),
     enabled: canAccess,
