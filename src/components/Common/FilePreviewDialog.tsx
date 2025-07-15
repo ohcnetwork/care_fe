@@ -98,57 +98,9 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
   const [rotation, setRotation] = useState<number>(0);
   const [numPages, setNumPages] = useState(1);
   const [index, setIndex] = useState<number>(currentIndex);
-  const [scale, setScale] = useState(0.75);
   const transformRef = useRef<ReactZoomPanPinchRef>(null);
-
-  const [touchStart, setTouchStart] = useState<{
-    distance: number;
-    scale: number;
-  } | null>(null);
-
   const [isPanning, setIsPanning] = useState(false);
 
-  const getTouchDistance = (touches: TouchList) => {
-    if (touches.length < 2) return 0;
-    const touch1 = touches[0];
-    const touch2 = touches[1];
-    const dx = touch1.clientX - touch2.clientX;
-    const dy = touch1.clientY - touch2.clientY;
-    return Math.sqrt(dx * dx + dy * dy);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (
-      !file_state.isImage &&
-      file_state.extension === "pdf" &&
-      e.touches.length === 2
-    ) {
-      const distance = getTouchDistance(e.touches as unknown as TouchList);
-      setTouchStart({ distance, scale });
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (
-      !file_state.isImage &&
-      file_state.extension === "pdf" &&
-      e.touches.length === 2 &&
-      touchStart
-    ) {
-      e.preventDefault();
-      const distance = getTouchDistance(e.touches as unknown as TouchList);
-      const scaleChange = distance / touchStart.distance;
-      const newScale = Math.max(
-        0.5,
-        Math.min(2, touchStart.scale * scaleChange),
-      );
-      setScale(newScale);
-    }
-  };
-
-  const handleTouchEnd = () => {
-    setTouchStart(null);
-  };
   // Browser detection function
   const isSafari = () => {
     const userAgent = navigator.userAgent;
@@ -173,46 +125,22 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
   }, [index, show]);
 
   const handleZoomIn = () => {
-    if (file_state.isImage && transformRef.current) {
+    if (transformRef.current) {
       transformRef.current.zoomIn(0.5);
-    } else {
-      setScale((prevScale) => Math.min(prevScale + 0.25, 2));
     }
   };
 
   const handleZoomOut = () => {
-    if (file_state.isImage && transformRef.current) {
+    if (transformRef.current) {
       transformRef.current.zoomOut(0.5);
-    } else {
-      setScale((prevScale) => Math.max(prevScale - 0.25, 0.5));
     }
   };
+
   const handleRotate = (angle: number) => {
     setRotation((prev) => {
       const newRotation = (prev + angle + 360) % 360;
       return newRotation;
     });
-  };
-
-  const handleWheel = (e: React.WheelEvent) => {
-    if (e.ctrlKey) {
-      e.stopPropagation();
-
-      const zoomIn = e.deltaY < 0;
-
-      if (file_state.extension === "pdf") {
-        const currentScale = scale;
-        let newScale: number;
-
-        if (zoomIn) {
-          newScale = Math.min(2, currentScale + 0.1);
-        } else {
-          newScale = Math.max(0.5, currentScale - 0.1);
-        }
-
-        setScale(newScale);
-      }
-    }
   };
 
   const fileName = file_state?.name
@@ -246,7 +174,6 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
     setPage(1);
     setNumPages(1);
     setIndex(-1);
-    setScale(0.75);
     onClose?.();
   };
 
@@ -288,7 +215,19 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                     </p>
                   )}
               </div>
-              <div>
+              <div className="flex gap-2">
+                {file_state.extension === "pdf" && fileUrl && (
+                  <Button
+                    variant="outline"
+                    data-cy="file-preview-open-browser"
+                    onClick={() => {
+                      window.open(fileUrl, "_blank", "noopener,noreferrer");
+                    }}
+                  >
+                    <CareIcon icon="l-external-link-alt" className="size-4" />
+                    <span>{t("open_in_browser")}</span>
+                  </Button>
+                )}
                 {downloadURL && downloadURL.length > 0 && (
                   <Button variant="primary" data-cy="file-preview-download">
                     <a
@@ -351,13 +290,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                     </TransformComponent>
                   </TransformWrapper>
                 ) : file_state.extension === "pdf" ? (
-                  <div
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                    onWheel={handleWheel}
-                    className="w-full h-full"
-                  >
+                  <div className="w-full h-full overflow-auto">
                     <Suspense fallback={<CircularProgress />}>
                       <PDFViewer
                         url={fileUrl}
@@ -366,7 +299,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                           setNumPages(numPages);
                         }}
                         pageNumber={page}
-                        scale={scale}
+                        scale={1}
                         className="max-md:max-w-[50vw]"
                       />
                     </Suspense>
@@ -487,8 +420,8 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                       onClick={button.action}
                       className={cn(
                         "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70",
-                        index == 3 && "col-start-1 md:col-auto",
-                        index == 4 && "col-start-3 md:col-auto",
+                        index === 3 && "col-start-1 md:col-auto",
+                        index === 4 && "col-start-3 md:col-auto",
                       )}
                       disabled={button.disabled}
                     >
@@ -504,26 +437,8 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                 </div>
               )}
               {file_state.extension === "pdf" && (
-                <div className="mt-2 grid grid-cols-3 md:grid-cols-6 gap-4">
+                <div className="mt-2 grid grid-cols-3 gap-4">
                   {[
-                    {
-                      label: t("zoom_in"),
-                      icon: "l-search-plus",
-                      action: handleZoomIn,
-                      disabled: scale >= 2,
-                    },
-                    {
-                      label: `${Math.round(scale * 100)}%`,
-                      icon: null,
-                      action: () => {},
-                      disabled: false,
-                    },
-                    {
-                      label: t("zoom_out"),
-                      icon: "l-search-minus",
-                      action: handleZoomOut,
-                      disabled: scale <= 0.5,
-                    },
                     {
                       label: t("previous"),
                       icon: "l-arrow-left",
