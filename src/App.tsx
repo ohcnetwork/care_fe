@@ -25,7 +25,6 @@ import { handleHttpError } from "@/Utils/request/errorHandler";
 import { HTTPError } from "@/Utils/request/types";
 
 import { createUserPersister } from "./OfflineSupport/createUserPersister";
-import useNetworkStatus from "./Utils/networkstatus";
 import { PubSubProvider } from "./Utils/pubsubContext";
 
 onlineManager.setEventListener(() => {
@@ -65,17 +64,8 @@ const ScrollToTop = () => {
 
   return null;
 };
-const NetworkManager = () => {
-  const { isOnline, isChecked } = useNetworkStatus();
 
-  useEffect(() => {
-    console.log(" Network Status:", { isOnline, isChecked });
-  }, [isOnline, isChecked]);
-
-  return null;
-};
 const userPersister = createUserPersister();
-
 const App = () => {
   useEffect(() => {
     displayCareConsoleArt();
@@ -96,7 +86,6 @@ const App = () => {
           },
         }}
       >
-        <NetworkManager />
         <ScrollToTop />
         <Suspense fallback={<Loading />}>
           <PubSubProvider>

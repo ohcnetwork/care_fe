@@ -20,14 +20,6 @@ export default function useNetworkStatus() {
   const queryClient = useQueryClient();
   const persistor = createUserPersister();
   const { t } = useTranslation();
-  const cancelNonSuccessQueries = async () => {
-    queryClient
-      .getQueryCache()
-      .getAll()
-      .forEach((query) => {
-        queryClient.cancelQueries({ queryKey: query.queryKey });
-      });
-  };
 
   const restorePersistedCache = async () => {
     if (!persistor) return;
@@ -43,7 +35,7 @@ export default function useNetworkStatus() {
     if (isRestoring) return;
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 4s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout ( after that it will consider as offline)
 
       const response = await fetch(CHECK_URL, {
         method: "HEAD",
@@ -53,18 +45,15 @@ export default function useNetworkStatus() {
 
       clearTimeout(timeoutId);
       const online = response.ok;
-      if (!onlineManager.isOnline()) {
-        await cancelNonSuccessQueries();
-      }
 
       setIsOnline(online);
       onlineManager.setOnline(online);
-      await queryClient.invalidateQueries({ queryKey: ["user-refresh-token"] });
+      toast.info(t("You are online"));
     } catch {
       setIsOnline(false);
-      console.log(" HEAD fetch failed:");
+
       onlineManager.setOnline(false);
-      toast.info(t("you_are_offline"));
+      toast.info(t("you are offline"));
       await restorePersistedCache();
     } finally {
       setIsChecked(true);
@@ -79,13 +68,12 @@ export default function useNetworkStatus() {
     const handleOffline = async () => {
       setIsOnline(false);
       onlineManager.setOnline(false);
+      toast.info(t("you are offline"));
       setIsChecked(true);
       await restorePersistedCache();
-      console.log(" Browser says: offline");
     };
 
     const handleOnline = () => {
-      console.log(" Browser says: online — verifying...");
       checkConnection();
     };
 
