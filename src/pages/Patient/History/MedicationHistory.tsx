@@ -1,7 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -29,15 +30,19 @@ export const MedicationHistory = ({ patientId }: { patientId: string }) => {
         <h4 className="text-xl">{t("past_medications")}</h4>
       </div>
       <Tabs defaultValue="prescriptions" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="prescriptions">{t("prescriptions")}</TabsTrigger>
-          <TabsTrigger value="statements">
-            {t("medication_statements")}
-          </TabsTrigger>
-          <TabsTrigger value="administration">
-            {t("medicine_administration")}
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto">
+          <TabsList className="mb-4">
+            <TabsTrigger value="prescriptions">
+              {t("prescriptions")}
+            </TabsTrigger>
+            <TabsTrigger value="statements">
+              {t("medication_statements")}
+            </TabsTrigger>
+            <TabsTrigger value="administration">
+              {t("medicine_administration")}
+            </TabsTrigger>
+          </TabsList>
+        </div>
         <TabsContent value="prescriptions">
           <Prescriptions patientId={patientId} />
         </TabsContent>
@@ -68,16 +73,33 @@ interface GroupedPrescription {
 }
 
 const Prescriptions = ({ patientId }: { patientId: string }) => {
-  const { data: medications, isLoading } = useQuery({
-    queryKey: ["activeMedicationRequests", patientId],
-    queryFn: query(medicationRequestApi.list, {
-      pathParams: { patientId: patientId },
-      queryParams: { limit: 100, status: "active", ordering: "-created_date" },
-    }),
-    select: (data: PaginatedResponse<MedicationRequestRead>) => data.results,
-  });
+  const { t } = useTranslation();
 
-  if (isLoading || !medications) {
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["infinite-activeMedicationRequests", patientId],
+      queryFn: async ({ pageParam = 0, signal }) => {
+        const response = await query(medicationRequestApi.list, {
+          pathParams: { patientId: patientId },
+          queryParams: {
+            limit: 100,
+            status: "active",
+            ordering: "-created_date",
+            offset: String(pageParam),
+          },
+        })({ signal });
+        return response as PaginatedResponse<MedicationRequestRead>;
+      },
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) => {
+        const currentOffset = allPages.length * 100;
+        return currentOffset < lastPage.count ? currentOffset : null;
+      },
+    });
+
+  const medications = data?.pages.flatMap((page) => page.results) ?? [];
+
+  if (isLoading) {
     return <TableSkeleton count={10} />;
   }
 
@@ -103,7 +125,7 @@ const Prescriptions = ({ patientId }: { patientId: string }) => {
               {year}
             </h2>
             <div className="border-l border-gray-300 pt-5 ml-4">
-              {Object.entries(groupedByDate).map(([date, symptoms]) => {
+              {Object.entries(groupedByDate).map(([date, items]) => {
                 return (
                   <div key={date} className="pb-6">
                     <div className="flex items-start gap-4">
@@ -115,7 +137,7 @@ const Prescriptions = ({ patientId }: { patientId: string }) => {
                         <h3 className="text-sm font-medium text-indigo-700">
                           {format(date, "dd MMMM, yyyy")}
                         </h3>
-                        <MedicationsTable medications={symptoms} />
+                        <MedicationsTable medications={items} />
                       </div>
                     </div>
                   </div>
@@ -125,6 +147,18 @@ const Prescriptions = ({ patientId }: { patientId: string }) => {
           </div>
         );
       })}
+      {hasNextPage && (
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {t("load_more")}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

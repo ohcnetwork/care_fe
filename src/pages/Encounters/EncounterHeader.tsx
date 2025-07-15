@@ -2,6 +2,7 @@ import { ChevronDown, ExternalLink } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -35,6 +36,7 @@ export function EncounterHeader() {
   const readOnly = selectedEncounterId !== currentEncounterId;
 
   const { patient, facility } = encounter;
+  const tags = [...patient.instance_tags, ...patient.facility_tags];
 
   return (
     <Card className="p-2 md:p-4 flex flex-col md:flex-row md:justify-between gap-6">
@@ -78,12 +80,32 @@ export function EncounterHeader() {
                 : t("ongoing")}
             </span>
           </div>
+          {patient.instance_identifiers.map((identifier) => (
+            <div
+              key={identifier.config.id}
+              className="flex md:flex-col gap-0.5 items-center md:items-start"
+            >
+              <span className="text-xs text-gray-600 w-32 md:w-auto">
+                {identifier.config.config.display}:{" "}
+              </span>
+              <span className="text-sm font-semibold">{identifier.value}</span>
+            </div>
+          ))}
           <div className="flex md:flex-col gap-0.5 items-center md:items-start">
             <span className="text-xs text-gray-600 w-32 md:w-auto">
-              {t("hospital_identifier")}:{" "}
+              {t("tags")}:{" "}
             </span>
-            {/* TODO: implement this once we have it */}
-            <span className="text-sm font-semibold">--</span>
+            {tags.length ? (
+              <div className="flex flex-wrap gap-1">
+                {tags.map((tag) => (
+                  <Badge key={tag.id} variant="secondary" size="sm">
+                    {tag.display}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <span className="text-sm font-semibold">--</span>
+            )}
           </div>
         </div>
         <div className="md:hidden">

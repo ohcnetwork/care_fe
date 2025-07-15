@@ -2,6 +2,7 @@ import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import {
   Appointment,
+  AppointmentCancelRequest,
   AppointmentCreateRequest,
   AppointmentRead,
   AppointmentUpdateRequest,
@@ -125,7 +126,7 @@ export default {
     list: {
       path: "/api/v1/facility/{facilityId}/appointments/",
       method: HttpMethod.GET,
-      TRes: Type<PaginatedResponse<Appointment>>(),
+      TRes: Type<PaginatedResponse<AppointmentRead>>(),
     },
     retrieve: {
       path: "/api/v1/facility/{facilityId}/appointments/{id}/",
@@ -141,7 +142,7 @@ export default {
     cancel: {
       path: "/api/v1/facility/{facilityId}/appointments/{id}/cancel/",
       method: HttpMethod.POST,
-      TBody: Type<{ reason: "cancelled" | "entered_in_error" }>(),
+      TBody: Type<AppointmentCancelRequest>(),
       TRes: Type<Appointment>(),
     },
     reschedule: {
