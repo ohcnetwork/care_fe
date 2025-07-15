@@ -3037,6 +3037,7 @@
   "patient_body": "Patient Body",
   "patient_care": "Patient Care",
   "patient_category": "Patient Category",
+  "patient_clinical_history_page_title": "{{ name }}'s clinical history",
   "patient_consultation__admission": "Date of admission",
   "patient_consultation__consultation_notes": "General Instructions",
   "patient_consultation__dc_admission": "Date of domiciliary care commenced",
