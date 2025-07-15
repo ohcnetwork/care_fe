@@ -47,7 +47,7 @@ export const Demography = (props: PatientProps) => {
 
   const renderClickableAddress = (address: string) => (
     <div
-      className="[&_a]:text-sky-600 [&_a]:underline [&_a]:hover:text-sky-300"
+      className="[&_a]:text-sky-600 [&_a]:underline [&_a]:hover:text-sky-300 break-words overflow-wrap-anywhere"
       onClick={(e) => {
         if (e.target instanceof HTMLAnchorElement && e.target.href) {
           e.preventDefault();
