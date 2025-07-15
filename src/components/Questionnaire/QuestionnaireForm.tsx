@@ -751,7 +751,7 @@ export function QuestionnaireForm({
           {questionnaireForms.map((form) => (
             <div key={form.questionnaire.id} className="space-y-2">
               <Button
-                variant={null}
+                variant="ghost"
                 className={cn(
                   "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
                   activeQuestionnaireId === form.questionnaire.id &&
@@ -767,7 +767,7 @@ export function QuestionnaireForm({
                   .filter((q) => q.type === "group")
                   .map((group) => (
                     <Button
-                      variant={null}
+                      variant="ghost"
                       key={group.id}
                       className={cn(
                         "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
