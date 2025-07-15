@@ -104,8 +104,8 @@ export const EncounterOverviewTab = () => {
                     </span>
                     <Badge variant="yellow" className="flex items-start">
                       <img
-                        src="/images/Allergic-hand.svg"
-                        alt="allergic hand"
+                        src="/images/icons/allergy.svg"
+                        alt="allergy"
                         className="size-5 m-0.5"
                       />
                       <div>

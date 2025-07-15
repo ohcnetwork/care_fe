@@ -23,9 +23,9 @@ export const MedicationHistory = ({ patientId }: { patientId: string }) => {
     <div className="max-w-5xl mx-auto">
       <div className="flex items-center gap-2 mb-5">
         <img
-          src="/images/icons/diagnosis.svg"
+          src="/images/icons/medicine.svg"
           alt="diagnosis"
-          className="size-9 bg-cyan-200 border border-cyan-400 rounded-md p-1.5"
+          className="size-8 bg-pink-100 border border-pink-400 rounded-md p-1"
         />
         <h4 className="text-xl">{t("past_medications")}</h4>
       </div>
@@ -130,7 +130,7 @@ const Prescriptions = ({ patientId }: { patientId: string }) => {
                   <div key={date} className="pb-6">
                     <div className="flex items-start gap-4">
                       <div className="flex flex-col items-center h-full">
-                        <div className="size-3 bg-cyan-300 ring-1 ring-cyan-700 rounded-full flex-shrink-0 -ml-1.5 mt-1"></div>
+                        <div className="size-3 bg-pink-300 ring-1 ring-pink-700 rounded-full flex-shrink-0 -ml-1.5 mt-1"></div>
                       </div>
 
                       <div className="space-y-3 overflow-auto w-full">
