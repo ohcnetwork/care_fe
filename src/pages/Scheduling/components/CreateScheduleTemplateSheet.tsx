@@ -206,7 +206,7 @@ export default function CreateScheduleTemplateSheet({
             slot_type: availability.slot_type,
             slot_size_in_minutes: availability.slot_size_in_minutes,
             tokens_per_slot: availability.tokens_per_slot,
-            reason: availability.reason,
+            reason: availability.reason?.trim() ?? "",
             availability: values.weekdays.map((day) => ({
               day_of_week: day,
               start_time: availability.start_time,
