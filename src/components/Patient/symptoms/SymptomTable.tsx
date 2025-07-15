@@ -1,4 +1,4 @@
-import { BadgeInfo, X } from "lucide-react";
+import { BadgeInfo, ExternalLink, File, X } from "lucide-react";
 import { navigate, usePathParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -90,22 +90,17 @@ const SymptomRow = ({
               <BadgeInfo size={16} />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
-            <div className="px-3 py-2 text-sm text-gray-500 border-b">
-              <div className="font-medium text-gray-700">
-                {t("reported_by")}
-              </div>
-              <div className="flex items-center gap-2 mt-1">
-                <Avatar
-                  name={formatName(symptom.created_by)}
-                  className="size-5"
-                  imageUrl={symptom.created_by.profile_picture_url}
-                />
-                <span className="text-sm">
-                  {formatName(symptom.created_by)}
-                </span>
-              </div>
-            </div>
+          <DropdownMenuContent>
+            {symptom.note && (
+              <DropdownMenuItem
+                onClick={() => setShowNote(!showNote)}
+                className="flex items-center gap-2 px-3 py-2 font-semibold"
+              >
+                <File className="size-4" />
+                <span>{showNote ? t("hide_note") : t("see_note")}</span>
+              </DropdownMenuItem>
+            )}
+
             <DropdownMenuItem
               onClick={() =>
                 navigate(
@@ -114,14 +109,27 @@ const SymptomRow = ({
                     : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
                 )
               }
+              className="flex items-center gap-2 px-3 py-2 font-semibold"
             >
-              {t("view_encounter")}
+              <ExternalLink className="size-4" />
+              <span>{t("go_to_encounter")}</span>
             </DropdownMenuItem>
-            {symptom.note && (
-              <DropdownMenuItem onClick={() => setShowNote(!showNote)}>
-                {showNote ? t("hide_note") : t("see_note")}
-              </DropdownMenuItem>
-            )}
+
+            <div className="my-2 border-t border-dashed border-gray-300" />
+
+            <div className="p-1 text-sm">
+              <div className="text-gray-500">{t("reported_by")}:</div>
+              <div className="mt-1 flex items-center gap-2">
+                <Avatar
+                  name={formatName(symptom.created_by)}
+                  className="size-6"
+                  imageUrl={symptom.created_by.profile_picture_url}
+                />
+                <span className="font-semibold text-gray-900">
+                  {formatName(symptom.created_by)}
+                </span>
+              </div>
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

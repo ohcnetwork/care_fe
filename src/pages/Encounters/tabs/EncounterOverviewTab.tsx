@@ -114,7 +114,10 @@ export const EncounterOverviewTab = () => {
                           .map((allergy) => allergy.code.display)
                           .join(", ")}
                         {allergies && allergies.results.length > 3 && (
-                          <> + {allergies.results.length - 3}</>
+                          <>
+                            {" "}
+                            + {allergies.results.length - 3} {t("more")}
+                          </>
                         )}
                       </div>
                     </Badge>
