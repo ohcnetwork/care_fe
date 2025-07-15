@@ -33,7 +33,7 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import {
   ENCOUNTER_CLASSES_COLORS,
-  ENCOUNTER_CLASSES_ICONS,
+  ENCOUNTER_CLASS_ICONS,
   EncounterClass,
 } from "@/types/emr/encounter/encounter";
 import {
@@ -154,9 +154,7 @@ export default function MedicationRequestList({
             <TabsList className="flex items-center">
               <TabsTrigger value="all">
                 <span className="text-gray-950 font-medium text-sm flex items-center gap-1">
-                  {React.createElement(NotepadText, {
-                    className: "size-4 text-gray-500",
-                  })}
+                  <NotepadText className="size-4 text-gray-500" />
                   {t("all_prescriptions")}
                 </span>
               </TabsTrigger>
@@ -164,7 +162,7 @@ export default function MedicationRequestList({
                 <TabsTrigger key={key} value={key}>
                   <span className="text-gray-950 font-medium text-sm flex items-center gap-1">
                     {React.createElement(
-                      ENCOUNTER_CLASSES_ICONS[key as EncounterClass],
+                      ENCOUNTER_CLASS_ICONS[key as EncounterClass],
                       {
                         className: "size-4 text-gray-500",
                       },
@@ -196,7 +194,7 @@ export default function MedicationRequestList({
                           onClick={() => handleDropdownSelect(key)}
                           className="text-gray-950 font-medium text-sm flex items-center gap-1"
                         >
-                          {React.createElement(ENCOUNTER_CLASSES_ICONS[key], {
+                          {React.createElement(ENCOUNTER_CLASS_ICONS[key], {
                             className: "size-4",
                           })}
                           {t(`encounter_class__${key}`)}

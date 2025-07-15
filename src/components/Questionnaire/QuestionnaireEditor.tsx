@@ -203,7 +203,12 @@ function LayoutOptionCard({
   );
 }
 
-const HIDE_REPEATABLE_QUESTION_TYPES = ["boolean", "group", "display"];
+const HIDE_REPEATABLE_QUESTION_TYPES = [
+  "boolean",
+  "group",
+  "display",
+  "structured",
+];
 
 function findFirstErrorPath(errors: any, path: number[] = []): number[] | null {
   for (let i = 0; i < errors.length; i++) {
@@ -1974,9 +1979,16 @@ function QuestionEditor({
                   value={type}
                   onValueChange={(val: QuestionType) => {
                     if (val !== "group") {
-                      updateField("type", val, { questions: [] });
+                      updateField("type", val, {
+                        questions: [],
+                        repeats: HIDE_REPEATABLE_QUESTION_TYPES.includes(val)
+                          ? false
+                          : question.repeats,
+                      });
                     } else {
-                      updateField("type", val);
+                      updateField("type", val, {
+                        repeats: false,
+                      });
                     }
                   }}
                 >

@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
-import Loading from "@/components/Common/Loading";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
@@ -93,9 +93,10 @@ function getAdministrationsForTimeSlot(
 // Types and Interfaces
 interface AdministrationTabProps {
   patientId: string;
-  encounterId: string;
+  encounterId?: string;
   canAccess: boolean;
   canWrite: boolean;
+  showTimeLine?: boolean;
 }
 
 interface TimeSlotHeaderProps {
@@ -394,6 +395,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   encounterId,
   canAccess,
   canWrite,
+  showTimeLine = false,
 }) => {
   const { t } = useTranslation();
   const subpathMatch = usePathParams("/facility/:facilityId/*");
@@ -433,7 +435,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
   // Queries
   const { data: activeMedications } = useQuery({
-    queryKey: ["medication_requests_active", patientId],
+    queryKey: ["medication_requests_active", patientId, encounterId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: {
@@ -447,7 +449,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   });
 
   const { data: stoppedMedications } = useQuery({
-    queryKey: ["medication_requests_stopped", patientId],
+    queryKey: ["medication_requests_stopped", patientId, encounterId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: {
@@ -461,7 +463,12 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   });
 
   const { data: administrations } = useQuery({
-    queryKey: ["medication_administrations", patientId, visibleSlots],
+    queryKey: [
+      "medication_administrations",
+      patientId,
+      visibleSlots,
+      encounterId,
+    ],
     queryFn: query(medicationAdministrationApi.list, {
       pathParams: { patientId },
       queryParams: {
@@ -607,6 +614,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
   const handleAdminister = useCallback(
     (medication: MedicationRequestRead) => {
+      if (!encounterId) {
+        return;
+      }
       setAdministrationRequest(
         createMedicationAdministrationRequest(medication, encounterId),
       );
@@ -678,7 +688,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   if (!activeMedications || !stoppedMedications) {
     content = (
       <div className="min-h-[200px] flex items-center justify-center">
-        <Loading />
+        <TableSkeleton count={5} />
       </div>
     );
   } else if (
@@ -818,54 +828,56 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   }
 
   return (
-    <div className="flex flex-col gap-2 mt-4 mx-2">
-      <div className="flex justify-start items-center gap-2 flex-wrap">
-        <div className="flex items-center gap-2 flex-1">
+    <div className="flex flex-col gap-2 mx-2">
+      {!showTimeLine && (
+        <div className="flex justify-start items-center gap-2 flex-wrap">
           <div className="flex items-center gap-2 flex-1">
-            <CareIcon icon="l-search" className="text-lg text-gray-500" />
-            <Input
-              placeholder={t("search_medications")}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 bg-transparent text-sm outline-hidden placeholder:text-gray-500"
-            />
-            {searchQuery && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2 text-gray-500 hover:text-foreground"
-                onClick={() => setSearchQuery("")}
-              >
-                <CareIcon icon="l-times" className="text-lg" />
-              </Button>
-            )}
+            <div className="flex items-center gap-2 flex-1">
+              <CareIcon icon="l-search" className="text-lg text-gray-500" />
+              <Input
+                placeholder={t("search_medications")}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 bg-transparent text-sm outline-hidden placeholder:text-gray-500"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-gray-500 hover:text-foreground"
+                  onClick={() => setSearchQuery("")}
+                >
+                  <CareIcon icon="l-times" className="text-lg" />
+                </Button>
+              )}
+            </div>
           </div>
+          {canWrite && (
+            <Button
+              variant="outline"
+              className="text-emerald-600 border-emerald-600 hover:bg-emerald-50 w-full sm:w-auto"
+              onClick={() => setIsSheetOpen(true)}
+              disabled={!activeMedications?.results.length}
+            >
+              <CareIcon icon="l-plus" className="mr-2 size-4" />
+              {t("administer_medicine")}
+            </Button>
+          )}
+          {facilityIdExists && (
+            <Button
+              variant="outline"
+              disabled={!activeMedications?.results?.length}
+              size="sm"
+              className="text-gray-950 hover:text-gray-700 h-9"
+            >
+              <Link href={`../${encounterId}/medicines/administrations/print`}>
+                <CareIcon icon="l-print" className="mr-2" />
+                {t("print")}
+              </Link>
+            </Button>
+          )}
         </div>
-        {canWrite && (
-          <Button
-            variant="outline"
-            className="text-emerald-600 border-emerald-600 hover:bg-emerald-50 w-full sm:w-auto"
-            onClick={() => setIsSheetOpen(true)}
-            disabled={!activeMedications?.results.length}
-          >
-            <CareIcon icon="l-plus" className="mr-2 size-4" />
-            {t("administer_medicine")}
-          </Button>
-        )}
-        {facilityIdExists && (
-          <Button
-            variant="outline"
-            disabled={!activeMedications?.results?.length}
-            size="sm"
-            className="text-gray-950 hover:text-gray-700 h-9"
-          >
-            <Link href={`medicines/administrations/print`}>
-              <CareIcon icon="l-print" className="mr-2" />
-              {t("print")}
-            </Link>
-          </Button>
-        )}
-      </div>
+      )}
 
       <div className="mt-4">{content}</div>
 
@@ -894,21 +906,23 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         />
       )}
 
-      <MedicineAdminSheet
-        open={isSheetOpen}
-        onOpenChange={(open) => {
-          setIsSheetOpen(open);
-          if (!open) {
-            queryClient.invalidateQueries({
-              queryKey: ["medication_administrations"],
-            });
-          }
-        }}
-        medications={activeMedications?.results || []}
-        lastAdministeredDates={lastAdministeredDetails?.dates}
-        patientId={patientId}
-        encounterId={encounterId}
-      />
+      {encounterId && (
+        <MedicineAdminSheet
+          open={isSheetOpen}
+          onOpenChange={(open) => {
+            setIsSheetOpen(open);
+            if (!open) {
+              queryClient.invalidateQueries({
+                queryKey: ["medication_administrations"],
+              });
+            }
+          }}
+          medications={activeMedications?.results || []}
+          lastAdministeredDates={lastAdministeredDetails?.dates}
+          patientId={patientId}
+          encounterId={encounterId}
+        />
+      )}
     </div>
   );
 };
