@@ -207,7 +207,7 @@
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
       "prettier --write --ignore-unknown --plugin prettier-plugin-tailwindcss --plugin @trivago/prettier-plugin-sort-imports",
-      "eslint --fix",
+      "cross-env PRE_COMMIT=true eslint --fix --config eslint.config.mjs",
       "git update-index --again"
     ],
     "public/locale/*.json": [

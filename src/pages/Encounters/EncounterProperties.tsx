@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, Edit2Icon, MapPinIcon, PenIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -14,6 +15,7 @@ import {
 import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import { formatDateTime } from "@/Utils/utils";
 import {
@@ -29,6 +31,7 @@ interface Props {
 
 export default function EncounterProperties({ encounter, canEdit }: Props) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   const EncounterClassIcon = ENCOUNTER_CLASS_ICONS[encounter.encounter_class];
 
@@ -120,9 +123,49 @@ export default function EncounterProperties({ encounter, canEdit }: Props) {
               facilityId={encounter.facility.id}
               trigger={
                 <Button variant="ghost" size="xs">
-                  <PenIcon className="size-3" />
+                  <PenIcon />
                 </Button>
               }
+            />
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <span className="text-xs font-medium">{t("tags")}: </span>
+        <div className="flex flex-wrap gap-2">
+          {encounter.tags.length > 0 ? (
+            <>
+              {encounter.tags.map((tag) => (
+                <Badge
+                  key={tag.id}
+                  variant="secondary"
+                  className="capitalize"
+                  title={tag.description}
+                >
+                  {tag.display}
+                </Badge>
+              ))}
+            </>
+          ) : (
+            <p className="text-sm text-gray-500">{t("no_tags")}</p>
+          )}
+          {canEdit && (
+            <TagAssignmentSheet
+              entityType="encounter"
+              entityId={encounter.id}
+              currentTags={encounter.tags}
+              onUpdate={() => {
+                queryClient.invalidateQueries({
+                  queryKey: ["encounter", encounter.id],
+                });
+              }}
+              trigger={
+                <Button variant="ghost" size="xs">
+                  <PenIcon />
+                </Button>
+              }
+              canWrite={canEdit}
             />
           )}
         </div>
