@@ -83,6 +83,7 @@ import {
 import patientApi from "@/types/emr/patient/patientApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { Organization } from "@/types/organization/organization";
+import { PatientIdentifier } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
 interface PatientRegistrationPageProps {
   facilityId?: string;
@@ -305,6 +306,7 @@ export default function PatientRegistration(
 
   const queuePatientUpdateOffline = async (
     updatePatientData: PatientUpdate,
+    identifiers: PatientIdentifier[],
   ) => {
     if (!patientId) {
       toast.error(t("patient_id_missing_cannot_able_to_update_patient"));
@@ -313,6 +315,7 @@ export default function PatientRegistration(
     try {
       const entry = await db.OfflineWrites.get(patientId);
       const permissions = patientQuery.data?.permissions ?? [];
+      const existingTags = patientQuery.data?.instance_tags ?? [];
       if (entry) {
         const isCreateType = entry.type === "createPatient";
         const updatedEntry = isCreateType
@@ -337,6 +340,8 @@ export default function PatientRegistration(
           updatedEntry,
           user,
           selectedOrganization,
+          existingTags,
+          identifiers,
           permissions,
         );
 
@@ -364,6 +369,8 @@ export default function PatientRegistration(
           saveResult.entry,
           user,
           selectedOrganization,
+          existingTags,
+          identifiers,
           permissions,
           patientQuery.data?.created_date,
           patientQuery.data?.modified_date,
@@ -380,7 +387,10 @@ export default function PatientRegistration(
     }
   };
 
-  const queueNewPatientOffline = async (createPatientData: PatientCreate) => {
+  const queueNewPatientOffline = async (
+    createPatientData: PatientCreate,
+    identifiers: PatientIdentifier[],
+  ) => {
     try {
       const generatedId = `offline-${crypto.randomUUID()}`;
 
@@ -406,6 +416,8 @@ export default function PatientRegistration(
         saveResult.entry,
         user,
         selectedOrganization,
+        selectedTags,
+        identifiers,
         permissions,
       );
 
@@ -441,6 +453,21 @@ export default function PatientRegistration(
       return !config?.config.default_value && !!identifier.value;
     }) as PatientIdentifierCreate[];
 
+    //  reuse editableIdentifiers to find full config as , we need it for normlizepatient for offline case:
+    const fullIdentifiers: PatientIdentifier[] = editableIdentifiers
+      .map((identifier) => {
+        const config = facility?.patient_instance_identifier_configs.find(
+          (c) => c.id === identifier.config,
+        );
+        if (!config) return null;
+
+        return {
+          config: config,
+          value: identifier.value,
+        };
+      })
+      .filter((i): i is PatientIdentifier => i !== null);
+
     if (patientId) {
       const updatePatientData: PatientUpdate = {
         ...values,
@@ -458,7 +485,7 @@ export default function PatientRegistration(
       };
 
       if (!onlineManager.isOnline()) {
-        await queuePatientUpdateOffline(updatePatientData);
+        await queuePatientUpdateOffline(updatePatientData, fullIdentifiers);
       } else updatePatient(updatePatientData);
       return;
     } else if (facilityId) {
@@ -476,7 +503,7 @@ export default function PatientRegistration(
         identifiers: editableIdentifiers,
       };
       if (!onlineManager.isOnline()) {
-        await queueNewPatientOffline(createPatientData);
+        await queueNewPatientOffline(createPatientData, fullIdentifiers);
         return;
       } else {
         createPatient(createPatientData);
@@ -487,7 +514,6 @@ export default function PatientRegistration(
   const sidebarItems = [
     { label: t("patient__general-info"), id: "general-info" },
   ];
-
   const title = !patientId
     ? t("add_details_of_patient")
     : t("update_patient_details");

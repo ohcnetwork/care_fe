@@ -27,6 +27,7 @@ import { Symptom } from "@/types/emr/symptom/symptom";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum, FacilityData } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
+import { PatientIdentifier } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import {
@@ -165,6 +166,8 @@ export const normalizeOfflinePatientRecord = (
   entry: OfflineWritesEntry,
   user: AuthUserModel,
   selectedGeoLocation: Organization | null,
+  selectedTags: TagConfig[],
+  identifierforNormalize: PatientIdentifier[],
   permissions?: string[],
   created_date?: string,
   modified_date?: string,
@@ -190,9 +193,9 @@ export const normalizeOfflinePatientRecord = (
 
     created_date: created_date ? created_date : nowIso,
     modified_date: modified_date ? modified_date : nowIso,
-    instance_tags: [], // change needed
+    instance_tags: selectedTags ?? [], // change needed
     facility_tags: [], // change needed
-    instance_identifiers: [], // change needed
+    instance_identifiers: identifierforNormalize ?? [], // change needed
 
     geo_organization: selectedGeoLocation ?? {
       id: payload.geo_organization ?? "unknown",
