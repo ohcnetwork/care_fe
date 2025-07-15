@@ -136,6 +136,7 @@ function HealthcareServiceFormContent({
   });
 
   const form = useForm<FormValues>({
+    mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues:
       isEditMode && existingData
@@ -246,7 +247,7 @@ function HealthcareServiceFormContent({
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("name")}</FormLabel>
+                      <FormLabel aria-required>{t("name")}</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -336,6 +337,7 @@ function HealthcareServiceFormContent({
                   name="locations"
                   render={({ field }) => (
                     <FormItem>
+                      <FormLabel aria-required>Locations</FormLabel>
                       <FormControl>
                         <RequirementsSelector
                           title={t("location_requirements")}
@@ -427,7 +429,10 @@ function HealthcareServiceFormContent({
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button
+                type="submit"
+                disabled={!form.formState.isDirty || !form.formState.isValid}
+              >
                 {isPending
                   ? isEditMode
                     ? t("saving")
