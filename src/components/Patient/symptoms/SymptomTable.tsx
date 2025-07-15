@@ -135,7 +135,7 @@ const SymptomRow = ({
       </div>
 
       {showNote && symptom.note && (
-        <div className="col-span-full relative border border-gray-200 p-2 pt-4 bg-gray-50 rounded -mt-3 rounded-t-none">
+        <div className="col-span-full relative border border-gray-200 p-2 pt-4 bg-gray-50 rounded -mt-2.5 rounded-t-none">
           <div className="font-semibold text-gray-800">{t("note")}:</div>
 
           <Button
