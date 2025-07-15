@@ -26,12 +26,12 @@ import { GENDERS, GENDER_TYPES } from "@/common/constants";
 import { validateName, validatePincode } from "@/common/validation";
 
 import { usePubSub } from "@/Utils/pubsubContext";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { Patient } from "@/types/emr/patient/patient";
+import patientApi from "@/types/emr/patient/patientApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
@@ -151,7 +151,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
 
   const { mutate: createPatient } = useMutation({
     mutationFn: (body: Partial<AppointmentPatientRegister>) =>
-      mutate(routes.otp.createPatient, {
+      mutate(patientApi.otpCreatePatient, {
         body: { ...body, phone_number: tokenData.phoneNumber },
         headers: {
           Authorization: `Bearer ${tokenData.token}`,

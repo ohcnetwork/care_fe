@@ -11,7 +11,6 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import { Separator } from "@/components/ui/separator";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, properCase } from "@/Utils/utils";
 import { formatName, formatPatientAge } from "@/Utils/utils";
@@ -64,7 +63,7 @@ export function PrintQuestionnaireQuestionnaireResponses({
       encounterId,
       patientId,
     ],
-    queryFn: query(routes.getQuestionnaireResponses, {
+    queryFn: query(patientApi.getQuestionnaireResponses, {
       queryParams: {
         questionnaire: questionnaireId,
         encounter: encounterId,

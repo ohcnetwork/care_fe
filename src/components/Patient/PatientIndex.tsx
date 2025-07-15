@@ -38,7 +38,6 @@ import SearchInput from "@/components/Common/SearchInput";
 import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -47,6 +46,7 @@ import {
   Patient,
   getPartialId,
 } from "@/types/emr/patient/patient";
+import patientApi from "@/types/emr/patient/patientApi";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const [{ phone_number: phoneNumber = "" }, setPhoneNumberQuery] =
@@ -143,7 +143,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 
   const { data: patientList, isFetching } = useQuery({
     queryKey: ["patient-search", facilityId, phoneNumber, identifierSearch],
-    queryFn: query.debounced(routes.searchPatient, {
+    queryFn: query.debounced(patientApi.searchPatient, {
       body: phoneNumber
         ? { phone_number: phoneNumber }
         : identifierSearch.config && identifierSearch.value

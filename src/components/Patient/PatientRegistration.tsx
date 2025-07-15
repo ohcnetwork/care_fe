@@ -55,7 +55,6 @@ import countryList from "@/common/static/countries.json";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import dayjs from "@/Utils/dayjs";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
@@ -335,7 +334,7 @@ export default function PatientRegistration(
 
   const patientPhoneSearch = useQuery({
     queryKey: ["patients", "phone-number", phoneNumber],
-    queryFn: query.debounced(routes.searchPatient, {
+    queryFn: query.debounced(patientApi.searchPatient, {
       body: {
         phone_number: phoneNumber,
       },

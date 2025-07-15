@@ -11,7 +11,6 @@ import {
 import { AuthUserModel, UpdatePasswordForm } from "@/components/Users/models";
 
 import { PaginatedResponse } from "@/Utils/request/types";
-import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { MFAAuthenticationToken } from "@/types/auth/otp";
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import { Code } from "@/types/base/code/code";
@@ -20,24 +19,12 @@ import {
   EncounterEditRequest,
 } from "@/types/emr/encounter/encounter";
 import {
-  Observation,
-  ObservationAnalyzeResponse,
-} from "@/types/emr/observation";
-import {
-  Patient,
-  PatientRead,
-  PatientSearchResponse,
-} from "@/types/emr/patient/patient";
-import {
   BaseFacility,
   CreateFacility,
   FacilityData,
 } from "@/types/facility/facility";
-import { Message } from "@/types/notes/messages";
-import { Thread } from "@/types/notes/threads";
 import { PlugConfig } from "@/types/plugConfig";
 import { BatchSubmissionResult } from "@/types/questionnaire/batch";
-import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import {
   CreateResourceRequest,
   ResourceRequest,
@@ -204,25 +191,6 @@ const routes = {
     TRes: Type<PaginatedResponse<UserBase>>(),
   },
 
-  // Patient
-
-  searchPatient: {
-    path: "/api/v1/patient/search/",
-    method: "POST",
-    TRes: Type<PatientSearchResponse>(),
-    TBody: Type<{
-      phone_number?: string;
-      config?: string;
-      value?: string;
-    }>(),
-  },
-  getPatient: {
-    path: "/api/v1/patient/{id}/",
-    method: "GET",
-    TBody: Type<Patient>(),
-    TRes: Type<PatientRead>(),
-  },
-
   //Profile
 
   getUserDetails: {
@@ -373,55 +341,6 @@ const routes = {
       TBody: Type<void>(),
     },
   },
-  getQuestionnaireResponses: {
-    path: "/api/v1/patient/{patientId}/questionnaire_response/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<QuestionnaireResponse>>(),
-  },
-  getQuestionnaireResponse: {
-    path: "/api/v1/patient/{patientId}/questionnaire_response/{responseId}/",
-    method: "GET",
-    TRes: Type<QuestionnaireResponse>(),
-  },
-  listObservations: {
-    path: "/api/v1/patient/{patientId}/observation/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<Observation>>(),
-  },
-  observationsAnalyse: {
-    path: "/api/v1/patient/{patientId}/observation/analyse/",
-    method: "POST",
-    TRes: Type<ObservationAnalyzeResponse>(),
-  },
-
-  // Notes Routes
-  notes: {
-    patient: {
-      listThreads: {
-        path: "/api/v1/patient/{patientId}/thread/",
-        method: "GET",
-        TRes: Type<PaginatedResponse<Thread>>(),
-        TQuery: Type<{ encounter?: string }>(),
-      },
-      createThread: {
-        path: "/api/v1/patient/{patientId}/thread/",
-        method: "POST",
-        TRes: Type<Thread>(),
-        TBody: Type<{ title: string; encounter?: string }>(),
-      },
-      getMessages: {
-        path: "/api/v1/patient/{patientId}/thread/{threadId}/note/",
-        method: "GET",
-        TRes: Type<PaginatedResponse<Message>>(),
-      },
-      postMessage: {
-        path: "/api/v1/patient/{patientId}/thread/{threadId}/note/",
-        method: "POST",
-        TRes: Type<Message>(),
-        TBody: Type<{ message: string }>(),
-      },
-    },
-  },
 
   // Encounter Routes
   encounter: {
@@ -466,39 +385,6 @@ const routes = {
     },
   },
 
-  // New Patient Routes
-
-  patient: {
-    users: {
-      addUser: {
-        method: "POST",
-        path: "/api/v1/patient/{patientId}/add_user/",
-        TRes: Type<UserBase>(),
-        TBody: Type<{ user: string; role: string }>(),
-      },
-      listUsers: {
-        method: "GET",
-        path: "/api/v1/patient/{patientId}/get_users/",
-        TRes: Type<PaginatedResponse<UserBase>>(),
-      },
-      removeUser: {
-        method: "POST",
-        path: "/api/v1/patient/{patientId}/delete_user/",
-        TRes: Type<{ user: string }>(),
-      },
-    },
-    search_retrieve: {
-      path: "/api/v1/patient/search_retrieve/",
-      method: "POST",
-      TRes: Type<Patient>(),
-      TBody: Type<{
-        phone_number: string;
-        year_of_birth: string;
-        partial_id: string;
-      }>(),
-    },
-  },
-
   // OTP Routes
   otp: {
     sendOtp: {
@@ -517,27 +403,6 @@ const routes = {
       method: "POST",
       TBody: Type<{ phone_number: string; otp: string }>(),
       TRes: Type<{ access: string }>(),
-    },
-    getPatient: {
-      path: "/api/v1/otp/patient/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<Patient>>(),
-      auth: {
-        key: "Authorization",
-        value: "Bearer {token}",
-        type: "header",
-      },
-    },
-    createPatient: {
-      path: "/api/v1/otp/patient/",
-      method: "POST",
-      TBody: Type<Partial<AppointmentPatientRegister>>(),
-      TRes: Type<Patient>(),
-      auth: {
-        key: "Authorization",
-        value: "Bearer {token}",
-        type: "header",
-      },
     },
   },
 } as const;

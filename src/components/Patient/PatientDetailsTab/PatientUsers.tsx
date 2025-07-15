@@ -42,11 +42,11 @@ import UserSelector from "@/components/Common/UserSelector";
 
 import { getPermissions } from "@/common/Permissions";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import patientApi from "@/types/emr/patient/patientApi";
 import roleApi from "@/types/emr/role/roleApi";
 import { UserBase } from "@/types/user/user";
 
@@ -71,7 +71,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 
   const { mutate: assignUser } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
-      mutate(routes.patient.users.addUser, {
+      mutate(patientApi.addUser, {
         pathParams: { patientId },
         body,
       })(body),
@@ -237,14 +237,14 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
 
   const { data: users } = useQuery({
     queryKey: ["patientUsers", patientId],
-    queryFn: query(routes.patient.users.listUsers, {
+    queryFn: query(patientApi.listUsers, {
       pathParams: { patientId },
     }),
   });
 
   const { mutate: removeUser } = useMutation({
     mutationFn: (user: string) =>
-      mutate(routes.patient.users.removeUser, {
+      mutate(patientApi.removeUser, {
         pathParams: { patientId },
         body: { user },
       })({ user }),
