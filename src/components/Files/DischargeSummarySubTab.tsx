@@ -50,6 +50,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 
 interface DischargeTabProps {
   type: "encounter" | "patient";
@@ -77,7 +78,7 @@ export const DischargeTab = ({
 
   const { mutate: generateDischargeSummary, isPending: isGenerating } =
     useMutation<{ detail: string }>({
-      mutationFn: mutate(routes.encounter.generateDischargeSummary, {
+      mutationFn: mutate(encounterApi.generateDischargeSummary, {
         pathParams: { encounterId: encounter.id },
       }),
       onSuccess: (response) => {

@@ -1,14 +1,54 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
+import { PaginatedResponse } from "@/Utils/request/types";
 
-import { Encounter } from "./encounter";
+import { Encounter, EncounterEditRequest } from "./encounter";
 
 export default {
-  getEncounter: {
+  // Encounter CRUD Operations
+  list: {
+    path: "/api/v1/encounter/",
+    method: HttpMethod.GET,
+    TRes: Type<PaginatedResponse<Encounter>>(),
+  },
+  create: {
+    path: "/api/v1/encounter/",
+    method: HttpMethod.POST,
+    TRes: Type<Encounter>(),
+    TBody: Type<EncounterEditRequest>(),
+  },
+  get: {
     path: "/api/v1/encounter/{id}/",
     method: HttpMethod.GET,
-    TBody: Type<Encounter>(),
     TRes: Type<Encounter>(),
   },
+  update: {
+    path: "/api/v1/encounter/{id}/",
+    method: HttpMethod.PUT,
+    TRes: Type<Encounter>(),
+    TBody: Type<EncounterEditRequest>(),
+  },
+
+  // Organization Management
+  addOrganization: {
+    path: "/api/v1/encounter/{encounterId}/organizations_add/",
+    method: HttpMethod.POST,
+    TRes: Type<Encounter>(),
+    TBody: Type<{ organization: string }>(),
+  },
+  removeOrganization: {
+    path: "/api/v1/encounter/{encounterId}/organizations_remove/",
+    method: HttpMethod.DELETE,
+    TRes: Type<Encounter>(),
+    TBody: Type<{ organization: string }>(),
+  },
+
+  // Discharge Summary
+  generateDischargeSummary: {
+    path: "/api/v1/encounter/{encounterId}/generate_discharge_summary/",
+    method: HttpMethod.POST,
+    TRes: Type<{ detail: string }>(),
+  },
+
   // Tag-related endpoints
   setTags: {
     path: "/api/v1/encounter/{external_id}/set_tags/",
@@ -22,4 +62,4 @@ export default {
     TRes: Type<unknown>(),
     TBody: Type<{ tags: string[] }>(),
   },
-};
+} as const;

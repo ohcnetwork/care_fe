@@ -39,7 +39,7 @@ export function PrintQuestionnaireQuestionnaireResponses({
 
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId, facilityId],
-    queryFn: query(encounterApi.getEncounter, {
+    queryFn: query(encounterApi.get, {
       pathParams: { id: encounterId! },
       queryParams: { facility: facilityId },
     }),

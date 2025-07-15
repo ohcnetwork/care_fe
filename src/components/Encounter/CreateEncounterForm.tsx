@@ -45,7 +45,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
@@ -56,6 +55,7 @@ import {
   EncounterClass,
   EncounterRequest,
 } from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 
 interface Props {
   patientId: string;
@@ -100,7 +100,7 @@ export default function CreateEncounterForm({
   });
 
   const { mutate: createEncounter, isPending } = useMutation({
-    mutationFn: mutate(routes.encounter.create),
+    mutationFn: mutate(encounterApi.create),
     onSuccess: (data: Encounter) => {
       toast.success(t("encounter_created"));
       setIsOpen(false);

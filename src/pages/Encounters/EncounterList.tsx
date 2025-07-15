@@ -31,13 +31,13 @@ import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
 import useFilters from "@/hooks/useFilters";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import {
   ENCOUNTER_STATUS_ICONS,
   Encounter,
   EncounterPriority,
 } from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 
 interface EncounterListProps {
   encounters?: Encounter[];
@@ -126,7 +126,7 @@ export function EncounterList({
 
   const { data: queryEncounters, isLoading } = useQuery({
     queryKey: ["encounters", facilityId, qParams],
-    queryFn: query.debounced(routes.encounter.list, {
+    queryFn: query.debounced(encounterApi.list, {
       queryParams: {
         ...buildQueryParams(facilityId, status, encounterClass, priority),
         name,
@@ -140,7 +140,7 @@ export function EncounterList({
 
   const { data: queryEncounter } = useQuery({
     queryKey: ["encounter", encounter_id],
-    queryFn: query(routes.encounter.get, {
+    queryFn: query(encounterApi.get, {
       pathParams: { id: encounter_id },
       queryParams: {
         facility: facilityId,

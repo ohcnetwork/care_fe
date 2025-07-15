@@ -15,10 +15,6 @@ import { MFAAuthenticationToken } from "@/types/auth/otp";
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import { Code } from "@/types/base/code/code";
 import {
-  Encounter,
-  EncounterEditRequest,
-} from "@/types/emr/encounter/encounter";
-import {
   BaseFacility,
   CreateFacility,
   FacilityData,
@@ -339,49 +335,6 @@ const routes = {
       method: "DELETE",
       TRes: Type<Record<string, never>>(),
       TBody: Type<void>(),
-    },
-  },
-
-  // Encounter Routes
-  encounter: {
-    list: {
-      path: "/api/v1/encounter/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<Encounter>>(),
-    },
-    create: {
-      path: "/api/v1/encounter/",
-      method: "POST",
-      TRes: Type<Encounter>(),
-      TBody: Type<EncounterEditRequest>(),
-    },
-    get: {
-      path: "/api/v1/encounter/{id}/",
-      method: "GET",
-      TRes: Type<Encounter>(),
-    },
-    update: {
-      path: "/api/v1/encounter/{id}/",
-      method: "PUT",
-      TRes: Type<Encounter>(),
-      TBody: Type<EncounterEditRequest>(),
-    },
-    addOrganization: {
-      path: "/api/v1/encounter/{encounterId}/organizations_add/",
-      method: "POST",
-      TRes: Type<Encounter>(),
-      TBody: Type<{ organization: string }>(),
-    },
-    removeOrganization: {
-      path: "/api/v1/encounter/{encounterId}/organizations_remove/",
-      method: "DELETE",
-      TRes: Type<Encounter>(),
-      TBody: Type<{ organization: string }>(),
-    },
-    generateDischargeSummary: {
-      path: "/api/v1/encounter/{encounterId}/generate_discharge_summary/",
-      method: "POST",
-      TRes: Type<{ detail: string }>(),
     },
   },
 

@@ -36,7 +36,6 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import {
   ENCOUNTER_ADMIT_SOURCE,
@@ -54,6 +53,7 @@ import {
   type EncounterStatus,
   Hospitalization,
 } from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 import type {
   QuestionnaireResponse,
   ResponseValue,
@@ -89,7 +89,7 @@ export function EncounterQuestion({
   // Fetch encounter data
   const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounter", encounterId],
-    queryFn: query(routes.encounter.get, {
+    queryFn: query(encounterApi.get, {
       pathParams: { id: encounterId },
       queryParams: { facility: facilityId },
     }),
