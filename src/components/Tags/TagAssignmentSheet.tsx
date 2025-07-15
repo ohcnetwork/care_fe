@@ -280,7 +280,7 @@ export function TagSelectorPopover({
       )}
 
       {/* Tag selector popover */}
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={setOpen} modal={false}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
@@ -421,7 +421,7 @@ export default function TagAssignmentSheet({
   const isLoadingTags = isSettingTags || isRemovingTags;
 
   return (
-    <Sheet open={open} onOpenChange={setOpen} modal={false}>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         {trigger || (
           <Button variant="outline" size="sm" disabled={!canWrite}>
