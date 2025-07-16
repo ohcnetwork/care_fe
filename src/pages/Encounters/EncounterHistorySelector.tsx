@@ -9,6 +9,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -206,7 +207,9 @@ export default function EncounterHistorySelector() {
         </Sheet>
       </div>
       <div className="hidden lg:block">
-        <EncounterHistoryList />
+        <ScrollArea className="h-[calc(100vh-10rem)] pr-3">
+          <EncounterHistoryList />
+        </ScrollArea>
       </div>
     </>
   );

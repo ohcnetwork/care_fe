@@ -38,10 +38,6 @@ const actionLinks = [
     href: "questionnaire/symptom",
     label: "Add Symptoms",
   },
-  {
-    href: "questionnaire/charge_item",
-    label: "Add Charge Item",
-  },
 ];
 
 export const EncounterOverviewTab = () => {
