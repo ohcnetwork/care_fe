@@ -234,10 +234,8 @@ export interface EncounterRead
   tags: TagConfig[];
 }
 
-export interface EncounterCreate
-  extends Omit<EncounterBase, "id" | "discharge_summary_advice"> {
+export interface EncounterCreate extends Omit<EncounterBase, "id"> {
   organizations: string[];
-  discharge_summary_advice?: string;
 }
 
 export interface EncounterEdit extends Omit<EncounterBase, "id"> {
