@@ -1,5 +1,4 @@
 import { format } from "date-fns";
-import { MoveRight } from "lucide-react";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -94,7 +93,7 @@ function EncounterCard({
                     name: tag.display,
                     parent: tag.parent && { name: tag.parent.display },
                   },
-                  <MoveRight className="size-3" />,
+                  " : ",
                 )}
               </Badge>
             ))}

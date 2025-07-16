@@ -1,6 +1,5 @@
 import { Separator } from "@radix-ui/react-separator";
 import { format } from "date-fns";
-import { MoveRight } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -91,7 +90,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
                     name: tag.display,
                     parent: tag.parent && { name: tag.parent.display },
                   },
-                  <MoveRight className="size-3" />,
+                  " : ",
                 )}
               </Badge>
             ))}
