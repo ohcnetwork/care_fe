@@ -496,7 +496,7 @@ export function MedicationRequestQuestion({
                   limit,
                   offset,
                   status:
-                    "active,on-hold,draft,unknown,ended,completed,cancelled",
+                    "active,on_hold,draft,unknown,ended,completed,cancelled",
                   ordering: "-created_date",
                 },
               })({ signal: new AbortController().signal });
