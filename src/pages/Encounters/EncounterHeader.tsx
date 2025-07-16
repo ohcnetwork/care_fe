@@ -120,17 +120,17 @@ export function EncounterHeader() {
       </div>
 
       {!readOnly && (
-        <div className="flex flex-col items-end justify-center gap-4">
+        <div className="flex flex-col items-end justify-center gap-2">
           <PLUGIN_Component
             __name="PatientInfoCardQuickActions"
             encounter={encounter}
-            className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
+            className="w-full lg:w-40! bg-primary-700 text-white hover:bg-primary-600"
           />
 
           {!inactiveEncounterStatus.includes(encounter.status) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="primary_gradient">
+                <Button variant="primary_gradient" className="w-full lg:w-40!">
                   {t("update")}
                   <ChevronDown className="ml-2 size-4" />
                 </Button>
