@@ -56,6 +56,67 @@ interface Props {
   permissions: string[];
 }
 
+function DeleteOrgDialog({
+  org,
+  facilityId,
+}: {
+  org: FacilityOrganization;
+  facilityId: string;
+}) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  const { mutate: deleteOrganization } = useMutation({
+    mutationFn: (organizationId: string) =>
+      mutate(facilityOrganizationApi.delete, {
+        pathParams: { facilityId, organizationId },
+      })(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["facilityOrganization"],
+      });
+      toast.success(t("organization_deleted_successfully"));
+    },
+  });
+  return (
+    <AlertDialog>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <AlertDialogTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Trash className="size-4" />
+            </Button>
+          </AlertDialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>{t("delete")}</TooltipContent>
+      </Tooltip>
+      <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            {t("remove_name", { name: org.name })}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {t("are_you_sure_want_to_delete", {
+              name: org.name,
+            })}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => deleteOrganization(org.id)}
+            className={buttonVariants({
+              variant: "destructive",
+            })}
+          >
+            {t("remove")}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
 function OrganizationCard({
   org,
   facilityId,
@@ -68,21 +129,6 @@ function OrganizationCard({
   canWrite: boolean;
 }) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
-
-  const deleteOrganization = useMutation({
-    mutationFn: (organizationId: string) => {
-      return mutate(facilityOrganizationApi.delete, {
-        pathParams: { facilityId, organizationId },
-      })();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["facilityOrganization"],
-      });
-      toast.success(t("organization_deleted_successfully"));
-    },
-  });
 
   return (
     <Card key={org.id}>
@@ -110,43 +156,7 @@ function OrganizationCard({
               )}
             </div>
             {!org.has_children && org.org_type !== "root" && (
-              <AlertDialog>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <Trash className="size-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent>{t("delete")}</TooltipContent>
-                </Tooltip>
-                <AlertDialogContent
-                  onCloseAutoFocus={(e) => e.preventDefault()}
-                >
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      {t("remove_name", { name: org.name })}
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {t("are_you_sure_want_to_delete", {
-                        name: org.name,
-                      })}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => deleteOrganization.mutate(org.id)}
-                      className={buttonVariants({
-                        variant: "destructive",
-                      })}
-                    >
-                      {t("remove")}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <DeleteOrgDialog org={org} facilityId={facilityId} />
             )}
           </div>
         </CardHeader>
@@ -194,7 +204,6 @@ export default function FacilityOrganizationView({
   permissions,
 }: Props) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const { qParams, Pagination, resultsPerPage, updateQuery } = useFilters({
     limit: 12,
     disableCache: true,
@@ -221,20 +230,6 @@ export default function FacilityOrganizationView({
         name: qParams.search || undefined,
       },
     }),
-  });
-
-  const deleteOrganization = useMutation({
-    mutationFn: (organizationId: string) => {
-      return mutate(facilityOrganizationApi.delete, {
-        pathParams: { facilityId, organizationId },
-      })();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["facilityOrganization"],
-      });
-      toast.success(t("organization_deleted_successfully"));
-    },
   });
 
   const { canCreateFacilityOrganization, canManageFacilityOrganization } =
@@ -362,47 +357,10 @@ export default function FacilityOrganizationView({
                             )}
 
                             {!org.has_children && org.org_type !== "root" ? (
-                              <AlertDialog>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <AlertDialogTrigger asChild>
-                                      <Button variant="ghost" size="icon">
-                                        <Trash className="size-4" />
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                  </TooltipTrigger>
-                                  <TooltipContent>{t("delete")}</TooltipContent>
-                                </Tooltip>
-                                <AlertDialogContent
-                                  onCloseAutoFocus={(e) => e.preventDefault()}
-                                >
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>
-                                      {t("remove_name", { name: org.name })}
-                                    </AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      {t("are_you_sure_want_to_delete", {
-                                        name: org.name,
-                                      })}
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>
-                                      {t("cancel")}
-                                    </AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={() =>
-                                        deleteOrganization.mutate(org.id)
-                                      }
-                                      className={buttonVariants({
-                                        variant: "destructive",
-                                      })}
-                                    >
-                                      {t("remove")}
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
+                              <DeleteOrgDialog
+                                org={org}
+                                facilityId={facilityId}
+                              />
                             ) : (
                               <div className="size-10" />
                             )}
