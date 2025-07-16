@@ -7,7 +7,7 @@ import { Permissions, getPermissions } from "@/common/Permissions";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { usePermissions } from "@/context/PermissionContext";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { Patient } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
@@ -19,9 +19,9 @@ type EncounterContextType = {
   selectedEncounterId: string;
 
   patient: Patient | undefined;
-  currentEncounter: Encounter | undefined;
-  pastEncounters: PaginatedResponse<Encounter> | undefined;
-  selectedEncounter: Encounter | undefined;
+  currentEncounter: EncounterRead | undefined;
+  pastEncounters: PaginatedResponse<EncounterRead> | undefined;
+  selectedEncounter: EncounterRead | undefined;
   isPatientLoading: boolean;
   isCurrentEncounterLoading: boolean;
   isSelectedEncounterLoading: boolean;

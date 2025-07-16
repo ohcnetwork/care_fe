@@ -28,7 +28,7 @@ import { EncounterOverviewTab } from "@/pages/Encounters/tabs/EncounterOverviewT
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
-  Encounter,
+  EncounterRead,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { Patient } from "@/types/emr/patient/patient";
@@ -38,7 +38,7 @@ import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
 import { EncounterServiceRequestTab } from "./tabs/EncounterServiceRequestTab";
 
 export interface PluginEncounterTabProps {
-  encounter: Encounter;
+  encounter: EncounterRead;
   patient: Patient;
 }
 

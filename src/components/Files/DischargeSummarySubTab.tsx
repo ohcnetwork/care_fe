@@ -49,13 +49,13 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 
 interface DischargeTabProps {
   type: "encounter" | "patient";
   // facilityId: string;
-  encounter: Encounter;
+  encounter: EncounterRead;
   canEdit: boolean | undefined;
 }
 

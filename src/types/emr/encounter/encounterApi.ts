@@ -1,30 +1,30 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
-import { Encounter, EncounterCreate, EncounterEdit } from "./encounter";
+import { EncounterCreate, EncounterEdit, EncounterRead } from "./encounter";
 
 export default {
   // Encounter CRUD Operations
   list: {
     path: "/api/v1/encounter/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<Encounter>>(),
+    TRes: Type<PaginatedResponse<EncounterRead>>(),
   },
   create: {
     path: "/api/v1/encounter/",
     method: HttpMethod.POST,
-    TRes: Type<Encounter>(),
+    TRes: Type<EncounterRead>(),
     TBody: Type<EncounterCreate>(),
   },
   get: {
     path: "/api/v1/encounter/{id}/",
     method: HttpMethod.GET,
-    TRes: Type<Encounter>(),
+    TRes: Type<EncounterRead>(),
   },
   update: {
     path: "/api/v1/encounter/{id}/",
     method: HttpMethod.PUT,
-    TRes: Type<Encounter>(),
+    TRes: Type<EncounterRead>(),
     TBody: Type<EncounterEdit>(),
   },
 
@@ -32,13 +32,13 @@ export default {
   addOrganization: {
     path: "/api/v1/encounter/{encounterId}/organizations_add/",
     method: HttpMethod.POST,
-    TRes: Type<Encounter>(),
+    TRes: Type<EncounterRead>(),
     TBody: Type<{ organization: string }>(),
   },
   removeOrganization: {
     path: "/api/v1/encounter/{encounterId}/organizations_remove/",
     method: HttpMethod.DELETE,
-    TRes: Type<Encounter>(),
+    TRes: Type<EncounterRead>(),
     TBody: Type<{ organization: string }>(),
   },
 

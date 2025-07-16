@@ -11,7 +11,7 @@ import { formatDosage, formatSig } from "@/components/Medicine/utils";
 
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import {
   MedicationRequestRead,
   displayMedicationName,
@@ -37,7 +37,7 @@ const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
 };
 
 interface PrescriptionPreviewProps {
-  encounter?: Encounter;
+  encounter?: EncounterRead;
   medications: MedicationRequestRead[];
   patient: Patient;
 }

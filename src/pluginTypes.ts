@@ -5,7 +5,7 @@ import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { DeviceDetail } from "@/types/device/device";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { Patient } from "@/types/emr/patient/patient";
 import { UserBase } from "@/types/user/user";
 
@@ -30,17 +30,17 @@ export type PatientHomeActionsComponentType = React.FC<{
 }>;
 
 export type PatientInfoCardActionsComponentType = React.FC<{
-  encounter: Encounter;
+  encounter: EncounterRead;
   className?: string;
 }>;
 
 export type PatientInfoCardQuickActionsComponentType = React.FC<{
-  encounter: Encounter;
+  encounter: EncounterRead;
   className?: string;
 }>;
 
 export type PatientInfoCardMarkAsCompleteComponentType = React.FC<{
-  encounter: Encounter;
+  encounter: EncounterRead;
 }>;
 
 export type FacilityHomeActionsComponentType = React.FC<{
@@ -93,7 +93,7 @@ export type PluginDeviceManifest = {
     onChange: (metadata: Record<string, unknown>) => void;
   }>;
   showPageCard?: React.FC<{ device: DeviceDetail; facilityId: string }>;
-  encounterOverview?: React.FC<{ encounter: Encounter }>;
+  encounterOverview?: React.FC<{ encounter: EncounterRead }>;
 };
 
 type SupportedPluginExtensions =

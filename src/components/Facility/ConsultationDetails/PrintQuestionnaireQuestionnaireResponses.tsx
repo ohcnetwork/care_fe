@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import query from "@/Utils/request/query";
 import { formatDateTime, properCase } from "@/Utils/utils";
 import { formatName, formatPatientAge } from "@/Utils/utils";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { Patient } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
@@ -148,7 +148,7 @@ const DetailRow = ({
 };
 
 interface EncounterDetailsProps {
-  encounter?: Encounter;
+  encounter?: EncounterRead;
   patient?: Patient;
 }
 
