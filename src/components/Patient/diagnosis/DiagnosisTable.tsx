@@ -282,8 +282,7 @@ export const DiagnosisTable = ({
   patientId: string;
 }) => {
   const { t } = useTranslation();
-  const subpathMatch = usePathParams("/facility/:facilityId/*");
-  const facilityId = subpathMatch?.facilityId;
+  const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
   const isMobile = useIsMobile();
   const baseHeaderClasses =
     "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700";

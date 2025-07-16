@@ -17,6 +17,8 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 
+import { useIsMobile } from "@/hooks/use-mobile";
+
 import { formatName } from "@/Utils/utils";
 import {
   SYMPTOM_CLINICAL_STATUS_COLORS,
@@ -156,6 +158,138 @@ const SymptomRow = ({
   );
 };
 
+const SymptomCard = ({
+  symptom,
+  patientId,
+  facilityId,
+}: {
+  symptom: Symptom;
+  patientId: string;
+  facilityId?: string;
+}) => {
+  const [showNote, setShowNote] = useState(false);
+  const { t } = useTranslation();
+  return (
+    <div className="border rounded-md p-4 bg-white">
+      <div className="flex justify-between items-start flex-wrap gap-3">
+        <div className="flex-1 font-semibold text-gray-900 break-words">
+          {symptom.code.display}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Badge
+            variant={SYMPTOM_CLINICAL_STATUS_COLORS[symptom.clinical_status]}
+            className="whitespace-nowrap"
+          >
+            {t(symptom.clinical_status)}
+          </Badge>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="link"
+                className="text-gray-500 hover:text-gray-700 p-1"
+              >
+                <BadgeInfo size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {symptom.note && (
+                <DropdownMenuItem
+                  onClick={() => setShowNote(!showNote)}
+                  className="flex items-center gap-2 px-3 py-2 font-semibold"
+                >
+                  <File className="size-4" />
+                  <span>{showNote ? t("hide_note") : t("see_note")}</span>
+                </DropdownMenuItem>
+              )}
+
+              <DropdownMenuItem
+                onClick={() =>
+                  navigate(
+                    facilityId
+                      ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
+                      : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
+                  )
+                }
+                className="flex items-center gap-2 px-3 py-2 font-semibold"
+              >
+                <ExternalLink className="size-4" />
+                <span>{t("go_to_encounter")}</span>
+              </DropdownMenuItem>
+
+              <div className="my-2 border-t border-dashed border-gray-300" />
+
+              <div className="p-1 text-sm">
+                <div className="text-gray-500">{t("reported_by")}:</div>
+                <div className="mt-1 flex items-center gap-2">
+                  <Avatar
+                    name={formatName(symptom.created_by)}
+                    className="size-6"
+                    imageUrl={symptom.created_by.profile_picture_url}
+                  />
+                  <span className="font-semibold text-gray-900">
+                    {formatName(symptom.created_by)}
+                  </span>
+                </div>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+      <div className="mt-4 flex gap-8 flex-wrap">
+        <div>
+          <div className="text-sm text-gray-600 mb-1">{t("verification")}</div>
+          <Badge
+            variant={
+              SYMPTOM_VERIFICATION_STATUS_COLORS[symptom.verification_status]
+            }
+            className="whitespace-nowrap"
+          >
+            {t(symptom.verification_status)}
+          </Badge>
+        </div>
+        <div>
+          <div className="text-sm text-gray-600 mb-1">{t("severity")}</div>
+          <Badge
+            variant={SYMPTOM_SEVERITY_COLORS[symptom.severity]}
+            className="whitespace-nowrap"
+          >
+            {t(symptom.severity)}
+          </Badge>
+        </div>
+        <div>
+          <div className="text-sm text-gray-600 mb-1">{t("onset")}</div>
+          {symptom.onset?.onset_datetime ? (
+            <RelativeDateTooltip date={symptom.onset.onset_datetime} />
+          ) : (
+            "-"
+          )}
+        </div>
+      </div>
+      {showNote && symptom.note && (
+        <div className="col-span-full border border-gray-200 p-2 bg-white rounded mt-2">
+          <div className="flex flex-row w-full justify-between">
+            <div className="text-sm font-semibold text-gray-800">
+              {t("note")} :
+            </div>
+            <Button
+              variant={null}
+              className="size-6"
+              onClick={() => setShowNote(false)}
+            >
+              <X size={14} />
+              <span className="sr-only">{t("close")}</span>
+            </Button>
+          </div>
+          <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8 max-w-full break-words">
+            {symptom.note}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const SymptomTable = ({
   symptoms,
   patientId,
@@ -164,11 +298,22 @@ export const SymptomTable = ({
   patientId: string;
 }) => {
   const { t } = useTranslation();
-  const subpathMatch = usePathParams("/facility/:facilityId/*");
-  const facilityId = subpathMatch?.facilityId;
+  const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
+  const isMobile = useIsMobile();
   const baseHeaderClasses =
     "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700";
-  return (
+  return isMobile ? (
+    <div className="space-y-2">
+      {symptoms.map((symptom) => (
+        <SymptomCard
+          key={symptom.id}
+          symptom={symptom}
+          patientId={patientId}
+          facilityId={facilityId}
+        />
+      ))}
+    </div>
+  ) : (
     <div className="max-w-6xl overflow-x-auto">
       <div className="min-w-xxl pb-2">
         <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-y-2">
