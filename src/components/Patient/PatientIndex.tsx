@@ -164,12 +164,12 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       setSelectedPatient(patient);
       setVerificationOpen(true);
       setYearOfBirth("");
-    } else {
+    } else if ("year_of_birth" in patient) {
       navigate(`/facility/${facilityId}/patients/verify`, {
         query: {
           phone_number: patient.phone_number,
-          year_of_birth: (patient as PatientRead).year_of_birth.toString(),
-          partial_id: (patient as PatientRead).id.slice(0, 5),
+          year_of_birth: patient.year_of_birth.toString(),
+          partial_id: patient.id.slice(0, 5),
         },
       });
     }
