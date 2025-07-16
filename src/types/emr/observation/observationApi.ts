@@ -3,7 +3,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import {
   Observation,
   ObservationAnalyzeResponse,
-} from "@/src/types/emr/observation";
+} from "@/types/emr/observation";
 
 import {
   ObservationCreate,
