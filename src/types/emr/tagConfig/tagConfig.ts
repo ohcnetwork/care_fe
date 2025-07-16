@@ -85,5 +85,5 @@ export function getTagHierarchyDisplay(tag: TagConfig): string {
     currentTag = currentTag.parent;
   }
 
-  return [...tempHierarchy, tag.display].join(" > ");
+  return [...tempHierarchy, tag.display].join(": ");
 }

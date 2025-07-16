@@ -127,11 +127,11 @@ export default function TagConfigView({
     });
   };
 
-  const handleViewChild = (config: TagConfig) => {
+  const handleViewChild = (configId: string) => {
     if (facilityId) {
-      navigate(`/facility/${facilityId}/settings/tag_config/${config.id}`);
+      navigate(`/facility/${facilityId}/settings/tag_config/${configId}`);
     } else {
-      navigate(`/admin/tag_config/${config.id}`);
+      navigate(`/admin/tag_config/${configId}`);
     }
   };
 
@@ -270,13 +270,7 @@ export default function TagConfigView({
                     className="p-0 h-auto text-blue-600"
                     onClick={() =>
                       handleViewChild(
-                        // TODO: This is a hack to get the parent navigation to work, this needs to be fixed
-                        tagConfig.parent
-                          ? ({
-                              ...tagConfig,
-                              id: tagConfig.parent.id,
-                            } as TagConfig)
-                          : tagConfig,
+                        tagConfig.parent ? tagConfig.parent.id : tagConfig.id,
                       )
                     }
                   >
