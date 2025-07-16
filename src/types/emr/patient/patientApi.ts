@@ -14,7 +14,9 @@ import {
   Patient,
   PatientCreate,
   PatientRead,
+  PatientSearchRequest,
   PatientSearchResponse,
+  PatientSearchRetrieveRequest,
   PatientUpdate,
 } from "./patient";
 
@@ -48,24 +50,14 @@ export default {
     path: "/api/v1/patient/search/",
     method: HttpMethod.POST,
     TRes: Type<PatientSearchResponse>(),
-    TBody: Type<{
-      phone_number?: string;
-      config?: string;
-      value?: string;
-    }>(),
+    TBody: Type<PatientSearchRequest>(),
   },
 
   searchRetrieve: {
     path: "/api/v1/patient/search_retrieve/",
     method: HttpMethod.POST,
     TRes: Type<PatientRead>(),
-    TBody: Type<
-      Partial<{
-        phone_number: string;
-        year_of_birth: string;
-        partial_id: string;
-      }>
-    >(),
+    TBody: Type<PatientSearchRetrieveRequest>(),
   },
 
   // Questionnaire Responses

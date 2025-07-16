@@ -106,6 +106,18 @@ export interface PatientSearchResponse {
   results: PartialPatientModel[] | Patient[];
 }
 
+export interface PatientSearchRequest {
+  phone_number?: string;
+  config?: string;
+  value?: string;
+}
+
+export interface PatientSearchRetrieveRequest {
+  phone_number?: string;
+  year_of_birth?: string;
+  partial_id?: string;
+}
+
 export function getPartialId(patient: PartialPatientModel | Patient) {
   if ("partial_id" in patient) {
     return patient.partial_id;
