@@ -862,9 +862,7 @@ export default function SectionBuilder({ form }: SectionBuilderProps) {
       <CardHeader className="flex flex-col sm:flex-row items-center justify-between">
         <div>
           <CardTitle>{t("sections")}</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            {t("sections_description")}
-          </p>
+          <p className="text-sm">{t("sections_description")}</p>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -884,9 +882,7 @@ export default function SectionBuilder({ form }: SectionBuilderProps) {
         ))}
 
         {fields.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            {t("no_sections")}
-          </div>
+          <div className="text-center py-8">{t("no_sections")}</div>
         )}
       </CardContent>
       <CardFooter>

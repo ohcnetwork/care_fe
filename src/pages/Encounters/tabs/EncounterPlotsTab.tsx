@@ -13,27 +13,23 @@ import Loading from "@/components/Common/Loading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
-import { getPermissions } from "@/common/Permissions";
-
-import { usePermissions } from "@/context/PermissionContext";
-import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
 type QueryParams = {
   plot: ObservationPlotConfig[number]["id"];
 };
 
-export const EncounterPlotsTab = (props: EncounterTabProps) => {
+export const EncounterPlotsTab = () => {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams<QueryParams>();
-  const { hasPermission } = usePermissions();
-  const { canViewClinicalData } = getPermissions(
-    hasPermission,
-    props.patient.permissions,
-  );
-  const { canViewEncounter } = getPermissions(
-    hasPermission,
-    props.encounter.permissions,
-  );
+
+  const {
+    patientId,
+    selectedEncounterId: encounterId,
+    patientPermissions: { canViewClinicalData },
+    selectedEncounterPermissions: { canViewEncounter },
+  } = useEncounter();
+
   const canAccess = canViewClinicalData || canViewEncounter;
   const plotColumns = useBreakpoints({ default: 1, lg: 2 });
 
@@ -57,7 +53,9 @@ export const EncounterPlotsTab = (props: EncounterTabProps) => {
     <div className="mt-2">
       <Tabs
         value={currentTabId}
-        onValueChange={(value) => setQParams({ plot: value })}
+        onValueChange={(value) =>
+          setQParams({ plot: value }, { overwrite: false })
+        }
       >
         <div className="overflow-x-scroll w-full">
           <TabsList>
@@ -72,8 +70,8 @@ export const EncounterPlotsTab = (props: EncounterTabProps) => {
         {data.map((tab) => (
           <TabsContent key={tab.id} value={tab.id}>
             <ObservationVisualizer
-              patientId={props.patient.id}
-              encounterId={props.encounter.id}
+              patientId={patientId}
+              encounterId={encounterId}
               codeGroups={tab.groups}
               gridCols={plotColumns}
               canAccess={canAccess}
