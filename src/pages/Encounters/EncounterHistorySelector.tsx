@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { MoveRight } from "lucide-react";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -21,6 +22,7 @@ import {
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { stringifyNestedObject } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   ENCOUNTER_STATUS_COLORS,
@@ -84,6 +86,19 @@ function EncounterCard({
             </div>
           </div>
           <div className="text-xs text-gray-500">{encounter.facility.name}</div>
+          <div className="flex flex-wrap gap-1 text-xs">
+            {encounter.tags?.map((tag) => (
+              <Badge variant="outline" key={tag.id} className="text-xs">
+                {stringifyNestedObject(
+                  {
+                    name: tag.display,
+                    parent: tag.parent && { name: tag.parent.display },
+                  },
+                  <MoveRight className="size-3" />,
+                )}
+              </Badge>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>

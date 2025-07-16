@@ -1,5 +1,6 @@
 import { Separator } from "@radix-ui/react-separator";
 import { format } from "date-fns";
+import { MoveRight } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -18,6 +19,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import { stringifyNestedObject } from "@/Utils/utils";
 import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
@@ -82,6 +84,17 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
             <Badge variant={ENCOUNTER_PRIORITY_COLORS[encounter.priority]}>
               {t(`encounter_priority__${encounter.priority}`)}
             </Badge>
+            {encounter.tags?.map((tag) => (
+              <Badge variant="outline" key={tag.id}>
+                {stringifyNestedObject(
+                  {
+                    name: tag.display,
+                    parent: tag.parent && { name: tag.parent.display },
+                  },
+                  <MoveRight className="size-3" />,
+                )}
+              </Badge>
+            ))}
           </div>
           <div>
             <Separator />
