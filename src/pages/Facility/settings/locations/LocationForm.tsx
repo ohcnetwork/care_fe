@@ -28,10 +28,10 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { BatchRequestBody } from "@/types/base/batch/batch";
+import batchApi from "@/types/base/batch/batchApi";
 import {
   LocationFormOptions,
   type LocationWrite,
@@ -203,7 +203,7 @@ export default function LocationForm({
   });
 
   const { mutate: submitBatch } = useMutation({
-    mutationFn: mutate(routes.batchRequest),
+    mutationFn: mutate(batchApi.batchRequest),
     onSuccess: (data: { results: BatchSubmissionResult[] }) => {
       toast.success(
         t("bed_created_notification", { count: data.results.length }),
@@ -282,6 +282,10 @@ export default function LocationForm({
               <FormLabel>{t("location_form")}</FormLabel>
               <Select
                 onValueChange={(value) => {
+                  if (value === "bd" && !parentId) {
+                    toast.error(t("bed_requires_parent_location"));
+                    return;
+                  }
                   field.onChange(value);
                   if (value !== "bd") {
                     form.setValue("enableBulkCreation", false);

@@ -180,7 +180,7 @@ export function EncounterDetails({
           value={
             encounter?.period?.start
               ? format(new Date(encounter.period.start), "dd MMM yyyy, EEEE")
-              : t("NA")
+              : t("na")
           }
           isStrong
         />
