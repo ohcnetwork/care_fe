@@ -4,10 +4,10 @@ import { createContext, useEffect, useState } from "react";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
+import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { TokenData } from "@/types/auth/otp";
 import { Patient } from "@/types/emr/patient/patient";
-import patientApi from "@/types/emr/patient/patientApi";
 
 export type PatientUserContextType = {
   patients?: Patient[];
@@ -32,7 +32,7 @@ export default function PatientUserProvider({ children }: Props) {
 
   const { data: userData } = useQuery({
     queryKey: ["patients", tokenData],
-    queryFn: query(patientApi.otpGetPatient, {
+    queryFn: query(routes.otp.getPatient, {
       headers: {
         Authorization: `Bearer ${tokenData?.token}`,
       },

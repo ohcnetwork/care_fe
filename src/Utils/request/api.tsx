@@ -11,9 +11,11 @@ import {
 import { AuthUserModel, UpdatePasswordForm } from "@/components/Users/models";
 
 import { PaginatedResponse } from "@/Utils/request/types";
+import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { MFAAuthenticationToken } from "@/types/auth/otp";
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import { Code } from "@/types/base/code/code";
+import { Patient } from "@/types/emr/patient/patient";
 import {
   BaseFacility,
   CreateFacility,
@@ -356,6 +358,27 @@ const routes = {
       method: "POST",
       TBody: Type<{ phone_number: string; otp: string }>(),
       TRes: Type<{ access: string }>(),
+    },
+    getPatient: {
+      path: "/api/v1/otp/patient/",
+      method: "GET",
+      TRes: Type<PaginatedResponse<Patient>>(),
+      auth: {
+        key: "Authorization",
+        value: "Bearer {token}",
+        type: "header",
+      },
+    },
+    createPatient: {
+      path: "/api/v1/otp/patient/",
+      method: "POST",
+      TBody: Type<Partial<AppointmentPatientRegister>>(),
+      TRes: Type<Patient>(),
+      auth: {
+        key: "Authorization",
+        value: "Bearer {token}",
+        type: "header",
+      },
     },
   },
 } as const;

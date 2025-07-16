@@ -1,6 +1,5 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import {
   Observation,
   ObservationAnalyzeResponse,
@@ -125,29 +124,6 @@ export default {
     path: "/api/v1/patient/{patientId}/delete_user/",
     method: HttpMethod.POST,
     TRes: Type<{ user: string }>(),
-  },
-
-  // OTP Patient Routes
-  otpGetPatient: {
-    path: "/api/v1/otp/patient/",
-    method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<Patient>>(),
-    auth: {
-      key: "Authorization",
-      value: "Bearer {token}",
-      type: "header",
-    },
-  },
-  otpCreatePatient: {
-    path: "/api/v1/otp/patient/",
-    method: HttpMethod.POST,
-    TBody: Type<Partial<AppointmentPatientRegister>>(),
-    TRes: Type<Patient>(),
-    auth: {
-      key: "Authorization",
-      value: "Bearer {token}",
-      type: "header",
-    },
   },
 
   // Tag-related endpoints
