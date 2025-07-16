@@ -53,7 +53,7 @@ import {
   ENCOUNTER_PRIORITY,
   Encounter,
   EncounterClass,
-  EncounterRequest,
+  EncounterCreate,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 
@@ -114,7 +114,7 @@ export default function CreateEncounterForm({
   });
 
   function onSubmit(data: z.infer<typeof encounterFormSchema>) {
-    const encounterRequest: EncounterRequest = {
+    const encounterRequest: EncounterCreate = {
       ...data,
       patient: patientId,
       facility: facilityId,
@@ -187,7 +187,7 @@ export default function CreateEncounterForm({
                               updatedDate.setMinutes(date.getMinutes());
                               field.onChange(updatedDate.toISOString());
                             }}
-                            initialFocus
+                            autoFocus
                           />
                         </PopoverContent>
                       </Popover>

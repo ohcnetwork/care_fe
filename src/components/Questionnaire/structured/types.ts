@@ -6,7 +6,7 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
-import { EncounterEditRequest } from "@/types/emr/encounter/encounter";
+import { EncounterEdit } from "@/types/emr/encounter/encounter";
 import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { ServiceRequestApplyActivityDefinitionSpec } from "@/types/emr/serviceRequest/serviceRequest";
@@ -24,7 +24,7 @@ export interface StructuredDataMap {
   symptom: SymptomRequest;
   diagnosis: DiagnosisRequest;
   medication_statement: MedicationStatementRequest;
-  encounter: EncounterEditRequest;
+  encounter: EncounterEdit;
   appointment: CreateAppointmentQuestion;
   files: FileUploadQuestion;
   time_of_death: string;
@@ -39,7 +39,7 @@ export interface StructuredRequestMap {
   symptom: { datapoints: SymptomRequest[] };
   diagnosis: { datapoints: DiagnosisRequest[] };
   medication_statement: { datapoints: MedicationStatementRequest[] };
-  encounter: EncounterEditRequest;
+  encounter: EncounterEdit;
   appointment: AppointmentCreateRequest;
   service_request: ServiceRequestApplyActivityDefinitionSpec;
   files: FileUploadQuestion;

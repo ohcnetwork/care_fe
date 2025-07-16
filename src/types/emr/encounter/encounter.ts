@@ -228,7 +228,7 @@ export interface Encounter {
   tags: TagConfig[];
 }
 
-export interface EncounterEditRequest {
+export interface EncounterEdit {
   organizations: string[];
   patient: string;
   status: EncounterStatus;
@@ -241,7 +241,7 @@ export interface EncounterEditRequest {
   discharge_summary_advice?: string | null;
 }
 
-export interface EncounterRequest {
+export interface EncounterCreate {
   organizations: string[];
   patient: string;
   status: EncounterStatus;

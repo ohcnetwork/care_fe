@@ -1,7 +1,7 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
-import { Encounter, EncounterEditRequest } from "./encounter";
+import { Encounter, EncounterCreate, EncounterEdit } from "./encounter";
 
 export default {
   // Encounter CRUD Operations
@@ -14,7 +14,7 @@ export default {
     path: "/api/v1/encounter/",
     method: HttpMethod.POST,
     TRes: Type<Encounter>(),
-    TBody: Type<EncounterEditRequest>(),
+    TBody: Type<EncounterCreate>(),
   },
   get: {
     path: "/api/v1/encounter/{id}/",
@@ -25,7 +25,7 @@ export default {
     path: "/api/v1/encounter/{id}/",
     method: HttpMethod.PUT,
     TRes: Type<Encounter>(),
-    TBody: Type<EncounterEditRequest>(),
+    TBody: Type<EncounterEdit>(),
   },
 
   // Organization Management

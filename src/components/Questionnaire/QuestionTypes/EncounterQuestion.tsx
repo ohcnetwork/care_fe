@@ -48,7 +48,7 @@ import {
   type EncounterClass,
   type EncounterDietPreference,
   type EncounterDischargeDisposition,
-  type EncounterEditRequest,
+  type EncounterEdit,
   type EncounterPriority,
   type EncounterStatus,
   Hospitalization,
@@ -97,7 +97,7 @@ export function EncounterQuestion({
   });
   const { t } = useTranslation();
 
-  const [encounter, setEncounter] = useState<EncounterEditRequest>({
+  const [encounter, setEncounter] = useState<EncounterEdit>({
     status: "unknown" as EncounterStatus,
     encounter_class: "amb" as EncounterClass,
     period: {
@@ -146,7 +146,7 @@ export function EncounterQuestion({
   // Update encounter state when data is loaded
   useEffect(() => {
     if (encounterData) {
-      handleUpdateEncounter(encounterData as unknown as EncounterEditRequest);
+      handleUpdateEncounter(encounterData as unknown as EncounterEdit);
     }
   }, [encounterData]);
 
@@ -160,7 +160,7 @@ export function EncounterQuestion({
   }, [questionnaireResponse]);
 
   const handleUpdateEncounter = (
-    updates: Partial<Omit<EncounterEditRequest, "organizations" | "patient">>,
+    updates: Partial<Omit<EncounterEdit, "organizations" | "patient">>,
   ) => {
     clearError();
     const newEncounter = { ...encounter, ...updates };
@@ -169,7 +169,7 @@ export function EncounterQuestion({
     }
 
     // Create the full encounter request object
-    const encounterRequest: EncounterEditRequest = {
+    const encounterRequest: EncounterEdit = {
       ...newEncounter,
       organizations,
       patient: patientId,
