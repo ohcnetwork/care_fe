@@ -71,7 +71,7 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
         <div className="mt-4 flex justify-between items-start gap-4">
           <div className="space-y-2 flex-1 min-w-0">
             <div>
-              <Label>{t("practitioner")}:</Label>
+              <Label>{t("practitioner", { count: 1 })}:</Label>
               <p className="text-sm font-semibold break-words">
                 {formatName(appointment.user)}
               </p>

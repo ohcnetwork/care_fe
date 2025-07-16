@@ -476,7 +476,7 @@ function ObservationDefinitionFormContent({
                     <ValueSetSelect
                       system="system-body-site"
                       value={form.watch("body_site")}
-                      placeholder={t("e.g., Right Arm")}
+                      placeholder={t("select_body_site")}
                       onSelect={(code) => {
                         form.setValue("body_site", {
                           code: code.code,
@@ -493,7 +493,7 @@ function ObservationDefinitionFormContent({
                     <ValueSetSelect
                       system="system-collection-method"
                       value={form.watch("method")}
-                      placeholder={t("e.g., Automatic")}
+                      placeholder={t("method_placeholder")}
                       onSelect={(code) => {
                         form.setValue("method", {
                           code: code.code,
@@ -510,7 +510,7 @@ function ObservationDefinitionFormContent({
                     <ValueSetSelect
                       system="system-ucum-units"
                       value={form.watch("permitted_unit")}
-                      placeholder={t("e.g., mmHg")}
+                      placeholder={t("unit_placeholder")}
                       onSelect={(code) => {
                         form.setValue("permitted_unit", {
                           code: code.code,
@@ -571,13 +571,11 @@ function ObservationDefinitionFormContent({
                 {(form.watch("component") ?? [])?.length === 0 ? (
                   <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4">
                     <p className="mb-2 text-sm text-gray-500">
-                      {t(
-                        "Components are useful for observations that need multiple values, like:",
-                      )}
+                      {t("observation_components_description")}
                     </p>
                     <ul className="mb-4 text-sm text-gray-600">
-                      <li>• Blood Pressure (Systolic + Diastolic)</li>
-                      <li>• Complete Blood Count (RBC + WBC + Platelets)</li>
+                      <li>• {t("blood_pressure_systolic_diastolic")}</li>
+                      <li>• {t("complete_blood_count_rbc_wbc_platelets")}</li>
                     </ul>
                     <Button
                       type="button"
