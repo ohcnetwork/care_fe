@@ -334,7 +334,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           />
           <Input
             type="time"
-            className="w-full sm:max-w-[9.5rem] text-sm sm:text-base"
+            className="w-full sm:max-w-40 text-sm sm:text-base"
             value={formatTime(administrationRequest.occurrence_period_start)}
             onChange={(e) => handleTimeChange(e, true)}
             disabled={!isPastTime || !!administrationRequest.id}
@@ -373,7 +373,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           />
           <Input
             type="time"
-            className="w-full sm:max-w-[9.5rem] text-sm sm:text-base"
+            className="w-full sm:max-w-40 text-sm sm:text-base"
             value={formatTime(administrationRequest.occurrence_period_end)}
             onChange={(e) => handleTimeChange(e, false)}
             disabled={
