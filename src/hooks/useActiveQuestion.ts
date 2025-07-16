@@ -19,6 +19,8 @@ export function useActiveQuestion() {
   return {
     activeQuestionId,
     activeSubQuestionId,
+    setActiveQuestionId,
+    setActiveSubQuestionId,
     focusQuestion,
     focusSubQuestion,
   };

@@ -48,6 +48,7 @@ import { isQuestionEnabled } from "./QuestionTypes/QuestionGroup";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
+import { useActiveQuestion } from "@/hooks/useActiveQuestion";
 
 export interface QuestionnaireFormState {
   questionnaire: QuestionnaireDetail;
@@ -335,8 +336,13 @@ export function QuestionnaireForm({
   const [serverErrors, setServerErrors] = useState<ServerValidationError[]>();
   const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string>();
 
-  const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
+  const {
+    activeQuestionId,
+    activeSubQuestionId,
+    setActiveSubQuestionId,
+    setActiveQuestionId,
+  } = useActiveQuestion();
 
   const {
     data: questionnaireData,
@@ -724,15 +730,19 @@ export function QuestionnaireForm({
     submitBatch({ requests });
   };
 
-  const scrollToQuestion = (questionnaireId: string, groupId?: string) => {
+  const scrollToQuestion = (questionnaireId: string, QuestionId?: string,SubQuestionId?:string) => {
     setActiveQuestionnaireId(questionnaireId);
-    setActiveGroupId(groupId);
+    setActiveQuestionId(QuestionId||"");
+    setActiveSubQuestionId(SubQuestionId||"");
 
     let element: Element | null;
 
-    if (groupId) {
-      element = document.querySelector(`[data-group-id="${groupId}"]`);
-    } else {
+    if(SubQuestionId){
+         element = document.querySelector(`[data-subquestion-id="${SubQuestionId}"]`);
+    }else if (QuestionId) {
+      element = document.querySelector(`[data-question-id="${QuestionId}"]`);
+    } 
+    else {
       element = document.querySelector(
         `[data-questionnaire-id="${questionnaireId}"]`,
       );
@@ -742,7 +752,7 @@ export function QuestionnaireForm({
       element.scrollIntoView({ block: "start" });
     }
   };
-
+  
   return (
     <div className="flex gap-4">
       {/* Left Navigation */}
@@ -752,7 +762,7 @@ export function QuestionnaireForm({
             <button
               className={cn(
                 "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
-                activeQuestionnaireId === form.questionnaire.id &&
+                activeQuestionnaireId === form.questionnaire.id && !activeQuestionId &&
                   "bg-gray-100 text-green-600",
               )}
               onClick={() => scrollToQuestion(form.questionnaire.id)}
@@ -761,24 +771,53 @@ export function QuestionnaireForm({
               {form.questionnaire.title}
             </button>
             <div className="pl-4 space-y-1">
-              {form.questionnaire.questions
-                .filter((q) => q.type === "group")
-                .map((group) => (
+              {form.questionnaire.questions.map((question ,index) => {
+                const hasSubQuestions = question.type === "group" && question.questions && question.questions.length > 0;
+                return (
+                   <div key={question.id} className="space-y-1">
                   <button
-                    key={group.id}
+                    key={question.id}
                     className={cn(
-                      "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
-                      activeGroupId === group.id &&
+                      "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100 flex items-center gap-2",
+                      activeQuestionId === question.id && !activeSubQuestionId &&
                         "bg-gray-100 text-green-600",
                     )}
                     onClick={() =>
-                      scrollToQuestion(form.questionnaire.id, group.id)
+                      scrollToQuestion(form.questionnaire.id, question.id)
                     }
                     disabled={isPending}
                   >
-                    {group.text}
+                    <span className="font-medium text-gray-500">{index + 1}.</span>
+                   <span className="flex-1 truncate">
+                    {question.text || t("untitled_question")}
+                    </span>
                   </button>
-                ))}
+                  {hasSubQuestions && (
+                  <div className="ml-6 border-l-2">
+                    {question?.questions?.map((subQuestion, subIndex) => (
+                    <button
+                      key={subQuestion.id}
+                      className={cn(
+                      "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100 flex items-center gap-2",
+                     activeSubQuestionId === subQuestion.link_id &&
+                        "bg-gray-100 text-green-600",
+                    )}
+                      onClick={() => scrollToQuestion(form.questionnaire.id,question.id ,subQuestion.link_id)}
+                      disabled={isPending}
+                    >
+                      <span className="font-medium text-gray-500">
+                        {index + 1}.{subIndex + 1}
+                      </span>
+                      <span className="flex-1 truncate">
+                        {subQuestion.text || t("untitled_question")}
+                      </span>
+                    </button>
+                  ))}
+                  </div>
+                  )}
+                  </div>
+                );
+                })}
             </div>
           </div>
         ))}
@@ -854,7 +893,7 @@ export function QuestionnaireForm({
                 }
               }}
               disabled={isPending}
-              activeGroupId={activeGroupId}
+              activeGroupId={activeQuestionId||""}
               errors={form.errors}
               patientId={patientId}
               clearError={(questionId: string) => {
