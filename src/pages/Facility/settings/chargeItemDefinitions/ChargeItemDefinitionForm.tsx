@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { CheckIcon, Loader2 } from "lucide-react";
 import { navigate } from "raviger";
-import React from "react";
+import React, { useEffect } from "react";
 import { FieldErrors, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import {
   MonetaryAmountInput,
   MonetaryDisplay,
+  mapPriceComponent,
 } from "@/components/ui/monetary-display";
 import {
   Select,
@@ -59,15 +60,13 @@ const priceComponentSchema = z.object({
       system: z.string(),
       display: z.string(),
     })
-    .nullable()
     .optional(),
-  factor: z.number().gt(0).max(100).nullable().optional(),
+  factor: z.number().gt(0).max(100).optional(),
   amount: z
     .string()
     .refine((val) => !val || Number(val) > 0, {
       message: "Amount must be greater than 0",
     })
-    .nullable()
     .optional(),
 });
 
@@ -249,9 +248,9 @@ export function ChargeItemDefinitionForm({
         message: t("slug_format_message"),
       }),
     status: z.nativeEnum(ChargeItemDefinitionStatus),
-    description: z.string().nullable(),
-    purpose: z.string().nullable(),
-    derived_from_uri: z.string().url().nullable(),
+    description: z.string().optional(),
+    purpose: z.string().optional(),
+    derived_from_uri: z.string().url().optional(),
     price_components: z.array(priceComponentSchema).refine(
       (components) => {
         // Ensure there is exactly one base price component and it's the first one
@@ -282,10 +281,12 @@ export function ChargeItemDefinitionForm({
       title: initialData?.title || "",
       slug: initialData?.slug || "",
       status: initialData?.status || ChargeItemDefinitionStatus.active,
-      description: initialData?.description || null,
-      purpose: initialData?.purpose || null,
-      derived_from_uri: initialData?.derived_from_uri || null,
-      price_components: initialData?.price_components || [
+      description: initialData?.description,
+      purpose: initialData?.purpose,
+      derived_from_uri: initialData?.derived_from_uri,
+      price_components: initialData?.price_components.map(
+        mapPriceComponent,
+      ) || [
         {
           monetary_component_type: MonetaryComponentType.base,
           amount: "0",
@@ -293,6 +294,18 @@ export function ChargeItemDefinitionForm({
       ],
     },
   });
+
+  useEffect(() => {
+    console.log(
+      "initalData",
+      form.getValues("price_components"),
+      typeof form.getValues("price_components")[0].amount,
+    );
+    console.log(
+      "form.formState.errors",
+      form.formState.errors.price_components,
+    );
+  }, [form.formState.errors.price_components, initialData?.price_components]);
 
   React.useEffect(() => {
     if (isUpdate) return;
@@ -336,6 +349,11 @@ export function ChargeItemDefinitionForm({
       ...values,
     };
     upsert(submissionData);
+  };
+
+  // Log form errors when validation fails
+  const onError = (errors: FieldErrors<z.infer<typeof formSchema>>) => {
+    console.error("Form validation errors:", errors);
   };
 
   if (isLoading || !facilityData) {
@@ -448,7 +466,7 @@ export function ChargeItemDefinitionForm({
         onSubmit={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          form.handleSubmit(onSubmit)();
+          form.handleSubmit(onSubmit, onError)();
         }}
         className="space-y-6"
       >
@@ -551,7 +569,7 @@ export function ChargeItemDefinitionForm({
                     <Textarea
                       {...field}
                       value={field.value || ""}
-                      onChange={(e) => field.onChange(e.target.value || null)}
+                      onChange={(e) => field.onChange(e.target.value)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -569,7 +587,7 @@ export function ChargeItemDefinitionForm({
                     <Textarea
                       {...field}
                       value={field.value || ""}
-                      onChange={(e) => field.onChange(e.target.value || null)}
+                      onChange={(e) => field.onChange(e.target.value)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -587,7 +605,7 @@ export function ChargeItemDefinitionForm({
                     <Input
                       {...field}
                       value={field.value || ""}
-                      onChange={(e) => field.onChange(e.target.value || null)}
+                      onChange={(e) => field.onChange(e.target.value)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -638,7 +656,7 @@ export function ChargeItemDefinitionForm({
                             {...field}
                             value={field.value ?? 0}
                             onChange={(e) =>
-                              field.onChange(e.target.valueAsNumber)
+                              field.onChange(String(e.target.value))
                             }
                             placeholder="0.00"
                           />

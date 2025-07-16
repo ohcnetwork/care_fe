@@ -63,15 +63,15 @@ export interface PaymentReconciliationBase {
   kind: PaymentReconciliationKind;
   issuer_type: PaymentReconciliationIssuerType;
   outcome: PaymentReconciliationOutcome;
-  disposition?: string | null;
-  payment_datetime?: string | null;
+  disposition?: string;
+  payment_datetime?: string;
   method: PaymentReconciliationPaymentMethod;
-  reference_number?: string | null;
-  authorization?: string | null;
-  tendered_amount?: string | null;
-  returned_amount?: string | null;
-  note?: string | null;
-  amount?: string | null;
+  reference_number?: string;
+  authorization?: string;
+  tendered_amount?: string;
+  returned_amount?: string;
+  note?: string;
+  amount?: string;
 }
 
 export interface PaymentReconciliationCreate

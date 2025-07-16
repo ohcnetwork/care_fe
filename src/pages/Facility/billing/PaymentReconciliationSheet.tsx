@@ -1,9 +1,11 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -18,7 +20,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import {
+  MonetaryAmountInput,
+  MonetaryDisplay,
+} from "@/components/ui/monetary-display";
 import {
   Select,
   SelectContent,
@@ -59,6 +64,50 @@ interface PaymentReconciliationSheetProps {
   onSuccess?: () => void;
 }
 
+// Add schema before the component
+const formSchema = z.object({
+  reconciliation_type: z.nativeEnum(PaymentReconciliationType),
+  status: z.nativeEnum(PaymentReconciliationStatus),
+  kind: z.nativeEnum(PaymentReconciliationKind),
+  issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
+  outcome: z.nativeEnum(PaymentReconciliationOutcome),
+  method: z.nativeEnum(PaymentReconciliationPaymentMethod),
+  payment_datetime: z.string(),
+  amount: z.string().refine(
+    (val) => {
+      const num = Number(val);
+      return !isNaN(num) && num > 0 && /^\d+(\.\d{0,2})?$/.test(val);
+    },
+    { message: "Amount must be a positive number with up to 2 decimal places" },
+  ),
+  tendered_amount: z.string().refine(
+    (val) => {
+      const num = Number(val);
+      return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
+    },
+    {
+      message:
+        "Tendered amount must be a non-negative number with up to 2 decimal places",
+    },
+  ),
+  returned_amount: z.string().refine(
+    (val) => {
+      const num = Number(val);
+      return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
+    },
+    {
+      message:
+        "Returned amount must be a non-negative number with up to 2 decimal places",
+    },
+  ),
+  target_invoice: z.string().optional(),
+  reference_number: z.string().optional(),
+  authorization: z.string().optional(),
+  disposition: z.string().optional(),
+  note: z.string().optional(),
+  account: z.string(),
+});
+
 export function PaymentReconciliationSheet({
   open,
   onOpenChange,
@@ -72,7 +121,8 @@ export function PaymentReconciliationSheet({
   const [tenderAmount, setTenderAmount] = useState<string>("0");
   const [returnedAmount, setReturnedAmount] = useState<string>("0");
 
-  const form = useForm<PaymentReconciliationCreate>({
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       reconciliation_type: PaymentReconciliationType.payment,
       status: PaymentReconciliationStatus.active,
@@ -164,7 +214,15 @@ export function PaymentReconciliationSheet({
   });
 
   const handleSubmit = form.handleSubmit((data) => {
-    submitPayment(data);
+    // Convert form data to PaymentReconciliationCreate type
+    const submissionData: PaymentReconciliationCreate = {
+      ...data,
+      // Ensure amount strings are properly formatted
+      amount: Number(data.amount).toFixed(2),
+      tendered_amount: Number(data.tendered_amount).toFixed(2),
+      returned_amount: Number(data.returned_amount).toFixed(2),
+    };
+    submitPayment(submissionData);
   });
 
   return (
@@ -291,15 +349,10 @@ export function PaymentReconciliationSheet({
                   <FormItem>
                     <FormLabel>{t("payment_amount")}</FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
+                      <MonetaryAmountInput
                         {...field}
                         value={field.value || ""}
-                        onChange={(e) => {
-                          const value = parseFloat(e.target.value);
-                          field.onChange(isNaN(value) ? 0 : value);
-                        }}
+                        onChange={(e) => field.onChange(e.target.value)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -326,18 +379,12 @@ export function PaymentReconciliationSheet({
                           </TooltipComponent>
                         </FormLabel>
                         <FormControl>
-                          <Input
-                            type="number"
-                            step="0.01"
+                          <MonetaryAmountInput
                             value={tenderAmount || ""}
                             onChange={(e) => {
-                              const value = parseFloat(e.target.value);
-                              setTenderAmount(
-                                isNaN(value) ? "0" : String(value),
-                              );
-                              field.onChange(
-                                isNaN(value) ? "0" : String(value),
-                              );
+                              const value = e.target.value;
+                              setTenderAmount(value);
+                              field.onChange(value);
                             }}
                           />
                         </FormControl>

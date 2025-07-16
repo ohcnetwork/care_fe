@@ -22,6 +22,15 @@ export const numberFormatterWithoutCurrency = new Intl.NumberFormat("en-IN", {
 // Helper function to get currency symbol
 export const getCurrencySymbol = () => CURRENCY_SYMBOL;
 
+export function mapPriceComponent<T extends MonetaryComponent>(data: T): T {
+  if (!data) return data;
+
+  return {
+    ...data,
+    amount: data.amount != null ? String(data.amount) : undefined,
+  } as T;
+}
+
 function MonetaryDisplay({
   amount,
   factor,
@@ -54,18 +63,25 @@ function MonetaryDisplay({
 }
 
 function MonetaryAmountInput(props: React.ComponentProps<typeof Input>) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow empty value, numbers with up to 2 decimal places
+    if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
+      props.onChange?.(e);
+    }
+  };
+
   return (
     <div className="flex items-center space-x-2">
       <span className="text-lg font-medium">₹</span>
       <Input
-        type="number"
-        min={0}
+        type="text"
+        inputMode="decimal"
+        pattern="^\d*\.?\d{0,2}$"
+        placeholder="0.00"
         data-care-input="monetary-amount"
-        onWheel={(e) => {
-          e.currentTarget.blur();
-          e.stopPropagation();
-        }}
         {...props}
+        onChange={handleChange}
         className={cn("text-right", props.className)}
       />
     </div>
