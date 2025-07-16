@@ -57,6 +57,7 @@ import countryList from "@/common/static/countries.json";
 
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import OfflinePatientWarningDialog from "@/OfflineSupport/OfflinePatientCreateWarning";
+import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
   getYearOfBirth,
   normalizeOfflinePatientRecord,
@@ -317,7 +318,7 @@ export default function PatientRegistration(
       const permissions = patientQuery.data?.permissions ?? [];
       const existingTags = patientQuery.data?.instance_tags ?? [];
       if (entry) {
-        const isCreateType = entry.type === "createPatient";
+        const isCreateType = entry.type === OfflineKeyMap.create_patient;
         const updatedEntry = isCreateType
           ? {
               ...entry,
@@ -350,10 +351,12 @@ export default function PatientRegistration(
         const offlineWrite: saveOfflineWriteData = {
           id: patientId,
           userId: user.external_id,
-          mutationSyncRouteKey: "updatePatient",
-          type: "updatePatient",
+          mutationSyncRouteKey: OfflineKeyMap.update_patient,
+          type: OfflineKeyMap.update_patient,
           resourceType: "patient",
-          mutationPathParams: { id: patientId || "" },
+          mutationPathParams: {
+            id: patientId || "",
+          } satisfies PathParamsObject<typeof patientApi.updatePatient>,
           payload: updatePatientData,
           serverTimestamp: patientQuery?.data?.modified_date,
           useQueryRouteKey: "getPatient",
@@ -397,8 +400,8 @@ export default function PatientRegistration(
       const offlineWrite: saveOfflineWriteData = {
         id: generatedId,
         userId: user.external_id,
-        mutationSyncRouteKey: "addPatient",
-        type: "createPatient",
+        mutationSyncRouteKey: OfflineKeyMap.create_patient,
+        type: OfflineKeyMap.create_patient,
         resourceType: "patient",
         payload: createPatientData,
       };

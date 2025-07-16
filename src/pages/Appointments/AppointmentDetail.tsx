@@ -64,6 +64,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { getPermissions } from "@/common/Permissions";
 
 import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
+import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
   isOfflineId,
   normalizeUserBase,
@@ -192,12 +193,12 @@ export default function AppointmentDetail(props: Props) {
     const baseEntry = {
       id: statusupdateId,
       userId: authUser.external_id,
-      mutationSyncRouteKey: "updateAppointment",
+      mutationSyncRouteKey: OfflineKeyMap.update_appointment_status,
       mutationPathParams: {
-        facility_id: appointment.facility.id,
-        id: appointment.id,
-      },
-      type: "statusUpdate",
+        facilityId,
+        id: props.appointmentId,
+      } satisfies PathParamsObject<typeof scheduleApis.appointments.update>,
+      type: OfflineKeyMap.update_appointment_status,
       resourceType: "Appointment",
       payload: updateAppointmentData,
       parentMutationIds: isOfflineId(appointment.id)
@@ -207,7 +208,7 @@ export default function AppointmentDetail(props: Props) {
           : [],
     };
 
-    const writeEntry = !isOfflineId(appointment.id)
+    const writeEntry: saveOfflineWriteData = !isOfflineId(appointment.id)
       ? {
           ...baseEntry,
           serverTimestamp: appointment.modified_date, // only add  when we upating and an exisitng appointment as needed for conflict detection
@@ -640,12 +641,12 @@ const AppointmentActions = ({
     const baseEntry: saveOfflineWriteData = {
       id: cancelAppointmentID,
       userId: authUser?.external_id,
-      mutationSyncRouteKey: "cancelAppointment",
+      mutationSyncRouteKey: OfflineKeyMap.cancel_appointment,
       mutationPathParams: {
-        facility_id: facilityId,
+        facilityId,
         id: appointment.id,
-      },
-      type: "cancelAppointment",
+      } satisfies PathParamsObject<typeof scheduleApis.appointments.cancel>,
+      type: OfflineKeyMap.cancel_appointment,
       resourceType: "Appointment",
       payload: cancelAppointmentData,
     };
@@ -668,7 +669,7 @@ const AppointmentActions = ({
     try {
       if (isOfflineId(appointment.id)) {
         const existingCreateEntry = await db.OfflineWrites.get(appointment.id);
-        if (existingCreateEntry?.type === "createAppointment") {
+        if (existingCreateEntry?.type === OfflineKeyMap.create_appointment) {
           await db.OfflineWrites.delete(appointment.id);
 
           toast.success(t("unsynced_appointment_cancelled"));
@@ -802,22 +803,22 @@ const AppointmentActions = ({
 
       if (
         createAppointmentExist &&
-        createAppointmentExist.type === "createAppointment"
+        createAppointmentExist.type === OfflineKeyMap.create_appointment
       ) {
-        const prevMutationpathparams =
-          createAppointmentExist.mutationPathParams;
         const updateEntry: OfflineWritesEntry = {
           ...createAppointmentExist,
           mutationPathParams: {
-            ...prevMutationpathparams,
-            slot_id: rescheduleAppointmentData.new_slot,
-          },
+            facilityId: facilityId,
+            slotId: rescheduleAppointmentData.new_slot,
+          } satisfies PathParamsObject<
+            typeof scheduleApis.slots.createAppointment
+          >,
         };
 
         await db.OfflineWrites.update(createAppointmentExist.id, updateEntry);
       } else if (
         rescheduleEntryExist &&
-        rescheduleEntryExist.type === "rescheduleAppointment"
+        rescheduleEntryExist.type === OfflineKeyMap.reschedule_appointment
       ) {
         const updateEntry: OfflineWritesEntry = {
           ...rescheduleEntryExist,
@@ -829,12 +830,14 @@ const AppointmentActions = ({
         const offlineEntry: saveOfflineWriteData = {
           id: rescheduleID,
           userId: authUser?.external_id,
-          mutationSyncRouteKey: "rescheduleAppointment",
+          mutationSyncRouteKey: OfflineKeyMap.reschedule_appointment,
           mutationPathParams: {
-            facility_id: facilityId,
+            facilityId,
             id: appointment.id,
-          },
-          type: "rescheduleAppointment",
+          } satisfies PathParamsObject<
+            typeof scheduleApis.appointments.reschedule
+          >,
+          type: OfflineKeyMap.reschedule_appointment,
           resourceType: "Appointment",
           payload: rescheduleAppointmentData,
           serverTimestamp: appointment.modified_date, // point to note : Although here we are changing  modified dat ehre for a appointment , It is correct for new appointment ,
@@ -887,7 +890,10 @@ const AppointmentActions = ({
 
       const existingStatusEntry = await db.OfflineWrites.get(statusUpdateId);
 
-      if (existingStatusEntry && existingStatusEntry.type === "statusUpdate") {
+      if (
+        existingStatusEntry &&
+        existingStatusEntry.type === OfflineKeyMap.update_appointment_status
+      ) {
         await db.OfflineWrites.delete(statusUpdateId);
       }
 

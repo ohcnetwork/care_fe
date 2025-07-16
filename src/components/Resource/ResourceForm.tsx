@@ -52,6 +52,7 @@ import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 
 import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
+import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
   isOfflineId,
   normaliZedResourcerequestRecord,
@@ -249,7 +250,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       const entry = await db.OfflineWrites.get(resourceId);
 
       if (entry) {
-        const isCreate = entry.type === "createResourceRequest";
+        const isCreate = entry.type === OfflineKeyMap.create_resource_request;
 
         // Narrow the payload type based on the type field
         const existingPayload = isCreate
@@ -304,13 +305,18 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         const offlineEntry: saveOfflineWriteData = {
           id: resourceId,
           userId: authUser.external_id,
-          mutationSyncRouteKey: "updateResource",
-          type: "updateResourceRequest",
+          mutationSyncRouteKey: OfflineKeyMap.update_resource_request,
+          mutationPathParams: { id: String(id) } satisfies PathParamsObject<
+            typeof routes.updateResource
+          >,
+          type: OfflineKeyMap.update_resource_request,
           resourceType: "resourceRequest",
           payload: resourcePayload,
           serverTimestamp: resourceData?.modified_date,
           useQueryRouteKey: "getResourceDetails",
-          useQueryPathParams: { id: String(id) },
+          useQueryPathParams: { id: String(id) } satisfies PathParamsObject<
+            typeof routes.getResourceDetails
+          >,
         };
         const saveResult = await saveOfflineWrite(offlineEntry);
         if (!saveResult.success) {
@@ -358,8 +364,8 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       const offlineEntry: saveOfflineWriteData = {
         id: generatedId,
         userId: authUser.external_id,
-        mutationSyncRouteKey: "createResource",
-        type: "createResourceRequest",
+        mutationSyncRouteKey: OfflineKeyMap.create_resource_request,
+        type: OfflineKeyMap.create_resource_request,
         resourceType: "resourceRequest",
         payload: resourcePayload,
         parentMutationIds: isOfflineId(related_patient)
@@ -448,6 +454,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       } else createResource(resourcePayload);
     }
   };
+
   const { data: facilities } = useQuery({
     queryKey: ["facilities", facilitySearch],
     queryFn: query.debounced(facilityApi.getAllFacilities, {

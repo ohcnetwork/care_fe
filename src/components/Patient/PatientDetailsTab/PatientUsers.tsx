@@ -51,6 +51,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { getPermissions } from "@/common/Permissions";
 
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
   isOfflineId,
   saveOfflineWrite,
@@ -131,9 +132,11 @@ function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
       const offlineWrite: saveOfflineWriteData = {
         id: generatedId,
         userId: authUser.external_id,
-        mutationSyncRouteKey: "assignUser",
-        mutationPathParams: { patientId },
-        type: "assignUser",
+        mutationSyncRouteKey: OfflineKeyMap.assign_user_to_patient,
+        mutationPathParams: { patientId } satisfies PathParamsObject<
+          typeof routes.patient.users.addUser
+        >,
+        type: OfflineKeyMap.assign_user_to_patient,
         resourceType: "patient",
         payload: assignUserData,
         parentMutationIds: isOfflineId(patientId) ? [patientId] : [],
@@ -337,9 +340,11 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
       const offlineWrite = {
         id: generatedId,
         userId: authUser.external_id,
-        mutationSyncRouteKey: "removeAssignUser",
-        mutationPathParams: { patientId },
-        type: "removeAssignUser",
+        mutationSyncRouteKey: OfflineKeyMap.remove_user_from_patient,
+        mutationPathParams: { patientId } satisfies PathParamsObject<
+          typeof routes.patient.users.removeUser
+        >,
+        type: OfflineKeyMap.remove_user_from_patient,
         resourceType: "patient",
         payload: { user: removeUserId },
         parentMutationIds: isOfflineId(patientId) ? [patientId] : [],

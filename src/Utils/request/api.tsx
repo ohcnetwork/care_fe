@@ -440,6 +440,10 @@ const routes = {
       path: "/api/v1/encounter/{id}/",
       method: "GET",
       TRes: Type<Encounter>(),
+      TQuery: Type<{
+        facility?: string;
+        patient?: string;
+      }>(),
     },
     update: {
       path: "/api/v1/encounter/{id}/",

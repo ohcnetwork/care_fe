@@ -1,5 +1,6 @@
 import careConfig from "@careConfig";
 import {
+  onlineManager,
   useIsRestoring,
   useMutation,
   useQuery,
@@ -8,6 +9,7 @@ import {
 import { useSetAtom } from "jotai";
 import { navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import Loading from "@/components/Common/Loading";
 
@@ -16,6 +18,7 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 import { LocalStorageKeys } from "@/common/constants";
 
 import { createUserPersister } from "@/OfflineSupport/createUserPersister";
+import { syncOfflineRecords } from "@/OfflineSupport/syncmanger";
 import useNetworkStatus from "@/Utils/networkstatus";
 import routes, {
   JwtTokenObtainPair,
@@ -215,6 +218,17 @@ export default function AuthUserProvider({
   }, [signOut]);
   const isRestoring = useIsRestoring();
   console.log(isLoading, !isRestoring, !isChecked);
+
+  useEffect(() => {
+    if (!onlineManager.isOnline() || !user?.external_id) return;
+
+    const timeout = setTimeout(() => {
+      toast.info(" sync start");
+      syncOfflineRecords();
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, [user?.external_id, onlineManager.isOnline()]);
 
   if (isLoading || isRestoring || !isChecked) {
     return <Loading />;

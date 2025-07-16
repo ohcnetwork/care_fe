@@ -24,6 +24,7 @@ import { AuthUserModel } from "@/components/Users/models";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { OfflineKeyMap } from "@/OfflineSupport/offlineKeys";
 import {
   cacheQuestionnairResponse,
   isOfflineId,
@@ -609,8 +610,8 @@ export function QuestionnaireForm({
       const newOfflineEntry = {
         id: generatedId,
         userId: authUser.external_id,
-        mutationSyncRouteKey: "submitQuestionnaire",
-        type: reference_id,
+        mutationSyncRouteKey: OfflineKeyMap.structured_questionnair,
+        type: OfflineKeyMap.structured_questionnair,
         resourceType: "Questionnaire",
         payload: {
           requests: [req],
@@ -712,8 +713,8 @@ export function QuestionnaireForm({
       const newOfflineEntry = {
         id: recordId,
         userId: authUser.external_id,
-        mutationSyncRouteKey: "submitQuestionnaire",
-        type: "diagnosis",
+        mutationSyncRouteKey: OfflineKeyMap.structured_questionnair,
+        type: OfflineKeyMap.structured_questionnair,
         resourceType: "Questionnaire",
         payload: cleanedRequests,
         parentMutationIds: isOfflineId(parentID) ? [parentID] : [],
@@ -796,8 +797,8 @@ export function QuestionnaireForm({
       const newOfflineEntry = {
         id: recordId,
         userId: authUser.external_id,
-        mutationSyncRouteKey: "submitQuestionnaire",
-        type: reference_id,
+        mutationSyncRouteKey: OfflineKeyMap.structured_questionnair,
+        type: OfflineKeyMap.structured_questionnair,
         resourceType: "Questionnaire",
         payload: cleanedRequests,
         parentMutationIds: isOfflineId(parentID) ? [parentID] : [],
@@ -890,8 +891,8 @@ export function QuestionnaireForm({
       const newOfflineEntry = {
         id: recordId,
         userId: authUser.external_id,
-        mutationSyncRouteKey: "submitQuestionnaire",
-        type: "encounter",
+        mutationSyncRouteKey: OfflineKeyMap.update_encounter_questionnair,
+        type: OfflineKeyMap.update_encounter_questionnair,
         resourceType: "Questionnaire",
         payload: cleanedRequests,
         parentMutationIds: isOfflineId(parentID) ? [parentID] : [],
@@ -1010,8 +1011,8 @@ export function QuestionnaireForm({
       const offlineEntry = {
         id: generatedId,
         userId: authUser.external_id,
-        mutationSyncRouteKey: "submitQuestionnaire",
-        type: "nonFixedQuestionnaire",
+        mutationSyncRouteKey: OfflineKeyMap.non_structured_questionnaire,
+        type: OfflineKeyMap.non_structured_questionnaire,
         resourceType: "Questionnaire",
         payload: { requests: nonStructuredQuestionnaires },
         parentMutationIds: isOfflineId(parentID) ? [parentID] : [],

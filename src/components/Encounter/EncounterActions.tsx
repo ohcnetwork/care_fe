@@ -28,6 +28,11 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { getPermissions } from "@/common/Permissions";
 
 import {
+  OfflineKeyMap,
+  PathParamsObject,
+  QueryParamsObject,
+} from "@/OfflineSupport/offlineKeys";
+import {
   isOfflineId,
   normalizeUserBase,
   saveOfflineWrite,
@@ -95,24 +100,28 @@ export default function EncounterActions({
       toast.error(t("cannot_mark_offline_created_encounter_as_complete"));
       return;
     }
+
+    const useQueryParams: QueryParamsObject<typeof routes.encounter.get> =
+      encounter.facility.id
+        ? { facility: encounter.facility.id }
+        : { patient: encounter.patient.id };
+
     const offlineWrite: saveOfflineWriteData = {
       id: encounter.id,
       userId: authUser.external_id,
-      mutationSyncRouteKey: "updateEncounter",
-      type: "markAsCompleteEncounter",
+      mutationSyncRouteKey: OfflineKeyMap.mark_encounter_as_complete,
+      type: OfflineKeyMap.mark_encounter_as_complete,
       resourceType: "Encounter",
-      mutationPathParams: { id: encounter.id },
+      mutationPathParams: { id: encounter.id } satisfies PathParamsObject<
+        typeof routes.encounter.update
+      >,
       payload: encounterUpdatedData,
       serverTimestamp: encounter.modified_date,
       useQueryRouteKey: "getEncounter",
-      useQueryPathParams: { id: encounter.id },
-      useQueryParams: encounter.id
-        ? {
-            facility: encounter.facility.id,
-          }
-        : {
-            patient: encounter.patient.id,
-          },
+      useQueryPathParams: { id: encounter.id } satisfies PathParamsObject<
+        typeof routes.encounter.get
+      >,
+      useQueryParams: useQueryParams,
     };
 
     try {

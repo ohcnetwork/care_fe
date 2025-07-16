@@ -1,5 +1,7 @@
 import Dexie from "dexie";
 
+import { OfflineKey } from "./offlineKeys";
+
 export interface QueryCacheEntry {
   cacheKey: string;
   data: unknown;
@@ -9,8 +11,8 @@ export interface QueryCacheEntry {
 export interface OfflineWritesEntry {
   id: string;
   userId: string;
-  mutationSyncRouteKey: string;
-  type?: string;
+  mutationSyncRouteKey: OfflineKey;
+  type: OfflineKey;
   resourceType?: string;
   mutationPathParams?: Record<string, any>;
   mutationQueryParams?: Record<string, any>;

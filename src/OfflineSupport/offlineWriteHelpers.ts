@@ -46,6 +46,7 @@ import { UserBase } from "@/types/user/user";
 
 import { OfflineWritesEntry } from "./AppcacheDB";
 import { AppCacheDB } from "./AppcacheDB";
+import { OfflineKey } from "./offlineKeys";
 
 interface QuestionnaireListResponse {
   results: QuestionnaireDetail[];
@@ -59,10 +60,10 @@ export type SaveOfflineWriteResult =
 export type saveOfflineWriteData = {
   id: string;
   userId: string;
-  mutationSyncRouteKey: string;
+  mutationSyncRouteKey: OfflineKey;
   mutationPathParams?: Record<string, any>;
   mutationQueryParams?: Record<string, any>;
-  type?: string;
+  type: OfflineKey;
   resourceType?: string;
   payload: unknown;
   parentMutationIds?: string[];

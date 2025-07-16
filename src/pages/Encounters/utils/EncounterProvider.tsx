@@ -4,6 +4,7 @@ import { createContext, useContext } from "react";
 
 import { Permissions, getPermissions } from "@/common/Permissions";
 
+import { QueryParamsObject } from "@/OfflineSupport/offlineKeys";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -60,14 +61,16 @@ export function EncounterProvider({
     networkMode: "online",
   });
 
+  const queryParams: QueryParamsObject<typeof routes.encounter.get> = facilityId
+    ? { facility: facilityId }
+    : { patient: patientId };
+
   const { data: currentEncounter, isLoading: isCurrentEncounterLoading } =
     useQuery({
       queryKey: ["encounter", currentEncounterId],
       queryFn: query(routes.encounter.get, {
         pathParams: { id: currentEncounterId },
-        queryParams: facilityId
-          ? { facility: facilityId }
-          : { patient: patientId },
+        queryParams: queryParams,
       }),
       meta: { persist: true },
       networkMode: "online",
@@ -78,9 +81,7 @@ export function EncounterProvider({
       queryKey: ["encounter", selectedEncounterId],
       queryFn: query(routes.encounter.get, {
         pathParams: { id: selectedEncounterId },
-        queryParams: facilityId
-          ? { facility: facilityId }
-          : { patient: patientId },
+        queryParams: queryParams,
       }),
       meta: { persist: true },
       networkMode: "online",

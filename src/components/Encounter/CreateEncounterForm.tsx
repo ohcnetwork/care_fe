@@ -52,6 +52,7 @@ import {
 
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { OfflineKeyMap } from "@/OfflineSupport/offlineKeys";
 import {
   isOfflineId,
   normalizeOfflineEncounterRecord,
@@ -141,8 +142,8 @@ export default function CreateEncounterForm({
       const offlineWrite: saveOfflineWriteData = {
         id: generatedId,
         userId: authUser.external_id,
-        mutationSyncRouteKey: "createEncounter",
-        type: "createEncounter",
+        mutationSyncRouteKey: OfflineKeyMap.create_encounter,
+        type: OfflineKeyMap.create_encounter,
         resourceType: "Encounter",
         payload: encounterRequestData,
         parentMutationIds: isOfflineId(patientId) ? [patientId] : [],

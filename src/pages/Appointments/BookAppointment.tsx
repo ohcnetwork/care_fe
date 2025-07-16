@@ -22,6 +22,7 @@ import { AuthUserModel } from "@/components/Users/models";
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
   isOfflineId,
   normalizedAppointmentRecord,
@@ -126,12 +127,14 @@ export default function BookAppointment({ patientId }: Props) {
       const offlineEntry: saveOfflineWriteData = {
         id: generatedId,
         userId: authUser?.external_id,
-        mutationSyncRouteKey: "createAppointment",
+        mutationSyncRouteKey: OfflineKeyMap.create_appointment,
         mutationPathParams: {
-          facility_id: facilityId,
-          slot_id: selectedSlotId ?? "",
-        },
-        type: "createAppointment",
+          facilityId,
+          slotId: selectedSlotId ?? "",
+        } satisfies PathParamsObject<
+          typeof scheduleApis.slots.createAppointment
+        >,
+        type: OfflineKeyMap.create_appointment,
         resourceType: "Appointment",
         payload: createAppointmentData,
         parentMutationIds: isOfflineId(patientId) ? [patientId] : [],
