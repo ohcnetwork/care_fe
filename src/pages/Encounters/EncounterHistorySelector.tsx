@@ -94,6 +94,7 @@ function EncounterCard({
                     parent: tag.parent && { name: tag.parent.display },
                   },
                   " : ",
+                  true,
                 )}
               </Badge>
             ))}

@@ -91,6 +91,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
                     parent: tag.parent && { name: tag.parent.display },
                   },
                   " : ",
+                  true,
                 )}
               </Badge>
             ))}
