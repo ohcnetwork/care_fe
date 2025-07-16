@@ -313,7 +313,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
 
       <div className="space-y-2">
         <Label>{t("start_time")}</Label>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <DatePicker
             date={
               administrationRequest.occurrence_period_start
@@ -329,10 +329,12 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
               const encounterStart = new Date(medication.authored_on);
               return date < encounterStart || date > now;
             }}
+            disablePicker={!isPastTime || !!administrationRequest.id}
+            className="flex-1"
           />
           <Input
             type="time"
-            className="w-full max-w-[7rem] sm:max-w-[9.5rem] text-sm sm:text-base py-0"
+            className="w-full sm:max-w-[9.5rem] text-sm sm:text-base"
             value={formatTime(administrationRequest.occurrence_period_start)}
             onChange={(e) => handleTimeChange(e, true)}
             disabled={!isPastTime || !!administrationRequest.id}
@@ -345,7 +347,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
 
       <div className="space-y-2">
         <Label>{t("end_time")}</Label>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <DatePicker
             date={
               administrationRequest.occurrence_period_end
@@ -361,10 +363,17 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
               const encounterStart = new Date(medication.authored_on);
               return date < encounterStart || date > now;
             }}
+            className="flex-1"
+            disablePicker={
+              !isPastTime ||
+              (!!administrationRequest.id &&
+                administrationRequest.status !== "in_progress") ||
+              administrationRequest.status === "in_progress"
+            }
           />
           <Input
             type="time"
-            className="w-full max-w-[7rem] sm:max-w-[9.5rem] text-sm sm:text-base py-0"
+            className="w-full sm:max-w-[9.5rem] text-sm sm:text-base"
             value={formatTime(administrationRequest.occurrence_period_end)}
             onChange={(e) => handleTimeChange(e, false)}
             disabled={

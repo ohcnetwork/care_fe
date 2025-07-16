@@ -152,8 +152,9 @@ export default function CreateEncounterForm({
                 return (
                   <FormItem>
                     <FormLabel>{t("date_and_time")}</FormLabel>
-                    <div className="flex sm:gap-2 flex-wrap">
+                    <div className="flex flex-col sm:flex-row sm:gap-2">
                       <DatePicker
+                        className="sm:w-[150px] text-gray-500 border-gray-200 h-8 shadow-none"
                         date={date}
                         onChange={(newDate) => {
                           if (!newDate) return;
@@ -162,6 +163,7 @@ export default function CreateEncounterForm({
                           updatedDate.setMinutes(date.getMinutes());
                           field.onChange(updatedDate.toISOString());
                         }}
+                        dateFormat="d/M/yyyy"
                       />
                       <Input
                         type="time"
