@@ -80,7 +80,7 @@ export const UCUM_TIME_UNITS = [
 
 export const ACTIVE_MEDICATION_STATUSES = [
   "active",
-  "on_hold", // Todo: check why it was on_hold instead of on_hold
+  "on_hold", // Todo: Change to on_hold in MedicationBillForm
   "draft",
   "unknown",
 ] as const;
