@@ -25,13 +25,13 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import mutate from "@/Utils/request/mutate";
 import { usePermissions } from "@/context/PermissionContext";
 import {
-  Encounter,
+  EncounterRead,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 
 interface EncounterActionsProps {
-  encounter: Encounter;
+  encounter: EncounterRead;
   variant?: "default" | "outline" | "ghost";
   size?: "default" | "sm" | "lg" | "icon";
   disableButtons?: boolean;

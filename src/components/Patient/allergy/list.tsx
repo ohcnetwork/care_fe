@@ -23,7 +23,7 @@ import {
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import {
-  Encounter,
+  EncounterRead,
   completedEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 
@@ -35,7 +35,7 @@ interface AllergyListProps {
   encounterId?: string;
   className?: string;
   readOnly?: boolean;
-  encounterStatus?: Encounter["status"];
+  encounterStatus?: EncounterRead["status"];
   showTimeline?: boolean;
 }
 interface GroupedAllergies {

@@ -34,13 +34,13 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import {
   ENCOUNTER_STATUS_ICONS,
-  Encounter,
   EncounterPriority,
+  EncounterRead,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 
 interface EncounterListProps {
-  encounters?: Encounter[];
+  encounters?: EncounterRead[];
   facilityId: string;
 }
 
@@ -603,7 +603,7 @@ export function EncounterList({
             </div>
           ) : (
             <>
-              {encounters.map((encounter: Encounter) => (
+              {encounters.map((encounter: EncounterRead) => (
                 <EncounterInfoCard
                   key={encounter.id}
                   encounter={encounter}

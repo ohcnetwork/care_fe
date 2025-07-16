@@ -42,7 +42,7 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import dayjs from "@/Utils/dayjs";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 import {
-  Encounter,
+  EncounterRead,
   completedEncounterStatus,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
@@ -51,7 +51,7 @@ import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrgan
 
 export interface PatientInfoCardProps {
   patient: Patient;
-  encounter: Encounter;
+  encounter: EncounterRead;
   fetchPatientData?: (state: { aborted: boolean }) => void;
   canWrite: boolean;
   disableButtons?: boolean;

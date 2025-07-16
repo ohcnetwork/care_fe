@@ -51,9 +51,9 @@ import {
   ENCOUNTER_CLASS,
   ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_PRIORITY,
-  Encounter,
   EncounterClass,
   EncounterCreate,
+  EncounterRead,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 
@@ -101,7 +101,7 @@ export default function CreateEncounterForm({
 
   const { mutate: createEncounter, isPending } = useMutation({
     mutationFn: mutate(encounterApi.create),
-    onSuccess: (data: Encounter) => {
+    onSuccess: (data: EncounterRead) => {
       toast.success(t("encounter_created"));
       setIsOpen(false);
       form.reset();
