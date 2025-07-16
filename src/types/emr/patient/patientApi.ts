@@ -88,7 +88,6 @@ export default {
     path: "/api/v1/patient/{patientId}/thread/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<Thread>>(),
-    TQuery: Type<{ encounter?: string }>(),
   },
   createThread: {
     path: "/api/v1/patient/{patientId}/thread/",
