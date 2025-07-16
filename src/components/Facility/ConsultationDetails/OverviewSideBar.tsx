@@ -28,6 +28,7 @@ interface Props {
 }
 
 export default function SideOverview({ encounter, canEdit }: Props) {
+  const { t } = useTranslation();
   const { selectedEncounterId, currentEncounterId } = useEncounter();
   const readOnly = selectedEncounterId !== currentEncounterId;
 
@@ -42,6 +43,14 @@ export default function SideOverview({ encounter, canEdit }: Props) {
         {!readOnly && canEdit && <Questionnaires encounter={encounter} />}
         <Locations canEdit={canEdit} encounter={encounter} />
         <DepartmentsAndTeams canEdit={canEdit} encounter={encounter} />
+        <div className="flex md:flex-col gap-0.5 items-center md:items-start">
+          <span className="text-xs text-gray-600 w-32 md:w-auto">
+            {t("hospital_identifier")}:{" "}
+          </span>
+          <span className="text-sm font-semibold">
+            {encounter.external_identifier || "--"}
+          </span>
+        </div>
         <AuditLogs encounter={encounter} />
       </div>
     </div>
