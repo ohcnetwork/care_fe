@@ -37,6 +37,7 @@ import {
 } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { useAvailabilityHeatmap } from "@/pages/Appointments/utils";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import ScheduleExceptions from "@/pages/Scheduling/ScheduleExceptions";
 import ScheduleTemplates from "@/pages/Scheduling/ScheduleTemplates";
 import CreateScheduleExceptionSheet from "@/pages/Scheduling/components/CreateScheduleExceptionSheet";
@@ -72,9 +73,8 @@ export default function UserAvailabilityTab({
   const view = qParams.tab || "schedule";
   const [month, setMonth] = useState(new Date());
   const { hasPermission } = usePermissions();
+  const { facilityId } = useCurrentFacility();
   const { canViewSchedule } = getPermissions(hasPermission, permissions ?? []);
-
-  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
 
   const templatesQuery = useQuery({
     queryKey: [
@@ -82,7 +82,7 @@ export default function UserAvailabilityTab({
       { facilityId, userId: user.id, month },
     ],
     queryFn: query(scheduleApis.templates.list, {
-      pathParams: { facility_id: facilityId! },
+      pathParams: { facilityId },
       queryParams: {
         user: user.id,
         valid_from: format(startOfMonth(month), "yyyy-MM-dd'T'HH:mm"),
@@ -98,7 +98,7 @@ export default function UserAvailabilityTab({
       { facilityId, userId: user.id, month },
     ],
     queryFn: query(scheduleApis.exceptions.list, {
-      pathParams: { facility_id: facilityId! },
+      pathParams: { facilityId },
       queryParams: {
         user: user.id,
         valid_from: format(startOfMonth(month), "yyyy-MM-dd"),
@@ -336,7 +336,7 @@ function DayDetailsPopover({
             <hr className="bg-gray-200 h-px my-3" />
             <Link
               className="flex items-center gap-2 text-sm text-gray-500 underline underline-offset-2"
-              href={`/facility/${facilityId}/appointments?practitioner=${user.username}&date_from=${dateQueryString(date)}&date_to=${dateQueryString(date)}`}
+              href={`/facility/${facilityId}/appointments?practitioners=${user.id}&date_from=${dateQueryString(date)}&date_to=${dateQueryString(date)}`}
             >
               <span className="text-sm text-gray-500">
                 {t("appointments_scheduled_for_day_link", {
