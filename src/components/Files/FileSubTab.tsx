@@ -50,12 +50,12 @@ import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 
 interface FilesTabProps {
   type: "encounter" | "patient";
   encounter?: EncounterRead;
-  patient?: Patient;
+  patient?: PatientRead;
   associatingId: string;
   canEdit: boolean | undefined;
 }

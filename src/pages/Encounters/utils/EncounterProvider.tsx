@@ -9,7 +9,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { usePermissions } from "@/context/PermissionContext";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 
 type EncounterContextType = {
@@ -18,7 +18,7 @@ type EncounterContextType = {
   patientId: string;
   selectedEncounterId: string;
 
-  patient: Patient | undefined;
+  patient: PatientRead | undefined;
   currentEncounter: EncounterRead | undefined;
   pastEncounters: PaginatedResponse<EncounterRead> | undefined;
   selectedEncounter: EncounterRead | undefined;

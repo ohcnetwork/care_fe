@@ -15,7 +15,7 @@ import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { MFAAuthenticationToken } from "@/types/auth/otp";
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import { Code } from "@/types/base/code/code";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import {
   BaseFacility,
   CreateFacility,
@@ -362,7 +362,7 @@ const routes = {
     getPatient: {
       path: "/api/v1/otp/patient/",
       method: "GET",
-      TRes: Type<PaginatedResponse<Patient>>(),
+      TRes: Type<PaginatedResponse<PatientRead>>(),
       auth: {
         key: "Authorization",
         value: "Bearer {token}",
@@ -373,7 +373,7 @@ const routes = {
       path: "/api/v1/otp/patient/",
       method: "POST",
       TBody: Type<Partial<AppointmentPatientRegister>>(),
-      TRes: Type<Patient>(),
+      TRes: Type<PatientRead>(),
       auth: {
         key: "Authorization",
         value: "Bearer {token}",

@@ -16,7 +16,7 @@ import { formatDateTime, properCase } from "@/Utils/utils";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -149,7 +149,7 @@ const DetailRow = ({
 
 interface EncounterDetailsProps {
   encounter?: EncounterRead;
-  patient?: Patient;
+  patient?: PatientRead;
 }
 
 export function EncounterDetails({

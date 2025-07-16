@@ -14,12 +14,12 @@ import {
   EncounterRead,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 
 interface FilesTabsProps {
   type: "encounter" | "patient";
   encounter?: EncounterRead;
-  patient?: Patient;
+  patient?: PatientRead;
   readOnly?: boolean;
 }
 

@@ -6,7 +6,7 @@ import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { DeviceDetail } from "@/types/device/device";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import { UserBase } from "@/types/user/user";
 
 import { AppRoutes } from "./Routers/AppRouter";
@@ -24,7 +24,7 @@ export type ScribeComponentType = React.FC<{
 }>;
 
 export type PatientHomeActionsComponentType = React.FC<{
-  patient: Patient;
+  patient: PatientRead;
   facilityId?: string;
   className?: string;
 }>;
@@ -57,7 +57,7 @@ export type PatientRegistrationFormComponentType = React.FC<{
 export type PatientDetailsTabDemographyGeneralInfoComponentType = React.FC<{
   facilityId: string;
   patientId: string;
-  patientData: Patient;
+  patientData: PatientRead;
 }>;
 
 // Define supported plugin components

@@ -16,7 +16,7 @@ import {
   MedicationRequestRead,
   displayMedicationName,
 } from "@/types/emr/medicationRequest/medicationRequest";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 
 interface DetailRowProps {
   label: string;
@@ -39,7 +39,7 @@ const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
 interface PrescriptionPreviewProps {
   encounter?: EncounterRead;
   medications: MedicationRequestRead[];
-  patient: Patient;
+  patient: PatientRead;
 }
 
 export const PrescriptionPreview = ({

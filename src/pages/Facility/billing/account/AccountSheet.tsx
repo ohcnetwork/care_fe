@@ -40,7 +40,7 @@ import {
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
 import { Period } from "@/types/emr/encounter/encounter";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 
 interface AccountFormValues {
   name: string;
@@ -48,7 +48,7 @@ interface AccountFormValues {
   status: AccountStatus;
   billing_status: AccountBillingStatus;
   id?: string;
-  patient?: Patient;
+  patient?: PatientRead;
   service_period?: Period;
 }
 

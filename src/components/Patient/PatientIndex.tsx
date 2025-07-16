@@ -43,7 +43,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   PartialPatientModel,
-  Patient,
+  PatientRead,
   getPartialId,
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
@@ -53,7 +53,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     useQueryParams();
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<
-    PartialPatientModel | Patient | null
+    PartialPatientModel | PatientRead | null
   >(null);
   const [verificationOpen, setVerificationOpen] = useState(false);
   const { t } = useTranslation();
@@ -168,8 +168,8 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       navigate(`/facility/${facilityId}/patients/verify`, {
         query: {
           phone_number: patient.phone_number,
-          year_of_birth: (patient as Patient).year_of_birth.toString(),
-          partial_id: (patient as Patient).id.slice(0, 5),
+          year_of_birth: (patient as PatientRead).year_of_birth.toString(),
+          partial_id: (patient as PatientRead).id.slice(0, 5),
         },
       });
     }

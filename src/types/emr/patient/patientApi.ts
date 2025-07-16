@@ -10,7 +10,6 @@ import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireR
 import { UserBase } from "@/types/user/user";
 
 import {
-  Patient,
   PatientCreate,
   PatientRead,
   PatientSearchRequest,
@@ -36,7 +35,7 @@ export default {
   listPatient: {
     path: "/api/v1/patient/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<Patient>>(),
+    TRes: Type<PaginatedResponse<PatientRead>>(),
   },
   getPatient: {
     path: "/api/v1/patient/{id}/",

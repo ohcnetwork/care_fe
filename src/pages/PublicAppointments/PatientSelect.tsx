@@ -18,7 +18,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
@@ -27,10 +27,10 @@ import {
 } from "@/types/scheduling/schedule";
 
 interface PatientCardProps {
-  patient: Patient;
+  patient: PatientRead;
   selectedPatient: string | null;
   setSelectedPatient: (patientId: string) => void;
-  getPatienDobOrAge: (patient: Patient) => string;
+  getPatienDobOrAge: (patient: PatientRead) => string;
 }
 
 function PatientCard({
@@ -83,10 +83,10 @@ function PatientList({
   setSelectedPatient,
   getPatienDobOrAge,
 }: {
-  patients: Patient[];
+  patients: PatientRead[];
   selectedPatient: string | null;
   setSelectedPatient: (patientId: string | null) => void;
-  getPatienDobOrAge: (patient: Patient) => string;
+  getPatienDobOrAge: (patient: PatientRead) => string;
 }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-0 sm:p-4">
@@ -184,7 +184,7 @@ export default function PatientSelect({
     );
   };
 
-  const getPatienDobOrAge = (patient: Patient) => {
+  const getPatienDobOrAge = (patient: PatientRead) => {
     if (patient.date_of_birth) {
       return dayjs(patient.date_of_birth).format("DD MMM YYYY");
     }

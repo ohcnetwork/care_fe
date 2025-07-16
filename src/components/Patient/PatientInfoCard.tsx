@@ -46,11 +46,11 @@ import {
   completedEncounterStatus,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
 export interface PatientInfoCardProps {
-  patient: Patient;
+  patient: PatientRead;
   encounter: EncounterRead;
   fetchPatientData?: (state: { aborted: boolean }) => void;
   canWrite: boolean;

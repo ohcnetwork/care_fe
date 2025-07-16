@@ -31,7 +31,7 @@ import {
   EncounterRead,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 
 import { EncounterDiagnosticReportsTab } from "./tabs/EncounterDiagnosticReportsTab";
 import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
@@ -39,7 +39,7 @@ import { EncounterServiceRequestTab } from "./tabs/EncounterServiceRequestTab";
 
 export interface PluginEncounterTabProps {
   encounter: EncounterRead;
-  patient: Patient;
+  patient: PatientRead;
 }
 
 const defaultTabs = {
