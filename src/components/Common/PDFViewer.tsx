@@ -2,8 +2,6 @@ import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 
-import { cn } from "@/lib/utils";
-
 export default function PDFViewer(
   props: Readonly<{
     url: string;
@@ -16,14 +14,13 @@ export default function PDFViewer(
   pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
   return (
-    <div className="flex h-full flex-col items-center justify-center">
-      <div className={cn("w-full overflow-auto", props.className)}>
+    <div className="flex h-full w-full flex-col items-center justify-center overflow-auto">
+      <div className="overflow-auto max-w-full max-h-full max-md:max-w-[50vw]">
         <Document
           file={props.url}
           onLoadSuccess={({ numPages }) =>
             props.onDocumentLoadSuccess(numPages)
           }
-          className="w-full"
         >
           <Page
             pageNumber={props.pageNumber}

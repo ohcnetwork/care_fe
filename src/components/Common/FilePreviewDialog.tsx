@@ -1,14 +1,10 @@
-import {
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  Suspense,
-  lazy,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { ReactNode, Suspense, lazy, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  ReactZoomPanPinchRef,
+  TransformComponent,
+  TransformWrapper,
+} from "react-zoom-pan-pinch";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import { cn } from "@/lib/utils";
@@ -30,25 +26,13 @@ import { FileUploadModel } from "@/components/Patient/models";
 import { FILE_EXTENSIONS, getVideoMimeType } from "@/common/constants";
 
 const PDFViewer = lazy(() => import("@/components/Common/PDFViewer"));
-export const zoom_values = [
-  "scale-25",
-  "scale-50",
-  "scale-75",
-  "scale-100",
-  "scale-125",
-  "scale-150",
-  "scale-175",
-  "scale-200",
-];
 export interface StateInterface {
   open: boolean;
   isImage: boolean;
   name: string;
   extension: string;
-  zoom: number;
   isZoomInDisabled: boolean;
   isZoomOutDisabled: boolean;
-  rotation: number;
   id?: string;
   associating_id?: string;
 }
@@ -58,7 +42,6 @@ type FilePreviewProps = {
   show: boolean;
   onClose: () => void;
   file_state: StateInterface;
-  setFileState: Dispatch<SetStateAction<StateInterface>>;
   downloadURL?: string;
   fileUrl: string;
   className?: string;
@@ -85,40 +68,25 @@ const previewExtensions = [
   ".webp",
 ];
 
-interface DragState {
-  isDragging: boolean;
-  position: { x: number; y: number };
-  dragStart: { x: number; y: number };
+function getRotationClass(rotation: number) {
+  const normalizedRotation = rotation % 360;
+  switch (normalizedRotation) {
+    case 90:
+      return "rotate-90";
+    case 180:
+      return "rotate-180";
+    case 270:
+      return "-rotate-90";
+    default:
+      return "";
+  }
 }
 
-const calculateClampedPosition = (
-  e: { clientX: number; clientY: number },
-  dragStart: { x: number; y: number },
-  containerRect: DOMRect,
-  imageRect: DOMRect,
-) => {
-  const maxX = Math.max(0, (imageRect.width - containerRect.width) / 2);
-  const maxY = Math.max(0, (imageRect.height - containerRect.height) / 2);
-  const newX = e.clientX - dragStart.x;
-  const newY = e.clientY - dragStart.y;
-  return {
-    x: Math.max(-maxX, Math.min(maxX, newX)),
-    y: Math.max(-maxY, Math.min(maxY, newY)),
-  };
-};
-
-const initialDragState: DragState = {
-  isDragging: false,
-  position: { x: 0, y: 0 },
-  dragStart: { x: 0, y: 0 },
-};
-
-const FilePreviewDialog = (props: FilePreviewProps) => {
+export default function FilePreviewDialog(props: FilePreviewProps) {
   const {
     show,
     onClose,
     file_state,
-    setFileState,
     downloadURL,
     fileUrl,
     uploadedFiles,
@@ -127,12 +95,11 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   } = props;
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
+  const [rotation, setRotation] = useState<number>(0);
   const [numPages, setNumPages] = useState(1);
   const [index, setIndex] = useState<number>(currentIndex);
-  const [scale, setScale] = useState(0.75);
-  const [dragState, setDragState] = useState<DragState>(initialDragState);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const dragStateRef = useRef(dragState);
+  const transformRef = useRef<ReactZoomPanPinchRef>(null);
+  const [isPanning, setIsPanning] = useState(false);
 
   // Browser detection function
   const isSafari = () => {
@@ -146,72 +113,35 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   };
 
   useEffect(() => {
-    dragStateRef.current = dragState;
-  }, [dragState]);
-
-  useEffect(() => {
     if (uploadedFiles && show) {
       setIndex(currentIndex);
     }
   }, [uploadedFiles, show, currentIndex]);
 
   useEffect(() => {
-    setDragState(initialDragState);
+    if (transformRef.current && show) {
+      transformRef.current.resetTransform();
+    }
   }, [index, show]);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    const handler = (e: TouchEvent) => {
-      if (dragStateRef.current.isDragging) {
-        handleTouchMove(e as unknown as React.TouchEvent);
-      }
-    };
-    container.addEventListener("touchmove", handler, { passive: false });
-    return () => {
-      container.removeEventListener("touchmove", handler);
-    };
-  }, []);
-
   const handleZoomIn = () => {
-    const checkFull = file_state.zoom === zoom_values.length;
-    setFileState({
-      ...file_state,
-      zoom: !checkFull ? file_state.zoom + 1 : file_state.zoom,
-    });
-    setScale((prevScale) => Math.min(prevScale + 0.25, 2));
-  };
-  const handleZoomOut = () => {
-    const checkFull = file_state.zoom === 1;
-    setFileState({
-      ...file_state,
-      zoom: !checkFull ? file_state.zoom - 1 : file_state.zoom,
-    });
-    setScale((prevScale) => Math.max(prevScale - 0.25, 0.5));
-  };
-  const handleRotate = (angle: number) => {
-    setFileState((prev: any) => {
-      const newRotation = (prev.rotation + angle + 360) % 360;
-      return {
-        ...prev,
-        rotation: newRotation,
-      };
-    });
+    if (transformRef.current) {
+      transformRef.current.zoomIn(0.5);
+    }
   };
 
-  function getRotationClass(rotation: number) {
-    const normalizedRotation = rotation % 360;
-    switch (normalizedRotation) {
-      case 90:
-        return "rotate-90";
-      case 180:
-        return "rotate-180";
-      case 270:
-        return "-rotate-90";
-      default:
-        return "";
+  const handleZoomOut = () => {
+    if (transformRef.current) {
+      transformRef.current.zoomOut(0.5);
     }
-  }
+  };
+
+  const handleRotate = (angle: number) => {
+    setRotation((prev) => {
+      const newRotation = (prev + angle + 360) % 360;
+      return newRotation;
+    });
+  };
 
   const fileName = file_state?.name
     ? file_state.name + "." + file_state.extension
@@ -244,7 +174,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     setPage(1);
     setNumPages(1);
     setIndex(-1);
-    setScale(0.75);
     onClose?.();
   };
 
@@ -254,92 +183,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     ["ArrowRight"],
     () => index < (uploadedFiles?.length || 0) - 1 && handleNext(index + 1),
   );
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!file_state.isImage) return;
-    setDragState((prev) => ({
-      ...prev,
-      isDragging: true,
-      dragStart: {
-        x: e.clientX - prev.position.x,
-        y: e.clientY - prev.position.y,
-      },
-    }));
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!dragState.isDragging) return;
-    const container = e.currentTarget as HTMLDivElement;
-    const image = container.querySelector("img");
-    if (!image) return;
-
-    const containerRect = container.getBoundingClientRect();
-    const imageRect = image.getBoundingClientRect();
-
-    const { x, y } = calculateClampedPosition(
-      e,
-      dragState.dragStart,
-      containerRect,
-      imageRect,
-    );
-
-    setDragState((prev) => ({
-      ...prev,
-      position: { x, y },
-    }));
-  };
-
-  const handleMouseUp = () => {
-    setDragState((prev) => ({
-      ...prev,
-      isDragging: false,
-    }));
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!file_state.isImage) return;
-    setDragState((prev) => ({
-      ...prev,
-      isDragging: true,
-      dragStart: {
-        x: e.touches[0].clientX - prev.position.x,
-        y: e.touches[0].clientY - prev.position.y,
-      },
-    }));
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!dragState.isDragging) return;
-    e.preventDefault();
-    const container = e.currentTarget as HTMLDivElement;
-    const image = container.querySelector("img");
-    if (!image) return;
-
-    const containerRect = container.getBoundingClientRect();
-    const imageRect = image.getBoundingClientRect();
-
-    const { x, y } = calculateClampedPosition(
-      {
-        clientX: e.touches[0].clientX,
-        clientY: e.touches[0].clientY,
-      },
-      dragState.dragStart,
-      containerRect,
-      imageRect,
-    );
-
-    setDragState((prev) => ({
-      ...prev,
-      position: { x, y },
-    }));
-  };
-
-  const handleTouchEnd = () => {
-    setDragState((prev) => ({
-      ...prev,
-      isDragging: false,
-    }));
-  };
 
   return (
     <Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
@@ -372,7 +215,19 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     </p>
                   )}
               </div>
-              <div>
+              <div className="flex gap-2">
+                {file_state.extension === "pdf" && fileUrl && (
+                  <Button
+                    variant="outline"
+                    data-cy="file-preview-open-browser"
+                    onClick={() => {
+                      window.open(fileUrl, "_blank", "noopener,noreferrer");
+                    }}
+                  >
+                    <CareIcon icon="l-external-link-alt" className="size-4" />
+                    <span>{t("open_in_browser")}</span>
+                  </Button>
+                )}
                 {downloadURL && downloadURL.length > 0 && (
                   <Button variant="primary" data-cy="file-preview-download">
                     <a
@@ -398,55 +253,57 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   <CareIcon icon="l-arrow-left" className="size-4" />
                 </Button>
               )}
-              <div
-                ref={containerRef}
-                className={cn(
-                  "flex h-[50vh] md:h-[70vh] w-full items-center justify-center overflow-hidden rounded-lg border border-secondary-200 touch-none",
-                  dragState.isDragging ? "cursor-grabbing" : "cursor-grab",
-                )}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-              >
+
+              <div className="flex h-[50vh] md:h-[70vh] w-full items-center justify-center overflow-hidden rounded-lg border border-secondary-200">
                 {file_state.isImage ? (
-                  <div
-                    className={cn(
-                      "flex items-center justify-center w-full h-full transition-transform duration-100",
-                      dragState.isDragging ? "duration-0" : "",
-                    )}
-                    style={{
-                      transform: `translate(${dragState.position.x}px, ${dragState.position.y}px)`,
-                    }}
+                  <TransformWrapper
+                    ref={transformRef}
+                    initialScale={1}
+                    minScale={0.25}
+                    maxScale={2}
+                    centerOnInit
+                    wheel={{ step: 0.5 }}
+                    pinch={{ step: 5 }}
+                    doubleClick={{ disabled: false, step: 0.7 }}
+                    panning={{ velocityDisabled: true }}
+                    onPanning={() => setIsPanning(true)}
+                    onPanningStop={() => setIsPanning(false)}
                   >
-                    <img
-                      src={fileUrl}
-                      alt={fileName}
-                      className={cn(
-                        "max-h-full max-w-full select-none object-contain",
-                        zoom_values[file_state.zoom - 1],
-                        getRotationClass(file_state.rotation),
-                      )}
-                      draggable={false}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </div>
+                    <TransformComponent
+                      wrapperStyle={{ width: "100%", height: "100%" }}
+                      contentStyle={{ width: "100%", height: "100%" }}
+                      wrapperClass={
+                        isPanning ? "cursor-grabbing" : "cursor-grab"
+                      }
+                    >
+                      <img
+                        src={fileUrl}
+                        alt={fileName}
+                        className={cn(
+                          "h-full w-full select-none object-contain",
+                          getRotationClass(rotation),
+                        )}
+                        draggable={false}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </TransformComponent>
+                  </TransformWrapper>
                 ) : file_state.extension === "pdf" ? (
-                  <Suspense fallback={<CircularProgress />}>
-                    <PDFViewer
-                      url={fileUrl}
-                      onDocumentLoadSuccess={(numPages: number) => {
-                        setPage(1);
-                        setNumPages(numPages);
-                      }}
-                      pageNumber={page}
-                      scale={scale}
-                      className="max-md:max-w-[50vw]"
-                    />
-                  </Suspense>
+                  <div className="w-full h-full overflow-auto">
+                    <Suspense fallback={<CircularProgress />}>
+                      <PDFViewer
+                        url={fileUrl}
+                        onDocumentLoadSuccess={(numPages: number) => {
+                          setPage(1);
+                          setNumPages(numPages);
+                        }}
+                        pageNumber={page}
+                        scale={1}
+                        className="max-md:max-w-[50vw]"
+                      />
+                    </Suspense>
+                  </div>
                 ) : isVideo ? (
                   shouldSkipVideo() ? (
                     <div className="flex h-full w-full flex-col items-center justify-center">
@@ -520,133 +377,105 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
               )}
             </div>
             <div className="flex items-center justify-center">
-              <div className="mt-2 grid grid-cols-3 md:grid-cols-6 gap-4">
-                {file_state.isImage && (
-                  <>
-                    {[
-                      {
-                        label: t("zoom_in"),
-                        icon: "l-search-plus",
-                        action: handleZoomIn,
-                        disabled: file_state.zoom === zoom_values.length,
+              {file_state.isImage && (
+                <div className="mt-2 grid grid-cols-3 md:grid-cols-5 gap-4">
+                  {[
+                    {
+                      label: t("zoom_in"),
+                      icon: "l-search-plus",
+                      action: handleZoomIn,
+                      disabled: false,
+                    },
+                    {
+                      label: t("reset"),
+                      icon: "l-refresh",
+                      action: () => {
+                        setRotation(0);
+                        transformRef.current?.resetTransform();
                       },
-                      {
-                        label: `${25 * file_state.zoom}%`,
-                        icon: null,
-                        action: () => {
-                          setFileState({ ...file_state, zoom: 4 });
-                        },
-                        disabled: false,
-                      },
-                      {
-                        label: t("zoom_out"),
-                        icon: "l-search-minus",
-                        action: handleZoomOut,
-                        disabled: file_state.zoom === 1,
-                      },
-                      {
-                        label: t("rotate_left"),
-                        icon: "l-corner-up-left",
-                        action: () => handleRotate(-90),
-                        disabled: false,
-                      },
-                      {
-                        label: t("reset"),
-                        icon: "l-minus-circle",
-                        action: () =>
-                          setFileState((prev) => ({
-                            ...prev,
-                            rotation: 0,
-                            zoom: 4,
-                          })),
-                        disabled: false,
-                      },
-                      {
-                        label: t("rotate_right"),
-                        icon: "l-corner-up-right",
-                        action: () => handleRotate(90),
-                        disabled: false,
-                      },
-                    ].map((button, index) => (
-                      <Button
-                        variant="ghost"
-                        key={index}
-                        onClick={button.action}
-                        className="z-50 rounded bg-white/60 text-black backdrop-blur-sm transition hover:bg-white/70"
-                        disabled={button.disabled}
-                      >
-                        <div>
-                          {button.icon && (
-                            <CareIcon
-                              icon={button.icon as IconName}
-                              className="text-lg"
-                            />
-                          )}
-                          <div>{button.label}</div>
-                        </div>
-                      </Button>
-                    ))}
-                  </>
-                )}
-                {file_state.extension === "pdf" && (
-                  <>
-                    {[
-                      {
-                        label: t("zoom_in"),
-                        icon: "l-search-plus",
-                        action: handleZoomIn,
-                        disabled: scale >= 2,
-                      },
-                      {
-                        label: `${Math.round(scale * 100)}%`,
-                        icon: null,
-                        action: () => {},
-                        disabled: false,
-                      },
-                      {
-                        label: t("zoom_out"),
-                        icon: "l-search-minus",
-                        action: handleZoomOut,
-                        disabled: scale <= 0.5,
-                      },
-                      {
-                        label: t("previous"),
-                        icon: "l-arrow-left",
-                        action: () => setPage((prev) => prev - 1),
-                        disabled: page === 1,
-                      },
-                      {
-                        label: `${page}/${numPages}`,
-                        icon: null,
-                        action: () => {},
-                        disabled: false,
-                      },
-                      {
-                        label: t("next"),
-                        icon: "l-arrow-right",
-                        action: () => setPage((prev) => prev + 1),
-                        disabled: page === numPages,
-                      },
-                    ].map((button, index) => (
-                      <Button
-                        variant="ghost"
-                        key={index}
-                        onClick={button.action}
-                        className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
-                        disabled={button.disabled}
-                      >
-                        {button.icon && (
-                          <CareIcon
-                            icon={button.icon as IconName}
-                            className="mr-2 text-lg"
-                          />
-                        )}
-                        {button.label}
-                      </Button>
-                    ))}
-                  </>
-                )}
-              </div>
+                      disabled: false,
+                    },
+                    {
+                      label: t("zoom_out"),
+                      icon: "l-search-minus",
+                      action: handleZoomOut,
+                      disabled: false,
+                    },
+                    {
+                      label: t("rotate_left"),
+                      icon: "l-corner-up-left",
+                      action: () => handleRotate(-90),
+                      disabled: false,
+                    },
+                    {
+                      label: t("rotate_right"),
+                      icon: "l-corner-up-right",
+                      action: () => handleRotate(90),
+                      disabled: false,
+                    },
+                  ].map((button, index) => (
+                    <Button
+                      variant="ghost"
+                      key={index}
+                      onClick={button.action}
+                      className={cn(
+                        "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70",
+                        index === 3 && "col-start-1 md:col-auto",
+                        index === 4 && "col-start-3 md:col-auto",
+                      )}
+                      disabled={button.disabled}
+                    >
+                      {button.icon && (
+                        <CareIcon
+                          icon={button.icon as IconName}
+                          className="mr-2 text-lg"
+                        />
+                      )}
+                      {button.label}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              {file_state.extension === "pdf" && (
+                <div className="mt-2 grid grid-cols-3 gap-4">
+                  {[
+                    {
+                      label: t("previous"),
+                      icon: "l-arrow-left",
+                      action: () => setPage((prev) => prev - 1),
+                      disabled: page === 1,
+                    },
+                    {
+                      label: `${page}/${numPages}`,
+                      icon: null,
+                      action: () => {},
+                      disabled: false,
+                    },
+                    {
+                      label: t("next"),
+                      icon: "l-arrow-right",
+                      action: () => setPage((prev) => prev + 1),
+                      disabled: page === numPages,
+                    },
+                  ].map((button, index) => (
+                    <Button
+                      variant="ghost"
+                      key={index}
+                      onClick={button.action}
+                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
+                      disabled={button.disabled}
+                    >
+                      {button.icon && (
+                        <CareIcon
+                          icon={button.icon as IconName}
+                          className="mr-2 text-lg"
+                        />
+                      )}
+                      {button.label}
+                    </Button>
+                  ))}
+                </div>
+              )}
             </div>
           </>
         ) : (
@@ -657,5 +486,4 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
       </DialogContent>
     </Dialog>
   );
-};
-export default FilePreviewDialog;
+}
