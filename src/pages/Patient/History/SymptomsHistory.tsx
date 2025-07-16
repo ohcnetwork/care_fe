@@ -10,7 +10,7 @@ export const SymptomsHistory = ({ patientId }: { patientId: string }) => {
         <img
           src="/images/icons/symptoms.svg"
           alt="symptoms"
-          className="size-8"
+          className="size-8 bg-pink-100 border border-pink-400 rounded-md p-1"
         />
         <h4 className="text-xl">{t("past_symptoms")}</h4>
       </div>
