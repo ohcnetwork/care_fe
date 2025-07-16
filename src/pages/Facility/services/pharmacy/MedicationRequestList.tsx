@@ -154,9 +154,7 @@ export default function MedicationRequestList({
             <TabsList className="flex items-center">
               <TabsTrigger value="all">
                 <span className="text-gray-950 font-medium text-sm flex items-center gap-1">
-                  {React.createElement(NotepadText, {
-                    className: "size-4 text-gray-500",
-                  })}
+                  <NotepadText className="size-4 text-gray-500" />
                   {t("all_prescriptions")}
                 </span>
               </TabsTrigger>
