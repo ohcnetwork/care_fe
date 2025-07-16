@@ -236,7 +236,6 @@ export default function FacilityForm({
                     placeholder={t("select_facility_type")}
                     inputPlaceholder={t("search_facility_type")}
                     className="min-w-0"
-                    data-cy="facility-type"
                   />
                   <FormMessage />
                 </FormItem>

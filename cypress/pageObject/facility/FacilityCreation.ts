@@ -36,7 +36,7 @@ export class FacilityCreation {
   }
 
   selectFacilityType(facilityType: string) {
-    cy.typeAndSelectOptionV2('[data-cy="facility-type"]', facilityType);
+    cy.typeAndSelectOptionV2("Facility Type", facilityType);
     return this;
   }
 
