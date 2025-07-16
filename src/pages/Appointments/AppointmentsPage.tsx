@@ -656,7 +656,7 @@ export default function AppointmentsPage() {
                 key={status}
                 status={status}
                 slot={slot?.id}
-                practitioners={qParams.practitioners ?? null}
+                practitioners={qParams.practitioners || null}
                 date_from={qParams.date_from}
                 date_to={qParams.date_to}
                 search={qParams.search?.toLowerCase()}
@@ -670,7 +670,7 @@ export default function AppointmentsPage() {
       ) : (
         <AppointmentRow
           updateQuery={updateQuery}
-          practitioners={qParams.practitioners ?? null}
+          practitioners={qParams.practitioners || null}
           slot={qParams.slot}
           page={qParams.page}
           date_from={qParams.date_from}
