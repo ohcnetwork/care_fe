@@ -3091,6 +3091,7 @@
   "patient_registration_success": "Patient Registered Successfully",
   "patient_state": "Patient State",
   "patient_status": "Patient Status",
+  "patient_tags": "Patient Tags",
   "patient_transfer_birth_match_note": "Note: Year of birth must match the patient to process the transfer request.",
   "patient_update_error": "Could not update patient",
   "patient_update_success": "Patient Updated Successfully",
