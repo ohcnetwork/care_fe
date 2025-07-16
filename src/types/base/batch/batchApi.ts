@@ -10,6 +10,6 @@ const batchApi = {
     TRes: Type<{ results: BatchSubmissionResult[] }>(),
     TBody: Type<BatchRequestBody>(),
   },
-};
+} as const;
 
 export default batchApi;
