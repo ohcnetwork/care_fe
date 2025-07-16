@@ -20,6 +20,7 @@ import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 import EncounterProperties from "@/pages/Encounters/EncounterProperties";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
+import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 export function EncounterHeader() {
   const { t } = useTranslation();
@@ -93,13 +94,18 @@ export function EncounterHeader() {
           ))}
           <div className="flex md:flex-col gap-0.5 items-center md:items-start">
             <span className="text-xs text-gray-600 w-32 md:w-auto">
-              {t("tags")}:{" "}
+              {t("patient_tags")}:{" "}
             </span>
             {tags.length ? (
               <div className="flex flex-wrap gap-1">
                 {tags.map((tag) => (
-                  <Badge key={tag.id} variant="secondary" size="sm">
-                    {tag.display}
+                  <Badge
+                    key={tag.id}
+                    variant="secondary"
+                    size="sm"
+                    className="text-xs"
+                  >
+                    {getTagHierarchyDisplay(tag)}
                   </Badge>
                 ))}
               </div>
