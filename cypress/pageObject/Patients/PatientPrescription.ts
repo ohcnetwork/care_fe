@@ -29,8 +29,10 @@ export class PatientPrescription {
     const { medicineName, dosage, frequency, instructions, notes } = details;
 
     if (medicineName) {
+      cy.get("button").contains("Add Medication").click();
+      cy.get("button").contains("Medication List").click();
       cy.typeAndSelectOption(
-        '[data-cy="add-medication-request"]',
+        "input[data-slot='command-input']",
         medicineName,
         false,
       );

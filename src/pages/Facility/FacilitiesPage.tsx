@@ -15,9 +15,7 @@ import useFilters from "@/hooks/useFilters";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import OrganizationFilter from "@/pages/Organization/components/OrganizationFilter";
-import { FacilityData } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 
 import { FacilityCard } from "./components/FacilityCard";
@@ -41,9 +39,7 @@ export function FacilitiesPage() {
     }
   }, [selectedOrg]);
 
-  const { data: facilitiesResponse, isLoading } = useQuery<
-    PaginatedResponse<FacilityData>
-  >({
+  const { data: facilitiesResponse, isLoading } = useQuery({
     queryKey: ["facilities", qParams],
     queryFn: query.debounced(facilityApi.getAllFacilities, {
       queryParams: {
@@ -95,6 +91,7 @@ export function FacilitiesPage() {
               type: "text",
               placeholder: t("search_by_facility_name"),
               value: qParams.name || "",
+              display: t("name"),
             },
           ]}
           className="w-[calc(100vw-2rem)] sm:max-w-min sm:min-w-64"
