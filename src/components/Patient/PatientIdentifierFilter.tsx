@@ -30,7 +30,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { getPartialId } from "@/types/emr/patient/patient";
@@ -75,10 +74,26 @@ export default function PatientIdentifierFilter({
     }
   }, [patientId]);
 
+  // Fetch patient details when patientId is provided
+  const { data: patientDetails } = useQuery({
+    queryKey: ["patient-details", patientId],
+    queryFn: query(patientApi.getPatient, {
+      pathParams: { id: patientId! },
+    }),
+    enabled: !!patientId,
+  });
+
+  // Update selectedPatient when patientDetails are fetched
+  useEffect(() => {
+    if (patientDetails) {
+      setSelectedPatient(patientDetails);
+    }
+  }, [patientDetails]);
+
   // Patient search query
   const { data: patientList, isFetching } = useQuery({
     queryKey: ["patient-search", searchTerm, searchType],
-    queryFn: query.debounced(routes.searchPatient, {
+    queryFn: query.debounced(patientApi.searchPatient, {
       body:
         searchType && searchTerm
           ? { config: searchType, value: searchTerm }
@@ -148,11 +163,16 @@ export default function PatientIdentifierFilter({
               variant="outline"
               role="combobox"
               aria-expanded={open}
-              className="flex-1 justify-between bg-white border-0"
+              className={cn(
+                "flex-1 justify-between bg-white",
+                selectedPatient && !verificationOpen
+                  ? "border-primary-500"
+                  : "border-gray-200",
+              )}
             >
               {selectedPatient && !verificationOpen ? (
-                <span className="text-gray-500 text-sm">
-                  {t("filtered_by_patient")}
+                <span className="text-primary-500 text-sm">
+                  {t("filtered_by_patient")}: {selectedPatient.name}
                 </span>
               ) : (
                 placeholder || t("search_patients")
@@ -186,20 +206,21 @@ export default function PatientIdentifierFilter({
                 )}
               </div>
 
-              <div className="flex flex-wrap gap-2 p-2 border-t">
+              <div className="flex flex-wrap gap-1.5 p-2 border-t rounded-b-lg bg-gray-50 border-t-gray-100">
                 {facility?.patient_instance_identifier_configs?.map(
                   (config) => (
                     <Button
                       key={config.id}
+                      variant="outline"
                       onClick={() => {
                         setSearchType(config.id);
                         setSearchTerm("");
                       }}
                       className={cn(
-                        "h-7 px-3 text-xs rounded-md",
+                        "h-6 px-2 text-xs rounded-md",
                         searchType === config.id
-                          ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                          : "bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300",
+                          ? "bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200",
                       )}
                     >
                       {config.config.display}
