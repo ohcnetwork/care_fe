@@ -100,7 +100,9 @@ export default function AppRouter() {
   const appPages = useRoutes(routes);
   const adminPages = useRoutes(AdminRouter);
 
-  const sidebarFor = adminPages ? SidebarFor.ADMIN : SidebarFor.FACILITY;
+  const isAdminPage = window.location.pathname.startsWith("/admin");
+
+  const sidebarFor = isAdminPage ? SidebarFor.ADMIN : SidebarFor.FACILITY;
 
   const pages = appPages || adminPages || <ErrorPage />;
 
