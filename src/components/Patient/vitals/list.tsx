@@ -1,14 +1,16 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
-import { Observation } from "@/types/emr/observation";
+import { Observation, ObservationWithUser } from "@/types/emr/observation";
+import { ObservationRoutes } from "@/types/emr/observation/observationApi";
 
 import { VitalsObservation, VitalsTable } from "./VitalsTable";
 
@@ -26,7 +28,7 @@ interface VitalsListProps {
 interface GroupedObservations {
   [key: string]: Observation[];
 }
-const LIMIT = 100;
+const LIMIT = 50;
 function extractVitals(observations: Observation[], vitalCodes: Code[]) {
   if (!observations || observations.length === 0) return [];
   // Group observations by effective_datetime
@@ -82,20 +84,41 @@ export const VitalsList = ({
   codeGroups,
   className,
 }: VitalsListProps) => {
+  // Extract only relevant vital codes from the code groups
   const vitalCodes =
     codeGroups
       ?.flatMap((group) => group.codes)
-      .filter((code) => code.display && code.display !== "FiO2") || [];
-  const { data: vitals, isLoading } = useQuery({
-    queryKey: ["vitals", patientId, encounterId],
-    queryFn: query(routes.listObservations, {
-      pathParams: { patientId },
-      queryParams: { encounter: encounterId, limit: LIMIT },
-    }),
-    select: (data: PaginatedResponse<Observation>) =>
-      extractVitals(data.results, vitalCodes),
+      .filter((code) => code.display && code.code !== "3151-8") || [];
+  const { data, isLoading, hasNextPage, fetchNextPage } = useInfiniteQuery<
+    PaginatedResponse<ObservationWithUser>
+  >({
+    queryKey: [
+      "infinite-observations",
+      patientId,
+      vitalCodes.map((c) => c.code).join(","),
+    ],
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await query(ObservationRoutes.listObservations, {
+        pathParams: { patientId },
+        queryParams: {
+          encounter: encounterId,
+          limit: String(LIMIT),
+          codes: vitalCodes.map((c) => c.code).join(","),
+          offset: String(pageParam),
+        },
+      })({ signal: new AbortController().signal });
+      return response as PaginatedResponse<ObservationWithUser>;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * LIMIT;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
   });
-
+  const vitals = extractVitals(
+    data?.pages.flatMap((page) => page.results) || [],
+    vitalCodes,
+  );
   if (isLoading) {
     return (
       <EncounterAccordionLayout
@@ -107,7 +130,6 @@ export const VitalsList = ({
       </EncounterAccordionLayout>
     );
   }
-
   if (!vitals || vitals.length === 0) return null;
 
   return (
@@ -116,7 +138,16 @@ export const VitalsList = ({
       readOnly={true}
       className={className}
     >
-      <VitalsTable vitals={vitals} vitalCodes={vitalCodes} />
+      <div>
+        <VitalsTable vitals={vitals} vitalCodes={vitalCodes} />
+      </div>
+      {hasNextPage && (
+        <div className="flex justify-center">
+          <Button variant="ghost" size="xs" onClick={() => fetchNextPage()}>
+            {t("view_all")}
+          </Button>
+        </div>
+      )}
     </EncounterAccordionLayout>
   );
 };
