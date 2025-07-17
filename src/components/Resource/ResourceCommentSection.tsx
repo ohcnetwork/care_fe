@@ -99,7 +99,7 @@ const CommentSection = ({ id }: { id: string }) => {
               ) : (
                 <ul>
                   {resourceComments?.results
-                    ? [...resourceComments.results].reverse().map((comment) => (
+                    ? resourceComments.results.map((comment) => (
                         <li key={comment.id} className="w-full">
                           <Comment {...comment} />
                         </li>

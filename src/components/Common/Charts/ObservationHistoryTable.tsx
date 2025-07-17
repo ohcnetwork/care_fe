@@ -54,7 +54,11 @@ export const ObservationHistoryTable = ({
   const { data, isLoading, hasNextPage, fetchNextPage } = useInfiniteQuery<
     PaginatedResponse<ObservationWithUser>
   >({
-    queryKey: ["observations", patientId, codes.map((c) => c.code).join(",")],
+    queryKey: [
+      "infinite-observations",
+      patientId,
+      codes.map((c) => c.code).join(","),
+    ],
     queryFn: async ({ pageParam = 0 }) => {
       const response = await query(routes.listObservations, {
         pathParams: { patientId },

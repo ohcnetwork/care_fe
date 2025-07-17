@@ -34,6 +34,17 @@ export enum TagResource {
   PATIENT = "patient",
 }
 
+export interface TagConfigParent {
+  id: string;
+  slug: string;
+  parent?: TagConfigParent;
+  display: string;
+  category: TagCategory;
+  description: string;
+  level_cache: number;
+  cache_expiry: string;
+}
+
 export interface TagConfig {
   meta: TagConfigMeta;
   id: string;
@@ -46,7 +57,7 @@ export interface TagConfig {
   level_cache: number;
   system_generated: boolean;
   has_children: boolean;
-  parent: TagConfig | Record<string, never>;
+  parent?: TagConfigParent;
   resource: TagResource;
 }
 
@@ -60,4 +71,19 @@ export interface TagConfigRequest {
   parent?: string | null;
   resource: TagResource;
   facility?: string;
+}
+
+export function getTagHierarchyDisplay(tag: TagConfig): string {
+  // Build hierarchy iteratively to avoid stack overflow
+  let currentTag: TagConfigParent | undefined = tag.parent;
+  const tempHierarchy: string[] = [];
+
+  while (currentTag) {
+    if (currentTag.display) {
+      tempHierarchy.unshift(currentTag.display);
+    }
+    currentTag = currentTag.parent;
+  }
+
+  return [...tempHierarchy, tag.display].join(": ");
 }
