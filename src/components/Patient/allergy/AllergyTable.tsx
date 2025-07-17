@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { GenericRow } from "@/components/Patient/Util";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -25,132 +26,6 @@ import {
   ALLERGY_VERIFICATION_STATUS_COLORS,
   AllergyIntolerance,
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
-
-const AllergyRow = ({
-  allergy,
-  patientId,
-  facilityId,
-}: {
-  allergy: AllergyIntolerance;
-  patientId: string;
-  facilityId?: string;
-}) => {
-  const [showNote, setShowNote] = useState(false);
-  const { t } = useTranslation();
-
-  return (
-    <>
-      <div className="px-2 py-1 bg-gray-100 break-words whitespace-normal text-base font-semibold text-gray-900 border border-gray-200 rounded-l">
-        {allergy.code.display}{" "}
-        <span className="italic text-gray-500 text-sm">
-          ({t(allergy.category)})
-        </span>
-      </div>
-
-      <div className="flex items-center justify-center px-2 border-t border-b border-gray-200">
-        <Badge
-          variant={ALLERGY_CLINICAL_STATUS_COLORS[allergy.clinical_status]}
-          className="whitespace-nowrap"
-        >
-          {t(allergy.clinical_status)}
-        </Badge>
-      </div>
-
-      <div className="flex items-center justify-center px-2 border border-gray-200">
-        <Badge
-          variant={ALLERGY_CRITICALITY_COLORS[allergy.criticality]}
-          className="whitespace-nowrap"
-        >
-          {t(allergy.criticality)}
-        </Badge>
-      </div>
-
-      <div className="flex items-center justify-center px-2 border border-l-0 border-gray-200">
-        <Badge
-          variant={
-            ALLERGY_VERIFICATION_STATUS_COLORS[allergy.verification_status]
-          }
-          className="whitespace-nowrap"
-        >
-          {t(allergy.verification_status)}
-        </Badge>
-      </div>
-
-      <div className="flex items-center justify-center border-gray-200 border border-l-0 rounded-r-sm">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="link"
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <BadgeInfo size={16} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            {allergy.note && (
-              <DropdownMenuItem
-                onClick={() => setShowNote(!showNote)}
-                className="flex items-center gap-2 px-3 py-2 font-semibold"
-              >
-                <File className="size-4" />
-                <span>{showNote ? t("hide_note") : t("see_note")}</span>
-              </DropdownMenuItem>
-            )}
-
-            <DropdownMenuItem
-              onClick={() =>
-                navigate(
-                  facilityId
-                    ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
-                    : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
-                )
-              }
-              className="flex items-center gap-2 px-3 py-2 font-semibold"
-            >
-              <ExternalLink className="size-4" />
-              <span>{t("go_to_encounter")}</span>
-            </DropdownMenuItem>
-
-            <div className="my-2 border-t border-dashed border-gray-300" />
-
-            <div className="p-1 text-sm">
-              <div className="text-gray-500">{t("reported_by")}:</div>
-              <div className="mt-1 flex items-center gap-2">
-                <Avatar
-                  name={formatName(allergy.created_by)}
-                  className="size-6"
-                  imageUrl={allergy.created_by.profile_picture_url}
-                />
-                <span className="font-semibold text-gray-900">
-                  {formatName(allergy.created_by)}
-                </span>
-              </div>
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      {showNote && allergy.note && (
-        <div className="col-span-full relative border border-gray-200 p-2 pt-4 bg-gray-50 rounded -mt-2.5 rounded-t-none">
-          <div className="font-semibold text-gray-800">{t("note")}:</div>
-
-          <Button
-            variant={null}
-            className="absolute top-2 right-4 flex items-center gap-1 p-0 text-sm"
-            onClick={() => setShowNote(false)}
-          >
-            <X size={14} />
-            <span className="underline">{t("hide_note")}</span>
-          </Button>
-
-          <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8 max-w-full break-words mt-2">
-            {allergy.note}
-          </p>
-        </div>
-      )}
-    </>
-  );
-};
 
 const AllergyCard = ({
   allergy,
@@ -324,11 +199,61 @@ export const AllergyTable = ({
             )}
           ></div>
           {allergies.map((allergy) => (
-            <AllergyRow
+            <GenericRow
               key={allergy.id}
-              allergy={allergy}
+              item={allergy}
               patientId={patientId}
               facilityId={facilityId}
+              getEncounterId={(item) => item.encounter}
+              note={allergy.note}
+              createdBy={allergy.created_by}
+              columns={[
+                {
+                  key: "display",
+                  className:
+                    "bg-gray-100 break-words whitespace-normal text-base font-semibold text-gray-900 rounded-l",
+                  render: (item) => item.code.display,
+                },
+                {
+                  key: "status",
+                  render: (item) => (
+                    <Badge
+                      variant={
+                        ALLERGY_CLINICAL_STATUS_COLORS[item.clinical_status]
+                      }
+                      className="whitespace-nowrap"
+                    >
+                      {t(item.clinical_status)}
+                    </Badge>
+                  ),
+                },
+                {
+                  key: "criticality",
+                  render: (item) => (
+                    <Badge
+                      variant={ALLERGY_CRITICALITY_COLORS[item.criticality]}
+                      className="whitespace-nowrap"
+                    >
+                      {t(item.criticality)}
+                    </Badge>
+                  ),
+                },
+                {
+                  key: "verification",
+                  render: (item) => (
+                    <Badge
+                      variant={
+                        ALLERGY_VERIFICATION_STATUS_COLORS[
+                          item.verification_status
+                        ]
+                      }
+                      className="whitespace-nowrap"
+                    >
+                      {t(item.verification_status)}
+                    </Badge>
+                  ),
+                },
+              ]}
             />
           ))}
         </div>
