@@ -1,4 +1,4 @@
-import { Code } from "@/types/questionnaire/code";
+import { Code } from "@/types/base/code/code";
 import { UserBase } from "@/types/user/user";
 
 export const SYMPTOM_CLINICAL_STATUS = [
@@ -48,7 +48,7 @@ export interface Symptom {
   updated_by: UserBase;
   category: string;
   encounter: string;
-  created_date?: string;
+  created_date: string;
   updated_date?: string;
 }
 

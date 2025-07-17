@@ -64,7 +64,7 @@ interface TagSelectorProps {
   triggerClassName?: string;
 }
 
-export function TagSelectorPopover({
+export function QuestionnaireTagSelectorPopover({
   title,
   selected,
   onToggle,
@@ -293,7 +293,7 @@ export default function ManageQuestionnaireTagsSheet({ form, trigger }: Props) {
           {/* Tag Selector */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium">{t("add_tags")}</h3>
-            <TagSelectorPopover
+            <QuestionnaireTagSelectorPopover
               selected={selectedTags}
               onToggle={handleToggleTag}
               searchQuery={searchQuery}

@@ -18,7 +18,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { Patient } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/patient/patient";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,

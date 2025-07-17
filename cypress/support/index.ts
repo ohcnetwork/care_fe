@@ -30,7 +30,7 @@ declare global {
       ): Chainable<Element>;
       verifyAndClickElement(
         element: string,
-        reference: string,
+        reference: string | RegExp,
       ): Chainable<Element>;
       preventPrint(): Chainable<Window>;
       closeNotification(): Chainable<JQuery<HTMLElement>>;

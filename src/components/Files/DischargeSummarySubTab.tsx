@@ -49,7 +49,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter } from "@/types/emr/encounter/encounter";
 
 interface DischargeTabProps {
   type: "encounter" | "patient";
@@ -73,6 +73,7 @@ export const DischargeTab = ({
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination } = useFilters({
     limit: 15,
+    disableCache: true,
   });
 
   const { mutate: generateDischargeSummary, isPending: isGenerating } =
@@ -627,15 +628,20 @@ export const DischargeTab = ({
             <CareIcon icon="l-sync" className="mr-2" />
             {t("refresh")}
           </Button>
-          <Button
-            variant="primary"
-            className="min-w-24 sm:min-w-28"
-            onClick={() => generateDischargeSummary()}
-            disabled={isGenerating}
-          >
-            <CareIcon icon="l-file-medical" className="hidden sm:block mr-2" />
-            {isGenerating ? t("generating") : t("generate_discharge_summary")}
-          </Button>
+          {canEdit && (
+            <Button
+              variant="primary"
+              className="min-w-24 sm:min-w-28"
+              onClick={() => generateDischargeSummary()}
+              disabled={isGenerating}
+            >
+              <CareIcon
+                icon="l-file-medical"
+                className="hidden sm:block mr-2"
+              />
+              {isGenerating ? t("generating") : t("generate_discharge_summary")}
+            </Button>
+          )}
           {/* <ReportBuilderSheet
             facilityId={facilityId || ""}
             patientId={encounter?.patient.id || ""}
