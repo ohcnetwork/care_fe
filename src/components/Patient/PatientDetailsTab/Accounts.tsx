@@ -13,6 +13,7 @@ export const Accounts = (props: AccountsProps) => {
           facilityId={props.facilityId}
           patientId={props.patientId}
           hideTitleOnPage
+          hidePatientName
           className="mt-2"
         />
       )}
