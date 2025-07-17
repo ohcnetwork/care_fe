@@ -98,19 +98,19 @@ export function EncounterQuestion({
   const { t } = useTranslation();
 
   const [encounter, setEncounter] = useState<EncounterEdit>({
-    status: "unknown" as EncounterStatus,
-    encounter_class: "amb" as EncounterClass,
+    status: "unknown",
+    encounter_class: "amb",
     period: {
       start: new Date().toISOString(),
       end: undefined,
     },
-    priority: "routine" as EncounterPriority,
+    priority: "routine",
     external_identifier: "",
     hospitalization: {
       re_admission: false,
-      admit_source: "other" as EncounterAdmitSources,
-      discharge_disposition: "home" as EncounterDischargeDisposition,
-      diet_preference: "none" as EncounterDietPreference,
+      admit_source: "other",
+      discharge_disposition: "home",
+      diet_preference: "none",
     },
     facility: "",
     patient: "",
@@ -312,7 +312,7 @@ export function EncounterQuestion({
                   <AlertDialogAction
                     onClick={() => {
                       handleUpdateEncounter({
-                        status: "discharged" as EncounterStatus,
+                        status: "discharged",
                         period: {
                           ...encounter.period,
                           end: new Date().toISOString(),
