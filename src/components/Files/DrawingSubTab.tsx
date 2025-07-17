@@ -34,6 +34,7 @@ export interface DrawingsTabProps {
   patient?: Patient;
   encounter?: Encounter;
   patientId?: string;
+  readOnly?: boolean;
 }
 
 interface ExcalidrawPreviewProps {
@@ -134,6 +135,7 @@ export const DrawingPage = ({
   patientId,
   patient,
   encounter,
+  readOnly,
 }: DrawingsTabProps) => {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -141,7 +143,7 @@ export const DrawingPage = ({
   const facilityIdExists = !!subpathMatch?.facilityId;
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    cacheBlacklist: ["name"],
+    disableCache: true,
   });
   const { data: patientData } = useQuery({
     queryKey: ["patient", patientId],
@@ -173,7 +175,8 @@ export const DrawingPage = ({
     !inactiveEncounterStatus.includes(encounter.status);
 
   const canEdit =
-    type === "encounter" ? canWriteCurrentEncounter : canWritePatient;
+    !readOnly &&
+    (type === "encounter" ? canWriteCurrentEncounter : canWritePatient);
 
   const { data, isLoading } = useQuery({
     queryKey: ["drawings", associatingId, qParams, resultsPerPage],

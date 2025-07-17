@@ -49,6 +49,7 @@ import {
   ChargeItemRead,
   ChargeItemStatus,
 } from "@/types/billing/chargeItem/chargeItem";
+import { InvoiceStatus } from "@/types/billing/invoice/invoice";
 import {
   MedicationDispenseCategory,
   MedicationDispenseRead,
@@ -135,7 +136,9 @@ function MedicationTable({
             const instruction = medication.dosage_instruction[0] ?? {};
             const frequency = instruction?.timing?.code;
             const dosage = instruction?.dose_and_rate?.dose_quantity;
-            const isPaid = medication.charge_item.paid_invoice;
+            const isPaid =
+              medication.charge_item.paid_invoice?.status ===
+              InvoiceStatus.balanced;
             const shouldShowCheckbox = showCheckbox;
 
             return (
@@ -348,8 +351,14 @@ export default function DispensedMedicationList({
   };
 
   const filteredMedications = response?.results?.filter((med) => {
-    if (paymentFilter === "paid") return med.charge_item.paid_invoice;
-    if (paymentFilter === "unpaid") return !med.charge_item.paid_invoice;
+    if (paymentFilter === "paid")
+      return med.charge_item.paid_invoice?.status === InvoiceStatus.balanced;
+    if (paymentFilter === "unpaid")
+      return (
+        !med.charge_item.paid_invoice ||
+        med.charge_item.paid_invoice?.status === InvoiceStatus.issued ||
+        med.charge_item.paid_invoice?.status === InvoiceStatus.draft
+      );
     return true;
   });
 

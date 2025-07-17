@@ -313,7 +313,7 @@ function ProductKnowledgeFormContent({
                     {t("basic_information")}
                   </h2>
                   <p className="mt-0.5 text-sm text-gray-500">
-                    {t("PKF_basic_information_description")}
+                    {t("pk_form_basic_information_description")}
                   </p>
                 </div>
 
@@ -571,7 +571,7 @@ function ProductKnowledgeFormContent({
                       {t("storage_guidelines")}
                     </h2>
                     <p className="mt-0.5 text-sm text-gray-500">
-                      {t("PKF_storage_guidelines_description")}
+                      {t("pk_form_storage_guidelines_description")}
                     </p>
                   </div>
                   <Button
@@ -661,7 +661,7 @@ function ProductKnowledgeFormContent({
                                   value={form.watch(
                                     `storage_guidelines.${index}.stability_duration.unit`,
                                   )}
-                                  placeholder={t("e.g., Day, Month")}
+                                  placeholder={t("duration_unit_placeholder")}
                                   onSelect={(code) => {
                                     form.setValue(
                                       `storage_guidelines.${index}.stability_duration.unit`,
@@ -706,7 +706,7 @@ function ProductKnowledgeFormContent({
                       {t("product_definition")}
                     </h2>
                     <p className="mt-0.5 text-sm text-gray-500">
-                      {t("PKF_definitional_description")}
+                      {t("pk_form_definitional_description")}
                     </p>
                   </div>
                   {form.watch("definitional") ? (
@@ -717,7 +717,7 @@ function ProductKnowledgeFormContent({
                       onClick={() => form.setValue("definitional", null)}
                     >
                       <X className="mr-2 size-4" />
-                      {t("remove") + " " + t("definition")}
+                      {t("remove_definition")}
                     </Button>
                   ) : (
                     <Button
@@ -760,7 +760,7 @@ function ProductKnowledgeFormContent({
                               >
                                 <SelectTrigger>
                                   <SelectValue
-                                    placeholder={t("e.g., Tablet, Injection")}
+                                    placeholder={t("dosage_form_placeholder")}
                                   />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -790,7 +790,7 @@ function ProductKnowledgeFormContent({
                             {t("intended_routes")}
                           </h3>
                           <p className="mt-0.5 text-xs text-gray-500">
-                            {t("PKF_intended_routes_description")}
+                            {t("pk_form_intended_routes_description")}
                           </p>
                         </div>
                         <Button
@@ -830,9 +830,7 @@ function ProductKnowledgeFormContent({
                                         <ValueSetSelect
                                           system="system-route"
                                           value={routeField.value}
-                                          placeholder={t(
-                                            "e.g., Oral, Intravenous",
-                                          )}
+                                          placeholder={t("select_route")}
                                           onSelect={(code) => {
                                             routeField.onChange({
                                               code: code.code,

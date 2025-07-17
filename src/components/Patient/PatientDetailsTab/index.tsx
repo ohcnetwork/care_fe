@@ -9,6 +9,7 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import { Accounts } from "./Accounts";
 import { Appointments } from "./Appointments";
 import { PatientFilesTab } from "./PatientFiles";
+import { PatientNotesTab } from "./PatientNotes";
 import { PatientUsers } from "./PatientUsers";
 import { ResourceRequests } from "./ResourceRequests";
 import { Updates } from "./patientUpdates";
@@ -57,6 +58,10 @@ export const BASE_PATIENT_TABS: Tab[] = [
   {
     route: "users",
     component: PatientUsers,
+  },
+  {
+    route: "notes",
+    component: PatientNotesTab,
   },
   {
     route: "files",

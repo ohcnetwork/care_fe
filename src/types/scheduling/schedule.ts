@@ -176,6 +176,9 @@ export interface Appointment {
 
 export interface AppointmentRead extends Appointment {
   tags: TagConfig[];
+  updated_by: UserBase | null;
+  created_by: UserBase;
+  modified_date: string;
 }
 
 export interface AppointmentCreateRequest {
@@ -191,4 +194,9 @@ export interface AppointmentUpdateRequest {
 export interface CreateAppointmentQuestion {
   reason_for_visit: string;
   slot_id: string;
+}
+
+export interface AppointmentCancelRequest {
+  reason: "cancelled" | "entered_in_error";
+  reason_for_visit?: string;
 }

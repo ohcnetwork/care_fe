@@ -43,7 +43,6 @@ import FileUploadDialog from "@/components/Files/FileUploadDialog";
 
 import useFileUpload from "@/hooks/useFileUpload";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { Code } from "@/types/base/code/code";
@@ -65,6 +64,8 @@ import {
   ObservationDefinitionReadSpec,
 } from "@/types/emr/observationDefinition/observationDefinition";
 import { SpecimenRead, SpecimenStatus } from "@/types/emr/specimen/specimen";
+import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
+import filesApi from "@/types/files/filesApi";
 
 interface DiagnosticReportFormProps {
   patientId: string;
@@ -75,6 +76,7 @@ interface DiagnosticReportFormProps {
   activityDefinition?: {
     diagnostic_report_codes?: Code[];
     category?: string;
+    specimen_requirements?: SpecimenDefinitionRead[];
   };
   specimens: SpecimenRead[];
 }
@@ -135,7 +137,7 @@ export function DiagnosticReportForm({
 
   // Check if all required specimens are collected
   const hasCollectedSpecimens =
-    activityDefinition?.category !== "laboratory" ||
+    activityDefinition?.specimen_requirements?.length === 0 ||
     specimens.some((specimen) => specimen.status === SpecimenStatus.available);
 
   // Fetch the full diagnostic report to get observations
@@ -154,7 +156,7 @@ export function DiagnosticReportForm({
   const { data: files = { results: [], count: 0 }, refetch: refetchFiles } =
     useQuery({
       queryKey: ["files", "diagnostic_report", fullReport?.id],
-      queryFn: query(routes.viewUpload, {
+      queryFn: query(filesApi.viewUpload, {
         queryParams: {
           file_type: "diagnostic_report",
           associating_id: fullReport?.id,
@@ -1187,7 +1189,7 @@ export function DiagnosticReportForm({
                       <textarea
                         id="conclusion"
                         className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-lg border border-gray-300 p-2"
-                        placeholder={t("enter") + " " + t("conclusion")}
+                        placeholder={t("enter_conclusion")}
                         value={conclusion}
                         onChange={(e) => setConclusion(e.target.value)}
                         rows={3}
@@ -1257,7 +1259,7 @@ export function DiagnosticReportForm({
                                       ? fileUpload.files
                                           .map((file) => file.name)
                                           .join(", ")
-                                      : t("select") + " " + t("files")}
+                                      : t("select_files")}
                                   </span>
                                   {fileUpload.Input({ className: "hidden" })}
                                 </Label>

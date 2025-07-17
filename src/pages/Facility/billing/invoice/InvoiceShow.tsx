@@ -956,7 +956,7 @@ export function InvoiceShow({
                     title:
                       invoice.status === InvoiceStatus.cancelled
                         ? t("invoice_cancelled")
-                        : t("invoice") + " " + t("entered_in_error"),
+                        : t("invoice_entered_in_error"),
                   });
                 }
 
@@ -1022,7 +1022,7 @@ export function InvoiceShow({
               onClick={handleRemoveChargeItem}
               disabled={isRemoving}
             >
-              {isRemoving ? t("removing...") : t("remove")}
+              {isRemoving ? t("removing_with_dots") : t("remove")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
