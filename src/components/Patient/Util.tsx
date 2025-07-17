@@ -3,6 +3,8 @@ import { navigate } from "raviger";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -45,10 +47,16 @@ export function GenericRow<T>({
 
   return (
     <>
-      {columns.map((col) => (
+      {columns.map((col, index) => (
         <div
           key={col.key}
-          className={`px-2 py-1 border border-gray-200 ${col.className || ""}`}
+          className={cn(
+            "px-2 py-1 border-t border-b border-gray-200",
+            index === 0 && "border-l rounded-l",
+            index !== 0 && "border-l",
+            index === columns.length - 1 && "border-r",
+            col.className,
+          )}
         >
           {col.render(item)}
         </div>

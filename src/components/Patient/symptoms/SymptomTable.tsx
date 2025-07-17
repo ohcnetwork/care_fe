@@ -40,7 +40,7 @@ const SymptomCard = ({
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
   return (
-    <div className="border rounded-md p-4 bg-white">
+    <div className="border-1 shadow rounded-md p-4 bg-white">
       <div className="flex justify-between items-start flex-wrap gap-3">
         <div className="flex-1 font-semibold text-gray-900 break-words">
           {symptom.code.display}
@@ -130,14 +130,17 @@ const SymptomCard = ({
         <div>
           <div className="text-sm text-gray-600 mb-1">{t("onset")}</div>
           {symptom.onset?.onset_datetime ? (
-            <RelativeDateTooltip date={symptom.onset.onset_datetime} />
+            <RelativeDateTooltip
+              date={symptom.onset.onset_datetime}
+              className="font-normal"
+            />
           ) : (
             "-"
           )}
         </div>
       </div>
       {showNote && symptom.note && (
-        <div className="col-span-full border border-gray-200 p-2 bg-white rounded mt-2">
+        <div className="col-span-full p-2 bg-gray-50 rounded mt-2">
           <div className="flex flex-row w-full justify-between">
             <div className="text-sm font-semibold text-gray-800">
               {t("note")} :
@@ -173,7 +176,7 @@ export const SymptomTable = ({
   const baseHeaderClasses =
     "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700";
   return isMobile ? (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {symptoms.map((symptom) => (
         <SymptomCard
           key={symptom.id}
