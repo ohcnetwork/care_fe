@@ -149,70 +149,75 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
               <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center mb-4 h-20">
                 <div className="flex items-center justify-between gap-8">
                   {isLaptopScreen ? (
-                    <DropdownMenu
-                      open={showCameraSelector}
-                      onOpenChange={setShowCameraSelector}
-                    >
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="secondary"
-                          className="rounded-full size-13"
-                        >
-                          <SwitchCamera className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-full" align="start">
-                        <DropdownMenuLabel className="flex items-center gap-2 text-md font-medium">
-                          <SwitchCamera className="size-4" />
-                          {t("select_camera")}
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <div className="space-y-2 p-3">
-                          {videoDevices.map((camera) => (
-                            <div
-                              key={camera.deviceId}
-                              className={`p-3 rounded-lg border cursor-pointer transition-all hover:bg-gray-50 ${
-                                selectedDeviceId === camera.deviceId
-                                  ? "border-green-500 bg-green-50"
-                                  : "border-gray-200"
-                              }`}
-                              onClick={() => {
-                                setSelectedDeviceId(camera.deviceId);
-                                setShowCameraSelector(!showCameraSelector);
-                              }}
-                            >
-                              <div className="flex items-center gap-3">
-                                <CareIcon icon="l-camera" className="size-4" />
-                                <div className="flex-1">
-                                  <div className="font-medium text-sm">
-                                    {camera.label}
+                    videoDevices.length > 1 ? (
+                      <DropdownMenu
+                        open={showCameraSelector}
+                        onOpenChange={setShowCameraSelector}
+                      >
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="secondary"
+                            className="rounded-full size-13"
+                          >
+                            <SwitchCamera className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-full" align="start">
+                          <DropdownMenuLabel className="flex items-center gap-2 text-md font-medium">
+                            <SwitchCamera className="size-4" />
+                            {t("select_camera")}
+                          </DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <div className="space-y-2 p-3">
+                            {videoDevices.map((camera) => (
+                              <div
+                                key={camera.deviceId}
+                                className={`p-3 rounded-lg border cursor-pointer transition-all hover:bg-gray-50 ${
+                                  selectedDeviceId === camera.deviceId
+                                    ? "border-green-500 bg-green-50"
+                                    : "border-gray-200"
+                                }`}
+                                onClick={() => {
+                                  setSelectedDeviceId(camera.deviceId);
+                                  setShowCameraSelector(!showCameraSelector);
+                                }}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <CareIcon
+                                    icon="l-camera"
+                                    className="size-4"
+                                  />
+                                  <div className="flex-1">
+                                    <div className="font-medium text-sm">
+                                      {camera.label}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge
+                                      variant={
+                                        selectedDeviceId === camera.deviceId
+                                          ? "primary"
+                                          : "outline"
+                                      }
+                                      className="text-xs"
+                                    >
+                                      {selectedDeviceId === camera.deviceId
+                                        ? t("selected")
+                                        : camera.kind === "videoinput"
+                                          ? t("built_in")
+                                          : t("external")}
+                                    </Badge>
+                                    {selectedDeviceId === camera.deviceId && (
+                                      <div className="size-2 bg-green-500 rounded-full" />
+                                    )}
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <Badge
-                                    variant={
-                                      selectedDeviceId === camera.deviceId
-                                        ? "primary"
-                                        : "outline"
-                                    }
-                                    className="text-xs"
-                                  >
-                                    {selectedDeviceId === camera.deviceId
-                                      ? t("selected")
-                                      : camera.kind === "videoinput"
-                                        ? t("built_in")
-                                        : t("external")}
-                                  </Badge>
-                                  {selectedDeviceId === camera.deviceId && (
-                                    <div className="size-2 bg-green-500 rounded-full" />
-                                  )}
-                                </div>
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                            ))}
+                          </div>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : null
                   ) : (
                     <Button
                       variant="secondary"
@@ -222,6 +227,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       <SwitchCamera className="size-4" />
                     </Button>
                   )}
+
                   <Button
                     variant="secondary"
                     onClick={() => {
