@@ -73,7 +73,7 @@ export const PractitionerSelector = ({
           ) : showAll ? (
             <span>{showAll}</span>
           ) : (
-            t("select_practitioner")
+            <span className="text-gray-400">{t("select_practitioner")}</span>
           )}
           <CaretDownIcon className="ml-auto" />
         </Button>
