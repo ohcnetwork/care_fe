@@ -266,10 +266,7 @@ export class PatientDepartments {
   }
 
   clickAddOrganization() {
-    cy.get('button[aria-haspopup="dialog"]')
-      .find("svg.lucide-pen")
-      .parent()
-      .click();
+    cy.verifyAndClickElement("#root", "Update Department");
     return this;
   }
 
