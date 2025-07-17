@@ -49,6 +49,7 @@ export const SPECIMEN_DISCARD_REASONS: SpecimenDiscardReason[] = [
 
 export interface CollectionSpec {
   collector: string | null;
+  collector_object: UserBase | null;
   collected_date_time: string | null;
   quantity: QuantitySpec | null;
   method: Code | null;
@@ -62,6 +63,7 @@ export interface ProcessingSpec {
   description: string;
   method: Code | null;
   performer: string | null;
+  performer_object: UserBase | null;
   time_date_time: string | null;
 }
 

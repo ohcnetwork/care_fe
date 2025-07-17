@@ -1013,6 +1013,8 @@
   "collect_specimen_before_report": "Please collect the required specimen before creating a report",
   "collect_time": "Collect Time",
   "collected_at": "Collected At",
+  "collected_by": "Collected by",
+  "collected_specimen": "Collected specimen",
   "collection": "Collection",
   "collection_date_time": "Collection Date & Time",
   "collection_information": "Collection Information",

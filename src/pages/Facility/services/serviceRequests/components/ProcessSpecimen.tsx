@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
+import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { ProcessingSpec } from "@/types/emr/specimen/specimen";
@@ -80,6 +81,7 @@ export function ProcessSpecimen({
         description: noteDialog.description,
         method: noteDialog.method,
         performer: null,
+        performer_object: null,
         time_date_time: new Date().toISOString(),
       });
     } else {
@@ -125,9 +127,9 @@ export function ProcessSpecimen({
                   )}
               </div>
               <div>
-                {process.performer && (
+                {process.performer_object && (
                   <div className="text-sm text-gray-600 mt-0.5">
-                    {t("performed_by")}: {process.performer}
+                    {t("performed_by")}: {formatName(process.performer_object)}
                   </div>
                 )}
                 <div className="text-sm text-gray-600 mt-0.5">

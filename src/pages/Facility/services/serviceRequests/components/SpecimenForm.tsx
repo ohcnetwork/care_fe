@@ -81,6 +81,7 @@ export function SpecimenForm({
         method: specimenDefinition.collection || null,
         body_site: null,
         collector: currentUserId || null, // Use user ID, default to null if not available yet
+        collector_object: null,
         collected_date_time: new Date().toISOString(),
         quantity: null,
         procedure: null,
@@ -222,6 +223,7 @@ export function SpecimenForm({
         fasting_status_duration:
           finalData.specimen.collection?.fasting_status_duration ?? null,
         collector: currentUserId,
+        collector_object: null,
       },
       // Preserve these from draft specimen
       processing: draftSpecimen.processing,

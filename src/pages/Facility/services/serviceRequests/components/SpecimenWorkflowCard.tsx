@@ -1,22 +1,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import {
-  Barcode,
   CheckCheck,
   CheckCircle2,
   ChevronsDownUp,
   ChevronsUpDown,
   CircleDashed,
-  Droplet,
   Eye,
   FileText,
   MoreVertical,
   PackageSearch,
   Plus,
   Receipt,
-  TestTubeDiagonal,
   Trash2,
-  User,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -66,11 +62,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { Avatar } from "@/components/Common/Avatar";
 import { PrintableQRCode } from "@/components/PrintableQRCode";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
 import mutate from "@/Utils/request/mutate";
+import { formatName } from "@/Utils/utils";
 import { ProcessSpecimen } from "@/pages/Facility/services/serviceRequests/components/ProcessSpecimen";
 import {
   ServiceRequestReadSpec,
@@ -239,27 +237,21 @@ export function SpecimenWorkflowCard({
               // --- Collected Header ---
               <div className="flex justify-between items-start overflow-x-auto">
                 <div className="space-y-1.5">
-                  <CardTitle className="text-lg font-semibold">
+                  <span className="text-sm text-gray-600">
+                    {t("collected_specimen")}:
+                  </span>
+                  <CardTitle className="text-base font-semibold">
                     {collectedSpecimen.specimen_definition.title}
                   </CardTitle>
                   {/* Mimic original UI structure */}
-                  <div className="flex flex-wrap gap-x-8 gap-y-1 text-sm text-gray-500 mt-4">
-                    {collectedSpecimen.accession_identifier && (
-                      <span className="flex  gap-1.5 flex-col">
-                        <span className="text-xs text-gray-500 flex items-center gap-1.5">
-                          <Barcode className="h-4 w-4" />
-                          {collectedSpecimen.accession_identifier}
-                        </span>
-                      </span>
-                    )}
+                  <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm text-gray-700 mt-4">
                     {collectedSpecimen.specimen_definition?.type_tested
                       ?.container?.cap?.display && (
-                      <span className="flex  gap-1.5 flex-col">
-                        <span className="text-xs text-gray-500 flex items-center gap-1.5">
-                          <Droplet className="h-4 w-4" />
-                          Container Cap:{" "}
+                      <span className="flex flex-col">
+                        <span className="text-sm text-gray-600 flex items-center">
+                          {t("container_cap")}:
                         </span>
-                        <span className="ml-6">
+                        <span className="text-base capitalize">
                           {
                             collectedSpecimen.specimen_definition.type_tested
                               .container.cap.display
@@ -268,25 +260,40 @@ export function SpecimenWorkflowCard({
                       </span>
                     )}
                     {collectedSpecimen.specimen_type?.display && (
-                      <span className="flex  gap-1.5 flex-col">
-                        <span className="text-xs text-gray-500 flex items-center gap-1.5">
-                          <TestTubeDiagonal className="h-4 w-4" />
-                          Specimen:{" "}
+                      <span className="flex flex-col">
+                        <span className="text-sm text-gray-600 flex items-center">
+                          {t("specimen")}:
                         </span>
-                        <span className="font-semibold ml-6">
+                        <span className="text-base font-semibold capitalize">
                           {collectedSpecimen.specimen_type.display}
                         </span>
                       </span>
                     )}
-                    {collectedSpecimen.collection?.collector && (
-                      <span className="flex  gap-1.5 flex-col">
-                        <span className="text-xs text-gray-500 flex items-center gap-1.5">
-                          <User className="h-4 w-4" />
-                          Collector:{" "}
+                    {collectedSpecimen.collection?.collector_object && (
+                      <span className="flex flex-col">
+                        <span className="text-sm text-gray-600 flex items-center">
+                          {t("collected_by")}:
                         </span>
-                        <span className="ml-6">
-                          {collectedSpecimen.collection.collector}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <Avatar
+                            imageUrl={
+                              collectedSpecimen.collection.collector_object
+                                .profile_picture_url
+                            }
+                            name={formatName(
+                              collectedSpecimen.collection.collector_object,
+                              true,
+                            )}
+                            className="size-5 rounded-full"
+                          />
+                          <span className="text-base">
+                            {collectedSpecimen.collection.collector_object
+                              ? formatName(
+                                  collectedSpecimen.collection.collector_object,
+                                )
+                              : "--"}
+                          </span>
+                        </div>
                       </span>
                     )}
                   </div>
