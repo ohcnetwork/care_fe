@@ -173,8 +173,8 @@ export type Period = {
 };
 
 export type Hospitalization = {
-  re_admission: boolean;
-  admit_source: EncounterAdmitSources;
+  re_admission?: boolean;
+  admit_source?: EncounterAdmitSources;
   discharge_disposition?: EncounterDischargeDisposition;
   diet_preference?: EncounterDietPreference;
 };
@@ -207,7 +207,7 @@ export interface EncounterBase {
   status: EncounterStatus;
   encounter_class: EncounterClass;
   period: Period;
-  hospitalization?: Hospitalization;
+  hospitalization?: Hospitalization | null;
   priority: EncounterPriority;
   external_identifier?: string;
   discharge_summary_advice?: string | null;

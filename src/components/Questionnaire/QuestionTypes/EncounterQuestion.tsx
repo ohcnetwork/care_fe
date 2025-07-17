@@ -162,7 +162,7 @@ export function EncounterQuestion({
     clearError();
     const newEncounter = { ...encounter, ...updates };
     if (["amb", "vr", "hh"].includes(newEncounter.encounter_class)) {
-      newEncounter.hospitalization = undefined;
+      newEncounter.hospitalization = {};
     }
 
     // Create the full encounter request object
