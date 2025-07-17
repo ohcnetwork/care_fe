@@ -5,6 +5,7 @@ import {
   TransformComponent,
   TransformWrapper,
 } from "react-zoom-pan-pinch";
+import { toast } from "sonner";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import { cn } from "@/lib/utils";
@@ -184,6 +185,30 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
     () => index < (uploadedFiles?.length || 0) - 1 && handleNext(index + 1),
   );
 
+  const handleDownload = async () => {
+    if (!downloadURL) return;
+
+    try {
+      const response = await fetch(downloadURL);
+      if (!response.ok) throw new Error();
+
+      const data = await response.blob();
+      const blobUrl = window.URL.createObjectURL(data);
+
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = `${file_state.name}.${file_state.extension}`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Clean up
+      window.URL.revokeObjectURL(blobUrl);
+      document.body.removeChild(a);
+    } catch {
+      toast.error(t("file_download_failed"));
+    }
+  };
+
   return (
     <Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="h-full w-full max-w-[100vw] md:max-w-[80vw] flex-col gap-4 rounded-lg p-4 shadow-xl md:p-6 overflow-y-auto">
@@ -229,15 +254,13 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                   </Button>
                 )}
                 {downloadURL && downloadURL.length > 0 && (
-                  <Button variant="primary" data-cy="file-preview-download">
-                    <a
-                      href={downloadURL}
-                      className="text-white flex items-center gap-2"
-                      download={`${file_state.name}.${file_state.extension}`}
-                    >
-                      <CareIcon icon="l-file-download" className="size-4" />
-                      <span>{t("download")}</span>
-                    </a>
+                  <Button
+                    variant="primary"
+                    data-cy="file-preview-download"
+                    onClick={handleDownload}
+                  >
+                    <CareIcon icon="l-file-download" className="size-4" />
+                    <span>{t("download")}</span>
                   </Button>
                 )}
               </div>
@@ -318,18 +341,9 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                         {t("mov_file_safari_only")}
                       </p>
                       {downloadURL && (
-                        <Button variant="primary">
-                          <a
-                            href={downloadURL}
-                            className="text-white flex items-center gap-2"
-                            download={`${file_state.name}.${file_state.extension}`}
-                          >
-                            <CareIcon
-                              icon="l-file-download"
-                              className="size-4"
-                            />
-                            <span>{t("download_to_play")}</span>
-                          </a>
+                        <Button variant="primary" onClick={handleDownload}>
+                          <CareIcon icon="l-file-download" className="size-4" />
+                          <span>{t("download_to_play")}</span>
                         </Button>
                       )}
                     </div>
