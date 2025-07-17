@@ -33,3 +33,11 @@ export default function useCurrentFacility() {
 
   return { facilityId, facility };
 }
+
+export function useCurrentFacilitySilently() {
+  try {
+    return useCurrentFacility();
+  } catch {
+    return { facilityId: undefined, facility: undefined };
+  }
+}

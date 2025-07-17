@@ -27,7 +27,7 @@ import ValueSetSearchContent from "@/components/Questionnaire/ValueSetSearchCont
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
@@ -54,7 +54,7 @@ export default function MedicationValueSetSelect({
   wrapTextForSmallScreen = false,
 }: Props) {
   const { t } = useTranslation();
-  const { facilityId } = useCurrentFacility();
+  const { facilityId } = useCurrentFacilitySilently();
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"product" | "valueset">("product");
   const [search, setSearch] = useState("");
@@ -89,7 +89,7 @@ export default function MedicationValueSetSelect({
       className="w-full"
     >
       <div className="flex items-center border-b">
-        <TabsList className="h-10 w-full rounded-t-3xl">
+        <TabsList className="h-10 w-full px-2">
           <TabsTrigger value="product" className="flex-1">
             {t("in_stock")}
           </TabsTrigger>
@@ -167,7 +167,7 @@ export default function MedicationValueSetSelect({
             className={cn(
               "w-full justify-between",
               wrapTextForSmallScreen
-                ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
+                ? "h-auto whitespace-normal text-left"
                 : "truncate",
               !value?.display && "text-gray-400",
             )}
@@ -177,12 +177,11 @@ export default function MedicationValueSetSelect({
             <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
           </Button>
         </SheetTrigger>
-        <SheetContent
-          side="bottom"
-          className="h-[80vh] px-0 pt-2 pb-0 rounded-t-3xl"
-        >
+        <SheetContent side="bottom" className="px-0 pt-2 pb-0 rounded-t-2xl">
           <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto bg-gray-300 mt-2" />
-          <div className="mt-6 h-full">{renderTabContent()}</div>
+          <div className="mt-8 h-full overflow-y-auto">
+            {renderTabContent()}
+          </div>
         </SheetContent>
       </Sheet>
     );
