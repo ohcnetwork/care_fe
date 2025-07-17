@@ -167,7 +167,7 @@ export function AppointmentQuestion({
                 setSelectedSlot(undefined);
               }
             }}
-            clearSelection={t("show_all")}
+            showAll={t("show_all")}
           />
         </div>
       </div>

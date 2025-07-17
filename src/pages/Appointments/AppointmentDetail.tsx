@@ -77,6 +77,7 @@ import {
   AppointmentUpdateRequest,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+import { UserBase } from "@/types/user/user";
 
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
 
@@ -442,9 +443,8 @@ const AppointmentActions = ({
   const queryClient = useQueryClient();
 
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
-  const [selectedPractitioner, setSelectedPractitioner] = useState(
-    appointment.user,
-  );
+  const [selectedPractitioner, setSelectedPractitioner] =
+    useState<UserBase | null>(appointment.user);
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
   const currentStatus = appointment.status;
@@ -515,17 +515,22 @@ const AppointmentActions = ({
                 <PractitionerSelector
                   facilityId={facilityId}
                   selected={selectedPractitioner}
-                  onSelect={(user) => user && setSelectedPractitioner(user)}
-                  clearSelection={t("show_all")}
+                  onSelect={(user) => setSelectedPractitioner(user)}
                 />
               </div>
-              <AppointmentSlotPicker
-                facilityId={facilityId}
-                resourceId={selectedPractitioner?.id}
-                selectedSlotId={selectedSlotId}
-                onSlotSelect={setSelectedSlotId}
-                currentAppointment={appointment}
-              />
+              <div
+                className={cn(
+                  !selectedPractitioner && "opacity-50 pointer-events-none",
+                )}
+              >
+                <AppointmentSlotPicker
+                  facilityId={facilityId}
+                  resourceId={selectedPractitioner?.id}
+                  selectedSlotId={selectedSlotId}
+                  onSlotSelect={setSelectedSlotId}
+                  currentAppointment={appointment}
+                />
+              </div>
 
               <div className="flex justify-end gap-2 mt-6">
                 <Button

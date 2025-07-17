@@ -1,6 +1,7 @@
 import { CaretDownIcon } from "@radix-ui/react-icons";
 import { CheckIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
+import { XIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -30,14 +31,14 @@ interface PractitionerSelectorProps {
   selected: UserBase | null;
   onSelect: (user: UserBase | null) => void;
   facilityId: string;
-  clearSelection?: string;
+  showAll?: string;
 }
 
 export const PractitionerSelector = ({
   facilityId,
   selected,
   onSelect,
-  clearSelection,
+  showAll,
 }: PractitionerSelectorProps) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -69,8 +70,10 @@ export const PractitionerSelector = ({
               />
               <span>{formatName(selected)}</span>
             </div>
+          ) : showAll ? (
+            <span>{showAll}</span>
           ) : (
-            <span>{t("show_all")}</span>
+            t("select_practitioner")
           )}
           <CaretDownIcon className="ml-auto" />
         </Button>
@@ -89,19 +92,22 @@ export const PractitionerSelector = ({
               {isFetching ? t("searching") : t("no_results")}
             </CommandEmpty>
             <CommandGroup>
-              {clearSelection && (
+              {selected && (
                 <CommandItem
-                  value="all"
                   onSelect={() => {
                     onSelect(null);
                     setOpen(false);
                   }}
-                  className="cursor-pointer w-full"
+                  className="cursor-pointer w-full h-9"
                 >
-                  <div className="w-full flex items-start">
-                    <span>{clearSelection}</span>
-                    {!selected && <CheckIcon className="ml-auto" />}
-                  </div>
+                  {showAll ? (
+                    showAll
+                  ) : (
+                    <>
+                      <XIcon />
+                      <span> {t("clear_selection")}</span>
+                    </>
+                  )}
                 </CommandItem>
               )}
               {practitioners?.users.map((user) => (
