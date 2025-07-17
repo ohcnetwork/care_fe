@@ -853,7 +853,7 @@ export const normalizeAndUpdateMedication_Statement = (
   );
   replaceEncounterScopedInPaginatedCache<MedicationStatementRead>(
     queryClient,
-    ["medication_statements", patientID],
+    ["medication_statements", patientID, undefined],
     encounterID,
     normalizeMedication_Statement,
   );

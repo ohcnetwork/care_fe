@@ -39,6 +39,7 @@ import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { OfflineKeyMap } from "@/OfflineSupport/offlineKeys";
 import { isOfflineId } from "@/OfflineSupport/offlineWriteHelpers";
 import { PendingSyncBadge } from "@/OfflineSupport/pendingSyncbadge";
 import routes from "@/Utils/request/api";
@@ -214,7 +215,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     const loadOfflinePatient = async () => {
       try {
         const allOfflinePatients = await db.OfflineWrites.where("type")
-          .equals("createPatient")
+          .equals(OfflineKeyMap.create_patient)
           .toArray();
 
         const partialOfflinePatients: PartialPatientModel[] =
