@@ -50,6 +50,7 @@ import {
   type EncounterDischargeDisposition,
   type EncounterEdit,
   type EncounterPriority,
+  type EncounterRead,
   type EncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -140,10 +141,25 @@ export function EncounterQuestion({
     }
   }, [encounter.status]);
 
+  // Transform EncounterRead to EncounterEdit format
+  const transformEncounterForUpdate = (
+    read: EncounterRead,
+  ): Partial<Omit<EncounterEdit, "organizations" | "patient">> => {
+    return {
+      status: read.status,
+      encounter_class: read.encounter_class,
+      period: read.period,
+      priority: read.priority,
+      hospitalization: read.hospitalization,
+      external_identifier: read.external_identifier,
+      discharge_summary_advice: read.discharge_summary_advice,
+    };
+  };
+
   // Update encounter state when data is loaded
   useEffect(() => {
     if (encounterData) {
-      handleUpdateEncounter(encounterData as unknown as EncounterEdit);
+      handleUpdateEncounter(transformEncounterForUpdate(encounterData));
     }
   }, [encounterData]);
 
