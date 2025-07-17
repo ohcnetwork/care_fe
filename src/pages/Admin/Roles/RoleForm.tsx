@@ -89,7 +89,7 @@ export default function RoleForm({
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, name: e.target.value }))
             }
-            placeholder={t("enter") + " " + t("role") + " " + t("name")}
+            placeholder={t("enter_role_name")}
             required
           />
         </div>
@@ -102,7 +102,7 @@ export default function RoleForm({
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, description: e.target.value }))
             }
-            placeholder={t("enter") + " " + t("role") + " " + t("description")}
+            placeholder={t("enter_role_description")}
             rows={3}
           />
         </div>

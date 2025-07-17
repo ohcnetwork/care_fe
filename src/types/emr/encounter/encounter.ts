@@ -11,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationAssociationStatus } from "@/types/location/association";
@@ -127,7 +127,7 @@ export const ENCOUNTER_STATUS_COLORS = {
   React.ComponentProps<typeof Badge>["variant"]
 >;
 
-export const ENCOUNTER_CLASSES_ICONS = {
+export const ENCOUNTER_CLASS_ICONS = {
   imp: BedDouble,
   amb: Ambulance,
   obsenc: Stethoscope,
@@ -135,6 +135,14 @@ export const ENCOUNTER_CLASSES_ICONS = {
   vr: MonitorSmartphone,
   hh: Home,
 } as const satisfies Record<EncounterClass, LucideIcon>;
+
+export const ENCOUNTER_STATUS_ICONS = {
+  planned: "l-calender",
+  in_progress: "l-spinner",
+  discharged: "l-home",
+  completed: "l-check",
+  cancelled: "l-x",
+} as const satisfies Partial<Record<EncounterStatus, string>>;
 
 export const ENCOUNTER_CLASSES_COLORS = {
   imp: "indigo", // Inpatient
@@ -194,7 +202,7 @@ export type LocationHistory = {
 
 export interface Encounter {
   id: string;
-  patient: Patient;
+  patient: PatientRead;
   facility: {
     id: string;
     name: string;
