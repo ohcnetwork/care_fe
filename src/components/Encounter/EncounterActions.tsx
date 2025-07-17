@@ -75,7 +75,6 @@ export default function EncounterActions({
     updateEncounter({
       ...encounter,
       status: "completed",
-      organizations: encounter.organizations.map((org) => org.id),
       patient: encounter.patient.id,
       encounter_class: encounter.encounter_class,
       period: {

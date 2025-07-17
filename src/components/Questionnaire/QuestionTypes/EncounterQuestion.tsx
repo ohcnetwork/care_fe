@@ -51,7 +51,6 @@ import {
   type EncounterEdit,
   type EncounterPriority,
   type EncounterStatus,
-  Hospitalization,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import type {
@@ -81,7 +80,6 @@ export function EncounterQuestion({
   updateQuestionnaireResponseCB,
   disabled,
   clearError,
-  organizations = [],
   encounterId,
   patientId = "",
   facilityId,
@@ -114,7 +112,6 @@ export function EncounterQuestion({
     },
     facility: "",
     patient: "",
-    organizations: [],
   });
 
   useEffect(() => {
@@ -160,18 +157,17 @@ export function EncounterQuestion({
   }, [questionnaireResponse]);
 
   const handleUpdateEncounter = (
-    updates: Partial<Omit<EncounterEdit, "organizations" | "patient">>,
+    updates: Partial<Omit<EncounterEdit, "patient">>,
   ) => {
     clearError();
     const newEncounter = { ...encounter, ...updates };
     if (["amb", "vr", "hh"].includes(newEncounter.encounter_class)) {
-      newEncounter.hospitalization = {} as Hospitalization;
+      newEncounter.hospitalization = undefined;
     }
 
     // Create the full encounter request object
     const encounterRequest: EncounterEdit = {
       ...newEncounter,
-      organizations,
       patient: patientId,
     };
 

@@ -138,7 +138,6 @@ export const structuredHandlers: {
       }
       return encounters.map((encounter) => {
         const body: RequestTypeFor<"encounter"> = {
-          organizations: [],
           patient: patientId,
           status: encounter.status,
           encounter_class: encounter.encounter_class,

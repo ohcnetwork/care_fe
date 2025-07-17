@@ -238,9 +238,7 @@ export interface EncounterCreate extends Omit<EncounterBase, "id"> {
   organizations: string[];
 }
 
-export interface EncounterEdit extends Omit<EncounterBase, "id"> {
-  organizations: string[];
-}
+export type EncounterEdit = Omit<EncounterBase, "id">;
 
 export const completedEncounterStatus = ["completed"];
 export const inactiveEncounterStatus = [
