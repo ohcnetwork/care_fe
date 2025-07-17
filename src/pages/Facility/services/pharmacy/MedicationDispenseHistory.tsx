@@ -96,7 +96,7 @@ export default function MedicationDispenseHistory({
       <div className="flex items-center gap-4 mb-6">
         <div className="flex-1">
           <Input
-            placeholder={t("Search by patient name, ID, or prescription...")}
+            placeholder={t("search_by_patient_name_id_or_prescription")}
             value={qParams.search}
             onChange={(e) => updateQuery({ search: e.target.value })}
             className="w-full"

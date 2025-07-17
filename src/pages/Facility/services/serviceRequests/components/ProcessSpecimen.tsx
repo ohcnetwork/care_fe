@@ -102,7 +102,7 @@ export function ProcessSpecimen({
         <div className="flex-row items-center justify-between space-y-0 pb-2">
           <div className="text-sm font-medium flex items-center gap-1">
             <Settings2 className="h-4 w-4" />
-            {t("process") + " " + t("specimen")}
+            {t("process_specimen")}
             <Badge variant="primary">{existingProcessing.length}</Badge>
           </div>
         </div>
@@ -161,11 +161,11 @@ export function ProcessSpecimen({
           {!hasReport && (
             <div className="space-y-2">
               <label className="text-sm font-medium">
-                {t("PROCESS_SPECIMEN__step_heading")}
+                {t("process_specimen__step_heading")}
               </label>
               <ValueSetSelect
                 system="system-specimen-processing-method-code"
-                placeholder={t("PROCESS_SPECIMEN__valusetselect_placeholder")}
+                placeholder={t("process_specimen__valusetselect_placeholder")}
                 onSelect={handleSelectStep}
                 value={null}
               />
@@ -184,10 +184,10 @@ export function ProcessSpecimen({
           <DialogHeader>
             <DialogTitle>
               {noteDialog.index === -1
-                ? t("PROCESS_SPECIMEN__dialog_action_title", {
+                ? t("process_specimen__dialog_action_title", {
                     action: t("add"),
                   })
-                : t("PROCESS_SPECIMEN__dialog_action_title", {
+                : t("process_specimen__dialog_action_title", {
                     action: t("edit"),
                   })}
             </DialogTitle>
@@ -196,7 +196,7 @@ export function ProcessSpecimen({
             {noteDialog.method && (
               <div className="rounded-md bg-gray-50 p-3">
                 <Label className="text-sm text-gray-600">
-                  {t("processing") + " " + t("method")}
+                  {t("processing_method")}
                 </Label>
                 <div className="font-medium mt-1">
                   {noteDialog.method.display}
@@ -213,11 +213,11 @@ export function ProcessSpecimen({
                     description: e.target.value,
                   }))
                 }
-                placeholder={t("PROCESS_SPECIMEN__textarea_placeholder")}
+                placeholder={t("process_specimen__textarea_placeholder")}
                 className="min-h-[100px]"
               />
               <p className="text-sm text-gray-500">
-                {t("PROCESS_SPECIMEN__dialog_text_area_description")}
+                {t("process_specimen__dialog_text_area_description")}
               </p>
             </div>
           </div>
