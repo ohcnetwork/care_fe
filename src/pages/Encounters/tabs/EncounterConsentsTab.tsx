@@ -241,9 +241,7 @@ export const EncounterConsentsTab = () => {
           />
         </div>
 
-        {!readOnly && (
-          <ConsentFormSheet patientId={patientId} encounterId={encounterId} />
-        )}
+        {!readOnly && <ConsentFormSheet />}
       </div>
 
       {filteredConsents && filteredConsents.length > 0 ? (
