@@ -1,4 +1,4 @@
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, subDays } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -326,7 +326,10 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
             }}
             disabled={(date) => {
               const now = new Date();
-              const encounterStart = new Date(medication.authored_on);
+              const encounterStart = subDays(
+                new Date(medication.authored_on),
+                1,
+              );
               return date < encounterStart || date > now;
             }}
             disablePicker={!isPastTime || !!administrationRequest.id}
@@ -360,7 +363,10 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
             }}
             disabled={(date) => {
               const now = new Date();
-              const encounterStart = new Date(medication.authored_on);
+              const encounterStart = subDays(
+                new Date(medication.authored_on),
+                1,
+              );
               return date < encounterStart || date > now;
             }}
             className="flex-1"
