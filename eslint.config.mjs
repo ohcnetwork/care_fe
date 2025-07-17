@@ -2,11 +2,27 @@ import eslint from "@eslint/js";
 import tseslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
 import i18nextPlugin from "eslint-plugin-i18next";
+import i18nextNoUndefinedTranslationKeysPlugin from "eslint-plugin-i18next-no-undefined-translation-keys";
 import noRelativeImportPaths from "eslint-plugin-no-relative-import-paths";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import reactPlugin from "eslint-plugin-react";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
 import globals from "globals";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const namespaceMappingPath = path.join(__dirname, "namespaceMapping.json");
+const namespaceMapping = {
+  default: path.join(__dirname, "public/locale/en.json"),
+};
+fs.writeFileSync(
+  namespaceMappingPath,
+  JSON.stringify(namespaceMapping, null, 2),
+);
 
 const isPreCommit = process.env.PRE_COMMIT === "true";
 const DEFAULT = true;
@@ -137,6 +153,8 @@ const config = [
     files: ["**/*.{js,jsx,ts,tsx}"],
     plugins: {
       i18next: i18nextPlugin,
+      "i18next-no-undefined-translation-keys":
+        i18nextNoUndefinedTranslationKeysPlugin,
     },
     rules: {
       ...i18nextPlugin.configs.recommended.rules,
@@ -151,6 +169,13 @@ const config = [
           callees: {
             exclude: [".*"],
           },
+        },
+      ],
+      "i18next-no-undefined-translation-keys/no-undefined-translation-keys": [
+        "error",
+        {
+          namespaceTranslationMappingFile: namespaceMappingPath,
+          defaultNamespace: "default",
         },
       ],
     },

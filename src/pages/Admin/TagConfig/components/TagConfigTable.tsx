@@ -41,7 +41,7 @@ import {
 interface TagConfigTableProps {
   configs: TagConfig[];
   isLoading: boolean;
-  onView: (config: TagConfig) => void;
+  onView: (id: string) => void;
   onArchive?: (config: TagConfig) => void;
   showChildrenColumn?: boolean;
   showArchiveAction?: boolean;
@@ -57,14 +57,14 @@ function TagConfigCard({
   onArchive,
 }: {
   config: TagConfig;
-  onView: (config: TagConfig) => void;
+  onView: (id: string) => void;
   showArchiveAction?: boolean;
   onArchive?: (config: TagConfig) => void;
 }) {
   const { t } = useTranslation();
 
   const handleCardClick = () => {
-    onView(config);
+    onView(config.id);
   };
 
   return (
@@ -228,7 +228,7 @@ export default function TagConfigTable({
                 <TableRow
                   key={config.id}
                   className="divide-x cursor-pointer hover:bg-gray-50"
-                  onClick={() => onView(config)}
+                  onClick={() => onView(config.id)}
                 >
                   <TableCell className="font-medium">
                     <div>
@@ -269,7 +269,7 @@ export default function TagConfigTable({
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          onView(config);
+                          onView(config.id);
                         }}
                       >
                         <CareIcon icon="l-eye" className="size-4" />

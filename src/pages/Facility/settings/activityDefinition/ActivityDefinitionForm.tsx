@@ -721,7 +721,7 @@ function ActivityDefinitionFormContent({
                     <ValueSetSelect
                       system="system-body-site"
                       value={form.watch("body_site")}
-                      placeholder={t("e.g., Right Arm")}
+                      placeholder={t("select_body_site")}
                       onSelect={(code) => {
                         form.setValue("body_site", {
                           code: code.code,
