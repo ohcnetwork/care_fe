@@ -199,9 +199,9 @@ export function EncounterQuestion({
           <Label>{t("encounter_status")}</Label>
           <Select
             value={encounter.status}
-            onValueChange={(value) =>
+            onValueChange={(value: EncounterStatus) =>
               handleUpdateEncounter({
-                status: value as EncounterStatus,
+                status: value,
               })
             }
             disabled={disabled}
@@ -223,9 +223,9 @@ export function EncounterQuestion({
           <Label>{t("encounter_class")}</Label>
           <Select
             value={encounter.encounter_class}
-            onValueChange={(value) =>
+            onValueChange={(value: EncounterClass) =>
               handleUpdateEncounter({
-                encounter_class: value as EncounterClass,
+                encounter_class: value,
               })
             }
             disabled={disabled}
@@ -247,9 +247,9 @@ export function EncounterQuestion({
           <Label>{t("priority")}</Label>
           <Select
             value={encounter.priority}
-            onValueChange={(value) =>
+            onValueChange={(value: EncounterPriority) =>
               handleUpdateEncounter({
-                priority: value as EncounterPriority,
+                priority: value,
               })
             }
             disabled={disabled}
@@ -377,12 +377,12 @@ export function EncounterQuestion({
               <Label>{t("admit_source")}</Label>
               <Select
                 value={encounter.hospitalization?.admit_source}
-                onValueChange={(value) => {
+                onValueChange={(value: EncounterAdmitSources) => {
                   if (!encounter.hospitalization) return;
                   handleUpdateEncounter({
                     hospitalization: {
                       ...encounter.hospitalization,
-                      admit_source: value as EncounterAdmitSources,
+                      admit_source: value,
                     },
                   });
                 }}
@@ -409,13 +409,12 @@ export function EncounterQuestion({
                   <Label>{t("discharge_disposition")}</Label>
                   <Select
                     value={encounter.hospitalization?.discharge_disposition}
-                    onValueChange={(value) => {
+                    onValueChange={(value: EncounterDischargeDisposition) => {
                       if (!encounter.hospitalization) return;
                       handleUpdateEncounter({
                         hospitalization: {
                           ...encounter.hospitalization,
-                          discharge_disposition:
-                            value as EncounterDischargeDisposition,
+                          discharge_disposition: value,
                         },
                       });
                     }}
@@ -542,12 +541,12 @@ export function EncounterQuestion({
               <Label>{t("diet_preference")}</Label>
               <Select
                 value={encounter.hospitalization?.diet_preference}
-                onValueChange={(value) => {
+                onValueChange={(value: EncounterDietPreference) => {
                   if (!encounter.hospitalization) return;
                   handleUpdateEncounter({
                     hospitalization: {
                       ...encounter.hospitalization,
-                      diet_preference: value as EncounterDietPreference,
+                      diet_preference: value,
                     },
                   });
                 }}
