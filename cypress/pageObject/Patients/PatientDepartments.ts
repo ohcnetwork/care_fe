@@ -266,7 +266,7 @@ export class PatientDepartments {
   }
 
   clickAddOrganization() {
-    cy.get('[data-cy="add-organization-badge"]').first().click();
+    cy.verifyAndClickElement("#root", "Update Department");
     return this;
   }
 

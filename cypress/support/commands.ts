@@ -133,7 +133,7 @@ Cypress.Commands.add(
 
 Cypress.Commands.add(
   "verifyAndClickElement",
-  (element: string, reference: string) => {
+  (element: string, reference: string | RegExp) => {
     cy.get(element).scrollIntoView();
     cy.get(element).contains(reference).should("be.visible").click();
   },
@@ -319,6 +319,21 @@ Cypress.Commands.add(
     cy.get("label")
       .contains(labelText)
       .parent()
+      .within(() => {
+        cy.get(`button[value='${buttonValue}']`).click();
+      });
+  },
+);
+
+// Enhanced command for clicking radio buttons in complex nested structures
+Cypress.Commands.add(
+  "clickRadioButtonByLabel",
+  (labelText: string, buttonValue: string) => {
+    cy.get("label").contains(labelText).scrollIntoView();
+    // Find the label and navigate to the closest question container
+    cy.get("label")
+      .contains(labelText)
+      .closest('[data-cy^="question-"]')
       .within(() => {
         cy.get(`button[value='${buttonValue}']`).click();
       });
