@@ -10,6 +10,7 @@ export const PatientNotesTab = (props: PatientProps) => {
         canWrite={true}
         patientId={props.patientData.id}
         encounterId={undefined}
+        hideEncounterNotes={true}
       />
     </div>
   );

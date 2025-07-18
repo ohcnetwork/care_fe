@@ -25,7 +25,6 @@ const DATA_TYPES = [
   "DateTime",
   "Time",
   "String",
-  "Quantity",
 ] as const;
 
 const LOINC_CODES = [

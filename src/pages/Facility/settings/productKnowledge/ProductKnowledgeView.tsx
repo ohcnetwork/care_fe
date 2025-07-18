@@ -209,7 +209,7 @@ export default function ProductKnowledgeView({
               <CardHeader>
                 <CardTitle>{t("storage_guidelines")}</CardTitle>
                 <CardDescription>
-                  {t("storage_guidelines_description")}
+                  {t("pk_form_storage_guidelines_description")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
