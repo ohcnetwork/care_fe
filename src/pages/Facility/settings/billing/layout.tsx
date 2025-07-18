@@ -1,6 +1,7 @@
 import { Menu } from "lucide-react";
-import { useRoutes } from "raviger";
+import { ActiveLink, useFullPath, useRoutes } from "raviger";
 import { Link } from "raviger";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -90,6 +91,18 @@ export function BillingSettingsLayout() {
     basePath: `/facility/${facilityId}/settings/billing`,
     routeProps: { facilityId },
   });
+  const fullPath = useFullPath();
+  const fullPathMap = useMemo(
+    () =>
+      fullPath.split("/").reduce(
+        (acc, part) => ({
+          ...acc,
+          [part]: true,
+        }),
+        {} as Record<string, boolean>,
+      ),
+    [fullPath],
+  );
 
   return (
     <div className="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
@@ -135,16 +148,23 @@ export function BillingSettingsLayout() {
                 </h4>
                 <div className="space-y-1">
                   {category.items.map((item) => (
-                    <Link
+                    <ActiveLink
                       key={item.href}
                       href={`/billing${item.href}`}
                       className={cn(
                         buttonVariants({ variant: "ghost" }),
                         "w-full justify-start",
                       )}
+                      activeClass={cn(
+                        item.href
+                          .split("/")
+                          .every((part) => fullPathMap[part]) &&
+                          "bg-white text-green-700 shadow",
+                      )}
+                      exactActiveClass="bg-white text-green-700 shadow"
                     >
                       {item.title}
-                    </Link>
+                    </ActiveLink>
                   ))}
                 </div>
               </div>
