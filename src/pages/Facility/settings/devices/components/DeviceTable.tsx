@@ -13,12 +13,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import {
-  DeviceAvailabilityStatusBadge,
-  DeviceStatusBadge,
-} from "@/pages/Facility/settings/devices/Utils";
 import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceTypeIcon";
-import { DeviceList } from "@/types/device/device";
+import {
+  DEVICE_AVAILABILITY_STATUS_COLORS,
+  DeviceList,
+} from "@/types/device/device";
 
 interface Props {
   devices: DeviceList[];
@@ -59,12 +58,24 @@ export default function DeviceTable({ devices }: Props) {
                 </div>
               </TableCell>
               <TableCell className="text-center">
-                <DeviceStatusBadge status={device.status} />
+                <Badge
+                  variant={DEVICE_AVAILABILITY_STATUS_COLORS[device.status]}
+                >
+                  {t(`device_status_${device.status}`)}
+                </Badge>
               </TableCell>
               <TableCell className="text-center">
-                <DeviceAvailabilityStatusBadge
-                  status={device.availability_status}
-                />
+                <Badge
+                  variant={
+                    DEVICE_AVAILABILITY_STATUS_COLORS[
+                      device.availability_status
+                    ]
+                  }
+                >
+                  {t(
+                    `device_availability_status_${device.availability_status}`,
+                  )}
+                </Badge>
               </TableCell>
               <TableCell className="text-center">
                 {device.care_type ? (
