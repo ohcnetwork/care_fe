@@ -194,6 +194,7 @@ export interface AppointmentUpdateRequest {
 export interface CreateAppointmentQuestion {
   reason_for_visit: string;
   slot_id: string;
+  tags?: string[];
 }
 
 export interface AppointmentCancelRequest {
