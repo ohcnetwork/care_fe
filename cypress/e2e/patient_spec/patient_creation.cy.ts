@@ -99,9 +99,8 @@ describe("Patient Creation and modification", () => {
   patientTestCases.forEach(({ description, data }) => {
     it(`creates a new ${description} and verifies registration`, () => {
       facilityCreation.selectFirstRandomFacility();
+      cy.getFacilityIdAndNavigate("patients");
       patientCreation
-        .expandPatientNav()
-        .clickSearchPatients()
         .clickCreateNewPatient()
         .fillPatientDetails(data)
         .submitPatientForm()

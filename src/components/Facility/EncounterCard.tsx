@@ -16,6 +16,7 @@ import {
   Encounter,
   completedEncounterStatus,
 } from "@/types/emr/encounter/encounter";
+import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 interface EncounterCardProps {
   encounter: Encounter;
@@ -127,6 +128,19 @@ export const EncounterCard = (props: EncounterCardProps) => {
                 </div>
               )}
             </div>
+
+            {encounter.tags.length > 0 && (
+              <div className="w-full mx-3 sm:w-auto">
+                <div className="flex flex-wrap gap-2">
+                  {encounter.tags.map((tag) => (
+                    <Badge variant="outline" key={tag.id}>
+                      {getTagHierarchyDisplay(tag)}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {canAccess && (
               <div className="w-full py-2 bg-gray-100 px-2">
                 <Button variant="outline" className="p-2 border border-black">

@@ -15,8 +15,11 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
+
 import { AppointmentSlotPicker } from "@/pages/Appointments/components/AppointmentSlotPicker";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
@@ -56,6 +59,10 @@ const APPOINTMENT_FIELDS: FieldDefinitions = {
     key: "slot_id",
     required: true,
   },
+  TAGS: {
+    key: "tags",
+    required: true,
+  },
 } as const;
 
 export function validateAppointmentQuestion(
@@ -72,6 +79,10 @@ export function validateAppointmentQuestion(
       ...APPOINTMENT_FIELDS.SLOT,
       required: required || value?.reason_for_visit !== undefined,
     },
+    TAGS: {
+      ...APPOINTMENT_FIELDS.TAGS,
+      required: required,
+    },
   });
 }
 
@@ -86,6 +97,7 @@ export function AppointmentQuestion({
   const { t } = useTranslation();
   const [resource, setResource] = useState<UserBase>();
   const [open, setOpen] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
   const { hasError } = useFieldError(question.id, errors);
 
   const values =
@@ -95,7 +107,11 @@ export function AppointmentQuestion({
 
   const handleUpdate = (updates: Partial<CreateAppointmentQuestion>) => {
     const updatedValue = { ...value, ...updates };
-    if (!updatedValue.reason_for_visit?.trim() && !updatedValue.slot_id) {
+    if (
+      !updatedValue.reason_for_visit?.trim() &&
+      !updatedValue.slot_id &&
+      !updatedValue.tags?.length
+    ) {
       updateQuestionnaireResponseCB(
         [],
         questionnaireResponse.question_id,
@@ -125,6 +141,20 @@ export function AppointmentQuestion({
   return (
     <div className="space-y-4">
       <div>
+        <div className="mb-4 mt-2">
+          <Label className="mb-2">{t("tags")}</Label>
+          <TagSelectorPopover
+            selected={selectedTags}
+            onChange={(tags) => {
+              setSelectedTags(tags);
+              handleUpdate({ tags: tags.map((tag) => tag.id) });
+            }}
+            resource={TagResource.APPOINTMENT}
+            className={cn(
+              hasError(APPOINTMENT_FIELDS.TAGS.key) && "ring-1 ring-red-500",
+            )}
+          />
+        </div>
         <Label className="mb-2">
           {t("reason_for_visit")}
           {question.required && <span className="text-red-500 ml-0.5">*</span>}

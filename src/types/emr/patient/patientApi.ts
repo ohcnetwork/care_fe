@@ -1,7 +1,13 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
-import { Patient, PatientCreate, PatientRead, PatientUpdate } from "./patient";
+import {
+  Patient,
+  PatientCreate,
+  PatientRead,
+  PatientSearchResponse,
+  PatientUpdate,
+} from "./patient";
 
 export default {
   addPatient: {
@@ -51,5 +57,15 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<unknown>(),
     TBody: Type<{ tags: string[] }>(),
+  },
+  searchPatient: {
+    path: "/api/v1/patient/search/",
+    method: HttpMethod.POST,
+    TRes: Type<PatientSearchResponse>(),
+    TBody: Type<{
+      phone_number?: string;
+      config?: string;
+      value?: string;
+    }>(),
   },
 };
