@@ -804,7 +804,7 @@ export function DiagnosticReportForm({
             onClick={() => handleDeleteObservation(definition.id, index)}
             disabled={isUpdatingStatus}
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="size-4" />
           </Button>
         </div>
         {definition.component.map((component, componentIndex) => {
@@ -1350,7 +1350,7 @@ export function DiagnosticReportForm({
                     }
                     className="w-full sm:w-auto sm:shrink-0"
                   >
-                    <PlusCircle className="h-4 w-4 mr-2" />
+                    <PlusCircle className="size-4 mr-2" />
                     {t("create_report")}
                   </Button>
                 </div>
