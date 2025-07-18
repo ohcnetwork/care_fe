@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { getPermissions } from "@/common/Permissions";
 import { encounterIcons } from "@/common/constants";
 
-import { formatDateTime } from "@/Utils/utils";
+import { formatDateTime, stringifyNestedObject } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import {
   Encounter,
@@ -127,6 +127,26 @@ export const EncounterCard = (props: EncounterCardProps) => {
                 </div>
               )}
             </div>
+
+            {encounter.tags.length > 0 && (
+              <div className="w-full mx-3 sm:w-auto">
+                <div className="flex flex-wrap gap-2">
+                  {encounter.tags.map((tag) => (
+                    <Badge variant="outline" key={tag.id}>
+                      {stringifyNestedObject(
+                        {
+                          name: tag.display,
+                          parent: tag.parent && { name: tag.parent.display },
+                        },
+                        " : ",
+                        true,
+                      )}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {canAccess && (
               <div className="w-full py-2 bg-gray-100 px-2">
                 <Button variant="outline" className="p-2 border border-black">
