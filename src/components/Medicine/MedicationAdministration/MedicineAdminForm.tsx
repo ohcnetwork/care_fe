@@ -1,4 +1,4 @@
-import { formatDistanceToNow, subDays } from "date-fns";
+import { format, formatDistanceToNow, subDays, startOfMinute } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -54,9 +54,12 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   const [endTimeError, setEndTimeError] = useState("");
 
   const validateDateTime = (date: Date, isStartTime: boolean): string => {
-    const now = new Date();
-    const authoredOn = new Date(medication.authored_on);
-    const startTime = new Date(administrationRequest.occurrence_period_start);
+    const now = startOfMinute(new Date());
+    const authoredOn = startOfMinute(new Date(medication.authored_on));
+    const startTime = startOfMinute(
+      new Date(administrationRequest.occurrence_period_start),
+    );
+    date = startOfMinute(date);
 
     if (date > now) {
       return t(
