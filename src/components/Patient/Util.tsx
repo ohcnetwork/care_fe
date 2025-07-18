@@ -28,7 +28,7 @@ interface RowProps<T> {
   patientId: string;
   facilityId?: string;
   columns: ColumnConfig<T>[];
-  getEncounterId: (item: T) => string | undefined;
+  getEncounterId: (item: T) => string;
   note?: string;
   createdBy: UserBase;
 }
@@ -87,13 +87,11 @@ export function GenericRow<T>({
             <DropdownMenuItem
               onClick={() => {
                 const encounterId = getEncounterId(item);
-                if (encounterId) {
-                  navigate(
-                    facilityId
-                      ? `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`
-                      : `/organization/organizationId/patient/${patientId}/encounter/${encounterId}/updates`,
-                  );
-                }
+                navigate(
+                  facilityId
+                    ? `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`
+                    : `/organization/organizationId/patient/${patientId}/encounter/${encounterId}/updates`,
+                );
               }}
               className="flex items-center gap-2 px-3 py-2 font-semibold"
             >
