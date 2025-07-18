@@ -52,6 +52,7 @@
   "dependencies": {
     "@excalidraw/excalidraw": "^0.18.0-a18b139",
     "@fontsource/figtree": "^5.1.1",
+    "@fontsource/libre-barcode-128-text": "^5.2.5",
     "@hookform/resolvers": "^5.0.1",
     "@originjs/vite-plugin-federation": "^1.3.7",
     "@radix-ui/react-accordion": "^1.2.8",
@@ -98,7 +99,7 @@
     "i18next-resources-to-backend": "^1.2.1",
     "input-otp": "^1.4.2",
     "jotai": "^2.12.3",
-    "jspdf": "^3.0.0",
+    "jspdf": "^3.0.1",
     "libphonenumber-js": "^1.11.18",
     "lucide-react": "^0.503.0",
     "markdown-it": "^14.1.0",
@@ -117,7 +118,10 @@
     "react-intersection-observer": "^9.15.1",
     "react-pdf": "^9.2.1",
     "react-phone-number-input": "^3.4.12",
+    "react-qr-barcode-scanner": "^2.1.2",
+    "react-resizable-panels": "^3.0.2",
     "react-webcam": "^7.2.0",
+    "react-zoom-pan-pinch": "^3.7.0",
     "reactflow": "^11.11.4",
     "recharts": "^2.15.0",
     "sonner": "^2.0.3",
@@ -156,6 +160,7 @@
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-i18next": "^6.1.0",
+    "eslint-plugin-i18next-no-undefined-translation-keys": "^3.4.0",
     "eslint-plugin-no-relative-import-paths": "^1.6.1",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-react": "^7.37.2",
@@ -186,7 +191,7 @@
   "optionalDependencies": {
     "@esbuild/linux-arm64": "latest",
     "@esbuild/linux-x64": "latest",
-    "@rollup/rollup-linux-arm64-gnu": "4.44.0",
+    "@rollup/rollup-linux-arm64-gnu": "4.45.1",
     "@rollup/rollup-linux-x64-gnu": "4.44.0"
   },
   "browserslist": {
@@ -204,7 +209,7 @@
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
       "prettier --write --ignore-unknown --plugin prettier-plugin-tailwindcss --plugin @trivago/prettier-plugin-sort-imports",
-      "eslint --fix",
+      "cross-env PRE_COMMIT=true eslint --fix --config eslint.config.mjs",
       "git update-index --again"
     ],
     "public/locale/*.json": [

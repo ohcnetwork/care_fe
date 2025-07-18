@@ -179,10 +179,7 @@ const ScheduleTemplateEditor = ({
 
   const { mutate: updateTemplate, isPending: isUpdating } = useMutation({
     mutationFn: mutate(scheduleApis.templates.update, {
-      pathParams: {
-        facility_id: facilityId,
-        id: template.id,
-      },
+      pathParams: { facilityId, id: template.id },
     }),
     onSuccess: () => {
       toast.success("Schedule template updated successfully");
@@ -194,10 +191,7 @@ const ScheduleTemplateEditor = ({
 
   const { mutate: deleteTemplate, isPending: isDeleting } = useMutation({
     mutationFn: mutate(scheduleApis.templates.delete, {
-      pathParams: {
-        facility_id: facilityId,
-        id: template.id,
-      },
+      pathParams: { facilityId, id: template.id },
     }),
     onSuccess: () => {
       toast.success(t("template_deleted"));
@@ -363,11 +357,7 @@ const AvailabilityEditor = ({
 
   const { mutate: deleteAvailability, isPending: isDeleting } = useMutation({
     mutationFn: mutate(scheduleApis.templates.availabilities.delete, {
-      pathParams: {
-        facility_id: facilityId,
-        schedule_id: scheduleId,
-        id: availability.id,
-      },
+      pathParams: { facilityId, scheduleId, id: availability.id },
     }),
     onSuccess: () => {
       toast.success(t("schedule_availability_deleted_successfully"));
@@ -581,7 +571,7 @@ const NewAvailabilityCard = ({
         .min(1, t("field_required")) as unknown as z.ZodType<Time>,
       slot_size_in_minutes: z.number().nullable(),
       tokens_per_slot: z.number().nullable(),
-      reason: z.string(),
+      reason: z.string().trim(),
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek>)
         .min(1, t("schedule_weekdays_min_error")),
@@ -620,10 +610,7 @@ const NewAvailabilityCard = ({
 
   const { mutate: createAvailability, isPending } = useMutation({
     mutationFn: mutate(scheduleApis.templates.availabilities.create, {
-      pathParams: {
-        facility_id: facilityId,
-        schedule_id: scheduleId,
-      },
+      pathParams: { facilityId, scheduleId },
     }),
     onSuccess: () => {
       toast.success(t("schedule_availability_created_successfully"));

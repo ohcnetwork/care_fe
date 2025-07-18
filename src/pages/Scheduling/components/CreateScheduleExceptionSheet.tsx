@@ -144,7 +144,7 @@ export default function CreateScheduleExceptionSheet({
 
   const { mutate: createException, isPending } = useMutation({
     mutationFn: mutate(scheduleApis.exceptions.create, {
-      pathParams: { facility_id: facilityId },
+      pathParams: { facilityId },
     }),
     onSuccess: () => {
       toast.success(t("exception_created"));
@@ -167,6 +167,7 @@ export default function CreateScheduleExceptionSheet({
     if (unavailableAllDay) {
       form.setValue("start_time", "00:00");
       form.setValue("end_time", "23:59");
+      form.clearErrors(["start_time", "end_time"]);
     } else {
       form.resetField("start_time");
       form.resetField("end_time");

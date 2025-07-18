@@ -34,24 +34,19 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import { Encounter } from "@/types/emr/encounter";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import patientApi from "@/types/emr/patient/patientApi";
 
-export default function VerifyPatient(props: { facilityId: string }) {
+export default function VerifyPatient() {
   const { t } = useTranslation();
   const [qParams] = useQueryParams();
   const { phone_number, year_of_birth, partial_id } = qParams;
   const { goBack } = useAppHistory();
+  const { facility, facilityId } = useCurrentFacility();
   const { hasPermission } = usePermissions();
 
-  const { data: facilityData, isLoading: facilityLoading } = useQuery({
-    queryKey: ["facility", props.facilityId],
-    queryFn: query(routes.getPermittedFacility, {
-      pathParams: { id: props.facilityId },
-    }),
-  });
-
   const { canCreateAppointment, canCreateEncounter, canListEncounters } =
-    getPermissions(hasPermission, facilityData?.permissions ?? []);
+    getPermissions(hasPermission, facility?.permissions ?? []);
 
   const {
     mutate: verifyPatient,
@@ -59,7 +54,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
     isPending: isVerifyingPatient,
     isError,
   } = useMutation({
-    mutationFn: mutate(routes.patient.search_retrieve),
+    mutationFn: mutate(patientApi.searchRetrieve),
     onError: (error) => {
       const errorData = error.cause as { errors: { msg: string[] } };
       errorData.errors.msg.forEach((er) => {
@@ -80,18 +75,6 @@ export default function VerifyPatient(props: { facilityId: string }) {
     enabled: !!patientData?.id && canListEncounters,
   });
 
-  const { data: closedEncounters } = useQuery({
-    queryKey: ["encounters", "closed", patientData?.id],
-    queryFn: query(routes.encounter.list, {
-      queryParams: {
-        patient: patientData?.id,
-        live: true,
-      },
-      silent: true,
-    }),
-    enabled: !!patientData?.id && canListEncounters,
-  });
-
   useEffect(() => {
     if (phone_number && year_of_birth && partial_id) {
       verifyPatient({
@@ -102,7 +85,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
     }
   }, [phone_number, year_of_birth, partial_id, verifyPatient]);
 
-  if (isVerifyingPatient || facilityLoading || encounterLoading) {
+  if (isVerifyingPatient || !facility || encounterLoading) {
     return (
       <div className="space-y-4">
         <CardListSkeleton count={1} />
@@ -176,7 +159,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
                     className="group relative h-[100px] md:h-[120px] overflow-hidden border-0 bg-linear-to-br from-blue-50 to-indigo-50 p-0 shadow-md hover:shadow-xl transition-all duration-300"
                   >
                     <Link
-                      href={`/facility/${props.facilityId}/patient/${patientData.id}/book-appointment`}
+                      href={`/facility/${facilityId}/patient/${patientData.id}/book-appointment`}
                       className="p-4 md:p-6"
                     >
                       <div className="absolute inset-0 bg-linear-to-br from-primary/80 to-primary opacity-0 transition-opacity duration-300 group-hover:opacity-10" />
@@ -204,7 +187,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
                 {canCreateEncounter && (
                   <CreateEncounterForm
                     patientId={patientData.id}
-                    facilityId={props.facilityId}
+                    facilityId={facilityId}
                     patientName={patientData.name}
                     trigger={
                       <Button
@@ -254,14 +237,14 @@ export default function VerifyPatient(props: { facilityId: string }) {
               <CardContent className="flex flex-col gap-3 pt-2">
                 {encounters?.results && encounters.results.length > 0 ? (
                   <>
-                    {encounters.results.map((encounter: Encounter) => (
+                    {encounters.results.map((encounter) => (
                       <EncounterCard
                         encounter={encounter}
                         key={encounter.id}
-                        permissions={facilityData?.permissions ?? []}
+                        permissions={facility?.permissions ?? []}
                         facilityId={
-                          encounter.facility.id === props.facilityId
-                            ? props.facilityId
+                          encounter.facility.id === facilityId
+                            ? facilityId
                             : undefined
                         }
                       />
@@ -284,43 +267,6 @@ export default function VerifyPatient(props: { facilityId: string }) {
                   </div>
                 )}
               </CardContent>
-              <CardHeader className="pb-2">
-                <CardTitle>{t("completed_encounters")}</CardTitle>
-                <CardDescription>
-                  {t("view_completed_encounters")}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-3 pt-2">
-                {closedEncounters?.results &&
-                closedEncounters.results.length > 0 ? (
-                  <>
-                    {closedEncounters.results.map((encounter: Encounter) => (
-                      <EncounterCard
-                        encounter={encounter}
-                        key={encounter.id}
-                        permissions={facilityData?.permissions ?? []}
-                        facilityId={
-                          encounter.facility.id === props.facilityId
-                            ? props.facilityId
-                            : undefined
-                        }
-                      />
-                    ))}
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center justify-center p-6 md:p-8 text-center border rounded-lg border-dashed">
-                    <div className="rounded-full bg-primary/10 p-2 md:p-3 mb-3 md:mb-4">
-                      <CareIcon
-                        icon="l-folder-open"
-                        className="size-5 md:size-6 text-primary"
-                      />
-                    </div>
-                    <h3 className="text-base md:text-lg font-semibold mb-1">
-                      {t("no_completed_encounters_found")}
-                    </h3>
-                  </div>
-                )}
-              </CardContent>
             </Card>
           )}
         </div>
@@ -337,7 +283,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
               <Button
                 variant={"primary_gradient"}
                 className="gap-3 group"
-                onClick={() => goBack(`/facility/${props.facilityId}/patients`)}
+                onClick={() => goBack(`/facility/${facilityId}/patients`)}
               >
                 {t("go_back")}
               </Button>

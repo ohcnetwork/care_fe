@@ -2,7 +2,8 @@ import { DayOfWeek } from "@/components/ui/WeekdayCheckbox";
 import { Badge } from "@/components/ui/badge";
 
 import { Time } from "@/Utils/types";
-import { Patient } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/patient/patient";
+import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { UserBase } from "@/types/user/user";
 
@@ -90,6 +91,10 @@ export interface TokenSlot {
   allocated: number;
 }
 
+export interface GetSlotsForDayResponse {
+  results: TokenSlot[];
+}
+
 export interface AvailabilityHeatmapRequest {
   from_date: string;
   to_date: string;
@@ -168,9 +173,17 @@ export interface Appointment {
   facility: FacilityBareMinimum;
 }
 
+export interface AppointmentRead extends Appointment {
+  tags: TagConfig[];
+  updated_by: UserBase | null;
+  created_by: UserBase;
+  modified_date: string;
+}
+
 export interface AppointmentCreateRequest {
   patient: string;
   reason_for_visit: string;
+  tags?: string[];
 }
 
 export interface AppointmentUpdateRequest {
@@ -180,4 +193,9 @@ export interface AppointmentUpdateRequest {
 export interface CreateAppointmentQuestion {
   reason_for_visit: string;
   slot_id: string;
+}
+
+export interface AppointmentCancelRequest {
+  reason: "cancelled" | "entered_in_error";
+  reason_for_visit?: string;
 }
