@@ -73,6 +73,7 @@ export const DischargeTab = ({
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination } = useFilters({
     limit: 15,
+    disableCache: true,
   });
 
   const { mutate: generateDischargeSummary, isPending: isGenerating } =
