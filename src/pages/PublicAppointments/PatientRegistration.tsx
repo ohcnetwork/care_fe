@@ -33,10 +33,7 @@ import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrgani
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { Patient } from "@/types/emr/patient/patient";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import {
-  Appointment,
-  AppointmentCreateRequest,
-} from "@/types/scheduling/schedule";
+import { Appointment } from "@/types/scheduling/schedule";
 
 type PatientRegistrationProps = {
   facilityId: string;
@@ -119,14 +116,12 @@ export function PatientRegistration(props: PatientRegistrationProps) {
 
   const { mutate: createAppointment, isPending: isCreatingAppointment } =
     useMutation({
-      mutationFn: (body: AppointmentCreateRequest) =>
-        mutate(PublicAppointmentApi.createAppointment, {
-          pathParams: { id: slotId ?? "" },
-          body,
-          headers: {
-            Authorization: `Bearer ${tokenData.token}`,
-          },
-        })(body),
+      mutationFn: mutate(PublicAppointmentApi.createAppointment, {
+        pathParams: { id: slotId },
+        headers: {
+          Authorization: `Bearer ${tokenData.token}`,
+        },
+      }),
       onSuccess: (data: Appointment) => {
         toast.success(t("appointment_created_success"));
         queryClient.invalidateQueries({

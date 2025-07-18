@@ -20,10 +20,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { Patient } from "@/types/emr/patient/patient";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import {
-  Appointment,
-  AppointmentCreateRequest,
-} from "@/types/scheduling/schedule";
+import { Appointment } from "@/types/scheduling/schedule";
 
 interface PatientCardProps {
   patient: Patient;
@@ -143,14 +140,12 @@ export default function PatientSelect({
   });
 
   const { mutate: createAppointment } = useMutation({
-    mutationFn: (body: AppointmentCreateRequest) =>
-      mutate(PublicAppointmentApi.createAppointment, {
-        pathParams: { id: slotId ?? "" },
-        body,
-        headers: {
-          Authorization: `Bearer ${tokenData.token}`,
-        },
-      })(body),
+    mutationFn: mutate(PublicAppointmentApi.createAppointment, {
+      pathParams: { id: slotId ?? "" },
+      headers: {
+        Authorization: `Bearer ${tokenData.token}`,
+      },
+    }),
     onSuccess: (data: Appointment) => {
       toast.success(t("appointment_created_success"));
       queryClient.invalidateQueries({
@@ -195,8 +190,8 @@ export default function PatientSelect({
     if (!selectedPatientData) return;
 
     createAppointment({
-      patient: selectedPatientData.id ?? "",
-      reason_for_visit: reason ?? "",
+      patient: selectedPatientData.id,
+      reason_for_visit: reason,
     });
   };
 
