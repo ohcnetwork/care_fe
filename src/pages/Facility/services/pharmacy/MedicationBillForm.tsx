@@ -91,13 +91,13 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useFilters from "@/hooks/useFilters";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import { PatientHeader } from "@/pages/Facility/services/serviceRequests/components/PatientHeader";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import batchApi from "@/types/base/batch/batchApi";
 import { Code } from "@/types/base/code/code";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
@@ -780,7 +780,7 @@ export default function MedicationBillForm({ patientId }: Props) {
         queryParams: {
           facility: facilityId,
           limit: 100,
-          status: "active,on-hold,draft,unknown,ended,completed,cancelled",
+          status: "active,on_hold,draft,unknown,ended,completed,cancelled",
           exclude_dispense_status: "complete,incomplete",
         },
       })({ signal });
@@ -968,7 +968,7 @@ export default function MedicationBillForm({ patientId }: Props) {
   }
 
   const { mutate: dispense, isPending } = useMutation({
-    mutationFn: mutate(routes.batchRequest),
+    mutationFn: mutate(batchApi.batchRequest),
     onSuccess: (response) => {
       toast.success(t("medications_billed_successfully"));
       queryClient.invalidateQueries({
@@ -2701,7 +2701,7 @@ export const DispensedItemsSheet = ({
                     <TableHead>{t("lot_number")}</TableHead>
                     <TableHead>{t("dispensed_on")}</TableHead>
                     <TableHead>{t("status")}</TableHead>
-                    <TableHead>{t("total") + " " + t("price")}</TableHead>
+                    <TableHead>{t("total_price")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

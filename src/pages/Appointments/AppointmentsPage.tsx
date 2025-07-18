@@ -64,6 +64,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -82,7 +83,6 @@ import {
   formatPatientAge,
 } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import {
   formatSlotTimeRange,
   groupSlotsByAvailability,
@@ -92,11 +92,17 @@ import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import {
   Appointment,
+  AppointmentCancelledStatus,
+  AppointmentNonCancelledStatus,
   AppointmentRead,
+  AppointmentStatus,
   AppointmentStatuses,
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+import { UserBase } from "@/types/user/user";
+
+import { MultiPractitionerSelector } from "./components/MultiPractitionerSelect";
 
 interface DateRangeDisplayProps {
   dateFrom: string | null;
@@ -298,8 +304,9 @@ export default function AppointmentsPage() {
   });
 
   const resources = schedulableUsersQuery.data?.users;
-  const practitioner = resources?.find(
-    (r) => r.username === qParams.practitioner,
+  const practitionerIds = qParams.practitioners?.split(",") ?? [];
+  const practitioners = resources?.filter((r) =>
+    practitionerIds.includes(r.id),
   );
 
   useEffect(() => {
@@ -311,12 +318,12 @@ export default function AppointmentsPage() {
     // Sets the practitioner filter to the current user if they are in the list of
     // schedulable users and no practitioner was selected.
     if (
-      !qParams.practitioner &&
+      !qParams.practitioners &&
       schedulableUsersQuery.data?.users.some(
         (r) => r.username === authUser.username,
       )
     ) {
-      qParams.practitioner = authUser.username;
+      qParams.practitioners = authUser.external_id;
     }
 
     // Set default date range if no dates are present
@@ -343,22 +350,24 @@ export default function AppointmentsPage() {
         ...qParams,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [schedulableUsersQuery.isLoading]);
 
   // Enabled only if filtered by a practitioner and a single day
   const slotsFilterEnabled =
     !!qParams.date_from &&
-    !!practitioner &&
+    !!practitioners &&
+    practitioners.length === 1 &&
     (qParams.date_from === qParams.date_to || !qParams.date_to);
 
   const slotsQuery = useQuery({
-    queryKey: ["slots", facilityId, qParams.practitioner, qParams.date_from],
+    queryKey: ["slots", facilityId, qParams.practitioners, qParams.date_from],
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
       pathParams: { facilityId },
       body: {
         // voluntarily coalesce to empty string since we know query would be
         // enabled only if practitioner and date_from are present
-        user: practitioner?.id ?? "",
+        user: practitioners?.map((p) => p.id).join(",") ?? "",
         day: qParams.date_from ?? "",
       },
     }),
@@ -405,17 +414,24 @@ export default function AppointmentsPage() {
         <div className="flex flex-col xl:flex-row gap-4 items-start md:items-start md:w-xs">
           <div className="mt-1 w-full">
             <Label className="mb-2 text-black">
-              {t("select_practitioner")}
+              {t("practitioner", { count: 2 })}
             </Label>
-            <PractitionerSelector
+            <MultiPractitionerSelector
               facilityId={facilityId}
-              selected={practitioner ?? null}
-              onSelect={(user) =>
-                updateQuery({
-                  practitioner: user?.username ?? null,
-                  slot: null,
-                })
-              }
+              selected={practitioners ?? null}
+              onSelect={(users: UserBase[] | null) => {
+                if (users) {
+                  updateQuery({
+                    practitioners: users.map((user) => user.id).join(","),
+                    slot: null,
+                  });
+                } else {
+                  updateQuery({
+                    practitioners: null,
+                    slot: null,
+                  });
+                }
+              }}
               clearSelection={t("show_all")}
             />
           </div>
@@ -616,7 +632,13 @@ export default function AppointmentsPage() {
           </div>
         </div>
 
-        <div className="flex gap-4 items-center">
+        <div className="flex flex-col sm:flex-row gap-4 items-center">
+          <PatientIdentifierFilter
+            onSelect={(patientId) => updateQuery({ patient: patientId })}
+            placeholder={t("filter_by_patient")}
+            className="w-full sm:w-auto"
+            patientId={qParams.patient}
+          />
           <Input
             className="md:w-xs w-full"
             placeholder={t("search")}
@@ -641,12 +663,13 @@ export default function AppointmentsPage() {
                 key={status}
                 status={status}
                 slot={slot?.id}
-                practitioner={practitioner?.id ?? null}
+                practitioners={qParams.practitioners || null}
                 date_from={qParams.date_from}
                 date_to={qParams.date_to}
                 search={qParams.search?.toLowerCase()}
                 canViewAppointments={canViewAppointments}
                 tags={selectedTags.map((tag) => tag.id)}
+                patient={qParams.patient}
               />
             ))}
           </div>
@@ -655,7 +678,7 @@ export default function AppointmentsPage() {
       ) : (
         <AppointmentRow
           updateQuery={updateQuery}
-          practitioner={practitioner?.id ?? null}
+          practitioners={qParams.practitioners || null}
           slot={qParams.slot}
           page={qParams.page}
           date_from={qParams.date_from}
@@ -666,6 +689,7 @@ export default function AppointmentsPage() {
           status={qParams.status}
           Pagination={Pagination}
           tags={selectedTags.map((tag) => tag.id)}
+          patient={qParams.patient}
         />
       )}
     </Page>
@@ -674,13 +698,14 @@ export default function AppointmentsPage() {
 
 function AppointmentColumn(props: {
   status: AppointmentNonCancelledStatus | AppointmentCancelledStatus;
-  practitioner: string | null;
+  practitioners: string | null;
   slot?: string | null;
   tags?: string[];
   date_from: string | null;
   date_to: string | null;
   search?: string;
   canViewAppointments: boolean;
+  patient?: string;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -690,12 +715,13 @@ function AppointmentColumn(props: {
       "appointments",
       facilityId,
       props.status,
-      props.practitioner,
+      props.practitioners,
       props.slot,
       props.date_from,
       props.date_to,
       props.tags,
       props.search,
+      props.patient,
     ],
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facilityId },
@@ -704,10 +730,11 @@ function AppointmentColumn(props: {
         tags: props.tags?.join(","),
         limit: 100,
         slot: props.slot,
-        user: props.practitioner ?? undefined,
+        user: props.practitioners ?? undefined,
         date_after: props.date_from,
         date_before: props.date_to,
         ordering: "token_slot__start_datetime",
+        patient: props.patient,
       },
     }),
     enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
@@ -817,7 +844,7 @@ function AppointmentCard({ appointment }: { appointment: AppointmentRead }) {
 
 function AppointmentRow(props: {
   page: number | null;
-  practitioner: string | null;
+  practitioners: string | null;
   Pagination: ({
     totalCount,
     noMargin,
@@ -834,6 +861,7 @@ function AppointmentRow(props: {
   search?: string;
   canViewAppointments: boolean;
   tags?: string[];
+  patient?: string;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -844,24 +872,26 @@ function AppointmentRow(props: {
       facilityId,
       props.status,
       props.page,
-      props.practitioner,
+      props.practitioners,
       props.slot,
       props.date_from,
       props.date_to,
       props.tags,
+      props.patient,
     ],
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facilityId },
       queryParams: {
         status: props.status ?? "booked",
         slot: props.slot,
-        user: props.practitioner ?? undefined,
+        user: props.practitioners ?? undefined,
         date_after: props.date_from,
         date_before: props.date_to,
         tags: props.tags,
         limit: props.resultsPerPage,
         offset: ((props.page ?? 1) - 1) * props.resultsPerPage,
         ordering: "token_slot__start_datetime",
+        patient: props.patient,
       },
     }),
     enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
@@ -925,7 +955,7 @@ function AppointmentRow(props: {
                     {t("patient")}
                   </TableHead>
                   <TableHead className="font-semibold text-black text-xs">
-                    {t("practitioner")}
+                    {t("practitioner", { count: 1 })}
                   </TableHead>
                   <TableHead className="font-semibold text-black text-xs">
                     {t("current_status")}

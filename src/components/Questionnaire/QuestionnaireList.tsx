@@ -131,7 +131,7 @@ const RenderCard = ({
                     className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
                   >
                     <EyeIcon className="size-4 mr-1" />
-                    {t("View")}
+                    {t("view")}
                   </Button>
                 </div>
               </CardContent>
