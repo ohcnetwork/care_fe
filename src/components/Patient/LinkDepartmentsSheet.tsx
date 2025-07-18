@@ -341,7 +341,7 @@ export default function LinkDepartmentsSheet({
                         <Building className="size-4 text-gray-700" />
                         <div className="flex flex-col">
                           <span
-                            className="font-medium"
+                            className="font-bold"
                             data-cy="link-organisation-name"
                           >
                             {orgPath}

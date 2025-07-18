@@ -146,11 +146,9 @@ export default function FacilityOrganizationSelector(
   };
 
   const handleCancelSelection = () => {
-    if (navigationLevels.length > 0) {
-      setNavigationLevels(navigationLevels.slice(0, -1));
-    }
     setCurrentSelection(null);
     setPendingSelection(null);
+    setNavigationLevels([]);
   };
 
   const handleRemoveOrganization = (index: number) => {
@@ -235,7 +233,7 @@ export default function FacilityOrganizationSelector(
           />
         </div>
         <CommandList
-          className="max-h-[calc(100vh-40rem)] overflow-y-scroll"
+          className="max-h-48 mb-4 overflow-y-auto"
           onWheel={(e) => e.stopPropagation()}
         >
           <CommandEmpty>
@@ -288,7 +286,7 @@ export default function FacilityOrganizationSelector(
           </CommandGroup>
         </CommandList>
         {currentSelection && (
-          <div className="md:m-0 m-2 flex items-center justify-between px-3 py-2  bg-sky-50/50 border-sky-200 rounded-md ">
+          <div className="md:m-0 m-2 flex items-center justify-between px-2 py-2  bg-blue-100 border-sky-200 rounded-md ">
             <div className="flex flex-col">
               <span className="text-xs text-gray-500 mb-0.5">
                 {t("selected")}
@@ -313,17 +311,15 @@ export default function FacilityOrganizationSelector(
               <div className="flex items-center justify-between px-3 py-2 border-sky-200 rounded-md">
                 <div className="flex items-center gap-2">
                   <Button
-                    variant="white"
-                    size="sm"
-                    className="h-8"
+                    variant="link"
+                    className="h-10 underline font-semibold"
                     onClick={handleCancelSelection}
                   >
                     {t("cancel")}
                   </Button>
                   <Button
-                    variant="primary"
-                    size="sm"
-                    className="h-8"
+                    variant="white"
+                    className="h-10 w-auto font-semibold text-center border border-green-600 text-green-800"
                     onClick={handleConfirmSelection}
                     disabled={isDisabled}
                   >
@@ -334,8 +330,8 @@ export default function FacilityOrganizationSelector(
                       </>
                     ) : (
                       <>
-                        <span>{t("confirm")}</span>
                         <CareIcon icon="l-check" className="h-4 w-4" />
+                        <span>{t("confirm")}</span>
                       </>
                     )}
                   </Button>
@@ -391,10 +387,10 @@ export default function FacilityOrganizationSelector(
                     </SheetTrigger>
 
                     <SheetContent
-                      className="p-0 h-1/3 overflow-auto"
+                      className="p-0 h-auto overflow-auto min-h-48"
                       side="bottom"
                     >
-                      {renderOrganizationPopover("mb-12")}
+                      {renderOrganizationPopover("mb-4")}
                     </SheetContent>
                   </Sheet>
                 </>
@@ -432,7 +428,7 @@ export default function FacilityOrganizationSelector(
                   return (
                     <div
                       key={index}
-                      className="flex-1 flex items-center gap-3 rounded-md border border-sky-100 bg-blue-200 p-2.5 my-2"
+                      className="flex-1 flex items-center gap-3 rounded-md border border-sky-100 bg-blue-100 p-2.5 my-2"
                     >
                       <Building className="size-4 text-sky-600 shrink-0" />
                       <div className="flex-1 min-w-0 overflow-hidden">
