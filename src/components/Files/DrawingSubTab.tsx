@@ -143,7 +143,7 @@ export const DrawingPage = ({
   const facilityIdExists = !!subpathMatch?.facilityId;
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    cacheBlacklist: ["name"],
+    disableCache: true,
   });
   const { data: patientData } = useQuery({
     queryKey: ["patient", patientId],
