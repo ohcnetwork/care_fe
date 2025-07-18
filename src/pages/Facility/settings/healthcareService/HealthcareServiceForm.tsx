@@ -337,7 +337,7 @@ function HealthcareServiceFormContent({
                   name="locations"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel aria-required>Locations</FormLabel>
+                      <FormLabel aria-required>{t("location")}</FormLabel>
                       <FormControl>
                         <RequirementsSelector
                           title={t("location_requirements")}
