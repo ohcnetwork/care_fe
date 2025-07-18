@@ -45,7 +45,7 @@ import {
   CardListSkeleton,
 } from "@/components/Common/SkeletonLoading";
 
-import useBreakpoints from "@/hooks/useBreakpoints";
+import { useIsMobile } from "@/hooks/use-mobile";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
@@ -72,7 +72,7 @@ export default function DevicesList({ facilityId }: Props) {
     limit: 12,
     disableCache: true,
   });
-  const isMobile = useBreakpoints({ default: true, md: false });
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!qParams.locationId) {
@@ -139,31 +139,44 @@ export default function DevicesList({ facilityId }: Props) {
     }),
   });
 
+  const locationTree = (
+    <div className="space-y-4 p-2 h-full overflow-auto">
+      {parentLocations?.results?.length ? (
+        parentLocations.results.map((location) => (
+          <LocationTreeNode
+            key={location.id}
+            showAllForms={true}
+            location={location}
+            facilityId={facilityId}
+            selectedLocationId={qParams.locationId || null}
+            expandedLocations={expandedLocations}
+            onToggleExpand={handleToggleExpand}
+            onSelect={(loc) => {
+              handleLocationSelect(loc);
+              if (isMobile) setShowLocationFilter(false);
+            }}
+          />
+        ))
+      ) : (
+        <p className="text-center text-sm text-gray-500">
+          {t("no_locations_available")}
+        </p>
+      )}
+    </div>
+  );
+
   return (
     <div className="flex flex-col md:flex-row gap-6 h-full min-h-[calc(100vh-10rem)]">
       {showLocationFilter && !isMobile && (
         <div className="md:w-1/4 min-h-full">
           <Card className="w-full h-full flex flex-col">
-            <CardContent className="p-4 flex-grow overflow-auto h-full">
+            <CardContent className="p-4 h-full">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-base font-semibold text-gray-800">
                   {t("locations")}
                 </h3>
               </div>
-              {parentLocations?.results?.length
-                ? parentLocations.results.map((location) => (
-                    <LocationTreeNode
-                      showAllForms={true}
-                      key={location.id}
-                      location={location}
-                      facilityId={facilityId}
-                      selectedLocationId={qParams.locationId || null}
-                      expandedLocations={expandedLocations}
-                      onToggleExpand={handleToggleExpand}
-                      onSelect={handleLocationSelect}
-                    />
-                  ))
-                : t("no_locations_available")}
+              {locationTree}
             </CardContent>
           </Card>
         </div>
@@ -176,29 +189,7 @@ export default function DevicesList({ facilityId }: Props) {
                 {t("locations")}
               </SheetTitle>
             </SheetHeader>
-            <div className="space-y-4 p-2 h-full overflow-auto">
-              {parentLocations?.results?.length ? (
-                parentLocations.results.map((location) => (
-                  <LocationTreeNode
-                    key={location.id}
-                    showAllForms={true}
-                    location={location}
-                    facilityId={facilityId}
-                    selectedLocationId={qParams.locationId || null}
-                    expandedLocations={expandedLocations}
-                    onToggleExpand={handleToggleExpand}
-                    onSelect={(loc) => {
-                      handleLocationSelect(loc);
-                      setShowLocationFilter(false);
-                    }}
-                  />
-                ))
-              ) : (
-                <p className="text-center text-sm text-gray-500">
-                  {t("no_locations_available")}
-                </p>
-              )}
-            </div>
+            {locationTree}
           </SheetContent>
         </Sheet>
       )}
@@ -226,10 +217,8 @@ export default function DevicesList({ facilityId }: Props) {
                   variant="outline"
                   className={cn(
                     "flex items-center gap-2 w-full sm:w-auto",
-                    (!isMobile && showLocationFilter) ||
-                      (isMobile && qParams.locationId)
-                      ? "bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-700 border-blue-700"
-                      : "",
+                    qParams.locationId &&
+                      "bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-700 border-blue-700",
                   )}
                   onClick={() => setShowLocationFilter(!showLocationFilter)}
                 >
@@ -254,7 +243,7 @@ export default function DevicesList({ facilityId }: Props) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild className="w-full sm:w-auto">
                     <Button
-                      variant="white"
+                      variant="outline"
                       className="flex items-center justify-between gap-2 w-full sm:w-auto"
                     >
                       {t("add_device")}
@@ -292,7 +281,7 @@ export default function DevicesList({ facilityId }: Props) {
                 </DropdownMenu>
               ) : (
                 <Button
-                  variant="white"
+                  variant="outline"
                   asChild
                   data-cy="add-device-button"
                   className="w-full sm:w-auto"
