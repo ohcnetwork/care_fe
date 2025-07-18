@@ -64,6 +64,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -631,7 +632,13 @@ export default function AppointmentsPage() {
           </div>
         </div>
 
-        <div className="flex gap-4 items-center">
+        <div className="flex flex-col sm:flex-row gap-4 items-center">
+          <PatientIdentifierFilter
+            onSelect={(patientId) => updateQuery({ patient: patientId })}
+            placeholder={t("filter_by_patient")}
+            className="w-full sm:w-auto"
+            patientId={qParams.patient}
+          />
           <Input
             className="md:w-xs w-full"
             placeholder={t("search")}
@@ -662,6 +669,7 @@ export default function AppointmentsPage() {
                 search={qParams.search?.toLowerCase()}
                 canViewAppointments={canViewAppointments}
                 tags={selectedTags.map((tag) => tag.id)}
+                patient={qParams.patient}
               />
             ))}
           </div>
@@ -681,6 +689,7 @@ export default function AppointmentsPage() {
           status={qParams.status}
           Pagination={Pagination}
           tags={selectedTags.map((tag) => tag.id)}
+          patient={qParams.patient}
         />
       )}
     </Page>
@@ -696,6 +705,7 @@ function AppointmentColumn(props: {
   date_to: string | null;
   search?: string;
   canViewAppointments: boolean;
+  patient?: string;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -711,6 +721,7 @@ function AppointmentColumn(props: {
       props.date_to,
       props.tags,
       props.search,
+      props.patient,
     ],
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facilityId },
@@ -723,6 +734,7 @@ function AppointmentColumn(props: {
         date_after: props.date_from,
         date_before: props.date_to,
         ordering: "token_slot__start_datetime",
+        patient: props.patient,
       },
     }),
     enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
@@ -849,6 +861,7 @@ function AppointmentRow(props: {
   search?: string;
   canViewAppointments: boolean;
   tags?: string[];
+  patient?: string;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -864,6 +877,7 @@ function AppointmentRow(props: {
       props.date_from,
       props.date_to,
       props.tags,
+      props.patient,
     ],
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facilityId },
@@ -877,6 +891,7 @@ function AppointmentRow(props: {
         limit: props.resultsPerPage,
         offset: ((props.page ?? 1) - 1) * props.resultsPerPage,
         ordering: "token_slot__start_datetime",
+        patient: props.patient,
       },
     }),
     enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
