@@ -223,6 +223,12 @@ export default function PatientSelect({
           onClick={() =>
             navigate(
               `/facility/${facilityId}/appointments/${staffId}/patient-registration`,
+              {
+                query: {
+                  slotId,
+                  reason,
+                },
+              },
             )
           }
         >
