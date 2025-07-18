@@ -1,4 +1,4 @@
-import { format, formatDistanceToNow, subDays, startOfMinute } from "date-fns";
+import { formatDistanceToNow, startOfMinute, subDays } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
