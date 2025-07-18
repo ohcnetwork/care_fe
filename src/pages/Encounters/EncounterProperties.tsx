@@ -14,6 +14,7 @@ import {
 
 import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
+import { AccountSheetButton } from "@/components/Patient/AccountSheet";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
@@ -36,7 +37,7 @@ export default function EncounterProperties({ encounter, canEdit }: Props) {
   const EncounterClassIcon = ENCOUNTER_CLASS_ICONS[encounter.encounter_class];
 
   return (
-    <div className="flex flex-wrap md:flex-col gap-2">
+    <div className="flex flex-wrap md:flex-col gap-3">
       <div className="hidden md:flex flex-col gap-1">
         <span className="text-xs font-medium">{t("status")}: </span>
         <div>
@@ -170,6 +171,26 @@ export default function EncounterProperties({ encounter, canEdit }: Props) {
           )}
         </div>
       </div>
+
+      <div className="flex flex-col gap-1">
+        <span className="text-xs font-medium">{t("account")}: </span>
+        <div className="flex flex-wrap gap-2">
+          <AccountSheetButton
+            encounter={encounter}
+            trigger={
+              <div className="flex items-center gap-1">
+                <Badge variant="secondary" size="sm">
+                  <span>{t("accounts")}</span>
+                </Badge>
+                <Button variant="ghost" size="xs">
+                  <PenIcon />
+                </Button>
+              </div>
+            }
+            canWrite={canEdit}
+          />
+        </div>
+      </div>
     </div>
   );
 }
@@ -236,14 +257,14 @@ const LocationPropertyBadge = ({
         facilityId={encounter.facility.id}
         encounter={encounter}
         trigger={
-          <div className="group flex items-center gap-1">
+          <div className="flex items-center gap-1">
             <Badge variant="secondary" size="sm" className="cursor-pointer">
               <MapPinIcon className="size-3" />
               {t("no_location_associated")}
             </Badge>
-            <div className="group-hover:opacity-100 opacity-0 transition-opacity duration-200 ease-in-out">
-              <Edit2Icon className="size-3" />
-            </div>
+            <Button variant="ghost" size="xs">
+              <Edit2Icon className="size-4" />
+            </Button>
           </div>
         }
         history={encounter.location_history}

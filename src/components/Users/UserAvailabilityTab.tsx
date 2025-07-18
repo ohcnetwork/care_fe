@@ -336,7 +336,7 @@ function DayDetailsPopover({
             <hr className="bg-gray-200 h-px my-3" />
             <Link
               className="flex items-center gap-2 text-sm text-gray-500 underline underline-offset-2"
-              href={`/facility/${facilityId}/appointments?practitioner=${user.username}&date_from=${dateQueryString(date)}&date_to=${dateQueryString(date)}`}
+              href={`/facility/${facilityId}/appointments?practitioners=${user.id}&date_from=${dateQueryString(date)}&date_to=${dateQueryString(date)}`}
             >
               <span className="text-sm text-gray-500">
                 {t("appointments_scheduled_for_day_link", {
