@@ -5,8 +5,8 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
+import { EmptyState } from "@/components/Patient/Util";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -78,7 +78,7 @@ export function DiagnosisList({
     if (showTimeline) {
       return (
         <EmptyState
-          message={t("no_diagnoses")}
+          title={t("no_diagnoses")}
           description={t("no_diagnoses_recorded_description")}
         />
       );

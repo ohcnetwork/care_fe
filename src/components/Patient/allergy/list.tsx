@@ -12,8 +12,8 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
+import { EmptyState } from "@/components/Patient/Util";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -101,7 +101,7 @@ export function AllergyList({
     if (showTimeline) {
       return (
         <EmptyState
-          message={t("no_allergies")}
+          title={t("no_allergies")}
           description={t("no_allergies_recorded_description")}
         />
       );
