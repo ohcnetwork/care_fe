@@ -97,7 +97,7 @@ export const ResourceRequests = (props: PatientProps) => {
                         ]
                       }
                     >
-                      {t(request.status)}
+                      {t(`resource_status__${request.status}`)}
                     </Badge>
                   </TableCell>
                   <TableCell>{formatDateTime(request.created_date)}</TableCell>
