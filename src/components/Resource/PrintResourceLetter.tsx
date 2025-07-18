@@ -107,7 +107,7 @@ export default function PrintResourceLetter({ id }: { id: string }) {
               </div>
             </div>
 
-            {data.status !== "pending" && (
+            {["approved", "rejected"].includes(data.status) && (
               <div>
                 <div className="mb-20">
                   <div className="font-semibold">
