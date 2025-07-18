@@ -67,10 +67,9 @@ function DeleteOrgDialog({
   const queryClient = useQueryClient();
 
   const { mutate: deleteOrganization } = useMutation({
-    mutationFn: (organizationId: string) =>
-      mutate(facilityOrganizationApi.delete, {
-        pathParams: { facilityId, organizationId },
-      })(),
+    mutationFn: mutate(facilityOrganizationApi.delete, {
+      pathParams: { facilityId, organizationId: org.id },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["facilityOrganization"],
@@ -104,7 +103,7 @@ function DeleteOrgDialog({
         <AlertDialogFooter>
           <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
           <AlertDialogAction
-            onClick={() => deleteOrganization(org.id)}
+            onClick={() => deleteOrganization()}
             className={buttonVariants({
               variant: "destructive",
             })}
