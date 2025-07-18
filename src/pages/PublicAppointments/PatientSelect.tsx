@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { ArrowLeft } from "lucide-react";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -23,7 +23,6 @@ import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
   AppointmentCreateRequest,
-  TokenSlot,
 } from "@/types/scheduling/schedule";
 
 interface PatientCardProps {
@@ -111,10 +110,7 @@ export default function PatientSelect({
   staffId: string;
 }) {
   const { t } = useTranslation();
-  const selectedSlot = JSON.parse(
-    localStorage.getItem("selectedSlot") ?? "",
-  ) as TokenSlot;
-  const reason = localStorage.getItem("reason");
+  const [{ slotId, reason }] = useQueryParams();
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
 
   const patientUserContext = usePatientContext();
@@ -128,7 +124,7 @@ export default function PatientSelect({
   } else if (!tokenData) {
     toast.error(t("phone_number_not_found"));
     navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);
-  } else if (!selectedSlot) {
+  } else if (!slotId) {
     toast.error(t("selected_slot_not_found"));
     navigate(
       `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
@@ -149,7 +145,7 @@ export default function PatientSelect({
   const { mutate: createAppointment } = useMutation({
     mutationFn: (body: AppointmentCreateRequest) =>
       mutate(PublicAppointmentApi.createAppointment, {
-        pathParams: { id: selectedSlot?.id },
+        pathParams: { id: slotId ?? "" },
         body,
         headers: {
           Authorization: `Bearer ${tokenData.token}`,
