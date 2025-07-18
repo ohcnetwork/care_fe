@@ -28,6 +28,7 @@ interface CombinedDatePickerProps {
   dateFormat?: string;
   disabled?: boolean;
   blockDate?: (date: Date) => boolean;
+  max?: string;
 }
 
 export function CombinedDatePicker({

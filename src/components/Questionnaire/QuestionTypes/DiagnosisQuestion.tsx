@@ -100,18 +100,11 @@ function DiagnosisDatePicker({
   disabled?: boolean;
   hasId: boolean;
 }) {
-  const blockDate = (date: Date) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    date.setHours(0, 0, 0, 0);
-    return date > today;
-  };
-
   return (
     <CombinedDatePicker
       value={onsetDatetime ? new Date(onsetDatetime) : undefined}
       onChange={onChange}
-      blockDate={blockDate}
+      blockDate={(date) => date > new Date()}
       dateFormat="P"
       disabled={disabled || hasId}
       buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
