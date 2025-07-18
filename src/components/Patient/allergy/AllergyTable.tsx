@@ -39,7 +39,7 @@ const AllergyCard = ({
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
   return (
-    <div className="border rounded-md p-4 bg-white">
+    <div className="border-1 shadow rounded-md p-4 bg-white">
       <div className="flex justify-between items-start flex-wrap gap-2">
         <div className="flex-1 min-w-0">
           <div className="text-base font-semibold text-gray-900 break-words">
@@ -131,7 +131,7 @@ const AllergyCard = ({
         </div>
       </div>
       {showNote && allergy.note && (
-        <div className="col-span-full border border-gray-200 p-2 bg-white rounded mt-2">
+        <div className="col-span-full p-2 bg-gray-50 rounded mt-2">
           <div className="flex flex-row w-full justify-between">
             <div className="text-sm font-semibold text-gray-800">
               {t("note")} :
@@ -167,7 +167,7 @@ export const AllergyTable = ({
     "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700";
 
   return isMobile ? (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {allergies.map((allergy) => (
         <AllergyCard
           key={allergy.id}
