@@ -13,6 +13,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -107,6 +109,7 @@ interface TagSelectorProps {
   onChange: (tags: TagConfig[]) => void;
   resource: TagResource;
   asFilter?: boolean;
+  className?: string;
 }
 
 export function TagSelectorPopover({
@@ -114,6 +117,7 @@ export function TagSelectorPopover({
   onChange,
   asFilter = false,
   resource,
+  className,
 }: TagSelectorProps) {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -284,7 +288,10 @@ export function TagSelectorPopover({
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="mt-2 w-full justify-between bg-transparent"
+            className={cn(
+              "mt-2 w-full justify-between bg-transparent",
+              className,
+            )}
           >
             {asFilter ? (
               <div className="flex items-center gap-2">

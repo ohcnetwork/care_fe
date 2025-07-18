@@ -59,6 +59,10 @@ const APPOINTMENT_FIELDS: FieldDefinitions = {
     key: "slot_id",
     required: true,
   },
+  TAGS: {
+    key: "tags",
+    required: true,
+  },
 } as const;
 
 export function validateAppointmentQuestion(
@@ -74,6 +78,10 @@ export function validateAppointmentQuestion(
     SLOT: {
       ...APPOINTMENT_FIELDS.SLOT,
       required: required || value?.reason_for_visit !== undefined,
+    },
+    TAGS: {
+      ...APPOINTMENT_FIELDS.TAGS,
+      required: required,
     },
   });
 }
@@ -142,6 +150,9 @@ export function AppointmentQuestion({
               handleUpdate({ tags: tags.map((tag) => tag.id) });
             }}
             resource={TagResource.APPOINTMENT}
+            className={cn(
+              hasError(APPOINTMENT_FIELDS.TAGS.key) && "ring-1 ring-red-500",
+            )}
           />
         </div>
         <Label className="mb-2">
