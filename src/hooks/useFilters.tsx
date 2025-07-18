@@ -73,6 +73,14 @@ export default function useFilters({
   const removeFilter = (param: string) => removeFilters([param]);
 
   useEffect(() => {
+    if (disableCache) {
+      // Clean-up any existing cache if present for this path.
+      FiltersCache.invalidate();
+
+      // Skip cache restoration logic for this usage.
+      return;
+    }
+
     const qParamKeys = Object.keys(qParams);
 
     // If we navigate to a path that has query params set on mount,
