@@ -22,7 +22,7 @@ export function ClinicalHistoryPage({
   tab = "symptoms",
   facilityId,
 }: {
-  facilityId: string;
+  facilityId?: string;
   patientId: string;
   tab: string;
 }) {
@@ -37,13 +37,18 @@ export function ClinicalHistoryPage({
   });
 
   const handleClose = () => {
-    navigate(sourceUrl || `/facility/${facilityId}/patient/${patientId}`);
+    navigate(sourceUrl || `/patient/${patientId}`);
   };
 
   const handleTabChange = (value: string) => {
-    navigate(`/facility/${facilityId}/patient/${patientId}/history/${value}`, {
-      query: { sourceUrl },
-    });
+    navigate(
+      facilityId
+        ? `/facility/${facilityId}/patient/${patientId}/history/${value}`
+        : `/patient/${patientId}/history/${value}`,
+      {
+        ...(sourceUrl ? { query: { sourceUrl } } : {}),
+      },
+    );
   };
 
   return (

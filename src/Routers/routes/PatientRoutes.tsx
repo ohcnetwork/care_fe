@@ -126,6 +126,9 @@ const PatientRoutes: AppRoutes = {
       tab={tab}
     />
   ),
+  "/patient/:patientId/history/:tab": ({ patientId, tab }) => (
+    <ClinicalHistoryPage patientId={patientId} tab={tab} />
+  ),
 };
 
 export default PatientRoutes;

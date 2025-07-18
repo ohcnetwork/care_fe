@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { DropletIcon, HandIcon, Plus } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { Link, navigate, usePath } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +53,8 @@ export const EncounterOverviewTab = () => {
     currentEncounterId,
     facilityId,
   } = useEncounter();
+
+  const sourceUrl = usePath();
 
   const { data: allergies } = useQuery({
     queryKey: ["allergy-intolerance", patientId, "confirmed"],
@@ -116,7 +118,11 @@ export const EncounterOverviewTab = () => {
                 className="md:w-auto w-full"
               >
                 <Link
-                  href={`/facility/${facilityId}/patient/${patientId}/history/symptoms?sourceUrl=${encodeURIComponent(`/facility/${facilityId}/patient/${patientId}/encounter/${currentEncounterId}/updates`)}`}
+                  href={
+                    facilityId
+                      ? `/facility/${facilityId}/patient/${patientId}/history/symptoms?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
+                      : `/patient/${patientId}/history/symptoms?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
+                  }
                 >
                   <img
                     src="/images/icons/clinical_history.svg"
