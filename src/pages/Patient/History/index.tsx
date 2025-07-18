@@ -37,7 +37,12 @@ export function ClinicalHistoryPage({
   });
 
   const handleClose = () => {
-    navigate(sourceUrl || `/patient/${patientId}`);
+    navigate(
+      sourceUrl ||
+        (facilityId
+          ? `/facility/${facilityId}/patient/${patientId}`
+          : `/patient/${patientId}`),
+    );
   };
 
   const handleTabChange = (value: string) => {
