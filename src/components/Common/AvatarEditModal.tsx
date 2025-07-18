@@ -152,6 +152,11 @@ export default function AvatarEditModal({
       const imageData = canvas.toDataURL("image/jpeg");
       setPreview(imageData);
       setShowCameraPreview(true);
+      setCroppedAreaPixels(null);
+      setCroppedPreview(null);
+      setShowCroppedPreview(false);
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
 
       canvas.toBlob(
         (blob) => {
