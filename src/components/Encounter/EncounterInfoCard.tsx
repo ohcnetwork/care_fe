@@ -18,13 +18,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { stringifyNestedObject } from "@/Utils/utils";
 import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
   ENCOUNTER_STATUS_COLORS,
   Encounter,
 } from "@/types/emr/encounter/encounter";
+import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 export interface EncounterInfoCardProps {
   encounter: Encounter;
@@ -85,14 +85,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
             </Badge>
             {encounter.tags?.map((tag) => (
               <Badge variant="outline" key={tag.id}>
-                {stringifyNestedObject(
-                  {
-                    name: tag.display,
-                    parent: tag.parent && { name: tag.parent.display },
-                  },
-                  " : ",
-                  true,
-                )}
+                {getTagHierarchyDisplay(tag)}
               </Badge>
             ))}
           </div>

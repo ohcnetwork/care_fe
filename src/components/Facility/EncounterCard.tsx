@@ -10,12 +10,13 @@ import { Separator } from "@/components/ui/separator";
 import { getPermissions } from "@/common/Permissions";
 import { encounterIcons } from "@/common/constants";
 
-import { formatDateTime, stringifyNestedObject } from "@/Utils/utils";
+import { formatDateTime } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import {
   Encounter,
   completedEncounterStatus,
 } from "@/types/emr/encounter/encounter";
+import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 interface EncounterCardProps {
   encounter: Encounter;
@@ -133,14 +134,7 @@ export const EncounterCard = (props: EncounterCardProps) => {
                 <div className="flex flex-wrap gap-2">
                   {encounter.tags.map((tag) => (
                     <Badge variant="outline" key={tag.id}>
-                      {stringifyNestedObject(
-                        {
-                          name: tag.display,
-                          parent: tag.parent && { name: tag.parent.display },
-                        },
-                        " : ",
-                        true,
-                      )}
+                      {getTagHierarchyDisplay(tag)}
                     </Badge>
                   ))}
                 </div>

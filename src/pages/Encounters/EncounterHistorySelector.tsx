@@ -21,12 +21,12 @@ import {
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
-import { stringifyNestedObject } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   ENCOUNTER_STATUS_COLORS,
   Encounter,
 } from "@/types/emr/encounter/encounter";
+import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 interface EncounterCardProps {
   encounter: Encounter;
@@ -86,16 +86,9 @@ function EncounterCard({
           </div>
           <div className="text-xs text-gray-500">{encounter.facility.name}</div>
           <div className="flex flex-wrap gap-1 text-xs">
-            {encounter.tags?.map((tag) => (
+            {encounter.tags.map((tag) => (
               <Badge variant="outline" key={tag.id} className="text-xs">
-                {stringifyNestedObject(
-                  {
-                    name: tag.display,
-                    parent: tag.parent && { name: tag.parent.display },
-                  },
-                  " : ",
-                  true,
-                )}
+                {getTagHierarchyDisplay(tag)}
               </Badge>
             ))}
           </div>
