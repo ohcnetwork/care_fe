@@ -184,7 +184,12 @@ export interface AppointmentRead extends Appointment {
 export interface AppointmentCreateRequest {
   patient: string;
   reason_for_visit: string;
-  tags?: string[];
+  tags: string[];
+}
+
+export interface AppointmentCreatePublicRequest {
+  patient: string;
+  reason_for_visit: string;
 }
 
 export interface AppointmentUpdateRequest {
@@ -194,6 +199,7 @@ export interface AppointmentUpdateRequest {
 export interface CreateAppointmentQuestion {
   reason_for_visit: string;
   slot_id: string;
+  tags: string[];
 }
 
 export interface AppointmentCancelRequest {

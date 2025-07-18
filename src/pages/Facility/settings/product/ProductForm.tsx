@@ -452,7 +452,7 @@ export function ProductFormContent({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t("charge_item_definition")}</FormLabel>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row">
                     <FormControl className="flex-1">
                       <Autocomplete
                         options={mergeAutocompleteOptions(
@@ -481,7 +481,11 @@ export function ProductFormContent({
                     </FormControl>
                     <Sheet open={createCidOpen} onOpenChange={setCreateCidOpen}>
                       <SheetTrigger asChild>
-                        <Button type="button" variant="outline">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full sm:w-auto"
+                        >
                           {t("create_new")}
                         </Button>
                       </SheetTrigger>
