@@ -23,6 +23,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
@@ -169,31 +170,34 @@ export default function DevicesList({ facilityId }: Props) {
       )}
       {isMobile && (
         <Sheet open={showLocationFilter} onOpenChange={setShowLocationFilter}>
-          <SheetContent
-            side="bottom"
-            className="h-[80vh] w-full sm:max-w-md bottom-0 right-0 top-auto rounded-tl-[10px] rounded-tr-[10px] data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom overflow-y-auto"
-          >
+          <SheetContent side="bottom" className="h-[70vh] rounded-t-md">
             <SheetHeader>
-              <SheetTitle>{t("locations")}</SheetTitle>
+              <SheetTitle className="w-full text-center">
+                {t("locations")}
+              </SheetTitle>
             </SheetHeader>
-            <div className="space-y-4 pt-2 max-h-[calc(80vh-80px)] overflow-auto">
-              {parentLocations?.results?.length
-                ? parentLocations.results.map((location) => (
-                    <LocationTreeNode
-                      key={location.id}
-                      showAllForms={true}
-                      location={location}
-                      facilityId={facilityId}
-                      selectedLocationId={qParams.locationId || null}
-                      expandedLocations={expandedLocations}
-                      onToggleExpand={handleToggleExpand}
-                      onSelect={(loc) => {
-                        handleLocationSelect(loc);
-                        setShowLocationFilter(false);
-                      }}
-                    />
-                  ))
-                : t("no_locations_available")}
+            <div className="space-y-4 p-2 h-full overflow-auto">
+              {parentLocations?.results?.length ? (
+                parentLocations.results.map((location) => (
+                  <LocationTreeNode
+                    key={location.id}
+                    showAllForms={true}
+                    location={location}
+                    facilityId={facilityId}
+                    selectedLocationId={qParams.locationId || null}
+                    expandedLocations={expandedLocations}
+                    onToggleExpand={handleToggleExpand}
+                    onSelect={(loc) => {
+                      handleLocationSelect(loc);
+                      setShowLocationFilter(false);
+                    }}
+                  />
+                ))
+              ) : (
+                <p className="text-center text-sm text-gray-500">
+                  {t("no_locations_available")}
+                </p>
+              )}
             </div>
           </SheetContent>
         </Sheet>
@@ -381,15 +385,17 @@ export default function DevicesList({ facilityId }: Props) {
                       <DeviceCard devices={devices.results} />
                     )
                   ) : (
-                    <Card>
-                      <CardContent className="p-6 text-center text-gray-500">
-                        {qParams.search_text ||
+                    <EmptyState
+                      icon="l-box"
+                      title={t("no_devices_found")}
+                      description={
+                        qParams.search_text ||
                         qParams.care_type ||
                         qParams.locationId
                           ? t("no_devices_matching_filters")
-                          : t("no_devices_available")}
-                      </CardContent>
-                    </Card>
+                          : t("no_devices_available")
+                      }
+                    />
                   )}
                 </div>
                 {devices && devices.count > resultsPerPage && (

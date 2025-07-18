@@ -34,6 +34,9 @@ export default function DeviceTable({ devices }: Props) {
           <TableRow className="hover:bg-transparent">
             <TableHead>{t("device")}</TableHead>
             <TableHead className="text-center">{t("status")}</TableHead>
+            <TableHead className="text-center">
+              {t("availability_status")}
+            </TableHead>
             <TableHead className="text-center">{t("care_type")}</TableHead>
             <TableHead className="text-center">{t("actions")}</TableHead>
           </TableRow>
@@ -56,12 +59,12 @@ export default function DeviceTable({ devices }: Props) {
                 </div>
               </TableCell>
               <TableCell className="text-center">
-                <div className="flex flex-col gap-2 sm:flex-row justify-center">
-                  <DeviceStatusBadge status={device.status} />
-                  <DeviceAvailabilityStatusBadge
-                    status={device.availability_status}
-                  />
-                </div>
+                <DeviceStatusBadge status={device.status} />
+              </TableCell>
+              <TableCell className="text-center">
+                <DeviceAvailabilityStatusBadge
+                  status={device.availability_status}
+                />
               </TableCell>
               <TableCell className="text-center">
                 {device.care_type ? (
