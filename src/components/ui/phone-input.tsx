@@ -108,7 +108,14 @@ const CountrySelect = ({
     setOpen(false);
   };
   return (
-    <Popover open={open} onOpenChange={setOpen} modal>
+    <Popover
+      open={open}
+      modal
+      onOpenChange={(open) => {
+        setOpen(open);
+        open && setSearchValue("");
+      }}
+    >
       <PopoverTrigger asChild>
         <Button
           type="button"
