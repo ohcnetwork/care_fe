@@ -92,14 +92,9 @@ export default function DevicesList({ facilityId }: Props) {
     });
   }, []);
 
-  const handleLocationSelect = useCallback(
-    (location: LocationListType) => {
-      updateQuery({ locationId: location.id });
-
-      setExpandedLocations(new Set([...expandedLocations, location.id]));
-    },
-    [expandedLocations, updateQuery],
-  );
+  const handleLocationSelect = (location: LocationListType) => {
+    updateQuery({ locationId: location.id });
+  };
 
   // Handle search input change
   const handleSearchChange = useCallback(
