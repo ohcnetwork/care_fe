@@ -127,11 +127,11 @@ export default function TagConfigView({
     });
   };
 
-  const handleViewChild = (config: TagConfig) => {
+  const handleViewChild = (configId: string) => {
     if (facilityId) {
-      navigate(`/facility/${facilityId}/settings/tag_config/${config.id}`);
+      navigate(`/facility/${facilityId}/settings/tag_config/${configId}`);
     } else {
-      navigate(`/admin/tag_config/${config.id}`);
+      navigate(`/admin/tag_config/${configId}`);
     }
   };
 
@@ -259,29 +259,26 @@ export default function TagConfigView({
                 </div>
               </div>
             )}
-            {tagConfig.parent &&
-              typeof tagConfig.parent === "object" &&
-              tagConfig.parent.id && (
-                <div>
-                  <label className="text-sm font-medium text-gray-600">
-                    {t("parent_tag")}
-                  </label>
-                  <div className="mt-1">
-                    <Button
-                      variant="link"
-                      className="p-0 h-auto text-blue-600"
-                      onClick={() =>
-                        handleViewChild({
-                          ...tagConfig.parent,
-                          id: tagConfig.parent.id!,
-                        } as TagConfig)
-                      }
-                    >
-                      {tagConfig.parent.display}
-                    </Button>
-                  </div>
+            {tagConfig.parent && tagConfig.parent.id && (
+              <div>
+                <label className="text-sm font-medium text-gray-600">
+                  {t("parent_tag")}
+                </label>
+                <div className="mt-1">
+                  <Button
+                    variant="link"
+                    className="p-0 h-auto text-blue-600"
+                    onClick={() =>
+                      handleViewChild(
+                        tagConfig.parent ? tagConfig.parent.id : tagConfig.id,
+                      )
+                    }
+                  >
+                    {tagConfig.parent.display}
+                  </Button>
                 </div>
-              )}
+              </div>
+            )}
           </CardContent>
         </Card>
 

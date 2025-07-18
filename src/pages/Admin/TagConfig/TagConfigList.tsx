@@ -22,7 +22,6 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import {
   TagCategory,
-  TagConfig,
   TagResource,
   TagStatus,
 } from "@/types/emr/tagConfig/tagConfig";
@@ -69,11 +68,11 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
 
   const configs = response?.results || [];
 
-  const handleView = (config: TagConfig) => {
+  const handleView = (configId: string) => {
     if (facilityId) {
-      navigate(`/facility/${facilityId}/settings/tag_config/${config.id}`);
+      navigate(`/facility/${facilityId}/settings/tag_config/${configId}`);
     } else {
-      navigate(`/admin/tag_config/${config.id}`);
+      navigate(`/admin/tag_config/${configId}`);
     }
   };
 
