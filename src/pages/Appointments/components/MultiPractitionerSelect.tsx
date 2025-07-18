@@ -64,7 +64,7 @@ export const MultiPractitionerSelector = ({
   );
 
   const getItemValue = (user: UserBase) => {
-    return formatName(user) + " " + user.id;
+    return formatName(user) + " " + (user.username ?? "");
   };
 
   return (
