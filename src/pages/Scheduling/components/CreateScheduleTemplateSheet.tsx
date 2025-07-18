@@ -317,7 +317,7 @@ export default function CreateScheduleTemplateSheet({
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
                           disabled={(date) =>
-                          dayjs(date).isBefore(dayjs(), "day")
+                            dayjs(date).isBefore(dayjs(), "day")
                           }
                           ref={field.ref}
                         />
@@ -338,7 +338,7 @@ export default function CreateScheduleTemplateSheet({
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
                           disabled={(date) =>
-                          dayjs(date).isBefore(dayjs(), "day")
+                            dayjs(date).isBefore(dayjs(), "day")
                           }
                           ref={field.ref}
                         />
