@@ -19,27 +19,26 @@ function toLocalDateTimeString(isoString: string | undefined): string {
 
 type DateTimeInputProps = React.ComponentProps<typeof Input> & {
   onDateChange?: (val: string) => void;
-  maxDate?: string;
 } & React.InputHTMLAttributes<HTMLInputElement>;
 
 export function DateTimeInput({
   value,
   onDateChange,
-  maxDate,
+
   ...props
 }: DateTimeInputProps & React.ComponentProps<"input">) {
   const localValue =
     !value || typeof value !== "string" ? "" : toLocalDateTimeString(value);
-  const max = maxDate ? toLocalDateTimeString(maxDate) : undefined;
+
   return (
     <Input
       {...props}
       type="datetime-local"
       value={localValue}
+      max={props.max}
       onChange={(e) => {
         onDateChange?.(toISOWithTimezone(e.target.value) || "");
       }}
-      max={max}
     />
   );
 }
