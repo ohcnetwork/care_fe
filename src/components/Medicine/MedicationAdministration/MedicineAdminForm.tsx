@@ -69,21 +69,19 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
     const startTime = startOfMinute(
       new Date(administrationRequest.occurrence_period_start),
     );
-    const roundedDate = startOfMinute(date);
+    date = startOfMinute(date);
 
-    if (roundedDate > now) {
+    if (date > now) {
       return t(
         isStartTime ? "start_time_future_error" : "end_time_future_error",
       );
     }
 
     if (isStartTime) {
-      return roundedDate < authoredOn
-        ? t("start_time_before_authored_error")
-        : "";
+      return date < authoredOn ? t("start_time_before_authored_error") : "";
     }
 
-    return roundedDate < startTime ? t("end_time_before_start_error") : "";
+    return date < startTime ? t("end_time_before_start_error") : "";
   };
 
   // Validate and notify parent whenever times change
