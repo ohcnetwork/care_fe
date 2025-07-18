@@ -2,10 +2,12 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
   BeakerIcon,
+  Clock,
   CookingPotIcon,
   HeartPulseIcon,
   LeafIcon,
 } from "lucide-react";
+import { Link, usePath, usePathParams } from "raviger";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -64,7 +66,8 @@ export function AllergyList({
   const { t } = useTranslation();
 
   const LIMIT = showTimeline ? 30 : 14;
-
+  const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
+  const sourceUrl = usePath();
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["infinite-allergies", patientId, encounterId, encounterStatus],
@@ -172,6 +175,17 @@ export function AllergyList({
       readOnly={readOnly}
       className={className}
       editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
+      actionButton={
+        <Button variant="outline" size="sm" asChild className="px-1">
+          <Link
+            href={`/facility/${facilityId}/patient/${patientId}/history/allergies?sourceUrl=${sourceUrl}`}
+            className="font-semibold"
+          >
+            <Clock />
+            <span className="text-sm">{t("allergy_history")}</span>
+          </Link>
+        </Button>
+      }
     >
       <AllergyTable allergies={allergies} />
       {hasNextPage && (

@@ -1,5 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { Clock } from "lucide-react";
+import { Link, usePath, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -42,7 +44,8 @@ export function DiagnosisList({
   const { t } = useTranslation();
 
   const LIMIT = showTimeline ? 30 : 14;
-
+  const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
+  const sourceUrl = usePath();
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["infinite-encounter_diagnosis", patientId, encounterId],
@@ -149,6 +152,17 @@ export function DiagnosisList({
       readOnly={readOnly}
       className={className}
       editLink={!readOnly ? "questionnaire/diagnosis" : undefined}
+      actionButton={
+        <Button variant="outline" size="sm" className="px-1" asChild>
+          <Link
+            href={`/facility/${facilityId}/patient/${patientId}/history/diagnoses?sourceUrl=${sourceUrl}`}
+            className="font-semibold"
+          >
+            <Clock />
+            <span className="text-sm">{t("diagnosis_history")}</span>
+          </Link>
+        </Button>
+      }
     >
       <div className="space-y-2">
         {diagnoses.length ? <DiagnosisTable diagnoses={diagnoses} /> : null}

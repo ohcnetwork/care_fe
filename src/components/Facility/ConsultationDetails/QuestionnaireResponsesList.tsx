@@ -263,9 +263,9 @@ function PrintButton({ item }: { item: QuestionnaireResponse }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="xs" className="[&_svg]:size-3">
-          <Printer className="size-4" />
-          {t("print")}
+        <Button variant="outline" className="h-7 px-2">
+          <Printer />
+          <span>{t("print")}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
