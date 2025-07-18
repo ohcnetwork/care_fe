@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
@@ -38,36 +38,63 @@ export function SymptomsList({
 }: SymptomsListProps) {
   const { t } = useTranslation();
 
-  const LIMIT = showTimeline ? 30 : 14;
+  const LIMIT = showTimeline ? 50 : 25; // Increased default limits to reduce need for pagination
 
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ["infinite-symptoms", patientId, encounterId],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(symptomApi.listSymptoms, {
-          pathParams: { patientId },
-          queryParams: {
-            encounter: encounterId,
-            ordering: "-created_date",
-            limit: LIMIT,
-            offset: String(pageParam),
-            exclude_verification_status: "entered_in_error",
-          },
-        })({ signal });
-        return response as PaginatedResponse<Symptom>;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * LIMIT;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
-    });
+  // Use regular query for encounter overview (non-timeline) for better performance
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = showTimeline
+    ? useInfiniteQuery({
+        queryKey: ["infinite-symptoms", patientId, encounterId],
+        queryFn: async ({ pageParam = 0, signal }) => {
+          const response = await query(symptomApi.listSymptoms, {
+            pathParams: { patientId },
+            queryParams: {
+              encounter: encounterId,
+              ordering: "-created_date",
+              limit: LIMIT,
+              offset: String(pageParam),
+              exclude_verification_status: "entered_in_error",
+            },
+          })({ signal });
+          return response as PaginatedResponse<Symptom>;
+        },
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages) => {
+          const currentOffset = allPages.length * LIMIT;
+          return currentOffset < lastPage.count ? currentOffset : null;
+        },
+      })
+    : {
+        data: undefined,
+        isLoading: false,
+        fetchNextPage: () => {},
+        hasNextPage: false,
+        isFetchingNextPage: false,
+      };
 
-  if (isLoading) {
+  // For encounter overview, use a simple query with higher limit
+  const { data: regularData, isLoading: isRegularLoading } = useQuery({
+    queryKey: ["symptoms", patientId, encounterId],
+    queryFn: query(symptomApi.listSymptoms, {
+      pathParams: { patientId },
+      queryParams: {
+        encounter: encounterId,
+        ordering: "-created_date",
+        limit: LIMIT,
+        exclude_verification_status: "entered_in_error",
+      },
+    }),
+    enabled: !showTimeline,
+  });
+
+  const symptoms = showTimeline 
+    ? data?.pages.flatMap((page) => page.results) ?? []
+    : regularData?.results ?? [];
+  
+  const isLoadingCombined = showTimeline ? isLoading : isRegularLoading;
+
+  if (isLoadingCombined) {
     return <TableSkeleton count={5} />;
   }
-
-  const symptoms = data?.pages.flatMap((page) => page.results) ?? [];
 
   if (!symptoms?.length) {
     if (showTimeline) {

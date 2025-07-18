@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
   BeakerIcon,
@@ -63,37 +63,67 @@ export function AllergyList({
 }: AllergyListProps) {
   const { t } = useTranslation();
 
-  const LIMIT = showTimeline ? 30 : 14;
+  const LIMIT = showTimeline ? 50 : 25; // Increased default limits to reduce need for pagination
 
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ["infinite-allergies", patientId, encounterId, encounterStatus],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(allergyIntoleranceApi.getAllergy, {
-          pathParams: { patientId },
-          queryParams: {
-            encounter:
-              encounterStatus &&
-              completedEncounterStatus.includes(encounterStatus)
-                ? encounterId
-                : undefined,
-            limit: LIMIT,
-            offset: String(pageParam),
-            exclude_verification_status: "entered_in_error",
-          },
-        })({ signal });
-        return response as PaginatedResponse<AllergyIntolerance>;
+  // Use regular query for encounter overview (non-timeline) for better performance
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = showTimeline
+    ? useInfiniteQuery({
+        queryKey: ["infinite-allergies", patientId, encounterId, encounterStatus],
+        queryFn: async ({ pageParam = 0, signal }) => {
+          const response = await query(allergyIntoleranceApi.getAllergy, {
+            pathParams: { patientId },
+            queryParams: {
+              encounter:
+                encounterStatus &&
+                completedEncounterStatus.includes(encounterStatus)
+                  ? encounterId
+                  : undefined,
+              limit: LIMIT,
+              offset: String(pageParam),
+              exclude_verification_status: "entered_in_error",
+            },
+          })({ signal });
+          return response as PaginatedResponse<AllergyIntolerance>;
+        },
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages) => {
+          const currentOffset = allPages.length * LIMIT;
+          return currentOffset < lastPage.count ? currentOffset : null;
+        },
+      })
+    : {
+        data: undefined,
+        isLoading: false,
+        fetchNextPage: () => {},
+        hasNextPage: false,
+        isFetchingNextPage: false,
+      };
+
+  // For encounter overview, use a simple query with higher limit
+  const { data: regularData, isLoading: isRegularLoading } = useQuery({
+    queryKey: ["allergies", patientId, encounterId, encounterStatus],
+    queryFn: query(allergyIntoleranceApi.getAllergy, {
+      pathParams: { patientId },
+      queryParams: {
+        encounter:
+          encounterStatus &&
+          completedEncounterStatus.includes(encounterStatus)
+            ? encounterId
+            : undefined,
+        limit: LIMIT,
+        exclude_verification_status: "entered_in_error",
       },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * LIMIT;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
-    });
+    }),
+    enabled: !showTimeline,
+  });
 
-  const allergies = data?.pages.flatMap((page) => page.results) ?? [];
+  const allergies = showTimeline 
+    ? data?.pages.flatMap((page) => page.results) ?? []
+    : regularData?.results ?? [];
+  
+  const isLoadingCombined = showTimeline ? isLoading : isRegularLoading;
 
-  if (isLoading) {
+  if (isLoadingCombined) {
     return <TableSkeleton count={5} />;
   }
 

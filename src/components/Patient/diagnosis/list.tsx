@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
@@ -41,36 +41,65 @@ export function DiagnosisList({
 }: DiagnosisListProps) {
   const { t } = useTranslation();
 
-  const LIMIT = showTimeline ? 30 : 14;
+  const LIMIT = showTimeline ? 50 : 25; // Increased default limits to reduce need for pagination
 
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ["infinite-encounter_diagnosis", patientId, encounterId],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(diagnosisApi.listDiagnosis, {
-          pathParams: { patientId },
-          queryParams: {
-            category: "encounter_diagnosis,chronic_condition",
-            clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
-            exclude_verification_status: "entered_in_error",
-            ...(encounterId ? { encounter: encounterId } : {}),
-            ordering: "-created_date",
-            limit: LIMIT,
-            offset: String(pageParam),
-          },
-        })({ signal });
-        return response as PaginatedResponse<Diagnosis>;
+  // Use regular query for encounter overview (non-timeline) for better performance
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = showTimeline
+    ? useInfiniteQuery({
+        queryKey: ["infinite-encounter_diagnosis", patientId, encounterId],
+        queryFn: async ({ pageParam = 0, signal }) => {
+          const response = await query(diagnosisApi.listDiagnosis, {
+            pathParams: { patientId },
+            queryParams: {
+              category: "encounter_diagnosis,chronic_condition",
+              clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
+              exclude_verification_status: "entered_in_error",
+              ...(encounterId ? { encounter: encounterId } : {}),
+              ordering: "-created_date",
+              limit: LIMIT,
+              offset: String(pageParam),
+            },
+          })({ signal });
+          return response as PaginatedResponse<Diagnosis>;
+        },
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages) => {
+          const currentOffset = allPages.length * LIMIT;
+          return currentOffset < lastPage.count ? currentOffset : null;
+        },
+      })
+    : {
+        data: undefined,
+        isLoading: false,
+        fetchNextPage: () => {},
+        hasNextPage: false,
+        isFetchingNextPage: false,
+      };
+
+  // For encounter overview, use a simple query with higher limit
+  const { data: regularData, isLoading: isRegularLoading } = useQuery({
+    queryKey: ["encounter_diagnosis", patientId, encounterId],
+    queryFn: query(diagnosisApi.listDiagnosis, {
+      pathParams: { patientId },
+      queryParams: {
+        category: "encounter_diagnosis,chronic_condition",
+        clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
+        exclude_verification_status: "entered_in_error",
+        ...(encounterId ? { encounter: encounterId } : {}),
+        ordering: "-created_date",
+        limit: LIMIT,
       },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * LIMIT;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
-    });
+    }),
+    enabled: !showTimeline,
+  });
 
-  const diagnoses = data?.pages.flatMap((page) => page.results) ?? [];
+  const diagnoses = showTimeline 
+    ? data?.pages.flatMap((page) => page.results) ?? []
+    : regularData?.results ?? [];
+  
+  const isLoadingCombined = showTimeline ? isLoading : isRegularLoading;
 
-  if (isLoading) {
+  if (isLoadingCombined) {
     return <TableSkeleton count={5} />;
   }
 

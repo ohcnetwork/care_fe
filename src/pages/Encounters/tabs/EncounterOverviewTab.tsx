@@ -1,5 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
-import { DropletIcon, HandIcon, Plus } from "lucide-react";
+import { DropletIcon, Plus } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -16,10 +15,8 @@ import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSea
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
-import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import EncounterOverviewDevices from "@/pages/Facility/settings/devices/components/EncounterOverviewDevices";
-import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 
 const actionLinks = [
@@ -54,14 +51,6 @@ export const EncounterOverviewTab = () => {
     facilityId,
   } = useEncounter();
 
-  const { data: allergies } = useQuery({
-    queryKey: ["allergy-intolerance", patientId, "confirmed"],
-    queryFn: query(allergyIntoleranceApi.getAllergy, {
-      pathParams: { patientId },
-      queryParams: { verification_status: "confirmed" },
-    }),
-  });
-
   const canAccess = canViewEncounter || canViewClinicalData;
   const canEdit =
     !!facilityId &&
@@ -93,21 +82,6 @@ export const EncounterOverviewTab = () => {
                     </span>
                   </Badge>
                 </div>
-                {!!allergies?.results.length && (
-                  <div className="flex flex-col items-start gap-1">
-                    <span className="text-sm font-medium text-gray-600">
-                      {t("allergies")}:
-                    </span>
-                    <Badge variant="yellow">
-                      <HandIcon className="size-4" />
-                      <span>
-                        {allergies?.results
-                          .map((allergy) => allergy.code.display)
-                          .join(", ")}
-                      </span>
-                    </Badge>
-                  </div>
-                )}
               </div>
               <Button
                 asChild
