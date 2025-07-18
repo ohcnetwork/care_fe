@@ -31,7 +31,7 @@ export default function ReportCard({
               {t("facility")}
             </Badge>
           ) : (
-            <Badge variant="primary" className="bg-blue-100 border-blue-300">
+            <Badge variant="blue" className="text-xs">
               {t("instance")}
             </Badge>
           )}

@@ -1,16 +1,13 @@
 import { useTranslation } from "react-i18next";
 
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import RadioInput from "@/components/ui/RadioInput";
 
 import type {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
-import type { Question } from "@/types/questionnaire/question";
 
 interface BooleanQuestionProps {
-  question: Question;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (
     values: ResponseValue[],
@@ -22,7 +19,6 @@ interface BooleanQuestionProps {
 }
 
 export function BooleanQuestion({
-  question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
@@ -30,16 +26,22 @@ export function BooleanQuestion({
 }: BooleanQuestionProps) {
   const { t } = useTranslation();
 
+  const selectedValue = questionnaireResponse.values[0]?.value?.toString();
+
   return (
-    <RadioGroup
-      value={questionnaireResponse.values[0]?.value?.toString()}
+    <RadioInput
+      options={[
+        { value: "true", label: t("yes") },
+        { value: "false", label: t("no") },
+      ]}
+      value={selectedValue ?? ""}
       onValueChange={(value) => {
         clearError();
         updateQuestionnaireResponseCB(
           [
             {
               type: "boolean",
-              value: value === "true",
+              value: { true: true, false: false }[value] ?? undefined,
             },
           ],
           questionnaireResponse.question_id,
@@ -47,27 +49,6 @@ export function BooleanQuestion({
         );
       }}
       disabled={disabled}
-    >
-      <div className="flex items-center space-x-6">
-        <div className="px-2 flex gap-1 items-center">
-          <RadioGroupItem value="true" id={`${question.id}-true`} />
-          <Label
-            htmlFor={`${question.id}-true`}
-            className="text-sm font-normal"
-          >
-            {t("yes")}
-          </Label>
-        </div>
-        <div className="px-2 flex gap-1 items-center">
-          <RadioGroupItem value="false" id={`${question.id}-false`} />
-          <Label
-            htmlFor={`${question.id}-false`}
-            className="text-sm font-normal"
-          >
-            {t("no")}
-          </Label>
-        </div>
-      </div>
-    </RadioGroup>
+    />
   );
 }

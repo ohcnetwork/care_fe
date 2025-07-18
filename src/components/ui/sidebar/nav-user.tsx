@@ -18,6 +18,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 
 import { Avatar } from "@/components/Common/Avatar";
 
@@ -27,8 +28,6 @@ import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { formatName } from "@/Utils/utils";
-
-import { NavigationLink } from "./facility-nav";
 
 export function FacilityNavUser({
   selectedFacilityId,

@@ -1,4 +1,7 @@
+import { Code } from "@/types/base/code/code";
+import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryComponent";
 import { Organization } from "@/types/organization/organization";
+import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
 export interface FacilityBareMinimum {
   id: string;
@@ -39,4 +42,14 @@ export interface FacilityData {
   permissions: string[];
   root_org_permissions: string[];
   child_org_permissions: string[];
+  instance_discount_codes: Code[];
+  instance_discount_monetary_components: MonetaryComponentRead[];
+  instance_informational_codes: Code[];
+  instance_tax_codes: Code[];
+  instance_tax_monetary_components: MonetaryComponentRead[];
+  invoice_number_expression: string;
+  discount_codes: Code[];
+  discount_monetary_components: MonetaryComponentRead[];
+  patient_instance_identifier_configs: PatientIdentifierConfig[];
+  patient_facility_identifier_configs: PatientIdentifierConfig[];
 }

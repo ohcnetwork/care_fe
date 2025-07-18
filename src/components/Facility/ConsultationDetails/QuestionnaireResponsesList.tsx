@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -32,7 +31,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, properCase } from "@/Utils/utils";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter } from "@/types/emr/encounter/encounter";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
@@ -153,10 +152,11 @@ function QuestionGroup({
     const response = responses.find((r) => r.question_id === question.id);
     if (!response) return null;
 
-    const value = response.values[0]?.value;
-    const unit = response.values[0]?.unit || question.unit;
-    const coding = response.values[0]?.coding;
-    const note = response?.note;
+    const values = response.values;
+    if (!values?.length) return null;
+
+    const hasAnyValue = values.some((v) => v.value || v.coding);
+    if (!hasAnyValue) return null;
 
     return (
       <TableRow key={question.id}>
@@ -165,18 +165,28 @@ function QuestionGroup({
             {question.text}
           </div>
         </TableCell>
-        <TableCell className="py-1 pr-0 align-top" colSpan={note ? 1 : 2}>
-          <div className="text-sm font-medium break-words whitespace-normal">
-            {formatValue(value, question.type)}
-            {unit && <span className="ml-1 text-gray-600">{unit.code}</span>}
-            {coding && (
-              <span className="ml-1 text-gray-600">
-                {coding.display} ({coding.code})
-              </span>
-            )}
+        <TableCell
+          className="py-1 pr-0 align-top"
+          colSpan={response.note ? 1 : 2}
+        >
+          <div className="text-sm font-medium break-words whitespace-pre-wrap">
+            {values.map((val, idx) => (
+              <React.Fragment key={idx}>
+                {idx > 0 && ", "}
+                {val.value && formatValue(val.value, question.type)}
+                {val.unit && (
+                  <span className="ml-1 text-gray-600">{val.unit.code}</span>
+                )}
+                {val.coding && (
+                  <span className="ml-1 text-gray-600">
+                    {val.coding.display} ({val.coding.code})
+                  </span>
+                )}
+              </React.Fragment>
+            ))}
           </div>
         </TableCell>
-        {note && (
+        {response.note && (
           <TableCell className="py-1 pr-0 align-top">
             <div className="flex justify-end">
               <Popover>
@@ -191,7 +201,7 @@ function QuestionGroup({
                 </PopoverTrigger>
                 <PopoverContent className="w-52 p-4">
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                    {note}
+                    {response.note}
                   </p>
                 </PopoverContent>
               </Popover>
@@ -244,36 +254,6 @@ function QuestionGroup({
         })}
       </div>
     </div>
-  );
-}
-
-export function StructuredResponseBadge({
-  type,
-  submitType,
-}: {
-  type: string;
-  submitType: string;
-}) {
-  const { t } = useTranslation();
-
-  const colors = {
-    symptom: "bg-yellow-100 text-yellow-800",
-    diagnosis: "bg-blue-100 text-blue-800",
-    medication_request: "bg-green-100 text-green-800",
-    medication_statement: "bg-purple-100 text-purple-800",
-    follow_up_appointment: "bg-pink-100 text-pink-800",
-  };
-
-  return (
-    <Badge
-      variant="outline"
-      className={`${
-        colors[type as keyof typeof colors] || "bg-gray-100 text-gray-800"
-      } border-none`}
-    >
-      {submitType === "CREATE" ? t("created") : t("updated")}{" "}
-      {properCase(type.replace(/_/g, " "))}
-    </Badge>
   );
 }
 
@@ -340,14 +320,12 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                       (r) => r.question_id === question.id,
                     );
                     if (!response) return null;
-                    const value = response.values
-                      ?.map((v) => v.value)
-                      .join(", ");
-                    const unit = response.values[0]?.unit || question.unit;
-                    const coding = response.values[0]?.coding;
-                    const note = response?.note;
 
-                    if (!value && !coding) return null;
+                    const values = response.values;
+                    if (!values?.length) return null;
+
+                    const hasAnyValue = values.some((v) => v.value || v.coding);
+                    if (!hasAnyValue) return null;
 
                     return (
                       <TableRow key={question.id}>
@@ -358,23 +336,29 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                         </TableCell>
                         <TableCell
                           className="py-1 pr-0 align-top"
-                          colSpan={note ? 1 : 2}
+                          colSpan={response.note ? 1 : 2}
                         >
-                          <div className="text-sm font-medium break-words whitespace-normal">
-                            {formatValue(value, question.type)}
-                            {unit && (
-                              <span className="ml-1 text-gray-600">
-                                {unit.code}
-                              </span>
-                            )}
-                            {coding && (
-                              <span className="ml-1 text-gray-600">
-                                {coding.display} ({coding.code})
-                              </span>
-                            )}
+                          <div className="text-sm font-medium break-words whitespace-pre-wrap">
+                            {values.map((val, idx) => (
+                              <React.Fragment key={idx}>
+                                {idx > 0 && ", "}
+                                {val.value &&
+                                  formatValue(val.value, question.type)}
+                                {val.unit && (
+                                  <span className="ml-1 text-gray-600">
+                                    {val.unit.code}
+                                  </span>
+                                )}
+                                {val.coding && (
+                                  <span className="ml-1 text-gray-600">
+                                    {val.coding.display} ({val.coding.code})
+                                  </span>
+                                )}
+                              </React.Fragment>
+                            ))}
                           </div>
                         </TableCell>
-                        {note && (
+                        {response.note && (
                           <TableCell className="py-1 pr-0 align-top text-right">
                             <div className="flex justify-end">
                               <Popover>
@@ -389,7 +373,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                                 </PopoverTrigger>
                                 <PopoverContent className="w-52 p-4">
                                   <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                                    {note}
+                                    {response.note}
                                   </p>
                                 </PopoverContent>
                               </Popover>

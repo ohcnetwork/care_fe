@@ -100,7 +100,7 @@ export default function CreateScheduleTemplateSheet({
               z.object({
                 slot_type: z.literal("appointment"),
                 name: z.string().min(1, t("field_required")),
-                reason: z.string(),
+                reason: z.string().trim(),
                 start_time: z
                   .string()
                   .min(1, t("field_required")) as unknown as z.ZodType<Time>,
@@ -122,7 +122,7 @@ export default function CreateScheduleTemplateSheet({
               z.object({
                 slot_type: z.enum(["open", "closed"]),
                 name: z.string().min(1, t("field_required")),
-                reason: z.string(),
+                reason: z.string().trim(),
                 start_time: z
                   .string()
                   .min(1, t("field_required")) as unknown as z.ZodType<Time>,
@@ -181,7 +181,7 @@ export default function CreateScheduleTemplateSheet({
 
   const { mutate: createTemplate, isPending } = useMutation({
     mutationFn: mutate(scheduleApis.templates.create, {
-      pathParams: { facility_id: facilityId },
+      pathParams: { facilityId },
     }),
     onSuccess: () => {
       toast.success("Schedule template created successfully");
@@ -277,7 +277,7 @@ export default function CreateScheduleTemplateSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-fit ">
+      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-fit">
         <SheetHeader>
           <SheetTitle>{t("create_schedule_template")}</SheetTitle>
           <SheetDescription className="sr-only">
@@ -559,6 +559,8 @@ export default function CreateScheduleTemplateSheet({
                                         <FormControl>
                                           <Input
                                             type="number"
+                                            inputMode="numeric"
+                                            pattern="[0-9]*"
                                             min={1}
                                             defaultValue={1}
                                             {...field}
@@ -593,6 +595,8 @@ export default function CreateScheduleTemplateSheet({
                                   <FormControl>
                                     <Input
                                       type="number"
+                                      inputMode="numeric"
+                                      pattern="[0-9]*"
                                       min={0}
                                       placeholder="e.g. 10"
                                       {...field}
@@ -624,6 +628,8 @@ export default function CreateScheduleTemplateSheet({
                                   <FormControl>
                                     <Input
                                       type="number"
+                                      inputMode="numeric"
+                                      pattern="[0-9]*"
                                       min={0}
                                       placeholder="e.g. 1"
                                       {...field}

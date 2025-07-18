@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import { Code } from "@/types/questionnaire/code";
+import { Code } from "@/types/base/code/code";
 import type {
   QuestionnaireResponse,
   ResponseValue,
@@ -110,6 +110,8 @@ export const QuantityQuestion = memo(function QuantityQuestion({
         <Input
           id={`${question.id}-value`}
           type="number"
+          inputMode="decimal"
+          pattern="[0-9]*[.]?[0-9]*"
           value={currentValue?.toString() || ""}
           onChange={(e) => handleValueChange(e.target.value)}
           step="0.01"

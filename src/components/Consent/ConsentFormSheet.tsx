@@ -12,6 +12,7 @@ import { tzAwareDateTime } from "@/lib/validators";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import RadioInput from "@/components/ui/RadioInput";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -24,7 +25,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -69,7 +69,7 @@ const consentFormSchema = (isEdit: boolean) =>
       date: tzAwareDateTime,
       period: z.object({
         start: tzAwareDateTime.optional(),
-        end: z.union([tzAwareDateTime, z.undefined()]).optional(),
+        end: tzAwareDateTime.optional(),
       }),
       note: z.string().optional(),
       fileEntries: z
@@ -230,10 +230,10 @@ export default function ConsentFormSheet({
         period: {
           start: existingConsent!.period.start
             ? new Date(existingConsent!.period.start).toISOString()
-            : "",
+            : undefined,
           end: existingConsent!.period.end
             ? new Date(existingConsent!.period.end).toISOString()
-            : "",
+            : undefined,
         },
         note: existingConsent!.note || "",
         fileEntries: [],
@@ -302,9 +302,7 @@ export default function ConsentFormSheet({
       <SheetContent className="overflow-y-auto sm:max-w-lg">
         <SheetHeader className="mb-6">
           <SheetTitle>
-            {isEdit
-              ? t("edit") + " " + t("consent")
-              : t("add") + " " + t("consent")}
+            {isEdit ? t("edit_consent") : t("add_consent")}
           </SheetTitle>
           <SheetDescription>
             {isEdit
@@ -377,27 +375,16 @@ export default function ConsentFormSheet({
                   control={form.control}
                   name="decision"
                   render={({ field }) => (
-                    <FormItem className="space-y-2">
+                    <FormItem>
                       <FormLabel>{t("consent_decision")}</FormLabel>
-                      <RadioGroup
+                      <RadioInput
+                        {...field}
+                        options={CONSENT_DECISIONS.map((decision) => ({
+                          label: t(`consent_decision__${decision}`),
+                          value: decision,
+                        }))}
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        value={field.value}
-                        className="flex gap-4"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="permit" id="permit" />
-                          <Label htmlFor="permit">
-                            {t("consent_decision__permit")}
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="deny" id="deny" />
-                          <Label htmlFor="deny">
-                            {t("consent_decision__deny")}
-                          </Label>
-                        </div>
-                      </RadioGroup>
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
@@ -415,7 +402,7 @@ export default function ConsentFormSheet({
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger ref={field.ref}>
                             <SelectValue
                               placeholder={t("select_category")}
                               className="flex justify-start items-center w-full"
@@ -469,7 +456,7 @@ export default function ConsentFormSheet({
                     value={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger ref={field.ref}>
                         <SelectValue placeholder={t("select_status")} />
                       </SelectTrigger>
                     </FormControl>
@@ -572,11 +559,12 @@ export default function ConsentFormSheet({
             <div className="flex justify-end mt-6 space-x-2">
               <Button
                 type="button"
+                variant="outline"
                 onClick={() => {
                   setIsOpen(false);
                   form.reset();
                 }}
-                className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
+                disabled={isPending}
               >
                 {t("cancel")}
               </Button>

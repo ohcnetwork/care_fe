@@ -19,7 +19,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
-import { MedicationRequest } from "@/types/emr/medicationRequest";
+import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { FileUploadQuestion } from "@/types/files/files";
 import {
@@ -184,8 +184,8 @@ function ValidationErrorDisplay({
                   size="sm"
                   className="mt-2 h-8 text-xs"
                   onClick={() => {
-                    const element = document.querySelector(
-                      `[data-question-id="${structuredQuestion.questionId}"]`,
+                    const element = document.getElementById(
+                      "question-" + structuredQuestion.questionId,
                     );
                     if (element) {
                       element.scrollIntoView({ block: "center" });
@@ -246,8 +246,8 @@ function ValidationErrorDisplay({
                         size="sm"
                         className="mt-2 h-8 text-xs"
                         onClick={() => {
-                          const element = document.querySelector(
-                            `[data-question-id="${error.question_id}"]`,
+                          const element = document.getElementById(
+                            "question-" + error.question_id,
                           );
                           if (element) {
                             element.scrollIntoView({ block: "center" });
@@ -619,9 +619,7 @@ export function QuestionnaireForm({
 
     if (firstErrorId) {
       setTimeout(() => {
-        const element = document.querySelector(
-          `[data-question-id="${firstErrorId}"]`,
-        );
+        const element = document.getElementById("question-" + firstErrorId);
         element?.scrollIntoView({ block: "center" });
       });
       return;
@@ -629,7 +627,7 @@ export function QuestionnaireForm({
 
     // Continue with existing submission logic...
     const requests: FormBatchRequest[] = [];
-    if (encounterId && patientId) {
+    if (patientId) {
       const context = { facilityId, patientId, encounterId };
       const structuredPromises: Promise<FormBatchRequest[]>[] = [];
 

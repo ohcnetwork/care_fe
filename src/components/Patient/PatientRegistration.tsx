@@ -15,6 +15,7 @@ import { tzAwareDateTime } from "@/lib/validators";
 
 import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
 
+import RadioInput from "@/components/ui/RadioInput";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -30,7 +31,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -45,6 +45,7 @@ import { DateTimeInput } from "@/components/Common/DateTimeInput";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
@@ -59,8 +60,15 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
-import { Patient } from "@/types/emr/patient";
+import {
+  BloodGroupChoices,
+  PatientIdentifierCreate,
+  PatientRead,
+} from "@/types/emr/patient/patient";
+import patientApi from "@/types/emr/patient/patientApi";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { Organization } from "@/types/organization/organization";
 
 interface PatientRegistrationPageProps {
@@ -75,16 +83,17 @@ export const BLOOD_GROUPS = BLOOD_GROUP_CHOICES.map((bg) => bg.id) as [
 export default function PatientRegistration(
   props: PatientRegistrationPageProps,
 ) {
+  const { enableMinimalPatientRegistration } = careConfig;
   const [{ phone_number }] = useQueryParams();
   const { patientId, facilityId } = props;
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const defaultCountry = careConfig.defaultCountry.name;
+  const { facility } = useCurrentFacility();
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
-  const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
-  const [isDeceased, setIsDeceased] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
 
   const formSchema = useMemo(
     () =>
@@ -95,7 +104,7 @@ export default function PatientRegistration(
           same_phone_number: z.boolean(),
           emergency_phone_number: validators().phoneNumber.required,
           gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
-          blood_group: z.enum(BLOOD_GROUPS, {
+          blood_group: z.nativeEnum(BloodGroupChoices, {
             required_error: t("blood_group_is_required"),
           }),
           age_or_dob: z.enum(["dob", "age"]),
@@ -107,7 +116,7 @@ export default function PatientRegistration(
               return parsedDate.isValid() && !parsedDate.isAfter(dayjs());
             }, t("enter_valid_dob"))
             .optional(),
-          deceased_datetime: tzAwareDateTime.optional(),
+          deceased_datetime: tzAwareDateTime.optional().nullable(),
           age: z
             .number()
             .int()
@@ -115,20 +124,30 @@ export default function PatientRegistration(
             .min(1, t("age_must_be_positive"))
             .max(120, t("age_must_be_below_120"))
             .optional(),
-          address: z.string().nonempty(t("address_is_required")),
+          address: enableMinimalPatientRegistration
+            ? z.string().optional()
+            : z.string().nonempty(t("address_is_required")),
           same_address: z.boolean(),
-          permanent_address: z.string().nonempty(t("field_required")),
-          pincode: z
-            .number()
-            .int()
-            .positive()
-            .min(100000, t("pincode_must_be_6_digits"))
-            .max(999999, t("pincode_must_be_6_digits")),
+          permanent_address: enableMinimalPatientRegistration
+            ? z.string().optional()
+            : z.string().nonempty(t("field_required")),
+          pincode: enableMinimalPatientRegistration
+            ? validators().pincode.optional()
+            : validators().pincode,
           nationality: z.string().nonempty(t("nationality_is_required")),
-          geo_organization: z
-            .string()
-            .uuid({ message: t("geo_organization_is_required") })
-            .optional(),
+          geo_organization: z.string().uuid({
+            message: enableMinimalPatientRegistration
+              ? t("minimal_patient_registration_geo_organization_required")
+              : t("geo_organization_is_required"),
+          }),
+          _selected_levels: z.array(z.custom<Organization>()),
+          _is_deceased: z.boolean(),
+          identifiers: z.array(
+            z.object({
+              config: z.string().uuid(),
+              value: z.string().optional(),
+            }),
+          ),
         })
         .refine(
           (data) => (data.age_or_dob === "dob" ? !!data.date_of_birth : true),
@@ -172,9 +191,32 @@ export default function PatientRegistration(
               : t("invalid_date_format", { format: "DD-MM-YYYY HH:mm" }),
             path: ["deceased_datetime"],
           }),
-        ),
-
-    [], // eslint-disable-line react-hooks/exhaustive-deps
+        )
+        .superRefine((data, ctx) => {
+          // When an identifier is required, and it has no default_value, it should have a value
+          // The identifiers with errors are returned and errors are shown for all applicable identifiers
+          const identifierConfigs =
+            facility?.patient_instance_identifier_configs || [];
+          const identifiers = data.identifiers || [];
+          identifiers.forEach((identifier, index) => {
+            const config = identifierConfigs.find(
+              (c) => c.id === identifier.config,
+            );
+            const isAutogenerated = !!config?.config.default_value;
+            if (
+              config?.config.required &&
+              !identifier.value &&
+              !isAutogenerated
+            ) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: config?.config.display + " " + t("is_required"),
+                path: ["identifiers", index, "value"],
+              });
+            }
+          });
+        }),
+    [facility], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const form = useForm({
@@ -186,14 +228,16 @@ export default function PatientRegistration(
       age_or_dob: "dob",
       same_phone_number: false,
       same_address: true,
+      _selected_levels: [],
+      _is_deceased: false,
     },
     mode: "onSubmit",
   });
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
     mutationKey: ["create_patient"],
-    mutationFn: mutate(routes.addPatient),
-    onSuccess: (resp: Patient) => {
+    mutationFn: mutate(patientApi.addPatient),
+    onSuccess: (resp: PatientRead) => {
       toast.success(t("patient_registration_success"));
       // Lets navigate the user to the verify page as the patient is not accessible to the user yet
       navigate(`/facility/${facilityId}/patients/verify`, {
@@ -214,7 +258,7 @@ export default function PatientRegistration(
     isPending: isUpdatingPatient,
     isSuccess: isUpdateSuccess,
   } = useMutation({
-    mutationFn: mutate(routes.updatePatient, {
+    mutationFn: mutate(patientApi.updatePatient, {
       pathParams: { id: patientId || "" },
     }),
     onSuccess: () => {
@@ -227,10 +271,16 @@ export default function PatientRegistration(
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    const editableIdentifiers = values.identifiers.filter((identifier) => {
+      const config = facility?.patient_instance_identifier_configs.find(
+        (c) => c.id === identifier.config,
+      );
+      return !config?.config.default_value && !!identifier.value;
+    }) as PatientIdentifierCreate[];
+
     if (patientId) {
       updatePatient({
         ...values,
-        ward_old: undefined,
         age: values.age_or_dob === "age" ? values.age : undefined,
         date_of_birth:
           values.age_or_dob === "dob" ? values.date_of_birth : undefined,
@@ -240,11 +290,11 @@ export default function PatientRegistration(
         permanent_address: values.same_address
           ? values.address
           : values.permanent_address,
+        pincode: String(values.pincode) || undefined,
+        identifiers: editableIdentifiers,
       });
       return;
-    }
-
-    if (facilityId) {
+    } else if (facilityId) {
       createPatient({
         ...values,
         emergency_phone_number: values.same_phone_number
@@ -254,7 +304,9 @@ export default function PatientRegistration(
           ? values.address
           : values.permanent_address,
         facility: facilityId,
-        ward_old: undefined,
+        pincode: String(values.pincode) || undefined,
+        tags: selectedTags.map((tag) => tag.id),
+        identifiers: editableIdentifiers,
       });
     }
   }
@@ -297,19 +349,19 @@ export default function PatientRegistration(
 
   const patientQuery = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(routes.getPatient, {
+    queryFn: query(patientApi.getPatient, {
       pathParams: { id: patientId || "" },
     }),
     enabled: !!patientId,
   });
 
   useEffect(() => {
-    if (patientQuery.data) {
-      setSelectedLevels([
-        patientQuery.data.geo_organization as unknown as Organization,
-      ]);
-      setIsDeceased(!!patientQuery.data.deceased_datetime);
+    if (patientQuery.data && facility) {
       form.reset({
+        _selected_levels: [
+          patientQuery.data.geo_organization as unknown as Organization,
+        ],
+        _is_deceased: !!patientQuery.data.deceased_datetime,
         name: patientQuery.data.name || "",
         phone_number: patientQuery.data.phone_number || "",
         emergency_phone_number: patientQuery.data.emergency_phone_number || "",
@@ -333,10 +385,31 @@ export default function PatientRegistration(
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
-        deceased_datetime: patientQuery.data.deceased_datetime || undefined,
+        deceased_datetime: null,
+        identifiers: facility.patient_instance_identifier_configs.map(
+          (identifierConfig) => {
+            const identifier = patientQuery.data.instance_identifiers.find(
+              (i) => i.config.id === identifierConfig.id,
+            );
+            return {
+              config: identifierConfig.id,
+              value: identifier?.value,
+            };
+          },
+        ),
       } as unknown as z.infer<typeof formSchema>);
+    } else if (facility) {
+      form.setValue(
+        "identifiers",
+        facility.patient_instance_identifier_configs.map(
+          (identifierConfig) => ({
+            config: identifierConfig.id,
+            value: "",
+          }),
+        ),
+      );
     }
-  }, [patientQuery.data]);
+  }, [patientQuery.data, facility]);
 
   const showDuplicate =
     !patientPhoneSearch.isLoading &&
@@ -367,7 +440,9 @@ export default function PatientRegistration(
         <Form {...form}>
           <form
             className="md:w-[500px] space-y-10"
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={form.handleSubmit(onSubmit, (errors) => {
+              console.log("errors", errors);
+            })}
           >
             <PLUGIN_Component
               __name="PatientRegistrationForm"
@@ -489,29 +564,18 @@ export default function PatientRegistration(
                 control={form.control}
                 name="gender"
                 render={({ field }) => (
-                  <FormItem className="space-y-3">
+                  <FormItem>
                     <FormLabel aria-required>{t("sex")}</FormLabel>
                     <FormControl>
-                      <RadioGroup
+                      <RadioInput
                         {...field}
                         onValueChange={field.onChange}
                         value={field.value ?? undefined}
-                        className="flex gap-5 flex-wrap"
-                      >
-                        {GENDER_TYPES.map((g) => (
-                          <FormItem key={g.id} className="flex">
-                            <FormControl>
-                              <RadioGroupItem
-                                value={g.id}
-                                data-cy={`gender-radio-${g.id.toLowerCase()}`}
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal">
-                              {t(`GENDER__${g.id}`)}
-                            </FormLabel>
-                          </FormItem>
-                        ))}
-                      </RadioGroup>
+                        options={GENDER_TYPES.map((g) => ({
+                          value: g.id,
+                          label: t(`GENDER__${g.id}`),
+                        }))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -530,7 +594,10 @@ export default function PatientRegistration(
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger data-cy="blood-group-select">
+                        <SelectTrigger
+                          data-cy="blood-group-select"
+                          ref={field.ref}
+                        >
                           <SelectValue
                             placeholder={t("please_select_blood_group")}
                           />
@@ -548,6 +615,18 @@ export default function PatientRegistration(
                   </FormItem>
                 )}
               />
+
+              {/* Tag Selector (only for create) */}
+              {!patientId && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">{t("tags")}</h3>
+                  <TagSelectorPopover
+                    selected={selectedTags}
+                    onChange={setSelectedTags}
+                    resource={TagResource.PATIENT}
+                  />
+                </div>
+              )}
 
               <Tabs
                 value={form.watch("age_or_dob")}
@@ -606,6 +685,8 @@ export default function PatientRegistration(
                         <FormControl>
                           <Input
                             type="number"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             placeholder={t("age")}
                             min={1}
                             max={120}
@@ -664,9 +745,9 @@ export default function PatientRegistration(
                   <div className="flex items-center gap-2">
                     <Checkbox
                       id="is-deceased"
-                      checked={isDeceased}
+                      checked={form.watch("_is_deceased")}
                       onCheckedChange={(checked) => {
-                        setIsDeceased(checked as boolean);
+                        form.setValue("_is_deceased", checked as boolean);
                         form.setValue(
                           "deceased_datetime",
                           checked ? form.getValues("deceased_datetime") : "",
@@ -683,7 +764,8 @@ export default function PatientRegistration(
                   </div>
                 </div>
 
-                {(isDeceased || form.watch("deceased_datetime")) && (
+                {(form.watch("_is_deceased") ||
+                  form.watch("deceased_datetime")) && (
                   <div className="mt-4">
                     <div className="flex items-center gap-2 mb-4 text-gray-500">
                       <InfoIcon className="size-4" />
@@ -705,7 +787,7 @@ export default function PatientRegistration(
                               value={field.value ?? ""}
                               onDateChange={(val) => {
                                 field.onChange(val);
-                                setIsDeceased(!!val);
+                                form.setValue("_is_deceased", !!val);
                               }}
                               max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
                             />
@@ -723,7 +805,11 @@ export default function PatientRegistration(
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel aria-required>{t("current_address")}</FormLabel>
+                    <FormLabel
+                      aria-required={!enableMinimalPatientRegistration}
+                    >
+                      {t("current_address")}
+                    </FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
@@ -779,7 +865,9 @@ export default function PatientRegistration(
                 disabled={form.watch("same_address")}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel aria-required>
+                    <FormLabel
+                      aria-required={!enableMinimalPatientRegistration}
+                    >
                       {t("permanent_address")}
                     </FormLabel>
                     <FormControl>
@@ -795,10 +883,16 @@ export default function PatientRegistration(
                 name="pincode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel aria-required>{t("pincode")}</FormLabel>
+                    <FormLabel
+                      aria-required={!enableMinimalPatientRegistration}
+                    >
+                      {t("pincode")}
+                    </FormLabel>
                     <FormControl>
                       <Input
                         type="number"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         {...field}
                         onChange={(e) => {
                           const value = e.target.value
@@ -852,8 +946,8 @@ export default function PatientRegistration(
                         <FormControl>
                           <GovtOrganizationSelector
                             {...field}
-                            required={true}
-                            selected={selectedLevels}
+                            required={!enableMinimalPatientRegistration}
+                            selected={form.watch("_selected_levels")}
                             value={form.watch("geo_organization")}
                             onChange={(value) =>
                               form.setValue("geo_organization", value, {
@@ -870,6 +964,61 @@ export default function PatientRegistration(
                 )}
               </div>
             </div>
+
+            {/* Patient Identifiers */}
+            {facility && facility.patient_instance_identifier_configs && (
+              <div className="space-y-4">
+                <h2 className="text-lg font-semibold">{t("identifiers")}</h2>
+                {facility.patient_instance_identifier_configs.map((c, idx) => {
+                  const identifiers = form.watch("identifiers") || [];
+                  const identifierValue = identifiers[idx]?.value || "";
+                  const isAutogenerated = !!c.config.default_value;
+                  const isRequired = c.config.required && !isAutogenerated;
+                  return (
+                    <FormField
+                      key={c.id}
+                      control={form.control}
+                      name={`identifiers.${idx}.value` as const}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel aria-required={isRequired}>
+                            {c.config.display}
+                          </FormLabel>
+                          <FormDescription>
+                            {c.config.description}
+                          </FormDescription>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              value={identifierValue}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                const identifiers = [
+                                  ...(form.getValues("identifiers") || []),
+                                ];
+                                identifiers[idx] = {
+                                  config: c.id || "",
+                                  value,
+                                };
+                                form.setValue("identifiers", identifiers);
+                              }}
+                              placeholder={
+                                isAutogenerated
+                                  ? t("identifier_value_autogenerated")
+                                  : t("enter_identifier_value")
+                              }
+                              disabled={isAutogenerated}
+                              data-cy={`identifier-input-${c.id || ""}`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  );
+                })}
+              </div>
+            )}
 
             <div className="flex justify-end gap-4">
               <Button

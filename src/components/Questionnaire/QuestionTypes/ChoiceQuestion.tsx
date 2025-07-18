@@ -1,20 +1,23 @@
 import { t } from "i18next";
 import { memo } from "react";
+import { toast } from "sonner";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import RadioInput from "@/components/ui/RadioInput";
 import Autocomplete from "@/components/ui/autocomplete";
-import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Button } from "@/components/ui/button";
+import { MultiSelect } from "@/components/ui/multi-select";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import { properCase } from "@/Utils/utils";
-import { Code } from "@/types/questionnaire/code";
+import { Code } from "@/types/base/code/code";
 import type {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
-import type { AnswerOption, Question } from "@/types/questionnaire/question";
+import type { Question } from "@/types/questionnaire/question";
 
 interface ChoiceQuestionProps {
   question: Question;
@@ -45,23 +48,10 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
       : "radio";
   const currentValue = questionnaireResponse.values[index]?.value?.toString();
   const currentCoding = questionnaireResponse.values[index]?.coding;
-
-  const availableOptions = question.repeats
-    ? options.filter((option) =>
-        questionnaireResponse.values.every(
-          (v, i) =>
-            i === index || v.value?.toString() !== option.value.toString(),
-        ),
-      )
-    : options;
-
   const handleValueChange = (newValue: string) => {
     clearError();
     const newValues = [...questionnaireResponse.values];
-    newValues[index] = {
-      type: "string",
-      value: newValue,
-    };
+    newValues[index] = { type: "string", value: newValue };
 
     updateQuestionnaireResponseCB(
       newValues,
@@ -70,17 +60,34 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
     );
   };
 
-  const handleCodingChange = (newValue: Code) => {
+  const handleCodingChange = (newValue: Code, idx?: number) => {
     clearError();
     const newValues = [...questionnaireResponse.values];
-    newValues[index] = {
+
+    const newResponseValue = {
       type: "quantity",
       coding: {
         code: newValue.code,
         system: newValue.system,
         display: newValue.display,
       },
-    };
+    } as ResponseValue;
+
+    if (newValues.some((value) => value.coding?.code === newValue.code)) {
+      toast.error(t("value_already_selected"));
+      return;
+    }
+
+    if (idx === undefined) {
+      updateQuestionnaireResponseCB(
+        [...newValues, newResponseValue],
+        questionnaireResponse.question_id,
+        questionnaireResponse.note,
+      );
+      return;
+    }
+
+    newValues[idx] = newResponseValue;
 
     updateQuestionnaireResponseCB(
       newValues,
@@ -88,59 +95,122 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
       questionnaireResponse.note,
     );
   };
-  return (
-    <>
-      {question.answer_value_set ? (
+
+  const handleMultiSelectChange = (values: string[]) => {
+    clearError();
+    const newValues = values.map((value) => ({
+      type: "string" as const,
+      value: value,
+    }));
+
+    updateQuestionnaireResponseCB(
+      newValues,
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
+  };
+
+  if (question.answer_value_set) {
+    if (!question.repeats) {
+      return (
         <ValueSetSelect
           system={question.answer_value_set}
           value={currentCoding}
-          onSelect={handleCodingChange}
+          onSelect={(newValue) => handleCodingChange(newValue, 0)}
         ></ValueSetSelect>
-      ) : selectType === "dropdown" || question.repeats ? (
-        <Autocomplete
-          value={currentValue || ""}
-          onChange={handleValueChange}
-          options={availableOptions.map((option) => ({
-            label: properCase(option.display || option.value),
-            value: option.value.toString(),
-          }))}
-          placeholder={t("select_an_option")}
-          disabled={disabled}
-        />
-      ) : (
-        <div className="mt-2">
-          <RadioGroup
-            onValueChange={handleValueChange}
-            disabled={disabled}
-            className="flex flex-col gap-3"
-            value={currentValue}
-          >
-            {availableOptions.map((option: AnswerOption) => (
-              <Label
-                htmlFor={`${question.id}-${option.value.toString()}`}
-                className="cursor-pointer"
-                key={`${question.id}-${option.value.toString()}`}
+      );
+    }
+    return (
+      <>
+        {questionnaireResponse.values.map((value, idx) => {
+          return (
+            <div key={idx} className="flex items-center gap-2 mb-2">
+              <div className="flex-1">
+                <ValueSetSelect
+                  system={question.answer_value_set!}
+                  value={value.coding}
+                  onSelect={(newValue) => handleCodingChange(newValue, idx)}
+                />
+              </div>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  const newValues = questionnaireResponse.values.filter(
+                    (_, i) => i !== idx,
+                  );
+                  updateQuestionnaireResponseCB(
+                    newValues,
+                    questionnaireResponse.question_id,
+                  );
+                }}
               >
-                <Card
-                  className="shadow-none rounded-md border-1 border-gray-400 bg-gray-50 p-2 transition-all hover:bg-gray-50/50 [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary-300 [&:has([data-state=checked])]:shadow-sm w-full"
-                  role="presentation"
-                >
-                  <div className="flex flex-row items-center gap-2">
-                    <RadioGroupItem
-                      value={option.value.toString()}
-                      id={`${question.id}-${option.value.toString()}`}
-                      className="sr-only"
-                    />
-                    <div className="font-medium leading-5">
-                      {properCase(option.display || option.value)}
-                    </div>
-                  </div>
-                </Card>
-              </Label>
-            ))}
-          </RadioGroup>
+                <CareIcon icon="l-trash" className="size-4" />
+              </Button>
+            </div>
+          );
+        })}
+
+        <div>
+          <ValueSetSelect
+            closeOnSelect={false}
+            system={question.answer_value_set}
+            value={null}
+            onSelect={handleCodingChange}
+          />
         </div>
-      )}
-    </>
+      </>
+    );
+  }
+
+  if (question.repeats) {
+    return (
+      <MultiSelect
+        value={questionnaireResponse.values.map(
+          (v) => v.value?.toString() || "",
+        )}
+        onValueChange={handleMultiSelectChange}
+        options={options.map((option) => ({
+          label: properCase(option.display || option.value),
+          value: option.value.toString(),
+        }))}
+        placeholder={t("select_an_option")}
+        disabled={disabled}
+        id={`choice-${question.id}`}
+        className="bg-white"
+      />
+    );
+  }
+
+  if (selectType === "dropdown") {
+    return (
+      <Autocomplete
+        value={currentValue || ""}
+        onChange={handleValueChange}
+        options={options.map((option) => ({
+          label: properCase(option.display || option.value),
+          value: option.value.toString(),
+        }))}
+        placeholder={t("select_an_option")}
+        disabled={disabled}
+      />
+    );
+  }
+
+  const selectedValue = questionnaireResponse.values[index]?.value?.toString();
+
+  return (
+    <div className="mt-2">
+      <RadioInput
+        options={options.map((option) => ({
+          label: properCase(option.display || option.value),
+          value: option.value.toString(),
+        }))}
+        value={selectedValue ?? ""}
+        onValueChange={handleValueChange}
+        disabled={disabled}
+      />
+    </div>
   );
 });

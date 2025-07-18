@@ -1,5 +1,3 @@
-import { Dispatch, SetStateAction } from "react";
-
 import { LocalStorageKeys } from "@/common/constants";
 
 import { QueryParams } from "@/Utils/request/types";
@@ -84,16 +82,6 @@ export async function getResponseBody<TData>(res: Response): Promise<TData> {
     return await res.json();
   } catch {
     return (await res.text()) as TData;
-  }
-}
-
-export function handleUploadPercentage(
-  event: ProgressEvent,
-  setUploadPercent: Dispatch<SetStateAction<number>>,
-) {
-  if (event.lengthComputable) {
-    const percentComplete = Math.round((event.loaded / event.total) * 100);
-    setUploadPercent(percentComplete);
   }
 }
 

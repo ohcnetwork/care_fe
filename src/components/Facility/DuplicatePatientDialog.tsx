@@ -21,12 +21,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { PartialPatientModel } from "@/types/emr/patient";
+import { PartialPatientModel, Patient } from "@/types/emr/patient/patient";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  patientList: Array<PartialPatientModel>;
+  patientList: Array<PartialPatientModel | Patient>;
   handleOk: (action: string) => void;
 }
 

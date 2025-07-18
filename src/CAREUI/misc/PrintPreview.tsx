@@ -18,6 +18,7 @@ type Props = {
   disabled?: boolean;
   className?: string;
   title: string;
+  showBackButton?: boolean;
 };
 
 export default function PrintPreview(props: Props) {
@@ -31,10 +32,12 @@ export default function PrintPreview(props: Props) {
         title={props.title}
         options={
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => goBack()}>
-              <CareIcon icon="l-arrow-left" className="text-lg" />
-              {t("back")}
-            </Button>
+            {props.showBackButton !== false && (
+              <Button variant="outline" onClick={() => goBack()}>
+                <CareIcon icon="l-arrow-left" className="text-lg" />
+                {t("back")}
+              </Button>
+            )}
             <Button variant="primary" disabled={props.disabled} onClick={print}>
               <CareIcon icon="l-print" className="text-lg" />
               {t("print")}
