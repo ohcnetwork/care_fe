@@ -111,7 +111,6 @@ export function FilterTabs({
     if (variant === "underline") {
       return "w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto";
     }
-    return "bg-gray-100 p-0 h-8 text-gray-950 overflow-x-auto";
   };
 
   const getTriggerClassName = () => {
@@ -125,7 +124,7 @@ export function FilterTabs({
     if (variant === "underline") {
       return "text-gray-500 font-semibold hover:text-gray-900 hover:bg-transparent pb-2.5 px-2.5 rounded-none";
     }
-    return "text-gray-600 font-medium hover:text-gray-900 hover:bg-gray-50 px-3 py-1 text-sm h-8 bg-gray-100 rounded-md border-0 ring-0 focus:ring-0 focus:outline-none transition-colors duration-200";
+    return "text-gray-500 font-medium text-sm px-3 flex items-center";
   };
 
   const tabsToShow = showMoreDropdown ? visibleOptions : options;

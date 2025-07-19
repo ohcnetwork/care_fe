@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { navigate, useNavigationPrompt } from "raviger";
+import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -33,11 +33,7 @@ import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrgani
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { Patient } from "@/types/emr/patient/patient";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import {
-  Appointment,
-  AppointmentCreateRequest,
-  TokenSlot,
-} from "@/types/scheduling/schedule";
+import { Appointment } from "@/types/scheduling/schedule";
 
 type PatientRegistrationProps = {
   facilityId: string;
@@ -46,12 +42,8 @@ type PatientRegistrationProps = {
 
 export function PatientRegistration(props: PatientRegistrationProps) {
   const { staffId } = props;
-  const selectedSlot = JSON.parse(
-    localStorage.getItem("selectedSlot") ?? "",
-  ) as TokenSlot;
-  const reason = localStorage.getItem("reason");
-
   const { t } = useTranslation();
+  const [{ slotId, reason }] = useQueryParams();
 
   const queryClient = useQueryClient();
 
@@ -124,14 +116,12 @@ export function PatientRegistration(props: PatientRegistrationProps) {
 
   const { mutate: createAppointment, isPending: isCreatingAppointment } =
     useMutation({
-      mutationFn: (body: AppointmentCreateRequest) =>
-        mutate(PublicAppointmentApi.createAppointment, {
-          pathParams: { id: selectedSlot?.id },
-          body,
-          headers: {
-            Authorization: `Bearer ${tokenData.token}`,
-          },
-        })(body),
+      mutationFn: mutate(PublicAppointmentApi.createAppointment, {
+        pathParams: { id: slotId },
+        headers: {
+          Authorization: `Bearer ${tokenData.token}`,
+        },
+      }),
       onSuccess: (data: Appointment) => {
         toast.success(t("appointment_created_success"));
         queryClient.invalidateQueries({

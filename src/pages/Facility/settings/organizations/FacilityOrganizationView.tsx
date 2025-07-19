@@ -1,13 +1,25 @@
-import { useQuery } from "@tanstack/react-query";
-import { Building, FolderOpen, PenLine } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Building, FolderOpen, PenLine, Trash } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -30,6 +42,7 @@ import useFilters from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
@@ -41,6 +54,66 @@ interface Props {
   id?: string;
   facilityId: string;
   permissions: string[];
+}
+
+function DeleteOrgDialog({
+  org,
+  facilityId,
+}: {
+  org: FacilityOrganization;
+  facilityId: string;
+}) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  const { mutate: deleteOrganization } = useMutation({
+    mutationFn: mutate(facilityOrganizationApi.delete, {
+      pathParams: { facilityId, organizationId: org.id },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["facilityOrganization"],
+      });
+      toast.success(t("organization_deleted_successfully"));
+    },
+  });
+  return (
+    <AlertDialog>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <AlertDialogTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Trash className="size-4" />
+            </Button>
+          </AlertDialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>{t("delete")}</TooltipContent>
+      </Tooltip>
+      <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            {t("remove_name", { name: org.name })}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {t("are_you_sure_want_to_delete", {
+              name: org.name,
+            })}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => deleteOrganization()}
+            className={buttonVariants({
+              variant: "destructive",
+            })}
+          >
+            {t("remove")}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 }
 
 function OrganizationCard({
@@ -59,24 +132,33 @@ function OrganizationCard({
   return (
     <Card key={org.id}>
       <CardContent className="p-4 space-y-4">
-        <div className="flex items-center gap-2">
-          <Building className="size-4" />
-          <span className="text-lg font-semibold hover:underline hover:decoration-green-600 hover:text-green-600">
-            {org.name}
-          </span>
-          {org.has_children && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="cursor-help">
-                    <FolderOpen className="size-3 text-gray-400" />
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>{t("has_child_organizations")}</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-        </div>
+        <CardHeader className="p-0">
+          <div className="flex justify-between">
+            <div className="flex items-center gap-2">
+              <Building className="size-4" />
+              <span className="text-lg font-semibold hover:underline hover:decoration-green-600 hover:text-green-600">
+                {org.name}
+              </span>
+              {org.has_children && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="cursor-help">
+                        <FolderOpen className="size-3 text-gray-400" />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {t("has_child_organizations")}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
+            {!org.has_children && org.org_type !== "root" && (
+              <DeleteOrgDialog org={org} facilityId={facilityId} />
+            )}
+          </div>
+        </CardHeader>
 
         <Badge variant="indigo" className="w-fit">
           {t(`facility_organization_type__${org.org_type}`)}
@@ -251,8 +333,9 @@ export default function FacilityOrganizationView({
                           className="text-right"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          {canManageFacilityOrganization &&
-                            org.org_type !== "root" && (
+                          <div className="flex items-center justify-end gap-1">
+                            {canManageFacilityOrganization &&
+                            org.org_type !== "root" ? (
                               <FacilityOrganizationFormSheet
                                 facilityId={facilityId}
                                 parentId={id}
@@ -268,7 +351,19 @@ export default function FacilityOrganizationView({
                                   </Button>
                                 }
                               />
+                            ) : (
+                              <div className="size-10" />
                             )}
+
+                            {!org.has_children && org.org_type !== "root" ? (
+                              <DeleteOrgDialog
+                                org={org}
+                                facilityId={facilityId}
+                              />
+                            ) : (
+                              <div className="size-10" />
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
