@@ -708,7 +708,7 @@ export function NoteManager({
 
                   {/* Message Input */}
                   {canWrite && (
-                    <div className="border-t border-gray-200 p-3 sm:p-4 bg-white sticky max-sm:bottom-14">
+                    <div className="border-t border-gray-200 p-3 sm:p-4 bg-white sticky bottom-0 max-lg:bottom-14">
                       <form onSubmit={handleSendMessage}>
                         <div className="flex gap-2">
                           <AutoExpandingTextarea
