@@ -10,6 +10,8 @@ import PatientRegistration from "@/components/Patient/PatientRegistration";
 import { AppRoutes } from "@/Routers/AppRouter";
 import { ConsentDetailPage } from "@/pages/Encounters/ConsentDetail";
 import EncountersOverview from "@/pages/Encounters/EncountersOverview";
+import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
+import ClinicalHistoryPage from "@/pages/Patient/History";
 import VerifyPatient from "@/pages/Patients/VerifyPatient";
 
 const ExcalidrawEditor = lazy(
@@ -38,16 +40,15 @@ const PatientRoutes: AppRoutes = {
   ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/consents/:consentId":
     ({ facilityId, patientId, encounterId, consentId }) => (
-      <ConsentDetailPage
-        facilityId={facilityId}
-        patientId={patientId}
+      <EncounterProvider
         encounterId={encounterId}
-        consentId={consentId}
-      />
+        patientId={patientId}
+        facilityId={facilityId}
+      >
+        <ConsentDetailPage consentId={consentId} />
+      </EncounterProvider>
     ),
-  "/facility/:facilityId/patients/verify": ({ facilityId }) => (
-    <VerifyPatient facilityId={facilityId} />
-  ),
+  "/facility/:facilityId/patients/verify": () => <VerifyPatient />,
   "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
   "/patient/:id/update": ({ id }) => <PatientRegistration patientId={id} />,
   ...patientTabs.reduce((acc: AppRoutes, tab) => {
@@ -113,6 +114,17 @@ const PatientRoutes: AppRoutes = {
         drawingId={drawingId}
       />
     </Suspense>
+  ),
+  "/facility/:facilityId/patient/:patientId/history/:tab": ({
+    facilityId,
+    patientId,
+    tab,
+  }) => (
+    <ClinicalHistoryPage
+      facilityId={facilityId}
+      patientId={patientId}
+      tab={tab}
+    />
   ),
 };
 

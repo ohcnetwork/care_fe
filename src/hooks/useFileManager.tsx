@@ -69,10 +69,8 @@ export default function useFileManager(
     isImage: false,
     name: "",
     extension: "",
-    zoom: 4,
     isZoomInDisabled: false,
     isZoomOutDisabled: false,
-    rotation: 0,
   });
   const [fileUrl, setFileUrl] = useState<string>("");
   const [downloadURL, setDownloadURL] = useState<string>("");
@@ -201,7 +199,6 @@ export default function useFileManager(
     setFileState({
       ...file_state,
       open: false,
-      zoom: 4,
       isZoomInDisabled: false,
       isZoomOutDisabled: false,
     });
@@ -258,7 +255,6 @@ export default function useFileManager(
         show={file_state.open}
         fileUrl={fileUrl}
         file_state={file_state}
-        setFileState={setFileState}
         downloadURL={downloadURL}
         uploadedFiles={uploadedFiles}
         onClose={handleFilePreviewClose}
@@ -452,7 +448,7 @@ export default function useFileManager(
             className="flex w-full flex-col"
           >
             <div>
-              <Label>{t("enter_the_file_name")}</Label>
+              <Label className="mb-3">{t("enter_the_file_name")}</Label>
               <Input
                 name="editFileName"
                 id="edit-file-name"
