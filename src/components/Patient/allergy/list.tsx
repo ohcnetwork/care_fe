@@ -133,7 +133,7 @@ export function AllergyList({
                     <div key={date} className="pb-6">
                       <div className="flex items-start gap-4">
                         <div className="flex flex-col items-center h-full">
-                          <div className="size-3 bg-yellow-300 ring-1 ring-yellow-700 rounded-full flex-shrink-0 -ml-1.5 mt-1"></div>
+                          <div className="size-3 bg-yellow-200 ring-1 ring-yellow-500 rounded-full flex-shrink-0 -ml-1.5 mt-1"></div>
                         </div>
 
                         <div className="space-y-3 overflow-auto w-full">
