@@ -41,7 +41,7 @@ export function FacilitiesPage() {
 
   const { data: facilitiesResponse, isLoading } = useQuery({
     queryKey: ["facilities", qParams],
-    queryFn: query.debounced(facilityApi.getAllFacilities, {
+    queryFn: query.debounced(facilityApi.getAll, {
       queryParams: {
         name: qParams.name,
         ...(qParams.facility_type && { facility_type: qParams.facility_type }),

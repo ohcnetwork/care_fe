@@ -42,6 +42,7 @@ import query from "@/Utils/request/query";
 import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { BaseFacility } from "@/types/facility/facility";
+import facilityApi from "@/types/facility/facilityApi";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -109,7 +110,7 @@ export default function FacilityForm({
   }, [org, organizationId]);
 
   const { mutate: createFacility, isPending } = useMutation({
-    mutationFn: mutate(routes.facility.create),
+    mutationFn: mutate(facilityApi.create),
     onSuccess: (_data: BaseFacility) => {
       toast.success(t("facility_added_successfully"));
       queryClient.invalidateQueries({ queryKey: ["organizationFacilities"] });
@@ -118,7 +119,7 @@ export default function FacilityForm({
     },
   });
   const { mutate: updateFacility, isPending: isUpdatePending } = useMutation({
-    mutationFn: mutate(routes.updateFacility, {
+    mutationFn: mutate(facilityApi.update, {
       pathParams: { id: facilityId || "" },
     }),
     onSuccess: (_data: FacilityModel) => {

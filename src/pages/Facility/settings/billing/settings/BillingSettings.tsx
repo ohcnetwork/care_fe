@@ -28,7 +28,7 @@ export function BillingSettings() {
     isError,
     reset,
   } = useMutation({
-    mutationFn: mutate(facilityApi.patchInvoiceNumberExpression, {
+    mutationFn: mutate(facilityApi.setInvoiceExpression, {
       pathParams: { id: facilityId },
     }),
     onSuccess: () => {

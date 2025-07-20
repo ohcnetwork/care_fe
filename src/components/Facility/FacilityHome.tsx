@@ -90,7 +90,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   );
 
   const { mutate: deleteFacility, isPending: isDeleting } = useMutation({
-    mutationFn: mutate(facilityApi.deleteFacility, {
+    mutationFn: mutate(facilityApi.delete, {
       pathParams: { id: facilityId },
     }),
     onSuccess: () => {
@@ -121,7 +121,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   });
 
   const { mutateAsync: deleteAvatar } = useMutation({
-    mutationFn: mutate(routes.deleteFacilityCoverImage, {
+    mutationFn: mutate(facilityApi.deleteCoverImage, {
       pathParams: { id: facilityId },
     }),
     onSuccess: () => {

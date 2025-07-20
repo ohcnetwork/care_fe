@@ -129,7 +129,7 @@ export function InvoiceShow({
   // Fetch facility data for available components
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(facilityApi.getFacility, {
+    queryFn: query(facilityApi.get, {
       pathParams: { id: facilityId },
     }),
   });

@@ -1,8 +1,4 @@
-import {
-  CommentModel,
-  FacilityModel,
-  FacilityRequest,
-} from "@/components/Facility/models";
+import { CommentModel, FacilityModel } from "@/components/Facility/models";
 import {
   CreateFileRequest,
   CreateFileResponse,
@@ -28,11 +24,7 @@ import {
   PatientRead,
   PatientSearchResponse,
 } from "@/types/emr/patient/patient";
-import {
-  BaseFacility,
-  CreateFacility,
-  FacilityData,
-} from "@/types/facility/facility";
+import { FacilityData } from "@/types/facility/facility";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
 import { PlugConfig } from "@/types/plugConfig";
@@ -180,20 +172,6 @@ const routes = {
     TRes: Type<FacilityModel>(),
   },
 
-  updateFacility: {
-    path: "/api/v1/facility/{id}/",
-    method: "PUT",
-    TRes: Type<FacilityModel>(),
-    TBody: Type<FacilityRequest>(),
-  },
-
-  deleteFacilityCoverImage: {
-    path: "/api/v1/facility/{id}/cover_image/",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<void>(),
-  },
-
   getScheduleAbleFacilityUser: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
     TRes: Type<UserBase>(),
@@ -307,17 +285,7 @@ const routes = {
       method: "GET",
       TRes: Type<PaginatedResponse<UserBase>>(),
     },
-    list: {
-      path: "/api/v1/facility/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<BaseFacility>>(),
-    },
-    create: {
-      path: "/api/v1/facility/",
-      method: "POST",
-      TRes: Type<BaseFacility>(),
-      TBody: Type<CreateFacility>(),
-    },
+
     show: {
       path: "/api/v1/facility/{id}/",
       method: "GET",
