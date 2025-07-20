@@ -102,14 +102,25 @@ const CountrySelect = ({
   const { t } = useTranslation();
   const scrollAreaRef = React.useRef<HTMLDivElement>(null);
   const [searchValue, setSearchValue] = React.useState("");
-
+  const [open, setOpen] = React.useState(false);
+  const handleCountrySelect = (country: RPNInput.Country) => {
+    onChange(country);
+    setOpen(false);
+  };
   return (
-    <Popover modal>
+    <Popover
+      open={open}
+      modal
+      onOpenChange={(open) => {
+        setOpen(open);
+        open && setSearchValue("");
+      }}
+    >
       <PopoverTrigger asChild>
         <Button
           type="button"
           variant="outline"
-          className="flex gap-1 rounded-e-none rounded-s-md border-r-0 px-3 focus:z-10 h-[42px] md:h-[38px]"
+          className="flex gap-1 rounded-e-none rounded-s-md border-r-0 border-gray-200 shadow-xs px-3 focus:z-10 h-auto"
           disabled={disabled}
         >
           <FlagComponent
@@ -159,7 +170,7 @@ const CountrySelect = ({
                       country={value}
                       countryName={label}
                       selectedCountry={selectedCountry}
-                      onChange={onChange}
+                      onChange={handleCountrySelect}
                     />
                   ) : null,
                 )}
