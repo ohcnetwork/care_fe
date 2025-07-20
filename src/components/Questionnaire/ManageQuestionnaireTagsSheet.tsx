@@ -197,7 +197,7 @@ export default function ManageQuestionnaireTagsSheet({ form, trigger }: Props) {
     if (tags) {
       setSelectedTags(tags);
     }
-  }, [tags]);
+  }, [tags, open]);
 
   // Simple merge of selected tags with available tags
   const tagOptions = useMemo(() => {
