@@ -50,11 +50,11 @@ export default function UserResetPassword({
         .min(1, { error: t("please_enter_confirm_password") }),
     })
     .refine((values) => values.new_password_1 === values.new_password_2, {
-      message: t("password_mismatch"),
+      error: t("password_mismatch"),
       path: ["new_password_2"],
     })
     .refine((values) => values.new_password_1 !== values.old_password, {
-      message: t("new_password_same_as_old"),
+      error: t("new_password_same_as_old"),
       path: ["new_password_1"],
     });
 
