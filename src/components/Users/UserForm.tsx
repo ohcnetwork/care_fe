@@ -82,7 +82,7 @@ export default function UserForm({
             .string()
             .trim()
             .min(1, { error: t("field_required") })
-            .refine(validateUsername, t("invalid")),
+            .refine(validateUsername, t("username_not_valid")),
       password_setup_method: z.enum(["immediate", "email"]).optional(),
       password: z
         .string()
