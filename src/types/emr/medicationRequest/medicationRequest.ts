@@ -10,7 +10,7 @@ export const MEDICATION_REQUEST_STATUS_COLORS = {
   completed: "blue",
   cancelled: "destructive",
   draft: "secondary",
-  "on-hold": "yellow",
+  on_hold: "yellow",
   unknown: "secondary",
   ended: "purple",
   entered_in_error: "destructive",
@@ -80,7 +80,7 @@ export const UCUM_TIME_UNITS = [
 
 export const ACTIVE_MEDICATION_STATUSES = [
   "active",
-  "on-hold", // Todo: check why it was on-hold instead of on_hold
+  "on_hold",
   "draft",
   "unknown",
 ] as const;

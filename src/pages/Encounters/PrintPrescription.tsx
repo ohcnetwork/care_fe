@@ -39,7 +39,7 @@ export const PrintPrescription = (props: {
       pathParams: { patientId: patientId },
       queryParams: {
         encounter: encounterId,
-        status: ["active", "on-hold", "draft", "unknown"].join(","),
+        status: ["active", "on_hold", "draft", "unknown"].join(","),
         facility: facilityId,
       },
       pageSize: 100,
