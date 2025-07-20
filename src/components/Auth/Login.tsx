@@ -128,11 +128,33 @@ const Login = (props: LoginProps) => {
 
   // Reactive translation for error messages
   const translatedOtpError = useMemo(() => {
-    return otpError ? t("send_otp_error") : "";
+    if (!otpError) return "";
+
+    // Define known translation keys that should be translated
+    const translationKeys = ["send_otp_error"];
+
+    // If it's a translation key, translate it
+    if (translationKeys.includes(otpError)) {
+      return t(otpError);
+    }
+
+    // Otherwise, return the server message as-is
+    return otpError;
   }, [otpError, t]);
 
   const translatedOtpValidationError = useMemo(() => {
-    return otpValidationError ? t("invalid_otp") : "";
+    if (!otpValidationError) return "";
+
+    // Define known translation keys that should be translated
+    const translationKeys = ["invalid_otp"];
+
+    // If it's a translation key, translate it
+    if (translationKeys.includes(otpValidationError)) {
+      return t(otpValidationError);
+    }
+
+    // Otherwise, return the server message as-is
+    return otpValidationError;
   }, [otpValidationError, t]);
 
   // Send OTP Mutation
@@ -147,9 +169,9 @@ const Login = (props: LoginProps) => {
       const errors = error?.data || [];
       if (Array.isArray(errors) && errors.length > 0) {
         const firstError = errors[0] as OtpError;
-        setOtpError(firstError.msg);
+        setOtpError(firstError.msg); // Keep server message as-is
       } else {
-        setOtpError(t("send_otp_error"));
+        setOtpError("send_otp_error"); // Use translation key for generic errors
       }
     },
   });
@@ -178,7 +200,6 @@ const Login = (props: LoginProps) => {
       }
     },
     onError: (error: any) => {
-      let errorMessage = t("invalid_otp");
       if (
         error.cause &&
         Array.isArray(error.cause.errors) &&
@@ -188,13 +209,19 @@ const Login = (props: LoginProps) => {
           (e: OtpValidationError) => e.otp,
         );
         if (otpError && otpError.otp) {
-          errorMessage = otpError.otp;
+          setOtpValidationError(otpError.otp); // Keep server message as-is
+          toast.error(otpError.otp);
+          return;
         }
-      } else if (error.message) {
-        errorMessage = error.message;
       }
-      setOtpValidationError(errorMessage);
-      toast.error(errorMessage);
+
+      if (error.message) {
+        setOtpValidationError(error.message); // Keep server message as-is
+        toast.error(error.message);
+      } else {
+        setOtpValidationError("invalid_otp"); // Use translation key for generic errors
+        toast.error(t("invalid_otp"));
+      }
     },
   });
 
