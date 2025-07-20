@@ -152,10 +152,8 @@ const Login = (props: LoginProps) => {
       const errors = error?.data || [];
       if (Array.isArray(errors) && errors.length > 0) {
         const firstError = errors[0] as OtpError;
-        console.log("Server Error : " + firstError.msg);
         setOtpError(firstError.msg);
       } else {
-        console.log("Translated Error");
         setOtpError(t("send_otp_error"));
       }
     },
