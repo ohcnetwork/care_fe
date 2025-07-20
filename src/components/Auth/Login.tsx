@@ -2,7 +2,7 @@ import careConfig from "@careConfig";
 import { useMutation } from "@tanstack/react-query";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useQueryParams } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ReCaptcha from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
@@ -126,19 +126,14 @@ const Login = (props: LoginProps) => {
     localStorage.setItem(LocalStorageKeys.loginPreference, loginMode);
   }, [loginMode]);
 
-  useEffect(() => {
-    if (otpError) {
-      // Re-translate the error message when language changes
-      setOtpError(t("send_otp_error"));
-    }
-  }, [t, otpError]);
+  // Reactive translation for error messages
+  const translatedOtpError = useMemo(() => {
+    return otpError ? t("send_otp_error") : "";
+  }, [otpError, t]);
 
-  useEffect(() => {
-    if (otpValidationError) {
-      // Re-translate the OTP validation error when language changes
-      setOtpValidationError(t("invalid_otp"));
-    }
-  }, [t, otpValidationError]);
+  const translatedOtpValidationError = useMemo(() => {
+    return otpValidationError ? t("invalid_otp") : "";
+  }, [otpValidationError, t]);
 
   // Send OTP Mutation
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
@@ -555,8 +550,10 @@ const Login = (props: LoginProps) => {
                           disabled={isOtpSent}
                           placeholder={t("enter_phone_number")}
                         />
-                        {otpError && (
-                          <p className="text-sm text-red-500">{otpError}</p>
+                        {translatedOtpError && (
+                          <p className="text-sm text-red-500">
+                            {translatedOtpError}
+                          </p>
                         )}
                       </div>
 
@@ -584,7 +581,7 @@ const Login = (props: LoginProps) => {
                                     index={index}
                                     className={cn(
                                       "size-10",
-                                      otpValidationError &&
+                                      translatedOtpValidationError &&
                                         "border-red-500 focus-visible:ring-red-500",
                                     )}
                                   />
@@ -592,9 +589,9 @@ const Login = (props: LoginProps) => {
                               </InputOTPGroup>
                             </InputOTP>
                           </div>
-                          {otpValidationError && (
+                          {translatedOtpValidationError && (
                             <p className="text-sm text-red-500 text-center">
-                              {otpValidationError}
+                              {translatedOtpValidationError}
                             </p>
                           )}
                         </div>
