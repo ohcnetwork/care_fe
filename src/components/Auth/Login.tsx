@@ -126,6 +126,20 @@ const Login = (props: LoginProps) => {
     localStorage.setItem(LocalStorageKeys.loginPreference, loginMode);
   }, [loginMode]);
 
+  useEffect(() => {
+    if (otpError) {
+      // Re-translate the error message when language changes
+      setOtpError(t("send_otp_error"));
+    }
+  }, [t, otpError]);
+
+  useEffect(() => {
+    if (otpValidationError) {
+      // Re-translate the OTP validation error when language changes
+      setOtpValidationError(t("invalid_otp"));
+    }
+  }, [t, otpValidationError]);
+
   // Send OTP Mutation
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
     mutationFn: mutate(routes.otp.sendOtp),
@@ -138,8 +152,10 @@ const Login = (props: LoginProps) => {
       const errors = error?.data || [];
       if (Array.isArray(errors) && errors.length > 0) {
         const firstError = errors[0] as OtpError;
+        console.log("Server Error : " + firstError.msg);
         setOtpError(firstError.msg);
       } else {
+        console.log("Translated Error");
         setOtpError(t("send_otp_error"));
       }
     },
