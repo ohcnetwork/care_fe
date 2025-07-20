@@ -76,7 +76,6 @@ import {
   AppointmentUpdateRequest,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { UserBase } from "@/types/user/user";
 
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
 
@@ -446,8 +445,9 @@ const AppointmentActions = ({
   const [rescheduleReason, setRescheduleReason] = useState(
     appointment.reason_for_visit,
   );
-  const [selectedPractitioner, setSelectedPractitioner] =
-    useState<UserBase | null>(appointment.user);
+  const [selectedPractitioner, setSelectedPractitioner] = useState(
+    appointment.user,
+  );
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
   const currentStatus = appointment.status;
@@ -554,22 +554,16 @@ const AppointmentActions = ({
                   <PractitionerSelector
                     facilityId={facilityId}
                     selected={selectedPractitioner}
-                    onSelect={(user) => setSelectedPractitioner(user)}
+                    onSelect={(user) => user && setSelectedPractitioner(user)}
                   />
                 </div>
-                <div
-                  className={cn(
-                    !selectedPractitioner && "opacity-50 pointer-events-none",
-                  )}
-                >
-                  <AppointmentSlotPicker
-                    facilityId={facilityId}
-                    resourceId={selectedPractitioner?.id}
-                    selectedSlotId={selectedSlotId}
-                    onSlotSelect={setSelectedSlotId}
-                    currentAppointment={appointment}
-                  />
-                </div>
+                <AppointmentSlotPicker
+                  facilityId={facilityId}
+                  resourceId={selectedPractitioner?.id}
+                  selectedSlotId={selectedSlotId}
+                  onSlotSelect={setSelectedSlotId}
+                  currentAppointment={appointment}
+                />
 
                 <div className="flex justify-end gap-2 mt-6">
                   <Button

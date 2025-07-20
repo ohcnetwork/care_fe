@@ -124,7 +124,7 @@ export default function BookAppointment({ patientId }: Props) {
               <PractitionerSelector
                 facilityId={facilityId}
                 selected={resource ?? null}
-                onSelect={(user) => setResourceId(user?.id ?? undefined)}
+                onSelect={(user) => user && setResourceId(user.id)}
               />
             </div>
           </div>

@@ -31,14 +31,14 @@ interface PractitionerSelectorProps {
   selected: UserBase | null;
   onSelect: (user: UserBase | null) => void;
   facilityId: string;
-  showAll?: string;
+  clearSelection?: boolean;
 }
 
 export const PractitionerSelector = ({
   facilityId,
   selected,
   onSelect,
-  showAll,
+  clearSelection = false,
 }: PractitionerSelectorProps) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -70,8 +70,6 @@ export const PractitionerSelector = ({
               />
               <span>{formatName(selected)}</span>
             </div>
-          ) : showAll ? (
-            <span>{showAll}</span>
           ) : (
             <span className="text-gray-400">{t("select_practitioner")}</span>
           )}
@@ -92,7 +90,7 @@ export const PractitionerSelector = ({
               {isFetching ? t("searching") : t("no_results")}
             </CommandEmpty>
             <CommandGroup>
-              {selected && (
+              {selected && clearSelection && (
                 <CommandItem
                   onSelect={() => {
                     onSelect(null);
@@ -100,14 +98,10 @@ export const PractitionerSelector = ({
                   }}
                   className="cursor-pointer w-full h-9"
                 >
-                  {showAll ? (
-                    showAll
-                  ) : (
-                    <>
-                      <XIcon />
-                      <span> {t("clear_selection")}</span>
-                    </>
-                  )}
+                  <>
+                    <XIcon />
+                    <span> {t("clear_selection")}</span>
+                  </>
                 </CommandItem>
               )}
               {practitioners?.users.map((user) => (
