@@ -44,6 +44,7 @@ import { DateTimeInput } from "@/components/Common/DateTimeInput";
 import useFileUpload from "@/hooks/useFileUpload";
 
 import mutate from "@/Utils/request/mutate";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   CONSENT_CATEGORIES,
   CONSENT_DECISIONS,
@@ -52,6 +53,7 @@ import {
   CreateConsentRequest,
 } from "@/types/consent/consent";
 import consentApi from "@/types/consent/consentApi";
+import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 
 interface FileEntry {
   file: File;
@@ -111,18 +113,22 @@ const consentFormSchema = (isEdit: boolean) =>
 type ConsentFormValues = z.infer<ReturnType<typeof consentFormSchema>>;
 
 interface ConsentFormSheetProps {
-  patientId: string;
-  encounterId: string;
   existingConsent?: ConsentModel;
 }
 
 export default function ConsentFormSheet({
-  patientId,
-  encounterId,
   existingConsent,
 }: ConsentFormSheetProps) {
   const { t } = useTranslation();
   const isEdit = !!existingConsent;
+  const {
+    selectedEncounterId: encounterId,
+    selectedEncounter: encounter,
+    patientId,
+  } = useEncounter();
+
+  const readOnly =
+    encounter && inactiveEncounterStatus.includes(encounter.status);
 
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -282,7 +288,9 @@ export default function ConsentFormSheet({
       createConsent(consentData);
     }
   };
-
+  if (readOnly) {
+    return null;
+  }
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
