@@ -7,8 +7,3 @@ export const validatePassword = (password: string) => {
     /(?=(.*[0-9]))((?=.*[A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z]))^.{8,}$/;
   return pattern.test(password);
 };
-
-export const validatePincode = (pincode: number) => {
-  const pattern = /^[1-9][0-9]{5}$/;
-  return pattern.test(pincode.toString());
-};

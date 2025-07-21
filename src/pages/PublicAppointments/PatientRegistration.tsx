@@ -23,11 +23,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { GENDERS, GENDER_TYPES } from "@/common/constants";
-import { validateName, validatePincode } from "@/common/validation";
+import { validateName } from "@/common/validation";
 
 import { usePubSub } from "@/Utils/pubsubContext";
 import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
+import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { Patient } from "@/types/emr/patient/patient";
@@ -62,13 +63,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       address: z.string().min(1, t("field_required")),
       age: z.string().optional(),
       date_of_birth: z.date().or(z.string()).optional(),
-      pincode: z
-        .number()
-        .min(1, t("field_required"))
-        .refine((pincode) => {
-          if (!pincode) return true;
-          return validatePincode(pincode);
-        }, t("invalid_pincode_msg")),
+      pincode: validators().pincode,
       geo_organization: z
         .string()
         .min(1, t("organization_required"))

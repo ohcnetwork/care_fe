@@ -34,7 +34,6 @@ import LocationPicker from "@/components/Common/GeoLocationPicker";
 import { FacilityModel } from "@/components/Facility/models";
 
 import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
-import { validatePincode } from "@/common/validation";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -66,7 +65,7 @@ export default function FacilityForm({
     name: z.string().min(1, t("name_is_required")),
     description: z.string().optional(),
     features: z.array(z.number()).default([]),
-    pincode: z.number().refine(validatePincode, t("invalid_pincode")),
+    pincode: validators().pincode,
     geo_organization: z.string().min(1, t("field_required")),
     address: z.string().min(1, t("address_is_required")),
     phone_number: validators().phoneNumber.required,
