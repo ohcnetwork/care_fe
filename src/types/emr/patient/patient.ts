@@ -31,7 +31,7 @@ export interface Patient {
   emergency_phone_number?: string;
   address?: string;
   permanent_address?: string;
-  pincode?: string;
+  pincode?: number;
   date_of_birth?: string;
   deceased_datetime?: string | null;
   blood_group?: BloodGroupChoices;
