@@ -296,18 +296,6 @@ export function ChargeItemDefinitionForm({
   });
 
   useEffect(() => {
-    console.log(
-      "initalData",
-      form.getValues("price_components"),
-      typeof form.getValues("price_components")[0].amount,
-    );
-    console.log(
-      "form.formState.errors",
-      form.formState.errors.price_components,
-    );
-  }, [form.formState.errors.price_components, initialData?.price_components]);
-
-  React.useEffect(() => {
     if (isUpdate) return;
 
     const subscription = form.watch((value, { name }) => {
@@ -349,11 +337,6 @@ export function ChargeItemDefinitionForm({
       ...values,
     };
     upsert(submissionData);
-  };
-
-  // Log form errors when validation fails
-  const onError = (errors: FieldErrors<z.infer<typeof formSchema>>) => {
-    console.error("Form validation errors:", errors);
   };
 
   if (isLoading || !facilityData) {
@@ -466,7 +449,7 @@ export function ChargeItemDefinitionForm({
         onSubmit={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          form.handleSubmit(onSubmit, onError)();
+          form.handleSubmit(onSubmit)();
         }}
         className="space-y-6"
       >

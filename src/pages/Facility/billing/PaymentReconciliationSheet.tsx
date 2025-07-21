@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -78,7 +79,7 @@ const formSchema = z.object({
       const num = Number(val);
       return !isNaN(num) && num > 0 && /^\d+(\.\d{0,2})?$/.test(val);
     },
-    { message: "Amount must be a positive number with up to 2 decimal places" },
+    { message: t("enter_valid_amount") },
   ),
   tendered_amount: z.string().refine(
     (val) => {
@@ -86,8 +87,7 @@ const formSchema = z.object({
       return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
     },
     {
-      message:
-        "Tendered amount must be a non-negative number with up to 2 decimal places",
+      message: t("enter_valid_amount"),
     },
   ),
   returned_amount: z.string().refine(
@@ -96,8 +96,7 @@ const formSchema = z.object({
       return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
     },
     {
-      message:
-        "Returned amount must be a non-negative number with up to 2 decimal places",
+      message: t("enter_valid_amount"),
     },
   ),
   target_invoice: z.string().optional(),
@@ -207,9 +206,8 @@ export function PaymentReconciliationSheet({
       form.reset();
       onSuccess?.();
     },
-    onError: (error) => {
+    onError: () => {
       toast.error(t("error_recording_payment"));
-      console.error("Payment recording error:", error);
     },
   });
 
@@ -440,9 +438,7 @@ export function PaymentReconciliationSheet({
                       <Input {...field} value={field.value || ""} />
                     </FormControl>
                     <FormDescription>
-                      {isCashPayment
-                        ? t("reference_number_description_cash")
-                        : t("reference_number_description")}
+                      {!isCashPayment && t("reference_number_description")}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
