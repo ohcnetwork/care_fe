@@ -1,9 +1,7 @@
 import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
 
-import {
-  ChargeItemCreate,
-  ChargeItemUpsert,
-} from "@/types/billing/chargeItem/chargeItem";
+import { ChargeItemUpsert } from "@/types/billing/chargeItem/chargeItem";
+import { ApplyMultipleChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
 import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import { EncounterEdit } from "@/types/emr/encounter/encounter";
@@ -46,7 +44,7 @@ export interface StructuredRequestMap {
   time_of_death: {
     deceased_datetime: string;
   };
-  charge_item: { datapoints: ChargeItemCreate[] };
+  charge_item: ApplyMultipleChargeItemDefinitionRequest;
 }
 
 export type RequestTypeFor<T extends StructuredQuestionType> =
