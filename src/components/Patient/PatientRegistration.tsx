@@ -98,7 +98,7 @@ export default function PatientRegistration(
     () =>
       z
         .object({
-          name: z.string().nonempty(t("name_is_required")),
+          name: z.string().trim().nonempty(t("name_is_required")),
           phone_number: validators().phoneNumber.required,
           same_phone_number: z.boolean(),
           emergency_phone_number: validators().phoneNumber.required,
@@ -124,12 +124,12 @@ export default function PatientRegistration(
             .max(120, t("age_must_be_below_120"))
             .optional(),
           address: enableMinimalPatientRegistration
-            ? z.string().optional()
-            : z.string().nonempty(t("address_is_required")),
+            ? z.string().trim().optional()
+            : z.string().trim().nonempty(t("address_is_required")),
           same_address: z.boolean(),
           permanent_address: enableMinimalPatientRegistration
-            ? z.string().optional()
-            : z.string().nonempty(t("field_required")),
+            ? z.string().trim().optional()
+            : z.string().trim().nonempty(t("field_required")),
           pincode: enableMinimalPatientRegistration
             ? validators().pincode.optional()
             : validators().pincode,
