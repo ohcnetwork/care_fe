@@ -127,7 +127,7 @@ export class FacilityCreation {
         label: "Phone Number",
         message: "This field is required",
       },
-      { label: "Pincode", message: "Invalid Pincode" },
+      { label: "Pincode", message: "Required" },
     ]);
     return this;
   }

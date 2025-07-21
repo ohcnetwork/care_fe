@@ -8,11 +8,6 @@ export const validatePassword = (password: string) => {
   return pattern.test(password);
 };
 
-export const validatePincode = (pincode: string) => {
-  const pattern = /^[1-9][0-9]{5}$/;
-  return pattern.test(pincode);
-};
-
 export const validateAge = (age: number) => {
   return age > 0 && age <= 120;
 };

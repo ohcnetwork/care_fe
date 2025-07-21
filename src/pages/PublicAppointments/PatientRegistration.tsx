@@ -23,19 +23,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { GENDERS, GENDER_TYPES } from "@/common/constants";
-import {
-  validateAge,
-  validateName,
-  validatePincode,
-} from "@/common/validation";
+import { validateAge, validateName } from "@/common/validation";
 
 import { usePubSub } from "@/Utils/pubsubContext";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
+import validators from "@/Utils/validatorsV4";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { Patient } from "@/types/emr/patient/patient";
+import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { Appointment } from "@/types/scheduling/schedule";
 
@@ -90,7 +87,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
             error: t("field_required"),
           },
         ),
-      pincode: z.string().refine(validatePincode, t("invalid_pincode")),
+      pincode: validators().pincode,
       geo_organization: z.string().min(1, { error: t("field_required") }),
       ageInputType: z.enum(["age", "date_of_birth"]),
     })
@@ -117,8 +114,8 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       age: "",
       date_of_birth: "",
       address: "",
-      pincode: "",
-      geo_organization: "",
+      pincode: undefined,
+      geo_organization: undefined,
     },
   });
 
@@ -149,7 +146,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
     mutationFn: (body: Partial<AppointmentPatientRegister>) =>
-      mutate(routes.otp.createPatient, {
+      mutate(publicPatientApi.createPatient, {
         body: { ...body, phone_number: tokenData.phoneNumber },
         headers: {
           Authorization: `Bearer ${tokenData.token}`,
@@ -370,7 +367,18 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   <FormItem className="flex flex-col">
                     <FormLabel aria-required>{t("pincode")}</FormLabel>
                     <FormControl>
-                      <Input {...field} type="number" />
+                      <Input
+                        {...field}
+                        onChange={(e) => {
+                          const value = e.target.value
+                            ? Number(e.target.value)
+                            : undefined;
+                          field.onChange(value);
+                        }}
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        type="number"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
