@@ -1,34 +1,37 @@
-import { FacilityModel, FacilityRequest } from "@/components/Facility/models";
-
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
 import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryComponent";
 
-import { BaseFacility, CreateFacility, FacilityData } from "./facility";
+import { FacilityCreate, FacilityRead } from "./facility";
 
 export default {
   getAll: {
     path: "/api/v1/getallfacilities/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<FacilityData>>(),
+    TRes: Type<PaginatedResponse<FacilityRead>>(),
+  },
+  getAny: {
+    path: "/api/v1/getallfacilities/{id}/",
+    method: HttpMethod.GET,
+    TRes: Type<FacilityRead>(),
   },
   list: {
     path: "/api/v1/facility/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<BaseFacility>>(),
+    TRes: Type<PaginatedResponse<FacilityRead>>(),
   },
   create: {
     path: "/api/v1/facility/",
     method: HttpMethod.POST,
-    TRes: Type<BaseFacility>(),
-    TBody: Type<CreateFacility>(),
+    TRes: Type<FacilityRead>(),
+    TBody: Type<FacilityCreate>(),
   },
   update: {
     path: "/api/v1/facility/{id}/",
     method: HttpMethod.PUT,
-    TRes: Type<FacilityModel>(),
-    TBody: Type<FacilityRequest>(),
+    TRes: Type<FacilityRead>(),
+    TBody: Type<FacilityCreate>(),
   },
   delete: {
     path: "/api/v1/facility/{id}/",
@@ -39,12 +42,12 @@ export default {
   get: {
     path: "/api/v1/facility/{id}/",
     method: HttpMethod.GET,
-    TRes: Type<FacilityData>(),
+    TRes: Type<FacilityRead>(),
   },
   uploadCoverImage: {
     path: "/api/v1/facility/{id}/cover_image/",
     method: HttpMethod.POST,
-    TRes: Type<FacilityData>(),
+    TRes: Type<FacilityRead>(),
     TBody: Type<FormData>(),
   },
   deleteCoverImage: {
@@ -56,7 +59,7 @@ export default {
   setInvoiceExpression: {
     path: "/api/v1/facility/{id}/set_invoice_expression/",
     method: HttpMethod.POST,
-    TRes: Type<FacilityData>(),
+    TRes: Type<FacilityRead>(),
     TBody: Type<{
       invoice_number_expression: string;
     }>(),
@@ -64,7 +67,7 @@ export default {
   setMonetaryComponents: {
     path: "/api/v1/facility/{facilityId}/set_monetary_codes/",
     method: HttpMethod.POST,
-    TRes: Type<FacilityData>(),
+    TRes: Type<FacilityRead>(),
     TBody: Type<{
       discount_codes: Code[];
       discount_monetary_components: MonetaryComponentRead[];

@@ -67,7 +67,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { FacilityData } from "@/types/facility/facility";
+import { FacilityRead } from "@/types/facility/facility";
 import {
   APPOINTMENT_STATUS_COLORS,
   Appointment,
@@ -210,7 +210,7 @@ const AppointmentDetails = ({
   facility,
 }: {
   appointment: AppointmentRead;
-  facility: FacilityData;
+  facility: FacilityRead;
 }) => {
   const { user } = appointment;
   const { t } = useTranslation();

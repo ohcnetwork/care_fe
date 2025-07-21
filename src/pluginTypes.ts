@@ -12,7 +12,7 @@ import { UserBase } from "@/types/user/user";
 import { AppRoutes } from "./Routers/AppRouter";
 import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
 import { pluginMap } from "./pluginMap";
-import { FacilityData } from "./types/facility/facility";
+import { FacilityRead } from "./types/facility/facility";
 
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserBase;
@@ -44,7 +44,7 @@ export type PatientInfoCardMarkAsCompleteComponentType = React.FC<{
 }>;
 
 export type FacilityHomeActionsComponentType = React.FC<{
-  facility: FacilityData;
+  facility: FacilityRead;
   className?: string;
 }>;
 

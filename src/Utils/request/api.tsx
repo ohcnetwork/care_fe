@@ -1,4 +1,4 @@
-import { CommentModel, FacilityModel } from "@/components/Facility/models";
+import { CommentModel } from "@/components/Facility/models";
 import {
   CreateFileRequest,
   CreateFileResponse,
@@ -24,7 +24,6 @@ import {
   PatientRead,
   PatientSearchResponse,
 } from "@/types/emr/patient/patient";
-import { FacilityData } from "@/types/facility/facility";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
 import { PlugConfig } from "@/types/plugConfig";
@@ -160,18 +159,6 @@ const routes = {
     TBody: Type<void>(),
   },
 
-  getPermittedFacility: {
-    path: "/api/v1/facility/{id}/",
-    method: "GET",
-    TRes: Type<FacilityData>(),
-  },
-
-  getAnyFacility: {
-    path: "/api/v1/getallfacilities/{id}/",
-    method: "GET",
-    TRes: Type<FacilityModel>(),
-  },
-
   getScheduleAbleFacilityUser: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
     TRes: Type<UserBase>(),
@@ -284,12 +271,6 @@ const routes = {
       path: "/api/v1/facility/{facility_id}/users/",
       method: "GET",
       TRes: Type<PaginatedResponse<UserBase>>(),
-    },
-
-    show: {
-      path: "/api/v1/facility/{id}/",
-      method: "GET",
-      TRes: Type<FacilityData>(),
     },
   },
 

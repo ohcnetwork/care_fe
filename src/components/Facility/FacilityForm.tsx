@@ -31,17 +31,15 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import LocationPicker from "@/components/Common/GeoLocationPicker";
-import { FacilityModel } from "@/components/Facility/models";
 
 import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
 import { validatePincode } from "@/common/validation";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
-import { BaseFacility } from "@/types/facility/facility";
+import { FacilityRead } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
@@ -65,7 +63,7 @@ export default function FacilityForm({
   const facilityFormSchema = z.object({
     facility_type: z.string().min(1, t("facility_type_required")),
     name: z.string().min(1, t("name_is_required")),
-    description: z.string().optional(),
+    description: z.string().min(1, t("field_required")),
     features: z.array(z.number()).default([]),
     pincode: z.string().refine(validatePincode, t("invalid_pincode")),
     geo_organization: z.string().min(1, t("field_required")),
@@ -83,7 +81,7 @@ export default function FacilityForm({
     defaultValues: {
       facility_type: "",
       name: "",
-      description: "",
+      description: undefined,
       features: [],
       pincode: "",
       geo_organization: organizationId || "",
@@ -111,7 +109,7 @@ export default function FacilityForm({
 
   const { mutate: createFacility, isPending } = useMutation({
     mutationFn: mutate(facilityApi.create),
-    onSuccess: (_data: BaseFacility) => {
+    onSuccess: (_data: FacilityRead) => {
       toast.success(t("facility_added_successfully"));
       queryClient.invalidateQueries({ queryKey: ["organizationFacilities"] });
       form.reset();
@@ -122,7 +120,7 @@ export default function FacilityForm({
     mutationFn: mutate(facilityApi.update, {
       pathParams: { id: facilityId || "" },
     }),
-    onSuccess: (_data: FacilityModel) => {
+    onSuccess: (_data: FacilityRead) => {
       toast.success(t("facility_updated_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["organizationFacilities"],
@@ -140,7 +138,7 @@ export default function FacilityForm({
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(routes.getPermittedFacility, {
+    queryFn: query(facilityApi.get, {
       pathParams: { id: facilityId || "" },
     }),
     enabled: !!facilityId,
@@ -281,7 +279,7 @@ export default function FacilityForm({
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("description")}</FormLabel>
+                <FormLabel aria-required>{t("description")}</FormLabel>
                 <FormControl>
                   <Textarea
                     {...field}
