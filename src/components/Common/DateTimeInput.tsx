@@ -23,6 +23,7 @@ type DateTimeInputProps = React.ComponentProps<typeof Input> & {
 
 export function DateTimeInput({
   value,
+  max,
   onDateChange,
 
   ...props
@@ -30,12 +31,15 @@ export function DateTimeInput({
   const localValue =
     !value || typeof value !== "string" ? "" : toLocalDateTimeString(value);
 
+  const localMax =
+    !max || typeof max !== "string" ? undefined : toLocalDateTimeString(max);
+
   return (
     <Input
       {...props}
       type="datetime-local"
       value={localValue}
-      max={props.max}
+      max={localMax}
       onChange={(e) => {
         onDateChange?.(toISOWithTimezone(e.target.value) || "");
       }}
