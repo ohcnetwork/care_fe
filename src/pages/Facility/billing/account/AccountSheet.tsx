@@ -182,10 +182,10 @@ export function AccountSheet({
               <FormField
                 name="name"
                 control={methods.control}
-                rules={{ required: t("name_required") }}
+                rules={{ required: t("name_is_required") }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("name")}</FormLabel>
+                    <FormLabel aria-required>{t("name")}</FormLabel>
                     <FormControl>
                       <Input {...field} disabled={isCreating} />
                     </FormControl>
@@ -209,10 +209,10 @@ export function AccountSheet({
               <FormField
                 name="status"
                 control={methods.control}
-                rules={{ required: t("status_required") }}
+                rules={{ required: t("required") }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("status")}</FormLabel>
+                    <FormLabel aria-required>{t("status")}</FormLabel>
                     <FormControl>
                       <Select
                         value={field.value}
