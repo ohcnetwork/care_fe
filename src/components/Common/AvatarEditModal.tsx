@@ -548,15 +548,13 @@ export default function AvatarEditModal({
                       <Crop className="text-lg" />
                     )}
                     <span>
-                      {isDeleting
-                        ? t("deleting")
-                        : isProcessing
-                          ? showCroppedPreview
-                            ? `${t("uploading")}...`
-                            : `${t("cropping")}...`
-                          : showCroppedPreview
-                            ? t("upload")
-                            : t("crop")}
+                      {isProcessing
+                        ? showCroppedPreview
+                          ? `${t("uploading")}...`
+                          : `${t("cropping")}...`
+                        : showCroppedPreview
+                          ? t("upload")
+                          : t("crop")}
                     </span>
                   </Button>
                 </div>
