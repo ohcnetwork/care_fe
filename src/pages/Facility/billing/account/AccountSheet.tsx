@@ -177,7 +177,7 @@ export function AccountSheet({
           <Form {...methods}>
             <form
               onSubmit={methods.handleSubmit(onSubmit)}
-              className="space-y-6 py-6"
+              className="space-y-6 py-6 hide-required-asterisk"
             >
               <FormField
                 name="name"
@@ -274,7 +274,12 @@ export function AccountSheet({
               <SheetFooter>
                 <Button
                   type="submit"
-                  disabled={isCreating || updateMutation.isPending}
+                  disabled={
+                    isCreating ||
+                    updateMutation.isPending ||
+                    !methods.formState.isValid ||
+                    !methods.formState.isDirty
+                  }
                 >
                   {isEdit ? t("update") : t("create")}
                 </Button>
