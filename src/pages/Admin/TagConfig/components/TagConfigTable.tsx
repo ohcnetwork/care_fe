@@ -231,10 +231,10 @@ export default function TagConfigTable({
                   onClick={() => onView(config.id)}
                 >
                   <TableCell className="font-medium">
-                    <div className="flex flex-col">
+                    <div className="flex flex-col max-w-md text-sm break-words whitespace-normal">
                       <span>{config.display}</span>
                       {config.description && (
-                        <span className="text-sm truncate max-w-md text-gray-500">
+                        <span className="text-gray-500">
                           {config.description}
                         </span>
                       )}
