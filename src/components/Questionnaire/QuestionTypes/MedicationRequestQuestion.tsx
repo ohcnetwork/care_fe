@@ -1381,7 +1381,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           value={medication.authored_on}
           onDateChange={(val) => onUpdate?.({ authored_on: val })}
           disabled={disabled || isReadOnly}
-          max={new Date().toISOString().slice(0, 16)}
+          max={new Date().toISOString()}
         />
       </div>
       {/* Notes */}
