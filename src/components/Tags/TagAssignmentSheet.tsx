@@ -130,9 +130,12 @@ export function TagSelectorPopover({
       queryParams: {
         resource,
         parent_is_null: true,
+        status: "active",
+        ordering: "priority",
         ...(search ? { search } : {}),
       },
     }),
+    enabled: open,
   });
 
   // Helper to fetch children for a tag
@@ -140,7 +143,12 @@ export function TagSelectorPopover({
     return useQuery({
       queryKey: ["tags", resource, "parent", parentId],
       queryFn: query(tagConfigApi.list, {
-        queryParams: { resource, parent: parentId },
+        queryParams: {
+          resource,
+          parent: parentId,
+          status: "active",
+          ordering: "priority",
+        },
       }),
       enabled: expanded.has(parentId),
     });
