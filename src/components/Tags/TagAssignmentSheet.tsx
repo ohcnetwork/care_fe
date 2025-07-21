@@ -131,6 +131,7 @@ export function TagSelectorPopover({
         resource,
         parent_is_null: true,
         status: "active",
+        ordering: "-priority",
         ...(search ? { search } : {}),
       },
     }),
@@ -142,7 +143,12 @@ export function TagSelectorPopover({
     return useQuery({
       queryKey: ["tags", resource, "parent", parentId],
       queryFn: query(tagConfigApi.list, {
-        queryParams: { resource, parent: parentId, status: "active" },
+        queryParams: {
+          resource,
+          parent: parentId,
+          status: "active",
+          ordering: "-priority",
+        },
       }),
       enabled: expanded.has(parentId),
     });
