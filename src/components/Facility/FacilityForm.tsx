@@ -33,7 +33,6 @@ import { Textarea } from "@/components/ui/textarea";
 import LocationPicker from "@/components/Common/GeoLocationPicker";
 
 import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
-import { validatePincode } from "@/common/validation";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -65,7 +64,7 @@ export default function FacilityForm({
     name: z.string().min(1, t("name_is_required")),
     description: z.string().min(1, t("field_required")),
     features: z.array(z.number()).default([]),
-    pincode: z.string().refine(validatePincode, t("invalid_pincode")),
+    pincode: validators().pincode,
     geo_organization: z.string().min(1, t("field_required")),
     address: z.string().min(1, t("address_is_required")),
     phone_number: validators().phoneNumber.required,
@@ -83,7 +82,7 @@ export default function FacilityForm({
       name: "",
       description: undefined,
       features: [],
-      pincode: "",
+      pincode: undefined,
       geo_organization: organizationId || "",
       address: "",
       phone_number: "",
@@ -199,7 +198,7 @@ export default function FacilityForm({
         name: facilityData.name,
         description: facilityData.description || "",
         features: facilityData.features || [],
-        pincode: facilityData.pincode?.toString() || "",
+        pincode: facilityData.pincode || undefined,
         geo_organization: (
           facilityData.geo_organization as unknown as Organization
         )?.id,
@@ -350,8 +349,17 @@ export default function FacilityForm({
                     <Input
                       data-cy="facility-pincode"
                       placeholder={t("enter_pincode")}
+                      type="number"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       maxLength={6}
                       {...field}
+                      onChange={(e) => {
+                        const value = e.target.value
+                          ? Number(e.target.value)
+                          : undefined;
+                        field.onChange(value);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
