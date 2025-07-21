@@ -893,7 +893,7 @@ function AppointmentColumn(props: {
                 >
                   <AppointmentCard
                     appointment={appointment}
-                    statusGroup={props.statusGroup}
+                    showStatus={props.statusGroup.statuses.length > 1}
                   />
                 </Link>
               </li>
@@ -907,10 +907,10 @@ function AppointmentColumn(props: {
 
 function AppointmentCard({
   appointment,
-  statusGroup,
+  showStatus,
 }: {
   appointment: AppointmentRead;
-  statusGroup: AppointmentStatusGroup;
+  showStatus: boolean;
 }) {
   const { patient } = appointment;
   const { t } = useTranslation();
@@ -936,7 +936,7 @@ function AppointmentCard({
               {tag.display}
             </Badge>
           ))}
-          {statusGroup.statuses.length > 1 && (
+          {showStatus && (
             <Badge
               variant={APPOINTMENT_STATUS_COLORS[appointment.status]}
               className="text-xs"
