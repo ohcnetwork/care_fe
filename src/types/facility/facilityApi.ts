@@ -54,9 +54,4 @@ export default {
       discount_monetary_components: MonetaryComponentRead[];
     }>(),
   },
-  getPermittedFacility: {
-    path: "/api/v1/facility/{id}/",
-    method: HttpMethod.GET,
-    TRes: Type<FacilityData>(),
-  },
 } as const;

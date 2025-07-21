@@ -139,7 +139,7 @@ export default function FacilityForm({
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(facilityApi.getPermittedFacility, {
+    queryFn: query(facilityApi.getFacility, {
       pathParams: { id: facilityId || "" },
     }),
     enabled: !!facilityId,
@@ -351,6 +351,7 @@ export default function FacilityForm({
                     <Input
                       data-cy="facility-pincode"
                       placeholder={t("enter_pincode")}
+                      type="number"
                       maxLength={6}
                       {...field}
                     />
