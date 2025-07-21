@@ -89,7 +89,6 @@ export default function AvatarEditModal({
   aspectRatio = 1,
 }: Props) {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isCropping, setIsCropping] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File>();
   const [preview, setPreview] = useState<string>();
@@ -154,11 +153,6 @@ export default function AvatarEditModal({
       const imageData = canvas.toDataURL("image/jpeg");
       setPreview(imageData);
       setShowCameraPreview(true);
-      setCroppedAreaPixels(null);
-      setCroppedPreview(null);
-      setShowCroppedPreview(false);
-      setCrop({ x: 0, y: 0 });
-      setZoom(1);
 
       canvas.toBlob(
         (blob) => {
@@ -177,20 +171,18 @@ export default function AvatarEditModal({
     }
   };
 
-  const closeModal = (forceClose = false) => {
-    if (forceClose || (!showCroppedPreview && !isCropping)) {
-      setPreview(undefined);
-      setIsProcessing(false);
-      setIsDeleting(false);
-      setSelectedFile(undefined);
-      setIsCameraOpen(false);
-      setCroppedAreaPixels(null);
-      setCroppedPreview(null);
-      setShowCroppedPreview(false);
-      setShowCameraPreview(false);
-      setCrop({ x: 0, y: 0 });
-      setZoom(1);
-    }
+  const closeModal = () => {
+    setPreview(undefined);
+    setIsProcessing(false);
+    setIsDeleting(false);
+    setSelectedFile(undefined);
+    setIsCameraOpen(false);
+    setCroppedAreaPixels(null);
+    setCroppedPreview(null);
+    setShowCroppedPreview(false);
+    setShowCameraPreview(false);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
     onOpenChange(false);
   };
 
@@ -227,7 +219,7 @@ export default function AvatarEditModal({
     if (!croppedAreaPixels || !preview) return;
 
     try {
-      setIsCropping(true);
+      setIsProcessing(true);
       const { file, previewUrl } = await getCroppedImg(
         preview,
         croppedAreaPixels,
@@ -240,7 +232,7 @@ export default function AvatarEditModal({
     } catch {
       toast.error(t("failed_to_crop_image_using_original_image"));
     } finally {
-      setIsCropping(false);
+      setIsProcessing(false);
     }
   };
 
@@ -327,17 +319,7 @@ export default function AvatarEditModal({
   const hintMessage = hint || defaultHint;
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(open) => {
-        if (!open) {
-          // When clicking outside, don't force close if we're in cropping/preview mode
-          closeModal(!showCroppedPreview && !isCropping);
-        } else {
-          onOpenChange(open);
-        }
-      }}
-    >
+    <Dialog open={open} onOpenChange={closeModal}>
       <DialogContent className="md:max-w-4xl max-h-screen overflow-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">{title}</DialogTitle>
@@ -521,7 +503,7 @@ export default function AvatarEditModal({
                     variant="outline"
                     onClick={(e) => {
                       e.stopPropagation();
-                      closeModal(true);
+                      closeModal();
                       dragProps.setFileDropError("");
                     }}
                     disabled={isProcessing || isDeleting}
@@ -537,7 +519,7 @@ export default function AvatarEditModal({
                       {isDeleting ? (
                         <CareIcon
                           icon="l-spinner"
-                          className=" animate-spin text-lg mr-1"
+                          className="animate-spin text-lg mr-1"
                         />
                       ) : null}
                       {isDeleting ? `${t("deleting")}...` : t("delete")}
@@ -551,17 +533,11 @@ export default function AvatarEditModal({
                       (!!imageUrl && !preview) ||
                       isProcessing ||
                       isDeleting ||
-                      isCropping ||
                       !selectedFile ||
                       (!croppedAreaPixels && !showCroppedPreview)
                     }
                   >
                     {isProcessing ? (
-                      <CareIcon
-                        icon="l-spinner"
-                        className="animate-spin text-lg"
-                      />
-                    ) : isCropping ? (
                       <CareIcon
                         icon="l-spinner"
                         className="animate-spin text-lg"
@@ -573,12 +549,10 @@ export default function AvatarEditModal({
                     )}
                     <span>
                       {isProcessing
-                        ? `${t("uploading")}` + "..."
-                        : isCropping
-                          ? `${t("cropping")}` + "..."
-                          : showCroppedPreview
-                            ? `${t("upload")}`
-                            : `${t("crop")}`}
+                        ? `${t("uploading")}...`
+                        : showCroppedPreview
+                          ? `${t("upload")}`
+                          : `${t("crop")}`}
                     </span>
                   </Button>
                 </div>
@@ -637,7 +611,8 @@ export default function AvatarEditModal({
                     variant="outline"
                     onClick={() => {
                       setIsCameraOpen(false);
-                      closeModal(true);
+                      setPreview(undefined);
+                      closeModal();
                     }}
                     disabled={isProcessing || isDeleting}
                   >
