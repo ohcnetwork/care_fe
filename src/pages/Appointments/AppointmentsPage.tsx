@@ -12,6 +12,7 @@ import {
   subDays,
 } from "date-fns";
 import dayjs from "dayjs";
+import { TFunction } from "i18next";
 import { Edit3Icon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -92,8 +93,6 @@ import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import {
   Appointment,
-  AppointmentCancelledStatus,
-  AppointmentNonCancelledStatus,
   AppointmentRead,
   AppointmentStatus,
   AppointmentStatuses,
@@ -109,14 +108,39 @@ interface DateRangeDisplayProps {
   dateTo: string | null;
 }
 
-const FILTERED_APPOINTMENT_STATUSES: Partial<AppointmentStatus>[] = [
-  "booked",
-  "checked_in",
-  "in_consultation",
-  "fulfilled",
-  "noshow",
-  "cancelled",
-] as const;
+type AppointmentStatusGroup = {
+  label: string;
+  statuses: AppointmentStatus[];
+};
+
+const getStatusGroups = (t: TFunction): AppointmentStatusGroup[] => {
+  return [
+    {
+      label: t("booked"),
+      statuses: ["booked"],
+    },
+    {
+      label: t("checked_in"),
+      statuses: ["checked_in"],
+    },
+    {
+      label: t("in_consultation"),
+      statuses: ["in_consultation"],
+    },
+    {
+      label: t("fulfilled"),
+      statuses: ["fulfilled"],
+    },
+    {
+      label: t("noshow"),
+      statuses: ["noshow"],
+    },
+    {
+      label: t("cancelled"),
+      statuses: ["cancelled"],
+    },
+  ];
+};
 
 function AppointmentsEmptyState() {
   const { t } = useTranslation();
@@ -658,10 +682,10 @@ export default function AppointmentsPage() {
           )}
         >
           <div className="flex w-max space-x-4">
-            {FILTERED_APPOINTMENT_STATUSES.map((status) => (
+            {getStatusGroups(t).map((statusGroup) => (
               <AppointmentColumn
-                key={status}
-                status={status}
+                key={statusGroup.label}
+                statusGroup={statusGroup}
                 slot={slot?.id}
                 practitioners={qParams.practitioners || null}
                 date_from={qParams.date_from}
@@ -697,7 +721,7 @@ export default function AppointmentsPage() {
 }
 
 function AppointmentColumn(props: {
-  status: AppointmentNonCancelledStatus | AppointmentCancelledStatus;
+  statusGroup: AppointmentStatusGroup;
   practitioners: string | null;
   slot?: string | null;
   tags?: string[];
@@ -714,7 +738,7 @@ function AppointmentColumn(props: {
     queryKey: [
       "appointments",
       facilityId,
-      props.status,
+      props.statusGroup.statuses,
       props.practitioners,
       props.slot,
       props.date_from,
@@ -726,7 +750,7 @@ function AppointmentColumn(props: {
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facilityId },
       queryParams: {
-        status: props.status,
+        status: props.statusGroup.statuses.join(","),
         tags: props.tags?.join(","),
         limit: 100,
         slot: props.slot,
@@ -757,7 +781,7 @@ function AppointmentColumn(props: {
     >
       <div className="flex px-3 items-center gap-2 mb-4">
         <h2 className="font-semibold capitalize text-base px-1">
-          {t(props.status)}
+          {props.statusGroup.label}
         </h2>
         <span className="bg-gray-200 px-2 py-1 rounded-md text-xs font-medium">
           {data?.count == null ? (
@@ -914,11 +938,13 @@ function AppointmentRow(props: {
             onValueChange={(value) => props.updateQuery({ status: value })}
           >
             <TabsList>
-              {FILTERED_APPOINTMENT_STATUSES.map((status) => (
-                <TabsTrigger key={status} value={status}>
-                  {t(status)}
-                </TabsTrigger>
-              ))}
+              {getStatusGroups(t).map((group) => {
+                return (
+                  <TabsTrigger key={group.label} value={group.label}>
+                    {group.label}
+                  </TabsTrigger>
+                );
+              })}
             </TabsList>
           </Tabs>
         </div>
@@ -930,12 +956,12 @@ function AppointmentRow(props: {
             onValueChange={(value) => props.updateQuery({ status: value })}
           >
             <SelectTrigger className="h-8 w-40">
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder={t("status")} />
             </SelectTrigger>
             <SelectContent>
-              {FILTERED_APPOINTMENT_STATUSES.map((status) => (
-                <SelectItem key={status} value={status}>
-                  <div className="flex items-center">{t(status)}</div>
+              {getStatusGroups(t).map((group) => (
+                <SelectItem key={group.label} value={group.label}>
+                  <div className="flex items-center">{group.label}</div>
                 </SelectItem>
               ))}
             </SelectContent>
