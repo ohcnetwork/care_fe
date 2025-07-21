@@ -289,7 +289,7 @@ export default function PatientRegistration(
         permanent_address: values.same_address
           ? values.address
           : values.permanent_address,
-        pincode: String(values.pincode) || undefined,
+        pincode: values.pincode || undefined,
         identifiers: editableIdentifiers,
       });
       return;
@@ -303,7 +303,7 @@ export default function PatientRegistration(
           ? values.address
           : values.permanent_address,
         facility: facilityId,
-        pincode: String(values.pincode) || undefined,
+        pincode: values.pincode || undefined,
         tags: selectedTags.map((tag) => tag.id),
         identifiers: editableIdentifiers,
       });
@@ -899,6 +899,7 @@ export default function PatientRegistration(
                             : undefined;
                           field.onChange(value);
                         }}
+                        value={field.value || undefined}
                         data-cy="pincode-input"
                       />
                     </FormControl>

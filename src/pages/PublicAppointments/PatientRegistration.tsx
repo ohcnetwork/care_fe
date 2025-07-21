@@ -26,12 +26,12 @@ import { GENDERS, GENDER_TYPES } from "@/common/constants";
 import { validateName, validatePincode } from "@/common/validation";
 
 import { usePubSub } from "@/Utils/pubsubContext";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { Patient } from "@/types/emr/patient/patient";
+import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { Appointment } from "@/types/scheduling/schedule";
 
@@ -63,7 +63,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       age: z.string().optional(),
       date_of_birth: z.date().or(z.string()).optional(),
       pincode: z
-        .string()
+        .number()
         .min(1, t("field_required"))
         .refine((pincode) => {
           if (!pincode) return true;
@@ -109,7 +109,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       age: undefined,
       date_of_birth: undefined,
       address: "",
-      pincode: "",
+      pincode: undefined,
       geo_organization: undefined,
     },
   });
@@ -141,7 +141,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
 
   const { mutate: createPatient } = useMutation({
     mutationFn: (body: Partial<AppointmentPatientRegister>) =>
-      mutate(routes.otp.createPatient, {
+      mutate(publicPatientApi.createPatient, {
         body: { ...body, phone_number: tokenData.phoneNumber },
         headers: {
           Authorization: `Bearer ${tokenData.token}`,
@@ -367,7 +367,15 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   <FormItem className="flex flex-col">
                     <FormLabel aria-required>{t("pincode")}</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input
+                        {...field}
+                        onChange={(e) => {
+                          const value = e.target.value
+                            ? Number(e.target.value)
+                            : undefined;
+                          field.onChange(value);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
