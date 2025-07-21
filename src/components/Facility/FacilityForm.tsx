@@ -34,14 +34,13 @@ import LocationPicker from "@/components/Common/GeoLocationPicker";
 import { FacilityModel } from "@/components/Facility/models";
 
 import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
-import { validatePincode } from "@/common/validation";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { BaseFacility } from "@/types/facility/facility";
+import facilityApi from "@/types/facility/facilityApi";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -66,7 +65,7 @@ export default function FacilityForm({
     name: z.string().min(1, t("name_is_required")),
     description: z.string().optional(),
     features: z.array(z.number()).default([]),
-    pincode: z.string().refine(validatePincode, t("invalid_pincode")),
+    pincode: validators().pincode,
     geo_organization: z.string().min(1, t("field_required")),
     address: z.string().min(1, t("address_is_required")),
     phone_number: validators().phoneNumber.required,
@@ -84,7 +83,7 @@ export default function FacilityForm({
       name: "",
       description: "",
       features: [],
-      pincode: "",
+      pincode: undefined,
       geo_organization: organizationId || "",
       address: "",
       phone_number: "",
@@ -109,7 +108,7 @@ export default function FacilityForm({
   }, [org, organizationId]);
 
   const { mutate: createFacility, isPending } = useMutation({
-    mutationFn: mutate(routes.facility.create),
+    mutationFn: mutate(facilityApi.create),
     onSuccess: (_data: BaseFacility) => {
       toast.success(t("facility_added_successfully"));
       queryClient.invalidateQueries({ queryKey: ["organizationFacilities"] });
@@ -118,7 +117,7 @@ export default function FacilityForm({
     },
   });
   const { mutate: updateFacility, isPending: isUpdatePending } = useMutation({
-    mutationFn: mutate(routes.updateFacility, {
+    mutationFn: mutate(facilityApi.updateFacility, {
       pathParams: { id: facilityId || "" },
     }),
     onSuccess: (_data: FacilityModel) => {
@@ -139,7 +138,7 @@ export default function FacilityForm({
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(routes.getPermittedFacility, {
+    queryFn: query(facilityApi.getFacility, {
       pathParams: { id: facilityId || "" },
     }),
     enabled: !!facilityId,
@@ -200,7 +199,7 @@ export default function FacilityForm({
         name: facilityData.name,
         description: facilityData.description || "",
         features: facilityData.features || [],
-        pincode: facilityData.pincode?.toString() || "",
+        pincode: facilityData.pincode || undefined,
         geo_organization: (
           facilityData.geo_organization as unknown as Organization
         )?.id,
@@ -351,8 +350,17 @@ export default function FacilityForm({
                     <Input
                       data-cy="facility-pincode"
                       placeholder={t("enter_pincode")}
+                      type="number"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       maxLength={6}
                       {...field}
+                      onChange={(e) => {
+                        const value = e.target.value
+                          ? Number(e.target.value)
+                          : undefined;
+                        field.onChange(value);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

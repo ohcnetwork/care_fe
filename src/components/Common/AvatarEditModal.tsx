@@ -175,7 +175,6 @@ export default function AvatarEditModal({
       );
     }
   };
-
   const closeModal = (force = false) => {
     if (force) {
       setPreview(undefined);

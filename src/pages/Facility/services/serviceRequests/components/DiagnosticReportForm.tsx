@@ -43,6 +43,8 @@ import FileUploadDialog from "@/components/Files/FileUploadDialog";
 
 import useFileUpload from "@/hooks/useFileUpload";
 
+import { BACKEND_ALLOWED_EXTENSIONS } from "@/common/constants";
+
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { Code } from "@/types/base/code/code";
@@ -281,7 +283,7 @@ export function DiagnosticReportForm({
   const fileUpload = useFileUpload({
     type: "diagnostic_report" as any,
     multiple: true,
-    allowedExtensions: ["pdf"],
+    allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
     allowNameFallback: false,
     onUpload: () => {
       queryClient.invalidateQueries({
@@ -802,7 +804,7 @@ export function DiagnosticReportForm({
             onClick={() => handleDeleteObservation(definition.id, index)}
             disabled={isUpdatingStatus}
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="size-4" />
           </Button>
         </div>
         {definition.component.map((component, componentIndex) => {
@@ -824,7 +826,7 @@ export function DiagnosticReportForm({
                 {component.permitted_unit && (
                   <div className="w-full sm:w-32">
                     <Label className="text-sm font-medium mb-1 block text-gray-700">
-                      Unit
+                      {t("unit")}
                     </Label>
                     <Select
                       value={componentData.unit}
@@ -862,7 +864,7 @@ export function DiagnosticReportForm({
 
                 <div className="flex-1">
                   <Label className="text-sm font-medium mb-1 block text-gray-700">
-                    Result
+                    {t("result")}
                   </Label>
                   <Input
                     value={componentData.value}
@@ -875,7 +877,7 @@ export function DiagnosticReportForm({
                         componentData.unit,
                       )
                     }
-                    placeholder="Component value"
+                    placeholder={t("component_value")}
                     type={
                       component.permitted_data_type === "decimal" ||
                       component.permitted_data_type === "integer"
@@ -902,7 +904,7 @@ export function DiagnosticReportForm({
                     htmlFor={`abnormal-checkbox-${definition.id}-${component.code.code}-${index}`}
                     className="text-sm font-medium text-gray-950 cursor-pointer"
                   >
-                    Abnormal
+                    {t("abnormal")}
                   </Label>
                 </div>
               </div>
@@ -1042,7 +1044,7 @@ export function DiagnosticReportForm({
                                     {definition.permitted_unit && (
                                       <div className="w-full sm:w-32">
                                         <Label className="text-sm font-medium mb-1 block text-gray-700">
-                                          Unit
+                                          {t("unit")}
                                         </Label>
                                         <Select
                                           value={observationData.unit}
@@ -1055,7 +1057,9 @@ export function DiagnosticReportForm({
                                           }
                                         >
                                           <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Unit" />
+                                            <SelectValue
+                                              placeholder={t("unit")}
+                                            />
                                           </SelectTrigger>
                                           <SelectContent>
                                             <SelectItem
@@ -1074,7 +1078,7 @@ export function DiagnosticReportForm({
 
                                     <div className="flex-1">
                                       <Label className="text-sm font-medium mb-1 block text-gray-700">
-                                        Result
+                                        {t("result")}
                                       </Label>
                                       <Input
                                         value={observationData.value}
@@ -1085,7 +1089,7 @@ export function DiagnosticReportForm({
                                             e.target.value,
                                           )
                                         }
-                                        placeholder="Result value"
+                                        placeholder={t("result_value")}
                                         type={
                                           definition.permitted_data_type ===
                                             "decimal" ||
@@ -1113,7 +1117,7 @@ export function DiagnosticReportForm({
                                         htmlFor={`abnormal-checkbox-${definition.id}-${index}`}
                                         className="text-sm font-medium text-gray-700 cursor-pointer"
                                       >
-                                        Abnormal
+                                        {t("abnormal")}
                                       </Label>
                                       <Button
                                         type="button"
@@ -1128,7 +1132,7 @@ export function DiagnosticReportForm({
                                         }
                                         disabled={isUpdatingStatus}
                                       >
-                                        <Trash2 className="h-4 w-4" />
+                                        <Trash2 className="size-4" />
                                       </Button>
                                     </div>
                                   </div>
@@ -1168,8 +1172,8 @@ export function DiagnosticReportForm({
                                 });
                               }}
                             >
-                              <PlusCircle className="h-4 w-4 mr-2" />
-                              Add Another Result
+                              <PlusCircle className="size-4 mr-2" />
+                              {t("add_another_result")}
                             </Button>
                           </div>
                         </CardContent>
@@ -1207,8 +1211,8 @@ export function DiagnosticReportForm({
                         onClick={handleSubmit}
                         disabled={isSubmitting}
                       >
-                        <Save className="h-4 w-4 mr-2" />
-                        Save Results
+                        <Save className="size-4 mr-2" />
+                        {t("save_results")}
                       </Button>
                     </div>
                   )}
@@ -1233,7 +1237,7 @@ export function DiagnosticReportForm({
 
                       {fullReport?.status ===
                         DiagnosticReportStatus.preliminary && (
-                        <Card className="mt-4 bg-gray-50 border-gray-200 shadow-none">
+                        <Card className="mt-4 bg-gray-50 border-gray-200 shadow-none cursor-auto">
                           <CardContent className="p-4">
                             <div className="space-y-4">
                               <div className="flex flex-col items-center justify-between gap-1">
@@ -1241,8 +1245,16 @@ export function DiagnosticReportForm({
                                 <Label className="text-base font-medium">
                                   {t("choose_file")}
                                 </Label>
-                                <div className="text-sm text-gray-500">
-                                  {t("pdf")}
+                                <div className="text-sm text-gray-500 mb-2">
+                                  {t("allowed_formats_are", {
+                                    formats:
+                                      BACKEND_ALLOWED_EXTENSIONS.slice(
+                                        0,
+                                        5,
+                                      ).join(", ") +
+                                      ", " +
+                                      t("etc"),
+                                  })}
                                 </div>
                                 <Label
                                   htmlFor="file_upload_diagnostic_report"
@@ -1338,7 +1350,7 @@ export function DiagnosticReportForm({
                     }
                     className="w-full sm:w-auto sm:shrink-0"
                   >
-                    <PlusCircle className="h-4 w-4 mr-2" />
+                    <PlusCircle className="size-4 mr-2" />
                     {t("create_report")}
                   </Button>
                 </div>
