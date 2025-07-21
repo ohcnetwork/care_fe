@@ -316,7 +316,7 @@ export function ChargeItemQuestion({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("Item")}</TableHead>
+              <TableHead>{t("item")}</TableHead>
               <TableHead>{t("quantity")}</TableHead>
               <TableHead>{t("status")}</TableHead>
               <TableHead>{t("note")}</TableHead>

@@ -104,7 +104,7 @@ export default function PurchaseOrdersBySupplier({
             <div className="flex items-center gap-8">
               <div className="text-right">
                 <p className="text-sm text-gray-500">{t("entry_date")}</p>
-                <p className="font-semibold">{t("n_a")}</p>
+                <p className="font-semibold">{t("na")}</p>
               </div>
               <div className="text-right">
                 <p className="text-sm text-gray-500">{t("status")}</p>

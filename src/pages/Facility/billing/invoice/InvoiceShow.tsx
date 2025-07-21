@@ -1025,7 +1025,7 @@ export function InvoiceShow({
               onClick={handleRemoveChargeItem}
               disabled={isRemoving}
             >
-              {isRemoving ? t("removing...") : t("remove")}
+              {isRemoving ? t("removing_with_dots") : t("remove")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

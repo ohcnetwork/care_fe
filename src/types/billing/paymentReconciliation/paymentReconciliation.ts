@@ -1,3 +1,4 @@
+import { AccountRead } from "@/types/billing/account/Account";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 
 export enum PaymentReconciliationType {
@@ -84,4 +85,5 @@ export type PaymentReconciliationUpdate = Omit<PaymentReconciliationBase, "id">;
 
 export interface PaymentReconciliationRead extends PaymentReconciliationBase {
   target_invoice: InvoiceRead;
+  account: AccountRead;
 }

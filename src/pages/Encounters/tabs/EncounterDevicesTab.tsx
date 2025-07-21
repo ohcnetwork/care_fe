@@ -33,6 +33,7 @@ import query from "@/Utils/request/query";
 import AssociateDeviceSheet from "@/pages/Encounters/AssociateDeviceSheet";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import deviceApi from "@/types/device/deviceApi";
+import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 
 export const EncounterDevicesTab = () => {
   const { t } = useTranslation();
@@ -43,9 +44,12 @@ export const EncounterDevicesTab = () => {
     patientId,
     facilityId,
     currentEncounterId,
+    selectedEncounter: encounter,
   } = useEncounter();
 
-  const readOnly = encounterId !== currentEncounterId;
+  const readOnly =
+    encounterId !== currentEncounterId ||
+    (encounter && inactiveEncounterStatus.includes(encounter.status));
 
   const limit = RESULTS_PER_PAGE_LIMIT;
 

@@ -11,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationAssociationStatus } from "@/types/location/association";
@@ -202,7 +202,7 @@ export type LocationHistory = {
 
 export interface Encounter {
   id: string;
-  patient: Patient;
+  patient: PatientRead;
   facility: {
     id: string;
     name: string;
