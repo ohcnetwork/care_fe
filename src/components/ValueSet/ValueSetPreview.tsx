@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -25,17 +24,17 @@ interface ValueSetPreviewProps {
 export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
-  const [search, setSearch] = useState("");
-  const [autocompleteOpen, setAutocompleteOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCode, setSelectedCode] = useState<string | null>(null);
 
   const { data: searchQuery, isFetching } = useQuery({
-    queryKey: ["valueset", "preview_all", valueset.compose],
-    queryFn: query(valuesetApi.preview_search, {
-      queryParams: { count: 1000 },
+    queryKey: ["valueset", "preview_search", searchTerm, valueset.compose],
+    queryFn: query.debounced(valuesetApi.preview_search, {
+      queryParams: { search: searchTerm, count: 20 },
       body: {
         ...valueset,
         name: valueset.name,
-        ...(valueset.slug?.match(/^[-\w]+$/) ? { slug: valueset.slug } : {}),
+        slug: valueset.slug,
         compose: valueset.compose.include[0]?.system
           ? valueset.compose
           : {
@@ -47,16 +46,14 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
     enabled: open,
   });
 
-  const filteredResults = useMemo(() => {
-    if (!searchQuery?.results) return [];
-    const lower = search.toLowerCase();
-    return searchQuery.results.filter(
-      (item) =>
-        item.code?.toLowerCase().includes(lower) ||
-        item.display?.toLowerCase().includes(lower) ||
-        item.system?.toLowerCase().includes(lower),
-    );
-  }, [search, searchQuery]);
+  const detailsToShow = useMemo(() => {
+    if (selectedCode) {
+      return searchQuery?.results?.filter(
+        (result) => result.code === selectedCode,
+      );
+    }
+    return searchQuery?.results;
+  }, [searchQuery?.results, selectedCode]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -73,47 +70,32 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
 
         <Autocomplete
           options={mergeAutocompleteOptions(
-            filteredResults.map((option) => ({
+            searchQuery?.results?.map((option) => ({
               label: option.display || "",
               value: option.code,
-            })),
+            })) || [],
           )}
-          value={search}
-          onChange={(value) => {
-            setSearch(value);
-
-            const match = filteredResults.find(
-              (opt) =>
-                opt.code?.toLowerCase() === value.toLowerCase() ||
-                opt.display?.toLowerCase() === value.toLowerCase(),
-            );
-
-            if (match) {
-              setAutocompleteOpen(false); // close dropdown
-            }
+          value={selectedCode || ""}
+          onChange={(val) => {
+            setSelectedCode(val);
+            setSearchTerm("");
           }}
-          onSearch={setSearch}
+          onSearch={(term) => {
+            setSearchTerm(term);
+            setSelectedCode(null);
+          }}
           placeholder={t("search_concept")}
           noOptionsMessage={
             searchQuery && !isFetching ? t("no_results_found") : t("searching")
           }
           className="px-1 mt-6"
         />
-
-        <div className="mt-4 px-1 text-sm text-gray-700 border-t pt-2 space-y-2">
-          {filteredResults.map((item) => (
-            <div key={item.code} className="border-b pb-2">
-              <p>
-                <strong>Code:</strong> {item.code}
-              </p>
-              <p>
-                <strong>Display:</strong> {item.display}
-              </p>
-              {item.system && (
-                <p>
-                  <strong>System:</strong> {item.system}
-                </p>
-              )}
+        <div className="mt-4">
+          {(detailsToShow ?? []).map((item) => (
+            <div key={item.code} className="py-2">
+              <div className="text-sm font-semibold">{item.display}</div>
+              <div className="text-xs text-gray-500">{item.code}</div>
+              <div className="text-xs text-gray-500">{item.system}</div>
             </div>
           ))}
         </div>
