@@ -189,7 +189,6 @@ export default function AvatarEditModal({
       setShowCameraPreview(false);
       setCrop({ x: 0, y: 0 });
       setZoom(1);
-      dragProps.setFileDropError("");
     }
     onOpenChange(false);
   };
@@ -518,6 +517,7 @@ export default function AvatarEditModal({
                     onClick={(e) => {
                       e.stopPropagation();
                       closeModal(true);
+                      dragProps.setFileDropError("");
                     }}
                     disabled={isProcessing || isDeleting}
                   >
