@@ -206,3 +206,8 @@ export interface AppointmentCancelRequest {
   reason: "cancelled" | "entered_in_error";
   reason_for_visit?: string;
 }
+
+export interface AppointmentRescheduleRequest {
+  new_slot: string;
+  reason: string;
+}
