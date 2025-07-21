@@ -89,6 +89,7 @@ export default function AvatarEditModal({
   aspectRatio = 1,
 }: Props) {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File>();
   const [preview, setPreview] = useState<string>();
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
@@ -173,6 +174,7 @@ export default function AvatarEditModal({
   const closeModal = () => {
     setPreview(undefined);
     setIsProcessing(false);
+    setIsDeleting(false);
     setSelectedFile(undefined);
     setIsCameraOpen(false);
     setCroppedAreaPixels(null);
@@ -263,14 +265,14 @@ export default function AvatarEditModal({
   };
 
   const deleteAvatar = async () => {
-    setIsProcessing(true);
+    setIsDeleting(true);
     await handleDelete(
       () => {
-        setIsProcessing(false);
+        setIsDeleting(false);
         setPreview(undefined);
         closeModal();
       },
-      () => setIsProcessing(false),
+      () => setIsDeleting(false),
     );
   };
 
@@ -470,6 +472,7 @@ export default function AvatarEditModal({
                       id="upload-cover-image"
                       variant="primary"
                       className="w-full"
+                      disabled={isProcessing || isDeleting}
                       asChild
                     >
                       <label className="cursor-pointer">
@@ -484,6 +487,7 @@ export default function AvatarEditModal({
                           accept="image/*"
                           className="hidden"
                           onChange={onSelectFile}
+                          disabled={isProcessing || isDeleting}
                         />
                       </label>
                     </Button>
@@ -504,7 +508,7 @@ export default function AvatarEditModal({
                       closeModal();
                       dragProps.setFileDropError("");
                     }}
-                    disabled={isProcessing}
+                    disabled={isProcessing || isDeleting}
                   >
                     {t("cancel")}
                   </Button>
@@ -512,9 +516,15 @@ export default function AvatarEditModal({
                     <Button
                       variant="destructive"
                       onClick={deleteAvatar}
-                      disabled={isProcessing}
+                      disabled={isProcessing || isDeleting}
                     >
-                      {t("delete")}
+                      {isDeleting ? (
+                        <CareIcon
+                          icon="l-spinner"
+                          className="animate-spin text-lg mr-1"
+                        />
+                      ) : null}
+                      {isDeleting ? `${t("deleting")}...` : t("delete")}
                     </Button>
                   )}
                   <Button
@@ -524,6 +534,7 @@ export default function AvatarEditModal({
                     disabled={
                       (!!imageUrl && !preview) ||
                       isProcessing ||
+                      isDeleting ||
                       !selectedFile ||
                       (!croppedAreaPixels && !showCroppedPreview)
                     }
@@ -577,7 +588,11 @@ export default function AvatarEditModal({
                   />
                 </div>
                 <div className="flex flex-col gap-2 pt-4 sm:flex-row">
-                  <Button variant="primary" onClick={handleSwitchCamera}>
+                  <Button
+                    variant="primary"
+                    onClick={handleSwitchCamera}
+                    disabled={isProcessing || isDeleting}
+                  >
                     <CareIcon icon="l-camera-change" className="text-lg" />
                     {`${t("switch")} ${t("camera")}`}
                   </Button>
@@ -587,6 +602,7 @@ export default function AvatarEditModal({
                       captureImage();
                       setIsCameraOpen(false);
                     }}
+                    disabled={isProcessing || isDeleting}
                   >
                     <CareIcon icon="l-capture" className="text-lg" />
                     {t("capture")}
@@ -600,7 +616,7 @@ export default function AvatarEditModal({
                       setPreview(undefined);
                       closeModal();
                     }}
-                    disabled={isProcessing}
+                    disabled={isProcessing || isDeleting}
                   >
                     {t("close")}
                   </Button>
