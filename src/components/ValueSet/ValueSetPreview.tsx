@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Autocomplete from "@/components/ui/autocomplete";
@@ -25,12 +25,11 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<string | null>(null);
 
   const { data: searchQuery, isFetching } = useQuery({
     queryKey: ["valueset", "preview_search", search, valueset.compose],
     queryFn: query.debounced(valuesetApi.preview_search, {
-      queryParams: { search: search, count: 20 },
+      queryParams: { search, count: 20 },
       body: {
         ...valueset,
         name: valueset.name,
@@ -46,15 +45,6 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
     enabled: open,
   });
 
-  const searchResults = searchQuery?.results;
-
-  const detailsToShow = useMemo(() => {
-    if (selected) {
-      return searchResults?.filter((result) => result.code === selected);
-    }
-    return searchResults;
-  }, [searchResults, selected]);
-
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
@@ -67,36 +57,22 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
             {t("valueset_preview_description")}
           </p>
         </SheetHeader>
-
         <Autocomplete
           options={mergeAutocompleteOptions(
             searchQuery?.results?.map((option) => ({
               label: option.display || "",
               value: option.code,
-            })) || [],
+            })) ?? [],
           )}
-          value={selected || ""}
-          onChange={(val) => {
-            setSelected(val);
-          }}
-          onSearch={(term) => {
-            setSearch(term);
-          }}
+          value={search}
+          onChange={setSearch}
+          onSearch={setSearch}
           placeholder={t("search_concept")}
           noOptionsMessage={
             searchQuery && !isFetching ? t("no_results_found") : t("searching")
           }
           className="px-1 mt-6"
         />
-        <div className="mt-4">
-          {(detailsToShow ?? []).map((item) => (
-            <div key={item.code} className="py-2">
-              <div className="text-sm font-semibold">{item.display}</div>
-              <div className="text-xs text-gray-500">{item.code}</div>
-              <div className="text-xs text-gray-500">{item.system}</div>
-            </div>
-          ))}
-        </div>
       </SheetContent>
     </Sheet>
   );

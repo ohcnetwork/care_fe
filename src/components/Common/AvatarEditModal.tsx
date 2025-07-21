@@ -107,10 +107,6 @@ export default function AvatarEditModal({
   const [showCroppedPreview, setShowCroppedPreview] = useState(false);
   const [showCameraPreview, setShowCameraPreview] = useState(false);
 
-  const [processingAction, setProcessingAction] = useState<
-    "upload" | "crop" | "delete" | null
-  >(null);
-
   const { startStream, stopStream } = useMediaStream({
     constraints: { video: { facingMode: constraint.facingMode } },
   });
@@ -224,7 +220,6 @@ export default function AvatarEditModal({
 
     try {
       setIsProcessing(true);
-      setProcessingAction("crop");
       const { file, previewUrl } = await getCroppedImg(
         preview,
         croppedAreaPixels,
@@ -249,7 +244,7 @@ export default function AvatarEditModal({
       }
 
       setIsProcessing(true);
-      setProcessingAction("upload");
+
       await handleUpload(
         selectedFile,
         () => {
@@ -268,8 +263,7 @@ export default function AvatarEditModal({
   };
 
   const deleteAvatar = async () => {
-    setIsProcessing(true);
-    setProcessingAction("delete");
+    setIsDeleting(true);
     await handleDelete(
       () => {
         setIsDeleting(false);
@@ -554,17 +548,15 @@ export default function AvatarEditModal({
                       <Crop className="text-lg" />
                     )}
                     <span>
-                      {isProcessing
-                        ? processingAction === "upload"
-                          ? `${t("uploading")}...`
-                          : processingAction === "crop"
-                            ? `${t("cropping")}...`
-                            : processingAction === "delete"
-                              ? t("deleting")
-                              : ""
-                        : showCroppedPreview
-                          ? t("upload")
-                          : t("crop")}
+                      {isDeleting
+                        ? t("deleting")
+                        : isProcessing
+                          ? showCroppedPreview
+                            ? `${t("uploading")}...`
+                            : `${t("cropping")}...`
+                          : showCroppedPreview
+                            ? t("upload")
+                            : t("crop")}
                     </span>
                   </Button>
                 </div>
