@@ -41,6 +41,12 @@ export default {
     method: HttpMethod.GET,
     TRes: Type<FacilityData>(),
   },
+  uploadCoverImage: {
+    path: "/api/v1/facility/{id}/cover_image/",
+    method: HttpMethod.POST,
+    TRes: Type<FacilityData>(),
+    TBody: Type<FormData>(),
+  },
   deleteCoverImage: {
     path: "/api/v1/facility/{id}/cover_image/",
     method: HttpMethod.DELETE,

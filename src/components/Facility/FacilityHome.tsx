@@ -41,11 +41,10 @@ import { getPermissions } from "@/common/Permissions";
 import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import uploadFile from "@/Utils/request/uploadFile";
-import { getAuthorizationHeader } from "@/Utils/request/utils";
+import { getAuthorizationHeader, makeUrl } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { FeatureBadge } from "@/pages/Facility/Utils";
@@ -79,7 +78,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
   const { data: facilityData, isLoading } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(routes.facility.show, {
+    queryFn: query(facilityApi.get, {
       pathParams: { id: facilityId },
     }),
   });
@@ -140,12 +139,12 @@ export const FacilityHome = ({ facilityId }: Props) => {
   ) => {
     const formData = new FormData();
     formData.append("cover_image", file);
-    const url = `${careConfig.apiUrl}/api/v1/facility/${facilityId}/cover_image/`;
+    const url = `${careConfig.apiUrl}${makeUrl(facilityApi.uploadCoverImage.path, undefined, { id: facilityId })}`;
 
     await uploadFile(
       url,
       formData,
-      "POST",
+      facilityApi.uploadCoverImage.method,
       { Authorization: getAuthorizationHeader() },
       async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
