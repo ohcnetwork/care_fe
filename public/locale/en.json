@@ -1241,6 +1241,7 @@
   "critical": "Critical",
   "criticality": "Criticality",
   "crop": "Crop",
+  "cropping": "Cropping",
   "csv_file_in_the_specified_format": "Select a CSV file in the specified format",
   "current_address": "Current Address and Route to Home",
   "current_balance": "Current Balance",

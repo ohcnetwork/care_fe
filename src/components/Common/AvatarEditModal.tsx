@@ -106,6 +106,10 @@ export default function AvatarEditModal({
   const [showCroppedPreview, setShowCroppedPreview] = useState(false);
   const [showCameraPreview, setShowCameraPreview] = useState(false);
 
+  const [processingAction, setProcessingAction] = useState<
+    "upload" | "crop" | "delete" | null
+  >(null);
+
   const { startStream, stopStream } = useMediaStream({
     constraints: { video: { facingMode: constraint.facingMode } },
   });
@@ -218,6 +222,7 @@ export default function AvatarEditModal({
 
     try {
       setIsProcessing(true);
+      setProcessingAction("crop");
       const { file, previewUrl } = await getCroppedImg(
         preview,
         croppedAreaPixels,
@@ -242,7 +247,7 @@ export default function AvatarEditModal({
       }
 
       setIsProcessing(true);
-
+      setProcessingAction("upload");
       await handleUpload(
         selectedFile,
         () => {
@@ -262,6 +267,7 @@ export default function AvatarEditModal({
 
   const deleteAvatar = async () => {
     setIsProcessing(true);
+    setProcessingAction("delete");
     await handleDelete(
       () => {
         setIsProcessing(false);
@@ -538,10 +544,16 @@ export default function AvatarEditModal({
                     )}
                     <span>
                       {isProcessing
-                        ? `${t("uploading")}...`
+                        ? processingAction === "upload"
+                          ? `${t("uploading")}...`
+                          : processingAction === "crop"
+                            ? `${t("cropping")}...`
+                            : processingAction === "delete"
+                              ? t("deleting")
+                              : ""
                         : showCroppedPreview
-                          ? `${t("upload")}`
-                          : `${t("crop")}`}
+                          ? t("upload")
+                          : t("crop")}
                     </span>
                   </Button>
                 </div>
