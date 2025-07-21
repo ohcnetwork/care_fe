@@ -1,4 +1,4 @@
-import { Code } from "@/types/questionnaire/code";
+import { Code } from "@/types/base/code/code";
 import { UserBase } from "@/types/user/user";
 
 export const DIAGNOSIS_CLINICAL_STATUS = [
@@ -61,7 +61,7 @@ export interface Diagnosis {
   created_by: UserBase;
   updated_by: UserBase;
   encounter: string;
-  created_date?: string;
+  created_date: string;
   updated_date?: string;
 }
 

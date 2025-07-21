@@ -1,4 +1,4 @@
-import { Code } from "@/types/questionnaire/code";
+import { Code } from "@/types/base/code/code";
 import { UserBase } from "@/types/user/user";
 
 export type AllergyVerificationStatus =
@@ -29,6 +29,8 @@ export interface AllergyIntolerance {
   created_by: UserBase;
   encounter: string;
   edited_by?: UserBase;
+  created_date: string;
+  modified_date: string;
 }
 
 // Type for API request, extends base type with required fields

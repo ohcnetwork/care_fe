@@ -19,11 +19,14 @@ import useFilters from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
-import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/patient";
+import {
+  Encounter,
+  inactiveEncounterStatus,
+} from "@/types/emr/encounter/encounter";
+import { Patient } from "@/types/emr/patient/patient";
+import patientApi from "@/types/emr/patient/patientApi";
 import metaArtifactApi from "@/types/metaAritifact/metaArtifactApi";
 
 export interface DrawingsTabProps {
@@ -31,6 +34,7 @@ export interface DrawingsTabProps {
   patient?: Patient;
   encounter?: Encounter;
   patientId?: string;
+  readOnly?: boolean;
 }
 
 interface ExcalidrawPreviewProps {
@@ -131,6 +135,7 @@ export const DrawingPage = ({
   patientId,
   patient,
   encounter,
+  readOnly,
 }: DrawingsTabProps) => {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -138,11 +143,11 @@ export const DrawingPage = ({
   const facilityIdExists = !!subpathMatch?.facilityId;
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    cacheBlacklist: ["name"],
+    disableCache: true,
   });
   const { data: patientData } = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(routes.patient.getPatient, {
+    queryFn: query(patientApi.getPatient, {
       pathParams: { id: patientId ?? "" },
     }),
     enabled: !!patient && !!patientId,
@@ -170,7 +175,8 @@ export const DrawingPage = ({
     !inactiveEncounterStatus.includes(encounter.status);
 
   const canEdit =
-    type === "encounter" ? canWriteCurrentEncounter : canWritePatient;
+    !readOnly &&
+    (type === "encounter" ? canWriteCurrentEncounter : canWritePatient);
 
   const { data, isLoading } = useQuery({
     queryKey: ["drawings", associatingId, qParams, resultsPerPage],

@@ -51,11 +51,12 @@ import FacilityOrganizationSelector from "@/pages/Facility/settings/organization
 import {
   ENCOUNTER_CLASS,
   ENCOUNTER_CLASSES,
+  ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_PRIORITY,
   Encounter,
   EncounterClass,
   EncounterRequest,
-} from "@/types/emr/encounter";
+} from "@/types/emr/encounter/encounter";
 
 interface Props {
   patientId: string;

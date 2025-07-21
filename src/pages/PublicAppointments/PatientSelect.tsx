@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { ArrowLeft } from "lucide-react";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -18,13 +18,9 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { Patient } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/patient/patient";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import {
-  Appointment,
-  AppointmentCreateRequest,
-  TokenSlot,
-} from "@/types/scheduling/schedule";
+import { Appointment } from "@/types/scheduling/schedule";
 
 interface PatientCardProps {
   patient: Patient;
@@ -111,10 +107,7 @@ export default function PatientSelect({
   staffId: string;
 }) {
   const { t } = useTranslation();
-  const selectedSlot = JSON.parse(
-    localStorage.getItem("selectedSlot") ?? "",
-  ) as TokenSlot;
-  const reason = localStorage.getItem("reason");
+  const [{ slotId, reason }] = useQueryParams();
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
 
   const patientUserContext = usePatientContext();
@@ -128,7 +121,7 @@ export default function PatientSelect({
   } else if (!tokenData) {
     toast.error(t("phone_number_not_found"));
     navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);
-  } else if (!selectedSlot) {
+  } else if (!slotId) {
     toast.error(t("selected_slot_not_found"));
     navigate(
       `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
@@ -147,14 +140,12 @@ export default function PatientSelect({
   });
 
   const { mutate: createAppointment } = useMutation({
-    mutationFn: (body: AppointmentCreateRequest) =>
-      mutate(PublicAppointmentApi.createAppointment, {
-        pathParams: { id: selectedSlot?.id },
-        body,
-        headers: {
-          Authorization: `Bearer ${tokenData.token}`,
-        },
-      })(body),
+    mutationFn: mutate(PublicAppointmentApi.createAppointment, {
+      pathParams: { id: slotId ?? "" },
+      headers: {
+        Authorization: `Bearer ${tokenData.token}`,
+      },
+    }),
     onSuccess: (data: Appointment) => {
       toast.success(t("appointment_created_success"));
       queryClient.invalidateQueries({
@@ -199,8 +190,8 @@ export default function PatientSelect({
     if (!selectedPatientData) return;
 
     createAppointment({
-      patient: selectedPatientData.id ?? "",
-      reason_for_visit: reason ?? "",
+      patient: selectedPatientData.id,
+      reason_for_visit: reason,
     });
   };
 
@@ -227,6 +218,12 @@ export default function PatientSelect({
           onClick={() =>
             navigate(
               `/facility/${facilityId}/appointments/${staffId}/patient-registration`,
+              {
+                query: {
+                  slotId,
+                  reason,
+                },
+              },
             )
           }
         >
