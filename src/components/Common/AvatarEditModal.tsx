@@ -171,20 +171,18 @@ export default function AvatarEditModal({
     }
   };
 
-  const closeModal = (forceClose = false) => {
-    if (forceClose || !showCroppedPreview) {
-      setPreview(undefined);
-      setIsProcessing(false);
-      setIsDeleting(false);
-      setSelectedFile(undefined);
-      setIsCameraOpen(false);
-      setCroppedAreaPixels(null);
-      setCroppedPreview(null);
-      setShowCroppedPreview(false);
-      setShowCameraPreview(false);
-      setCrop({ x: 0, y: 0 });
-      setZoom(1);
-    }
+  const closeModal = () => {
+    setPreview(undefined);
+    setIsProcessing(false);
+    setIsDeleting(false);
+    setSelectedFile(undefined);
+    setIsCameraOpen(false);
+    setCroppedAreaPixels(null);
+    setCroppedPreview(null);
+    setShowCroppedPreview(false);
+    setShowCameraPreview(false);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
     onOpenChange(false);
   };
 
@@ -321,16 +319,7 @@ export default function AvatarEditModal({
   const hintMessage = hint || defaultHint;
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(open) => {
-        if (!open) {
-          closeModal(!showCroppedPreview);
-        } else {
-          onOpenChange(open);
-        }
-      }}
-    >
+    <Dialog open={open} onOpenChange={closeModal}>
       <DialogContent className="md:max-w-4xl max-h-screen overflow-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">{title}</DialogTitle>
@@ -514,7 +503,7 @@ export default function AvatarEditModal({
                     variant="outline"
                     onClick={(e) => {
                       e.stopPropagation();
-                      closeModal(true);
+                      closeModal();
                       dragProps.setFileDropError("");
                     }}
                     disabled={isProcessing || isDeleting}
@@ -622,7 +611,8 @@ export default function AvatarEditModal({
                     variant="outline"
                     onClick={() => {
                       setIsCameraOpen(false);
-                      closeModal(true);
+                      setPreview(undefined);
+                      closeModal();
                     }}
                     disabled={isProcessing || isDeleting}
                   >
