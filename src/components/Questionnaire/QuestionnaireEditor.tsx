@@ -24,7 +24,13 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Collapsible,
@@ -1244,6 +1250,34 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                         ))}
                       </div>
                     </CardContent>
+                    <CardFooter className="flex flex-row items-center justify-end px-0 py-2">
+                      {rootQuestions.length > 3 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            const newQuestion: Question = {
+                              id: crypto.randomUUID(),
+                              link_id: `Q-${Date.now()}`,
+                              text: "New Question",
+                              type: "string",
+                              questions: [],
+                            };
+                            updateQuestions([...rootQuestions, newQuestion]);
+                            setExpandedQuestions(
+                              (prev) => new Set([...prev, newQuestion.link_id]),
+                            );
+                            setTimeout(() => {
+                              scrollToQuestion(newQuestion.link_id);
+                            }, 100);
+                          }}
+                        >
+                          <CareIcon icon="l-plus" className="mr-2 size-4" />
+                          {t("add_question")}
+                        </Button>
+                      )}
+                    </CardFooter>
                   </Card>
                 </form>
               </Form>
