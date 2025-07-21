@@ -31,9 +31,11 @@ export default () => ({
       .max(180, t("invalid_longitude")),
   },
   pincode: z
-    .number()
-    .int()
-    .positive()
-    .min(100000, t("pincode_must_be_6_digits"))
-    .max(999999, t("pincode_must_be_6_digits")),
+    .number({
+      error: t("field_required"),
+    })
+    .int({ error: "Must be an integer" })
+    .positive({ error: "Must be positive" })
+    .min(100000, { error: t("pincode_must_be_6_digits") })
+    .max(999999, { error: t("pincode_must_be_6_digits") }),
 });
