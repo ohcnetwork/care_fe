@@ -89,7 +89,7 @@ export default function AvatarEditModal({
   aspectRatio = 1,
 }: Props) {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isCropping, setIsCropping] = useState(false); // <-- Added
+  const [isCropping, setIsCropping] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File>();
   const [preview, setPreview] = useState<string>();
@@ -227,7 +227,7 @@ export default function AvatarEditModal({
     if (!croppedAreaPixels || !preview) return;
 
     try {
-      setIsCropping(true); // <-- Set cropping state
+      setIsCropping(true);
       const { file, previewUrl } = await getCroppedImg(
         preview,
         croppedAreaPixels,
@@ -240,7 +240,7 @@ export default function AvatarEditModal({
     } catch {
       toast.error(t("failed_to_crop_image_using_original_image"));
     } finally {
-      setIsCropping(false); // <-- Reset cropping state
+      setIsCropping(false);
     }
   };
 
@@ -551,7 +551,7 @@ export default function AvatarEditModal({
                       (!!imageUrl && !preview) ||
                       isProcessing ||
                       isDeleting ||
-                      isCropping || // <-- Disable while cropping
+                      isCropping ||
                       !selectedFile ||
                       (!croppedAreaPixels && !showCroppedPreview)
                     }
