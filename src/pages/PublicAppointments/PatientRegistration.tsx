@@ -370,6 +370,9 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                             : undefined;
                           field.onChange(value);
                         }}
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        type="number"
                       />
                     </FormControl>
                     <FormMessage />

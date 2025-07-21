@@ -351,8 +351,16 @@ export default function FacilityForm({
                       data-cy="facility-pincode"
                       placeholder={t("enter_pincode")}
                       type="number"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       maxLength={6}
                       {...field}
+                      onChange={(e) => {
+                        const value = e.target.value
+                          ? Number(e.target.value)
+                          : undefined;
+                        field.onChange(value);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
