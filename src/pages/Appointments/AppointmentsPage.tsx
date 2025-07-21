@@ -13,7 +13,7 @@ import {
 } from "date-fns";
 import dayjs from "dayjs";
 import { TFunction } from "i18next";
-import { Edit3Icon } from "lucide-react";
+import { Edit3Icon, FilterIcon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -98,6 +98,7 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import {
+  APPOINTMENT_STATUS_COLORS,
   Appointment,
   AppointmentRead,
   AppointmentStatus,
@@ -138,12 +139,8 @@ const getStatusGroups = (t: TFunction): AppointmentStatusGroup[] => {
       statuses: ["fulfilled"],
     },
     {
-      label: t("noshow"),
-      statuses: ["noshow"],
-    },
-    {
-      label: t("cancelled"),
-      statuses: ["cancelled"],
+      label: t("non_fulfilled"),
+      statuses: ["noshow", "cancelled", "entered_in_error", "rescheduled"],
     },
   ];
 };
@@ -739,12 +736,17 @@ function AppointmentColumn(props: {
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
+  const [selectedStatuses, setSelectedStatuses] = useState<AppointmentStatus[]>(
+    [],
+  );
 
   const { data } = useQuery({
     queryKey: [
       "appointments",
       facilityId,
-      props.statusGroup.statuses,
+      selectedStatuses.length === 0
+        ? props.statusGroup.statuses
+        : selectedStatuses,
       props.practitioners,
       props.slot,
       props.date_from,
@@ -756,7 +758,10 @@ function AppointmentColumn(props: {
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facilityId },
       queryParams: {
-        status: props.statusGroup.statuses.join(","),
+        status:
+          selectedStatuses.length === 0
+            ? props.statusGroup.statuses.join(",")
+            : selectedStatuses.join(","),
         tags: props.tags?.join(","),
         limit: 100,
         slot: props.slot,
@@ -778,6 +783,14 @@ function AppointmentColumn(props: {
     );
   }
 
+  const toggleStatus = (status: AppointmentStatus) => {
+    setSelectedStatuses((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status],
+    );
+  };
+
   return (
     <div
       className={cn(
@@ -785,28 +798,85 @@ function AppointmentColumn(props: {
         !data && "animate-pulse",
       )}
     >
-      <div className="flex px-3 items-center gap-2 mb-4">
-        <h2 className="font-semibold capitalize text-base px-1">
-          {props.statusGroup.label}
-        </h2>
-        <span className="bg-gray-200 px-2 py-1 rounded-md text-xs font-medium">
-          {data?.count == null ? (
-            "..."
-          ) : data.count === appointments.length ? (
-            data.count
-          ) : (
-            <Trans
-              i18nKey="showing_x_of_y"
-              values={{
-                x: appointments.length,
-                y: data.count,
-              }}
-              components={{
-                strong: <span className="font-bold" />,
-              }}
-            />
-          )}
-        </span>
+      <div className="flex flex-row justify-between px-3 gap-2 mb-3">
+        <div className="flex items-center gap-2">
+          <h2 className="font-semibold capitalize text-base px-1">
+            {props.statusGroup.label}
+          </h2>
+          <span className="bg-gray-200 px-2 py-1 rounded-md text-xs font-medium">
+            {data?.count == null ? (
+              "..."
+            ) : data.count === appointments.length ? (
+              data.count
+            ) : (
+              <Trans
+                i18nKey="showing_x_of_y"
+                values={{
+                  x: appointments.length,
+                  y: data.count,
+                }}
+                components={{
+                  strong: <span className="font-bold" />,
+                }}
+              />
+            )}
+          </span>
+        </div>
+        {props.statusGroup.statuses.length > 1 && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="icon">
+                <FilterIcon className="size-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-60 p-0" align="start">
+              <Command>
+                <CommandList>
+                  <CommandEmpty>{t("no_status_found")}</CommandEmpty>
+                  <CommandGroup>
+                    {props.statusGroup.statuses.map((status) => (
+                      <CommandItem
+                        key={status}
+                        onSelect={() => toggleStatus(status)}
+                        className="cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2 flex-1">
+                          <div
+                            className={
+                              "size-4 rounded flex items-center justify-center border border-gray-300"
+                            }
+                          >
+                            {selectedStatuses.includes(status) && <CheckIcon />}
+                          </div>
+                          <span>{t(status)}</span>
+                        </div>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        )}
+      </div>
+      <div className="px-3 mb-3">
+        {selectedStatuses.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {selectedStatuses.map((status) => (
+              <Badge
+                key={status}
+                variant="outline"
+                onClick={() => toggleStatus(status)}
+                className="bg-white"
+              >
+                {t(status)}
+                <Button variant="ghost" size="icon" className="size-6 -mr-2">
+                  <CareIcon icon="l-times" />
+                </Button>
+              </Badge>
+            ))}
+          </div>
+        )}
       </div>
       {appointments.length === 0 ? (
         <div className="flex justify-center items-center h-[calc(100vh-18rem)]">
@@ -821,7 +891,10 @@ function AppointmentColumn(props: {
                   href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`}
                   className="text-inherit"
                 >
-                  <AppointmentCard appointment={appointment} />
+                  <AppointmentCard
+                    appointment={appointment}
+                    statusGroup={props.statusGroup}
+                  />
                 </Link>
               </li>
             ))}
@@ -832,7 +905,13 @@ function AppointmentColumn(props: {
   );
 }
 
-function AppointmentCard({ appointment }: { appointment: AppointmentRead }) {
+function AppointmentCard({
+  appointment,
+  statusGroup,
+}: {
+  appointment: AppointmentRead;
+  statusGroup: AppointmentStatusGroup;
+}) {
   const { patient } = appointment;
   const { t } = useTranslation();
 
@@ -857,6 +936,14 @@ function AppointmentCard({ appointment }: { appointment: AppointmentRead }) {
               {tag.display}
             </Badge>
           ))}
+          {statusGroup.statuses.length > 1 && (
+            <Badge
+              variant={APPOINTMENT_STATUS_COLORS[appointment.status]}
+              className="text-xs"
+            >
+              {t(appointment.status)}
+            </Badge>
+          )}
         </div>
 
         <div className="flex gap-3">
