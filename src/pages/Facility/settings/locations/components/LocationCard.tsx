@@ -222,7 +222,7 @@ export function LocationCard({
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>
-                            {t("remove_location", { name: location.name })}
+                            {t("remove_name", { name: location.name })}
                           </AlertDialogTitle>
                           <AlertDialogDescription>
                             {t("are_you_sure_want_to_delete", {

@@ -208,6 +208,7 @@ export default function PaymentsData({
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>{t("account")}</TableHead>
                 <TableHead>{t("date")}</TableHead>
                 <TableHead>{t("invoice")}</TableHead>
                 <TableHead>{t("type")}</TableHead>
@@ -228,28 +229,48 @@ export default function PaymentsData({
                 payments.map((payment) => (
                   <TableRow key={payment.id}>
                     <TableCell>
+                      <Button variant="link" asChild>
+                        <Link
+                          href={`/facility/${facilityId}/billing/account/${payment.account?.id}`}
+                          className="hover:text-primary "
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <div className="text-base flex items-center gap-1 underline underline-offset-2">
+                            {payment.account?.name}
+                            <CareIcon
+                              icon="l-external-link-alt"
+                              className="size-3"
+                            />
+                          </div>
+                        </Link>
+                      </Button>
+                    </TableCell>
+                    <TableCell>
                       {payment.payment_datetime
                         ? format(
                             new Date(payment.payment_datetime),
-                            "MMM d, yyyy",
+                            "MMM d, yyyy hh:mm a",
                           )
                         : "-"}
                     </TableCell>
                     <TableCell>
-                      <Link
-                        href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice?.id}`}
-                        className="hover:text-primary transition-colors"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <div className="font-medium flex items-center gap-1">
-                          {t("view_invoice")}
-                          <CareIcon
-                            icon="l-external-link-alt"
-                            className="size-3"
-                          />
-                        </div>
-                      </Link>
+                      {payment.target_invoice && (
+                        <Button variant="link" asChild>
+                          <Link
+                            href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice?.id}`}
+                            className="hover:text-primary underline underline-offset-2"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {t("view_invoice")}
+                            <CareIcon
+                              icon="l-external-link-alt"
+                              className="size-3"
+                            />
+                          </Link>
+                        </Button>
+                      )}
                     </TableCell>
                     <TableCell>
                       {typeMap[payment.reconciliation_type]}

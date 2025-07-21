@@ -13,6 +13,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -107,6 +109,7 @@ interface TagSelectorProps {
   onChange: (tags: TagConfig[]) => void;
   resource: TagResource;
   asFilter?: boolean;
+  className?: string;
 }
 
 export function TagSelectorPopover({
@@ -114,6 +117,7 @@ export function TagSelectorPopover({
   onChange,
   asFilter = false,
   resource,
+  className,
 }: TagSelectorProps) {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -126,9 +130,12 @@ export function TagSelectorPopover({
       queryParams: {
         resource,
         parent_is_null: true,
+        status: "active",
+        ordering: "priority",
         ...(search ? { search } : {}),
       },
     }),
+    enabled: open,
   });
 
   // Helper to fetch children for a tag
@@ -136,7 +143,12 @@ export function TagSelectorPopover({
     return useQuery({
       queryKey: ["tags", resource, "parent", parentId],
       queryFn: query(tagConfigApi.list, {
-        queryParams: { resource, parent: parentId },
+        queryParams: {
+          resource,
+          parent: parentId,
+          status: "active",
+          ordering: "priority",
+        },
       }),
       enabled: expanded.has(parentId),
     });
@@ -284,7 +296,10 @@ export function TagSelectorPopover({
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="mt-2 w-full justify-between bg-transparent"
+            className={cn(
+              "mt-2 w-full justify-between bg-transparent",
+              className,
+            )}
           >
             {asFilter ? (
               <div className="flex items-center gap-2">
@@ -353,7 +368,7 @@ export default function TagAssignmentSheet({
     mutationFn: mutate(entityConfig.setTagsApi, {
       pathParams: {
         external_id: entityId,
-        facilityId: facilityId,
+        facilityId: facilityId || "",
       },
     }),
     onSuccess: () => {
@@ -371,7 +386,7 @@ export default function TagAssignmentSheet({
     mutationFn: mutate(entityConfig.removeTagsApi, {
       pathParams: {
         external_id: entityId,
-        facilityId: facilityId,
+        facilityId: facilityId || "",
       },
     }),
     onSuccess: () => {

@@ -138,7 +138,6 @@ export const structuredHandlers: {
       }
       return encounters.map((encounter) => {
         const body: RequestTypeFor<"encounter"> = {
-          organizations: [],
           patient: patientId,
           status: encounter.status,
           encounter_class: encounter.encounter_class,
@@ -161,7 +160,7 @@ export const structuredHandlers: {
   },
   appointment: {
     getRequests: async (appointment, { facilityId, patientId }) => {
-      const { reason_for_visit, slot_id } = appointment[0];
+      const { reason_for_visit, slot_id, tags } = appointment[0];
       return [
         {
           url: `/api/v1/facility/${facilityId}/slots/${slot_id}/create_appointment/`,
@@ -169,6 +168,7 @@ export const structuredHandlers: {
           body: {
             reason_for_visit,
             patient: patientId,
+            tags,
           },
           reference_id: "appointment",
         },

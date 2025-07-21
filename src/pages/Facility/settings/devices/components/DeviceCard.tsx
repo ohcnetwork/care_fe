@@ -22,6 +22,7 @@ import {
 interface Props {
   devices: DeviceList[];
 }
+
 export default function DeviceCard({ devices }: Props) {
   const { t } = useTranslation();
 
