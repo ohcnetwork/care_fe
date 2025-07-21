@@ -8,9 +8,11 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { usePermissions } from "@/context/PermissionContext";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import {
+  Encounter,
+  completedEncounterStatus,
+} from "@/types/emr/encounter/encounter";
 import { Patient } from "@/types/emr/patient/patient";
-import patientApi from "@/types/emr/patient/patientApi";
 
 type EncounterContextType = {
   currentEncounterId: string;
@@ -51,13 +53,6 @@ export function EncounterProvider({
   const [{ selectedEncounter: selectedEncounterId = encounterId }, setQParams] =
     useQueryParams();
 
-  const { data: patient, isLoading: isPatientLoading } = useQuery({
-    queryKey: ["patient", patientId],
-    queryFn: query(patientApi.getPatient, {
-      pathParams: { id: patientId },
-    }),
-  });
-
   const { data: currentEncounter, isLoading: isCurrentEncounterLoading } =
     useQuery({
       queryKey: ["encounter", currentEncounterId],
@@ -82,10 +77,19 @@ export function EncounterProvider({
 
   const { data: encounters, isLoading: isPastEncountersLoading } = useQuery({
     queryKey: ["encounters", "past", patientId],
+    // Apply patient_filter only if the current encounter is completed
     queryFn: query(routes.encounter.list, {
-      queryParams: { patient: patientId },
+      queryParams: completedEncounterStatus.includes(
+        currentEncounter?.status ?? "",
+      )
+        ? { patient_filter: patientId, facility: facilityId }
+        : { patient: patientId, facility: facilityId },
     }),
+    enabled: !!currentEncounter,
   });
+
+  const patient = currentEncounter?.patient;
+  const isPatientLoading = isCurrentEncounterLoading;
 
   const setSelectedEncounter = (encounterId: string | null) => {
     setQParams(
