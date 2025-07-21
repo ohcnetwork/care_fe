@@ -46,14 +46,9 @@ export function ClinicalHistoryPage({
   };
 
   const handleTabChange = (value: string) => {
-    navigate(
-      facilityId
-        ? `/facility/${facilityId}/patient/${patientId}/history/${value}`
-        : `/patient/${patientId}/history/${value}`,
-      {
-        ...(sourceUrl ? { query: { sourceUrl } } : {}),
-      },
-    );
+    navigate(value, {
+      ...(sourceUrl ? { query: { sourceUrl } } : {}),
+    });
   };
 
   return (
