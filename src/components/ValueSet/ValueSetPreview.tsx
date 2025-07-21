@@ -24,13 +24,13 @@ interface ValueSetPreviewProps {
 export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCode, setSelectedCode] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<string | null>(null);
 
   const { data: searchQuery, isFetching } = useQuery({
-    queryKey: ["valueset", "preview_search", searchTerm, valueset.compose],
+    queryKey: ["valueset", "preview_search", search, valueset.compose],
     queryFn: query.debounced(valuesetApi.preview_search, {
-      queryParams: { search: searchTerm, count: 20 },
+      queryParams: { search: search, count: 20 },
       body: {
         ...valueset,
         name: valueset.name,
@@ -46,14 +46,14 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
     enabled: open,
   });
 
+  const searchResults = searchQuery?.results;
+
   const detailsToShow = useMemo(() => {
-    if (selectedCode) {
-      return searchQuery?.results?.filter(
-        (result) => result.code === selectedCode,
-      );
+    if (selected) {
+      return searchResults?.filter((result) => result.code === selected);
     }
-    return searchQuery?.results;
-  }, [searchQuery?.results, selectedCode]);
+    return searchResults;
+  }, [searchResults, selected]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -75,14 +75,12 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
               value: option.code,
             })) || [],
           )}
-          value={selectedCode || ""}
+          value={selected || ""}
           onChange={(val) => {
-            setSelectedCode(val);
-            setSearchTerm("");
+            setSelected(val);
           }}
           onSearch={(term) => {
-            setSearchTerm(term);
-            setSelectedCode(null);
+            setSearch(term);
           }}
           placeholder={t("search_concept")}
           noOptionsMessage={
