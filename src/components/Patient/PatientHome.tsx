@@ -3,6 +3,8 @@ import dayjs from "dayjs";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -22,6 +24,10 @@ import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import patientApi from "@/types/emr/patient/patientApi";
+import {
+  TagConfig,
+  getTagHierarchyDisplay,
+} from "@/types/emr/tagConfig/tagConfig";
 
 import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
 
@@ -67,6 +73,8 @@ export const PatientHome = (props: {
     return <div>{t("patient_not_found")}</div>;
   }
 
+  const tags = [...patientData.instance_tags, ...patientData.facility_tags];
+
   return (
     <Page
       title={t("patient_details")}
@@ -90,7 +98,7 @@ export const PatientHome = (props: {
             <div>
               <div className="flex flex-col justify-between gap-4 gap-y-2 md:flex-row">
                 <div className="flex flex-col gap-4 md:flex-row">
-                  <div className="flex flex-row gap-x-4">
+                  <div className="flex flex-row gap-x-4 items-center">
                     <div className="size-10 shrink-0 md:size-14">
                       <Avatar
                         className="size-10 font-semibold text-secondary-800 md:size-auto"
@@ -98,7 +106,7 @@ export const PatientHome = (props: {
                       />
                     </div>
 
-                    <div className="space-y-1">
+                    <div className="space-y-1 md:mr-8">
                       <div className="flex flex-col md:flex-row gap-x-4">
                         <h1
                           id="patient-name"
@@ -122,12 +130,16 @@ export const PatientHome = (props: {
                         )}
                       </div>
 
-                      <h3 className="text-sm font-medium text-gray-600 capitalize">
+                      <h3 className="text-sm font-medium text-gray-600 capitalize whitespace-nowrap">
                         {formatPatientAge(patientData, true)},{"  "}
                         {t(`GENDER__${patientData.gender}`)}, {"  "}
                         {patientData.blood_group?.replace("_", " ")}
                       </h3>
+
+                      <PatientTags tags={tags} className="md:hidden" />
                     </div>
+
+                    <PatientTags tags={tags} className="hidden md:flex" />
                   </div>
                 </div>
               </div>
@@ -243,5 +255,39 @@ export const PatientHome = (props: {
         </div>
       </div>
     </Page>
+  );
+};
+
+const PatientTags = ({
+  tags,
+  className,
+}: {
+  tags: TagConfig[];
+  className: string;
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className={cn("flex flex-col gap-0.5 items-start", className)}>
+      <span className="text-xs text-gray-600 w-32 md:w-auto">
+        {t("tags")}:{" "}
+      </span>
+      {tags.length ? (
+        <div className="flex flex-wrap gap-1">
+          {tags.map((tag) => (
+            <Badge
+              key={tag.id}
+              variant="secondary"
+              size="sm"
+              className="text-xs"
+            >
+              {getTagHierarchyDisplay(tag)}
+            </Badge>
+          ))}
+        </div>
+      ) : (
+        <span className="text-sm font-semibold">--</span>
+      )}
+    </div>
   );
 };

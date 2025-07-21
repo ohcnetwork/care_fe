@@ -176,12 +176,20 @@ export interface Appointment {
 
 export interface AppointmentRead extends Appointment {
   tags: TagConfig[];
+  updated_by: UserBase | null;
+  created_by: UserBase;
+  modified_date: string;
 }
 
 export interface AppointmentCreateRequest {
   patient: string;
   reason_for_visit: string;
-  tags?: string[];
+  tags: string[];
+}
+
+export interface AppointmentCreatePublicRequest {
+  patient: string;
+  reason_for_visit: string;
 }
 
 export interface AppointmentUpdateRequest {
@@ -191,9 +199,15 @@ export interface AppointmentUpdateRequest {
 export interface CreateAppointmentQuestion {
   reason_for_visit: string;
   slot_id: string;
+  tags: string[];
 }
 
 export interface AppointmentCancelRequest {
   reason: "cancelled" | "entered_in_error";
   reason_for_visit?: string;
+}
+
+export interface AppointmentRescheduleRequest {
+  new_slot: string;
+  reason: string;
 }

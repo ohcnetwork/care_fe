@@ -404,7 +404,7 @@ export function SpecimenForm({
               <Label className="text-sm text-gray-700">{t("body_site")}</Label>
               <ValueSetSelect
                 system="system-body-site"
-                placeholder={t("body_site_placeholder")}
+                placeholder={t("select_body_site")}
                 onSelect={(code: Code | null) =>
                   handleCollectionChange("body_site", code)
                 }
