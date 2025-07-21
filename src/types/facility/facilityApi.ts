@@ -3,7 +3,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
 import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryComponent";
 
-import { FacilityCreate, FacilityRead } from "./facility";
+import { FacilityCreate, FacilityListRead, FacilityRead } from "./facility";
 
 export default {
   getAll: {
@@ -19,7 +19,7 @@ export default {
   list: {
     path: "/api/v1/facility/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<FacilityRead>>(),
+    TRes: Type<PaginatedResponse<FacilityListRead>>(),
   },
   create: {
     path: "/api/v1/facility/",

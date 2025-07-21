@@ -1,5 +1,6 @@
 import { Code } from "@/types/base/code/code";
 import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryComponent";
+import { FacilityPermissions } from "@/types/emr/permission/permission";
 import { Organization } from "@/types/organization/organization";
 import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
@@ -20,19 +21,17 @@ export interface FacilityBase extends FacilityBareMinimum {
 }
 
 export interface FacilityRead
-  extends Omit<FacilityBase, "geo_organization" | "latitude" | "longitude"> {
+  extends Omit<FacilityBase, "geo_organization" | "latitude" | "longitude">,
+    FacilityPermissions {
   id: string;
   read_cover_image_url?: string;
   cover_image_url?: string;
-  permissions: string[];
   created_date?: string;
   modified_date?: string;
   geo_organization: Organization;
   latitude?: string;
   longitude?: string;
   pincode: number;
-  root_org_permissions: string[];
-  child_org_permissions: string[];
   instance_discount_codes: Code[];
   instance_discount_monetary_components: MonetaryComponentRead[];
   instance_informational_codes: Code[];
@@ -45,6 +44,11 @@ export interface FacilityRead
   patient_facility_identifier_configs: PatientIdentifierConfig[];
   features: number[];
 }
+
+export type FacilityListRead = Omit<
+  FacilityRead,
+  "permissions" | "root_org_permissions" | "child_org_permissions"
+>;
 
 export interface FacilityCreate extends Omit<FacilityBase, "id"> {
   geo_organization: string;

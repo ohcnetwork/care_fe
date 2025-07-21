@@ -17,7 +17,7 @@ import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
-import { FacilityRead } from "@/types/facility/facility";
+import { FacilityListRead } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 
 import AddFacilitySheet from "./components/AddFacilitySheet";
@@ -113,7 +113,7 @@ export default function OrganizationFacilities({
                   </CardContent>
                 </Card>
               ) : (
-                facilities?.results?.map((facility: FacilityRead) => (
+                facilities?.results?.map((facility: FacilityListRead) => (
                   <Card
                     key={facility.id}
                     className="h-full hover:border-primary/50 transition-colors overflow-hidden"
