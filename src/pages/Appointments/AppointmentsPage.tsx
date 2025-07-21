@@ -61,7 +61,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
+import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -838,8 +844,7 @@ function AppointmentCard({ appointment }: { appointment: AppointmentRead }) {
             {patient.name}
           </h3>
           <p className="text-sm text-gray-700">
-            {formatPatientAge(patient as any, true)},{" "}
-            {t(`GENDER__${patient.gender}`)}
+            {formatPatientAge(patient, true)}, {t(`GENDER__${patient.gender}`)}
           </p>
           <p className="text-xs text-gray-500 mt-1">
             {formatDateTime(
@@ -854,12 +859,33 @@ function AppointmentCard({ appointment }: { appointment: AppointmentRead }) {
           ))}
         </div>
 
-        <div className="bg-gray-100 px-2 py-1 rounded text-center">
-          <p className="text-[10px] uppercase">{t("token")}</p>
-          {/* TODO: replace this with token number once that's ready... */}
-          <p className="font-bold text-2xl uppercase">
-            {getFakeTokenNumber(appointment)}
-          </p>
+        <div className="flex gap-3">
+          <div className="flex items-center justify-center">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Avatar
+                  name={formatName(appointment.user)}
+                  imageUrl={appointment.user.profile_picture_url}
+                  className="size-8"
+                />
+              </TooltipTrigger>
+              <TooltipContent className="flex flex-col gap-0">
+                <span className="text-sm font-medium">
+                  {formatName(appointment.user)}
+                </span>
+                <span className="text-xs text-gray-300 truncate">
+                  {appointment.user.username}
+                </span>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+          <div className="bg-gray-100 px-2 py-1 rounded text-center">
+            <p className="text-[10px] uppercase">{t("token")}</p>
+            {/* TODO: replace this with token number once that's ready... */}
+            <p className="font-bold text-2xl uppercase">
+              {getFakeTokenNumber(appointment)}
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -1030,7 +1056,7 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
           <span className="flex flex-col">
             <span className="text-sm font-semibold">{patient.name}</span>
             <span className="text-xs text-gray-500">
-              {formatPatientAge(patient as any, true)},{" "}
+              {formatPatientAge(patient, true)},{" "}
               {t(`GENDER__${patient.gender}`)}
             </span>
           </span>
