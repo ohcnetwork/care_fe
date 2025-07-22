@@ -380,11 +380,8 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
-                      {facilityData.features?.map((featureId) => (
-                        <FeatureBadge
-                          key={featureId}
-                          featureId={featureId as number}
-                        />
+                      {facilityData.features?.map((featureId: number) => (
+                        <FeatureBadge key={featureId} featureId={featureId} />
                       ))}
                     </div>
                   </CardContent>

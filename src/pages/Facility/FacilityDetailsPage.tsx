@@ -122,8 +122,8 @@ export function FacilityDetailsPage({ id }: Props) {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {facility.features?.map((featureId) => (
-                <FeatureBadge key={featureId} featureId={featureId as number} />
+              {facility.features?.map((featureId: number) => (
+                <FeatureBadge key={featureId} featureId={featureId} />
               ))}
             </div>
 

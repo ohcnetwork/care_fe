@@ -71,8 +71,11 @@ export function FacilitiesPage() {
           selected={qParams.organization}
           onChange={(filter) => {
             if ("organization" in filter) {
-              if (filter.organization) {
-                setSelectedOrg(filter.organization as string);
+              if (
+                filter.organization &&
+                typeof filter.organization === "string"
+              ) {
+                setSelectedOrg(filter.organization);
               } else {
                 setSelectedOrg(undefined);
               }
