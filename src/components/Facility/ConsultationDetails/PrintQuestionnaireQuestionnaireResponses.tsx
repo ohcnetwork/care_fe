@@ -11,13 +11,12 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import { Separator } from "@/components/ui/separator";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, properCase } from "@/Utils/utils";
 import { formatName, formatPatientAge } from "@/Utils/utils";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -40,7 +39,7 @@ export function PrintQuestionnaireQuestionnaireResponses({
 
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId, facilityId],
-    queryFn: query(encounterApi.getEncounter, {
+    queryFn: query(encounterApi.get, {
       pathParams: { id: encounterId! },
       queryParams: { facility: facilityId },
     }),
@@ -64,7 +63,7 @@ export function PrintQuestionnaireQuestionnaireResponses({
       encounterId,
       patientId,
     ],
-    queryFn: query(routes.getQuestionnaireResponses, {
+    queryFn: query(patientApi.getQuestionnaireResponses, {
       queryParams: {
         questionnaire: questionnaireId,
         encounter: encounterId,
@@ -149,8 +148,8 @@ const DetailRow = ({
 };
 
 interface EncounterDetailsProps {
-  encounter?: Encounter;
-  patient?: Patient;
+  encounter?: EncounterRead;
+  patient?: PatientRead;
 }
 
 export function EncounterDetails({

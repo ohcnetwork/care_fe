@@ -24,11 +24,12 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   ENCOUNTER_STATUS_COLORS,
-  Encounter,
+  EncounterRead,
 } from "@/types/emr/encounter/encounter";
+import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 interface EncounterCardProps {
-  encounter: Encounter;
+  encounter: EncounterRead;
   isSelected: boolean;
   onSelect: (encounterId: string) => void;
 }
@@ -84,6 +85,13 @@ function EncounterCard({
             </div>
           </div>
           <div className="text-xs text-gray-500">{encounter.facility.name}</div>
+          <div className="flex flex-wrap gap-1 text-xs">
+            {encounter.tags.map((tag) => (
+              <Badge variant="outline" key={tag.id} className="text-xs">
+                {getTagHierarchyDisplay(tag)}
+              </Badge>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>
