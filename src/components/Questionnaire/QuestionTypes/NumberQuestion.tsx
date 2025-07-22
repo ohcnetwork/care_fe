@@ -16,6 +16,7 @@ interface NumberQuestionProps {
   ) => void;
   disabled?: boolean;
   index: number;
+  onFocus: () => void;
 }
 
 export function NumberQuestion({
@@ -24,6 +25,7 @@ export function NumberQuestion({
   updateQuestionnaireResponseCB,
   disabled,
   index,
+  onFocus,
 }: NumberQuestionProps) {
   const handleChange = (value: string) => {
     const emptyValue = value === "";
@@ -52,6 +54,7 @@ export function NumberQuestion({
       onChange={(e) => handleChange(e.target.value)}
       step={question.type === "decimal" ? "0.01" : "1"}
       disabled={disabled}
+      onFocus={onFocus}
     />
   );
 }

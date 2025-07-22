@@ -30,6 +30,7 @@ interface DateTimeQuestionProps {
   clearError: () => void;
   classes?: string;
   index: number;
+  onFocus: () => void;
 }
 
 export function DateTimeQuestion({
@@ -39,6 +40,7 @@ export function DateTimeQuestion({
   clearError,
   classes,
   index,
+  onFocus,
 }: DateTimeQuestionProps) {
   const { t } = useTranslation();
 
@@ -109,6 +111,7 @@ export function DateTimeQuestion({
               classes,
             )}
             disabled={disabled}
+            onFocus={onFocus}
           >
             <CareIcon icon="l-calender" className="mr-2 size-4" />
             {currentValue ? format(currentValue, "PPP") : t("pick_a_date")}
@@ -129,6 +132,7 @@ export function DateTimeQuestion({
         value={formatTime(currentValue)}
         onChange={handleTimeChange}
         disabled={disabled || !currentValue}
+        onFocus={onFocus}
       />
     </div>
   );

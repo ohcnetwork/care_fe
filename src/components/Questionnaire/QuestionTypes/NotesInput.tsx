@@ -17,6 +17,7 @@ interface NotesInputProps {
   handleUpdateNote: (note: string) => void;
   disabled?: boolean;
   className?: string;
+  onFocus: () => void;
 }
 
 export function NotesInput({
@@ -24,6 +25,7 @@ export function NotesInput({
   handleUpdateNote,
   disabled,
   className,
+  onFocus,
 }: NotesInputProps) {
   const [open, setOpen] = useState(false);
   const notes = questionnaireResponse.note || "";
@@ -38,6 +40,7 @@ export function NotesInput({
             size="sm"
             className="h-full w-28 text-sm font-normal text-gray-700 hover:text-gray-900"
             disabled={disabled}
+            onFocus={onFocus}
             data-cy="notes"
           >
             {hasNotes ? (
@@ -55,6 +58,7 @@ export function NotesInput({
             className=" border-yellow-200 focus-visible:border-yellow-300 focus-visible:ring-yellow-300"
             placeholder="Add notes..."
             disabled={disabled}
+            onFocus={onFocus}
             data-cy="notes-textarea"
           />
         </PopoverContent>

@@ -23,6 +23,7 @@ interface QuantityQuestionProps {
   disabled?: boolean;
   clearError: () => void;
   index?: number;
+  onFocus: () => void;
 }
 
 export const QuantityQuestion = memo(function QuantityQuestion({
@@ -32,6 +33,7 @@ export const QuantityQuestion = memo(function QuantityQuestion({
   disabled = false,
   clearError,
   index = 0,
+  onFocus,
 }: QuantityQuestionProps) {
   const currentValue = questionnaireResponse.values[index]?.value as
     | number
@@ -101,6 +103,7 @@ export const QuantityQuestion = memo(function QuantityQuestion({
               system={question.answer_value_set}
               value={currentCoding}
               onSelect={handleCodingChange}
+              onFocus={onFocus}
             />
           </div>
         </div>
@@ -116,6 +119,7 @@ export const QuantityQuestion = memo(function QuantityQuestion({
           onChange={(e) => handleValueChange(e.target.value)}
           step="0.01"
           disabled={disabled}
+          onFocus={onFocus}
           className="w-[200px]"
         />
       </div>
@@ -126,6 +130,7 @@ export const QuantityQuestion = memo(function QuantityQuestion({
             system="system-ucum-units"
             value={currentUnit}
             onSelect={handleUnitChange}
+            onFocus={onFocus}
           />
         </div>
       </div>

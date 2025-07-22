@@ -16,6 +16,7 @@ interface BooleanQuestionProps {
   ) => void;
   disabled?: boolean;
   clearError: () => void;
+  onFocus: () => void;
 }
 
 export function BooleanQuestion({
@@ -23,6 +24,7 @@ export function BooleanQuestion({
   updateQuestionnaireResponseCB,
   disabled,
   clearError,
+  onFocus,
 }: BooleanQuestionProps) {
   const { t } = useTranslation();
 
@@ -48,6 +50,7 @@ export function BooleanQuestion({
           questionnaireResponse.note,
         );
       }}
+      onFocus={onFocus}
       disabled={disabled}
     />
   );

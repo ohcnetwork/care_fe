@@ -18,6 +18,7 @@ interface TextQuestionProps {
   disabled?: boolean;
   clearError: () => void;
   index: number;
+  onFocus: () => void;
 }
 
 export function TextQuestion({
@@ -27,6 +28,7 @@ export function TextQuestion({
   disabled,
   clearError,
   index,
+  onFocus,
 }: TextQuestionProps) {
   const handleChange = (value: string) => {
     clearError();
@@ -51,6 +53,7 @@ export function TextQuestion({
           onChange={(e) => handleChange(e.target.value)}
           className="min-h-[100px]"
           disabled={disabled}
+          onFocus={onFocus}
         />
       ) : (
         <Input
@@ -58,6 +61,7 @@ export function TextQuestion({
           value={questionnaireResponse.values[index]?.value?.toString() || ""}
           onChange={(e) => handleChange(e.target.value)}
           disabled={disabled}
+          onFocus={onFocus}
         />
       )}
     </>

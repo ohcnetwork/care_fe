@@ -18,6 +18,7 @@ interface TimeQuestionProps {
   clearError: () => void;
   classes?: string;
   index: number;
+  onFocus: () => void;
 }
 
 export function TimeQuestion({
@@ -27,6 +28,7 @@ export function TimeQuestion({
   clearError,
   classes,
   index,
+  onFocus,
 }: TimeQuestionProps) {
   const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const [hours, minutes] = event.target.value.split(":");
@@ -56,6 +58,7 @@ export function TimeQuestion({
       className={cn(classes)}
       onChange={handleTimeChange}
       disabled={disabled}
+      onFocus={onFocus}
     />
   );
 }

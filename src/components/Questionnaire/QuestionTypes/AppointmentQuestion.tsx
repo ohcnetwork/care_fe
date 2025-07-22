@@ -48,6 +48,7 @@ interface AppointmentQuestionProps {
   disabled?: boolean;
   errors: QuestionValidationError[];
   facilityId: string;
+  onFocus: () => void;
 }
 
 const APPOINTMENT_FIELDS: FieldDefinitions = {
@@ -93,6 +94,7 @@ export function AppointmentQuestion({
   disabled,
   errors,
   facilityId,
+  onFocus,
 }: AppointmentQuestionProps) {
   const { t } = useTranslation();
   const [resource, setResource] = useState<UserBase>();
@@ -171,6 +173,7 @@ export function AppointmentQuestion({
           className={cn(
             hasError(APPOINTMENT_FIELDS.REASON.key) && "border-red-500",
           )}
+          onFocus={onFocus}
         />
       </div>
 
@@ -186,6 +189,7 @@ export function AppointmentQuestion({
               hasError(APPOINTMENT_FIELDS.SLOT.key) &&
               "ring-1 ring-red-500",
           )}
+          onFocus={onFocus}
         >
           <PractitionerSelector
             facilityId={facilityId}

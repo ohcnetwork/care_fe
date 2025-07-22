@@ -51,6 +51,8 @@ interface QuestionInputProps {
   facilityId?: string;
   patientId: string;
   isSubQuestion?: boolean;
+  focusQuestion?: (id: string) => void;
+  focusSubQuestion?: (id: string) => void;
 }
 
 export function QuestionInput({
@@ -64,6 +66,8 @@ export function QuestionInput({
   facilityId,
   patientId,
   isSubQuestion,
+  focusQuestion,
+  focusSubQuestion,
 }: QuestionInputProps) {
   const { t } = useTranslation();
   const questionnaireResponse = questionnaireResponses.find(
@@ -97,6 +101,14 @@ export function QuestionInput({
     );
   };
 
+  const handleFocus = () => {
+    if (isSubQuestion && focusSubQuestion) {
+      focusSubQuestion(question.link_id);
+    } else if (focusQuestion) {
+      focusQuestion(question.id);
+    }
+  };
+
   const renderSingleInput = (index: number = 0) => {
     const commonProps = {
       classes: question.styling_metadata?.classes,
@@ -110,6 +122,7 @@ export function QuestionInput({
       index,
       patientId,
       errors,
+      onFocus: handleFocus,
     };
 
     switch (question.type) {
@@ -292,6 +305,7 @@ export function QuestionInput({
                   note,
                 );
               }}
+              onFocus={handleFocus}
               disabled={disabled}
             />
           </div>
@@ -361,6 +375,7 @@ export function QuestionInput({
                           ),
                         "mt-2": question.type === "text",
                       })}
+                      onFocus={handleFocus}
                       questionnaireResponse={questionnaireResponse}
                       handleUpdateNote={(note) => {
                         updateQuestionnaireResponseCB(
@@ -399,6 +414,7 @@ export function QuestionInput({
                   note,
                 );
               }}
+              onFocus={handleFocus}
               disabled={disabled}
             />
           </div>

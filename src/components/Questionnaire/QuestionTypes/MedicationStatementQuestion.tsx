@@ -90,6 +90,7 @@ interface MedicationStatementQuestionProps {
   ) => void;
   disabled?: boolean;
   errors: QuestionValidationError[];
+  onFocus: () => void;
 }
 
 const MEDICATION_STATEMENT_INITIAL_VALUE: MedicationStatementRequest = {
@@ -155,6 +156,7 @@ export function MedicationStatementQuestion({
   encounterId,
   question,
   errors,
+  onFocus,
 }: MedicationStatementQuestionProps) {
   const { t } = useTranslation();
   const isPreview = patientId === "preview";
@@ -562,6 +564,7 @@ export function MedicationStatementQuestion({
                                           e.stopPropagation();
                                           handleRemoveMedication(index);
                                         }}
+                                        onFocus={onFocus}
                                         className="size-10 p-4 border border-gray-400 bg-white shadow text-destructive"
                                       >
                                         <MinusCircledIcon className="size-5" />
@@ -666,6 +669,7 @@ export function MedicationStatementQuestion({
             onSelect={handleAddMedication}
             disabled={disabled}
             searchPostFix=" clinical drug"
+            onFocus={onFocus}
           />
         </div>
       ) : (

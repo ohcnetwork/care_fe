@@ -38,6 +38,7 @@ interface FilesQuestionProps {
   disabled?: boolean;
   errors: QuestionValidationError[];
   encounterId: string;
+  onFocus: () => void;
 }
 
 const FILE_UPLOAD_FIELDS = {
@@ -100,7 +101,7 @@ export function validateFileUploadQuestion(
 export function FilesQuestion(props: FilesQuestionProps) {
   const { questionnaireResponse, updateQuestionnaireResponseCB, encounterId } =
     props;
-
+  const { onFocus } = props;
   const { t } = useTranslation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -165,6 +166,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
             className="flex-1"
             value={value.name}
             onChange={(e) => handleUpdate({ name: e.target.value }, index)}
+            onFocus={onFocus}
           />
           <div className="bg-gray-100 border border-gray-200 rounded-lg px-2 py-1 flex items-center gap-2 max-w-[150px]">
             <span className="text-sm truncate">{value.original_name}</span>

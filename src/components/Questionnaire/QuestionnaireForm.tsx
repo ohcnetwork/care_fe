@@ -343,6 +343,8 @@ export function QuestionnaireForm({
     activeSubQuestionId,
     setActiveSubQuestionId,
     setActiveQuestionId,
+    focusQuestion,
+    focusSubQuestion,
   } = useActiveQuestion();
 
   const {
@@ -887,6 +889,8 @@ export function QuestionnaireForm({
               encounterId={encounterId}
               questions={form.questionnaire.questions}
               responses={form.responses}
+              focusQuestion={focusQuestion}
+              focusSubQuestion={focusSubQuestion}
               onResponseChange={(
                 values: ResponseValue[],
                 questionId: string,

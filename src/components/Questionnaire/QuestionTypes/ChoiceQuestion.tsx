@@ -31,6 +31,7 @@ interface ChoiceQuestionProps {
   withLabel?: boolean;
   clearError: () => void;
   index?: number;
+  onFocus: () => void;
 }
 
 export const ChoiceQuestion = memo(function ChoiceQuestion({
@@ -40,6 +41,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
   disabled = false,
   clearError,
   index = 0,
+  onFocus,
 }: ChoiceQuestionProps) {
   const options = question.answer_option || [];
   const selectType =
@@ -130,6 +132,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
                   system={question.answer_value_set!}
                   value={value.coding}
                   onSelect={(newValue) => handleCodingChange(newValue, idx)}
+                  onFocus={onFocus}
                 />
               </div>
 
@@ -145,6 +148,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
                     questionnaireResponse.question_id,
                   );
                 }}
+                onFocus={onFocus}
               >
                 <CareIcon icon="l-trash" className="size-4" />
               </Button>
@@ -158,6 +162,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
             system={question.answer_value_set}
             value={null}
             onSelect={handleCodingChange}
+            onFocus={onFocus}
           />
         </div>
       </>
@@ -179,6 +184,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
         disabled={disabled}
         id={`choice-${question.id}`}
         className="bg-white"
+        onFocus={onFocus}
       />
     );
   }
@@ -210,6 +216,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
         value={selectedValue ?? ""}
         onValueChange={handleValueChange}
         disabled={disabled}
+        onFocus={onFocus}
       />
     </div>
   );
