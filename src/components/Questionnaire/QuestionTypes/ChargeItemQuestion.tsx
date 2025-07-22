@@ -256,6 +256,7 @@ export function ChargeItemQuestion({
         note: undefined,
         override_reason: undefined,
         encounter: encounterId,
+        charge_item_definition: selectedCID.id,
       };
 
       // Automatically add the item when selected
