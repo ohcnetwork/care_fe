@@ -550,8 +550,8 @@ export default function AvatarEditModal({
                     <span>
                       {isProcessing
                         ? showCroppedPreview
-                          ? `${t("uploading")}...`
-                          : `${t("cropping")}...`
+                          ? t("uploading_indicator")
+                          : t("cropping_indicator")
                         : showCroppedPreview
                           ? t("upload")
                           : t("crop")}
