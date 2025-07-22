@@ -6,7 +6,6 @@ import {
   ChargeItemCreate,
   ChargeItemRead,
   ChargeItemUpdate,
-  ChargeItemUpsert,
 } from "./chargeItem";
 
 export default {
@@ -31,12 +30,6 @@ export default {
     method: HttpMethod.PUT,
     TRes: Type<ChargeItemRead>(),
     TBody: Type<ChargeItemUpdate>(),
-  },
-  upsertChargeItem: {
-    path: "/api/v1/facility/{facilityId}/charge_item/upsert/",
-    method: HttpMethod.POST,
-    TRes: Type<ChargeItemRead>(),
-    TBody: Type<{ datapoints: ChargeItemUpsert[] }>(),
   },
   applyChargeItemDefinitions: {
     path: "/api/v1/facility/{facilityId}/charge_item/apply_charge_item_defs/",

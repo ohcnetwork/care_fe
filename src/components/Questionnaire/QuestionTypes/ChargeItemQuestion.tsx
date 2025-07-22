@@ -17,13 +17,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -38,10 +31,7 @@ import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPr
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 
 import query from "@/Utils/request/query";
-import {
-  ChargeItemStatus,
-  ChargeItemUpsert,
-} from "@/types/billing/chargeItem/chargeItem";
+import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
@@ -54,17 +44,12 @@ interface ChargeItemQuestionProps {
   updateQuestionnaireResponseCB: (
     values: ResponseValue[],
     questionId: string,
-    note?: string,
   ) => void;
   disabled?: boolean;
   errors?: QuestionValidationError[];
 }
 
 const CHARGE_ITEM_FIELDS = {
-  STATUS: {
-    key: "status",
-    required: true,
-  },
   QUANTITY: {
     key: "quantity",
     required: true,
@@ -72,8 +57,8 @@ const CHARGE_ITEM_FIELDS = {
 } as const;
 
 interface ChargeItemFormProps {
-  chargeItem: ChargeItemUpsert;
-  onUpdate?: (updates: ChargeItemUpsert) => void;
+  chargeItem: ApplyChargeItemDefinitionRequest;
+  onUpdate?: (updates: ApplyChargeItemDefinitionRequest) => void;
   onRemove?: () => void;
   disabled?: boolean;
   errors?: QuestionValidationError[];
@@ -92,11 +77,10 @@ function ChargeItemForm({
   index,
 }: ChargeItemFormProps) {
   const { t } = useTranslation();
-  const [isPriceOpen, setIsPriceOpen] = useState(false);
 
   return (
     <TableRow>
-      <TableCell>{chargeItem.title}</TableCell>
+      <TableCell>{chargeItem.charge_item_definition_object.title}</TableCell>
       <TableCell>
         <Input
           type="number"
@@ -121,43 +105,31 @@ function ChargeItemForm({
         )}
       </TableCell>
       <TableCell>
-        <Select
-          value={chargeItem.status}
-          onValueChange={(value: ChargeItemStatus) =>
-            onUpdate?.({ ...chargeItem, status: value })
-          }
-          disabled={disabled}
-        >
-          <SelectTrigger className="w-32">
-            <SelectValue placeholder={t("select_status")} />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.values([
-              ChargeItemStatus.billable,
-              ChargeItemStatus.planned,
-            ]).map((status) => (
-              <SelectItem key={status} value={status}>
-                {t(status)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {questionId && index !== undefined && (
-          <FieldError
-            fieldKey={CHARGE_ITEM_FIELDS.STATUS.key}
-            questionId={questionId}
-            errors={errors}
-            index={index}
-          />
-        )}
-      </TableCell>
-      <TableCell>
-        <Input
-          value={chargeItem.note || ""}
-          onChange={(e) => onUpdate?.({ ...chargeItem, note: e.target.value })}
-          disabled={disabled}
-          placeholder={t("add_notes")}
-        />
+        <div className="space-y-1">
+          <div className="flex items-center gap-1">
+            <span>
+              {chargeItem.charge_item_definition_object.price_components?.[0]
+                ?.amount || 0}{" "}
+              {chargeItem.charge_item_definition_object.price_components?.[0]
+                ?.code?.code || "INR"}
+            </span>
+            {chargeItem.charge_item_definition_object.price_components?.length >
+              0 && (
+              <Popover>
+                <PopoverTrigger>
+                  <InfoIcon className="h-4 w-4 text-gray-700 cursor-pointer" />
+                </PopoverTrigger>
+                <PopoverContent side="right" className="p-0" align="start">
+                  <ChargeItemPriceDisplay
+                    priceComponents={
+                      chargeItem.charge_item_definition_object.price_components
+                    }
+                  />
+                </PopoverContent>
+              </Popover>
+            )}
+          </div>
+        </div>
       </TableCell>
       <TableCell className="text-right">
         <DropdownMenu>
@@ -167,26 +139,6 @@ function ChargeItemForm({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {chargeItem.unit_price_components?.length > 0 && (
-              <Popover open={isPriceOpen} onOpenChange={setIsPriceOpen}>
-                <PopoverTrigger asChild>
-                  <DropdownMenuItem
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      setIsPriceOpen(true);
-                    }}
-                  >
-                    <InfoIcon className="h-4 w-4 mr-2" />
-                    <span>View Cost</span>
-                  </DropdownMenuItem>
-                </PopoverTrigger>
-                <PopoverContent side="left" className="p-0">
-                  <ChargeItemPriceDisplay
-                    priceComponents={chargeItem.unit_price_components}
-                  />
-                </PopoverContent>
-              </Popover>
-            )}
             {onRemove && (
               <DropdownMenuItem
                 onSelect={() => onRemove()}
@@ -214,8 +166,11 @@ export function ChargeItemQuestion({
   const { t } = useTranslation();
   const [selectedChargeItemDefinition, setSelectedChargeItemDefinition] =
     useState<string | null>(null);
-  const [chargeItems, setChargeItems] = useState<ChargeItemUpsert[]>(
-    (questionnaireResponse.values?.[0]?.value as ChargeItemUpsert[]) || [],
+  const [chargeItems, setChargeItems] = useState<
+    ApplyChargeItemDefinitionRequest[]
+  >(
+    (questionnaireResponse.values?.[0]
+      ?.value as ApplyChargeItemDefinitionRequest[]) || [],
   );
   const [cidSearch, setCidSearch] = useState("");
 
@@ -248,15 +203,11 @@ export function ChargeItemQuestion({
       );
       if (!selectedCID) return;
 
-      const newChargeItem: ChargeItemUpsert = {
-        title: selectedCID.title,
-        status: ChargeItemStatus.billable,
+      const newChargeItem: ApplyChargeItemDefinitionRequest = {
         quantity: 1,
-        unit_price_components: selectedCID.price_components,
-        note: undefined,
-        override_reason: undefined,
         encounter: encounterId,
         charge_item_definition: selectedCID.id,
+        charge_item_definition_object: selectedCID,
       };
 
       // Automatically add the item when selected
@@ -289,7 +240,10 @@ export function ChargeItemQuestion({
     );
   };
 
-  const handleUpdateChargeItem = (index: number, updates: ChargeItemUpsert) => {
+  const handleUpdateChargeItem = (
+    index: number,
+    updates: ApplyChargeItemDefinitionRequest,
+  ) => {
     const newChargeItems = chargeItems.map((ci, i: number) => {
       if (i !== index) return ci;
       return { ...ci, ...updates };
@@ -304,7 +258,8 @@ export function ChargeItemQuestion({
 
   useEffect(() => {
     const initialChargeItems =
-      (questionnaireResponse.values?.[0]?.value as ChargeItemUpsert[]) || [];
+      (questionnaireResponse.values?.[0]
+        ?.value as ApplyChargeItemDefinitionRequest[]) || [];
 
     if (JSON.stringify(initialChargeItems) !== JSON.stringify(chargeItems)) {
       setChargeItems(initialChargeItems);
@@ -319,15 +274,14 @@ export function ChargeItemQuestion({
             <TableRow>
               <TableHead>{t("item")}</TableHead>
               <TableHead>{t("quantity")}</TableHead>
-              <TableHead>{t("status")}</TableHead>
-              <TableHead>{t("note")}</TableHead>
+              <TableHead>{t("price")}</TableHead>
               <TableHead className="text-right">{t("actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {chargeItems.map((chargeItem, index) => (
               <ChargeItemForm
-                key={`${chargeItem.title}-${index}`}
+                key={`${chargeItem.charge_item_definition_object.title}-${index}`}
                 chargeItem={chargeItem}
                 onUpdate={(updates) => handleUpdateChargeItem(index, updates)}
                 onRemove={() => handleRemoveChargeItem(index)}
