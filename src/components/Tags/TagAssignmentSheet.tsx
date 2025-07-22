@@ -9,7 +9,7 @@ import {
   Tag as TagIcon,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -122,6 +122,7 @@ export function TagSelectorPopover({
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
+  const isRemovingTagRef = useRef(false);
 
   // Fetch top-level tags
   const { data: rootTags, isLoading } = useQuery({
@@ -251,12 +252,15 @@ export function TagSelectorPopover({
     );
   };
 
-  // Remove tag
   const handleRemove = (tagId: string) => {
+    isRemovingTagRef.current = true;
     onChange(selected.filter((t) => t.id !== tagId));
+    // Reset the flag after a short delay
+    setTimeout(() => {
+      isRemovingTagRef.current = false;
+    }, 100);
   };
 
-  // Recursive render for tag tree
   function TagTree({ tags }: { tags: TagConfig[] }) {
     return (
       <>
@@ -271,7 +275,12 @@ export function TagSelectorPopover({
     <div>
       {/* Selected tags */}
       {selected.length > 0 && !asFilter && (
-        <div className="mt-2 flex flex-wrap gap-2">
+        <div
+          className="mt-2 flex flex-wrap gap-2"
+          data-selected-tags
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={(e) => e.stopPropagation()}
+        >
           {selected.map((tag) => (
             <Badge
               key={tag.id}
@@ -281,7 +290,12 @@ export function TagSelectorPopover({
               {tag.parent ? `${tag.parent.display}: ` : ""}
               {tag.display}
               <button
-                onClick={() => handleRemove(tag.id)}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleRemove(tag.id);
+                }}
                 className="ml-1 hover:bg-black/10 rounded-full p-0.5"
               >
                 <X className="h-3 w-3" />
@@ -292,7 +306,7 @@ export function TagSelectorPopover({
       )}
 
       {/* Tag selector popover */}
-      <Popover open={open} onOpenChange={setOpen} modal={false}>
+      <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
@@ -317,7 +331,16 @@ export function TagSelectorPopover({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[320px] p-0" align="start">
+        <PopoverContent
+          className="w-[320px] p-0"
+          align="start"
+          onInteractOutside={(e) => {
+            const target = e.target as Element;
+            if (target?.closest("[data-selected-tags]")) {
+              e.preventDefault();
+            }
+          }}
+        >
           <Command>
             <CommandInput
               className="border-none focus-visible:ring-0"
