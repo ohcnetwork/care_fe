@@ -946,14 +946,14 @@ function AppointmentCard({
           )}
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex">
           <div className="flex items-center justify-center">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Avatar
                   name={formatName(appointment.user)}
                   imageUrl={appointment.user.profile_picture_url}
-                  className="size-8"
+                  className="size-14 rounded-r-none"
                 />
               </TooltipTrigger>
               <TooltipContent className="flex flex-col gap-0">
@@ -966,7 +966,7 @@ function AppointmentCard({
               </TooltipContent>
             </Tooltip>
           </div>
-          <div className="bg-gray-100 px-2 py-1 rounded text-center">
+          <div className="bg-gray-100 px-2 py-1 rounded-l-none rounded-r-md ml-px text-center">
             <p className="text-[10px] uppercase">{t("token")}</p>
             {/* TODO: replace this with token number once that's ready... */}
             <p className="font-bold text-2xl uppercase">
