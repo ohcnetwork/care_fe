@@ -863,6 +863,22 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     setSelectedTags((current) => [...current, tag]);
   };
 
+  const handleAddQuestion = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const newQuestion: Question = {
+      id: crypto.randomUUID(),
+      link_id: `Q-${Date.now()}`,
+      text: "New Question",
+      type: "string",
+      questions: [],
+    };
+    updateQuestions([...rootQuestions, newQuestion]);
+    setExpandedQuestions((prev) => new Set([...prev, newQuestion.link_id]));
+    setTimeout(() => {
+      scrollToQuestion(newQuestion.link_id);
+    }, 100);
+  };
+
   return (
     <div className="container mx-auto px-4 py-6">
       <ScrollToTopButton className="fixed z-50 right-8 bottom-6" />
@@ -1148,23 +1164,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          const newQuestion: Question = {
-                            id: crypto.randomUUID(),
-                            link_id: `Q-${Date.now()}`,
-                            text: "New Question",
-                            type: "string",
-                            questions: [],
-                          };
-                          updateQuestions([...rootQuestions, newQuestion]);
-                          setExpandedQuestions(
-                            (prev) => new Set([...prev, newQuestion.link_id]),
-                          );
-                          setTimeout(() => {
-                            scrollToQuestion(newQuestion.link_id);
-                          }, 100);
-                        }}
+                        onClick={handleAddQuestion}
                       >
                         <CareIcon icon="l-plus" className="mr-2 size-4" />
                         {t("add_question")}
@@ -1255,23 +1255,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            const newQuestion: Question = {
-                              id: crypto.randomUUID(),
-                              link_id: `Q-${Date.now()}`,
-                              text: "New Question",
-                              type: "string",
-                              questions: [],
-                            };
-                            updateQuestions([...rootQuestions, newQuestion]);
-                            setExpandedQuestions(
-                              (prev) => new Set([...prev, newQuestion.link_id]),
-                            );
-                            setTimeout(() => {
-                              scrollToQuestion(newQuestion.link_id);
-                            }, 100);
-                          }}
+                          onClick={handleAddQuestion}
                         >
                           <CareIcon icon="l-plus" className="mr-2 size-4" />
                           {t("add_question")}
