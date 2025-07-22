@@ -800,19 +800,11 @@ function ActivityDefinitionFormContent({
                         isLoading={isLoadingSpecimens}
                         placeholder={t("select_specimen_requirements")}
                         onSearch={setSpecimenSearch}
-                        onRefetch={() => {
-                          queryClient.invalidateQueries({
-                            queryKey: ["specimenDefinitions"],
-                          });
-                        }}
                         canCreate={true}
-                        createForm={({ onSuccess, triggerRefetch }) => (
+                        createForm={(onSuccess) => (
                           <CreateSpecimenDefinition
                             facilityId={facilityId}
-                            onSuccess={() => {
-                              onSuccess();
-                              triggerRefetch();
-                            }}
+                            onSuccess={onSuccess}
                           />
                         )}
                       />
@@ -871,14 +863,11 @@ function ActivityDefinitionFormContent({
                         placeholder={t("select_observation_requirements")}
                         onSearch={setObservationSearch}
                         canCreate={true}
-                        createForm={({ onSuccess, triggerRefetch }) => (
+                        createForm={(onSuccess) => (
                           <div className="py-2">
                             <ObservationDefinitionForm
                               facilityId={facilityId}
-                              onSuccess={() => {
-                                onSuccess();
-                                triggerRefetch();
-                              }}
+                              onSuccess={onSuccess}
                             />
                           </div>
                         )}
@@ -922,20 +911,12 @@ function ActivityDefinitionFormContent({
                         isLoading={isLoadingChargeItemDefinitions}
                         placeholder={t("select_charge_item_definitions")}
                         onSearch={setChargeItemSearch}
-                        onRefetch={() => {
-                          queryClient.invalidateQueries({
-                            queryKey: ["chargeItemDefinitions"],
-                          });
-                        }}
                         canCreate={true}
-                        createForm={({ onSuccess, triggerRefetch }) => (
+                        createForm={(onSuccess) => (
                           <div className="py-2">
                             <ChargeItemDefinitionForm
                               facilityId={facilityId}
-                              onSuccess={() => {
-                                onSuccess();
-                                triggerRefetch();
-                              }}
+                              onSuccess={onSuccess}
                             />
                           </div>
                         )}
