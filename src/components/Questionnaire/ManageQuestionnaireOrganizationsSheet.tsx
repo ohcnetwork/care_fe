@@ -151,7 +151,6 @@ export default function ManageQuestionnaireOrganizationsSheet({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  // Remove selectedIds state - only keep selectedOrgDetails
   const [selectedOrgDetails, setSelectedOrgDetails] = useState<
     { id: string; name: string; description?: string }[]
   >([]);
