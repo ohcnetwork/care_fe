@@ -22,16 +22,16 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { getPermissions } from "@/common/Permissions";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { usePermissions } from "@/context/PermissionContext";
 import {
-  Encounter,
+  EncounterRead,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 
 interface EncounterActionsProps {
-  encounter: Encounter;
+  encounter: EncounterRead;
   variant?: "default" | "outline" | "ghost";
   size?: "default" | "sm" | "lg" | "icon";
   disableButtons?: boolean;
@@ -59,7 +59,7 @@ export default function EncounterActions({
     canWriteEncounter && !inactiveEncounterStatus.includes(encounter.status);
 
   const { mutate: updateEncounter } = useMutation({
-    mutationFn: mutate(routes.encounter.update, {
+    mutationFn: mutate(encounterApi.update, {
       pathParams: { id: encounter.id },
     }),
     onSuccess: () => {
@@ -75,7 +75,6 @@ export default function EncounterActions({
     updateEncounter({
       ...encounter,
       status: "completed",
-      organizations: encounter.organizations.map((org) => org.id),
       patient: encounter.patient.id,
       encounter_class: encounter.encounter_class,
       period: {

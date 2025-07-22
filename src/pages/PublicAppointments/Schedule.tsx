@@ -29,11 +29,7 @@ import { dateQueryString, formatName } from "@/Utils/utils";
 import { TokenSlotButton } from "@/pages/Appointments/components/AppointmentSlotPicker";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import {
-  Appointment,
-  AppointmentCreateRequest,
-  TokenSlot,
-} from "@/types/scheduling/schedule";
+import { Appointment, TokenSlot } from "@/types/scheduling/schedule";
 
 interface AppointmentsProps {
   facilityId: string;
@@ -149,14 +145,12 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
   const { mutate: createAppointment, isPending: isCreatingAppointment } =
     useMutation({
-      mutationFn: (body: AppointmentCreateRequest) =>
-        mutate(PublicAppointmentApi.createAppointment, {
-          pathParams: { id: selectedSlot?.id || "" },
-          body,
-          headers: {
-            Authorization: `Bearer ${tokenData.token}`,
-          },
-        })(body),
+      mutationFn: mutate(PublicAppointmentApi.createAppointment, {
+        pathParams: { id: selectedSlot?.id || "" },
+        headers: {
+          Authorization: `Bearer ${tokenData.token}`,
+        },
+      }),
       onSuccess: (data: Appointment) => {
         toast.success(t("appointment_created_success"));
         queryClient.invalidateQueries({

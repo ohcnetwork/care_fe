@@ -1,5 +1,5 @@
 import { Code } from "@/types/base/code/code";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { ObservationRead } from "@/types/emr/observation/observation";
 import { UserBase } from "@/types/user/user";
 
@@ -40,7 +40,7 @@ export interface DiagnosticReportUpdate
 
 export interface DiagnosticReportRead extends Omit<DiagnosticReportBase, "id"> {
   id: string;
-  encounter: Encounter;
+  encounter: EncounterRead;
   observations: ObservationRead[];
   created_by: UserBase;
   created_date: string;

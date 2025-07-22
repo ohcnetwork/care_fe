@@ -213,6 +213,8 @@ export default function AvatarEditModal({
     setSelectedFile(file);
     setShowCroppedPreview(false);
     setShowCameraPreview(false);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
   };
 
   const cropImage = async () => {

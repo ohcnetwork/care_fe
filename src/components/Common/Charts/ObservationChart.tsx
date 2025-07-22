@@ -31,9 +31,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { Code } from "@/types/base/code/code";
+import patientApi from "@/types/emr/patient/patientApi";
 
 import { ObservationHistoryTable } from "./ObservationHistoryTable";
 
@@ -124,7 +124,7 @@ export const ObservationVisualizer = ({
       encounterId,
       allCodes.map((c) => c.code).join(","),
     ],
-    queryFn: query(routes.observationsAnalyse, {
+    queryFn: query(patientApi.observationsAnalyse, {
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
