@@ -1,9 +1,4 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
-import {
-  Observation,
-  ObservationAnalyzeResponse,
-} from "@/types/emr/observation";
 
 import {
   ObservationCreate,
@@ -22,18 +17,5 @@ export default {
         | ObservationFromDefinitionCreate[]
         | ObservationUpdate[];
     }>(),
-  },
-} as const;
-
-export const ObservationRoutes = {
-  listObservations: {
-    path: "/api/v1/patient/{patientId}/observation/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<Observation>>(),
-  },
-  observationsAnalyse: {
-    path: "/api/v1/patient/{patientId}/observation/analyse/",
-    method: "POST",
-    TRes: Type<ObservationAnalyzeResponse>(),
   },
 } as const;

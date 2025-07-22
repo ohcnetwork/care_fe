@@ -10,7 +10,7 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
 import { Observation, ObservationWithUser } from "@/types/emr/observation";
-import { ObservationRoutes } from "@/types/emr/observation/observationApi";
+import patientApi from "@/types/emr/patient/patientApi";
 
 import { VitalsObservation, VitalsTable } from "./VitalsTable";
 
@@ -84,7 +84,7 @@ export const VitalsList = ({
   codeGroups,
   className,
 }: VitalsListProps) => {
-  // Extract only relevant vital codes from the code groups
+  // Extract only relevant vital codes from the code groups excluding FiO2
   const vitalCodes =
     codeGroups
       ?.flatMap((group) => group.codes)
@@ -98,7 +98,7 @@ export const VitalsList = ({
       vitalCodes.map((c) => c.code).join(","),
     ],
     queryFn: async ({ pageParam = 0 }) => {
-      const response = await query(ObservationRoutes.listObservations, {
+      const response = await query(patientApi.listObservations, {
         pathParams: { patientId },
         queryParams: {
           encounter: encounterId,
