@@ -98,7 +98,7 @@ export default function PatientRegistration(
     () =>
       z
         .object({
-          name: z.string().nonempty(t("name_is_required")),
+          name: z.string().trim().nonempty(t("name_is_required")),
           phone_number: validators().phoneNumber.required,
           same_phone_number: z.boolean(),
           emergency_phone_number: validators().phoneNumber.required,
@@ -125,12 +125,12 @@ export default function PatientRegistration(
             .max(120, t("age_must_be_below_120"))
             .optional(),
           address: enableMinimalPatientRegistration
-            ? z.string().optional()
-            : z.string().nonempty(t("address_is_required")),
+            ? z.string().trim().optional()
+            : z.string().trim().nonempty(t("address_is_required")),
           same_address: z.boolean(),
           permanent_address: enableMinimalPatientRegistration
-            ? z.string().optional()
-            : z.string().nonempty(t("field_required")),
+            ? z.string().trim().optional()
+            : z.string().trim().nonempty(t("field_required")),
           pincode: enableMinimalPatientRegistration
             ? validators().pincode.optional()
             : validators().pincode,
@@ -295,7 +295,7 @@ export default function PatientRegistration(
         permanent_address: values.same_address
           ? values.address
           : values.permanent_address,
-        pincode: String(values.pincode) || undefined,
+        pincode: values.pincode || undefined,
         identifiers: editableIdentifiers,
       });
       return;
@@ -309,7 +309,7 @@ export default function PatientRegistration(
           ? values.address
           : values.permanent_address,
         facility: facilityId,
-        pincode: String(values.pincode) || undefined,
+        pincode: values.pincode || undefined,
         tags: selectedTags.map((tag) => tag.id),
         identifiers: editableIdentifiers,
       });
@@ -393,7 +393,7 @@ export default function PatientRegistration(
         deceased_datetime: null,
         identifiers: facility.patient_instance_identifier_configs.map(
           (identifierConfig) => {
-            const identifier = patientQuery.data.instance_identifiers.find(
+            const identifier = patientQuery.data.instance_identifiers?.find(
               (i) => i.config.id === identifierConfig.id,
             );
             return {
@@ -905,6 +905,7 @@ export default function PatientRegistration(
                             : undefined;
                           field.onChange(value);
                         }}
+                        value={field.value || undefined}
                         data-cy="pincode-input"
                       />
                     </FormControl>

@@ -4,7 +4,7 @@ import {
   Category,
 } from "@/types/emr/activityDefinition/activityDefinition";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { ObservationRead } from "@/types/emr/observation/observation";
 import { SpecimenRead } from "@/types/emr/specimen/specimen";
 import { LocationList } from "@/types/location/location";
@@ -90,7 +90,7 @@ export interface ServiceRequestUpdateSpec extends BaseServiceRequestSpec {
 export interface ServiceRequestReadSpec extends BaseServiceRequestSpec {
   version?: number;
   locations: LocationList[];
-  encounter: Encounter;
+  encounter: EncounterRead;
   activity_definition: ActivityDefinitionReadSpec;
   specimens: SpecimenRead[];
   observations?: ObservationRead[];

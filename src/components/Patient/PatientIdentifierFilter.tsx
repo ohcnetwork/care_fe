@@ -33,7 +33,7 @@ import {
 import query from "@/Utils/request/query";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { getPartialId } from "@/types/emr/patient/patient";
-import { PartialPatientModel, Patient } from "@/types/emr/patient/patient";
+import { PartialPatientModel, PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 
 interface PatientIdentifierFilterProps {
@@ -53,10 +53,10 @@ export default function PatientIdentifierFilter({
   const { facility, facilityId } = useCurrentFacility();
   const [open, setOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<
-    Patient | PartialPatientModel | null
+    PatientRead | PartialPatientModel | null
   >(null);
   const [pendingPatient, setPendingPatient] = useState<
-    Patient | PartialPatientModel | null
+    PatientRead | PartialPatientModel | null
   >(null);
   const [searchType, setSearchType] = useState(
     facility?.patient_instance_identifier_configs?.[0]?.id ?? "",
@@ -68,7 +68,7 @@ export default function PatientIdentifierFilter({
   // Set initial patient ID if provided
   useEffect(() => {
     if (patientId && !selectedPatient) {
-      setSelectedPatient({ id: patientId } as Patient);
+      setSelectedPatient({ id: patientId } as PatientRead);
     } else if (!patientId) {
       setSelectedPatient(null);
     }
@@ -127,7 +127,7 @@ export default function PatientIdentifierFilter({
   }, [verifiedPatient]);
 
   const handleSelectPatient = useCallback(
-    (patient: Patient | PartialPatientModel) => {
+    (patient: PatientRead | PartialPatientModel) => {
       setSelectedPatient(patient);
       setOpen(false);
       setSearchTerm("");
@@ -136,7 +136,7 @@ export default function PatientIdentifierFilter({
     [onSelect],
   );
 
-  const handlePatientSelect = (patient: Patient | PartialPatientModel) => {
+  const handlePatientSelect = (patient: PatientRead | PartialPatientModel) => {
     if (patientList?.partial) {
       setPendingPatient(patient);
       setVerificationOpen(true);

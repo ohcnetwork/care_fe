@@ -3,7 +3,7 @@ import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
 import { Badge } from "@/components/ui/badge";
 
 import { Time } from "@/Utils/types";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { UserBase } from "@/types/user/user";
@@ -165,7 +165,7 @@ export type AppointmentStatus = (typeof AppointmentStatuses)[number];
 export interface Appointment {
   id: string;
   token_slot: TokenSlot;
-  patient: Patient;
+  patient: PatientRead;
   booked_on: string;
   status: AppointmentNonCancelledStatus;
   reason_for_visit: string;
@@ -184,7 +184,12 @@ export interface AppointmentRead extends Appointment {
 export interface AppointmentCreateRequest {
   patient: string;
   reason_for_visit: string;
-  tags?: string[];
+  tags: string[];
+}
+
+export interface AppointmentCreatePublicRequest {
+  patient: string;
+  reason_for_visit: string;
 }
 
 export interface AppointmentUpdateRequest {
@@ -194,9 +199,15 @@ export interface AppointmentUpdateRequest {
 export interface CreateAppointmentQuestion {
   reason_for_visit: string;
   slot_id: string;
+  tags: string[];
 }
 
 export interface AppointmentCancelRequest {
   reason: "cancelled" | "entered_in_error";
   reason_for_visit?: string;
+}
+
+export interface AppointmentRescheduleRequest {
+  new_slot: string;
+  reason: string;
 }
