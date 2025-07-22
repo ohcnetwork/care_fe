@@ -85,17 +85,17 @@ export const VitalsList = ({
   className,
 }: VitalsListProps) => {
   // Extract only relevant vital codes from the code groups excluding FiO2
-  const vitalCodes =
-    codeGroups
-      ?.flatMap((group) => group.codes)
-      .filter((code) => code.display && code.code !== "3151-8") || [];
+  const vitalCodes = codeGroups?.flatMap((group) => group.codes) ?? [];
+  const filteredVitalCodes = vitalCodes.filter(
+    (code) => code.display && code.code !== "3151-8",
+  );
   const { data, isLoading, hasNextPage, fetchNextPage } = useInfiniteQuery<
     PaginatedResponse<ObservationWithUser>
   >({
     queryKey: [
       "infinite-observations",
       patientId,
-      vitalCodes.map((c) => c.code).join(","),
+      filteredVitalCodes.map((c) => c.code).join(","),
     ],
     queryFn: async ({ pageParam = 0 }) => {
       const response = await query(patientApi.listObservations, {
@@ -103,7 +103,7 @@ export const VitalsList = ({
         queryParams: {
           encounter: encounterId,
           limit: String(LIMIT),
-          codes: vitalCodes.map((c) => c.code).join(","),
+          codes: filteredVitalCodes.map((c) => c.code).join(","),
           offset: String(pageParam),
         },
       })({ signal: new AbortController().signal });
@@ -117,7 +117,7 @@ export const VitalsList = ({
   });
   const vitals = extractVitals(
     data?.pages.flatMap((page) => page.results) || [],
-    vitalCodes,
+    filteredVitalCodes,
   );
   if (isLoading) {
     return (
@@ -139,7 +139,7 @@ export const VitalsList = ({
       className={className}
     >
       <div>
-        <VitalsTable vitals={vitals} vitalCodes={vitalCodes} />
+        <VitalsTable vitals={vitals} vitalCodes={filteredVitalCodes} />
       </div>
       {hasNextPage && (
         <div className="flex justify-center">
