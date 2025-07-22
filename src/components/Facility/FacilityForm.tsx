@@ -32,12 +32,13 @@ import { Textarea } from "@/components/ui/textarea";
 
 import LocationPicker from "@/components/Common/GeoLocationPicker";
 
-import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
+import { FACILITY_TYPES } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
+import { FACILITY_FEATURE_TYPES } from "@/types/facility/facility";
 import { FacilityRead } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 import { Organization } from "@/types/organization/organization";
@@ -190,18 +191,14 @@ export default function FacilityForm({
   // Update form when facility data is loaded
   useEffect(() => {
     if (facilityData) {
-      setSelectedLevels([
-        facilityData.geo_organization as unknown as Organization,
-      ]);
+      setSelectedLevels([facilityData.geo_organization]);
       form.reset({
         facility_type: facilityData.facility_type,
         name: facilityData.name,
         description: facilityData.description || "",
         features: facilityData.features || [],
         pincode: facilityData.pincode || undefined,
-        geo_organization: (
-          facilityData.geo_organization as unknown as Organization
-        )?.id,
+        geo_organization: facilityData.geo_organization.id,
         address: facilityData.address,
         phone_number: facilityData.phone_number,
         latitude: facilityData.latitude

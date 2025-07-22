@@ -38,7 +38,6 @@ import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
-import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import mutate from "@/Utils/request/mutate";
@@ -49,6 +48,7 @@ import { sleep } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { FeatureBadge } from "@/pages/Facility/Utils";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
+import { FACILITY_FEATURE_TYPES } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 import { renderGeoOrganizations } from "@/types/organization/organization";
 

@@ -7,8 +7,6 @@ import {
   Stethoscope,
 } from "lucide-react";
 
-import { IconName } from "@/CAREUI/icons/CareIcon";
-
 import { EncounterClass } from "@/types/emr/encounter/encounter";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
@@ -113,110 +111,6 @@ export const RESOURCE_STATUS_CHOICES = [
   { icon: "l-spinner", text: "transfer_in_progress" },
   { icon: "l-check-circle", text: "completed" },
 ] as const;
-
-export const FACILITY_FEATURE_TYPES: {
-  id: number;
-  name: string;
-  icon: IconName;
-  variant: string;
-}[] = [
-  {
-    id: 1,
-    name: "CT Scan",
-    icon: "l-compact-disc",
-    variant: "blue",
-  },
-  {
-    id: 2,
-    name: "Maternity Care",
-    icon: "l-baby-carriage",
-    variant: "pink",
-  },
-  {
-    id: 3,
-    name: "X-Ray",
-    icon: "l-clipboard-alt",
-    variant: "blue",
-  },
-  {
-    id: 4,
-    name: "Neonatal Care",
-    icon: "l-baby-carriage",
-    variant: "pink",
-  },
-  {
-    id: 5,
-    name: "Operation Theater",
-    icon: "l-syringe",
-    variant: "orange",
-  },
-  {
-    id: 6,
-    name: "Blood Bank",
-    icon: "l-medical-drip",
-    variant: "purple",
-  },
-  {
-    id: 7,
-    name: "Emergency Services",
-    icon: "l-ambulance",
-    variant: "red",
-  },
-  {
-    id: 8,
-    name: "Inpatient Services",
-    icon: "l-hospital",
-    variant: "orange",
-  },
-  {
-    id: 9,
-    name: "Outpatient Services",
-    icon: "l-hospital",
-    variant: "indigo",
-  },
-  {
-    id: 10,
-    name: "Intensive Care Units (ICU)",
-    icon: "l-hospital",
-    variant: "red",
-  },
-  {
-    id: 11,
-    name: "Pharmacy",
-    icon: "l-hospital",
-    variant: "indigo",
-  },
-  {
-    id: 12,
-    name: "Rehabilitation Services",
-    icon: "l-hospital",
-    variant: "teal",
-  },
-  {
-    id: 13,
-    name: "Home Care Services",
-    icon: "l-hospital",
-    variant: "teal",
-  },
-  {
-    id: 14,
-    name: "Psychosocial Support",
-    icon: "l-hospital",
-    variant: "purple",
-  },
-  {
-    id: 15,
-    name: "Respite Care",
-    icon: "l-hospital",
-    variant: "red",
-  },
-  {
-    id: 16,
-    name: "Daycare Programs",
-    icon: "l-hospital",
-    variant: "yellow",
-  },
-];
 
 export const SOCIOECONOMIC_STATUS_CHOICES = [
   "MIDDLE_CLASS",
