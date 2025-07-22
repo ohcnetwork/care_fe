@@ -107,7 +107,7 @@ export const PractitionerSelector = ({
               {practitioners?.users.map((user) => (
                 <CommandItem
                   key={user.id}
-                  value={`${formatName(user)} ${user.username ?? ""}`}
+                  value={`${formatName(user)} ${user.username}`}
                   onSelect={() => {
                     onSelect(user);
                     setOpen(false);
