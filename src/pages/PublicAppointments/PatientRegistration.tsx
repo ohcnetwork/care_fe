@@ -31,7 +31,7 @@ import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { Appointment } from "@/types/scheduling/schedule";
@@ -142,7 +142,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
           Authorization: `Bearer ${tokenData.token}`,
         },
       })(body),
-    onSuccess: (data: Patient) => {
+    onSuccess: (data: PatientRead) => {
       toast.success(t("patient_created_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["patients"],

@@ -1,5 +1,5 @@
 import { ContactPoint } from "@/types/common/contactPoint";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationList } from "@/types/location/location";
 import { UserBase } from "@/types/user/user";
@@ -51,7 +51,7 @@ export interface DeviceBase {
 
 export interface DeviceDetail extends DeviceBase {
   id: string;
-  current_encounter: Encounter | undefined;
+  current_encounter: EncounterRead | undefined;
   current_location: LocationList | undefined;
   created_by: UserBase;
   updated_by: UserBase;
@@ -66,7 +66,7 @@ export interface DeviceList extends DeviceBase {
 
 export interface DeviceEncounterHistory {
   id: string;
-  encounter: Encounter;
+  encounter: EncounterRead;
   created_by: UserBase;
   start: string;
   end: string;

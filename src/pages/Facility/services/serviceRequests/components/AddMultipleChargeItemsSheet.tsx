@@ -123,6 +123,7 @@ export default function AddMultipleChargeItemsSheet({
           encounter: request.encounter.id,
           service_resource: "service_request",
           service_resource_id: serviceRequestId,
+          charge_item_definition: selectedCID.id,
         },
       ]);
       setSelectedDefinitionId(null);

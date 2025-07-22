@@ -1,4 +1,4 @@
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import { Period } from "@/types/questionnaire/base";
 
 export enum AccountStatus {
@@ -42,7 +42,7 @@ export interface AccountBase {
 }
 
 export interface AccountRead extends AccountBase {
-  patient: Patient;
+  patient: PatientRead;
   calculated_at?: string;
   total_net: number;
   total_gross: number;
