@@ -13,10 +13,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with: 
+          ref: ${{ github.event.pull_request.base.ref }} # Check out base branch for safety
 
       - name: Label PR for type changes
         uses: actions/labeler@v5
         with:
-          # repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
           configuration-path: ./.github/labeler.yml
           sync-labels: true
