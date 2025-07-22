@@ -2,9 +2,9 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
   BeakerIcon,
-  Clock,
   CookingPotIcon,
   HeartPulseIcon,
+  History,
   LeafIcon,
 } from "lucide-react";
 import { Link, usePath, usePathParams } from "raviger";
@@ -176,13 +176,11 @@ export function AllergyList({
       className={className}
       editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
       actionButton={
-        <Button variant="outline" size="sm" asChild className="px-1">
+        <Button size="sm" variant={"link"} asChild>
           <Link
             href={`/facility/${facilityId}/patient/${patientId}/history/allergies?sourceUrl=${sourceUrl}`}
-            className="font-semibold"
           >
-            <Clock />
-            <span className="text-sm">{t("allergy_history")}</span>
+            <History className="size-4 text-gray-500" />
           </Link>
         </Button>
       }

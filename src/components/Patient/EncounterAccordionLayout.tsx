@@ -42,15 +42,11 @@ export function EncounterAccordionLayout({
               <CardTitle className="text-lg font-semibold pt-1">
                 {t(title)}:
               </CardTitle>
-              <div className="flex gap-1 items-center">
+              <div>
                 {!readOnly && editLink && (
                   <Button variant="link" size="xs">
-                    <Link
-                      href={editLink}
-                      className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
-                    >
-                      <SquarePen className="size-4" />
-                      <span className="underline"> {t("edit")}</span>
+                    <Link href={editLink}>
+                      <SquarePen className="size-4 text-gray-500" />
                     </Link>
                   </Button>
                 )}

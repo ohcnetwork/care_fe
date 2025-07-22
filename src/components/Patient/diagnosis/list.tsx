@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Clock } from "lucide-react";
+import { History } from "lucide-react";
 import { Link, usePath, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -153,13 +153,12 @@ export function DiagnosisList({
       className={className}
       editLink={!readOnly ? "questionnaire/diagnosis" : undefined}
       actionButton={
-        <Button variant="outline" size="sm" className="px-1" asChild>
+        <Button variant="link" asChild>
           <Link
             href={`/facility/${facilityId}/patient/${patientId}/history/diagnoses?sourceUrl=${sourceUrl}`}
             className="font-semibold"
           >
-            <Clock />
-            <span className="text-sm">{t("diagnosis_history")}</span>
+            <History className="size-4 text-gray-500" />
           </Link>
         </Button>
       }
