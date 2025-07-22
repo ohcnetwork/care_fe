@@ -237,10 +237,7 @@ export default function TagConfigTable({
             </TableHeader>
             <TableBody className="bg-white">
               {sortedConfigs.map((config: TagConfig) => (
-                <TableRow
-                  key={config.id}
-                  className="divide-x cursor-pointer hover:bg-gray-50"
-                >
+                <TableRow key={config.id} className="divide-x hover:bg-gray-50">
                   <TableCell className="font-medium">
                     <div className="flex flex-col max-w-md text-sm break-words whitespace-normal">
                       <span>{config.display}</span>
