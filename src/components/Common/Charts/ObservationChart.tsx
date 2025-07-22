@@ -34,7 +34,6 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import query from "@/Utils/request/query";
 import { Code } from "@/types/base/code/code";
-
 import patientApi from "@/types/emr/patient/patientApi";
 
 import { ObservationHistoryTable } from "./ObservationHistoryTable";
