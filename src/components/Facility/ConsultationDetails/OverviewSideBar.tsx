@@ -19,10 +19,10 @@ import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import EncounterProperties from "@/pages/Encounters/EncounterProperties";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 
 interface Props {
-  encounter: Encounter;
+  encounter: EncounterRead;
   canAccess: boolean;
   canEdit: boolean;
 }
@@ -141,7 +141,7 @@ const ManageCareTeamButton = () => {
   );
 };
 
-const Questionnaires = ({ encounter }: { encounter: Encounter }) => {
+const Questionnaires = ({ encounter }: { encounter: EncounterRead }) => {
   const { t } = useTranslation();
 
   const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
@@ -180,7 +180,7 @@ const Locations = ({
   encounter,
 }: {
   canEdit: boolean;
-  encounter: Encounter;
+  encounter: EncounterRead;
 }) => {
   const { t } = useTranslation();
 
@@ -234,7 +234,7 @@ const DepartmentsAndTeams = ({
   encounter,
 }: {
   canEdit: boolean;
-  encounter: Encounter;
+  encounter: EncounterRead;
 }) => {
   const { t } = useTranslation();
 
@@ -276,7 +276,7 @@ const DepartmentsAndTeams = ({
   );
 };
 
-const AuditLogs = ({ encounter }: { encounter: Encounter }) => {
+const AuditLogs = ({ encounter }: { encounter: EncounterRead }) => {
   const { t } = useTranslation();
 
   return (

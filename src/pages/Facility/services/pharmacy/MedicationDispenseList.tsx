@@ -39,9 +39,8 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import {
-  ACTIVE_MEDICATION_STATUSES,
-  INACTIVE_MEDICATION_STATUSES,
   MEDICATION_REQUEST_PRIORITY_COLORS,
+  MEDICATION_REQUEST_STATUS,
   MEDICATION_REQUEST_STATUS_COLORS,
   MedicationPriority,
   MedicationRequestDispenseStatus,
@@ -257,24 +256,27 @@ export default function MedicationDispenseList({
       <div className="mb-4 flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <FilterTabs
-            value={qParams.priority || ""}
-            onValueChange={(value) =>
-              updateQuery({ priority: value || undefined })
-            }
-            options={Object.values(MedicationPriority)}
-            allOptionLabel={t("all_priorities")}
+            value={qParams.status || "active"}
+            onValueChange={(value) => updateQuery({ status: value })}
+            options={Object.values(MEDICATION_REQUEST_STATUS)}
+            showMoreDropdown={true}
+            showAllOption={false}
+            maxVisibleTabs={4}
+            defaultVisibleOptions={[
+              "active",
+              "completed",
+              "cancelled",
+              "draft",
+            ]}
           />
           <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full sm:w-auto">
             <div className="flex-1 sm:flex-initial sm:w-auto">
               <FilterSelect
-                value={qParams.status || "active"}
-                onValueChange={(value) => updateQuery({ status: value })}
-                options={[
-                  ...ACTIVE_MEDICATION_STATUSES,
-                  ...INACTIVE_MEDICATION_STATUSES,
-                ]}
-                label="status"
-                onClear={() => updateQuery({ status: undefined })}
+                value={qParams.priority || ""}
+                onValueChange={(value) => updateQuery({ priority: value })}
+                options={Object.values(MedicationPriority)}
+                label={t("priority")}
+                onClear={() => updateQuery({ priority: undefined })}
               />
             </div>
           </div>

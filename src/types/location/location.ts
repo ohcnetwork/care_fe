@@ -13,7 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 import { Code } from "@/types/base/code/code";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
 export type AvailabilityStatus = "available" | "unavailable";
@@ -47,7 +47,7 @@ export interface LocationList extends LocationBase {
   id: string;
   has_children: boolean;
   parent?: LocationList;
-  current_encounter?: Encounter;
+  current_encounter?: EncounterRead;
   sort_index: number;
 }
 

@@ -286,7 +286,7 @@ function ActivityDefinitionFormContent({
             kind: existingData.kind,
             code: existingData.code,
             body_site: existingData.body_site,
-            diagnostic_report_codes: existingData.diagnostic_report_codes,
+            diagnostic_report_codes: existingData.diagnostic_report_codes || [],
             specimen_requirements:
               existingData.specimen_requirements?.map((s) => ({
                 value: s.id,
@@ -721,7 +721,7 @@ function ActivityDefinitionFormContent({
                     <ValueSetSelect
                       system="system-body-site"
                       value={form.watch("body_site")}
-                      placeholder={t("e.g., Right Arm")}
+                      placeholder={t("select_body_site")}
                       onSelect={(code) => {
                         form.setValue("body_site", {
                           code: code.code,

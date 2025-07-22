@@ -56,7 +56,7 @@ export function FacilityNavUser({
               <Avatar
                 className="size-8 rounded-lg"
                 name={`${user.first_name} ${user.last_name}`}
-                imageUrl={user.read_profile_picture_url}
+                imageUrl={user.profile_picture_url}
               />
               {(open || isMobile) && (
                 <>
@@ -82,7 +82,7 @@ export function FacilityNavUser({
                 <Avatar
                   className="size-8 rounded-lg"
                   name={`${user.first_name} ${user.last_name}`}
-                  imageUrl={user.read_profile_picture_url}
+                  imageUrl={user.profile_picture_url}
                 />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">

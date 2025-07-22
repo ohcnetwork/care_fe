@@ -19,9 +19,9 @@ import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 
-function PatientCard({ patient }: { patient: Patient }) {
+function PatientCard({ patient }: { patient: PatientRead }) {
   const { t } = useTranslation();
   return (
     <Card>

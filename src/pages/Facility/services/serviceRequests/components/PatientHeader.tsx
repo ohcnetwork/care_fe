@@ -16,10 +16,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 import dayjs from "@/Utils/dayjs";
 import { formatPatientAge } from "@/Utils/utils";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 
 interface PatientHeaderProps {
-  patient: Patient;
+  patient: PatientRead;
   facilityId: string;
   encounterId?: string;
 }
