@@ -96,7 +96,6 @@ const SearchInputFieldRenderer = ({
   open: boolean;
 }) => {
   const isMobile = useIsMobile();
-  console.log(selectedOption);
   switch (selectedOption.readableKey) {
     case "phone_number":
       return (
