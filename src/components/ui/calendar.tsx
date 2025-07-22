@@ -151,7 +151,7 @@ function Calendar({
     props.selectedClassName,
   );
   const _todayClassName = cn(
-    "[&>button]:bg-accent [&>button]:text-accent-foreground",
+    "[&>button]:bg-gray-100 [&>button]:rounded-md",
     props.todayClassName,
   );
   const _outsideClassName = cn(

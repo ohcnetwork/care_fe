@@ -28,16 +28,16 @@ import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordio
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, properCase } from "@/Utils/utils";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
+import patientApi from "@/types/emr/patient/patientApi";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 
 interface Props {
-  encounter?: Encounter;
+  encounter?: EncounterRead;
   patientId: string;
   isPrintPreview?: boolean;
   onlyUnstructured?: boolean;
@@ -496,7 +496,7 @@ export default function QuestionnaireResponsesList({
 
   const { data: questionnarieResponses, isLoading } = useQuery({
     queryKey: ["questionnaireResponses", patientId, qParams],
-    queryFn: query.paginated(routes.getQuestionnaireResponses, {
+    queryFn: query.paginated(patientApi.getQuestionnaireResponses, {
       pathParams: { patientId },
       queryParams: {
         ...(!isPrintPreview && {

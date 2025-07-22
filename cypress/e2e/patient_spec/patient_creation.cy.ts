@@ -99,9 +99,8 @@ describe("Patient Creation and modification", () => {
   patientTestCases.forEach(({ description, data }) => {
     it(`creates a new ${description} and verifies registration`, () => {
       facilityCreation.selectFirstRandomFacility();
+      cy.getFacilityIdAndNavigate("patients");
       patientCreation
-        .expandPatientNav()
-        .clickSearchPatients()
         .clickCreateNewPatient()
         .fillPatientDetails(data)
         .submitPatientForm()
@@ -173,8 +172,8 @@ describe("Patient Search and Encounter Creation", () => {
     cy.get("@patientPhone").then((phoneNumber) => {
       cy.get("@patientName").then((name) => {
         cy.get("@patientYear").then((year) => {
+          cy.getFacilityIdAndNavigate("patients");
           patientCreation
-            .clickSearchPatients()
             .searchPatient(String(phoneNumber))
             .verifySearchResults(String(name))
             .selectPatientFromResults(String(name))
