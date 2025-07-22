@@ -28,7 +28,7 @@ import query from "@/Utils/request/query";
 import { dateQueryString, formatName } from "@/Utils/utils";
 import { TokenSlotButton } from "@/pages/Appointments/components/AppointmentSlotPicker";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
-import facilityApi from "@/types/facility/facilityApi";
+import PublicFacilityApi from "@/types/facility/PublicFacilityApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { Appointment, TokenSlot } from "@/types/scheduling/schedule";
 
@@ -79,7 +79,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
   const { data: facilityResponse, error: facilityError } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(facilityApi.getAny, {
+    queryFn: query(PublicFacilityApi.getAny, {
       pathParams: { id: facilityId },
       silent: true,
     }),

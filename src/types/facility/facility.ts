@@ -18,10 +18,21 @@ export interface FacilityBase extends FacilityBareMinimum {
   latitude?: number;
   longitude?: number;
   middleware_address?: string;
+  pincode?: number;
+}
+
+export interface FacilityPublicRead
+  extends Omit<FacilityBase, "latitude" | "longitude"> {
+  features: number[];
+  read_cover_image_url?: string;
+  cover_image_url?: string;
+  geo_organization: Organization;
+  latitude?: string;
+  longitude?: string;
 }
 
 export interface FacilityRead
-  extends Omit<FacilityBase, "geo_organization" | "latitude" | "longitude">,
+  extends Omit<FacilityBase, "latitude" | "longitude">,
     FacilityPermissions {
   id: string;
   read_cover_image_url?: string;
@@ -31,7 +42,6 @@ export interface FacilityRead
   geo_organization: Organization;
   latitude?: string;
   longitude?: string;
-  pincode: number;
   instance_discount_codes: Code[];
   instance_discount_monetary_components: MonetaryComponentRead[];
   instance_informational_codes: Code[];

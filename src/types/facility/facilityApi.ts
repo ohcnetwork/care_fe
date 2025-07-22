@@ -6,16 +6,6 @@ import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryCo
 import { FacilityCreate, FacilityListRead, FacilityRead } from "./facility";
 
 export default {
-  getAll: {
-    path: "/api/v1/getallfacilities/",
-    method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<FacilityRead>>(),
-  },
-  getAny: {
-    path: "/api/v1/getallfacilities/{id}/",
-    method: HttpMethod.GET,
-    TRes: Type<FacilityRead>(),
-  },
   list: {
     path: "/api/v1/facility/",
     method: HttpMethod.GET,

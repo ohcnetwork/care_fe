@@ -9,10 +9,10 @@ import { Avatar } from "@/components/Common/Avatar";
 import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
 
 import { FeatureBadge } from "@/pages/Facility/Utils";
-import { FacilityRead } from "@/types/facility/facility";
+import { FacilityPublicRead, FacilityRead } from "@/types/facility/facility";
 
 interface Props {
-  facility: FacilityRead;
+  facility: FacilityRead | FacilityPublicRead;
   className?: string;
 }
 
