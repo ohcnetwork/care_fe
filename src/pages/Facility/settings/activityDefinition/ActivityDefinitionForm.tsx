@@ -807,6 +807,11 @@ function ActivityDefinitionFormContent({
                             onSuccess={onSuccess}
                           />
                         )}
+                        onCreationSuccess={() =>
+                          queryClient.invalidateQueries({
+                            queryKey: ["specimenDefinitions"],
+                          })
+                        }
                       />
                     </div>
                   </div>
@@ -871,6 +876,11 @@ function ActivityDefinitionFormContent({
                             />
                           </div>
                         )}
+                        onCreationSuccess={() =>
+                          queryClient.invalidateQueries({
+                            queryKey: ["observationDefinitions"],
+                          })
+                        }
                       />
                     </div>
                   </div>
@@ -920,6 +930,11 @@ function ActivityDefinitionFormContent({
                             />
                           </div>
                         )}
+                        onCreationSuccess={() =>
+                          queryClient.invalidateQueries({
+                            queryKey: ["chargeItemDefinitions"],
+                          })
+                        }
                       />
                     </div>
                   </div>

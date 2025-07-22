@@ -43,6 +43,7 @@ interface RequirementsSelectorProps {
   customSelector?: React.ReactNode;
   canCreate?: boolean;
   createForm?: (onSuccess: () => void) => React.ReactNode;
+  onCreationSuccess?: () => void;
   allowDuplicate?: boolean;
 }
 
@@ -118,6 +119,7 @@ export default function RequirementsSelector({
   customSelector,
   canCreate,
   createForm,
+  onCreationSuccess,
   allowDuplicate = false,
 }: RequirementsSelectorProps) {
   const { t } = useTranslation();
@@ -229,7 +231,10 @@ export default function RequirementsSelector({
                     className="flex h-full w-full flex-col overflow-y-auto md:max-w-[600px] lg:max-w-[800px]"
                   >
                     <div className="flex-1 overflow-y-auto py-6">
-                      {createForm?.(() => setIsCreateSheetOpen(false))}
+                      {createForm?.(() => {
+                        setIsCreateSheetOpen(false);
+                        onCreationSuccess?.();
+                      })}
                     </div>
                   </SheetContent>
                 </Sheet>
