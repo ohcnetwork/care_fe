@@ -198,10 +198,8 @@ export default function ManageQuestionnaireOrganizationsSheet({
       const isSelected = current.some((org) => org.id === orgId);
 
       if (isSelected) {
-        // Remove organization
         return current.filter((org) => org.id !== orgId);
       } else {
-        // Add organization - find it in available organizations
         const allOrgs = [
           ...(organizations?.results ?? []),
           ...(availableOrganizations?.results ?? []),
@@ -216,7 +214,6 @@ export default function ManageQuestionnaireOrganizationsSheet({
   };
 
   const handleSave = () => {
-    // Extract IDs from selectedOrgDetails for the API call
     const selectedIds = selectedOrgDetails.map((org) => org.id);
     setOrganizations({ organizations: selectedIds });
   };
@@ -286,7 +283,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
               {t("add_organization", { count: 0 })}
             </h3>
             <OrgSelectorPopover
-              selected={selectedOrgDetails.map((org) => org.id)} // Extract IDs for the popover
+              selected={selectedOrgDetails.map((org) => org.id)}
               onToggle={handleToggleOrganization}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
