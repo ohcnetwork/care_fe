@@ -22,11 +22,11 @@ import { formatDateTime } from "@/Utils/utils";
 import {
   ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_STATUS_ICONS,
-  Encounter,
+  EncounterRead,
 } from "@/types/emr/encounter/encounter";
 
 interface Props {
-  encounter: Encounter;
+  encounter: EncounterRead;
   canEdit: boolean;
 }
 
@@ -195,7 +195,7 @@ export default function EncounterProperties({ encounter, canEdit }: Props) {
   );
 }
 
-const StatusBadge = ({ encounter }: { encounter: Encounter }) => {
+const StatusBadge = ({ encounter }: { encounter: EncounterRead }) => {
   const { t } = useTranslation();
 
   return (
@@ -237,7 +237,7 @@ const LocationPropertyBadge = ({
   encounter,
   canEdit,
 }: {
-  encounter: Encounter;
+  encounter: EncounterRead;
   canEdit: boolean;
 }) => {
   const { t } = useTranslation();

@@ -61,7 +61,19 @@ export interface ChargeItemUpsert
   id?: string;
   account?: string;
   encounter: string;
+  charge_item_definition: string;
 }
+
+export interface ApplyChargeItemDefinitionRequest {
+  charge_item_definition: string;
+  quantity: number;
+  encounter: string;
+}
+
+export interface ApplyMultipleChargeItemDefinitionRequest {
+  requests: ApplyChargeItemDefinitionRequest[];
+}
+
 export interface ChargeItemUpdate
   extends Omit<
     ChargeItemBase,

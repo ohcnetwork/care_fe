@@ -138,7 +138,6 @@ export const structuredHandlers: {
       }
       return encounters.map((encounter) => {
         const body: RequestTypeFor<"encounter"> = {
-          organizations: [],
           patient: patientId,
           status: encounter.status,
           encounter_class: encounter.encounter_class,
@@ -213,11 +212,12 @@ export const structuredHandlers: {
       if (!encounterId) return [];
       return [
         {
-          url: `/api/v1/facility/${facilityId}/charge_item/upsert/`,
+          url: `/api/v1/facility/${facilityId}/charge_item/apply_charge_item_defs/`,
           method: "POST",
           body: {
-            datapoints: chargeItems.map((chargeItem) => ({
-              ...chargeItem,
+            requests: chargeItems.map((chargeItem) => ({
+              charge_item_definition: chargeItem.charge_item_definition,
+              quantity: chargeItem.quantity,
               encounter: encounterId,
             })),
           },

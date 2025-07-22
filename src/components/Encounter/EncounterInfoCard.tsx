@@ -22,12 +22,12 @@ import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
   ENCOUNTER_STATUS_COLORS,
-  Encounter,
+  EncounterRead,
 } from "@/types/emr/encounter/encounter";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 export interface EncounterInfoCardProps {
-  encounter: Encounter;
+  encounter: EncounterRead;
   facilityId: string;
   hideBorder?: boolean;
 }

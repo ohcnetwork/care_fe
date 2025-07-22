@@ -4,12 +4,12 @@ import { createContext, useContext } from "react";
 
 import { Permissions, getPermissions } from "@/common/Permissions";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { usePermissions } from "@/context/PermissionContext";
-import { Encounter } from "@/types/emr/encounter/encounter";
-import { Patient } from "@/types/emr/patient/patient";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
+import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 
 type EncounterContextType = {
@@ -18,10 +18,10 @@ type EncounterContextType = {
   patientId: string;
   selectedEncounterId: string;
 
-  patient: Patient | undefined;
-  currentEncounter: Encounter | undefined;
-  pastEncounters: PaginatedResponse<Encounter> | undefined;
-  selectedEncounter: Encounter | undefined;
+  patient: PatientRead | undefined;
+  currentEncounter: EncounterRead | undefined;
+  pastEncounters: PaginatedResponse<EncounterRead> | undefined;
+  selectedEncounter: EncounterRead | undefined;
   isPatientLoading: boolean;
   isCurrentEncounterLoading: boolean;
   isSelectedEncounterLoading: boolean;
@@ -61,7 +61,7 @@ export function EncounterProvider({
   const { data: currentEncounter, isLoading: isCurrentEncounterLoading } =
     useQuery({
       queryKey: ["encounter", currentEncounterId],
-      queryFn: query(routes.encounter.get, {
+      queryFn: query(encounterApi.get, {
         pathParams: { id: currentEncounterId },
         queryParams: facilityId
           ? { facility: facilityId }
@@ -72,7 +72,7 @@ export function EncounterProvider({
   const { data: selectedEncounter, isLoading: isSelectedEncounterLoading } =
     useQuery({
       queryKey: ["encounter", selectedEncounterId],
-      queryFn: query(routes.encounter.get, {
+      queryFn: query(encounterApi.get, {
         pathParams: { id: selectedEncounterId },
         queryParams: facilityId
           ? { facility: facilityId }
@@ -82,7 +82,7 @@ export function EncounterProvider({
 
   const { data: encounters, isLoading: isPastEncountersLoading } = useQuery({
     queryKey: ["encounters", "past", patientId],
-    queryFn: query(routes.encounter.list, {
+    queryFn: query(encounterApi.list, {
       queryParams: { patient: patientId },
     }),
   });
