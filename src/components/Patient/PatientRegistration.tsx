@@ -387,7 +387,7 @@ export default function PatientRegistration(
         deceased_datetime: null,
         identifiers: facility.patient_instance_identifier_configs.map(
           (identifierConfig) => {
-            const identifier = patientQuery.data.instance_identifiers.find(
+            const identifier = patientQuery.data.instance_identifiers?.find(
               (i) => i.config.id === identifierConfig.id,
             );
             return {

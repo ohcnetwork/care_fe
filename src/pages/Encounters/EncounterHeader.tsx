@@ -81,7 +81,7 @@ export function EncounterHeader() {
                 : t("ongoing")}
             </span>
           </div>
-          {patient.instance_identifiers.map((identifier) => (
+          {patient.instance_identifiers?.map((identifier) => (
             <div
               key={identifier.config.id}
               className="flex md:flex-col gap-0.5 items-center md:items-start"
