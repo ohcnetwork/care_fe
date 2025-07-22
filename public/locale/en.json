@@ -3773,6 +3773,7 @@
   "scribe__reviewing_field": "Reviewing field {{currentField}} / {{totalFields}}",
   "scribe_error": "Could not autofill fields",
   "scroll_to_question": "Scroll to question",
+  "scroll_to_top": "Scroll to top",
   "search": "Search",
   "search_accounts": "Search accounts",
   "search_activity_definitions": "Search activity definitions",

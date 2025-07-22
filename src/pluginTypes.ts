@@ -106,6 +106,7 @@ export type PluginManifest = {
   extends?: readonly SupportedPluginExtensions[];
   navItems?: NavigationLink[];
   userNavItems?: NavigationLink[];
+  adminNavItems?: NavigationLink[];
   components?: PluginComponentMap;
   encounterTabs?: Record<
     string,
