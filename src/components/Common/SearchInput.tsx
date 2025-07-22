@@ -122,7 +122,7 @@ const SearchInputFieldRenderer = ({
             inputMode="numeric"
             maxLength={12}
             pattern="\d{12}"
-            placeholder="Enter 12-digit Aadhaar number"
+            placeholder={selectedOption.placeholder}
             ref={inputRef as React.RefObject<HTMLInputElement>}
             value={searchValue}
             onChange={(e) => {
@@ -146,7 +146,7 @@ const SearchInputFieldRenderer = ({
           <Input
             type="text"
             maxLength={10}
-            placeholder="Enter PAN number (e.g., ABCDE1234F)"
+            placeholder={selectedOption.placeholder}
             ref={inputRef as React.RefObject<HTMLInputElement>}
             value={searchValue}
             onChange={(e) => {
