@@ -22,11 +22,12 @@ import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
   ENCOUNTER_STATUS_COLORS,
-  Encounter,
+  EncounterRead,
 } from "@/types/emr/encounter/encounter";
+import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 export interface EncounterInfoCardProps {
-  encounter: Encounter;
+  encounter: EncounterRead;
   facilityId: string;
   hideBorder?: boolean;
 }
@@ -82,6 +83,11 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
             <Badge variant={ENCOUNTER_PRIORITY_COLORS[encounter.priority]}>
               {t(`encounter_priority__${encounter.priority}`)}
             </Badge>
+            {encounter.tags?.map((tag) => (
+              <Badge variant="outline" key={tag.id}>
+                {getTagHierarchyDisplay(tag)}
+              </Badge>
+            ))}
           </div>
           <div>
             <Separator />

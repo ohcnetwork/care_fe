@@ -173,8 +173,8 @@ export type Period = {
 };
 
 export type Hospitalization = {
-  re_admission: boolean;
-  admit_source: EncounterAdmitSources;
+  re_admission?: boolean;
+  admit_source?: EncounterAdmitSources;
   discharge_disposition?: EncounterDischargeDisposition;
   diet_preference?: EncounterDietPreference;
 };
@@ -200,19 +200,26 @@ export type LocationHistory = {
   end_datetime?: string;
 };
 
-export interface Encounter {
+export interface EncounterBase {
   id: string;
+  patient: string;
+  facility: string;
+  status: EncounterStatus;
+  encounter_class: EncounterClass;
+  period: Period;
+  hospitalization?: Hospitalization | null;
+  priority: EncounterPriority;
+  external_identifier?: string;
+  discharge_summary_advice?: string | null;
+}
+
+export interface EncounterRead
+  extends Omit<EncounterBase, "patient" | "facility"> {
   patient: PatientRead;
   facility: {
     id: string;
     name: string;
   };
-  status: EncounterStatus;
-  encounter_class: EncounterClass;
-  period: Period;
-  hospitalization?: Hospitalization;
-  priority: EncounterPriority;
-  external_identifier?: string;
   created_by: UserBase;
   updated_by: UserBase;
   created_date: string;
@@ -224,35 +231,14 @@ export interface Encounter {
   location_history: LocationHistory[];
   permissions: string[];
   care_team: CareTeamResponse[];
-  discharge_summary_advice?: string;
   tags: TagConfig[];
 }
 
-export interface EncounterEditRequest {
+export interface EncounterCreate extends Omit<EncounterBase, "id"> {
   organizations: string[];
-  patient: string;
-  status: EncounterStatus;
-  encounter_class: EncounterClass;
-  period: Period;
-  hospitalization?: Hospitalization;
-  priority: EncounterPriority;
-  external_identifier?: string;
-  facility: string;
-  discharge_summary_advice?: string | null;
 }
 
-export interface EncounterRequest {
-  organizations: string[];
-  patient: string;
-  status: EncounterStatus;
-  encounter_class: EncounterClass;
-  period: Period;
-  hospitalization?: Hospitalization;
-  priority: EncounterPriority;
-  external_identifier?: string;
-  facility: string;
-  discharge_summary_advice?: string;
-}
+export type EncounterEdit = Omit<EncounterBase, "id">;
 
 export const completedEncounterStatus = ["completed"];
 export const inactiveEncounterStatus = [

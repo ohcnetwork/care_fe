@@ -22,7 +22,7 @@ export enum Category {
   laboratory = "laboratory",
   imaging = "imaging",
   surgical_procedure = "surgical_procedure",
-  counseling = "counseling",
+  counselling = "counselling",
 }
 
 export enum Kind {

@@ -317,6 +317,9 @@ export default function CreateScheduleTemplateSheet({
                       <DatePicker
                         date={field.value}
                         onChange={(date) => field.onChange(date)}
+                        disabled={(date) =>
+                          dayjs(date).isBefore(dayjs(), "day")
+                        }
                       />
                       <FormMessage />
                     </FormItem>
@@ -332,6 +335,9 @@ export default function CreateScheduleTemplateSheet({
                       <DatePicker
                         date={field.value}
                         onChange={(date) => field.onChange(date)}
+                        disabled={(date) =>
+                          dayjs(date).isBefore(dayjs(), "day")
+                        }
                       />
                       <FormMessage />
                     </FormItem>
