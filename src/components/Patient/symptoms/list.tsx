@@ -157,7 +157,7 @@ export function SymptomsList({
                 : `/patient/${patientId}/history/symptoms?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
             }
           >
-            <History className="size-4 text-gray-500" />
+            <History className="size-4" />
           </Link>
         </Button>
       }

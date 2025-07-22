@@ -44,7 +44,7 @@ export function EncounterAccordionLayout({
                 {!readOnly && editLink && (
                   <Button variant="link" size="xs">
                     <Link href={editLink}>
-                      <SquarePen className="size-4 text-gray-500" />
+                      <SquarePen className="size-4" />
                     </Link>
                   </Button>
                 )}

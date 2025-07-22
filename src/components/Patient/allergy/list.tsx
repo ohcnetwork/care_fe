@@ -185,7 +185,7 @@ export function AllergyList({
                 : `/patient/${patientId}/history/allergies?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
             }
           >
-            <History className="size-4 text-gray-500" />
+            <History className="size-4" />
           </Link>
         </Button>
       }

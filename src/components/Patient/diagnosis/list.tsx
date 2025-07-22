@@ -163,7 +163,7 @@ export function DiagnosisList({
             }
             className="font-semibold"
           >
-            <History className="size-4 text-gray-500" />
+            <History className="size-4" />
           </Link>
         </Button>
       }
