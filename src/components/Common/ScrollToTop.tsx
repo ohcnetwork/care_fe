@@ -18,7 +18,7 @@ export function ScrollToTopButton({ className }: { className?: string }) {
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0 });
   };
 
   if (!isVisible) return null;
