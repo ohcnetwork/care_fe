@@ -126,8 +126,8 @@ export default function AvatarEditModal({
   }, [isCameraOpen]);
 
   const handleSwitchCamera = useCallback(() => {
-    setConstraint(
-      constraint.facingMode === "user"
+    setConstraint((prevConstraint) =>
+      prevConstraint.facingMode === "user"
         ? VideoConstraints.environment
         : VideoConstraints.user,
     );
