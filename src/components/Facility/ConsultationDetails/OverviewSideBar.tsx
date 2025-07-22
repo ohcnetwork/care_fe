@@ -19,15 +19,16 @@ import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import EncounterProperties from "@/pages/Encounters/EncounterProperties";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 
 interface Props {
-  encounter: Encounter;
+  encounter: EncounterRead;
   canAccess: boolean;
   canEdit: boolean;
 }
 
 export default function SideOverview({ encounter, canEdit }: Props) {
+  const { t } = useTranslation();
   const { selectedEncounterId, currentEncounterId } = useEncounter();
   const readOnly = selectedEncounterId !== currentEncounterId;
 
@@ -42,6 +43,14 @@ export default function SideOverview({ encounter, canEdit }: Props) {
         {!readOnly && canEdit && <Questionnaires encounter={encounter} />}
         <Locations canEdit={canEdit} encounter={encounter} />
         <DepartmentsAndTeams canEdit={canEdit} encounter={encounter} />
+        <div className="flex md:flex-col gap-0.5 items-center md:items-start">
+          <span className="text-xs text-gray-600 w-32 md:w-auto">
+            {t("hospital_identifier")}:{" "}
+          </span>
+          <span className="text-sm font-semibold">
+            {encounter.external_identifier || "--"}
+          </span>
+        </div>
         <AuditLogs encounter={encounter} />
       </div>
     </div>
@@ -132,7 +141,7 @@ const ManageCareTeamButton = () => {
   );
 };
 
-const Questionnaires = ({ encounter }: { encounter: Encounter }) => {
+const Questionnaires = ({ encounter }: { encounter: EncounterRead }) => {
   const { t } = useTranslation();
 
   const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
@@ -171,7 +180,7 @@ const Locations = ({
   encounter,
 }: {
   canEdit: boolean;
-  encounter: Encounter;
+  encounter: EncounterRead;
 }) => {
   const { t } = useTranslation();
 
@@ -225,7 +234,7 @@ const DepartmentsAndTeams = ({
   encounter,
 }: {
   canEdit: boolean;
-  encounter: Encounter;
+  encounter: EncounterRead;
 }) => {
   const { t } = useTranslation();
 
@@ -267,7 +276,7 @@ const DepartmentsAndTeams = ({
   );
 };
 
-const AuditLogs = ({ encounter }: { encounter: Encounter }) => {
+const AuditLogs = ({ encounter }: { encounter: EncounterRead }) => {
   const { t } = useTranslation();
 
   return (

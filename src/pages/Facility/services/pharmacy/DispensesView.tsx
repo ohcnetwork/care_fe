@@ -38,13 +38,20 @@ export default function DispensesView({
   const { t } = useTranslation();
   const { locationId } = useCurrentLocation();
 
+  const defaultVisibleStatuses = [
+    MedicationDispenseStatus.preparation,
+    MedicationDispenseStatus.in_progress,
+    MedicationDispenseStatus.completed,
+    MedicationDispenseStatus.cancelled,
+  ];
+
   const allStatuses = Object.values(MedicationDispenseStatus);
   const [visibleTabs, setVisibleTabs] = useState<MedicationDispenseStatus[]>(
-    allStatuses.slice(0, 4),
+    defaultVisibleStatuses,
   );
   const [dropdownItems, setDropdownItems] = useState<
     MedicationDispenseStatus[]
-  >(allStatuses.slice(4));
+  >(allStatuses.filter((status) => !defaultVisibleStatuses.includes(status)));
 
   const handleDropdownSelect = (value: MedicationDispenseStatus) => {
     const lastVisibleTab = visibleTabs[visibleTabs.length - 1];

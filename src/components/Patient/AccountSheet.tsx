@@ -20,10 +20,10 @@ import {
   AccountStatus,
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 
 interface AccountSheetButtonProps {
-  encounter: Encounter;
+  encounter: EncounterRead;
   trigger: React.ReactNode;
   canWrite: boolean;
 }

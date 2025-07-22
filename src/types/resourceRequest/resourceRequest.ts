@@ -1,7 +1,7 @@
 import { FacilityModel } from "@/components/Facility/models";
 import { UserBareMinimum } from "@/components/Users/models";
 
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import { UserBase } from "@/types/user/user";
 
 export interface ResourceRequest {
@@ -23,7 +23,7 @@ export interface ResourceRequest {
   updated_by: UserBase;
   created_date: string;
   modified_date: string;
-  related_patient: Patient | null;
+  related_patient: PatientRead | null;
 }
 
 export const RESOURCE_REQUEST_STATUS_COLORS = {

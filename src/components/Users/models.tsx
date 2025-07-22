@@ -16,7 +16,7 @@ export type UserBareMinimum = {
   email: string;
   user_type: UserType;
   last_login: string | undefined;
-  read_profile_picture_url?: string;
+  profile_picture_url?: string;
   external_id: string;
   prefix: string | null;
   suffix: string | null;

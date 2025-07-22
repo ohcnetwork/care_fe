@@ -53,11 +53,11 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { useIsMobile } from "@/hooks/use-mobile";
 import useAuthUser from "@/hooks/useAuthUser";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime } from "@/Utils/utils";
+import patientApi from "@/types/emr/patient/patientApi";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
 
@@ -327,6 +327,7 @@ interface NoteManagerProps {
   canWrite: boolean;
   encounterId?: string;
   patientId: string;
+  hideEncounterNotes?: boolean;
 }
 
 export function NoteManager({
@@ -334,6 +335,7 @@ export function NoteManager({
   canWrite,
   encounterId,
   patientId,
+  hideEncounterNotes = false,
 }: NoteManagerProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -351,9 +353,13 @@ export function NoteManager({
   // Fetch threads
   const { data: threadsData, isLoading: threadsLoading } = useQuery({
     queryKey: ["threads", encounterId],
-    queryFn: query(routes.notes.patient.listThreads, {
+    queryFn: query(patientApi.listThreads, {
       pathParams: { patientId: patientId },
-      queryParams: { encounter: encounterId },
+      queryParams: {
+        ...(hideEncounterNotes
+          ? { encounter_isnull: "true" }
+          : encounterId && { encounter: encounterId }),
+      },
     }),
     enabled: canAccess,
   });
@@ -368,7 +374,7 @@ export function NoteManager({
   } = useInfiniteQuery<PaginatedResponse<Message>>({
     queryKey: ["messages", selectedThread],
     queryFn: async ({ pageParam = 0 }) => {
-      const response = await query(routes.notes.patient.getMessages, {
+      const response = await query(patientApi.getMessages, {
         pathParams: {
           patientId,
           threadId: selectedThread!,
@@ -395,7 +401,7 @@ export function NoteManager({
 
   // Create thread mutation
   const createThreadMutation = useMutation({
-    mutationFn: mutate(routes.notes.patient.createThread, {
+    mutationFn: mutate(patientApi.createThread, {
       pathParams: { patientId },
     }),
     onSuccess: (newThread) => {
@@ -411,7 +417,7 @@ export function NoteManager({
 
   // Create message mutation
   const createMessageMutation = useMutation({
-    mutationFn: mutate(routes.notes.patient.postMessage, {
+    mutationFn: mutate(patientApi.postMessage, {
       pathParams: { patientId, threadId: selectedThread! },
     }),
     onSuccess: () => {
