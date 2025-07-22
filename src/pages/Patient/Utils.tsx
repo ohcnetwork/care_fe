@@ -6,5 +6,5 @@ export type AppointmentPatientRegister = {
   date_of_birth?: Date | string;
   age?: string;
   geo_organization?: string;
-  pincode?: string;
+  pincode?: number;
 };
