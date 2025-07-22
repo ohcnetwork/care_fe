@@ -15,15 +15,15 @@ export default {
       value: "Bearer {token}",
       type: "header",
     },
-    listPatient: {
-      path: "/api/v1/otp/patient/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<PatientRead>>(),
-      auth: {
-        key: "Authorization",
-        value: "Bearer {token}",
-        type: "header",
-      },
+  },
+  listPatient: {
+    path: "/api/v1/otp/patient/",
+    method: HttpMethod.GET,
+    TRes: Type<PaginatedResponse<PatientRead>>(),
+    auth: {
+      key: "Authorization",
+      value: "Bearer {token}",
+      type: "header",
     },
   },
-};
+} as const;

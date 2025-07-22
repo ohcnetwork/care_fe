@@ -18,7 +18,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PatientRead } from "@/types/emr/patient/patient";
-import patientApi from "@/types/emr/patient/patientApi";
+import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { Appointment } from "@/types/scheduling/schedule";
 
@@ -130,7 +130,7 @@ export default function PatientSelect({
 
   const { data: patientData, isLoading } = useQuery({
     queryKey: ["otp-patient"],
-    queryFn: query(patientApi.listPatient, {
+    queryFn: query(publicPatientApi.listPatient, {
       headers: {
         Authorization: `Bearer ${tokenData.token}`,
         "Content-Type": "application/json",
