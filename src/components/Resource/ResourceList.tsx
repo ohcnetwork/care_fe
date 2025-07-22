@@ -77,6 +77,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
 
   const { data: queryResources, isLoading } = useQuery({
     queryKey: ["resources", facilityId, qParams],
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     queryFn: query.debounced(routes.listResourceRequests, {
       queryParams: {
         status: currentStatus,
@@ -117,6 +118,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                   options={[
                     {
                       key: "title",
+                      readableKey: "title",
                       type: "text",
                       placeholder: t("search_by_resource_title"),
                       value: title || "",

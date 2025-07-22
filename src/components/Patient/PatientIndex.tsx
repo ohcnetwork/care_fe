@@ -106,6 +106,10 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const identifierOptions =
     facility?.patient_instance_identifier_configs?.map((c) => ({
       key: c.id,
+      readableKey: c.config.display
+        .toLowerCase()
+        .replace(/\s+/g, "_")
+        .replace(/[^a-z0-9_]/g, ""),
       type: "text" as const,
       placeholder: t("search_by_identifier", { name: c.config.display }),
       value: "",
@@ -115,6 +119,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const searchOptions = [
     {
       key: "phone_number",
+      readableKey: "phone_number",
       type: "phone" as const,
       placeholder: t("search_by_phone_number"),
       value: phoneNumber,
@@ -296,7 +301,8 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
           </DialogHeader>
           <div className="py-4">
             <Input
-              type="text"
+              type="tel"
+              inputMode="numeric"
               placeholder={`${t("year_of_birth")} (YYYY)`}
               value={yearOfBirth}
               data-cy="year-of-birth-input"

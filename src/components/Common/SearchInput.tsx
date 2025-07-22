@@ -20,11 +20,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import { useIsMobile } from "@/hooks/use-mobile";
+
 import { isAppleDevice } from "@/Utils/utils";
 
 interface SearchOption {
   key: string;
   type: "text" | "phone";
+  readableKey: string;
   placeholder: string;
   value: string;
   component?: React.ComponentType<HTMLDivElement>;
@@ -92,8 +95,10 @@ const SearchInputFieldRenderer = ({
   isSingleOption: boolean;
   open: boolean;
 }) => {
-  switch (selectedOption.type) {
-    case "phone":
+  const isMobile = useIsMobile();
+  console.log(selectedOption);
+  switch (selectedOption.readableKey) {
+    case "phone_number":
       return (
         <div className="relative">
           <PhoneInput
@@ -106,9 +111,60 @@ const SearchInputFieldRenderer = ({
             ref={inputRef}
             {...prop}
           />
-          {!isSingleOption && <KeyboardShortcutHint open={open} />}
+          {!isSingleOption && !isMobile && <KeyboardShortcutHint open={open} />}
         </div>
       );
+
+    case "aadhar_card":
+      return (
+        <div className="relative">
+          <Input
+            type="tel"
+            inputMode="numeric"
+            maxLength={12}
+            pattern="\d{12}"
+            placeholder="Enter 12-digit Aadhaar number"
+            ref={inputRef as React.RefObject<HTMLInputElement>}
+            value={searchValue}
+            onChange={(e) => {
+              const val = e.target.value.replace(/\D/g, "").slice(0, 12);
+              setSearchValue(val);
+            }}
+            className={cn(
+              !isSingleOption &&
+                "grow border-none shadow-none focus-visible:ring-0",
+              inputClassName,
+            )}
+            {...prop}
+          />
+          {!isSingleOption && !isMobile && <KeyboardShortcutHint open={open} />}
+        </div>
+      );
+
+    case "pan_card":
+      return (
+        <div className="relative">
+          <Input
+            type="text"
+            maxLength={10}
+            placeholder="Enter PAN number (e.g., ABCDE1234F)"
+            ref={inputRef as React.RefObject<HTMLInputElement>}
+            value={searchValue}
+            onChange={(e) => {
+              const val = e.target.value.toUpperCase().slice(0, 10);
+              setSearchValue(val);
+            }}
+            className={cn(
+              !isSingleOption &&
+                "grow border-none shadow-none focus-visible:ring-0",
+              inputClassName,
+            )}
+            {...prop}
+          />
+          {!isSingleOption && !isMobile && <KeyboardShortcutHint open={open} />}
+        </div>
+      );
+
     default:
       return (
         <div className="relative">
@@ -125,7 +181,7 @@ const SearchInputFieldRenderer = ({
             )}
             {...prop}
           />
-          {!isSingleOption && <KeyboardShortcutHint open={open} />}
+          {!isSingleOption && !isMobile && <KeyboardShortcutHint open={open} />}
         </div>
       );
   }

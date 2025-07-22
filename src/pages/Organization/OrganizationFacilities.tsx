@@ -41,6 +41,7 @@ export default function OrganizationFacilities({
 
   const { data: facilities, isFetching } = useQuery({
     queryKey: ["organizationFacilities", id, qParams],
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     queryFn: query.debounced(routes.facility.list, {
       queryParams: {
         page: qParams.page,
@@ -84,6 +85,7 @@ export default function OrganizationFacilities({
                 options={[
                   {
                     key: "name",
+                    readableKey: "name",
                     type: "text",
                     placeholder: t("search_by_facility_name"),
                     value: qParams.name || "",

@@ -41,6 +41,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
     {
       key: "username",
       type: "text" as const,
+      readableKey: "username",
       placeholder: t("search_by_username"),
       value: qParams.name || "",
       display: t("username"),
@@ -48,6 +49,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
     {
       key: "phone_number",
       type: "phone" as const,
+      readableKey: "phone_number",
       placeholder: t("search_by_phone_number"),
       value: qParams.phone_number || "",
       display: t("phone_number"),

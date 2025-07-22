@@ -158,6 +158,7 @@ export function EncounterList({
     {
       key: "name",
       type: "text" as const,
+      readableKey: "name",
       placeholder: t("search_by_patient_name"),
       value: name || "",
       display: t("name"),
@@ -165,6 +166,7 @@ export function EncounterList({
     {
       key: "encounter_id",
       type: "text" as const,
+      readableKey: "encounter_id",
       placeholder: t("search_by_encounter_id"),
       value: encounter_id || "",
       display: t("encounter_id"),
@@ -172,6 +174,7 @@ export function EncounterList({
     {
       key: "external_identifier",
       type: "text" as const,
+      readableKey: "external_identifier",
       placeholder: t("search_by_external_id"),
       value: external_identifier || "",
       display: t("external_identifier"),
