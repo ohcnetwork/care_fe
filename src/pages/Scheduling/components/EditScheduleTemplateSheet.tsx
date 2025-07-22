@@ -567,7 +567,7 @@ const NewAvailabilityCard = ({
         .min(1, t("field_required")) as unknown as z.ZodType<Time>,
       slot_size_in_minutes: z.number().nullable(),
       tokens_per_slot: z.number().nullable(),
-      reason: z.string(),
+      reason: z.string().trim(),
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek>)
         .min(1, t("schedule_weekdays_min_error")),

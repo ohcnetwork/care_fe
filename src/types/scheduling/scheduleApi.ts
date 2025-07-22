@@ -5,6 +5,7 @@ import {
   AppointmentCancelRequest,
   AppointmentCreateRequest,
   AppointmentRead,
+  AppointmentRescheduleRequest,
   AppointmentUpdateRequest,
   AvailabilityHeatmapRequest,
   AvailabilityHeatmapResponse,
@@ -148,7 +149,7 @@ export default {
     reschedule: {
       path: "/api/v1/facility/{facilityId}/appointments/{id}/reschedule/",
       method: HttpMethod.POST,
-      TBody: Type<{ new_slot: string }>(),
+      TBody: Type<AppointmentRescheduleRequest>(),
       TRes: Type<Appointment>(),
     },
     /**

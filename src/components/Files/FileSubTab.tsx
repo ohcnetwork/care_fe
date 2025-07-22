@@ -49,13 +49,13 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import { Encounter } from "@/types/emr/encounter/encounter";
-import { Patient } from "@/types/emr/patient/patient";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
+import { PatientRead } from "@/types/emr/patient/patient";
 
 interface FilesTabProps {
   type: "encounter" | "patient";
-  encounter?: Encounter;
-  patient?: Patient;
+  encounter?: EncounterRead;
+  patient?: PatientRead;
   associatingId: string;
   canEdit: boolean | undefined;
 }

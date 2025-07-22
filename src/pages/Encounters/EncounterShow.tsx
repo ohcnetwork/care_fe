@@ -28,18 +28,18 @@ import { EncounterOverviewTab } from "@/pages/Encounters/tabs/EncounterOverviewT
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
-  Encounter,
+  EncounterRead,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 
 import { EncounterDiagnosticReportsTab } from "./tabs/EncounterDiagnosticReportsTab";
 import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
 import { EncounterServiceRequestTab } from "./tabs/EncounterServiceRequestTab";
 
 export interface PluginEncounterTabProps {
-  encounter: Encounter;
-  patient: Patient;
+  encounter: EncounterRead;
+  patient: PatientRead;
 }
 
 const defaultTabs = {
