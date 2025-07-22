@@ -187,7 +187,6 @@ export default function ManageQuestionnaireOrganizationsSheet({
       setOpen(false);
     },
   });
-  // Initialize selected organizations when organizations are loaded
   useEffect(() => {
     if (organizations?.results) {
       setSelectedOrgDetails(organizations.results);
