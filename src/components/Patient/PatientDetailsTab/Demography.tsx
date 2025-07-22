@@ -229,7 +229,7 @@ export const Demography = (props: PatientProps) => {
     {
       id: "identifiers",
       allowEdit: false,
-      details: patientData.instance_identifiers.map((i) => ({
+      details: patientData.instance_identifiers?.map((i) => ({
         label: i.config.config.display,
         value: i.value,
       })),
