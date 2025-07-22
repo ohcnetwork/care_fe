@@ -27,6 +27,7 @@ export default function RoleForm({
 }: RoleFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [error, setError] = React.useState("");
   const [formData, setFormData] = React.useState({
     name: role?.name || "",
     description: role?.description || "",
@@ -53,6 +54,11 @@ export default function RoleForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.permissions.length === 0) {
+      setError(t("please_select_at_least_one_permission"));
+      return;
+    }
+    setError("");
     const payload = {
       name: formData.name,
       description: formData.description,
@@ -192,6 +198,9 @@ export default function RoleForm({
               : t("create_role")}
         </Button>
       </div>
+      {error && (
+        <div className="text-red-500 text-sm mt-2 text-right">{error}</div>
+      )}
     </form>
   );
 }
