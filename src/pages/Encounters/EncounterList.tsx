@@ -32,17 +32,17 @@ import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useFilters from "@/hooks/useFilters";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import {
   ENCOUNTER_STATUS_ICONS,
-  Encounter,
   EncounterPriority,
+  EncounterRead,
 } from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 
 interface EncounterListProps {
-  encounters?: Encounter[];
+  encounters?: EncounterRead[];
   facilityId: string;
 }
 
@@ -131,7 +131,7 @@ export function EncounterList({
 
   const { data: queryEncounters, isLoading } = useQuery({
     queryKey: ["encounters", facilityId, qParams],
-    queryFn: query.debounced(routes.encounter.list, {
+    queryFn: query.debounced(encounterApi.list, {
       queryParams: {
         ...buildQueryParams(facilityId, status, encounterClass, priority),
         name,
@@ -146,7 +146,7 @@ export function EncounterList({
 
   const { data: queryEncounter } = useQuery({
     queryKey: ["encounter", encounter_id],
-    queryFn: query(routes.encounter.get, {
+    queryFn: query(encounterApi.get, {
       pathParams: { id: encounter_id },
       queryParams: {
         facility: facilityId,
@@ -625,7 +625,7 @@ export function EncounterList({
             </div>
           ) : (
             <>
-              {encounters.map((encounter: Encounter) => (
+              {encounters.map((encounter: EncounterRead) => (
                 <EncounterInfoCard
                   key={encounter.id}
                   encounter={encounter}

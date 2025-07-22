@@ -11,15 +11,15 @@ import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 import {
-  Encounter,
+  EncounterRead,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 
 interface FilesTabsProps {
   type: "encounter" | "patient";
-  encounter?: Encounter;
-  patient?: Patient;
+  encounter?: EncounterRead;
+  patient?: PatientRead;
   readOnly?: boolean;
 }
 
