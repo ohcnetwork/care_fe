@@ -191,7 +191,7 @@ export default function AppointmentDetail(props: Props) {
                   <AppointmentActions
                     facilityId={facilityId}
                     appointment={appointment}
-                    onChange={(status) => updateAppointment({ status })}
+                    updateAppointment={updateAppointment}
                     onViewPatient={redirectToPatientPage}
                     canCreateAppointment={canCreateAppointment}
                   />
@@ -287,9 +287,9 @@ const AppointmentDetails = ({
           </div>
           <Separator />
           <div className="text-sm">
-            <p className="font-medium">{t("reason")}</p>
+            <p className="font-medium">{t("note")}</p>
             <p className="text-gray-600 whitespace-pre-wrap">
-              {appointment.reason_for_visit || t("no_reason_provided")}
+              {appointment.note || t("no_note_provided")}
             </p>
           </div>
           <div className="text-sm">
@@ -424,8 +424,8 @@ const AppointmentDetails = ({
 
 interface AppointmentActionsProps {
   facilityId: string;
-  appointment: Appointment;
-  onChange: (status: Appointment["status"]) => void;
+  appointment: AppointmentRead;
+  updateAppointment: (data: AppointmentUpdateRequest) => void;
   onViewPatient: () => void;
   canCreateAppointment: boolean;
 }
@@ -433,7 +433,7 @@ interface AppointmentActionsProps {
 const AppointmentActions = ({
   facilityId,
   appointment,
-  onChange,
+  updateAppointment,
   onViewPatient,
   canCreateAppointment,
 }: AppointmentActionsProps) => {
@@ -442,9 +442,8 @@ const AppointmentActions = ({
 
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const [isRescheduleReasonOpen, setIsRescheduleReasonOpen] = useState(false);
-  const [rescheduleReason, setRescheduleReason] = useState(
-    appointment.reason_for_visit,
-  );
+  const [newVisitReason, setNewVisitReason] = useState(appointment.note);
+  const [rescheduleReason, setRescheduleReason] = useState(appointment.note);
   const [selectedPractitioner, setSelectedPractitioner] = useState(
     appointment.user,
   );
@@ -453,7 +452,7 @@ const AppointmentActions = ({
   const currentStatus = appointment.status;
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
   const [reasonForCancellation, setReasonForCancellation] = useState(
-    appointment.reason_for_visit,
+    appointment.note,
   );
 
   const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
@@ -520,6 +519,7 @@ const AppointmentActions = ({
                 <Label>{t("note")}</Label>
                 <Textarea
                   value={rescheduleReason}
+                  placeholder={t("reason_for_reschedule_placeholder")}
                   onChange={(e) => setRescheduleReason(e.target.value)}
                 />
               </AlertDialogHeader>
@@ -549,6 +549,43 @@ const AppointmentActions = ({
               </SheetHeader>
 
               <div className="mt-6">
+                <div className="text-sm">
+                  <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
+                    <Label className="font-medium">{t("tags")}</Label>
+                    <TagAssignmentSheet
+                      entityType="appointment"
+                      entityId={appointment.id}
+                      facilityId={facilityId}
+                      currentTags={appointment.tags}
+                      onUpdate={() => {
+                        queryClient.invalidateQueries({
+                          queryKey: ["appointment", appointment.id],
+                        });
+                      }}
+                      canWrite={true}
+                    />
+                  </div>
+                  {appointment.tags?.length > 0 ? (
+                    <p className="text-gray-600 flex flex-wrap gap-1">
+                      {appointment.tags.map((tag) => (
+                        <Badge key={tag.id} variant="secondary">
+                          {tag.parent ? `${tag.parent.display}: ` : ""}
+                          {tag.display}
+                        </Badge>
+                      ))}
+                    </p>
+                  ) : (
+                    <p className="text-gray-600 md:-mt-2">
+                      {t("no_tags_assigned")}
+                    </p>
+                  )}
+                </div>
+                <Label className="mb-2 aria-required mt-8">{t("note")}</Label>
+                <Textarea
+                  placeholder={t("appointment_note")}
+                  value={newVisitReason}
+                  onChange={(e) => setNewVisitReason(e.target.value)}
+                />
                 <div className="my-4">
                   <Label className="mb-2">{t("select_practitioner")}</Label>
                   <PractitionerSelector
@@ -583,7 +620,9 @@ const AppointmentActions = ({
                       if (selectedSlotId) {
                         rescheduleAppointment({
                           new_slot: selectedSlotId,
-                          reason: rescheduleReason,
+                          previous_booking_note: rescheduleReason,
+                          new_booking_note: newVisitReason,
+                          tags: appointment.tags.map((tag) => tag.id),
                         });
                       }
                     }}
@@ -602,7 +641,7 @@ const AppointmentActions = ({
           <Button
             disabled={!isToday}
             variant="outline_primary"
-            onClick={() => onChange("checked_in")}
+            onClick={() => updateAppointment({ status: "checked_in" })}
             size="lg"
           >
             <EnterIcon className="size-4 mr-2" />
@@ -617,7 +656,7 @@ const AppointmentActions = ({
           variant={
             currentStatus === "checked_in" ? "outline_primary" : "outline"
           }
-          onClick={() => onChange("in_consultation")}
+          onClick={() => updateAppointment({ status: "in_consultation" })}
           size="lg"
         >
           <PlusCircledIcon className="size-4 mr-2" />
@@ -628,7 +667,7 @@ const AppointmentActions = ({
       {currentStatus === "in_consultation" && (
         <Button
           variant="outline_primary"
-          onClick={() => onChange("fulfilled")}
+          onClick={() => updateAppointment({ status: "fulfilled" })}
           size="lg"
         >
           <CheckCircledIcon className="size-4 mr-2" />
@@ -637,10 +676,50 @@ const AppointmentActions = ({
       )}
 
       {["booked", "checked_in"].includes(currentStatus) && (
-        <Button variant="outline" onClick={() => onChange("noshow")} size="lg">
-          <EyeNoneIcon className="size-4 mr-2" />
-          {t("mark_as_noshow")}
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="outline" size="lg">
+              <EyeNoneIcon className="size-4 mr-2" />
+              {t("mark_as_noshow")}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("mark_as_noshow")}</AlertDialogTitle>
+              <Label>{t("note")}</Label>
+              <Textarea
+                value={reasonForCancellation}
+                onChange={(e) => setReasonForCancellation(e.target.value)}
+              />
+              <AlertDialogDescription>
+                <Alert variant="destructive">
+                  <AlertTitle>{t("warning")}</AlertTitle>
+                  <AlertDescription>
+                    {t("mark_as_noshow_warning")}
+                  </AlertDescription>
+                </Alert>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() =>
+                  updateAppointment({
+                    status: "noshow",
+                    note: reasonForCancellation,
+                  })
+                }
+                className={cn(buttonVariants({ variant: "destructive" }))}
+              >
+                {isCancelling ? (
+                  <Loader2 className="size-4 animate-spin mr-2" />
+                ) : (
+                  t("confirm")
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
 
       {appointment.status !== "in_consultation" && (
@@ -674,7 +753,7 @@ const AppointmentActions = ({
                 onClick={() =>
                   cancelAppointment({
                     reason: "cancelled",
-                    reason_for_visit: reasonForCancellation,
+                    note: reasonForCancellation,
                   })
                 }
                 className={cn(buttonVariants({ variant: "destructive" }))}

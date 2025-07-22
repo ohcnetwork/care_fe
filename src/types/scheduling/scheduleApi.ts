@@ -160,6 +160,10 @@ export default {
       method: HttpMethod.GET,
       TRes: Type<{ users: UserBase[] }>(),
     },
+    getPublicScheduleAbleFacilityUser: {
+      path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
+      TRes: Type<UserBase>(),
+    },
     /**
      * Get appointments across facilities
      */

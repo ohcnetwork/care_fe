@@ -52,7 +52,7 @@ interface AppointmentQuestionProps {
 
 const APPOINTMENT_FIELDS: FieldDefinitions = {
   REASON: {
-    key: "reason_for_visit",
+    key: "note",
     required: true,
   },
   SLOT: {
@@ -77,7 +77,7 @@ export function validateAppointmentQuestion(
     },
     SLOT: {
       ...APPOINTMENT_FIELDS.SLOT,
-      required: required || value?.reason_for_visit !== undefined,
+      required: required || value?.note !== undefined,
     },
     TAGS: {
       ...APPOINTMENT_FIELDS.TAGS,
@@ -108,7 +108,7 @@ export function AppointmentQuestion({
   const handleUpdate = (updates: Partial<CreateAppointmentQuestion>) => {
     const updatedValue = { ...value, ...updates };
     if (
-      !updatedValue.reason_for_visit?.trim() &&
+      !updatedValue.note?.trim() &&
       !updatedValue.slot_id &&
       !updatedValue.tags?.length
     ) {
@@ -156,15 +156,15 @@ export function AppointmentQuestion({
           />
         </div>
         <Label className="mb-2">
-          {t("reason_for_visit")}
+          {t("note")}
           {question.required && <span className="text-red-500 ml-0.5">*</span>}
         </Label>
         <Textarea
-          placeholder={t("reason_for_visit_placeholder")}
-          value={value.reason_for_visit || ""}
+          placeholder={t("appointment_note")}
+          value={value.note || ""}
           onChange={(e) =>
             handleUpdate({
-              reason_for_visit: e.target.value || undefined,
+              note: e.target.value || undefined,
             })
           }
           disabled={disabled}
