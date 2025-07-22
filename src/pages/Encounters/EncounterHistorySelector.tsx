@@ -24,12 +24,12 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   ENCOUNTER_STATUS_COLORS,
-  Encounter,
+  EncounterRead,
 } from "@/types/emr/encounter/encounter";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 interface EncounterCardProps {
-  encounter: Encounter;
+  encounter: EncounterRead;
   isSelected: boolean;
   onSelect: (encounterId: string) => void;
 }

@@ -9,9 +9,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import Page from "@/components/Common/Page";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
+import patientApi from "@/types/emr/patient/patientApi";
 import { QuestionnaireResponse as Response } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 
@@ -25,7 +25,7 @@ export default function QuestionnaireResponseView({
   const { t } = useTranslation();
   const { data: formResponse, isLoading } = useQuery({
     queryKey: ["getQuestionnaireResponse", patientId, responseId],
-    queryFn: query(routes.getQuestionnaireResponse, {
+    queryFn: query(patientApi.getQuestionnaireResponse, {
       pathParams: { patientId, responseId },
     }),
   });
