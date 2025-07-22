@@ -18,6 +18,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import {
+  ExpandableText,
+  ExpandableTextContent,
+  ExpandableTextExpandButton,
+} from "@/components/ui/expandable-text";
 
 import {
   CardGridSkeleton,
@@ -92,7 +97,14 @@ function TagConfigCard({
               {t(config.resource)} | {t("priority")}: {config.priority}
             </p>
             {config.description && (
-              <p className="mt-2 text-sm text-gray-600">{config.description}</p>
+              <ExpandableText>
+                <ExpandableTextContent className="mt-2 text-sm text-gray-600">
+                  {config.description}
+                </ExpandableTextContent>
+                <ExpandableTextExpandButton>
+                  {t("read_more")}
+                </ExpandableTextExpandButton>
+              </ExpandableText>
             )}
           </div>
           <div className="flex items-center gap-2">
@@ -228,15 +240,19 @@ export default function TagConfigTable({
                 <TableRow
                   key={config.id}
                   className="divide-x cursor-pointer hover:bg-gray-50"
-                  onClick={() => onView(config.id)}
                 >
                   <TableCell className="font-medium">
                     <div className="flex flex-col max-w-md text-sm break-words whitespace-normal">
                       <span>{config.display}</span>
                       {config.description && (
-                        <span className="text-gray-500">
-                          {config.description}
-                        </span>
+                        <ExpandableText>
+                          <ExpandableTextContent className="text-gray-500">
+                            {config.description}
+                          </ExpandableTextContent>
+                          <ExpandableTextExpandButton>
+                            {t("read_more")}
+                          </ExpandableTextExpandButton>
+                        </ExpandableText>
                       )}
                     </div>
                   </TableCell>
