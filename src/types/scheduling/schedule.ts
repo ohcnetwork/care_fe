@@ -3,7 +3,7 @@ import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
 import { Badge } from "@/components/ui/badge";
 
 import { Time } from "@/Utils/types";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { UserBase } from "@/types/user/user";
@@ -165,7 +165,7 @@ export type AppointmentStatus = (typeof AppointmentStatuses)[number];
 export interface Appointment {
   id: string;
   token_slot: TokenSlot;
-  patient: Patient;
+  patient: PatientRead;
   booked_on: string;
   status: AppointmentNonCancelledStatus;
   reason_for_visit: string;

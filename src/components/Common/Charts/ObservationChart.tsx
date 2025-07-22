@@ -34,7 +34,8 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import query from "@/Utils/request/query";
 import { Code } from "@/types/base/code/code";
-import { ObservationRoutes } from "@/types/emr/observation/observationApi";
+
+import patientApi from "@/types/emr/patient/patientApi";
 
 import { ObservationHistoryTable } from "./ObservationHistoryTable";
 
@@ -125,7 +126,8 @@ export const ObservationVisualizer = ({
       encounterId,
       allCodes.map((c) => c.code).join(","),
     ],
-    queryFn: query(ObservationRoutes.observationsAnalyse, {
+
+    queryFn: query(patientApi.observationsAnalyse, {
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
