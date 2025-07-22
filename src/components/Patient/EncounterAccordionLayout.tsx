@@ -37,11 +37,9 @@ export function EncounterAccordionLayout({
     <Card className={cn("border-none rounded-md", className)}>
       <Accordion defaultValue={title.toLowerCase()} type="single" collapsible>
         <AccordionItem value={title.toLowerCase()}>
-          <AccordionTrigger className="px-4 py-0 hover:no-underline flex items-center gap-1">
+          <AccordionTrigger className="px-2 py-1 hover:no-underline flex items-center gap-2">
             <CardHeader className="w-full flex flex-row items-center justify-between p-0 translate-y-0.5">
-              <CardTitle className="text-lg font-semibold pt-1">
-                {t(title)}:
-              </CardTitle>
+              <CardTitle className="text-lg pt-1">{t(title)}:</CardTitle>
               <div>
                 {!readOnly && editLink && (
                   <Button variant="link" size="xs">

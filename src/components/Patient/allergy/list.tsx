@@ -7,7 +7,7 @@ import {
   History,
   LeafIcon,
 } from "lucide-react";
-import { Link, usePath, usePathParams } from "raviger";
+import { Link, usePath } from "raviger";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -19,6 +19,7 @@ import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordio
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
   AllergyCategory,
   AllergyIntolerance,
@@ -66,7 +67,7 @@ export function AllergyList({
   const { t } = useTranslation();
 
   const LIMIT = showTimeline ? 30 : 14;
-  const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
+  const { facilityId } = useCurrentFacilitySilently();
   const sourceUrl = usePath();
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
@@ -176,9 +177,13 @@ export function AllergyList({
       className={className}
       editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
       actionButton={
-        <Button size="sm" variant={"link"} asChild>
+        <Button size="xs" variant={"link"} asChild>
           <Link
-            href={`/facility/${facilityId}/patient/${patientId}/history/allergies?sourceUrl=${sourceUrl}`}
+            href={
+              facilityId
+                ? `/facility/${facilityId}/patient/${patientId}/history/allergies?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
+                : `/patient/${patientId}/history/allergies?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
+            }
           >
             <History className="size-4 text-gray-500" />
           </Link>

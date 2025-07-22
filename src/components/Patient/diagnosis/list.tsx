@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { History } from "lucide-react";
-import { Link, usePath, usePathParams } from "raviger";
+import { Link, usePath } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordio
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
   ACTIVE_DIAGNOSIS_CLINICAL_STATUS,
   Diagnosis,
@@ -44,7 +45,7 @@ export function DiagnosisList({
   const { t } = useTranslation();
 
   const LIMIT = showTimeline ? 30 : 14;
-  const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
+  const { facilityId } = useCurrentFacilitySilently();
   const sourceUrl = usePath();
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
@@ -153,9 +154,13 @@ export function DiagnosisList({
       className={className}
       editLink={!readOnly ? "questionnaire/diagnosis" : undefined}
       actionButton={
-        <Button variant="link" asChild>
+        <Button variant="link" size="xs" asChild>
           <Link
-            href={`/facility/${facilityId}/patient/${patientId}/history/diagnoses?sourceUrl=${sourceUrl}`}
+            href={
+              facilityId
+                ? `/facility/${facilityId}/patient/${patientId}/history/diagnoses?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
+                : `/patient/${patientId}/history/diagnoses?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
+            }
             className="font-semibold"
           >
             <History className="size-4 text-gray-500" />
