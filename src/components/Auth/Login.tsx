@@ -138,9 +138,9 @@ const Login = (props: LoginProps) => {
       const errors = error?.data || [];
       if (Array.isArray(errors) && errors.length > 0) {
         const firstError = errors[0] as OtpError;
-        setOtpError(firstError.msg); // Keep server message as-is
+        setOtpError(firstError.msg);
       } else {
-        setOtpError("send_otp_error"); // Use translation key for generic errors
+        setOtpError("send_otp_error");
       }
     },
   });
@@ -169,6 +169,7 @@ const Login = (props: LoginProps) => {
       }
     },
     onError: (error: any) => {
+      let errorMessage = "invalid_otp";
       if (
         error.cause &&
         Array.isArray(error.cause.errors) &&
@@ -178,19 +179,13 @@ const Login = (props: LoginProps) => {
           (e: OtpValidationError) => e.otp,
         );
         if (otpError && otpError.otp) {
-          setOtpValidationError(otpError.otp); // Keep server message as-is
-          toast.error(otpError.otp);
-          return;
+          errorMessage = otpError.otp;
         }
+      } else if (error.message) {
+        errorMessage = error.message;
       }
-
-      if (error.message) {
-        setOtpValidationError(error.message); // Keep server message as-is
-        toast.error(error.message);
-      } else {
-        setOtpValidationError("invalid_otp"); // Use translation key for generic errors
-        toast.error(t("invalid_otp"));
-      }
+      setOtpValidationError(errorMessage);
+      toast.error(errorMessage);
     },
   });
 
