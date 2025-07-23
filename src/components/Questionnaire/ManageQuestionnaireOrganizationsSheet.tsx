@@ -151,7 +151,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedOrgDetails, setSelectedOrgDetails] = useState<
+  const [selectedOrganizations, setSelectedOrganizations] = useState<
     { id: string; name: string; description?: string }[]
   >([]);
 
@@ -189,12 +189,12 @@ export default function ManageQuestionnaireOrganizationsSheet({
   });
   useEffect(() => {
     if (organizations?.results) {
-      setSelectedOrgDetails(organizations.results);
+      setSelectedOrganizations(organizations.results);
     }
   }, [organizations?.results]);
 
   const handleToggleOrganization = (orgId: string) => {
-    setSelectedOrgDetails((current) => {
+    setSelectedOrganizations((current) => {
       const isSelected = current.some((org) => org.id === orgId);
 
       if (isSelected) {
@@ -214,16 +214,15 @@ export default function ManageQuestionnaireOrganizationsSheet({
   };
 
   const handleSave = () => {
-    const selectedIds = selectedOrgDetails.map((org) => org.id);
+    const selectedIds = selectedOrganizations.map((org) => org.id);
     setOrganizations({ organizations: selectedIds });
   };
-  const selectedOrganizations = selectedOrgDetails;
   const hasChanges = !organizations?.results
     ? false
     : new Set(organizations.results.map((org) => org.id)).size !==
-        new Set(selectedOrgDetails.map((org) => org.id)).size ||
+        new Set(selectedOrganizations.map((org) => org.id)).size ||
       !organizations.results.every((org) =>
-        selectedOrgDetails.some((selected) => selected.id === org.id),
+        selectedOrganizations.some((selected) => selected.id === org.id),
       );
 
   return (
@@ -283,7 +282,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
               {t("add_organization", { count: 0 })}
             </h3>
             <OrgSelectorPopover
-              selected={selectedOrgDetails.map((org) => org.id)}
+              selected={selectedOrganizations.map((org) => org.id)}
               onToggle={handleToggleOrganization}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
@@ -300,7 +299,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
               variant="outline"
               onClick={() => {
                 if (organizations?.results) {
-                  setSelectedOrgDetails(organizations.results);
+                  setSelectedOrganizations(organizations.results);
                 }
                 setOpen(false);
               }}
