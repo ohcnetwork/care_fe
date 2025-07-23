@@ -271,7 +271,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [expandPath, setExpandPath] = useState<string[]>([]);
   const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  const isMobile = useBreakpoints({ default: true, sm: true });
+  const isMobile = useBreakpoints({ default: true, md: false });
 
   const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
     const errorData = (
