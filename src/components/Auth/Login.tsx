@@ -154,7 +154,7 @@ const Login = (props: LoginProps) => {
       if ("errors" in response) {
         throw response;
       }
-      return response;
+      return response;  
     },
     onSuccess: async (response: { access: string }) => {
       const { access } = response;
@@ -635,6 +635,7 @@ const Login = (props: LoginProps) => {
                                 setOtp("");
                                 setOtpError("");
                                 setOtpValidationError("");
+                                setPhone("");
                               }}
                             >
                               {t("change_phone_number")}
