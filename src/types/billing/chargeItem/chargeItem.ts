@@ -66,7 +66,7 @@ export interface ChargeItemUpsert
 
 export interface ApplyChargeItemDefinitionRequest {
   charge_item_definition: string;
-  quantity: number;
+  quantity: string;
   encounter: string;
 }
 
