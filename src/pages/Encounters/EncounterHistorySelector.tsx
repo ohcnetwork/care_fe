@@ -204,13 +204,14 @@ export default function EncounterHistorySelector() {
           <SheetTrigger className="w-full">
             <EncounterSheetTrigger />
           </SheetTrigger>
-          <SheetContent side="bottom" className="max-h-[85vh] rounded-t-3xl">
+          <SheetContent
+            side="bottom"
+            className="max-h-[85vh] rounded-t-3xl overflow-y-auto mb-2"
+          >
             <SheetHeader className="px-4 pb-2">
               <SheetTitle>{t("past_encounters")}</SheetTitle>
             </SheetHeader>
-            <div className="overflow-y-auto h-full">
-              <EncounterHistoryList onSelect={() => setIsOpen(false)} />
-            </div>
+            <EncounterHistoryList onSelect={() => setIsOpen(false)} />
           </SheetContent>
         </Sheet>
       </div>

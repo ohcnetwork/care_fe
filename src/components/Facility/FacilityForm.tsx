@@ -8,6 +8,7 @@ import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -21,13 +22,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { PhoneInput } from "@/components/ui/phone-input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
 import LocationPicker from "@/components/Common/GeoLocationPicker";
@@ -229,28 +223,19 @@ export default function FacilityForm({
               render={({ field }) => (
                 <FormItem className="max-w-full">
                   <FormLabel aria-required>{t("facility_type")}</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger
-                        data-cy="facility-type"
-                        className="max-w-full truncate"
-                        ref={field.ref}
-                      >
-                        <SelectValue placeholder={t("select_facility_type")} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {FACILITY_TYPES.map((type) => (
-                        <SelectItem
-                          key={type.text}
-                          value={type.text}
-                          data-cy="facility-type-option"
-                        >
-                          {type.text}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Autocomplete
+                    {...field}
+                    options={FACILITY_TYPES.map((type) => ({
+                      label: type.text,
+                      value: type.text,
+                    }))}
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    noOptionsMessage={t("no_facilities_found")}
+                    placeholder={t("select_facility_type")}
+                    inputPlaceholder={t("search_facility_type")}
+                    className="min-w-0"
+                  />
                   <FormMessage />
                 </FormItem>
               )}
