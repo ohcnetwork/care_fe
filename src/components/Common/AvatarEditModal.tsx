@@ -204,6 +204,10 @@ export default function AvatarEditModal({
       return;
     }
     const file = e.target.files[0];
+    if (file.type === "image/gif") {
+      toast.error(t("avatar_gif_not_allowed"));
+      return;
+    }
     if (file.size > MAX_FILE_SIZE) {
       toast.error(
         t("image_size_error", { size: careConfig.imageUploadMaxSizeInMB }),
@@ -213,6 +217,8 @@ export default function AvatarEditModal({
     setSelectedFile(file);
     setShowCroppedPreview(false);
     setShowCameraPreview(false);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
   };
 
   const cropImage = async () => {
@@ -282,6 +288,10 @@ export default function AvatarEditModal({
     const droppedFile = e?.dataTransfer?.files[0];
     if (!isImageFile(droppedFile))
       return dragProps.setFileDropError(t("please_upload_an_image_file"));
+    if (droppedFile.type === "image/gif") {
+      dragProps.setFileDropError(t("avatar_gif_not_allowed"));
+      return;
+    }
     if (droppedFile.size > MAX_FILE_SIZE) {
       dragProps.setFileDropError(
         t("image_size_error", { size: careConfig.imageUploadMaxSizeInMB }),
