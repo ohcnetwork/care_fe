@@ -130,7 +130,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["encounters", "past", patientId],
+    queryKey: ["infinite-encounters", "past", patientId],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(encounterApi.list, {
         queryParams: {
