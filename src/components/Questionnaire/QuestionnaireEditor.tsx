@@ -82,6 +82,7 @@ import {
   StructuredQuestionType,
 } from "@/components/Questionnaire/data/StructuredFormData";
 
+import useBreakpoints from "@/hooks/useBreakpoints";
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
 import mutate from "@/Utils/request/mutate";
@@ -269,6 +270,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   >(new Map());
   const [expandPath, setExpandPath] = useState<string[]>([]);
   const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  const isMobile = useBreakpoints({ default: true, sm: true });
 
   const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
     const errorData = (
@@ -937,42 +940,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         </TabsList>
         <TabsContent value="edit">
           <div className="flex flex-col md:flex-row gap-2">
-            <div className="space-y-4 md:hidden">
-              <QuestionnaireProperties
-                form={form}
-                updateQuestionnaireField={updateQuestionnaireField}
-                id={id}
-                organizations={organizations}
-                organizationSelection={{
-                  selectedOrgs: selectedOrgs,
-                  onToggle: handleToggleOrganization,
-                  searchQuery: orgSearchQuery,
-                  setSearchQuery: setOrgSearchQuery,
-                  available: availableOrganizations,
-                  isLoading: isLoadingAvailableOrganizations,
-                  error: orgError,
-                  setError: setOrgError,
-                }}
-                tags={tags}
-                tagSelection={{
-                  selectedTags: selectedTags,
-                  onToggle: handleToggleTag,
-                  searchQuery: tagSearchQuery,
-                  setSearchQuery: setTagSearchQuery,
-                  available: tagOptions,
-                  isLoading: isLoadingAvailableTags,
-                  onTagCreated: !id ? handleTagCreated : undefined,
-                }}
-              />
-              <QuestionActions
-                selectedQuestions={selectedQuestions}
-                questions={rootQuestions}
-                updateQuestionnaireField={updateQuestionnaireField}
-                onQuestionsChange={updateQuestions}
-                setSelectedQuestions={setSelectedQuestions}
-                setExpandedQuestions={setExpandedQuestions}
-              />
-            </div>
             <Card className="hidden lg:block w-60 sticky top-4 self-start h-fit max-h-screen overflow-y-auto rounded-none border-none bg-transparent shadow-none space-y-3 mt-2">
               <CardHeader className="p-0">
                 <CardTitle>{t("navigation")}</CardTitle>
@@ -1039,7 +1006,44 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 </nav>
               </CardContent>
             </Card>
-
+            {isMobile && (
+              <div className="space-y-4 md:hidden">
+                <QuestionnaireProperties
+                  form={form}
+                  updateQuestionnaireField={updateQuestionnaireField}
+                  id={id}
+                  organizations={organizations}
+                  organizationSelection={{
+                    selectedOrgs: selectedOrgs,
+                    onToggle: handleToggleOrganization,
+                    searchQuery: orgSearchQuery,
+                    setSearchQuery: setOrgSearchQuery,
+                    available: availableOrganizations,
+                    isLoading: isLoadingAvailableOrganizations,
+                    error: orgError,
+                    setError: setOrgError,
+                  }}
+                  tags={tags}
+                  tagSelection={{
+                    selectedTags: selectedTags,
+                    onToggle: handleToggleTag,
+                    searchQuery: tagSearchQuery,
+                    setSearchQuery: setTagSearchQuery,
+                    available: tagOptions,
+                    isLoading: isLoadingAvailableTags,
+                    onTagCreated: !id ? handleTagCreated : undefined,
+                  }}
+                />
+                <QuestionActions
+                  selectedQuestions={selectedQuestions}
+                  questions={rootQuestions}
+                  updateQuestionnaireField={updateQuestionnaireField}
+                  onQuestionsChange={updateQuestions}
+                  setSelectedQuestions={setSelectedQuestions}
+                  setExpandedQuestions={setExpandedQuestions}
+                />
+              </div>
+            )}
             <div className="space-y-4 flex-1">
               <Form {...form}>
                 <form>
