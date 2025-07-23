@@ -1007,7 +1007,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
               </CardContent>
             </Card>
             {isMobile && (
-              <div className="space-y-4 md:hidden">
+              <div className="space-y-4">
                 <QuestionnaireProperties
                   form={form}
                   updateQuestionnaireField={updateQuestionnaireField}
