@@ -167,6 +167,7 @@ export default function CreateEncounterForm({
                           updatedDate.setMinutes(date.getMinutes());
                           field.onChange(updatedDate.toISOString());
                         }}
+                        className="h-8"
                       />
                       <Input
                         type="time"
