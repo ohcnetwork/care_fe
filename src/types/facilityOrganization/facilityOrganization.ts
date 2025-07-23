@@ -28,8 +28,7 @@ export interface FacilityOrganizationRead extends FacilityOrganizationBase {
   updated_at: string;
 }
 
-export interface FacilityOrganizationCreate
-  extends FacilityOrganizationBase {
+export interface FacilityOrganizationCreate extends FacilityOrganizationBase {
   facility: string;
   parent?: string;
 }

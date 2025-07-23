@@ -33,7 +33,7 @@ export function EditDiscountCodeSheet({
 
   const { mutate: updateCode, isPending } = useMutation({
     mutationFn: mutate(facilityApi.setMonetaryComponents, {
-      pathParams: { facilityId },
+      pathParams: { id: facilityId },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["facility", facilityId] });

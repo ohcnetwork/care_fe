@@ -52,7 +52,7 @@ export function DiscountComponentSettings() {
 
   const { mutate: deleteComponent, isPending } = useMutation({
     mutationFn: mutate(facilityApi.setMonetaryComponents, {
-      pathParams: { facilityId },
+      pathParams: { id: facilityId },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["facility", facilityId] });

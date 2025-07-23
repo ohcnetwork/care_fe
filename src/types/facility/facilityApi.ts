@@ -2,9 +2,9 @@ import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
 import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryComponent";
+import { UserBase } from "@/types/user/user";
 
 import { FacilityCreate, FacilityListRead, FacilityRead } from "./facility";
-import { UserBase } from "../user/user";
 
 export default {
   list: {
