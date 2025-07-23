@@ -142,13 +142,16 @@ export default function UserDashboard() {
                   data-cy="user-dashboard-menu-trigger"
                   variant="outline"
                   size="sm"
-                  className="px-2 w-full"
+                  className="px-2 w-auto"
                 >
                   <CareIcon icon="l-ellipsis-v" className="text-inherit" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuItem className="cursor-pointer flex items-center gap-2 text-xs leading-tight p-2">
+                <DropdownMenuItem
+                  asChild
+                  className="cursor-pointer flex items-center gap-2 text-xs leading-tight p-2"
+                >
                   <Link
                     href={`/users/${user.username}`}
                     className="flex items-center gap-2 w-full text-inherit"
