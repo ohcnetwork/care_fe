@@ -232,14 +232,6 @@ const routes = {
     TBody: Type<Partial<CommentModel>>(),
   },
 
-  facility: {
-    getUsers: {
-      path: "/api/v1/facility/{facility_id}/users/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<UserBase>>(),
-    },
-  },
-
   valueset: {
     expand: {
       path: "/api/v1/valueset/{system}/expand/",

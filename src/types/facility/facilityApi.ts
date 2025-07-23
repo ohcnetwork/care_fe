@@ -4,6 +4,7 @@ import { Code } from "@/types/base/code/code";
 import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryComponent";
 
 import { FacilityCreate, FacilityListRead, FacilityRead } from "./facility";
+import { UserBase } from "../user/user";
 
 export default {
   list: {
@@ -55,12 +56,17 @@ export default {
     }>(),
   },
   setMonetaryComponents: {
-    path: "/api/v1/facility/{facilityId}/set_monetary_codes/",
+    path: "/api/v1/facility/{id}/set_monetary_codes/",
     method: HttpMethod.POST,
     TRes: Type<FacilityRead>(),
     TBody: Type<{
       discount_codes: Code[];
       discount_monetary_components: MonetaryComponentRead[];
     }>(),
+  },
+  getUsers: {
+    path: "/api/v1/facility/{id}/users/",
+    method: HttpMethod.GET,
+    TRes: Type<PaginatedResponse<UserBase>>(),
   },
 } as const;
