@@ -192,7 +192,7 @@ function OrganizationSelector({
               data-cy="manage-organisation-questionnaire"
             >
               <Building className="mr-2 size-4" />
-              {t("manage_organization_one")}
+              {t("manage_organization_other")}
             </Button>
           }
         />

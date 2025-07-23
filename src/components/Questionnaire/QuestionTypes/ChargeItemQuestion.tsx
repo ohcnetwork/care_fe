@@ -89,7 +89,7 @@ function ChargeItemForm({
           onChange={(e) =>
             onUpdate?.({
               ...chargeItem,
-              quantity: parseInt(e.target.value, 10),
+              quantity: e.target.value,
             })
           }
           disabled={disabled}
@@ -204,7 +204,7 @@ export function ChargeItemQuestion({
       if (!selectedCID) return;
 
       const newChargeItem: ApplyChargeItemDefinitionRequest = {
-        quantity: 1,
+        quantity: "1",
         encounter: encounterId,
         charge_item_definition: selectedCID.id,
         charge_item_definition_object: selectedCID,

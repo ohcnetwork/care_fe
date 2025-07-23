@@ -113,7 +113,7 @@ export default function AddMultipleChargeItemsSheet({
       setSelectedItems([
         ...selectedItems,
         {
-          quantity: 1,
+          quantity: "1",
           encounter: request.encounter.id,
           charge_item_definition: selectedCID.id,
           charge_item_definition_object: selectedCID,
@@ -129,7 +129,7 @@ export default function AddMultipleChargeItemsSheet({
     setSelectedItems(selectedItems.filter((_, i) => i !== index));
   };
 
-  const handleUpdateQuantity = (index: number, quantity: number) => {
+  const handleUpdateQuantity = (index: number, quantity: string) => {
     setSelectedItems(
       selectedItems.map((item, i) =>
         i === index ? { ...item, quantity } : item,
@@ -208,10 +208,7 @@ export default function AddMultipleChargeItemsSheet({
                               min={1}
                               value={item.quantity}
                               onChange={(e) =>
-                                handleUpdateQuantity(
-                                  index,
-                                  parseInt(e.target.value, 10),
-                                )
+                                handleUpdateQuantity(index, e.target.value)
                               }
                               className="w-24"
                             />
@@ -276,10 +273,7 @@ export default function AddMultipleChargeItemsSheet({
                               min={1}
                               value={item.quantity}
                               onChange={(e) =>
-                                handleUpdateQuantity(
-                                  index,
-                                  parseInt(e.target.value, 10),
-                                )
+                                handleUpdateQuantity(index, e.target.value)
                               }
                               className="w-20"
                             />

@@ -236,6 +236,7 @@ export interface EncounterRead
 
 export interface EncounterCreate extends Omit<EncounterBase, "id"> {
   organizations: string[];
+  tags?: string[];
 }
 
 export type EncounterEdit = Omit<EncounterBase, "id">;
