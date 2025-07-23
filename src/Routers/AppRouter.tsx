@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { Redirect, useRedirect, useRoutes } from "raviger";
+import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
 
 import IconIndex from "@/CAREUI/icons/Index";
 
@@ -100,17 +100,21 @@ export default function AppRouter() {
   const appPages = useRoutes(routes);
   const adminPages = useRoutes(AdminRouter);
 
-  const sidebarFor = adminPages ? SidebarFor.ADMIN : SidebarFor.FACILITY;
+  const currentPath = usePath();
+  const isAdminPage = currentPath?.startsWith("/admin");
+
+  const sidebarFor = isAdminPage ? SidebarFor.ADMIN : SidebarFor.FACILITY;
 
   const pages = appPages || adminPages || <ErrorPage />;
 
   const user = useAuthUser();
-  const currentPath = window.location.pathname;
 
   // Check if the current path matches any of the paths without sidebar
-  const shouldShowSidebar = !PATHS_WITHOUT_SIDEBAR.some((path) =>
-    typeof path === "string" ? path === currentPath : path.test(currentPath),
-  );
+  const shouldShowSidebar =
+    currentPath &&
+    !PATHS_WITHOUT_SIDEBAR.some((path) =>
+      typeof path === "string" ? path === currentPath : path.test(currentPath),
+    );
 
   const sidebarOpen = useSidebarState();
 
