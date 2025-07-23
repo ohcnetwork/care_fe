@@ -5,7 +5,6 @@ import { createContext, useContext } from "react";
 import { Permissions, getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { usePermissions } from "@/context/PermissionContext";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -20,12 +19,10 @@ type EncounterContextType = {
 
   patient: PatientRead | undefined;
   currentEncounter: EncounterRead | undefined;
-  pastEncounters: PaginatedResponse<EncounterRead> | undefined;
   selectedEncounter: EncounterRead | undefined;
   isPatientLoading: boolean;
   isCurrentEncounterLoading: boolean;
   isSelectedEncounterLoading: boolean;
-  isPastEncountersLoading: boolean;
   setSelectedEncounter: (encounterId: string | null) => void;
   currentEncounterPermissions: Permissions;
   selectedEncounterPermissions: Permissions;
@@ -80,13 +77,6 @@ export function EncounterProvider({
       }),
     });
 
-  const { data: encounters, isLoading: isPastEncountersLoading } = useQuery({
-    queryKey: ["encounters", "past", patientId],
-    queryFn: query(encounterApi.list, {
-      queryParams: { patient: patientId },
-    }),
-  });
-
   const setSelectedEncounter = (encounterId: string | null) => {
     setQParams(
       { selectedEncounter: encounterId },
@@ -120,18 +110,10 @@ export function EncounterProvider({
         selectedEncounterId,
         patient,
         currentEncounter,
-        pastEncounters: encounters && {
-          ...encounters,
-          results:
-            encounters?.results.filter(
-              (encounter) => encounter.id !== currentEncounterId,
-            ) ?? [],
-        },
         selectedEncounter,
         isPatientLoading,
         isCurrentEncounterLoading,
         isSelectedEncounterLoading,
-        isPastEncountersLoading,
         setSelectedEncounter,
         currentEncounterPermissions,
         selectedEncounterPermissions,
