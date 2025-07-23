@@ -681,8 +681,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     let isValid = await form.trigger();
     const hasOrganizations = validateOrganizations();
     const hasValidStructuredType = validateStructuredType();
-    setGroupError(true);
     if (!isValid) {
+      setGroupError(true);
       const questionsErrors = form.formState.errors.questions as
         | any[]
         | undefined;
@@ -774,7 +774,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       }, 0); // delay lets react-hook-form update `formState.errors`
       return;
     }
-
+    setGroupError(false);
     if (id) {
       updateQuestionnaire({
         ...form.getValues(),
