@@ -12,7 +12,10 @@ export class PatientFiles {
   }
 
   selectUploadFromDevice() {
-    cy.verifyAndClickElement('[data-cy="choose-file-option"]', "Choose Files");
+    cy.verifyAndClickElement(
+      '[data-cy="choose-file-option"]',
+      "Upload From Device",
+    );
     return this;
   }
 
@@ -23,7 +26,7 @@ export class PatientFiles {
   }
 
   uploadMultipleFiles(filePaths: string[]) {
-    cy.contains("Choose Files").should("be.visible");
+    cy.contains("Upload From Device").should("be.visible");
     cy.get('input[type="file"]').selectFile(
       filePaths.map((file) => ({
         contents: file,

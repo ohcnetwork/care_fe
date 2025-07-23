@@ -212,7 +212,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
               className="flex items-center w-full text-primary-900 hover:text-black py-1 font-medium"
             >
               <CareIcon icon="l-file-upload-alt" />
-              <span>{t("choose_files")}</span>
+              <span>{t("choose_file")}</span>
             </Label>
             {fileUpload.Input({ className: "hidden" })}
           </DropdownMenuItem>
