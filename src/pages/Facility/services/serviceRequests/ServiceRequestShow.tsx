@@ -203,7 +203,6 @@ export default function ServiceRequestShow({
           method: requirement.collection || null,
           body_site: null,
           collector: null,
-          collector_object: null,
           collected_date_time: null,
           quantity: null,
           procedure: null,
