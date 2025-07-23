@@ -160,7 +160,7 @@ export function EncounterHeader() {
               </DropdownMenu>
 
               <Button variant="outline" onClick={() => setActionsOpen(true)}>
-                {t("actions")}
+                {t("encounter_actions")}
                 <CommandShortcut>
                   {isAppleDevice ? "⌘" : "Ctrl"} + E
                 </CommandShortcut>

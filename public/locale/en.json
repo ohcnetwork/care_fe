@@ -1642,6 +1642,7 @@
   "enabled": "Enabled",
   "enabled_only_for_partially_dispensed": "Enabled only for partially dispensed medications",
   "encounter": "Encounter",
+  "encounter_actions": "Encounter Actions",
   "encounter_admit_sources__born": "Born in hospital",
   "encounter_admit_sources__emd": "From accident/emergency department",
   "encounter_admit_sources__gp": "General Practitioner referral",
