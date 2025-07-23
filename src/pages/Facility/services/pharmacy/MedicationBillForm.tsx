@@ -1018,7 +1018,7 @@ export default function MedicationBillForm({ patientId }: Props) {
   const calculatePrices = (inventory: InventoryRead | undefined) => {
     if (!inventory)
       return {
-        basePrice: 0,
+        basePrice: "0",
       };
 
     const priceComponents =
@@ -1029,7 +1029,7 @@ export default function MedicationBillForm({ patientId }: Props) {
       (component) =>
         component.monetary_component_type === MonetaryComponentType.base,
     );
-    const basePrice = baseComponent?.amount || 0;
+    const basePrice = baseComponent?.amount || "0";
 
     return {
       basePrice,
