@@ -15,11 +15,11 @@ import {
 } from "@/components/ui/command";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { Code } from "@/types/base/code/code";
 import valuesetRoutes from "@/types/valueset/valuesetApi";
+import valuesetApi from "@/types/valueset/valuesetApi";
 
 interface Props {
   system: string;
@@ -92,7 +92,7 @@ export default function ValueSetSearchContent({
 
   const searchQuery = useQuery({
     queryKey: ["valueset", system, "expand", count, search],
-    queryFn: query.debounced(routes.valueset.expand, {
+    queryFn: query.debounced(valuesetApi.expandSystem, {
       pathParams: { system },
       body: { count, search: search + searchPostFix },
     }),

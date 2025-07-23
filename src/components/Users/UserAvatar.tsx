@@ -13,12 +13,12 @@ import Loading from "@/components/Common/Loading";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { formatName, sleep } from "@/Utils/utils";
+import userApi from "@/types/user/userApi";
 
 export default function UserAvatar({ username }: { username: string }) {
   const { t } = useTranslation();
@@ -28,7 +28,7 @@ export default function UserAvatar({ username }: { username: string }) {
   const canEditAvatar = authUser.is_superuser || authUser.username === username;
 
   const { mutateAsync: mutateAvatarDelete } = useMutation({
-    mutationFn: mutate(routes.deleteProfilePicture, {
+    mutationFn: mutate(userApi.removeProfilePicture, {
       pathParams: { username },
     }),
     onSuccess: () => {
@@ -43,7 +43,7 @@ export default function UserAvatar({ username }: { username: string }) {
 
   const { data: userData, isLoading } = useQuery({
     queryKey: ["getUserDetails", username],
-    queryFn: query(routes.getUserDetails, {
+    queryFn: query(userApi.get, {
       pathParams: { username },
     }),
   });

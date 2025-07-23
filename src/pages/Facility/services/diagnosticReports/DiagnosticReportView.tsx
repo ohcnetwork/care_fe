@@ -18,7 +18,6 @@ import BackButton from "@/components/Common/BackButton";
 import { FileListTable } from "@/components/Files/FileListTable";
 import { FileUploadModel } from "@/components/Patient/models";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
@@ -27,6 +26,7 @@ import { PatientHeader } from "@/pages/Facility/services/serviceRequests/compone
 import { DIAGNOSTIC_REPORT_STATUS_COLORS } from "@/types/emr/diagnosticReport/diagnosticReport";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import { ObservationStatus } from "@/types/emr/observation/observation";
+import filesApi from "@/types/files/filesApi";
 
 export default function DiagnosticReportView({
   facilityId,
@@ -53,7 +53,7 @@ export default function DiagnosticReportView({
   const { data: files = { results: [], count: 0 }, refetch: refetchFiles } =
     useQuery<PaginatedResponse<FileUploadModel>>({
       queryKey: ["files", "diagnostic_report", report?.id],
-      queryFn: query(routes.viewUpload, {
+      queryFn: query(filesApi.list, {
         queryParams: {
           file_type: "diagnostic_report",
           associating_id: report?.id,

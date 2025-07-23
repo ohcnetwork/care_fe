@@ -27,10 +27,10 @@ import {
   PREVIEWABLE_FILE_EXTENSIONS,
 } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
+import filesApi from "@/types/files/filesApi";
 
 export interface FileManagerOptions {
   type: string;
@@ -99,14 +99,10 @@ export default function useFileManager(
   ) => {
     return queryClient.fetchQuery({
       queryKey: ["file", fileType, associating_id, file.id],
-      queryFn: () =>
-        query(routes.retrieveUpload, {
-          queryParams: {
-            file_type: fileType,
-            associating_id,
-          },
-          pathParams: { id: file.id || "" },
-        })({} as any),
+      queryFn: query(filesApi.get, {
+        queryParams: { file_type: fileType, associating_id },
+        pathParams: { id: file.id || "" },
+      }),
     });
   };
 
@@ -148,7 +144,7 @@ export default function useFileManager(
 
   const { mutateAsync: archiveUpload } = useMutation({
     mutationFn: (body: { id: string; archive_reason: string }) =>
-      query(routes.archiveUpload, {
+      mutate(filesApi.archive, {
         body: { archive_reason: body.archive_reason },
         pathParams: { id: body.id },
       })({} as any),
@@ -216,7 +212,7 @@ export default function useFileManager(
 
   const { mutateAsync: editUpload } = useMutation({
     mutationFn: (body: { id: string; name: string; associating_id: string }) =>
-      mutate(routes.editUpload, {
+      mutate(filesApi.update, {
         body: { name: body.name },
         pathParams: { id: body.id },
       })(body),

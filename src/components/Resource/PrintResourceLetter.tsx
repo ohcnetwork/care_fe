@@ -7,18 +7,16 @@ import Loading from "@/components/Common/Loading";
 
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 
 export default function PrintResourceLetter({ id }: { id: string }) {
   const { t } = useTranslation();
 
   const { data, isLoading } = useQuery({
     queryKey: ["resource_request_letter", id],
-    queryFn: query(routes.getResourceDetails, {
-      pathParams: { id: id },
-    }),
+    queryFn: query(resourceRequestApi.get, { pathParams: { id } }),
   });
 
   if (isLoading || !data) {

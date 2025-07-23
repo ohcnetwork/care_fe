@@ -15,10 +15,10 @@ import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
+import batchApi from "@/types/base/batch/batchApi";
 import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { FileUploadQuestion } from "@/types/files/files";
@@ -351,7 +351,7 @@ export function QuestionnaireForm({
   });
 
   const { mutate: submitBatch, isPending } = useMutation({
-    mutationFn: mutate(routes.batchRequest, { silent: true }),
+    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       setServerErrors(undefined);
       toast.success(t("questionnaire_submitted_successfully"));

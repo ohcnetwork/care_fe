@@ -45,12 +45,12 @@ import {
   FILE_EXTENSIONS,
 } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
+import filesApi from "@/types/files/filesApi";
 
 interface DischargeTabProps {
   type: "encounter" | "patient";
@@ -94,7 +94,7 @@ export const DischargeTab = ({
     refetch,
   } = useQuery({
     queryKey: ["discharge_files", encounter.id, qParams],
-    queryFn: query.debounced(routes.viewUpload, {
+    queryFn: query.debounced(filesApi.list, {
       queryParams: {
         file_type: type,
         associating_id: encounter.id,

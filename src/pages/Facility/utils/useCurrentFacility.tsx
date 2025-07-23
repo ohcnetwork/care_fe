@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useFullPath } from "raviger";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import facilityApi from "@/types/facility/facilityApi";
 
 const extractFacilityId = (path: string) => {
   const segments = path.split("/");
@@ -25,7 +25,7 @@ export default function useCurrentFacility() {
 
   const { data: facility } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(routes.getPermittedFacility, {
+    queryFn: query(facilityApi.getFacility, {
       pathParams: { id: facilityId ?? "" },
     }),
     staleTime: 1000 * 60 * 30, // cache for 30 minutes

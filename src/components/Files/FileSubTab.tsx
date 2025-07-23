@@ -45,12 +45,12 @@ import {
   FILE_EXTENSIONS,
 } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
+import filesApi from "@/types/files/filesApi";
 
 interface FilesTabProps {
   type: "encounter" | "patient";
@@ -99,7 +99,7 @@ export const FilesPage = ({
     refetch,
   } = useQuery({
     queryKey: ["files", type, associatingId, qParams],
-    queryFn: query.debounced(routes.viewUpload, {
+    queryFn: query.debounced(filesApi.list, {
       queryParams: {
         file_type: type,
         associating_id: associatingId,

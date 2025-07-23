@@ -158,7 +158,7 @@ export function DiagnosticReportForm({
   const { data: files = { results: [], count: 0 }, refetch: refetchFiles } =
     useQuery({
       queryKey: ["files", "diagnostic_report", fullReport?.id],
-      queryFn: query(filesApi.viewUpload, {
+      queryFn: query(filesApi.list, {
         queryParams: {
           file_type: "diagnostic_report",
           associating_id: fullReport?.id,

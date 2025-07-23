@@ -44,7 +44,6 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
@@ -52,6 +51,7 @@ import validators from "@/Utils/validators";
 import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 import { UserBase } from "@/types/user/user";
 
 interface ResourceProps {
@@ -97,7 +97,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
   const { data: resourceData } = useQuery({
     queryKey: ["resource_request", id],
-    queryFn: query(routes.getResourceDetails, {
+    queryFn: query(resourceRequestApi.get, {
       pathParams: { id: String(id) },
     }),
     enabled: !!id,
@@ -144,7 +144,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   }, [resourceData, form]);
 
   const { mutate: createResource, isPending } = useMutation({
-    mutationFn: mutate(routes.createResource),
+    mutationFn: mutate(resourceRequestApi.create),
     onSuccess: (data: ResourceRequest) => {
       toast.success(t("resource_created_successfully"));
       navigate(`/facility/${facilityId}/resource/${data.id}`);
@@ -152,7 +152,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   });
 
   const { mutate: updateResource, isPending: isUpdatePending } = useMutation({
-    mutationFn: mutate(routes.updateResource, {
+    mutationFn: mutate(resourceRequestApi.update, {
       pathParams: { id: String(id) },
     }),
     onSuccess: (data: ResourceRequest) => {

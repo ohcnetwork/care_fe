@@ -31,10 +31,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
+import batchApi from "@/types/base/batch/batchApi";
 import {
   AccountBillingStatus,
   AccountStatus,
@@ -148,7 +148,7 @@ export default function ServiceRequestShow({
   });
 
   const { mutate: executeBatch } = useMutation({
-    mutationFn: mutate(routes.batchRequest, { silent: true }),
+    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["serviceRequest", facilityId, serviceRequestId],

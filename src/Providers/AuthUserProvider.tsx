@@ -10,16 +10,13 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 
 import { LocalStorageKeys } from "@/common/constants";
 
-import routes, {
-  JwtTokenObtainPair,
-  LoginResponse,
-  Type,
-} from "@/Utils/request/api";
+import { Type } from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { userAtom } from "@/atoms/user-atom";
 import authApi from "@/types/auth/authApi";
 import { MFAAuthenticationToken, TokenData } from "@/types/auth/otp";
+import { JwtTokenObtainPair, LoginResponse } from "@/types/auth/types";
 
 interface Props {
   children: React.ReactNode;
@@ -54,7 +51,7 @@ export default function AuthUserProvider({
 
   const { data: user, isLoading } = useQuery({
     queryKey: ["currentUser", accessToken],
-    queryFn: query(routes.currentUser, { silent: true }),
+    queryFn: query(authApi.getCurrentUser, { silent: true }),
     retry: false,
     enabled: !!localStorage.getItem(LocalStorageKeys.accessToken),
   });
@@ -67,7 +64,7 @@ export default function AuthUserProvider({
 
   const tokenRefreshQuery = useQuery({
     queryKey: ["user-refresh-token"],
-    queryFn: query(routes.token_refresh, {
+    queryFn: query(authApi.refreshAccessToken, {
       body: { refresh: refreshToken || "" },
     }),
     refetchIntervalInBackground: true,
@@ -90,7 +87,7 @@ export default function AuthUserProvider({
   }, [tokenRefreshQuery.data, tokenRefreshQuery.isError]);
 
   const { mutateAsync: signIn, isPending: isAuthenticating } = useMutation({
-    mutationFn: mutate(routes.login),
+    mutationFn: mutate(authApi.loginWithUsernamePassword),
     onSuccess: async (data: LoginResponse) => {
       if (isMFAResponse(data)) {
         localStorage.setItem("mfa_temp_token", data.temp_token);
@@ -144,7 +141,7 @@ export default function AuthUserProvider({
     if (accessToken && refreshToken) {
       try {
         await mutate({
-          ...routes.logout,
+          ...authApi.logout,
           TRes: Type<Record<string, never>>(),
         })({ access: accessToken, refresh: refreshToken });
       } catch (error) {

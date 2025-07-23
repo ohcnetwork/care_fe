@@ -18,11 +18,11 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { CommentModel } from "@/types/resourceRequest/resourceRequest";
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 
 const CommentSection = ({ id }: { id: string }) => {
   const { t } = useTranslation();
@@ -33,7 +33,7 @@ const CommentSection = ({ id }: { id: string }) => {
 
   const { data: resourceComments, isLoading } = useQuery({
     queryKey: ["resourceComments", id, qParams],
-    queryFn: query(routes.getResourceComments, {
+    queryFn: query(resourceRequestApi.getComments, {
       queryParams: {
         limit: RESULTS_PER_PAGE_LIMIT,
         offset: ((qParams.page ?? 1) - 1) * RESULTS_PER_PAGE_LIMIT,
@@ -43,7 +43,7 @@ const CommentSection = ({ id }: { id: string }) => {
   });
 
   const { mutate: addComment } = useMutation({
-    mutationFn: mutate(routes.addResourceComments, {
+    mutationFn: mutate(resourceRequestApi.addComments, {
       pathParams: { id },
     }),
     onSuccess: () => {

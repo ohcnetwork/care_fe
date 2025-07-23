@@ -27,10 +27,10 @@ import Page from "@/components/Common/Page";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { ProductSearch } from "@/pages/Facility/services/inventory/ProductSearch";
 import { SupplierSelect } from "@/pages/Facility/services/inventory/SupplierSelect";
+import batchApi from "@/types/base/batch/batchApi";
 import { ProductRead } from "@/types/inventory/product/product";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import {
@@ -98,7 +98,7 @@ export function ReceiveStock({
   });
 
   const batchRequest = useMutation({
-    mutationFn: mutate(routes.batchRequest),
+    mutationFn: mutate(batchApi.batchRequest),
     onSuccess: () => {
       toast.success(t("stock_received"));
       form.reset();

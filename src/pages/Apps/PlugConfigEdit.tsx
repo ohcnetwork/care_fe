@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -23,9 +24,9 @@ import { Textarea } from "@/components/ui/textarea";
 
 import Loading from "@/components/Common/Loading";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import plugConfigApi from "@/types/plugs/plugConfigApi";
 
 interface Props {
   slug: string;
@@ -33,11 +34,13 @@ interface Props {
 
 export function PlugConfigEdit({ slug }: Props) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
   const isNew = slug === "new";
 
   const { data: existingConfig, isLoading } = useQuery({
     queryKey: ["plug-config", slug],
-    queryFn: query(routes.plugConfig.getPlugConfig, { pathParams: { slug } }),
+    queryFn: query(plugConfigApi.get, { pathParams: { slug } }),
     enabled: !isNew,
   });
 
@@ -57,13 +60,13 @@ export function PlugConfigEdit({ slug }: Props) {
 
   const { mutate: upsertConfig } = useMutation({
     mutationFn: isNew
-      ? mutate(routes.plugConfig.createPlugConfig)
-      : mutate(routes.plugConfig.updatePlugConfig, { pathParams: { slug } }),
+      ? mutate(plugConfigApi.create)
+      : mutate(plugConfigApi.update, { pathParams: { slug } }),
     onSuccess: () => navigate("/apps"),
   });
 
   const { mutate: deleteConfig } = useMutation({
-    mutationFn: mutate(routes.plugConfig.deletePlugConfig, {
+    mutationFn: mutate(plugConfigApi.delete, {
       pathParams: { slug },
     }),
     onSuccess: () => navigate("/apps"),
@@ -88,31 +91,32 @@ export function PlugConfigEdit({ slug }: Props) {
     <div className="p-4">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">
-          {isNew ? "Create New Config" : "Edit Config"}
+          {isNew ? t("create_new_config") : t("edit_config")}
         </h1>
         {!isNew && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive">
                 <CareIcon icon="l-trash-alt" className="mr-2" />
-                Delete Config
+                {t("delete_config")}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will permanently delete the config "{config.slug}". This
-                  action cannot be undone.
+                  {t("this_will_permanently_delete_the_config", {
+                    slug: config.slug,
+                  })}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleDelete}
                   className={cn(buttonVariants({ variant: "destructive" }))}
                 >
-                  Delete
+                  {t("delete")}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -122,7 +126,7 @@ export function PlugConfigEdit({ slug }: Props) {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-medium">Slug</label>
+          <label className="mb-1 block text-sm font-medium">{t("slug")}</label>
           <Input
             value={config.slug}
             onChange={(e) =>
@@ -132,7 +136,9 @@ export function PlugConfigEdit({ slug }: Props) {
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium">Meta (JSON)</label>
+          <label className="mb-1 block text-sm font-medium">
+            {t("meta_json")}
+          </label>
           <Textarea
             value={config.meta}
             onChange={(e) =>
@@ -142,13 +148,13 @@ export function PlugConfigEdit({ slug }: Props) {
           />
         </div>
         <div className="flex gap-2">
-          <Button type="submit">Save</Button>
+          <Button type="submit">{t("save")}</Button>
           <Button
             type="button"
             variant="outline"
             onClick={() => navigate("/apps/plug-configs")}
           >
-            Cancel
+            {t("cancel")}
           </Button>
         </div>
       </form>

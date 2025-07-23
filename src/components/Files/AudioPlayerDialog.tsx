@@ -11,8 +11,8 @@ import {
 import AudioPlayer from "@/components/Common/AudioPlayer";
 import { FileUploadModel } from "@/components/Patient/models";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import filesApi from "@/types/files/filesApi";
 
 export default function AudioPlayerDialog({
   open,
@@ -30,8 +30,8 @@ export default function AudioPlayerDialog({
   const { t } = useTranslation();
 
   const { data: fileData } = useQuery({
-    queryKey: [routes.retrieveUpload, type, file?.id],
-    queryFn: query(routes.retrieveUpload, {
+    queryKey: [filesApi.get.path, type, file?.id],
+    queryFn: query(filesApi.get, {
       queryParams: { file_type: type, associating_id: associatingId },
       pathParams: { id: file?.id || "" },
     }),

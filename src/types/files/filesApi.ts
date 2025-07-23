@@ -8,34 +8,34 @@ import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
 export default {
-  createUpload: {
+  create: {
     path: "/api/v1/files/",
     method: HttpMethod.POST,
     TBody: Type<CreateFileRequest>(),
     TRes: Type<CreateFileResponse>(),
   },
-  viewUpload: {
+  list: {
     path: "/api/v1/files/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<FileUploadModel>>(),
   },
-  retrieveUpload: {
+  get: {
     path: "/api/v1/files/{id}/",
     method: HttpMethod.GET,
     TRes: Type<FileUploadModel>(),
   },
-  editUpload: {
+  update: {
     path: "/api/v1/files/{id}/",
     method: HttpMethod.PUT,
     TBody: Type<Partial<FileUploadModel>>(),
     TRes: Type<FileUploadModel>(),
   },
-  markUploadCompleted: {
+  markAsCompleted: {
     path: "/api/v1/files/{id}/mark_upload_completed/",
     method: HttpMethod.POST,
     TRes: Type<FileUploadModel>(),
   },
-  archiveUpload: {
+  archive: {
     path: "/api/v1/files/{id}/archive/",
     method: HttpMethod.POST,
     TRes: Type<FileUploadModel>(),

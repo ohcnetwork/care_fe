@@ -10,11 +10,11 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import { FileUploadModel } from "@/components/Patient/models";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
+import filesApi from "@/types/files/filesApi";
 
 import { DiagnosticReportResultsTable } from "./components/DiagnosticReportResultsTable";
 
@@ -70,7 +70,7 @@ export default function DiagnosticReportPrint({
     PaginatedResponse<FileUploadModel>
   >({
     queryKey: ["files", "diagnostic_report", report?.id],
-    queryFn: query(routes.viewUpload, {
+    queryFn: query(filesApi.list, {
       queryParams: {
         file_type: "diagnostic_report",
         associating_id: report?.id,
@@ -86,7 +86,7 @@ export default function DiagnosticReportPrint({
     if (!file.id || !report?.id) return null;
 
     try {
-      const data = await query(routes.retrieveUpload, {
+      const data = await query(filesApi.get, {
         queryParams: {
           file_type: "diagnostic_report",
           associating_id: report.id,

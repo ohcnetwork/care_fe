@@ -16,10 +16,10 @@ import CommentSection from "@/components/Resource/ResourceCommentSection";
 
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { PatientRead } from "@/types/emr/patient/patient";
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 
 function PatientCard({ patient }: { patient: PatientRead }) {
   const { t } = useTranslation();
@@ -113,9 +113,7 @@ export default function ResourceDetails({
 
   const { data, isLoading } = useQuery({
     queryKey: ["resource_request", id],
-    queryFn: query(routes.getResourceDetails, {
-      pathParams: { id },
-    }),
+    queryFn: query(resourceRequestApi.get, { pathParams: { id } }),
   });
 
   if (isLoading || !data) {

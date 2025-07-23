@@ -5,6 +5,7 @@ import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
 import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryComponent";
+import { UserBase } from "@/types/user/user";
 
 import { BaseFacility, CreateFacility, FacilityData } from "./facility";
 
@@ -15,10 +16,20 @@ export default {
     TRes: Type<BaseFacility>(),
     TBody: Type<CreateFacility>(),
   },
+  list: {
+    path: "/api/v1/facility/",
+    method: HttpMethod.GET,
+    TRes: Type<PaginatedResponse<BaseFacility>>(),
+  },
   getAllFacilities: {
     path: "/api/v1/getallfacilities/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<FacilityData>>(),
+  },
+  getAnyFacility: {
+    path: "/api/v1/getallfacilities/{id}/",
+    method: HttpMethod.GET,
+    TRes: Type<FacilityModel>(),
   },
   deleteFacility: {
     path: "/api/v1/facility/{id}/",
@@ -30,6 +41,12 @@ export default {
     path: "/api/v1/facility/{id}/",
     method: HttpMethod.GET,
     TRes: Type<FacilityData>(),
+  },
+  deleteFacilityCoverImage: {
+    path: "/api/v1/facility/{id}/cover_image/",
+    method: "DELETE",
+    TRes: Type<void>(),
+    TBody: Type<void>(),
   },
   patchInvoiceNumberExpression: {
     path: "/api/v1/facility/{id}/set_invoice_expression/",
@@ -53,5 +70,10 @@ export default {
       discount_codes: Code[];
       discount_monetary_components: MonetaryComponentRead[];
     }>(),
+  },
+  listUsers: {
+    path: "/api/v1/facility/{facility_id}/users/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<UserBase>>(),
   },
 } as const;

@@ -14,10 +14,10 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import { BatchRequestBody } from "@/types/base/batch/batch";
+import batchApi from "@/types/base/batch/batchApi";
 import deviceApi from "@/types/device/deviceApi";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
@@ -193,7 +193,7 @@ export default function LinkDepartmentsSheet({
   const queryClient = useQueryClient();
 
   const { mutate: submitBatch, isPending: isAdding } = useMutation({
-    mutationFn: mutate(routes.batchRequest, { silent: true }),
+    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
       queryClient.invalidateQueries({ queryKey: invalidateQueries });

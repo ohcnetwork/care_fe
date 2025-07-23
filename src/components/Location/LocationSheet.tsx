@@ -27,9 +27,9 @@ import {
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import batchApi from "@/types/base/batch/batchApi";
 import {
   EncounterRead,
   LocationHistory,
@@ -751,7 +751,7 @@ export function LocationSheet({
   };
 
   const { mutate: executeBatch, isPending } = useMutation({
-    mutationFn: mutate(routes.batchRequest, { silent: true }),
+    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       toast.success(t("bed_assigned_successfully"));
       resetStates();

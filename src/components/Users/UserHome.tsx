@@ -21,6 +21,7 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName, keysOf } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import facilityApi from "@/types/facility/facilityApi";
 
 export interface UserHomeProps {
   username?: string;
@@ -58,7 +59,7 @@ export default function UserHome(props: UserHomeProps) {
 
   const { data: facilityData } = useQuery({
     queryKey: ["getFacilityDetails", props.facilityId],
-    queryFn: query(routes.getPermittedFacility, {
+    queryFn: query(facilityApi.getFacility, {
       pathParams: { id: facilityId ?? "" },
     }),
     enabled: !!facilityId,

@@ -33,8 +33,8 @@ import CircularProgress from "@/components/Common/CircularProgress";
 import useAppHistory from "@/hooks/useAppHistory";
 import { useAuthContext } from "@/hooks/useAuthUser";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
+import authApi from "@/types/auth/authApi";
 import { TokenData } from "@/types/auth/otp";
 
 const FormSchema = z.object({
@@ -75,7 +75,7 @@ export default function PatientLogin({
     );
   }
   const { mutate: sendOTP, isPending: isSendOTPLoading } = useMutation({
-    mutationFn: mutate(routes.otp.sendOtp),
+    mutationFn: mutate(authApi.sendOtp),
     onSuccess: () => {
       toast.success(t("send_otp_success"));
       if (page === "send") {
@@ -94,7 +94,7 @@ export default function PatientLogin({
   };
 
   const { mutate: verifyOTP, isPending: isVerifyOTPLoading } = useMutation({
-    mutationFn: mutate(routes.otp.loginByOtp),
+    mutationFn: mutate(authApi.loginByOtp),
     onSuccess: (response: { access: string }) => {
       if (response.access) {
         const tokenData: TokenData = {

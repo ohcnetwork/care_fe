@@ -41,7 +41,6 @@ import { getPermissions } from "@/common/Permissions";
 import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import uploadFile from "@/Utils/request/uploadFile";
@@ -79,7 +78,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
   const { data: facilityData, isLoading } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(routes.facility.show, {
+    queryFn: query(facilityApi.getFacility, {
       pathParams: { id: facilityId },
     }),
   });
@@ -121,7 +120,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   });
 
   const { mutateAsync: deleteAvatar } = useMutation({
-    mutationFn: mutate(routes.deleteFacilityCoverImage, {
+    mutationFn: mutate(facilityApi.deleteFacilityCoverImage, {
       pathParams: { id: facilityId },
     }),
     onSuccess: () => {

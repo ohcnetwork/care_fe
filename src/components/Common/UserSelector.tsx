@@ -23,9 +23,9 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import facilityApi from "@/types/facility/facilityApi";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import { UserBase } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
@@ -82,7 +82,7 @@ export default function UserSelector({
         facilityId
           ? organizationId
             ? facilityOrganizationApi.listUsers
-            : routes.facility.getUsers
+            : facilityApi.listUsers
           : UserApi.list,
         {
           pathParams: getPathParams(),

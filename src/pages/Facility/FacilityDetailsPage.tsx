@@ -17,6 +17,7 @@ import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import facilityApi from "@/types/facility/facilityApi";
 
 import { FeatureBadge } from "./Utils";
 import { UserCard } from "./components/UserCard";
@@ -30,7 +31,7 @@ export function FacilityDetailsPage({ id }: Props) {
   const { goBack } = useAppHistory();
   const { data: facilityResponse, isLoading } = useQuery({
     queryKey: ["facility", id],
-    queryFn: query(routes.getAnyFacility, {
+    queryFn: query(facilityApi.getAnyFacility, {
       pathParams: { id },
     }),
   });

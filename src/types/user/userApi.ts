@@ -30,4 +30,17 @@ export default {
     TRes: Type<UserBase>(),
     TBody: Type<Partial<UpdateUserModel>>(),
   },
+  delete: {
+    path: "/api/v1/users/{username}/",
+    method: HttpMethod.DELETE,
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<void>(),
+  },
+
+  removeProfilePicture: {
+    path: "/api/v1/users/{username}/profile_picture/",
+    method: HttpMethod.DELETE,
+    TRes: Type<void>(),
+    TBody: Type<void>(),
+  },
 } as const;

@@ -34,9 +34,9 @@ import {
   RESOURCE_STATUS_CHOICES,
 } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 
 const COMPLETED = ["completed", "rejected", "cancelled"];
 const ACTIVE = RESOURCE_STATUS_CHOICES.map((o) => o.text).filter(
@@ -77,7 +77,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
 
   const { data: queryResources, isLoading } = useQuery({
     queryKey: ["resources", facilityId, qParams],
-    queryFn: query.debounced(routes.listResourceRequests, {
+    queryFn: query.debounced(resourceRequestApi.list, {
       queryParams: {
         status: currentStatus,
         title,

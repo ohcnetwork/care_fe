@@ -22,8 +22,8 @@ import { PasswordInput } from "@/components/ui/input-password";
 import { ValidationHelper } from "@/components/Users/UserFormValidations";
 import { UpdatePasswordForm } from "@/components/Users/models";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
+import authApi from "@/types/auth/authApi";
 import { UserBase } from "@/types/user/user";
 
 export default function UserResetPassword({
@@ -72,7 +72,7 @@ export default function UserResetPassword({
     },
   });
   const { mutate: resetPassword, isPending } = useMutation({
-    mutationFn: mutate(routes.updatePassword),
+    mutationFn: mutate(authApi.updatePassword),
     onSuccess: () => {
       toast.success(t("password_updated"));
       form.reset();

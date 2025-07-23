@@ -47,6 +47,12 @@ export default {
       search: string;
     }>(),
   },
+  expandSystem: {
+    path: "/api/v1/valueset/{system}/expand/",
+    method: HttpMethod.POST,
+    TBody: Type<{ search: string; count: number }>(),
+    TRes: Type<{ results: Code[] }>(),
+  },
   preview_search: {
     path: "/api/v1/valueset/preview_search/",
     method: HttpMethod.POST,

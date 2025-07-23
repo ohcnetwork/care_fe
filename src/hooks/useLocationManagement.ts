@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import batchApi from "@/types/base/batch/batchApi";
 import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -89,7 +89,7 @@ export function useLocationManagement({
         }),
       );
 
-      return mutate(routes.batchRequest, { silent: true })({
+      return mutate(batchApi.batchRequest, { silent: true })({
         requests: batchRequests,
       });
     },

@@ -17,10 +17,10 @@ import {
 
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import { RESOURCE_REQUEST_STATUS_COLORS } from "@/types/resourceRequest/resourceRequest";
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 
 import { PatientProps } from ".";
 
@@ -31,7 +31,7 @@ export const ResourceRequests = (props: PatientProps) => {
 
   const { data: resourceRequests, isLoading: loading } = useQuery({
     queryKey: ["resourceRequests", patientId],
-    queryFn: query(routes.listResourceRequests, {
+    queryFn: query(resourceRequestApi.list, {
       queryParams: {
         related_patient: patientId,
       },

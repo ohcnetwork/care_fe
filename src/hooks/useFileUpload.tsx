@@ -21,9 +21,9 @@ import {
 
 import { DEFAULT_ALLOWED_EXTENSIONS } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import uploadFile from "@/Utils/request/uploadFile";
+import filesApi from "@/types/files/filesApi";
 
 export type FileUploadOptions = {
   multiple?: boolean;
@@ -203,7 +203,7 @@ export default function useFileUpload(
         data: CreateFileResponse;
         associating_id: string;
       }) =>
-        mutate(routes.markUploadCompleted, {
+        mutate(filesApi.markAsCompleted, {
           pathParams: {
             id: body.data.id,
           },
@@ -273,7 +273,7 @@ export default function useFileUpload(
       file_category: FileCategory;
       mime_type: string;
     }) =>
-      mutate(routes.createUpload, {
+      mutate(filesApi.create, {
         body: {
           original_name: body.original_name,
           file_type: body.file_type,

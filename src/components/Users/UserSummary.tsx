@@ -25,9 +25,9 @@ import {
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import EditUserSheet from "@/pages/Organization/components/EditUserSheet";
+import userApi from "@/types/user/userApi";
 
 export default function UserSummaryTab({
   userData,
@@ -39,7 +39,7 @@ export default function UserSummaryTab({
   const [showEditUserSheet, setShowEditUserSheet] = useState(false);
 
   const { mutate: deleteUser, isPending: isDeleting } = useMutation({
-    mutationFn: mutate(routes.deleteUser, {
+    mutationFn: mutate(userApi.delete, {
       pathParams: { username: userData?.username || "" },
     }),
     onSuccess: () => {
