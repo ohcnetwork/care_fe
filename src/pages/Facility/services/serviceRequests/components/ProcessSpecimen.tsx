@@ -19,12 +19,15 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
-import { ProcessingSpec } from "@/types/emr/specimen/specimen";
+import {
+  ProcessingReadSpec,
+  ProcessingSpec,
+} from "@/types/emr/specimen/specimen";
 
 interface ProcessSpecimenProps {
   onAddProcessing: (processing: ProcessingSpec) => void;
   onUpdateProcessing: (index: number, processing: ProcessingSpec) => void;
-  existingProcessing?: ProcessingSpec[];
+  existingProcessing?: ProcessingReadSpec[];
   diagnosticReports?: DiagnosticReportRead[];
 }
 
@@ -81,7 +84,6 @@ export function ProcessSpecimen({
         description: noteDialog.description,
         method: noteDialog.method,
         performer: null,
-        performer_object: null,
         time_date_time: new Date().toISOString(),
       });
     } else {

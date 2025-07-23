@@ -66,8 +66,11 @@ export interface ProcessingSpec {
   description: string;
   method: Code | null;
   performer: string | null;
-  performer_object: UserBase | null;
   time_date_time: string | null;
+}
+
+export interface ProcessingReadSpec extends ProcessingSpec {
+  performer_object?: UserBase | null;
 }
 
 export interface SpecimenBase {
