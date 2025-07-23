@@ -90,7 +90,6 @@ export default function FacilityUsers(props: { facilityId: string }) {
           options={[
             {
               key: "username",
-              readableKey: "username",
               type: "text",
               placeholder: t("search_by_username"),
               value: qParams.username || "",

@@ -118,7 +118,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                   options={[
                     {
                       key: "title",
-                      readableKey: "title",
                       type: "text",
                       placeholder: t("search_by_resource_title"),
                       value: title || "",

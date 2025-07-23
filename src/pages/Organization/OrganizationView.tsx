@@ -69,7 +69,6 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                   options={[
                     {
                       key: "name",
-                      readableKey: "name",
                       type: "text",
                       placeholder: t("search_by_name"),
                       value: qParams.name || "",

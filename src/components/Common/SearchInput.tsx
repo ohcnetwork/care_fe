@@ -27,7 +27,6 @@ import { isAppleDevice } from "@/Utils/utils";
 interface SearchOption {
   key: string;
   type: "text" | "phone";
-  readableKey: string;
   placeholder: string;
   value: string;
   component?: React.ComponentType<HTMLDivElement>;
@@ -96,8 +95,8 @@ const SearchInputFieldRenderer = ({
   open: boolean;
 }) => {
   const isMobile = useIsMobile();
-  switch (selectedOption.readableKey) {
-    case "phone_number":
+  switch (selectedOption.type) {
+    case "phone":
       return (
         <div className="relative">
           <PhoneInput
@@ -113,57 +112,6 @@ const SearchInputFieldRenderer = ({
           {!isSingleOption && !isMobile && <KeyboardShortcutHint open={open} />}
         </div>
       );
-
-    case "aadhar_card":
-      return (
-        <div className="relative">
-          <Input
-            type="tel"
-            inputMode="numeric"
-            maxLength={12}
-            pattern="\d{12}"
-            placeholder={selectedOption.placeholder}
-            ref={inputRef as React.RefObject<HTMLInputElement>}
-            value={searchValue}
-            onChange={(e) => {
-              const val = e.target.value.replace(/\D/g, "").slice(0, 12);
-              setSearchValue(val);
-            }}
-            className={cn(
-              !isSingleOption &&
-                "grow border-none shadow-none focus-visible:ring-0",
-              inputClassName,
-            )}
-            {...prop}
-          />
-          {!isSingleOption && !isMobile && <KeyboardShortcutHint open={open} />}
-        </div>
-      );
-
-    case "pan_card":
-      return (
-        <div className="relative">
-          <Input
-            type="text"
-            maxLength={10}
-            placeholder={selectedOption.placeholder}
-            ref={inputRef as React.RefObject<HTMLInputElement>}
-            value={searchValue}
-            onChange={(e) => {
-              const val = e.target.value.toUpperCase().slice(0, 10);
-              setSearchValue(val);
-            }}
-            className={cn(
-              !isSingleOption &&
-                "grow border-none shadow-none focus-visible:ring-0",
-              inputClassName,
-            )}
-            {...prop}
-          />
-          {!isSingleOption && !isMobile && <KeyboardShortcutHint open={open} />}
-        </div>
-      );
-
     default:
       return (
         <div className="relative">

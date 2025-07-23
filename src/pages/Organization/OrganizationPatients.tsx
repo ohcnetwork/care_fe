@@ -40,7 +40,6 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
     {
       key: "name",
       type: "text" as const,
-      readableKey: "name",
       placeholder: t("search_by_patient_name"),
       value: qParams.name || "",
       display: t("name"),
@@ -48,7 +47,6 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
     {
       key: "phone_number",
       type: "phone" as const,
-      readableKey: "phone_number",
       placeholder: t("search_by_phone_number"),
       value: qParams.phone_number || "",
       display: t("phone_number"),

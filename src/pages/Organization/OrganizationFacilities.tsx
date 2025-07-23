@@ -85,7 +85,6 @@ export default function OrganizationFacilities({
                 options={[
                   {
                     key: "name",
-                    readableKey: "name",
                     type: "text",
                     placeholder: t("search_by_facility_name"),
                     value: qParams.name || "",
