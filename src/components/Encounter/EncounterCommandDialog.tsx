@@ -366,6 +366,23 @@ export function EncounterCommandDialog({
     };
   }, [open, encounterActions, handleAction, t]);
 
+  // Prevent auto-focus on search input
+  useEffect(() => {
+    if (open) {
+      // Use a small delay to ensure the dialog is fully rendered
+      const timer = setTimeout(() => {
+        const searchInput = document.querySelector(
+          '[data-slot="command-input"]',
+        ) as HTMLInputElement;
+        if (searchInput) {
+          searchInput.blur();
+        }
+      }, 10);
+
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
   return (
     <CommandDialog
       open={open}

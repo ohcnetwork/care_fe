@@ -38,7 +38,7 @@ export function EncounterHeader() {
   useKeyboardShortcut(
     [isAppleDevice ? "Meta" : "Control", "e"],
     () => setActionsOpen(true),
-    { ignoreInputFields: true },
+    { ignoreInputFields: true, overrideSystem: true },
   );
 
   if (!encounter) {
