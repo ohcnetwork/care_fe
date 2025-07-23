@@ -1800,6 +1800,7 @@
   "enter_title": "Enter Title",
   "enter_user_friendly_name": "Enter a user friendly name for the device",
   "enter_valid_age": "Please Enter Valid Age",
+  "enter_valid_amount": "Please enter a valid amount",
   "enter_valid_dob": "Enter a valid date of birth",
   "enter_valid_dob_age": "Please enter an age greater than 15 years",
   "enter_verification_code": "Enter the verification code",

@@ -262,7 +262,7 @@ export function AccountList({
                   <TableCell
                     className={cn(
                       "border-x p-3 text-base font-medium leading-6",
-                      account.total_balance > 0
+                      Number(account.total_balance) > 0
                         ? "text-gray-950"
                         : "text-green-700 italic",
                     )}
