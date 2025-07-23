@@ -33,6 +33,7 @@ import {
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
@@ -152,7 +153,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedOrganizations, setSelectedOrganizations] = useState<
-    { id: string; name: string; description?: string }[]
+    Organization[]
   >([]);
 
   const { data: organizations, isLoading } = useQuery({
