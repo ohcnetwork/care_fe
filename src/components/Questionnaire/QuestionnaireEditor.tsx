@@ -82,7 +82,6 @@ import {
   StructuredQuestionType,
 } from "@/components/Questionnaire/data/StructuredFormData";
 
-import { useIsMobile } from "@/hooks/use-mobile";
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
 import mutate from "@/Utils/request/mutate";
@@ -269,7 +268,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     Map<string, Set<{ question: Question; path: string[] }>>
   >(new Map());
   const [expandPath, setExpandPath] = useState<string[]>([]);
-  const isMobile = useIsMobile();
   const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
@@ -939,115 +937,108 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         </TabsList>
         <TabsContent value="edit">
           <div className="flex flex-col md:flex-row gap-2">
-            {isMobile ? (
-              <div className="space-y-4">
-                <QuestionnaireProperties
-                  form={form}
-                  updateQuestionnaireField={updateQuestionnaireField}
-                  id={id}
-                  organizations={organizations}
-                  organizationSelection={{
-                    selectedOrgs: selectedOrgs,
-                    onToggle: handleToggleOrganization,
-                    searchQuery: orgSearchQuery,
-                    setSearchQuery: setOrgSearchQuery,
-                    available: availableOrganizations,
-                    isLoading: isLoadingAvailableOrganizations,
-                    error: orgError,
-                    setError: setOrgError,
-                  }}
-                  tags={tags}
-                  tagSelection={{
-                    selectedTags: selectedTags,
-                    onToggle: handleToggleTag,
-                    searchQuery: tagSearchQuery,
-                    setSearchQuery: setTagSearchQuery,
-                    available: tagOptions,
-                    isLoading: isLoadingAvailableTags,
-                    onTagCreated: !id ? handleTagCreated : undefined,
-                  }}
-                />
-                <QuestionActions
-                  selectedQuestions={selectedQuestions}
-                  questions={rootQuestions}
-                  updateQuestionnaireField={updateQuestionnaireField}
-                  onQuestionsChange={updateQuestions}
-                  setSelectedQuestions={setSelectedQuestions}
-                  setExpandedQuestions={setExpandedQuestions}
-                />
-              </div>
-            ) : (
-              <Card className="sm:w-60 sticky top-4 self-start h-fit max-h-screen overflow-y-auto rounded-none border-none bg-transparent shadow-none space-y-3 mt-2">
-                <CardHeader className="p-0">
-                  <CardTitle>{t("navigation")}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <nav className="space-y-1">
-                    {rootQuestions.map((question, index) => {
-                      const hasSubQuestions =
-                        question.type === "group" &&
-                        question.questions &&
-                        question.questions.length > 0;
-                      return (
-                        <div key={question.link_id} className="space-y-1">
-                          <button
-                            onClick={() => {
-                              scrollToQuestion(question.link_id);
-                              toggleQuestionExpanded(question.link_id);
-                            }}
-                            className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
-                              expandedQuestions.has(question.link_id)
-                                ? "bg-accent"
-                                : ""
-                            }`}
-                          >
-                            <span className="font-medium text-gray-500">
-                              {index + 1}.
-                            </span>
-                            <span className="flex-1 truncate">
-                              {question.text || t("untitled_question")}
-                            </span>
-                          </button>
-                          {hasSubQuestions && question.questions && (
-                            <div className="ml-6 border-l-2 border-gray-200 pl-2 space-y-1">
-                              {question.questions.map(
-                                (subQuestion, subIndex) => (
-                                  <button
-                                    key={subQuestion.id}
-                                    onClick={() => {
-                                      if (
-                                        !expandedQuestions.has(question.link_id)
-                                      ) {
-                                        toggleQuestionExpanded(
-                                          question.link_id,
-                                        );
-                                        setTimeout(() => {
-                                          scrollToQuestion(subQuestion.link_id);
-                                        }, 100);
-                                      } else {
-                                        scrollToQuestion(subQuestion.link_id);
-                                      }
-                                    }}
-                                    className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
-                                  >
-                                    <span className="font-medium text-gray-500">
-                                      {index + 1}.{subIndex + 1}
-                                    </span>
-                                    <span className="flex-1 truncate">
-                                      {subQuestion.text || "Untitled Question"}
-                                    </span>
-                                  </button>
-                                ),
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </nav>
-                </CardContent>
-              </Card>
-            )}
+            <div className="space-y-4 md:hidden">
+              <QuestionnaireProperties
+                form={form}
+                updateQuestionnaireField={updateQuestionnaireField}
+                id={id}
+                organizations={organizations}
+                organizationSelection={{
+                  selectedOrgs: selectedOrgs,
+                  onToggle: handleToggleOrganization,
+                  searchQuery: orgSearchQuery,
+                  setSearchQuery: setOrgSearchQuery,
+                  available: availableOrganizations,
+                  isLoading: isLoadingAvailableOrganizations,
+                  error: orgError,
+                  setError: setOrgError,
+                }}
+                tags={tags}
+                tagSelection={{
+                  selectedTags: selectedTags,
+                  onToggle: handleToggleTag,
+                  searchQuery: tagSearchQuery,
+                  setSearchQuery: setTagSearchQuery,
+                  available: tagOptions,
+                  isLoading: isLoadingAvailableTags,
+                  onTagCreated: !id ? handleTagCreated : undefined,
+                }}
+              />
+              <QuestionActions
+                selectedQuestions={selectedQuestions}
+                questions={rootQuestions}
+                updateQuestionnaireField={updateQuestionnaireField}
+                onQuestionsChange={updateQuestions}
+                setSelectedQuestions={setSelectedQuestions}
+                setExpandedQuestions={setExpandedQuestions}
+              />
+            </div>
+            <Card className="hidden lg:block w-60 sticky top-4 self-start h-fit max-h-screen overflow-y-auto rounded-none border-none bg-transparent shadow-none space-y-3 mt-2">
+              <CardHeader className="p-0">
+                <CardTitle>{t("navigation")}</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <nav className="space-y-1">
+                  {rootQuestions.map((question, index) => {
+                    const hasSubQuestions =
+                      question.type === "group" &&
+                      question.questions &&
+                      question.questions.length > 0;
+                    return (
+                      <div key={question.link_id} className="space-y-1">
+                        <button
+                          onClick={() => {
+                            scrollToQuestion(question.link_id);
+                            toggleQuestionExpanded(question.link_id);
+                          }}
+                          className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
+                            expandedQuestions.has(question.link_id)
+                              ? "bg-accent"
+                              : ""
+                          }`}
+                        >
+                          <span className="font-medium text-gray-500">
+                            {index + 1}.
+                          </span>
+                          <span className="flex-1 truncate">
+                            {question.text || t("untitled_question")}
+                          </span>
+                        </button>
+                        {hasSubQuestions && question.questions && (
+                          <div className="ml-6 border-l-2 border-gray-200 pl-2 space-y-1">
+                            {question.questions.map((subQuestion, subIndex) => (
+                              <button
+                                key={subQuestion.id}
+                                onClick={() => {
+                                  if (
+                                    !expandedQuestions.has(question.link_id)
+                                  ) {
+                                    toggleQuestionExpanded(question.link_id);
+                                    setTimeout(() => {
+                                      scrollToQuestion(subQuestion.link_id);
+                                    }, 100);
+                                  } else {
+                                    scrollToQuestion(subQuestion.link_id);
+                                  }
+                                }}
+                                className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
+                              >
+                                <span className="font-medium text-gray-500">
+                                  {index + 1}.{subIndex + 1}
+                                </span>
+                                <span className="flex-1 truncate">
+                                  {subQuestion.text || "Untitled Question"}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </nav>
+              </CardContent>
+            </Card>
 
             <div className="space-y-4 flex-1">
               <Form {...form}>
