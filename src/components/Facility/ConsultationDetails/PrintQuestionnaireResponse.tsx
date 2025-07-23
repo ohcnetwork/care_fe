@@ -9,11 +9,9 @@ import {
   ResponseCard,
 } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireQuestionnaireResponses";
 
-import api from "@/Utils/request/api";
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { Encounter } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/patient";
+import encounterApi from "@/types/emr/encounter/encounterApi";
+import patientApi from "@/types/emr/patient/patientApi";
 
 type PrintQuestionnaireResponseProps = {
   questionnaireResponseId: string;
@@ -30,18 +28,18 @@ export function PrintQuestionnaireResponse({
 }: PrintQuestionnaireResponseProps) {
   const { t } = useTranslation();
 
-  const { data: encounter } = useQuery<Encounter>({
+  const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId, facilityId],
-    queryFn: query(api.encounter.get, {
+    queryFn: query(encounterApi.get, {
       pathParams: { id: encounterId! },
       queryParams: { facility: facilityId },
     }),
     enabled: !!(encounterId && facilityId),
   });
 
-  const { data: patient } = useQuery<Patient>({
+  const { data: patient } = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(routes.patient.getPatient, {
+    queryFn: query(patientApi.getPatient, {
       pathParams: {
         id: patientId,
       },
@@ -56,7 +54,7 @@ export function PrintQuestionnaireResponse({
       encounterId,
       patientId,
     ],
-    queryFn: query(routes.getQuestionnaireResponse, {
+    queryFn: query(patientApi.getQuestionnaireResponse, {
       pathParams: { patientId, responseId: questionnaireResponseId },
     }),
   });

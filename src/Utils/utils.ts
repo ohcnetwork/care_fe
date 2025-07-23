@@ -5,7 +5,7 @@ import { t } from "i18next";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
-import { Patient } from "@/types/emr/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
@@ -48,7 +48,7 @@ export const relativeDate = (date: DateLike, withoutSuffix = false) => {
 };
 
 export const formatName = (
-  user: {
+  user?: {
     first_name: string;
     last_name: string;
     prefix?: string | null;
@@ -57,21 +57,21 @@ export const formatName = (
   },
   hidePrefixSuffix: boolean = false,
 ) => {
-  return (
-    [
-      hidePrefixSuffix ? undefined : user.prefix,
-      user.first_name,
-      user.last_name,
-      hidePrefixSuffix ? undefined : user.suffix,
-    ]
-      .map((s) => s?.trim())
-      .filter(Boolean)
-      .join(" ") || user.username
-  );
+  if (!user) return "-";
+  const name = [
+    hidePrefixSuffix ? undefined : user.prefix,
+    user.first_name,
+    user.last_name,
+    hidePrefixSuffix ? undefined : user.suffix,
+  ]
+    .map((s) => s?.trim())
+    .filter(Boolean)
+    .join(" ");
+  return name || user.username || "-";
 };
 
 export const relativeTime = (time?: DateLike) => {
-  return `${dayjs(time).fromNow()}`;
+  return dayjs(time).fromNow();
 };
 
 export const dateQueryString = (date: DateLike) => {
@@ -130,7 +130,7 @@ const getRelativeDateSuffix = (abbreviated: boolean) => {
   };
 };
 
-export const formatPatientAge = (obj: Patient, abbreviated = false) => {
+export const formatPatientAge = (obj: PatientRead, abbreviated = false) => {
   const suffixes = getRelativeDateSuffix(abbreviated);
   const start = dayjs(
     obj.date_of_birth
@@ -332,4 +332,42 @@ export function getWeeklyIntervalsFromTodayTill(pastDate?: Date | string) {
   }
 
   return intervals;
+}
+
+/**
+ * Generates a URL-safe slug from a given string.
+ *
+ * @param title - The string to convert to a slug
+ * @param maxLength - Maximum length of the slug (default: 50)
+ * @returns A URL-safe slug string
+ *
+ * @example
+ * generateSlug("Hello World!") // "hello-world"
+ * generateSlug("Café & Résumé") // "cafe-resume"
+ * generateSlug("Special @#$% Characters") // "special-characters"
+ */
+export function generateSlug(title: string, maxLength: number = 50): string {
+  if (!title || typeof title !== "string") {
+    return "";
+  }
+
+  return (
+    title
+      // Convert to lowercase
+      .toLowerCase()
+      // Normalize unicode characters (handles accented characters)
+      .normalize("NFD")
+      // Remove diacritics (accents, umlauts, etc.)
+      .replace(/[\u0300-\u036f]/g, "")
+      // Replace special characters and spaces with hyphens
+      .replace(/[^\w\s-]/g, "")
+      // Replace multiple spaces or hyphens with single hyphen
+      .replace(/[\s-]+/g, "-")
+      // Remove leading and trailing hyphens
+      .replace(/^-+|-+$/g, "")
+      // Limit length
+      .slice(0, maxLength)
+      // Remove trailing hyphens after truncation
+      .replace(/-+$/, "")
+  );
 }

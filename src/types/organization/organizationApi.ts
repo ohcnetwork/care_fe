@@ -1,8 +1,13 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { Patient } from "@/types/emr/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 
-import { Organization, OrganizationUserRole } from "./organization";
+import {
+  Organization,
+  OrganizationCreate,
+  OrganizationEdit,
+  OrganizationUserRole,
+} from "./organization";
 
 export default {
   listMine: {
@@ -14,6 +19,23 @@ export default {
     path: "/api/v1/organization/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<Organization>>(),
+  },
+  create: {
+    path: "/api/v1/organization/",
+    method: HttpMethod.POST,
+    TRes: Type<Organization>(),
+    TBody: Type<OrganizationCreate>(),
+  },
+  update: {
+    path: "/api/v1/organization/{id}/",
+    method: HttpMethod.PUT,
+    TRes: Type<Organization>(),
+    TBody: Type<OrganizationEdit>(),
+  },
+  delete: {
+    path: "/api/v1/organization/{id}/",
+    method: HttpMethod.DELETE,
+    TRes: Type<void>(),
   },
   get: {
     path: "/api/v1/organization/{id}/",
@@ -45,7 +67,7 @@ export default {
   listPatients: {
     path: "/api/v1/patient/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<Patient>>(),
+    TRes: Type<PaginatedResponse<PatientRead>>(),
   },
   getPublicOrganizations: {
     path: "/api/v1/govt/organization/",

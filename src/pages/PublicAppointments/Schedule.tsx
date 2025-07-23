@@ -18,7 +18,6 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
-import { FacilityModel } from "@/components/Facility/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import { usePatientContext } from "@/hooks/usePatientUser";
@@ -30,11 +29,7 @@ import { dateQueryString, formatName } from "@/Utils/utils";
 import { TokenSlotButton } from "@/pages/Appointments/components/AppointmentSlotPicker";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import {
-  Appointment,
-  AppointmentCreateRequest,
-  TokenSlot,
-} from "@/types/scheduling/schedule";
+import { Appointment, TokenSlot } from "@/types/scheduling/schedule";
 
 interface AppointmentsProps {
   facilityId: string;
@@ -63,12 +58,10 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);
   }
 
-  const { data: appointmentData } = useQuery<{ results: Appointment[] }>({
+  const { data: appointmentData } = useQuery({
     queryKey: ["appointment", tokenData?.phoneNumber],
     queryFn: query(PublicAppointmentApi.getAppointments, {
-      headers: {
-        Authorization: `Bearer ${tokenData?.token}`,
-      },
+      headers: { Authorization: `Bearer ${tokenData?.token}` },
     }),
     enabled: !!appointmentId && !!tokenData?.token,
   });
@@ -83,14 +76,13 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     }
   }, [appointment]);
 
-  const { data: facilityResponse, error: facilityError } =
-    useQuery<FacilityModel>({
-      queryKey: ["facility", facilityId],
-      queryFn: query(routes.getAnyFacility, {
-        pathParams: { id: facilityId },
-        silent: true,
-      }),
-    });
+  const { data: facilityResponse, error: facilityError } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getAnyFacility, {
+      pathParams: { id: facilityId },
+      silent: true,
+    }),
+  });
 
   if (facilityError) {
     toast.error(t("error_fetching_facility_data"));
@@ -153,14 +145,12 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
   const { mutate: createAppointment, isPending: isCreatingAppointment } =
     useMutation({
-      mutationFn: (body: AppointmentCreateRequest) =>
-        mutate(PublicAppointmentApi.createAppointment, {
-          pathParams: { id: selectedSlot?.id || "" },
-          body,
-          headers: {
-            Authorization: `Bearer ${tokenData.token}`,
-          },
-        })(body),
+      mutationFn: mutate(PublicAppointmentApi.createAppointment, {
+        pathParams: { id: selectedSlot?.id || "" },
+        headers: {
+          Authorization: `Bearer ${tokenData.token}`,
+        },
+      }),
       onSuccess: (data: Appointment) => {
         toast.success(t("appointment_created_success"));
         queryClient.invalidateQueries({
@@ -341,13 +331,14 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                   if (appointmentId && appointment) {
                     handleRescheduleAppointment(appointment);
                   } else {
-                    localStorage.setItem(
-                      "selectedSlot",
-                      JSON.stringify(selectedSlot),
-                    );
-                    localStorage.setItem("reason", reason);
                     navigate(
                       `/facility/${facilityId}/appointments/${staffId}/patient-select`,
+                      {
+                        query: {
+                          slotId: selectedSlot?.id,
+                          reason: reason,
+                        },
+                      },
                     );
                   }
                 }}

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -28,16 +28,21 @@ import Page from "@/components/Common/Page";
 import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useFilters from "@/hooks/useFilters";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { Encounter, EncounterPriority } from "@/types/emr/encounter";
+import {
+  ENCOUNTER_STATUS_ICONS,
+  EncounterPriority,
+  EncounterRead,
+} from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 
 interface EncounterListProps {
-  encounters?: Encounter[];
+  encounters?: EncounterRead[];
   facilityId: string;
 }
 
@@ -85,7 +90,7 @@ export function EncounterList({
 }: EncounterListProps) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    cacheBlacklist: ["name", "encounter_id", "external_identifier"],
+    cacheBlacklist: ["name", "encounter_id", "external_identifier", "tags"],
   });
   const { t } = useTranslation();
   const {
@@ -104,8 +109,10 @@ export function EncounterList({
       name: undefined,
       encounter_id: undefined,
       external_identifier: undefined,
+      tags: qParams.tags,
     });
   };
+  const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
 
   const handleSearch = useCallback(
     (key: string, value: string) => {
@@ -114,6 +121,7 @@ export function EncounterList({
           status,
           encounter_class: encounterClass,
           priority,
+          tags: qParams.tags,
         },
         [key]: value || undefined,
       });
@@ -121,25 +129,24 @@ export function EncounterList({
     [status, encounterClass, priority, updateQuery],
   );
 
-  const { data: queryEncounters, isLoading } = useQuery<
-    PaginatedResponse<Encounter>
-  >({
+  const { data: queryEncounters, isLoading } = useQuery({
     queryKey: ["encounters", facilityId, qParams],
-    queryFn: query.debounced(routes.encounter.list, {
+    queryFn: query.debounced(encounterApi.list, {
       queryParams: {
         ...buildQueryParams(facilityId, status, encounterClass, priority),
         name,
         external_identifier,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
+        tags: qParams.tags,
       },
     }),
     enabled: !propEncounters && !encounter_id,
   });
 
-  const { data: queryEncounter } = useQuery<Encounter>({
+  const { data: queryEncounter } = useQuery({
     queryKey: ["encounter", encounter_id],
-    queryFn: query(routes.encounter.get, {
+    queryFn: query(encounterApi.get, {
       pathParams: { id: encounter_id },
       queryParams: {
         facility: facilityId,
@@ -153,18 +160,21 @@ export function EncounterList({
       type: "text" as const,
       placeholder: t("search_by_patient_name"),
       value: name || "",
+      display: t("name"),
     },
     {
       key: "encounter_id",
       type: "text" as const,
       placeholder: t("search_by_encounter_id"),
       value: encounter_id || "",
+      display: t("encounter_id"),
     },
     {
       key: "external_identifier",
       type: "text" as const,
       placeholder: t("search_by_external_id"),
       value: external_identifier || "",
+      display: t("external_identifier"),
     },
   ];
 
@@ -235,91 +245,107 @@ export function EncounterList({
                   </PopoverContent>
                 </Popover>
 
-                <Select
-                  value={priority || "all"}
-                  onValueChange={(value) => {
+                <div>
+                  <Select
+                    value={priority || "all"}
+                    onValueChange={(value) => {
+                      updateQuery({
+                        status,
+                        encounter_class: encounterClass,
+                        priority:
+                          value === "all"
+                            ? undefined
+                            : (value as EncounterPriority),
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="h-9 w-[120px]">
+                      <SelectValue placeholder={t("priority")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Priorities</SelectItem>
+                      <SelectItem value="asap">
+                        <div className="flex items-center">
+                          <span className="mr-2">🟡</span> ASAP
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="callback_results">
+                        <div className="flex items-center">
+                          <span className="mr-2">🔵</span> Callback Results
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="callback_for_scheduling">
+                        <div className="flex items-center">
+                          <span className="mr-2">🟣</span> Callback for
+                          Scheduling
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="elective">
+                        <div className="flex items-center">
+                          <span className="mr-2">🟤</span> Elective
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="emergency">
+                        <div className="flex items-center">
+                          <span className="mr-2">🔴</span> Emergency
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="preop">
+                        <div className="flex items-center">
+                          <span className="mr-2">🟠</span> Pre-op
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="as_needed">
+                        <div className="flex items-center">
+                          <span className="mr-2">⚫️</span> As Needed
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="routine">
+                        <div className="flex items-center">
+                          <span className="mr-2">⚪️</span> Routine
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="rush_reporting">
+                        <div className="flex items-center">
+                          <span className="mr-2">🟤</span> Rush Reporting
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="stat">
+                        <div className="flex items-center">
+                          <span className="mr-2">🔴</span> Stat
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="timing_critical">
+                        <div className="flex items-center">
+                          <span className="mr-2">🟡</span> Timing Critical
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="use_as_directed">
+                        <div className="flex items-center">
+                          <span className="mr-2">🔵</span> Use as Directed
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="urgent">
+                        <div className="flex items-center">
+                          <span className="mr-2">🟠</span> Urgent
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <TagSelectorPopover
+                  asFilter
+                  selected={selectedTags}
+                  onChange={(tags) => {
+                    setSelectedTags(tags);
                     updateQuery({
-                      status,
-                      encounter_class: encounterClass,
-                      priority:
-                        value === "all"
-                          ? undefined
-                          : (value as EncounterPriority),
+                      tags: tags.map((tag) => tag.id).join(","),
                     });
                   }}
-                >
-                  <SelectTrigger className="h-8 w-[120px]">
-                    <SelectValue placeholder={t("priority")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Priorities</SelectItem>
-                    <SelectItem value="asap">
-                      <div className="flex items-center">
-                        <span className="mr-2">🟡</span> ASAP
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="callback_results">
-                      <div className="flex items-center">
-                        <span className="mr-2">🔵</span> Callback Results
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="callback_for_scheduling">
-                      <div className="flex items-center">
-                        <span className="mr-2">🟣</span> Callback for Scheduling
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="elective">
-                      <div className="flex items-center">
-                        <span className="mr-2">🟤</span> Elective
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="emergency">
-                      <div className="flex items-center">
-                        <span className="mr-2">🔴</span> Emergency
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="preop">
-                      <div className="flex items-center">
-                        <span className="mr-2">🟠</span> Pre-op
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="as_needed">
-                      <div className="flex items-center">
-                        <span className="mr-2">⚫️</span> As Needed
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="routine">
-                      <div className="flex items-center">
-                        <span className="mr-2">⚪️</span> Routine
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="rush_reporting">
-                      <div className="flex items-center">
-                        <span className="mr-2">🟤</span> Rush Reporting
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="stat">
-                      <div className="flex items-center">
-                        <span className="mr-2">🔴</span> Stat
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="timing_critical">
-                      <div className="flex items-center">
-                        <span className="mr-2">🟡</span> Timing Critical
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="use_as_directed">
-                      <div className="flex items-center">
-                        <span className="mr-2">🔵</span> Use as Directed
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="urgent">
-                      <div className="flex items-center">
-                        <span className="mr-2">🟠</span> Urgent
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                  resource={TagResource.ENCOUNTER}
+                  className="w-auto mt-0 h-8"
+                />
 
                 {/* Status Filter - Mobile */}
                 <div className="md:hidden">
@@ -443,73 +469,33 @@ export function EncounterList({
                       >
                         {t("all_status")}
                       </TabsTrigger>
-                      <TabsTrigger
-                        data-cy="planned-filter"
-                        value="planned"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() =>
-                          updateQuery({
-                            ...{ encounter_class: encounterClass, priority },
-                            status: "planned",
-                          })
-                        }
-                      >
-                        <CareIcon icon="l-calender" className="size-4" />
-                        {t("encounter_status__planned")}
-                      </TabsTrigger>
-                      <TabsTrigger
-                        data-cy="in-progress-filter"
-                        value="in_progress"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() =>
-                          updateQuery({
-                            ...{ encounter_class: encounterClass, priority },
-                            status: "in_progress",
-                          })
-                        }
-                      >
-                        <CareIcon icon="l-spinner" className="size-4" />
-                        {t("encounter_class__in_progress")}
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="discharged"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() =>
-                          updateQuery({
-                            ...{ encounter_class: encounterClass, priority },
-                            status: "discharged",
-                          })
-                        }
-                      >
-                        <CareIcon icon="l-home" className="size-4" />
-                        {t("discharge")}
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="completed"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() =>
-                          updateQuery({
-                            ...{ encounter_class: encounterClass, priority },
-                            status: "completed",
-                          })
-                        }
-                      >
-                        <CareIcon icon="l-check" className="size-4" />
-                        {t("completed")}
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="cancelled"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() =>
-                          updateQuery({
-                            ...{ encounter_class: encounterClass, priority },
-                            status: "cancelled",
-                          })
-                        }
-                      >
-                        <CareIcon icon="l-x" className="size-4" />
-                        {t("cancelled")}
-                      </TabsTrigger>
+                      {(
+                        [
+                          "planned",
+                          "in_progress",
+                          "discharged",
+                          "completed",
+                          "cancelled",
+                        ] as const
+                      ).map((status) => (
+                        <TabsTrigger
+                          key={status}
+                          value={status}
+                          className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                          onClick={() =>
+                            updateQuery({
+                              ...{ encounter_class: encounterClass, priority },
+                              status,
+                            })
+                          }
+                        >
+                          <CareIcon
+                            icon={ENCOUNTER_STATUS_ICONS[status]}
+                            className="size-4"
+                          />
+                          {t(`encounter_status__${status}`)}
+                        </TabsTrigger>
+                      ))}
                     </div>
                   </TabsList>
                 </Tabs>
@@ -639,7 +625,7 @@ export function EncounterList({
             </div>
           ) : (
             <>
-              {encounters.map((encounter: Encounter) => (
+              {encounters.map((encounter: EncounterRead) => (
                 <EncounterInfoCard
                   key={encounter.id}
                   encounter={encounter}

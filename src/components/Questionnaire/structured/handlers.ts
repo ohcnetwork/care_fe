@@ -138,7 +138,6 @@ export const structuredHandlers: {
       }
       return encounters.map((encounter) => {
         const body: RequestTypeFor<"encounter"> = {
-          organizations: [],
           patient: patientId,
           status: encounter.status,
           encounter_class: encounter.encounter_class,
@@ -161,7 +160,7 @@ export const structuredHandlers: {
   },
   appointment: {
     getRequests: async (appointment, { facilityId, patientId }) => {
-      const { reason_for_visit, slot_id } = appointment[0];
+      const { reason_for_visit, slot_id, tags } = appointment[0];
       return [
         {
           url: `/api/v1/facility/${facilityId}/slots/${slot_id}/create_appointment/`,
@@ -169,6 +168,7 @@ export const structuredHandlers: {
           body: {
             reason_for_visit,
             patient: patientId,
+            tags,
           },
           reference_id: "appointment",
         },
@@ -204,6 +204,37 @@ export const structuredHandlers: {
           deceased_datetime: timeOfDeath,
         },
         reference_id: "time_of_death",
+      }));
+    },
+  },
+  charge_item: {
+    getRequests: async (chargeItems, { facilityId, encounterId }) => {
+      if (!encounterId) return [];
+      return [
+        {
+          url: `/api/v1/facility/${facilityId}/charge_item/apply_charge_item_defs/`,
+          method: "POST",
+          body: {
+            requests: chargeItems.map((chargeItem) => ({
+              charge_item_definition: chargeItem.charge_item_definition,
+              quantity: chargeItem.quantity,
+              encounter: encounterId,
+            })),
+          },
+          reference_id: "charge_item",
+        },
+      ];
+    },
+  },
+  service_request: {
+    getRequests: async (serviceRequests, { facilityId }) => {
+      return serviceRequests.map((serviceRequest) => ({
+        url: `/api/v1/facility/${facilityId}/service_request/apply_activity_definition/`,
+        method: "POST",
+        body: {
+          ...serviceRequest,
+        },
+        reference_id: "service_request",
       }));
     },
   },

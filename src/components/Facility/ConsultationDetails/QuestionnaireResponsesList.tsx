@@ -28,16 +28,16 @@ import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordio
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, properCase } from "@/Utils/utils";
-import { Encounter } from "@/types/emr/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
+import patientApi from "@/types/emr/patient/patientApi";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 
 interface Props {
-  encounter?: Encounter;
+  encounter?: EncounterRead;
   patientId: string;
   isPrintPreview?: boolean;
   onlyUnstructured?: boolean;
@@ -66,8 +66,6 @@ export function formatValue(
         : formatDateTime(value.toString(), "hh:mm A; DD/MM/YYYY");
     case "date":
       return formatDateTime(value.toString());
-    case "choice":
-      return properCase(value.toString());
     case "decimal":
     case "integer":
       return typeof value === "number" ? value.toString() : value.toString();
@@ -169,7 +167,7 @@ function QuestionGroup({
           className="py-1 pr-0 align-top"
           colSpan={response.note ? 1 : 2}
         >
-          <div className="text-sm font-medium break-words whitespace-normal">
+          <div className="text-sm font-medium break-words whitespace-pre-wrap">
             {values.map((val, idx) => (
               <React.Fragment key={idx}>
                 {idx > 0 && ", "}
@@ -338,7 +336,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                           className="py-1 pr-0 align-top"
                           colSpan={response.note ? 1 : 2}
                         >
-                          <div className="text-sm font-medium break-words whitespace-normal">
+                          <div className="text-sm font-medium break-words whitespace-pre-wrap">
                             {values.map((val, idx) => (
                               <React.Fragment key={idx}>
                                 {idx > 0 && ", "}
@@ -496,7 +494,7 @@ export default function QuestionnaireResponsesList({
 
   const { data: questionnarieResponses, isLoading } = useQuery({
     queryKey: ["questionnaireResponses", patientId, qParams],
-    queryFn: query.paginated(routes.getQuestionnaireResponses, {
+    queryFn: query.paginated(patientApi.getQuestionnaireResponses, {
       pathParams: { patientId },
       queryParams: {
         ...(!isPrintPreview && {

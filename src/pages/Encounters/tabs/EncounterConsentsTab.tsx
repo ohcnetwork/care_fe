@@ -20,10 +20,10 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
-import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { ConsentModel } from "@/types/consent/consent";
 import consentApi from "@/types/consent/consentApi";
-import { Encounter } from "@/types/emr/encounter";
+import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 
 const CONSENTS_PER_PAGE = 12;
 
@@ -50,10 +50,10 @@ export const EmptyState = () => {
 
 function ConsentCard({
   consent,
-  encounter,
+  patientId,
 }: {
   consent: ConsentModel;
-  encounter: Encounter;
+  patientId: string;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -168,7 +168,7 @@ function ConsentCard({
           className="w-full justify-center items-center gap-2 rounded-t-none"
           onClick={() =>
             navigate(
-              `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounterId}/consents/${consentId}`,
+              `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/consents/${consentId}`,
             )
           }
         >
@@ -181,20 +181,30 @@ function ConsentCard({
 }
 
 // Main tab component
-export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
+export const EncounterConsentsTab = () => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
+  const {
+    selectedEncounterId: encounterId,
+    patientId,
+    currentEncounterId,
+    selectedEncounter: encounter,
+  } = useEncounter();
+
+  const readOnly =
+    encounterId !== currentEncounterId ||
+    (encounter && inactiveEncounterStatus.includes(encounter.status));
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: CONSENTS_PER_PAGE,
   });
 
   const { data: existingConsents, isLoading } = useQuery({
-    queryKey: ["consents", encounter.patient.id, encounter.id, qParams],
+    queryKey: ["consents", patientId, encounterId, qParams],
     queryFn: query(consentApi.list, {
-      pathParams: { patientId: encounter.patient.id },
+      pathParams: { patientId },
       queryParams: {
-        encounter: encounter.id,
+        encounter: encounterId,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
@@ -231,10 +241,7 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
           />
         </div>
 
-        <ConsentFormSheet
-          patientId={encounter.patient.id}
-          encounterId={encounter.id}
-        />
+        {!readOnly && <ConsentFormSheet />}
       </div>
 
       {filteredConsents && filteredConsents.length > 0 ? (
@@ -244,7 +251,7 @@ export const EncounterConsentsTab = ({ encounter }: EncounterTabProps) => {
               <ConsentCard
                 key={consent.id}
                 consent={consent}
-                encounter={encounter}
+                patientId={patientId}
               />
             ))}
           </div>
