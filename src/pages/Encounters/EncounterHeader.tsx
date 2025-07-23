@@ -1,10 +1,13 @@
 import { ChevronDown, ExternalLink } from "lucide-react";
 import { Link } from "raviger";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { CommandShortcut } from "@/components/ui/command";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,9 +17,10 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterActions from "@/components/Encounter/EncounterActions";
+import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import { formatDateTime, formatPatientAge } from "@/Utils/utils";
+import { formatDateTime, formatPatientAge, isAppleDevice } from "@/Utils/utils";
 import EncounterProperties from "@/pages/Encounters/EncounterProperties";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
@@ -29,6 +33,13 @@ export function EncounterHeader() {
     selectedEncounterId,
     currentEncounterId,
   } = useEncounter();
+  const [actionsOpen, setActionsOpen] = useState(false);
+
+  useKeyboardShortcut(
+    [isAppleDevice ? "Meta" : "Control", "e"],
+    () => setActionsOpen(true),
+    { ignoreInputFields: true },
+  );
 
   if (!encounter) {
     return <CardListSkeleton count={1} />;
@@ -128,24 +139,39 @@ export function EncounterHeader() {
           />
 
           {!inactiveEncounterStatus.includes(encounter.status) && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="primary_gradient">
-                  {t("update")}
-                  <ChevronDown className="ml-2 size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-(--radix-dropdown-menu-trigger-width) sm:w-auto"
-              >
-                <EncounterActions encounter={encounter} layout="dropdown" />
-                <PLUGIN_Component
-                  __name="PatientInfoCardActions"
-                  encounter={encounter}
-                />
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="primary_gradient">
+                    {t("update")}
+                    <ChevronDown className="ml-2 size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-(--radix-dropdown-menu-trigger-width) sm:w-auto"
+                >
+                  <EncounterActions encounter={encounter} layout="dropdown" />
+                  <PLUGIN_Component
+                    __name="PatientInfoCardActions"
+                    encounter={encounter}
+                  />
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Button variant="outline" onClick={() => setActionsOpen(true)}>
+                {t("actions")}
+                <CommandShortcut>
+                  {isAppleDevice ? "⌘" : "Ctrl"} + E
+                </CommandShortcut>
+              </Button>
+
+              <EncounterCommandDialog
+                open={actionsOpen}
+                onOpenChange={setActionsOpen}
+                encounter={encounter}
+              />
+            </div>
           )}
         </div>
       )}

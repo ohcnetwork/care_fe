@@ -3805,6 +3805,7 @@
   "search_definitions": "Search definitions",
   "search_devices": "Search devices...",
   "search_drawings": "Search drawings...",
+  "search_encounter_command": "Type a command or search",
   "search_encounters": "Search Encounters",
   "search_existing_consent": "Search existing consent",
   "search_facilities": "Search for available facilities to book an appointment <strong>(for new patients)</strong>",
