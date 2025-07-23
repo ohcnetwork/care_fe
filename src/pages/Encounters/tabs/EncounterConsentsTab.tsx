@@ -66,9 +66,7 @@ function ConsentCard({
     if (!date) return <span>{t("na")}</span>;
     return (
       <>
-        {formatDateTime(date, "DD/MM/YYYY")}
-        <br />
-        {formatDateTime(date, "h:mm A")}
+        {formatDateTime(date, "DD MMM YYYY")} {formatDateTime(date, "h:mm A")}
       </>
     );
   };
@@ -133,21 +131,20 @@ function ConsentCard({
           </div>
         </div>
 
-        <div className="flex justify-between items-start w-full gap-4 text-sm">
+        <div className="flex flex-col justify-between w-full gap-4 text-sm">
           <div className="flex flex-col gap-1">
             <span className="text-xs text-gray-500">
               {t("consent_given_on")}
             </span>
-            <p className="font-medium text-xs">
+            <p className="font-medium text-xs w-full">
               {renderDateTime(consent.date)}
             </p>
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-xs text-gray-500">{t("valid_period")}</span>
-            <p className="font-medium text-xs">
+            <p className="font-medium text-xs w-full">
               {renderDateTime(consent.period.start)}
               {" - "}
-              <br />
               {renderDateTime(consent.period.end)}
             </p>
           </div>
