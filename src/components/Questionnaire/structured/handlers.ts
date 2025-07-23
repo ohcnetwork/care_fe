@@ -26,14 +26,9 @@ type StructuredHandler<T extends StructuredQuestionType> = {
   >;
 };
 
-const sanitizeNote = (
-  note?: string | null,
-  hasId?: boolean,
-): string | undefined => {
+const sanitizeNote = (note?: string | null): string | undefined => {
   if (note === undefined || note === null) return undefined;
-  const trimmed = note.trim();
-  if (trimmed !== "") return trimmed;
-  return hasId ? "" : undefined;
+  return note.trim();
 };
 
 export const structuredHandlers: {
@@ -52,7 +47,7 @@ export const structuredHandlers: {
           body: {
             datapoints: allergies.map((allergy) => ({
               ...allergy,
-              note: sanitizeNote(allergy.note, Boolean(allergy.id)),
+              note: sanitizeNote(allergy.note),
               encounter: encounterId,
             })),
           },
@@ -70,7 +65,7 @@ export const structuredHandlers: {
           body: {
             datapoints: medications.map((medication) => ({
               ...medication,
-              note: sanitizeNote(medication.note, Boolean(medication.id)),
+              note: sanitizeNote(medication.note),
               encounter: encounterId,
               patient: patientId,
             })),
@@ -111,7 +106,7 @@ export const structuredHandlers: {
           body: {
             datapoints: symptoms.map((symptom) => ({
               ...symptom,
-              note: sanitizeNote(symptom.note, Boolean(symptom.id)),
+              note: sanitizeNote(symptom.note),
               encounter: encounterId,
             })),
           },
@@ -135,7 +130,7 @@ export const structuredHandlers: {
               .filter((diagnosis) => diagnosis.dirty)
               .map((diagnosis) => ({
                 ...diagnosis,
-                note: sanitizeNote(diagnosis.note, Boolean(diagnosis.id)),
+                note: sanitizeNote(diagnosis.note),
                 encounter: encounterId,
               })),
           },
