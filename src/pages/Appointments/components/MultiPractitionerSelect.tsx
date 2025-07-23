@@ -40,6 +40,8 @@ interface MultiPractitionerSelectorProps {
   clearSelection?: string;
 }
 
+const MULTI_SELECT_SHOW_LIMIT = 5;
+
 export const MultiPractitionerSelector = ({
   facilityId,
   selected,
@@ -72,7 +74,7 @@ export const MultiPractitionerSelector = ({
       <div className="order-last sm:order-first">
         {selected && selected.length > 0 && (
           <div className="flex items-center gap-1">
-            {selected.map((user) => (
+            {selected.slice(0, MULTI_SELECT_SHOW_LIMIT).map((user) => (
               <Fragment key={user.id}>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -103,7 +105,13 @@ export const MultiPractitionerSelector = ({
             role="combobox"
             className="size-8! rounded-full"
           >
-            <CareIcon icon="l-plus" className="size-4" />
+            {selected && selected.length > MULTI_SELECT_SHOW_LIMIT ? (
+              <span className="text-xs text-gray-500">
+                +{selected.length - MULTI_SELECT_SHOW_LIMIT}
+              </span>
+            ) : (
+              <CareIcon icon="l-plus" className="size-4" />
+            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="p-0" align="start">

@@ -20,7 +20,10 @@ import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import EncounterOverviewDevices from "@/pages/Facility/settings/devices/components/EncounterOverviewDevices";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
-import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
+import {
+  completedEncounterStatus,
+  inactiveEncounterStatus,
+} from "@/types/emr/encounter/encounter";
 
 const actionLinks = [
   {
@@ -50,6 +53,7 @@ export const EncounterOverviewTab = () => {
       canViewEncounter,
       canSubmitEncounterQuestionnaire,
     },
+    currentEncounter,
     currentEncounterId,
     facilityId,
   } = useEncounter();
@@ -60,6 +64,9 @@ export const EncounterOverviewTab = () => {
       pathParams: { patientId },
       queryParams: { verification_status: "confirmed" },
     }),
+    enabled:
+      currentEncounter &&
+      !completedEncounterStatus.includes(currentEncounter.status),
   });
 
   const canAccess = canViewEncounter || canViewClinicalData;

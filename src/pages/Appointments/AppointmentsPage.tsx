@@ -12,7 +12,8 @@ import {
   subDays,
 } from "date-fns";
 import dayjs from "dayjs";
-import { Edit3Icon } from "lucide-react";
+import { TFunction } from "i18next";
+import { Edit3Icon, FilterIcon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -60,10 +61,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
+import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -90,9 +98,8 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import {
+  APPOINTMENT_STATUS_COLORS,
   Appointment,
-  AppointmentCancelledStatus,
-  AppointmentNonCancelledStatus,
   AppointmentRead,
   AppointmentStatus,
   AppointmentStatuses,
@@ -108,14 +115,35 @@ interface DateRangeDisplayProps {
   dateTo: string | null;
 }
 
-const FILTERED_APPOINTMENT_STATUSES: Partial<AppointmentStatus>[] = [
-  "booked",
-  "checked_in",
-  "in_consultation",
-  "fulfilled",
-  "noshow",
-  "cancelled",
-] as const;
+type AppointmentStatusGroup = {
+  label: string;
+  statuses: AppointmentStatus[];
+};
+
+const getStatusGroups = (t: TFunction): AppointmentStatusGroup[] => {
+  return [
+    {
+      label: t("booked"),
+      statuses: ["booked"],
+    },
+    {
+      label: t("checked_in"),
+      statuses: ["checked_in"],
+    },
+    {
+      label: t("in_consultation"),
+      statuses: ["in_consultation"],
+    },
+    {
+      label: t("fulfilled"),
+      statuses: ["fulfilled"],
+    },
+    {
+      label: t("non_fulfilled"),
+      statuses: ["noshow", "cancelled", "entered_in_error", "rescheduled"],
+    },
+  ];
+};
 
 function AppointmentsEmptyState() {
   const { t } = useTranslation();
@@ -631,7 +659,13 @@ export default function AppointmentsPage() {
           </div>
         </div>
 
-        <div className="flex gap-4 items-center">
+        <div className="flex flex-col sm:flex-row gap-4 items-center">
+          <PatientIdentifierFilter
+            onSelect={(patientId) => updateQuery({ patient: patientId })}
+            placeholder={t("filter_by_patient")}
+            className="w-full sm:w-auto"
+            patientId={qParams.patient}
+          />
           <Input
             className="md:w-xs w-full"
             placeholder={t("search")}
@@ -651,10 +685,10 @@ export default function AppointmentsPage() {
           )}
         >
           <div className="flex w-max space-x-4">
-            {FILTERED_APPOINTMENT_STATUSES.map((status) => (
+            {getStatusGroups(t).map((statusGroup) => (
               <AppointmentColumn
-                key={status}
-                status={status}
+                key={statusGroup.label}
+                statusGroup={statusGroup}
                 slot={slot?.id}
                 practitioners={qParams.practitioners || null}
                 date_from={qParams.date_from}
@@ -662,6 +696,7 @@ export default function AppointmentsPage() {
                 search={qParams.search?.toLowerCase()}
                 canViewAppointments={canViewAppointments}
                 tags={selectedTags.map((tag) => tag.id)}
+                patient={qParams.patient}
               />
             ))}
           </div>
@@ -681,6 +716,7 @@ export default function AppointmentsPage() {
           status={qParams.status}
           Pagination={Pagination}
           tags={selectedTags.map((tag) => tag.id)}
+          patient={qParams.patient}
         />
       )}
     </Page>
@@ -688,7 +724,7 @@ export default function AppointmentsPage() {
 }
 
 function AppointmentColumn(props: {
-  status: AppointmentNonCancelledStatus | AppointmentCancelledStatus;
+  statusGroup: AppointmentStatusGroup;
   practitioners: string | null;
   slot?: string | null;
   tags?: string[];
@@ -696,26 +732,36 @@ function AppointmentColumn(props: {
   date_to: string | null;
   search?: string;
   canViewAppointments: boolean;
+  patient?: string;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
+  const [selectedStatuses, setSelectedStatuses] = useState<AppointmentStatus[]>(
+    [],
+  );
 
   const { data } = useQuery({
     queryKey: [
       "appointments",
       facilityId,
-      props.status,
+      selectedStatuses.length === 0
+        ? props.statusGroup.statuses
+        : selectedStatuses,
       props.practitioners,
       props.slot,
       props.date_from,
       props.date_to,
       props.tags,
       props.search,
+      props.patient,
     ],
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facilityId },
       queryParams: {
-        status: props.status,
+        status:
+          selectedStatuses.length === 0
+            ? props.statusGroup.statuses.join(",")
+            : selectedStatuses.join(","),
         tags: props.tags?.join(","),
         limit: 100,
         slot: props.slot,
@@ -723,6 +769,7 @@ function AppointmentColumn(props: {
         date_after: props.date_from,
         date_before: props.date_to,
         ordering: "token_slot__start_datetime",
+        patient: props.patient,
       },
     }),
     enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
@@ -736,6 +783,14 @@ function AppointmentColumn(props: {
     );
   }
 
+  const toggleStatus = (status: AppointmentStatus) => {
+    setSelectedStatuses((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status],
+    );
+  };
+
   return (
     <div
       className={cn(
@@ -743,28 +798,85 @@ function AppointmentColumn(props: {
         !data && "animate-pulse",
       )}
     >
-      <div className="flex px-3 items-center gap-2 mb-4">
-        <h2 className="font-semibold capitalize text-base px-1">
-          {t(props.status)}
-        </h2>
-        <span className="bg-gray-200 px-2 py-1 rounded-md text-xs font-medium">
-          {data?.count == null ? (
-            "..."
-          ) : data.count === appointments.length ? (
-            data.count
-          ) : (
-            <Trans
-              i18nKey="showing_x_of_y"
-              values={{
-                x: appointments.length,
-                y: data.count,
-              }}
-              components={{
-                strong: <span className="font-bold" />,
-              }}
-            />
-          )}
-        </span>
+      <div className="flex flex-row justify-between px-3 gap-2 mb-3">
+        <div className="flex items-center gap-2">
+          <h2 className="font-semibold capitalize text-base px-1">
+            {props.statusGroup.label}
+          </h2>
+          <span className="bg-gray-200 px-2 py-1 rounded-md text-xs font-medium">
+            {data?.count == null ? (
+              "..."
+            ) : data.count === appointments.length ? (
+              data.count
+            ) : (
+              <Trans
+                i18nKey="showing_x_of_y"
+                values={{
+                  x: appointments.length,
+                  y: data.count,
+                }}
+                components={{
+                  strong: <span className="font-bold" />,
+                }}
+              />
+            )}
+          </span>
+        </div>
+        {props.statusGroup.statuses.length > 1 && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="icon">
+                <FilterIcon className="size-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-60 p-0" align="start">
+              <Command>
+                <CommandList>
+                  <CommandEmpty>{t("no_status_found")}</CommandEmpty>
+                  <CommandGroup>
+                    {props.statusGroup.statuses.map((status) => (
+                      <CommandItem
+                        key={status}
+                        onSelect={() => toggleStatus(status)}
+                        className="cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2 flex-1">
+                          <div
+                            className={
+                              "size-4 rounded flex items-center justify-center border border-gray-300"
+                            }
+                          >
+                            {selectedStatuses.includes(status) && <CheckIcon />}
+                          </div>
+                          <span>{t(status)}</span>
+                        </div>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        )}
+      </div>
+      <div className="px-3 mb-3">
+        {selectedStatuses.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {selectedStatuses.map((status) => (
+              <Badge
+                key={status}
+                variant="outline"
+                onClick={() => toggleStatus(status)}
+                className="bg-white"
+              >
+                {t(status)}
+                <Button variant="ghost" size="icon" className="size-6 -mr-2">
+                  <CareIcon icon="l-times" />
+                </Button>
+              </Badge>
+            ))}
+          </div>
+        )}
       </div>
       {appointments.length === 0 ? (
         <div className="flex justify-center items-center h-[calc(100vh-18rem)]">
@@ -779,7 +891,10 @@ function AppointmentColumn(props: {
                   href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`}
                   className="text-inherit"
                 >
-                  <AppointmentCard appointment={appointment} />
+                  <AppointmentCard
+                    appointment={appointment}
+                    showStatus={props.statusGroup.statuses.length > 1}
+                  />
                 </Link>
               </li>
             ))}
@@ -790,7 +905,13 @@ function AppointmentColumn(props: {
   );
 }
 
-function AppointmentCard({ appointment }: { appointment: AppointmentRead }) {
+function AppointmentCard({
+  appointment,
+  showStatus,
+}: {
+  appointment: AppointmentRead;
+  showStatus: boolean;
+}) {
   const { patient } = appointment;
   const { t } = useTranslation();
 
@@ -802,8 +923,7 @@ function AppointmentCard({ appointment }: { appointment: AppointmentRead }) {
             {patient.name}
           </h3>
           <p className="text-sm text-gray-700">
-            {formatPatientAge(patient as any, true)},{" "}
-            {t(`GENDER__${patient.gender}`)}
+            {formatPatientAge(patient, true)}, {t(`GENDER__${patient.gender}`)}
           </p>
           <p className="text-xs text-gray-500 mt-1">
             {formatDateTime(
@@ -811,20 +931,51 @@ function AppointmentCard({ appointment }: { appointment: AppointmentRead }) {
               "ddd, DD MMM YYYY, HH:mm",
             )}
           </p>
-          {appointment.tags.map((tag) => (
-            <Badge variant="primary" className="text-xs" key={tag.id}>
-              {tag.display}
-            </Badge>
-          ))}
         </div>
 
-        <div className="bg-gray-100 px-2 py-1 rounded text-center">
-          <p className="text-[10px] uppercase">{t("token")}</p>
-          {/* TODO: replace this with token number once that's ready... */}
-          <p className="font-bold text-2xl uppercase">
-            {getFakeTokenNumber(appointment)}
-          </p>
+        <div className="flex">
+          <div className="flex items-center justify-center">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Avatar
+                  name={formatName(appointment.user)}
+                  imageUrl={appointment.user.profile_picture_url}
+                  className="size-14 rounded-r-none"
+                />
+              </TooltipTrigger>
+              <TooltipContent className="flex flex-col gap-0">
+                <span className="text-sm font-medium">
+                  {formatName(appointment.user)}
+                </span>
+                <span className="text-xs text-gray-300 truncate">
+                  {appointment.user.username}
+                </span>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+          <div className="bg-gray-100 px-2 py-1 rounded-l-none rounded-r-md ml-px text-center">
+            <p className="text-[10px] uppercase">{t("token")}</p>
+            {/* TODO: replace this with token number once that's ready... */}
+            <p className="font-bold text-2xl uppercase">
+              {getFakeTokenNumber(appointment)}
+            </p>
+          </div>
         </div>
+      </div>
+      <div className="flex flex-wrap gap-1">
+        {appointment.tags.map((tag) => (
+          <Badge variant="primary" className="text-xs" key={tag.id}>
+            {tag.display}
+          </Badge>
+        ))}
+        {showStatus && (
+          <Badge
+            variant={APPOINTMENT_STATUS_COLORS[appointment.status]}
+            className="text-xs"
+          >
+            {t(appointment.status)}
+          </Badge>
+        )}
       </div>
     </div>
   );
@@ -849,6 +1000,7 @@ function AppointmentRow(props: {
   search?: string;
   canViewAppointments: boolean;
   tags?: string[];
+  patient?: string;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -864,6 +1016,7 @@ function AppointmentRow(props: {
       props.date_from,
       props.date_to,
       props.tags,
+      props.patient,
     ],
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facilityId },
@@ -877,6 +1030,7 @@ function AppointmentRow(props: {
         limit: props.resultsPerPage,
         offset: ((props.page ?? 1) - 1) * props.resultsPerPage,
         ordering: "token_slot__start_datetime",
+        patient: props.patient,
       },
     }),
     enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
@@ -899,11 +1053,13 @@ function AppointmentRow(props: {
             onValueChange={(value) => props.updateQuery({ status: value })}
           >
             <TabsList>
-              {FILTERED_APPOINTMENT_STATUSES.map((status) => (
-                <TabsTrigger key={status} value={status}>
-                  {t(status)}
-                </TabsTrigger>
-              ))}
+              {getStatusGroups(t).map((group) => {
+                return (
+                  <TabsTrigger key={group.label} value={group.label}>
+                    {group.label}
+                  </TabsTrigger>
+                );
+              })}
             </TabsList>
           </Tabs>
         </div>
@@ -915,12 +1071,12 @@ function AppointmentRow(props: {
             onValueChange={(value) => props.updateQuery({ status: value })}
           >
             <SelectTrigger className="h-8 w-40">
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder={t("status")} />
             </SelectTrigger>
             <SelectContent>
-              {FILTERED_APPOINTMENT_STATUSES.map((status) => (
-                <SelectItem key={status} value={status}>
-                  <div className="flex items-center">{t(status)}</div>
+              {getStatusGroups(t).map((group) => (
+                <SelectItem key={group.label} value={group.label}>
+                  <div className="flex items-center">{group.label}</div>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -989,7 +1145,7 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
           <span className="flex flex-col">
             <span className="text-sm font-semibold">{patient.name}</span>
             <span className="text-xs text-gray-500">
-              {formatPatientAge(patient as any, true)},{" "}
+              {formatPatientAge(patient, true)},{" "}
               {t(`GENDER__${patient.gender}`)}
             </span>
           </span>
