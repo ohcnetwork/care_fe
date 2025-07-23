@@ -1,9 +1,6 @@
 import { BatchSuccessResponse } from "@/types/base/batch/batch";
 import { MonetaryComponent } from "@/types/base/monetaryComponent/monetaryComponent";
-import {
-  ChargeItemDefinitionBase,
-  ChargeItemDefinitionRead,
-} from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 
 export enum ChargeItemStatus {
@@ -61,7 +58,6 @@ export interface ChargeItemCreate
 
 export interface ApplyChargeItemDefinitionRequest {
   charge_item_definition: string;
-  charge_item_definition_object: ChargeItemDefinitionRead;
   quantity: string;
   encounter: string;
   service_resource?: "service_request";

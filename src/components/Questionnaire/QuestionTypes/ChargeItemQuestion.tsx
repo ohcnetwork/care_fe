@@ -32,6 +32,7 @@ import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError"
 
 import query from "@/Utils/request/query";
 import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
+import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
@@ -56,9 +57,14 @@ const CHARGE_ITEM_FIELDS = {
   },
 } as const;
 
+interface ApplyChargeItemDefinitionRequestWithObject
+  extends ApplyChargeItemDefinitionRequest {
+  charge_item_definition_object: ChargeItemDefinitionRead;
+}
+
 interface ChargeItemFormProps {
-  chargeItem: ApplyChargeItemDefinitionRequest;
-  onUpdate?: (updates: ApplyChargeItemDefinitionRequest) => void;
+  chargeItem: ApplyChargeItemDefinitionRequestWithObject;
+  onUpdate?: (updates: ApplyChargeItemDefinitionRequestWithObject) => void;
   onRemove?: () => void;
   disabled?: boolean;
   errors?: QuestionValidationError[];
@@ -165,13 +171,10 @@ export function ChargeItemQuestion({
 }: ChargeItemQuestionProps) {
   const { t } = useTranslation();
   const [selectedChargeItemDefinition, setSelectedChargeItemDefinition] =
-    useState<string | null>(null);
+    useState<ChargeItemDefinitionRead | null>(null);
   const [chargeItems, setChargeItems] = useState<
-    ApplyChargeItemDefinitionRequest[]
-  >(
-    (questionnaireResponse.values?.[0]
-      ?.value as ApplyChargeItemDefinitionRequest[]) || [],
-  );
+    ApplyChargeItemDefinitionRequestWithObject[]
+  >([]);
   const [cidSearch, setCidSearch] = useState("");
 
   const { data: chargeItemDefinitions, isLoading } = useQuery({
@@ -182,39 +185,24 @@ export function ChargeItemQuestion({
     }),
   });
 
-  const {
-    data: selectedChargeItemDefinitionData,
-    isLoading: isLoadingSelectedCID,
-  } = useQuery({
-    queryKey: ["charge_item_definition", selectedChargeItemDefinition],
-    queryFn: query(chargeItemDefinitionApi.retrieveChargeItemDefinition, {
-      pathParams: {
-        facilityId,
-        chargeItemDefinitionId: selectedChargeItemDefinition || "",
-      },
-    }),
-    enabled: !!selectedChargeItemDefinition,
-  });
-
   useEffect(() => {
-    if (selectedChargeItemDefinition && selectedChargeItemDefinitionData) {
-      const selectedCID = chargeItemDefinitions?.results.find(
-        (cid) => cid.id === selectedChargeItemDefinition,
-      );
-      if (!selectedCID) return;
-
-      const newChargeItem: ApplyChargeItemDefinitionRequest = {
+    if (selectedChargeItemDefinition) {
+      const newChargeItem: ApplyChargeItemDefinitionRequestWithObject = {
         quantity: "1",
         encounter: encounterId,
-        charge_item_definition: selectedCID.id,
-        charge_item_definition_object: selectedCID,
+        charge_item_definition: selectedChargeItemDefinition.id,
+        charge_item_definition_object: selectedChargeItemDefinition,
       };
 
       // Automatically add the item when selected
       const updatedChargeItems = [...chargeItems, newChargeItem];
       setChargeItems(updatedChargeItems);
+      const updatedChargeItemsWithoutObject = updatedChargeItems.map(
+        ({ charge_item_definition_object: _discard, ...chargeItem }) =>
+          chargeItem,
+      );
       updateQuestionnaireResponseCB(
-        [{ type: "charge_item", value: updatedChargeItems }],
+        [{ type: "charge_item", value: updatedChargeItemsWithoutObject }],
         questionnaireResponse.question_id,
       );
 
@@ -223,7 +211,6 @@ export function ChargeItemQuestion({
     }
   }, [
     selectedChargeItemDefinition,
-    selectedChargeItemDefinitionData,
     chargeItemDefinitions,
     encounterId,
     chargeItems,
@@ -234,8 +221,12 @@ export function ChargeItemQuestion({
   const handleRemoveChargeItem = (index: number) => {
     const newChargeItems = chargeItems.filter((_, i: number) => i !== index);
     setChargeItems(newChargeItems);
+    const updatedChargeItemsWithoutObject = newChargeItems.map(
+      ({ charge_item_definition_object: _discard, ...chargeItem }) =>
+        chargeItem,
+    );
     updateQuestionnaireResponseCB(
-      [{ type: "charge_item", value: newChargeItems }],
+      [{ type: "charge_item", value: updatedChargeItemsWithoutObject }],
       questionnaireResponse.question_id,
     );
   };
@@ -250,21 +241,15 @@ export function ChargeItemQuestion({
     });
 
     setChargeItems(newChargeItems);
+    const updatedChargeItemsWithoutObject = newChargeItems.map(
+      ({ charge_item_definition_object: _discard, ...chargeItem }) =>
+        chargeItem,
+    );
     updateQuestionnaireResponseCB(
-      [{ type: "charge_item", value: newChargeItems }],
+      [{ type: "charge_item", value: updatedChargeItemsWithoutObject }],
       questionnaireResponse.question_id,
     );
   };
-
-  useEffect(() => {
-    const initialChargeItems =
-      (questionnaireResponse.values?.[0]
-        ?.value as ApplyChargeItemDefinitionRequest[]) || [];
-
-    if (JSON.stringify(initialChargeItems) !== JSON.stringify(chargeItems)) {
-      setChargeItems(initialChargeItems);
-    }
-  }, [questionnaireResponse.values]);
 
   return (
     <div className="space-y-4">
@@ -292,7 +277,7 @@ export function ChargeItemQuestion({
               />
             ))}
 
-            {isLoadingSelectedCID && (
+            {isLoading && (
               <TableRow>
                 <TableCell colSpan={5}>
                   <div className="flex items-center justify-between">
@@ -317,8 +302,14 @@ export function ChargeItemQuestion({
               value: cid.id,
             })) || []
           }
-          value={selectedChargeItemDefinition || ""}
-          onChange={(value) => setSelectedChargeItemDefinition(value)}
+          value={selectedChargeItemDefinition?.id || ""}
+          onChange={(value) => {
+            const selectedCID = chargeItemDefinitions?.results.find(
+              (cid) => cid.id === value,
+            );
+            if (!selectedCID) return;
+            setSelectedChargeItemDefinition(selectedCID);
+          }}
           onSearch={setCidSearch}
           placeholder={t("select_charge_item_definition")}
           isLoading={isLoading}

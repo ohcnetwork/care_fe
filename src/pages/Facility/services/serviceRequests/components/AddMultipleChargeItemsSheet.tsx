@@ -36,6 +36,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 
@@ -46,6 +47,11 @@ interface AddMultipleChargeItemsSheetProps {
   serviceRequestId: string;
   onChargeItemsAdded: () => void;
   disabled?: boolean;
+}
+
+interface ApplyChargeItemDefinitionRequestWithObject
+  extends ApplyChargeItemDefinitionRequest {
+  charge_item_definition_object: ChargeItemDefinitionRead;
 }
 
 export default function AddMultipleChargeItemsSheet({
@@ -59,7 +65,7 @@ export default function AddMultipleChargeItemsSheet({
   const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [selectedItems, setSelectedItems] = useState<
-    ApplyChargeItemDefinitionRequest[]
+    ApplyChargeItemDefinitionRequestWithObject[]
   >([]);
   const [search, setSearch] = useState("");
   const [selectedDefinitionId, setSelectedDefinitionId] = useState<
@@ -143,7 +149,12 @@ export default function AddMultipleChargeItemsSheet({
       return;
     }
 
-    applyChargeItems({ requests: selectedItems });
+    applyChargeItems({
+      requests: selectedItems.map(
+        ({ charge_item_definition_object: _discard, ...charge_item }) =>
+          charge_item,
+      ),
+    });
   };
 
   return (
