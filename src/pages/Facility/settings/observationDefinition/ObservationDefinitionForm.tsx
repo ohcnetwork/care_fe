@@ -271,7 +271,7 @@ function ObservationDefinitionFormContent({
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-4">
             {/* Basic Information Section */}
             <div className="rounded-lg border border-gray-200 bg-white p-4">
               <div className="space-y-4">
@@ -739,7 +739,11 @@ function ObservationDefinitionFormContent({
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button
+                type="submit"
+                onClick={form.handleSubmit(onSubmit)}
+                disabled={isPending}
+              >
                 {isPending
                   ? isEditMode
                     ? t("saving")
@@ -749,7 +753,7 @@ function ObservationDefinitionFormContent({
                     : t("create")}
               </Button>
             </div>
-          </form>
+          </div>
         </Form>
       </div>
     </Page>
