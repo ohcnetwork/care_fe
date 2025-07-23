@@ -286,7 +286,7 @@ export default function FacilityOrganizationSelector(
           </CommandGroup>
         </CommandList>
         {currentSelection && (
-          <div className="md:m-0 m-2 flex items-center justify-between px-2 py-2  bg-blue-100 border-sky-200 rounded-md ">
+          <div className="md:m-0 m-2 flex flex-wrap sm:justify-between justify-center px-2 py-2  bg-blue-100 border-sky-200 rounded-md ">
             <div className="flex flex-col">
               <span className="text-xs text-gray-500 mb-0.5">
                 {t("selected")}
@@ -299,7 +299,7 @@ export default function FacilityOrganizationSelector(
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 gap-2"
+                className="h-8"
                 disabled={alreadySelected}
                 data-cy="confirm-organization"
               >
@@ -312,14 +312,14 @@ export default function FacilityOrganizationSelector(
                 <div className="flex items-center gap-2">
                   <Button
                     variant="link"
-                    className="h-10 underline font-semibold"
+                    className="h-8 underline font-semibold"
                     onClick={handleCancelSelection}
                   >
                     {t("cancel")}
                   </Button>
                   <Button
                     variant="white"
-                    className="h-10 w-auto font-semibold text-center border border-green-600 text-green-800"
+                    className="h-8 w-auto font-semibold text-center border border-green-600 text-green-800"
                     onClick={handleConfirmSelection}
                     disabled={isDisabled}
                   >
