@@ -1,6 +1,6 @@
 import { ContactPoint } from "@/types/common/contactPoint";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationList } from "@/types/location/location";
 import { UserBase } from "@/types/user/user";
 
@@ -56,7 +56,7 @@ export interface DeviceDetail extends DeviceBase {
   created_by: UserBase;
   updated_by: UserBase;
   care_metadata: Record<string, unknown>;
-  managing_organization: FacilityOrganization | null;
+  managing_organization: FacilityOrganizationRead | null;
 }
 
 export interface DeviceList extends DeviceBase {

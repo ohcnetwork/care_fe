@@ -40,16 +40,15 @@ import {
 
 import mutate from "@/Utils/request/mutate";
 import {
-  FacilityOrganization,
   FacilityOrganizationCreate,
-  FacilityOrganizationEdit,
+  FacilityOrganizationRead,
 } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface Props {
   facilityId: string;
   parentId?: string;
-  org?: FacilityOrganization;
+  org?: FacilityOrganizationRead;
 
   trigger: React.ReactNode;
 
@@ -81,8 +80,9 @@ export default function FacilityOrganizationFormSheet({
       .string()
       .trim()
       .min(1, { message: t("field_required") }),
-    description: z.string().optional(),
-    org_type: z.enum(["dept", "team"]),
+    description: z.string().trim(),
+    org_type: z.enum(["dept", "team"] as const),
+    active: z.boolean(),
   });
 
   const form = useForm({
@@ -91,6 +91,7 @@ export default function FacilityOrganizationFormSheet({
       name: "",
       description: "",
       org_type: "dept" as OrgType,
+      active: true,
     },
   });
 
@@ -100,6 +101,7 @@ export default function FacilityOrganizationFormSheet({
         name: org.name || "",
         description: org.description || "",
         org_type: org.org_type as OrgType,
+        active: org.active,
       });
     }
   }, [isEditMode, org, open]);
@@ -127,7 +129,7 @@ export default function FacilityOrganizationFormSheet({
   });
 
   const { mutate: updateOrganization, isPending: isUpdating } = useMutation({
-    mutationFn: (body: FacilityOrganizationEdit) =>
+    mutationFn: (body: FacilityOrganizationCreate) =>
       mutate(facilityOrganizationApi.update, {
         pathParams: { facilityId, organizationId: org?.id },
         body,
@@ -144,15 +146,16 @@ export default function FacilityOrganizationFormSheet({
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const data = {
       name: values.name.trim(),
-      description: values.description?.trim() || undefined,
+      description: values.description.trim(),
       org_type: values.org_type,
       parent: parentId,
+      active: values.active,
     };
 
     if (isEditMode) {
       updateOrganization({ ...data, facility: facilityId });
     } else {
-      createOrganization(data);
+      createOrganization({ ...data, facility: facilityId });
     }
   };
 

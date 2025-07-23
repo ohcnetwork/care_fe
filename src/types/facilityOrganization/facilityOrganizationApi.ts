@@ -1,10 +1,8 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import {
-  FacilityOrganization,
   FacilityOrganizationCreate,
-  FacilityOrganizationEdit,
-  FacilityOrganizationResponse,
+  FacilityOrganizationRead,
 } from "@/types/facilityOrganization/facilityOrganization";
 import { OrganizationUserRole } from "@/types/organization/organization";
 
@@ -12,29 +10,29 @@ export default {
   list: {
     path: "/api/v1/facility/{facilityId}/organizations/",
     method: HttpMethod.GET,
-    TRes: Type<FacilityOrganizationResponse>(),
+    TRes: Type<PaginatedResponse<FacilityOrganizationRead>>(),
   },
   listMine: {
     path: "/api/v1/facility/{facilityId}/organizations/mine/",
     method: HttpMethod.GET,
-    TRes: Type<FacilityOrganizationResponse>(),
+    TRes: Type<PaginatedResponse<FacilityOrganizationRead>>(),
   },
   get: {
     path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/",
     method: HttpMethod.GET,
-    TRes: Type<FacilityOrganization>(),
+    TRes: Type<FacilityOrganizationRead>(),
   },
   create: {
     path: "/api/v1/facility/{facilityId}/organizations/",
     method: HttpMethod.POST,
-    TRes: Type<FacilityOrganization>(),
+    TRes: Type<FacilityOrganizationRead>(),
     TBody: Type<FacilityOrganizationCreate>(),
   },
   update: {
     path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/",
     method: HttpMethod.PUT,
-    TRes: Type<FacilityOrganization>(),
-    TBody: Type<FacilityOrganizationEdit>(),
+    TRes: Type<FacilityOrganizationRead>(),
+    TBody: Type<FacilityOrganizationCreate>(),
   },
   delete: {
     path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/",
