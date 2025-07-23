@@ -130,7 +130,7 @@ export default function ObservationDefinitionList({
           <h1 className="text-2xl font-bold text-gray-700">
             {t("observation_definitions")}
           </h1>
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex sm:flex-row sm:items-center sm:justify-between flex-col gap-4">
             <div>
               <p className="text-gray-600 text-sm">
                 {t("manage_observation_definitions")}
