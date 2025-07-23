@@ -268,6 +268,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   >(new Map());
   const [expandPath, setExpandPath] = useState<string[]>([]);
   const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const [hasGroupError, setGroupError] = useState(false);
 
   const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
     const errorData = (
@@ -680,7 +681,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     let isValid = await form.trigger();
     const hasOrganizations = validateOrganizations();
     const hasValidStructuredType = validateStructuredType();
-
+    setGroupError(true);
     if (!isValid) {
       const questionsErrors = form.formState.errors.questions as
         | any[]
@@ -1197,6 +1198,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                         size="sm"
                         onClick={(e) => {
                           e.preventDefault();
+                          setGroupError(false);
                           const newQuestion: Question = {
                             id: crypto.randomUUID(),
                             link_id: `Q-${Date.now()}`,
@@ -1244,6 +1246,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                 updateQuestions(newQuestions);
                               }}
                               onDelete={() => {
+                                setGroupError(false);
                                 const newQuestions = rootQuestions.filter(
                                   (_, i) => i !== index,
                                 );
@@ -1293,6 +1296,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               }
                               expandPath={expandPath}
                               questionRefs={questionRefs}
+                              hasSubmitted={hasGroupError}
+                              setGroupError={setGroupError}
                             />
                           </div>
                         ))}
@@ -1569,6 +1574,8 @@ interface QuestionEditorProps {
   handleEnableWhenDependentClick: (path: string[], targetId: string) => void;
   expandPath?: string[];
   questionPath?: number[];
+  hasSubmitted: boolean;
+  setGroupError: (value: boolean) => void;
   questionRefs: React.RefObject<{ [key: string]: HTMLDivElement | null }>;
 }
 
@@ -1596,6 +1603,8 @@ function QuestionEditor({
   expandPath,
   questionPath,
   questionRefs,
+  hasSubmitted,
+  setGroupError,
 }: QuestionEditorProps): React.ReactElement {
   const { t } = useTranslation();
   const {
@@ -2710,6 +2719,7 @@ function QuestionEditor({
                   size="sm"
                   className="underline text-gray-950 font-semibold"
                   onClick={(e) => {
+                    setGroupError(false);
                     e.preventDefault();
                     const newQuestion: Question = {
                       id: crypto.randomUUID(),
@@ -2734,7 +2744,7 @@ function QuestionEditor({
                   {t("add_sub_question")}
                 </Button>
               </div>
-              {groupError?.questions?.message && (
+              {hasSubmitted && groupError?.questions?.message && (
                 <div className="text-red-500 text-sm mb-2">
                   {groupError?.questions?.message}
                 </div>
@@ -2768,6 +2778,7 @@ function QuestionEditor({
                         updateField("questions", newQuestions);
                       }}
                       onDelete={() => {
+                        setGroupError(false);
                         const newQuestions = questions?.filter(
                           (_, i) => i !== idx,
                         );
@@ -2803,6 +2814,8 @@ function QuestionEditor({
                       isLast={idx === (questions?.length || 0) - 1}
                       expandPath={expandPath?.slice(1)}
                       questionRefs={questionRefs}
+                      hasSubmitted={hasSubmitted}
+                      setGroupError={setGroupError}
                     />
                   </div>
                 ))}
