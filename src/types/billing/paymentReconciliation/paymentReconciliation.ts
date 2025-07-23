@@ -1,3 +1,4 @@
+import { AccountRead } from "@/types/billing/account/Account";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 
 export enum PaymentReconciliationType {
@@ -63,15 +64,15 @@ export interface PaymentReconciliationBase {
   kind: PaymentReconciliationKind;
   issuer_type: PaymentReconciliationIssuerType;
   outcome: PaymentReconciliationOutcome;
-  disposition?: string | null;
-  payment_datetime?: string | null;
+  disposition?: string;
+  payment_datetime?: string;
   method: PaymentReconciliationPaymentMethod;
-  reference_number?: string | null;
-  authorization?: string | null;
-  tendered_amount?: number | null;
-  returned_amount?: number | null;
-  note?: string | null;
-  amount?: number | null;
+  reference_number?: string;
+  authorization?: string;
+  tendered_amount?: string;
+  returned_amount?: string;
+  note?: string;
+  amount?: string;
 }
 
 export interface PaymentReconciliationCreate
@@ -84,4 +85,5 @@ export type PaymentReconciliationUpdate = Omit<PaymentReconciliationBase, "id">;
 
 export interface PaymentReconciliationRead extends PaymentReconciliationBase {
   target_invoice: InvoiceRead;
+  account: AccountRead;
 }

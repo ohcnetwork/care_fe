@@ -106,6 +106,7 @@ export default function ActivityDefinitionView({
     updateActivityDefinition({
       ...definition,
       status: "retired",
+      diagnostic_report_codes: definition.diagnostic_report_codes || [],
     });
   };
 

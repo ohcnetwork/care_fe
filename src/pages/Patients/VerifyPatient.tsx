@@ -29,12 +29,12 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 
 export default function VerifyPatient() {
@@ -65,7 +65,7 @@ export default function VerifyPatient() {
 
   const { data: encounters, isLoading: encounterLoading } = useQuery({
     queryKey: ["encounters", "live", patientData?.id],
-    queryFn: query(routes.encounter.list, {
+    queryFn: query(encounterApi.list, {
       queryParams: {
         patient: patientData?.id,
         live: false,
