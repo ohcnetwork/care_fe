@@ -555,7 +555,6 @@ const AppointmentActions = ({
                     facilityId={facilityId}
                     selected={selectedPractitioner}
                     onSelect={(user) => user && setSelectedPractitioner(user)}
-                    clearSelection={t("show_all")}
                   />
                 </div>
                 <AppointmentSlotPicker

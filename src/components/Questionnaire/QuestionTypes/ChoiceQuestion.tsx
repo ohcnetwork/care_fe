@@ -11,7 +11,6 @@ import { MultiSelect } from "@/components/ui/multi-select";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import { properCase } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import type {
   QuestionnaireResponse,
@@ -172,7 +171,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
         )}
         onValueChange={handleMultiSelectChange}
         options={options.map((option) => ({
-          label: properCase(option.display || option.value),
+          label: option.display || option.value,
           value: option.value.toString(),
         }))}
         placeholder={t("select_an_option")}
@@ -189,7 +188,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
         value={currentValue || ""}
         onChange={handleValueChange}
         options={options.map((option) => ({
-          label: properCase(option.display || option.value),
+          label: option.display || option.value,
           value: option.value.toString(),
         }))}
         placeholder={t("select_an_option")}
@@ -204,7 +203,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
     <div className="mt-2">
       <RadioInput
         options={options.map((option) => ({
-          label: properCase(option.display || option.value),
+          label: option.display || option.value,
           value: option.value.toString(),
         }))}
         value={selectedValue ?? ""}
