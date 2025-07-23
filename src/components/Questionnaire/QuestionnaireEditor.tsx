@@ -76,6 +76,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AnimatedWrapper } from "@/components/Common/AnimatedWrapper";
 import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
+import { ScrollToTopButton } from "@/components/Common/ScrollToTop";
 import {
   STRUCTURED_QUESTIONS,
   StructuredQuestionType,
@@ -858,6 +859,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
   return (
     <div className="container mx-auto px-4 py-6">
+      <ScrollToTopButton className="fixed z-50 right-8 bottom-6" />
       <div className="mb-4 flex flex-col md:flex-row items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold">
