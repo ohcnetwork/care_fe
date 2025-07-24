@@ -114,11 +114,9 @@ function ObservationDefinitionFormContent({
   const isEditMode = Boolean(observationDefinitionId);
 
   const formSchema = z.object({
-    title: z.string({ error: t("field_required") }).min(1, t("field_required")),
-    slug: z.string({ error: t("field_required") }).min(1, t("field_required")),
-    description: z
-      .string({ error: t("field_required") })
-      .min(1, t("field_required")),
+    title: z.string().min(1, t("field_required")),
+    slug: z.string().min(1, t("field_required")),
+    description: z.string().min(1, t("field_required")),
     status: z.enum(OBSERVATION_DEFINITION_STATUS),
     category: z.enum(OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]], {
       error: t("field_required"),
@@ -131,7 +129,15 @@ function ObservationDefinitionFormContent({
     component: z
       .array(
         z.object({
-          code: CodeSchema,
+          code: z
+            .object({
+              code: z.string(),
+              display: z.string(),
+              system: z.string(),
+            })
+            .refine((data) => data.code && data.display && data.system, {
+              error: "Required",
+            }),
           permitted_data_type: z.enum(QuestionType),
           permitted_unit: z
             .object({
@@ -165,6 +171,9 @@ function ObservationDefinitionFormContent({
             component: existingData.component || [],
           }
         : {
+            title: "",
+            slug: "",
+            description: "",
             status: "active",
             component: [],
             body_site: null,

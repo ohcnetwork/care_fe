@@ -183,6 +183,8 @@ function ProductKnowledgeFormContent({
     }
 
     return {
+      name: "",
+      slug: "",
       product_type: ProductKnowledgeType.medication,
       names: [],
       storage_guidelines: [],

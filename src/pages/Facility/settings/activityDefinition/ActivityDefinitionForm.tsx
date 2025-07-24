@@ -39,6 +39,7 @@ import { generateSlug } from "@/Utils/utils";
 import { ChargeItemDefinitionForm } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionForm";
 import ObservationDefinitionForm from "@/pages/Facility/settings/observationDefinition/ObservationDefinitionForm";
 import { CreateSpecimenDefinition } from "@/pages/Facility/settings/specimen-definitions/CreateSpecimenDefinition";
+import { CodeSchema } from "@/types/base/code/code";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import {
   type ActivityDefinitionCreateSpec,
@@ -61,29 +62,11 @@ const formSchema = z.object({
   usage: z.string().min(1, "Usage is required"),
   derived_from_uri: z.string().nullable(),
   status: z.enum(Status),
-  category: z.enum(Category),
+  category: z.enum(Category, { error: "Required" }),
   kind: z.enum(Kind),
-  code: z.object({
-    code: z.string().min(1, "Code is required"),
-    display: z.string().min(1, "Display name is required"),
-    system: z.string().min(1, "System is required"),
-  }),
-  body_site: z
-    .object({
-      code: z.string().min(1, "Code is required"),
-      display: z.string().min(1, "Display name is required"),
-      system: z.string().min(1, "System is required"),
-    })
-    .nullable(),
-  diagnostic_report_codes: z
-    .array(
-      z.object({
-        code: z.string().min(1, "Code is required"),
-        display: z.string().min(1, "Display name is required"),
-        system: z.string().min(1, "System is required"),
-      }),
-    )
-    .prefault([]),
+  code: CodeSchema,
+  body_site: CodeSchema.nullable(),
+  diagnostic_report_codes: z.array(CodeSchema).prefault([]),
   specimen_requirements: z
     .array(
       z.object({
@@ -365,6 +348,10 @@ function ActivityDefinitionFormContent({
             locations: existingData.locations?.map((l) => l.id) || [],
           }
         : {
+            title: "",
+            slug: "",
+            description: "",
+            usage: "",
             status: Status.active,
             kind: Kind.service_request,
             specimen_requirements: [],

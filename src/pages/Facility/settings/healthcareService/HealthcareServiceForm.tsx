@@ -148,6 +148,7 @@ function HealthcareServiceFormContent({
             locations: existingData.locations.map((loc) => loc.id),
           }
         : {
+            name: "",
             styling_metadata: { careIcon: "" },
             extra_details: "",
             locations: [],

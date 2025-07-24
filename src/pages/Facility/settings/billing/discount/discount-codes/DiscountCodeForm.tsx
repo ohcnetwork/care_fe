@@ -17,11 +17,6 @@ import { Input } from "@/components/ui/input";
 
 import { Code } from "@/types/base/code/code";
 
-const formSchema = z.object({
-  code: z.string().min(1, { error: "field_required" }),
-  display: z.string().min(1, { error: "field_required" }),
-});
-
 interface DiscountCodeFormProps {
   defaultValues?: Code;
   onSubmit: (data: Code) => void;
@@ -32,6 +27,11 @@ export function DiscountCodeForm({
   onSubmit,
 }: DiscountCodeFormProps) {
   const { t } = useTranslation();
+
+  const formSchema = z.object({
+    code: z.string().min(1, { error: t("field_required") }),
+    display: z.string().min(1, { error: t("field_required") }),
+  });
 
   const form = useForm({
     resolver: zodResolver(formSchema),
