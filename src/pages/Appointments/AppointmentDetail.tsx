@@ -86,7 +86,7 @@ interface Props {
 export default function AppointmentDetail(props: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const { facility, facilityId } = useCurrentFacility();
+  const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
 
@@ -115,12 +115,26 @@ export default function AppointmentDetail(props: Props) {
   };
 
   useEffect(() => {
-    if (!canViewAppointments && !facility) {
+    // Don't redirect while facility is still loading
+    if (isFacilityLoading) {
+      return;
+    }
+
+    // If facility query failed (no access to facility)
+    if (!facility) {
       toast.error(t("no_permission_to_view_page"));
-      goBack(`/facility/${facilityId}/overview`);
+      goBack(`/`);
+      return;
+    }
+
+    // If facility is loaded but user doesn't have permission to view appointments
+    if (facility && !canViewAppointments) {
+      toast.error(t("no_permission_to_view_page"));
+      goBack(`/facility/${facility.id}/overview`);
+      return;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canViewAppointments, facility]);
+  }, [isFacilityLoading, facility, canViewAppointments, facilityId]);
 
   const { mutate: updateAppointment, isPending } = useMutation<
     Appointment,
