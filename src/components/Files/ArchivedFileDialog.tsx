@@ -14,6 +14,8 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { FileUploadModel } from "@/components/Patient/models";
 
+import { formatName } from "@/Utils/utils";
+
 export default function ArchivedFileDialog({
   open,
   onOpenChange,
@@ -60,7 +62,7 @@ export default function ArchivedFileDialog({
           </div>
           <div className="flex flex-col sm:flex-row gap-2 justify-between text-sm bg-blue-100 text-blue-900 p-2 rounded-md">
             <span className="break-words">
-              {t("archived_by")}: {file.archived_by?.username}
+              {t("archived_by")}: {formatName(file.archived_by)}
             </span>
             <span className="whitespace-nowrap">
               {t("archived_at")}:{" "}

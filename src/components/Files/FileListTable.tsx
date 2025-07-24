@@ -31,6 +31,8 @@ import useFileManager from "@/hooks/useFileManager";
 
 import { FILE_EXTENSIONS } from "@/common/constants";
 
+import { formatName } from "@/Utils/utils";
+
 const icons: Record<keyof typeof FILE_EXTENSIONS | "UNKNOWN", IconName> = {
   AUDIO: "l-volume",
   IMAGE: "l-image",
@@ -217,7 +219,7 @@ export function FileListTable({
                     <div>
                       <div className="text-gray-500">{t("shared_by")}</div>
                       <div className="font-medium">
-                        {file.uploaded_by?.username}
+                        {formatName(file.uploaded_by)}
                       </div>
                     </div>
                   </div>
@@ -329,7 +331,7 @@ export function FileListTable({
                         file.is_archived ? "bg-white/50" : "bg-white",
                       )}
                     >
-                      {file.uploaded_by?.username}
+                      {formatName(file.uploaded_by)}
                     </TableCell>
                     <TableCell
                       className={cn(

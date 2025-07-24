@@ -139,7 +139,7 @@ export function SymptomTable({ symptoms }: SymptomTableProps) {
             <TableCell className="last:rounded-r-md">
               <div className="flex items-center gap-2">
                 <Avatar
-                  name={symptom.created_by.username}
+                  name={formatName(symptom.created_by)}
                   className="size-4"
                   imageUrl={symptom.created_by.profile_picture_url}
                 />
