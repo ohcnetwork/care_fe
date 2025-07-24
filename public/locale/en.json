@@ -3507,8 +3507,6 @@
   "reason_for_request": "Reason for Request",
   "reason_for_reschedule_placeholder": "Enter reason for rescheduling the appointment",
   "reason_for_shift": "Reason for shift",
-  "reason_for_visit": "Reason for visit",
-  "reason_for_visit_placeholder": "Type the reason for booking appointment",
   "rebalance": "Rebalance",
   "rebalancing": "Rebalancing",
   "receive_item": "Receive Item",
