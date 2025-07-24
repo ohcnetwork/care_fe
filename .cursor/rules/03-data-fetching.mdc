@@ -31,7 +31,7 @@ export default {
     path: "/api/v1/users/",
     method: HttpMethod.POST,
     TRes: Type<UserReadBase>(),
-    TBody: Type<CreateUserModel>(),
+    TBody: Type<UserCreate>(),
   },
 } as const;
 

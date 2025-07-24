@@ -1,9 +1,10 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import {
-  CreateUserModel,
-  UpdateUserModel,
+  UserCreate,
+  UserRead,
   UserReadBase,
+  UserUpdate,
 } from "@/types/user/user";
 
 export default {
@@ -16,12 +17,12 @@ export default {
     path: "/api/v1/users/",
     method: HttpMethod.POST,
     TRes: Type<UserReadBase>(),
-    TBody: Type<CreateUserModel>(),
+    TBody: Type<UserCreate>(),
   },
   get: {
     path: "/api/v1/users/{username}/",
     method: HttpMethod.GET,
-    TRes: Type<UserReadBase>(),
+    TRes: Type<UserRead>(),
   },
   checkUsername: {
     path: "/api/v1/users/{username}/check_availability/",
@@ -32,6 +33,6 @@ export default {
     path: "/api/v1/users/{username}/",
     method: HttpMethod.PUT,
     TRes: Type<UserReadBase>(),
-    TBody: Type<Partial<UpdateUserModel>>(),
+    TBody: Type<UserUpdate>(),
   },
 } as const;
