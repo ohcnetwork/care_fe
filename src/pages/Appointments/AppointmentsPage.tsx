@@ -42,7 +42,6 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -675,12 +674,6 @@ export default function AppointmentsPage() {
             className="w-full sm:w-auto"
             patientId={qParams.patient}
           />
-          <Input
-            className="md:w-xs w-full"
-            placeholder={t("search")}
-            value={qParams.search ?? ""}
-            onChange={(e) => updateQuery({ search: e.target.value })}
-          />
         </div>
       </div>
 
@@ -702,7 +695,6 @@ export default function AppointmentsPage() {
                 practitioners={qParams.practitioners || null}
                 date_from={qParams.date_from}
                 date_to={qParams.date_to}
-                search={qParams.search?.toLowerCase()}
                 canViewAppointments={canViewAppointments}
                 tags={selectedTags.map((tag) => tag.id)}
                 patient={qParams.patient}
@@ -719,7 +711,6 @@ export default function AppointmentsPage() {
           page={qParams.page}
           date_from={qParams.date_from}
           date_to={qParams.date_to}
-          search={qParams.search?.toLowerCase()}
           canViewAppointments={canViewAppointments}
           resultsPerPage={resultsPerPage}
           status={qParams.status}
@@ -739,7 +730,6 @@ function AppointmentColumn(props: {
   tags?: string[];
   date_from: string | null;
   date_to: string | null;
-  search?: string;
   canViewAppointments: boolean;
   patient?: string;
 }) {
@@ -767,7 +757,6 @@ function AppointmentColumn(props: {
       props.date_from,
       props.date_to,
       props.tags,
-      props.search,
       props.patient,
     ],
     queryFn: async ({ pageParam = 0, signal }) => {
@@ -800,12 +789,6 @@ function AppointmentColumn(props: {
 
   let appointments =
     appointmentsData?.pages.flatMap((page) => page.results) ?? [];
-
-  if (props.search) {
-    appointments = appointments.filter(({ patient }) =>
-      patient.name.toLowerCase().includes(props.search!),
-    );
-  }
 
   const toggleStatus = (status: AppointmentStatus) => {
     setSelectedStatuses((prev) =>
@@ -1031,7 +1014,6 @@ function AppointmentRow(props: {
   status: string | null;
   date_from: string | null;
   date_to: string | null;
-  search?: string;
   canViewAppointments: boolean;
   tags?: string[];
   patient?: string;
@@ -1072,11 +1054,6 @@ function AppointmentRow(props: {
 
   let appointments = data?.results ?? [];
 
-  if (props.search) {
-    appointments = appointments.filter(({ patient }) =>
-      patient.name.toLowerCase().includes(props.search!),
-    );
-  }
   return (
     <div className="overflow-x-auto">
       <div className={cn(!data && "animate-pulse")}>
