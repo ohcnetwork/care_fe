@@ -1,5 +1,5 @@
 import { PaginatedResponse } from "@/Utils/request/types";
-import { UserBase } from "@/types/user/user";
+import { UserReadBase } from "@/types/user/user";
 
 export type OrgType = "root" | "dept" | "team";
 
@@ -35,7 +35,7 @@ export interface FacilityOrganizationCreate extends FacilityOrganizationBase {
 
 export interface FacilityOrganizationUserRole {
   id: string;
-  user: UserBase;
+  user: UserReadBase;
   role: {
     id: string;
     name: string;

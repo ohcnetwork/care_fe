@@ -1,7 +1,7 @@
 import { t } from "i18next";
 
 import { PaginatedResponse } from "@/Utils/request/types";
-import { UserBase } from "@/types/user/user";
+import { UserReadBase } from "@/types/user/user";
 
 type org_type =
   | "team"
@@ -64,7 +64,7 @@ export interface OrganizationCreate {
 
 export interface OrganizationUserRole {
   id: string;
-  user: UserBase;
+  user: UserReadBase;
   role: {
     id: string;
     name: string;

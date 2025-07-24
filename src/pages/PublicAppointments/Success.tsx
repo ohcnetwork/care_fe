@@ -12,7 +12,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import { UserBase } from "@/types/user/user";
+import { UserReadBase } from "@/types/user/user";
 
 export function AppointmentSuccess(props: { appointmentId: string }) {
   const { appointmentId } = props;
@@ -21,7 +21,9 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
   const patientUserContext = usePatientContext();
   const tokenData = patientUserContext?.tokenData;
 
-  const userData: UserBase = JSON.parse(localStorage.getItem("user") ?? "{}");
+  const userData: UserReadBase = JSON.parse(
+    localStorage.getItem("user") ?? "{}",
+  );
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["appointment", tokenData.phoneNumber],

@@ -1,6 +1,6 @@
 import { FacilityModel } from "@/components/Facility/models";
 
-import { UserBase } from "@/types/user/user";
+import { UserReadBase } from "@/types/user/user";
 
 export type AlignmentOptions =
   | "left"
@@ -295,8 +295,8 @@ export type ReportTemplateUpdate = Pick<ReportTemplateBase, "config">;
 
 export interface ReportTemplateModel extends ReportTemplateBase {
   facility: FacilityModel;
-  created_by: UserBase;
-  updated_by: UserBase;
+  created_by: UserReadBase;
+  updated_by: UserReadBase;
   derived_from_url?: string;
 }
 

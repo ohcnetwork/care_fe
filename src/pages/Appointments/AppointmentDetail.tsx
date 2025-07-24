@@ -408,7 +408,6 @@ const AppointmentDetails = ({
           <div className="grid gap-2">
             <div className="text-sm">
               <p className="font-medium">{formatName(user)}</p>
-              <p className="text-gray-600">{user.email}</p>
             </div>
             <Separator />
             <div className="text-sm">

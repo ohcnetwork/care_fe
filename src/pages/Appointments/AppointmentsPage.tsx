@@ -106,7 +106,7 @@ import {
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { UserBase } from "@/types/user/user";
+import { UserReadBase } from "@/types/user/user";
 
 import { MultiPractitionerSelector } from "./components/MultiPractitionerSelect";
 
@@ -446,7 +446,7 @@ export default function AppointmentsPage() {
             <MultiPractitionerSelector
               facilityId={facilityId}
               selected={practitioners ?? null}
-              onSelect={(users: UserBase[] | null) => {
+              onSelect={(users: UserReadBase[] | null) => {
                 if (users) {
                   updateQuery({
                     practitioners: users.map((user) => user.id).join(","),

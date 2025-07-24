@@ -16,7 +16,7 @@ import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationAssociationStatus } from "@/types/location/association";
 import { LocationList } from "@/types/location/location";
-import { UserBase } from "@/types/user/user";
+import { UserReadBase } from "@/types/user/user";
 
 export const ENCOUNTER_ADMIT_SOURCE = [
   "hosp_trans",
@@ -220,8 +220,8 @@ export interface EncounterRead
     id: string;
     name: string;
   };
-  created_by: UserBase;
-  updated_by: UserBase;
+  created_by: UserReadBase;
+  updated_by: UserReadBase;
   created_date: string;
   modified_date: string;
   encounter_class_history: EncounterClassHistory;

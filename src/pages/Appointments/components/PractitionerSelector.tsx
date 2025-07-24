@@ -24,11 +24,11 @@ import { Avatar } from "@/components/Common/Avatar";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import scheduleApi from "@/types/scheduling/scheduleApi";
-import { UserBase } from "@/types/user/user";
+import { UserReadBase } from "@/types/user/user";
 
 interface PractitionerSelectorProps {
-  selected: UserBase | null;
-  onSelect: (user: UserBase | null) => void;
+  selected: UserReadBase | null;
+  onSelect: (user: UserReadBase | null) => void;
   facilityId: string;
   clearSelection?: string;
 }

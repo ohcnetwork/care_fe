@@ -25,12 +25,12 @@ export default {
   list: {
     path: "/api/v1/users/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<UserBase>>(),
+    TRes: Type<PaginatedResponse<UserReadBase>>(),
   },
   create: {
     path: "/api/v1/users/",
     method: HttpMethod.POST,
-    TRes: Type<UserBase>(),
+    TRes: Type<UserReadBase>(),
     TBody: Type<CreateUserModel>(),
   },
 } as const;

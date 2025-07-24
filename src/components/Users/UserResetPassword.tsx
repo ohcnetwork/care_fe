@@ -24,12 +24,12 @@ import { UpdatePasswordForm } from "@/components/Users/models";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import { UserBase } from "@/types/user/user";
+import { UserReadBase } from "@/types/user/user";
 
 export default function UserResetPassword({
   userData,
 }: {
-  userData: UserBase;
+  userData: UserReadBase;
 }) {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);

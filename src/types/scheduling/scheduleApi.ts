@@ -18,7 +18,7 @@ import {
   ScheduleTemplateCreateRequest,
   ScheduleTemplateUpdateRequest,
 } from "@/types/scheduling/schedule";
-import { UserBase } from "@/types/user/user";
+import { UserReadBase } from "@/types/user/user";
 
 export default {
   /**
@@ -158,7 +158,7 @@ export default {
     availableUsers: {
       path: "/api/v1/facility/{facilityId}/appointments/available_users/",
       method: HttpMethod.GET,
-      TRes: Type<{ users: UserBase[] }>(),
+      TRes: Type<{ users: UserReadBase[] }>(),
     },
     /**
      * Get appointments across facilities

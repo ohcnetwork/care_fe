@@ -7,7 +7,7 @@ import {
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
 import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
-import { UserBase } from "@/types/user/user";
+import { UserReadBase } from "@/types/user/user";
 
 import {
   PatientCreate,
@@ -110,13 +110,13 @@ export default {
   addUser: {
     path: "/api/v1/patient/{patientId}/add_user/",
     method: HttpMethod.POST,
-    TRes: Type<UserBase>(),
+    TRes: Type<UserReadBase>(),
     TBody: Type<{ user: string; role: string }>(),
   },
   listUsers: {
     path: "/api/v1/patient/{patientId}/get_users/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<UserBase>>(),
+    TRes: Type<PaginatedResponse<UserReadBase>>(),
   },
   removeUser: {
     path: "/api/v1/patient/{patientId}/delete_user/",

@@ -1,5 +1,5 @@
 import { Code } from "@/types/base/code/code";
-import { UserBase } from "@/types/user/user";
+import { UserReadBase } from "@/types/user/user";
 
 export enum SpecimenDefinitionStatus {
   draft = "draft",
@@ -101,8 +101,8 @@ export interface SpecimenDefinitionCreate
 }
 
 export interface SpecimenDefinitionRead extends SpecimenDefinition {
-  created_by: UserBase;
-  updated_by: UserBase;
+  created_by: UserReadBase;
+  updated_by: UserReadBase;
   created_at: string;
   updated_at: string;
   type_tested?: TypeTestedSpec;

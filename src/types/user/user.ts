@@ -2,22 +2,33 @@ import { UserType } from "@/components/Users/UserFormValidations";
 
 import { GENDER_TYPES } from "@/common/constants";
 
-export type UserBase = {
+import { Organization } from "@/types/organization/organization";
+
+export interface UserBase {
   id: string;
   first_name: string;
-  username: string;
-  email: string;
   last_name: string;
-  user_type: UserType;
+  phone_number: string;
+  prefix?: string | null;
+  suffix?: string | null;
+}
+
+export interface UserReadBase extends UserBase {
   last_login: string;
   profile_picture_url: string;
-  phone_number: string;
+  user_type: UserType;
   gender: (typeof GENDER_TYPES)[number]["id"];
-  suffix: string | null;
-  prefix: string | null;
+  username: string;
   mfa_enabled: boolean;
   deleted: boolean;
-};
+}
+
+export interface UserRead extends UserReadBase {
+  geo_organization: Organization;
+  created_by: UserReadBase;
+  email: string;
+  flags: string[];
+}
 
 export type CreateUserModel = {
   user_type: UserType;
