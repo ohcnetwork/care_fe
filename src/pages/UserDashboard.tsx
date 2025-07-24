@@ -88,11 +88,7 @@ export default function UserDashboard() {
             </p>
           </div>
         </div>
-        <div
-          className={`flex ${
-            isMobile ? "flex-col gap-2 w-full" : "flex-row gap-2 items-center"
-          }`}
-        >
+        <div className="flex flex-col gap-2 w-full sm:flex-row sm:items-center sm:w-auto">
           {user.is_superuser && (
             <Button
               variant="outline"
@@ -106,7 +102,7 @@ export default function UserDashboard() {
                 className="gap-2 text-inherit flex items-center"
               >
                 <User2Icon className="size-4" />
-                <span className="leading-tight">{t("admin_dashboard")}</span>
+                {t("admin_dashboard")}
               </Link>
             </Button>
           )}
@@ -121,7 +117,7 @@ export default function UserDashboard() {
               >
                 <Link href={`/users/${user.username}`}>
                   <SquarePen className="size-4" />
-                  <span className="leading-tight">{t("edit_profile")}</span>
+                  {t("edit_profile")}
                 </Link>
               </Button>
               <Button
@@ -132,7 +128,7 @@ export default function UserDashboard() {
                 data-cy="sign-out-button"
               >
                 <LogOut className="size-4" />
-                <span className="leading-tight">{t("sign_out")}</span>
+                {t("sign_out")}
               </Button>
             </div>
           ) : (
@@ -142,7 +138,7 @@ export default function UserDashboard() {
                   data-cy="user-dashboard-menu-trigger"
                   variant="outline"
                   size="sm"
-                  className="px-2 w-auto"
+                  className="w-auto"
                 >
                   <CareIcon icon="l-ellipsis-v" className="text-inherit" />
                 </Button>
@@ -150,23 +146,23 @@ export default function UserDashboard() {
               <DropdownMenuContent align="end" className="w-40">
                 <DropdownMenuItem
                   asChild
-                  className="cursor-pointer flex items-center gap-2 text-xs leading-tight p-2"
+                  className="cursor-pointer flex items-center gap-2 text-xs w-full"
                 >
                   <Link
                     href={`/users/${user.username}`}
                     className="flex items-center gap-2 w-full text-inherit"
                   >
-                    <SquarePen className="size-4 shrink-0" />
-                    <span className="leading-tight">{t("edit_profile")}</span>
+                    <SquarePen className="size-4" />
+                    {t("edit_profile")}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   data-cy="sign-out-button"
-                  className="cursor-pointer flex items-center gap-2 text-xs leading-tight p-2"
+                  className="cursor-pointer flex items-center gap-2 text-xs w-full"
                   onClick={signOut}
                 >
-                  <LogOut className="size-4 shrink-0" />
-                  <span className="leading-tight">{t("sign_out")}</span>
+                  <LogOut className="size-4" />
+                  {t("sign_out")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
