@@ -56,7 +56,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { formatDateTime } from "@/Utils/utils";
+import { formatDateTime, isTouchDevice } from "@/Utils/utils";
 import patientApi from "@/types/emr/patient/patientApi";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
@@ -717,6 +717,10 @@ export function NoteManager({
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
                             onKeyDown={(e) => {
+                              // Skip on mobile devices
+                              if (isTouchDevice) {
+                                return;
+                              }
                               if (e.key === "Enter" && e.shiftKey) {
                                 handleSendMessage(e);
                               }

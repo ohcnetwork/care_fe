@@ -168,7 +168,7 @@ export interface Appointment {
   patient: PatientRead;
   booked_on: string;
   status: AppointmentNonCancelledStatus;
-  reason_for_visit: string;
+  note: string;
   user: UserBase;
   booked_by: UserBase | null; // This is null if the appointment was booked by the patient itself.
   facility: FacilityBareMinimum;
@@ -183,31 +183,34 @@ export interface AppointmentRead extends Appointment {
 
 export interface AppointmentCreateRequest {
   patient: string;
-  reason_for_visit: string;
+  note: string;
   tags: string[];
 }
 
 export interface AppointmentCreatePublicRequest {
   patient: string;
-  reason_for_visit: string;
+  note: string;
 }
 
 export interface AppointmentUpdateRequest {
   status: Appointment["status"];
+  note?: string;
 }
 
 export interface CreateAppointmentQuestion {
-  reason_for_visit: string;
+  note: string;
   slot_id: string;
   tags: string[];
 }
 
 export interface AppointmentCancelRequest {
   reason: "cancelled" | "entered_in_error";
-  reason_for_visit?: string;
+  note?: string;
 }
 
 export interface AppointmentRescheduleRequest {
   new_slot: string;
-  reason: string;
+  previous_booking_note: string;
+  new_booking_note: string;
+  tags: string[];
 }
