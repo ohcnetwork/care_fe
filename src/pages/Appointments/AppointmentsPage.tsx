@@ -787,7 +787,7 @@ function AppointmentColumn(props: {
     },
   });
 
-  let appointments =
+  const appointments =
     appointmentsData?.pages.flatMap((page) => page.results) ?? [];
 
   const toggleStatus = (status: AppointmentStatus) => {
@@ -1052,7 +1052,7 @@ function AppointmentRow(props: {
     enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
   });
 
-  let appointments = data?.results ?? [];
+  const appointments = data?.results ?? [];
 
   return (
     <div className="overflow-x-auto">
