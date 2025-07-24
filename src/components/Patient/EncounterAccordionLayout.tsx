@@ -38,8 +38,8 @@ export function EncounterAccordionLayout({
       <Accordion defaultValue={title.toLowerCase()} type="single" collapsible>
         <AccordionItem value={title.toLowerCase()}>
           <AccordionTrigger className="px-2 py-1 hover:no-underline flex items-center gap-2">
-            <CardHeader className="w-full flex flex-row items-center justify-between p-0 translate-y-0.5">
-              <CardTitle className="text-lg pt-1">{t(title)}:</CardTitle>
+            <CardHeader className="w-full flex flex-row items-center justify-between p-0 translate-y-0.5 pl-2">
+              <CardTitle className="text-base pt-1">{t(title)}:</CardTitle>
               <div>
                 {!readOnly && editLink && (
                   <Button variant="link" size="xs">
