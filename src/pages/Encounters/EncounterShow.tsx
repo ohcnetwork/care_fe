@@ -129,7 +129,7 @@ export const EncounterShow = (props: Props) => {
         {!inactiveEncounterStatus.includes(currentEncounter.status) && (
           <EncounterHistorySelector />
         )}
-        <div className="w-full overflow-x-auto">
+        <div className="w-full md:w-[calc(100vw-8rem)] overflow-x-auto">
           <div className="w-full border-b-2 border-secondary-200">
             <div className="overflow-x-auto sm:flex sm:items-baseline">
               <div className="mt-4 sm:mt-0">

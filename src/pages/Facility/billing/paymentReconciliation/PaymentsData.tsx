@@ -104,7 +104,7 @@ export default function PaymentsData({
   return (
     <>
       <div className="flex flex-row justify-between items-center gap-2 my-4 max-sm:flex-col w-full">
-        <div className="flex flex-row justify-start items-center gap-3 max-sm:flex-col w-full">
+        <div className="flex flex-wrap gap-3 justify-start items-center w-full px-4">
           <Tabs
             defaultValue={qParams.status ?? "all"}
             onValueChange={(value) =>
@@ -180,7 +180,7 @@ export default function PaymentsData({
               </SelectGroup>
             </SelectContent>
           </Select>
-          <div className="w-full sm:w-fit">
+          <div className="w-full sm:flex-shrink-0 sm:w-auto sm:min-w-[180px] sm:max-w-[250px]">
             <Select
               value={qParams.ordering}
               onValueChange={(value) => {

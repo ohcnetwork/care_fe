@@ -444,7 +444,7 @@ export default function PatientRegistration(
 
         <Form {...form}>
           <form
-            className="md:w-[500px] space-y-10"
+            className="w-full max-w-[500px] space-y-10"
             onSubmit={form.handleSubmit(onSubmit, (errors) => {
               console.log("errors", errors);
             })}
