@@ -635,7 +635,6 @@ const Login = (props: LoginProps) => {
                                 setOtp("");
                                 setOtpError("");
                                 setOtpValidationError("");
-                                setPhone("");
                               }}
                             >
                               {t("change_phone_number")}
