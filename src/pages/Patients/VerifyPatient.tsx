@@ -18,7 +18,10 @@ import {
 } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
-import Loading from "@/components/Common/Loading";
+import {
+  CardGridSkeleton,
+  CardListSkeleton,
+} from "@/components/Common/SkeletonLoading";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import { EncounterCard } from "@/components/Facility/EncounterCard";
 
@@ -83,7 +86,12 @@ export default function VerifyPatient() {
   }, [phone_number, year_of_birth, partial_id, verifyPatient]);
 
   if (isVerifyingPatient || !facility || encounterLoading) {
-    return <Loading />;
+    return (
+      <div className="space-y-4">
+        <CardListSkeleton count={1} />
+        <CardGridSkeleton count={4} />
+      </div>
+    );
   }
   return (
     <div>
