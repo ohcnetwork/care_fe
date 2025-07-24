@@ -64,14 +64,14 @@ export default function FacilityForm({
     facility_type: z.string().min(1, t("field_required")),
     name: z.string().trim().min(1, t("field_required")),
     description: z.string().optional(),
-    features: z.array(z.number()).default([]),
+    features: z.array(z.number()).prefault([]),
     pincode: validators().pincode,
     geo_organization: z.string().min(1, t("field_required")),
     address: z.string().trim().min(1, t("field_required")),
     phone_number: validators().phoneNumber.required,
     latitude: validators().coordinates.latitude.optional(),
     longitude: validators().coordinates.longitude.optional(),
-    is_public: z.boolean().default(false),
+    is_public: z.boolean().prefault(false),
   });
 
   type FacilityFormValues = z.infer<typeof facilityFormSchema>;

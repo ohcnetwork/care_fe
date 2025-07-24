@@ -84,7 +84,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       .string()
       .min(1, { error: t("field_required") }),
     referring_facility_contact_number: validators().phoneNumber.required,
-    priority: z.number().default(1),
+    priority: z.number().prefault(1),
     assigned_to: z.string().optional(),
   });
 
