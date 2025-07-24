@@ -86,8 +86,7 @@ interface Props {
 export default function AppointmentDetail(props: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const { facility, facilityId, isFacilityLoading, isFacilityError } =
-    useCurrentFacility();
+  const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
 
@@ -122,7 +121,7 @@ export default function AppointmentDetail(props: Props) {
     }
 
     // If facility query failed (no access to facility)
-    if (isFacilityError) {
+    if (!facility) {
       toast.error(t("no_permission_to_view_page"));
       goBack(`/`);
       return;
@@ -135,13 +134,7 @@ export default function AppointmentDetail(props: Props) {
       return;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    isFacilityLoading,
-    isFacilityError,
-    facility,
-    canViewAppointments,
-    facilityId,
-  ]);
+  }, [isFacilityLoading, facility, canViewAppointments, facilityId]);
 
   const { mutate: updateAppointment, isPending } = useMutation<
     Appointment,
