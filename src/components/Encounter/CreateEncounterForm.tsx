@@ -45,6 +45,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
+
 import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
@@ -56,6 +58,7 @@ import {
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 
 interface Props {
   patientId: string;
@@ -77,6 +80,7 @@ export default function CreateEncounterForm({
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
 
   const encounterFormSchema = z.object({
     status: z.enum(["planned", "in_progress", "on_hold"] as const),
@@ -121,6 +125,7 @@ export default function CreateEncounterForm({
       period: {
         start: data.start_date,
       },
+      tags: selectedTags.map((tag) => tag.id),
     };
 
     createEncounter(encounterRequest);
@@ -317,6 +322,14 @@ export default function CreateEncounterForm({
                   </FormItem>
                 )}
               />
+              <div>
+                <h3 className="text-sm font-medium">{t("tags")}</h3>
+                <TagSelectorPopover
+                  selected={selectedTags}
+                  onChange={setSelectedTags}
+                  resource={TagResource.ENCOUNTER}
+                />
+              </div>
             </div>
             <FormField
               control={form.control}

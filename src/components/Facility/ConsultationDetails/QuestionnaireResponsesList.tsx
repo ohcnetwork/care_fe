@@ -66,8 +66,6 @@ export function formatValue(
         : formatDateTime(value.toString(), "hh:mm A; DD/MM/YYYY");
     case "date":
       return formatDateTime(value.toString());
-    case "choice":
-      return properCase(value.toString());
     case "decimal":
     case "integer":
       return typeof value === "number" ? value.toString() : value.toString();
