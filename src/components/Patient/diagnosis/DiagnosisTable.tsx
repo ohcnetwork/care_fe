@@ -134,7 +134,7 @@ export function DiagnosisTable({ diagnoses, title }: DiagnosisTableProps) {
             <TableCell className="last:rounded-r-md text-center">
               <div className="flex items-center gap-2">
                 <Avatar
-                  name={diagnosis.created_by.username}
+                  name={formatName(diagnosis.created_by)}
                   className="size-4"
                   imageUrl={diagnosis.created_by.profile_picture_url}
                 />

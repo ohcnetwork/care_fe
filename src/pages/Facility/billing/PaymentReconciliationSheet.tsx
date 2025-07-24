@@ -1,9 +1,12 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -18,7 +21,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import {
+  MonetaryAmountInput,
+  MonetaryDisplay,
+} from "@/components/ui/monetary-display";
 import {
   Select,
   SelectContent,
@@ -59,6 +65,48 @@ interface PaymentReconciliationSheetProps {
   onSuccess?: () => void;
 }
 
+// Add schema before the component
+const formSchema = z.object({
+  reconciliation_type: z.nativeEnum(PaymentReconciliationType),
+  status: z.nativeEnum(PaymentReconciliationStatus),
+  kind: z.nativeEnum(PaymentReconciliationKind),
+  issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
+  outcome: z.nativeEnum(PaymentReconciliationOutcome),
+  method: z.nativeEnum(PaymentReconciliationPaymentMethod),
+  payment_datetime: z.string(),
+  amount: z.string().refine(
+    (val) => {
+      const num = Number(val);
+      return !isNaN(num) && num > 0 && /^\d+(\.\d{0,2})?$/.test(val);
+    },
+    { message: t("enter_valid_amount") },
+  ),
+  tendered_amount: z.string().refine(
+    (val) => {
+      const num = Number(val);
+      return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
+    },
+    {
+      message: t("enter_valid_amount"),
+    },
+  ),
+  returned_amount: z.string().refine(
+    (val) => {
+      const num = Number(val);
+      return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
+    },
+    {
+      message: t("enter_valid_amount"),
+    },
+  ),
+  target_invoice: z.string().optional(),
+  reference_number: z.string().optional(),
+  authorization: z.string().optional(),
+  disposition: z.string().optional(),
+  note: z.string().optional(),
+  account: z.string(),
+});
+
 export function PaymentReconciliationSheet({
   open,
   onOpenChange,
@@ -69,10 +117,11 @@ export function PaymentReconciliationSheet({
 }: PaymentReconciliationSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [tenderAmount, setTenderAmount] = useState<number>(0);
-  const [returnedAmount, setReturnedAmount] = useState<number>(0);
+  const [tenderAmount, setTenderAmount] = useState<string>("0");
+  const [returnedAmount, setReturnedAmount] = useState<string>("0");
 
-  const form = useForm<PaymentReconciliationCreate>({
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       reconciliation_type: PaymentReconciliationType.payment,
       status: PaymentReconciliationStatus.active,
@@ -81,9 +130,9 @@ export function PaymentReconciliationSheet({
       outcome: PaymentReconciliationOutcome.complete,
       method: PaymentReconciliationPaymentMethod.cash,
       payment_datetime: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-      amount: invoice?.total_gross || 0,
-      tendered_amount: 0,
-      returned_amount: 0,
+      amount: String(invoice?.total_gross || "0"),
+      tendered_amount: "0",
+      returned_amount: "0",
       target_invoice: invoice?.id,
       reference_number: "",
       authorization: "",
@@ -105,8 +154,8 @@ export function PaymentReconciliationSheet({
   useEffect(() => {
     if (invoice) {
       form.setValue("target_invoice", invoice.id);
-      form.setValue("amount", invoice.total_gross);
-      setTenderAmount(invoice.total_gross);
+      form.setValue("amount", String(invoice.total_gross));
+      setTenderAmount(String(invoice.total_gross));
     }
   }, [invoice, form]);
 
@@ -114,15 +163,17 @@ export function PaymentReconciliationSheet({
   useEffect(() => {
     if (isCashPayment) {
       // For cash payments, calculate change to return
-      const returned = Math.max(0, tenderAmount - (amount || 0));
+      const returned = String(
+        Math.max(0, Number(tenderAmount) - (Number(amount) || 0)),
+      );
       setReturnedAmount(returned);
       form.setValue("tendered_amount", tenderAmount);
       form.setValue("returned_amount", returned);
     } else {
       // For non-cash payments, tendered amount equals payment amount and returned is 0
-      form.setValue("tendered_amount", amount || 0);
-      form.setValue("returned_amount", 0);
-      setReturnedAmount(0);
+      form.setValue("tendered_amount", amount || "0");
+      form.setValue("returned_amount", "0");
+      setReturnedAmount("0");
     }
   }, [tenderAmount, amount, isCashPayment, form]);
 
@@ -155,14 +206,21 @@ export function PaymentReconciliationSheet({
       form.reset();
       onSuccess?.();
     },
-    onError: (error) => {
+    onError: () => {
       toast.error(t("error_recording_payment"));
-      console.error("Payment recording error:", error);
     },
   });
 
   const handleSubmit = form.handleSubmit((data) => {
-    submitPayment(data);
+    // Convert form data to PaymentReconciliationCreate type
+    const submissionData: PaymentReconciliationCreate = {
+      ...data,
+      // Ensure amount strings are properly formatted
+      amount: Number(data.amount).toFixed(2),
+      tendered_amount: Number(data.tendered_amount).toFixed(2),
+      returned_amount: Number(data.returned_amount).toFixed(2),
+    };
+    submitPayment(submissionData);
   });
 
   return (
@@ -190,7 +248,7 @@ export function PaymentReconciliationSheet({
                   <div className="text-right">
                     <p className="text-sm text-gray-500">{t("total_amount")}</p>
                     <p className="text-lg font-semibold">
-                      <MonetaryDisplay amount={invoice.total_gross} />
+                      <MonetaryDisplay amount={String(invoice.total_gross)} />
                     </p>
                   </div>
                 )}
@@ -289,15 +347,10 @@ export function PaymentReconciliationSheet({
                   <FormItem>
                     <FormLabel>{t("payment_amount")}</FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
+                      <MonetaryAmountInput
                         {...field}
                         value={field.value || ""}
-                        onChange={(e) => {
-                          const value = parseFloat(e.target.value);
-                          field.onChange(isNaN(value) ? 0 : value);
-                        }}
+                        onChange={(e) => field.onChange(e.target.value)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -324,14 +377,12 @@ export function PaymentReconciliationSheet({
                           </TooltipComponent>
                         </FormLabel>
                         <FormControl>
-                          <Input
-                            type="number"
-                            step="0.01"
+                          <MonetaryAmountInput
                             value={tenderAmount || ""}
                             onChange={(e) => {
-                              const value = parseFloat(e.target.value);
-                              setTenderAmount(isNaN(value) ? 0 : value);
-                              field.onChange(isNaN(value) ? 0 : value);
+                              const value = e.target.value;
+                              setTenderAmount(value);
+                              field.onChange(value);
                             }}
                           />
                         </FormControl>
@@ -343,7 +394,7 @@ export function PaymentReconciliationSheet({
                     )}
                   />
 
-                  {returnedAmount > 0 && (
+                  {Number(returnedAmount) > 0 && (
                     <div className="rounded-md bg-muted p-3">
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">
@@ -387,9 +438,7 @@ export function PaymentReconciliationSheet({
                       <Input {...field} value={field.value || ""} />
                     </FormControl>
                     <FormDescription>
-                      {isCashPayment
-                        ? t("reference_number_description_cash")
-                        : t("reference_number_description")}
+                      {!isCashPayment && t("reference_number_description")}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

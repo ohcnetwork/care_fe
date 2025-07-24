@@ -159,7 +159,7 @@ export default function RolesIndex() {
                   {t("add_role")}
                 </Button>
               </SheetTrigger>
-              <SheetContent className="overflow-y-auto">
+              <SheetContent>
                 <SheetHeader>
                   <SheetTitle>
                     {selectedRole && selectedRole.id

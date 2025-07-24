@@ -2,6 +2,7 @@ import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
 import {
+  ApplyMultipleChargeItemDefinitionRequest,
   ChargeItemCreate,
   ChargeItemRead,
   ChargeItemUpdate,
@@ -36,6 +37,12 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<ChargeItemRead>(),
     TBody: Type<{ datapoints: ChargeItemUpsert[] }>(),
+  },
+  applyChargeItemDefinitions: {
+    path: "/api/v1/facility/{facilityId}/charge_item/apply_charge_item_defs/",
+    method: HttpMethod.POST,
+    TRes: Type<ChargeItemRead>(),
+    TBody: Type<ApplyMultipleChargeItemDefinitionRequest>(),
   },
   addChargeItemsToInvoice: {
     path: "/api/v1/facility/{facilityId}/invoice/{invoiceId}/attach_items_to_invoice/",
