@@ -239,7 +239,7 @@ export default function TagConfigTable({
               {sortedConfigs.map((config: TagConfig) => (
                 <TableRow key={config.id} className="divide-x hover:bg-gray-50">
                   <TableCell className="font-medium">
-                    <div className="flex flex-col max-w-md text-sm break-words whitespace-normal">
+                    <div className="flex flex-col text-sm break-words whitespace-normal">
                       <span>{config.display}</span>
                       {config.description && (
                         <ExpandableText>
