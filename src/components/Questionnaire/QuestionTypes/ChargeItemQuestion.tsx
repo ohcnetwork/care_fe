@@ -233,7 +233,7 @@ export function ChargeItemQuestion({
 
   const handleUpdateChargeItem = (
     index: number,
-    updates: ApplyChargeItemDefinitionRequest,
+    updates: ApplyChargeItemDefinitionRequestWithObject,
   ) => {
     const newChargeItems = chargeItems.map((ci, i: number) => {
       if (i !== index) return ci;
