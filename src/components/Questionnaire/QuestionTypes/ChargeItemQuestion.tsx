@@ -279,7 +279,7 @@ export function ChargeItemQuestion({
 
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={5}>
+                <TableCell colSpan={4}>
                   <div className="flex items-center justify-between">
                     <div className="space-y-2">
                       <Skeleton className="h-4 w-[200px]" />
