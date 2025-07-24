@@ -286,7 +286,7 @@ function ActivityDefinitionFormContent({
             kind: existingData.kind,
             code: existingData.code,
             body_site: existingData.body_site,
-            diagnostic_report_codes: existingData.diagnostic_report_codes,
+            diagnostic_report_codes: existingData.diagnostic_report_codes || [],
             specimen_requirements:
               existingData.specimen_requirements?.map((s) => ({
                 value: s.id,
@@ -519,7 +519,7 @@ function ActivityDefinitionFormContent({
                             onChange={(e) => {
                               const sanitizedValue = e.target.value
                                 .toLowerCase()
-                                .replace(/[^a-z0-9-]/g, "");
+                                .replace(/[^a-z0-9_-]/g, "");
                               field.onChange(sanitizedValue);
                             }}
                           />
@@ -721,7 +721,7 @@ function ActivityDefinitionFormContent({
                     <ValueSetSelect
                       system="system-body-site"
                       value={form.watch("body_site")}
-                      placeholder={t("e.g., Right Arm")}
+                      placeholder={t("select_body_site")}
                       onSelect={(code) => {
                         form.setValue("body_site", {
                           code: code.code,
@@ -804,7 +804,12 @@ function ActivityDefinitionFormContent({
                         createForm={(onSuccess) => (
                           <CreateSpecimenDefinition
                             facilityId={facilityId}
-                            onSuccess={onSuccess}
+                            onSuccess={() => {
+                              queryClient.invalidateQueries({
+                                queryKey: ["specimenDefinitions"],
+                              });
+                              onSuccess();
+                            }}
                           />
                         )}
                       />
@@ -867,7 +872,12 @@ function ActivityDefinitionFormContent({
                           <div className="py-2">
                             <ObservationDefinitionForm
                               facilityId={facilityId}
-                              onSuccess={onSuccess}
+                              onSuccess={() => {
+                                queryClient.invalidateQueries({
+                                  queryKey: ["observationDefinitions"],
+                                });
+                                onSuccess();
+                              }}
                             />
                           </div>
                         )}
@@ -916,7 +926,12 @@ function ActivityDefinitionFormContent({
                           <div className="py-2">
                             <ChargeItemDefinitionForm
                               facilityId={facilityId}
-                              onSuccess={onSuccess}
+                              onSuccess={() => {
+                                queryClient.invalidateQueries({
+                                  queryKey: ["chargeItemDefinitions"],
+                                });
+                                onSuccess();
+                              }}
                             />
                           </div>
                         )}

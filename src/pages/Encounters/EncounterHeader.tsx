@@ -1,7 +1,9 @@
+import dayjs from "dayjs";
 import { ChevronDown, ExternalLink } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -19,6 +21,7 @@ import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 import EncounterProperties from "@/pages/Encounters/EncounterProperties";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
+import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 export function EncounterHeader() {
   const { t } = useTranslation();
@@ -35,6 +38,7 @@ export function EncounterHeader() {
   const readOnly = selectedEncounterId !== currentEncounterId;
 
   const { patient, facility } = encounter;
+  const tags = [...patient.instance_tags, ...patient.facility_tags];
 
   return (
     <Card className="p-2 md:p-4 flex flex-col md:flex-row md:justify-between gap-6">
@@ -78,17 +82,51 @@ export function EncounterHeader() {
                 : t("ongoing")}
             </span>
           </div>
+          {patient.instance_identifiers?.map((identifier) => (
+            <div
+              key={identifier.config.id}
+              className="flex md:flex-col gap-0.5 items-center md:items-start"
+            >
+              <span className="text-xs text-gray-600 w-32 md:w-auto">
+                {identifier.config.config.display}:{" "}
+              </span>
+              <span className="text-sm font-semibold">{identifier.value}</span>
+            </div>
+          ))}
           <div className="flex md:flex-col gap-0.5 items-center md:items-start">
             <span className="text-xs text-gray-600 w-32 md:w-auto">
-              {t("hospital_identifier")}:{" "}
+              {t("patient_tags")}:{" "}
             </span>
-            {/* TODO: implement this once we have it */}
-            <span className="text-sm font-semibold">--</span>
+            {tags.length ? (
+              <div className="flex flex-wrap gap-1">
+                {tags.map((tag) => (
+                  <Badge
+                    key={tag.id}
+                    variant="secondary"
+                    size="sm"
+                    className="text-xs"
+                  >
+                    {getTagHierarchyDisplay(tag)}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <span className="text-sm font-semibold">--</span>
+            )}
           </div>
         </div>
         <div className="md:hidden">
           <EncounterProperties encounter={encounter} canEdit={false} />
         </div>
+        {patient.deceased_datetime && (
+          <Badge variant="destructive" className="w-fit sm:self-center">
+            <h3 className="text-sm font-normal">
+              {t("time_of_death")}
+              {": "}
+              {dayjs(patient.deceased_datetime).format("DD MMM YYYY, hh:mm A")}
+            </h3>
+          </Badge>
+        )}
       </div>
 
       {!readOnly && (

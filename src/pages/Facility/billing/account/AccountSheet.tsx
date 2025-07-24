@@ -40,7 +40,7 @@ import {
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
 import { Period } from "@/types/emr/encounter/encounter";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 
 interface AccountFormValues {
   name: string;
@@ -48,7 +48,7 @@ interface AccountFormValues {
   status: AccountStatus;
   billing_status: AccountBillingStatus;
   id?: string;
-  patient?: Patient;
+  patient?: PatientRead;
   service_period?: Period;
 }
 
@@ -182,10 +182,10 @@ export function AccountSheet({
               <FormField
                 name="name"
                 control={methods.control}
-                rules={{ required: t("name_required") }}
+                rules={{ required: t("name_is_required") }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("name")}</FormLabel>
+                    <FormLabel aria-required>{t("name")}</FormLabel>
                     <FormControl>
                       <Input {...field} disabled={isCreating} />
                     </FormControl>
@@ -209,10 +209,10 @@ export function AccountSheet({
               <FormField
                 name="status"
                 control={methods.control}
-                rules={{ required: t("status_required") }}
+                rules={{ required: t("required") }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("status")}</FormLabel>
+                    <FormLabel aria-required>{t("status")}</FormLabel>
                     <FormControl>
                       <Select
                         value={field.value}

@@ -55,7 +55,6 @@ import countryList from "@/common/static/countries.json";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import dayjs from "@/Utils/dayjs";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
@@ -99,7 +98,7 @@ export default function PatientRegistration(
     () =>
       z
         .object({
-          name: z.string().nonempty(t("name_is_required")),
+          name: z.string().trim().nonempty(t("name_is_required")),
           phone_number: validators().phoneNumber.required,
           same_phone_number: z.boolean(),
           emergency_phone_number: validators().phoneNumber.required,
@@ -110,6 +109,7 @@ export default function PatientRegistration(
           age_or_dob: z.enum(["dob", "age"]),
           date_of_birth: z
             .string()
+            .nonempty(t("date_of_birth_must_be_present"))
             .regex(/^\d{4}-\d{2}-\d{2}$/, t("date_of_birth_format"))
             .refine((date) => {
               const parsedDate = dayjs(date);
@@ -125,12 +125,12 @@ export default function PatientRegistration(
             .max(120, t("age_must_be_below_120"))
             .optional(),
           address: enableMinimalPatientRegistration
-            ? z.string().optional()
-            : z.string().nonempty(t("address_is_required")),
+            ? z.string().trim().optional()
+            : z.string().trim().nonempty(t("address_is_required")),
           same_address: z.boolean(),
           permanent_address: enableMinimalPatientRegistration
-            ? z.string().optional()
-            : z.string().nonempty(t("field_required")),
+            ? z.string().trim().optional()
+            : z.string().trim().nonempty(t("field_required")),
           pincode: enableMinimalPatientRegistration
             ? validators().pincode.optional()
             : validators().pincode,
@@ -149,52 +149,56 @@ export default function PatientRegistration(
             }),
           ),
         })
-        .refine(
-          (data) => (data.age_or_dob === "dob" ? !!data.date_of_birth : true),
-          {
-            message: t("date_of_birth_must_be_present"),
-            path: ["date_of_birth"],
-          },
-        )
-        .refine((data) => (data.age_or_dob === "age" ? !!data.age : true), {
-          message: t("age_must_be_present"),
-          path: ["age"],
-        })
-        .refine(
-          (data) =>
-            data.nationality === defaultCountry
-              ? !!data.geo_organization
-              : true,
-          {
-            message: t("geo_organization_required"),
-            path: ["geo_organization"],
-          },
-        )
-        .refine(
-          (data) => {
-            if (!data.deceased_datetime) return true;
-
-            const deathDate = dayjs(data.deceased_datetime);
-            if (!deathDate.isValid()) return false;
-
-            const dob = data.date_of_birth
-              ? dayjs(data.date_of_birth)
-              : dayjs().subtract(data.age || 0, "years");
-
-            return data.date_of_birth
-              ? dob.isBefore(deathDate)
-              : dob.year() < deathDate.year();
-          },
-          (data) => ({
-            message: dayjs(data.deceased_datetime).isValid()
-              ? t("death_date_must_be_after_dob")
-              : t("invalid_date_format", { format: "DD-MM-YYYY HH:mm" }),
-            path: ["deceased_datetime"],
-          }),
-        )
         .superRefine((data, ctx) => {
-          // When an identifier is required, and it has no default_value, it should have a value
-          // The identifiers with errors are returned and errors are shown for all applicable identifiers
+          if (data.age_or_dob === "dob" && !data.date_of_birth) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("date_of_birth_must_be_present"),
+              path: ["date_of_birth"],
+            });
+          }
+          if (data.age_or_dob === "age" && !data.age) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("age_must_be_present"),
+              path: ["age"],
+            });
+          }
+
+          if (data.nationality === defaultCountry && !data.geo_organization) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("geo_organization_required"),
+              path: ["geo_organization"],
+            });
+          }
+          if (data.deceased_datetime) {
+            const deathDate = dayjs(data.deceased_datetime);
+            if (!deathDate.isValid()) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: t("invalid_date_format", {
+                  format: "DD-MM-YYYY HH:mm",
+                }),
+                path: ["deceased_datetime"],
+              });
+            } else {
+              const dob = data.date_of_birth
+                ? dayjs(data.date_of_birth)
+                : dayjs().subtract(data.age || 0, "years");
+              const valid = data.date_of_birth
+                ? dob.isBefore(deathDate)
+                : dob.year() < deathDate.year();
+              if (!valid) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: t("death_date_must_be_after_dob"),
+                  path: ["deceased_datetime"],
+                });
+              }
+            }
+          }
+
           const identifierConfigs =
             facility?.patient_instance_identifier_configs || [];
           const identifiers = data.identifiers || [];
@@ -226,6 +230,7 @@ export default function PatientRegistration(
       phone_number: phone_number || "",
       emergency_phone_number: "",
       age_or_dob: "dob",
+      date_of_birth: "",
       same_phone_number: false,
       same_address: true,
       _selected_levels: [],
@@ -290,7 +295,7 @@ export default function PatientRegistration(
         permanent_address: values.same_address
           ? values.address
           : values.permanent_address,
-        pincode: String(values.pincode) || undefined,
+        pincode: values.pincode || undefined,
         identifiers: editableIdentifiers,
       });
       return;
@@ -304,7 +309,7 @@ export default function PatientRegistration(
           ? values.address
           : values.permanent_address,
         facility: facilityId,
-        pincode: String(values.pincode) || undefined,
+        pincode: values.pincode || undefined,
         tags: selectedTags.map((tag) => tag.id),
         identifiers: editableIdentifiers,
       });
@@ -335,7 +340,7 @@ export default function PatientRegistration(
 
   const patientPhoneSearch = useQuery({
     queryKey: ["patients", "phone-number", phoneNumber],
-    queryFn: query.debounced(routes.searchPatient, {
+    queryFn: query.debounced(patientApi.searchPatient, {
       body: {
         phone_number: phoneNumber,
       },
@@ -388,7 +393,7 @@ export default function PatientRegistration(
         deceased_datetime: null,
         identifiers: facility.patient_instance_identifier_configs.map(
           (identifierConfig) => {
-            const identifier = patientQuery.data.instance_identifiers.find(
+            const identifier = patientQuery.data.instance_identifiers?.find(
               (i) => i.config.id === identifierConfig.id,
             );
             return {
@@ -900,6 +905,7 @@ export default function PatientRegistration(
                             : undefined;
                           field.onChange(value);
                         }}
+                        value={field.value || undefined}
                         data-cy="pincode-input"
                       />
                     </FormControl>
@@ -965,6 +971,7 @@ export default function PatientRegistration(
               </div>
             </div>
 
+            {/* TODO: Move Patient Identifier edit out to Patient display page */}
             {/* Patient Identifiers */}
             {facility && facility.patient_instance_identifier_configs && (
               <div className="space-y-4">
@@ -1000,7 +1007,10 @@ export default function PatientRegistration(
                                   config: c.id || "",
                                   value,
                                 };
-                                form.setValue("identifiers", identifiers);
+                                form.setValue("identifiers", identifiers, {
+                                  shouldDirty: true,
+                                  shouldValidate: form.formState.isSubmitted,
+                                });
                               }}
                               placeholder={
                                 isAutogenerated

@@ -358,7 +358,7 @@ function ProductKnowledgeFormContent({
                             onChange={(e) => {
                               const sanitizedValue = e.target.value
                                 .toLowerCase()
-                                .replace(/[^a-z0-9-]/g, "");
+                                .replace(/[^a-z0-9_-]/g, "");
                               field.onChange(sanitizedValue);
                             }}
                           />
@@ -661,7 +661,7 @@ function ProductKnowledgeFormContent({
                                   value={form.watch(
                                     `storage_guidelines.${index}.stability_duration.unit`,
                                   )}
-                                  placeholder={t("e.g., Day, Month")}
+                                  placeholder={t("duration_unit_placeholder")}
                                   onSelect={(code) => {
                                     form.setValue(
                                       `storage_guidelines.${index}.stability_duration.unit`,
@@ -760,7 +760,7 @@ function ProductKnowledgeFormContent({
                               >
                                 <SelectTrigger>
                                   <SelectValue
-                                    placeholder={t("e.g., Tablet, Injection")}
+                                    placeholder={t("dosage_form_placeholder")}
                                   />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -830,9 +830,7 @@ function ProductKnowledgeFormContent({
                                         <ValueSetSelect
                                           system="system-route"
                                           value={routeField.value}
-                                          placeholder={t(
-                                            "e.g., Oral, Intravenous",
-                                          )}
+                                          placeholder={t("select_route")}
                                           onSelect={(code) => {
                                             routeField.onChange({
                                               code: code.code,

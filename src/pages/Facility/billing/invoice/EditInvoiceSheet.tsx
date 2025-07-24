@@ -109,8 +109,8 @@ export default function EditInvoiceSheet({
 
     const data: InvoiceCreate = {
       status: invoice.status,
-      payment_terms: values.payment_terms?.trim() || null,
-      note: values.note?.trim() || null,
+      payment_terms: values.payment_terms?.trim(),
+      note: values.note?.trim(),
       account: invoice.account.id,
       charge_items: chargeItemIds,
       issue_date: invoice.issue_date,
@@ -188,7 +188,7 @@ export default function EditInvoiceSheet({
 
               <div className="flex justify-end gap-2 pt-4">
                 <Button type="submit" disabled={isPending}>
-                  {isPending ? t("saving...") : t("save")}
+                  {isPending ? t("saving_with_dots") : t("save")}
                 </Button>
               </div>
             </form>

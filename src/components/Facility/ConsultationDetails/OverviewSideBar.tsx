@@ -16,17 +16,19 @@ import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSea
 
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
+import { formatDateTime, formatName } from "@/Utils/utils";
 import EncounterProperties from "@/pages/Encounters/EncounterProperties";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 
 interface Props {
-  encounter: Encounter;
+  encounter: EncounterRead;
   canAccess: boolean;
   canEdit: boolean;
 }
 
 export default function SideOverview({ encounter, canEdit }: Props) {
+  const { t } = useTranslation();
   const { selectedEncounterId, currentEncounterId } = useEncounter();
   const readOnly = selectedEncounterId !== currentEncounterId;
 
@@ -41,6 +43,15 @@ export default function SideOverview({ encounter, canEdit }: Props) {
         {!readOnly && canEdit && <Questionnaires encounter={encounter} />}
         <Locations canEdit={canEdit} encounter={encounter} />
         <DepartmentsAndTeams canEdit={canEdit} encounter={encounter} />
+        <div className="flex md:flex-col gap-0.5 items-center md:items-start">
+          <span className="text-xs text-gray-600 w-32 md:w-auto">
+            {t("hospital_identifier")}:{" "}
+          </span>
+          <span className="text-sm font-semibold">
+            {encounter.external_identifier || "--"}
+          </span>
+        </div>
+        <AuditLogs encounter={encounter} />
       </div>
     </div>
   );
@@ -130,7 +141,7 @@ const ManageCareTeamButton = () => {
   );
 };
 
-const Questionnaires = ({ encounter }: { encounter: Encounter }) => {
+const Questionnaires = ({ encounter }: { encounter: EncounterRead }) => {
   const { t } = useTranslation();
 
   const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
@@ -169,7 +180,7 @@ const Locations = ({
   encounter,
 }: {
   canEdit: boolean;
-  encounter: Encounter;
+  encounter: EncounterRead;
 }) => {
   const { t } = useTranslation();
 
@@ -223,7 +234,7 @@ const DepartmentsAndTeams = ({
   encounter,
 }: {
   canEdit: boolean;
-  encounter: Encounter;
+  encounter: EncounterRead;
 }) => {
   const { t } = useTranslation();
 
@@ -253,13 +264,38 @@ const DepartmentsAndTeams = ({
             currentOrganizations={encounter.organizations}
             facilityId={encounter.facility.id}
             trigger={
-              <Button variant="outline" size="sm" className="w-full">
+              <Button variant="outline" className="w-full">
                 <Building className="size-4 mr-2" />
                 {t("update_department")}
               </Button>
             }
           />
         )}
+      </div>
+    </div>
+  );
+};
+
+const AuditLogs = ({ encounter }: { encounter: EncounterRead }) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="bg-gray-100 border border-gray-200 rounded-lg p-2">
+      <div className="space-y-2">
+        <div>
+          <p className="text-sm text-gray-500">{t("created_by")}</p>
+          <p className="text-sm">{formatName(encounter.created_by)}</p>
+          <p className="text-xs text-gray-500">
+            {formatDateTime(encounter.created_date)}
+          </p>
+        </div>
+        <div>
+          <p className="text-sm text-gray-500">{t("last_modified_by")}</p>
+          <p className="text-sm">{formatName(encounter.updated_by)}</p>
+          <p className="text-xs text-gray-500">
+            {formatDateTime(encounter.modified_date)}
+          </p>
+        </div>
       </div>
     </div>
   );

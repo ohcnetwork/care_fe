@@ -44,7 +44,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -293,23 +292,23 @@ const AppointmentDetails = ({
               {appointment.reason_for_visit || t("no_reason_provided")}
             </p>
           </div>
-          {appointment.tags?.length > 0 && (
-            <div className="text-sm">
-              <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
-                <p className="font-medium">{t("tags")}</p>
-                <TagAssignmentSheet
-                  entityType="appointment"
-                  entityId={appointment.id}
-                  facilityId={facility.id}
-                  currentTags={appointment.tags}
-                  onUpdate={() => {
-                    queryClient.invalidateQueries({
-                      queryKey: ["appointment", appointment.id],
-                    });
-                  }}
-                  canWrite={true}
-                />
-              </div>
+          <div className="text-sm">
+            <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
+              <p className="font-medium">{t("tags")}</p>
+              <TagAssignmentSheet
+                entityType="appointment"
+                entityId={appointment.id}
+                facilityId={facility.id}
+                currentTags={appointment.tags}
+                onUpdate={() => {
+                  queryClient.invalidateQueries({
+                    queryKey: ["appointment", appointment.id],
+                  });
+                }}
+                canWrite={true}
+              />
+            </div>
+            {appointment.tags?.length > 0 ? (
               <p className="text-gray-600 flex flex-wrap gap-1">
                 {appointment.tags.map((tag) => (
                   <Badge key={tag.id} variant="secondary">
@@ -318,8 +317,10 @@ const AppointmentDetails = ({
                   </Badge>
                 ))}
               </p>
-            </div>
-          )}
+            ) : (
+              <p className="text-gray-600 md:-mt-2">{t("no_tags_assigned")}</p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -440,6 +441,10 @@ const AppointmentActions = ({
   const queryClient = useQueryClient();
 
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
+  const [isRescheduleReasonOpen, setIsRescheduleReasonOpen] = useState(false);
+  const [rescheduleReason, setRescheduleReason] = useState(
+    appointment.reason_for_visit,
+  );
   const [selectedPractitioner, setSelectedPractitioner] = useState(
     appointment.user,
   );
@@ -475,6 +480,7 @@ const AppointmentActions = ({
         });
         setIsRescheduleOpen(false);
         setSelectedSlotId(undefined);
+        setRescheduleReason("");
         navigate(
           `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${newAppointment.id}`,
         );
@@ -493,63 +499,101 @@ const AppointmentActions = ({
       </Button>
 
       {canCreateAppointment && (
-        <Sheet open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
-          <SheetTrigger asChild>
-            {appointment.status !== "in_consultation" && (
-              <Button variant="outline" size="lg">
-                <CalendarIcon className="size-4 mr-2" />
-                {t("reschedule")}
-              </Button>
-            )}
-          </SheetTrigger>
-          <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
-            </SheetHeader>
-
-            <div className="mt-6">
-              <div className="my-4">
-                <Label className="mb-2">{t("select_practitioner")}</Label>
-                <PractitionerSelector
-                  facilityId={facilityId}
-                  selected={selectedPractitioner}
-                  onSelect={(user) => user && setSelectedPractitioner(user)}
-                  clearSelection={t("show_all")}
+        <>
+          <AlertDialog
+            open={isRescheduleReasonOpen}
+            onOpenChange={setIsRescheduleReasonOpen}
+          >
+            <AlertDialogTrigger asChild>
+              {appointment.status !== "in_consultation" && (
+                <Button variant="outline" size="lg">
+                  <CalendarIcon className="size-4 mr-2" />
+                  {t("reschedule")}
+                </Button>
+              )}
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {t("reschedule_appointment")}
+                </AlertDialogTitle>
+                <Label>{t("note")}</Label>
+                <Textarea
+                  value={rescheduleReason}
+                  onChange={(e) => setRescheduleReason(e.target.value)}
                 />
-              </div>
-              <AppointmentSlotPicker
-                facilityId={facilityId}
-                resourceId={selectedPractitioner?.id}
-                selectedSlotId={selectedSlotId}
-                onSlotSelect={setSelectedSlotId}
-                currentAppointment={appointment}
-              />
-
-              <div className="flex justify-end gap-2 mt-6">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setIsRescheduleOpen(false);
-                    setSelectedSlotId(undefined);
-                  }}
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel
+                  onClick={() => setIsRescheduleReasonOpen(false)}
                 >
                   {t("cancel")}
-                </Button>
-                <Button
-                  variant="default"
-                  disabled={!selectedSlotId || isRescheduling}
+                </AlertDialogCancel>
+                <AlertDialogAction
                   onClick={() => {
-                    if (selectedSlotId) {
-                      rescheduleAppointment({ new_slot: selectedSlotId });
-                    }
+                    setIsRescheduleReasonOpen(false);
+                    setIsRescheduleOpen(true);
                   }}
+                  disabled={!rescheduleReason}
                 >
-                  {isRescheduling ? t("rescheduling") : t("reschedule")}
-                </Button>
+                  {t("continue")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <Sheet open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
+            <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
+              </SheetHeader>
+
+              <div className="mt-6">
+                <div className="my-4">
+                  <Label className="mb-2">{t("select_practitioner")}</Label>
+                  <PractitionerSelector
+                    facilityId={facilityId}
+                    selected={selectedPractitioner}
+                    onSelect={(user) => user && setSelectedPractitioner(user)}
+                  />
+                </div>
+                <AppointmentSlotPicker
+                  facilityId={facilityId}
+                  resourceId={selectedPractitioner?.id}
+                  selectedSlotId={selectedSlotId}
+                  onSlotSelect={setSelectedSlotId}
+                  currentAppointment={appointment}
+                />
+
+                <div className="flex justify-end gap-2 mt-6">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsRescheduleOpen(false);
+                      setSelectedSlotId(undefined);
+                    }}
+                  >
+                    {t("cancel")}
+                  </Button>
+                  <Button
+                    variant="default"
+                    disabled={!selectedSlotId || isRescheduling}
+                    onClick={() => {
+                      if (selectedSlotId) {
+                        rescheduleAppointment({
+                          new_slot: selectedSlotId,
+                          reason: rescheduleReason,
+                        });
+                      }
+                    }}
+                  >
+                    {isRescheduling ? t("rescheduling") : t("reschedule")}
+                  </Button>
+                </div>
               </div>
-            </div>
-          </SheetContent>
-        </Sheet>
+            </SheetContent>
+          </Sheet>
+        </>
       )}
 
       {currentStatus === "booked" && (
