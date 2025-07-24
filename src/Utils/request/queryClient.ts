@@ -50,6 +50,7 @@ persistQueryClient({
   dehydrateOptions: {
     shouldDehydrateQuery: ({ meta }) => meta?.persist === true,
   },
+  buster: localStorage.getItem("app-version") ?? "0.0.0",
 });
 
 export default queryClient;
