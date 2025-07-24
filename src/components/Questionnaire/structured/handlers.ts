@@ -27,8 +27,7 @@ type StructuredHandler<T extends StructuredQuestionType> = {
 };
 
 const sanitizeNote = (note?: string | null): string | undefined => {
-  if (note === undefined || note === null) return undefined;
-  return note.trim();
+  return note?.trim() ?? undefined;
 };
 
 export const structuredHandlers: {
