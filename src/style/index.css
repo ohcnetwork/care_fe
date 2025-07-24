@@ -218,10 +218,6 @@
     }
   }
 
-  .hide-required-asterisk [data-slot="form-label"][for][aria-required="true"]::after {
-   content: none !important;
-  }
-
   .dropdown:hover .dropdown-menu {
     display: block;
   }

@@ -177,7 +177,7 @@ export function AccountSheet({
           <Form {...methods}>
             <form
               onSubmit={methods.handleSubmit(onSubmit)}
-              className="space-y-6 py-6 hide-required-asterisk"
+              className="space-y-6 py-6"
             >
               <FormField
                 name="name"
