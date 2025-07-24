@@ -69,10 +69,10 @@ describe("Facility Specimen Management", () => {
     cy.get("button").contains("Save").click();
 
     cy.verifyErrorMessages([
-      { message: "Required", label: "Title" },
-      { message: "Required", label: "Slug" },
+      { message: "This field is required", label: "Title" },
+      { message: "This field is required", label: "Slug" },
       {
-        message: "Required",
+        message: "This field is required",
         label: "Description",
       },
       { message: "Required", label: "Type Collected" },

@@ -86,20 +86,6 @@ const typeTestedSchema = z.object({
   single_use: z.boolean().nullable(),
 });
 
-const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  slug: z.string().min(1, "Slug is required"),
-  status: z.enum(SpecimenDefinitionStatus),
-  description: z.string().min(1, t("field_required")),
-  derived_from_uri: z.url({ message: "Please enter a valid URL" }).optional(),
-  type_collected: CodeSchema,
-  patient_preparation: z.array(CodeSchema).min(0),
-  collection: CodeSchema.optional(),
-  type_tested: typeTestedSchema.optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
 interface SpecimenDefinitionFormProps {
   initialData?: SpecimenDefinitionCreate;
   onSubmit: (data: SpecimenDefinitionCreate) => void;
@@ -115,13 +101,29 @@ export function SpecimenDefinitionForm({
 
   const { facilityId } = useCurrentFacility();
 
+  const formSchema = z.object({
+    title: z.string().min(1, t("field_required")),
+    slug: z.string().min(1, t("field_required")),
+    status: z.enum(SpecimenDefinitionStatus),
+    description: z.string().min(1, t("field_required")),
+    derived_from_uri: z
+      .url({ message: t("please_enter_invalid_url") })
+      .optional(),
+    type_collected: CodeSchema,
+    patient_preparation: z.array(CodeSchema).min(0),
+    collection: CodeSchema.optional(),
+    type_tested: typeTestedSchema.optional(),
+  });
+
+  type FormValues = z.infer<typeof formSchema>;
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: initialData?.title,
-      slug: initialData?.slug,
+      title: initialData?.title ?? "",
+      slug: initialData?.slug ?? "",
       status: initialData?.status ?? SpecimenDefinitionStatus.active,
-      description: initialData?.description,
+      description: initialData?.description ?? "",
       derived_from_uri: initialData?.derived_from_uri ?? undefined,
       type_collected: initialData?.type_collected,
       patient_preparation: initialData?.patient_preparation ?? [],

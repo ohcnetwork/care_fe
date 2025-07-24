@@ -1059,7 +1059,6 @@
   "invalid_pincode": "പിൻകോഡ് അസാധുവാണ്",
   "invalid_pincode_msg": "ദയവായി സാധുവായ പിൻകോഡ് നൽകുക",
   "invalid_reset": "അസാധുവായ റീസെറ്റ്",
-  "invalid_url": "ദയവായി ഒരു സാധുവായ url നൽകുക",
   "invalid_url_http_https": "URL http:// അല്ലെങ്കിൽ https:// എന്നതിൽ തുടങ്ങണം",
   "invalid_url_javascript": "URL-ൽ javascript ഉൾപ്പെടുത്തരുത്, ദയവായി ഒരു സാധുവായ URL നൽകുക.",
   "invalid_username": "അനിവാര്യം. 150 ചിഹ്നമോ, അക്ഷരമോ, സംഖ്യയോ അതിൽ കുറവോ. അക്ഷരങ്ങൾ, അക്കങ്ങൾ, @/./+/-/_ മാത്രം ഉപയോഗിക്കുക.",
