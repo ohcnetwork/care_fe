@@ -34,7 +34,6 @@ export default function FacilityUsers(props: { facilityId: string }) {
 
   const { data: userListData, isFetching: userListFetching } = useQuery({
     queryKey: ["facilityUsers", facilityId, qParams, resultsPerPage],
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
     queryFn: query.debounced(routes.facility.getUsers, {
       pathParams: { facility_id: facilityId },
       queryParams: {

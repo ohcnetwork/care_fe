@@ -58,7 +58,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const [verificationOpen, setVerificationOpen] = useState(false);
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-
   const { facility } = useCurrentFacility();
 
   const { canCreatePatient } = getPermissions(
@@ -68,7 +67,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 
   const handleCreatePatient = useCallback(() => {
     const queryParams = phoneNumber ? { phone_number: phoneNumber } : {};
-
     navigate(`/facility/${facilityId}/patient/create`, {
       query: queryParams,
     });
@@ -110,6 +108,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       placeholder: t("search_by_identifier", { name: c.config.display }),
       value: "",
       display: c.config.display,
+      regex: c.config.regex,
     })) || [];
 
   const searchOptions = [
@@ -119,6 +118,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       placeholder: t("search_by_phone_number"),
       value: phoneNumber,
       display: t("phone_number"),
+      regex: "",
     },
     ...identifierOptions,
   ];
@@ -127,39 +127,57 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const [identifierSearch, setIdentifierSearch] = useState<{
     config?: string;
     value?: string;
+    regex?: string;
   }>({});
 
-  const handleSearch = useCallback((key: string, value: string) => {
-    if (key === "phone_number") {
-      setPhoneNumberQuery({
-        phone_number: isValidPhoneNumber(value) || value === "" ? value : null,
-      });
-      setIdentifierSearch({});
-    } else {
-      setPhoneNumberQuery({ phone_number: "" });
-      setIdentifierSearch({ config: key, value });
+  const handleSearch = useCallback(
+    (key: string, value: string) => {
+      if (key === "phone_number") {
+        setPhoneNumberQuery({
+          phone_number:
+            isValidPhoneNumber(value) || value === "" ? value : null,
+        });
+        setIdentifierSearch({});
+      } else {
+        setPhoneNumberQuery({ phone_number: "" });
+        setIdentifierSearch({
+          config: key,
+          value,
+          regex: searchOptions.find((o) => o.key === key)?.regex,
+        });
+      }
+    },
+    [searchOptions],
+  );
+
+  const isIdentifierValid = (() => {
+    if (!identifierSearch.value) return false;
+    if (!identifierSearch.regex) return true;
+    try {
+      const regex = new RegExp(identifierSearch.regex);
+      return regex.test(identifierSearch.value);
+    } catch {
+      return false;
     }
-  }, []);
+  })();
 
   const { data: patientList, isFetching } = useQuery({
     queryKey: ["patient-search", facilityId, phoneNumber, identifierSearch],
     queryFn: query.debounced(patientApi.searchPatient, {
       body: phoneNumber
         ? { phone_number: phoneNumber }
-        : identifierSearch.config && identifierSearch.value
+        : isIdentifierValid
           ? { config: identifierSearch.config, value: identifierSearch.value }
           : {},
     }),
     enabled:
-      (!!isValidPhoneNumber(phoneNumber) && !!phoneNumber) ||
-      (!!identifierSearch.config && !!identifierSearch.value),
+      (!!isValidPhoneNumber(phoneNumber) && !!phoneNumber) || isIdentifierValid,
   });
 
   const handlePatientSelect = (index: number) => {
     const patient = patientList?.results[index];
-    if (!patient) {
-      return;
-    }
+    if (!patient) return;
+
     if (patientList && patientList.partial) {
       setSelectedPatient(patient);
       setVerificationOpen(true);
@@ -198,6 +216,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
             <AddPatientButton />
           </div>
         )}
+
         <div className="space-y-6 mt-6">
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-bold tracking-tight">
@@ -210,77 +229,72 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
             </p>
           </div>
 
-          <div>
-            <div className="space-y-6">
-              <SearchInput
-                data-cy="patient-search"
-                options={searchOptions}
-                onSearch={handleSearch}
-                className="w-full"
-                autoFocus
-              />
+          <div className="space-y-6">
+            <SearchInput
+              data-cy="patient-search"
+              options={searchOptions}
+              onSearch={handleSearch}
+              className="w-full"
+              autoFocus
+            />
 
-              <div className="min-h-[200px]" id="patient-search-results">
-                {(!!phoneNumber ||
-                  (!!identifierSearch.config && !!identifierSearch.value)) && (
-                  <>
-                    {isFetching || !patientList ? (
-                      <div className="flex items-center justify-center h-[200px]">
-                        <Loading />
-                      </div>
-                    ) : !patientList.results.length ? (
-                      <div>
-                        <div className="flex flex-col items-center justify-center py-10 text-center">
-                          <h3 className="text-lg font-semibold">
-                            {t("no_patient_record_found")}
-                          </h3>
-                          <p className="text-sm text-gray-500 mb-6">
-                            {t("no_patient_record_text")}
-                          </p>
-                          <AddPatientButton outline />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="rounded-lg border border-gray-200">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead className="w-[300px]">
-                                {t("patient_name")}
-                              </TableHead>
-                              <TableHead>{t("phone_number")}</TableHead>
-                              <TableHead>{t("gender")}</TableHead>
+            <div className="min-h-[200px]" id="patient-search-results">
+              {(!!phoneNumber || isIdentifierValid) && (
+                <>
+                  {isFetching || !patientList ? (
+                    <div className="flex items-center justify-center h-[200px]">
+                      <Loading />
+                    </div>
+                  ) : !patientList.results.length ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-center">
+                      <h3 className="text-lg font-semibold">
+                        {t("no_patient_record_found")}
+                      </h3>
+                      <p className="text-sm text-gray-500 mb-6">
+                        {t("no_patient_record_text")}
+                      </p>
+                      <AddPatientButton outline />
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border border-gray-200">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[300px]">
+                              {t("patient_name")}
+                            </TableHead>
+                            <TableHead>{t("phone_number")}</TableHead>
+                            <TableHead>{t("gender")}</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {patientList.results.map((patient, index) => (
+                            <TableRow
+                              key={patient.id}
+                              className="cursor-pointer"
+                              onClick={() => handlePatientSelect(index)}
+                            >
+                              <TableCell className="font-medium">
+                                {patient.name}
+                              </TableCell>
+                              <TableCell>
+                                {formatPhoneNumberIntl(patient.phone_number)}
+                              </TableCell>
+                              <TableCell>
+                                {
+                                  GENDER_TYPES.find(
+                                    (g) => g.id === patient.gender,
+                                  )?.text
+                                }
+                              </TableCell>
                             </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {patientList.results.map((patient, index) => (
-                              <TableRow
-                                key={patient.id}
-                                className="cursor-pointer"
-                                onClick={() => handlePatientSelect(index)}
-                              >
-                                <TableCell className="font-medium">
-                                  {patient.name}
-                                </TableCell>
-                                <TableCell>
-                                  {formatPhoneNumberIntl(patient.phone_number)}
-                                </TableCell>
-                                <TableCell>
-                                  {
-                                    GENDER_TYPES.find(
-                                      (g) => g.id === patient.gender,
-                                    )?.text
-                                  }
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
