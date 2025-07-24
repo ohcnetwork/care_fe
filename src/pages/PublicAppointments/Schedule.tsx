@@ -92,7 +92,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   const { data: userData, error: userError } = useQuery({
     queryKey: ["user", facilityId, staffId],
     queryFn: query(
-      scheduleApis.appointments.getPublicScheduleAbleFacilityUser,
+      scheduleApis.appointments.getPublicScheduleableFacilityUser,
       {
         pathParams: { facility_id: facilityId, user_id: staffId },
       },
