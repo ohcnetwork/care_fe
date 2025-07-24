@@ -1,16 +1,16 @@
-import { FacilityModel } from "@/components/Facility/models";
 import { UserBareMinimum } from "@/components/Users/models";
 
 import { PatientRead } from "@/types/emr/patient/patient";
+import { FacilityRead } from "@/types/facility/facility";
 import { UserReadBase } from "@/types/user/user";
 
 export interface ResourceRequest {
-  approving_facility: FacilityModel | null;
-  assigned_facility: FacilityModel | undefined;
+  approving_facility: FacilityRead | null;
+  assigned_facility: FacilityRead | undefined;
   category: string;
   emergency: boolean;
   id: string;
-  origin_facility: FacilityModel;
+  origin_facility: FacilityRead;
   priority: number;
   reason: string;
   referring_facility_contact_name: string;

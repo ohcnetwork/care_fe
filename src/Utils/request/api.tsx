@@ -1,4 +1,3 @@
-import { CommentModel } from "@/components/Facility/models";
 import {
   CreateFileRequest,
   CreateFileResponse,
@@ -14,6 +13,7 @@ import { Code } from "@/types/base/code/code";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { PlugConfig } from "@/types/plugConfig";
 import { BatchSubmissionResult } from "@/types/questionnaire/batch";
+import { CommentModel } from "@/types/resourceRequest/resourceRequest";
 import {
   CreateResourceRequest,
   ResourceRequest,
