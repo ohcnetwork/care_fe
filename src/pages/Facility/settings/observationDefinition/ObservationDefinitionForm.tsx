@@ -6,7 +6,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -51,7 +51,7 @@ const formSchema = z.object({
   description: z.string().min(1, "Description is required"),
   status: z.enum(OBSERVATION_DEFINITION_STATUS),
   category: z.enum(OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]]),
-  permitted_data_type: z.nativeEnum(QuestionType),
+  permitted_data_type: z.enum(QuestionType),
   code: z.object({
     code: z.string().min(1, "Code is required"),
     display: z.string().min(1, "Display name is required"),
@@ -88,9 +88,9 @@ const formSchema = z.object({
             system: z.string(),
           })
           .refine((data) => data.code && data.display && data.system, {
-            message: "Required",
+            error: "Required",
           }),
-        permitted_data_type: z.nativeEnum(QuestionType),
+        permitted_data_type: z.enum(QuestionType),
         permitted_unit: z
           .object({
             code: z.string(),
@@ -98,11 +98,11 @@ const formSchema = z.object({
             system: z.string(),
           })
           .refine((data) => data.code && data.display && data.system, {
-            message: "Required",
+            error: "Required",
           }),
       }),
     )
-    .default([]),
+    .prefault([]),
 });
 
 export default function ObservationDefinitionForm({

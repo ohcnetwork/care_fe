@@ -6,7 +6,7 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { cn } from "@/lib/utils";
 
@@ -77,8 +77,8 @@ const dispatchItemSchema = z.object({
 });
 
 const dispatchFormSchema = z.object({
-  status: z.nativeEnum(SupplyDeliveryStatus),
-  item_type: z.nativeEnum(SupplyDeliveryType),
+  status: z.enum(SupplyDeliveryStatus),
+  item_type: z.enum(SupplyDeliveryType),
   items: z.array(dispatchItemSchema).min(1, "At least one item is required"),
   is_fully_dispatched: z.boolean(),
 });

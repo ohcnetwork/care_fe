@@ -5,7 +5,7 @@ import { Info } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import * as z from "zod";
+import * as z from "zod/v4";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -45,7 +45,7 @@ import patientIdentifierConfigApi from "@/types/patient/patientIdentifierConfig/
 
 const formSchema = z.object({
   config: z.object({
-    use: z.nativeEnum(PatientIdentifierUse),
+    use: z.enum(PatientIdentifierUse),
     description: z.string().min(1, "Description is required"),
     system: z.string().min(1, "System is required"),
     required: z.boolean(),
@@ -59,7 +59,7 @@ const formSchema = z.object({
       retrieve_with_otp: z.boolean().optional(),
     }),
   }),
-  status: z.nativeEnum(PatientIdentifierConfigStatus),
+  status: z.enum(PatientIdentifierConfigStatus),
   facility: z.string().optional().nullable(),
 });
 

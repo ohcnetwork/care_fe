@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Trans } from "react-i18next";
 import { toast } from "sonner";
-import * as z from "zod";
+import * as z from "zod/v4";
 
 import { cn } from "@/lib/utils";
 
@@ -156,10 +156,10 @@ const ScheduleTemplateEditor = ({
     .object({
       name: z.string().min(1, t("field_required")),
       valid_from: z.date({
-        required_error: t("field_required"),
+        error: t("field_required"),
       }),
       valid_to: z.date({
-        required_error: t("field_required"),
+        error: t("field_required"),
       }),
     })
     .refine(
@@ -559,17 +559,13 @@ const NewAvailabilityCard = ({
     .object({
       name: z.string().min(1, t("field_required")),
       slot_type: z.enum(["appointment", "open", "closed"]),
-      start_time: z
-        .string()
-        .min(1, t("field_required")) as unknown as z.ZodType<Time>,
-      end_time: z
-        .string()
-        .min(1, t("field_required")) as unknown as z.ZodType<Time>,
+      start_time: z.custom<Time>((val) => !!val, t("field_required")),
+      end_time: z.custom<Time>((val) => !!val, t("field_required")),
       slot_size_in_minutes: z.number().nullable(),
       tokens_per_slot: z.number().nullable(),
       reason: z.string().trim(),
       weekdays: z
-        .array(z.number() as unknown as z.ZodType<DayOfWeek>)
+        .array(z.custom<DayOfWeek>())
         .min(1, t("schedule_weekdays_min_error")),
       is_auto_fill: z.boolean().optional(),
       num_of_slots: z.number().min(1, t("number_min_error", { min: 0 })),

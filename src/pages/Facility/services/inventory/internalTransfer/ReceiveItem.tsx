@@ -13,7 +13,7 @@ import { ReactNode, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { cn } from "@/lib/utils";
 
@@ -62,7 +62,7 @@ import {
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
 
 const receiveItemSchema = z.object({
-  condition: z.nativeEnum(SupplyDeliveryCondition),
+  condition: z.enum(SupplyDeliveryCondition),
   receivingStatus: z.enum([
     SupplyDeliveryStatus.completed,
     SupplyDeliveryStatus.abandoned,

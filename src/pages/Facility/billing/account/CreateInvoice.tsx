@@ -10,7 +10,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import * as z from "zod";
+import * as z from "zod/v4";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -54,7 +54,7 @@ import invoiceApi from "@/types/billing/invoice/invoiceApi";
 const ITEMS_PER_PAGE = 10;
 
 const formSchema = z.object({
-  status: z.nativeEnum(InvoiceStatus),
+  status: z.enum(InvoiceStatus),
   payment_terms: z.string().optional(),
   note: z.string().optional(),
   charge_items: z.array(z.string()),

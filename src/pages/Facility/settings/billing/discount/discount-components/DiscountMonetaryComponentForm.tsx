@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,7 @@ const formSchema = z
     title: z.string().min(1, { message: "field_required" }),
   })
   .refine((data) => data.factor != null || data.amount != null, {
-    message: "Either factor or amount must be provided",
+    error: "Either factor or amount must be provided",
     path: ["factor", "amount"],
   })
   .refine(
@@ -54,7 +54,7 @@ const formSchema = z
       return data.code == null || data.code.display.length > 0;
     },
     {
-      message: "Display text is required for custom codes",
+      error: "Display text is required for custom codes",
       path: ["code"],
     },
   );

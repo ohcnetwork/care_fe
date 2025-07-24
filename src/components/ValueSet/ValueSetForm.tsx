@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import * as z from "zod";
+import * as z from "zod/v4";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -313,7 +313,7 @@ export function ValueSetForm({
       .trim()
       .min(5, t("character_count_validation", { min: 5, max: 25 }))
       .max(25, t("character_count_validation", { min: 5, max: 25 }))
-      .regex(/^[-\w]+$/, { message: t("slug_format_message") }),
+      .regex(/^[-\w]+$/, { error: t("slug_format_message") }),
     description: z.string(),
     status: z.enum(["active", "draft", "retired", "unknown"]),
     is_system_defined: z.boolean(),

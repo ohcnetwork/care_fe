@@ -6,7 +6,7 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -60,9 +60,9 @@ const formSchema = z.object({
   description: z.string().min(1, "Description is required"),
   usage: z.string().min(1, "Usage is required"),
   derived_from_uri: z.string().nullable(),
-  status: z.nativeEnum(Status),
-  category: z.nativeEnum(Category),
-  kind: z.nativeEnum(Kind),
+  status: z.enum(Status),
+  category: z.enum(Category),
+  kind: z.enum(Kind),
   code: z.object({
     code: z.string().min(1, "Code is required"),
     display: z.string().min(1, "Display name is required"),
@@ -83,7 +83,7 @@ const formSchema = z.object({
         system: z.string().min(1, "System is required"),
       }),
     )
-    .default([]),
+    .prefault([]),
   specimen_requirements: z
     .array(
       z.object({
@@ -105,7 +105,7 @@ const formSchema = z.object({
         ),
       }),
     )
-    .default([]),
+    .prefault([]),
   observation_result_requirements: z
     .array(
       z.object({
@@ -127,7 +127,7 @@ const formSchema = z.object({
         ),
       }),
     )
-    .default([]),
+    .prefault([]),
   charge_item_definitions: z
     .array(
       z.object({
@@ -149,8 +149,8 @@ const formSchema = z.object({
         ),
       }),
     )
-    .default([]),
-  locations: z.array(z.string()).default([]),
+    .prefault([]),
+  locations: z.array(z.string()).prefault([]),
 });
 
 export default function ActivityDefinitionForm({

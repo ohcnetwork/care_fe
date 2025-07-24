@@ -15,7 +15,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import * as z from "zod";
+import * as z from "zod/v4";
 
 import { cn } from "@/lib/utils";
 
@@ -406,7 +406,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     },
   });
 
-  const urlSchema = z.string().url(t("please enter a valid url"));
+  const urlSchema = z.url(t("please enter a valid url"));
 
   const QuestionnaireFormPartialSchema = z.object({
     title: z.string().trim().min(1, t("field_required")),
@@ -761,7 +761,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       importQuestionnaire(importUrl);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        toast.error(error.errors[0].message);
+        toast.error(error.message);
       }
     }
   };

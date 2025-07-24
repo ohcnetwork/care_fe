@@ -5,7 +5,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -42,16 +42,19 @@ import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 const tagConfigSchema = z.object({
   slug: z.string().min(1, "Slug is required"),
   display: z.string().min(1, "Display name is required"),
-  category: z.nativeEnum(TagCategory, {
-    required_error: "Category is required",
+  category: z.enum(TagCategory, {
+    error: (issue) =>
+      issue.input === undefined ? "Category is required" : undefined,
   }),
   description: z.string().optional(),
   priority: z.number().min(0, "Priority must be non-negative"),
-  status: z.nativeEnum(TagStatus, {
-    required_error: "Status is required",
+  status: z.enum(TagStatus, {
+    error: (issue) =>
+      issue.input === undefined ? "Status is required" : undefined,
   }),
-  resource: z.nativeEnum(TagResource, {
-    required_error: "Resource is required",
+  resource: z.enum(TagResource, {
+    error: (issue) =>
+      issue.input === undefined ? "Resource is required" : undefined,
   }),
 });
 

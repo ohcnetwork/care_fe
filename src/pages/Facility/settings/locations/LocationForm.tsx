@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import * as z from "zod";
+import * as z from "zod/v4";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -67,10 +67,10 @@ export default function LocationForm({
     operational_status: z.enum(["C", "H", "O", "U", "K", "I"] as const),
     form: z.enum(LocationFormOptions),
     parent: z.string().optional().nullable(),
-    enableBulkCreation: z.boolean().default(false),
+    enableBulkCreation: z.boolean().prefault(false),
     numberOfBeds: z.string().optional(),
-    customizeNames: z.boolean().default(false),
-    organizations: z.array(z.string()).default([]),
+    customizeNames: z.boolean().prefault(false),
+    organizations: z.array(z.string()).prefault([]),
     availability_status: z.enum(["available", "unavailable"] as const),
     bedNames: z
       .array(
@@ -78,7 +78,7 @@ export default function LocationForm({
           name: z.string().min(1, { message: t("field_required") }),
         }),
       )
-      .default([]),
+      .prefault([]),
   });
 
   type FormValues = z.infer<typeof formSchema>;

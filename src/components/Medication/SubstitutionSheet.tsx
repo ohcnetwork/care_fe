@@ -4,7 +4,7 @@ import { ChevronDown, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -83,10 +83,10 @@ interface SubstitutionSheetProps {
 
 const substitutionSchema = z.object({
   substitutedProductKnowledge: z.any().refine((val) => val?.id, {
-    message: "Product selection is required",
+    error: "Product selection is required",
   }),
-  type: z.nativeEnum(SubstitutionType),
-  reason: z.nativeEnum(SubstitutionReason),
+  type: z.enum(SubstitutionType),
+  reason: z.enum(SubstitutionReason),
 });
 
 type SubstitutionFormValues = z.infer<typeof substitutionSchema>;

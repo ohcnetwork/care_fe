@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { cn } from "@/lib/utils";
 
@@ -68,11 +68,11 @@ const supplyRequestItemSchema = z.object({
 
 const createFormSchema = (mode: "external" | "internal") =>
   z.object({
-    status: z.nativeEnum(SupplyRequestStatus),
-    intent: z.nativeEnum(SupplyRequestIntent),
-    category: z.nativeEnum(SupplyRequestCategory),
-    priority: z.nativeEnum(SupplyRequestPriority),
-    reason: z.nativeEnum(SupplyRequestReason),
+    status: z.enum(SupplyRequestStatus),
+    intent: z.enum(SupplyRequestIntent),
+    category: z.enum(SupplyRequestCategory),
+    priority: z.enum(SupplyRequestPriority),
+    reason: z.enum(SupplyRequestReason),
     deliver_from:
       mode === "internal"
         ? z.string().min(1, "Please select a location to deliver from")

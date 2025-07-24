@@ -5,7 +5,7 @@ import { navigate } from "raviger";
 import React, { useEffect } from "react";
 import { FieldErrors, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import * as z from "zod";
+import * as z from "zod/v4";
 
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,7 @@ import facilityApi from "@/types/facility/facilityApi";
 
 // Schema for a single price component
 const priceComponentSchema = z.object({
-  monetary_component_type: z.nativeEnum(MonetaryComponentType),
+  monetary_component_type: z.enum(MonetaryComponentType),
   code: z
     .object({
       code: z.string(),
@@ -247,10 +247,10 @@ export function ChargeItemDefinitionForm({
       .regex(/^[a-z0-9-]+$/, {
         message: t("slug_format_message"),
       }),
-    status: z.nativeEnum(ChargeItemDefinitionStatus),
+    status: z.enum(ChargeItemDefinitionStatus),
     description: z.string().optional(),
     purpose: z.string().optional(),
-    derived_from_uri: z.string().url().optional(),
+    derived_from_uri: z.url().optional(),
     price_components: z.array(priceComponentSchema).refine(
       (components) => {
         // Ensure there is exactly one base price component and it's the first one

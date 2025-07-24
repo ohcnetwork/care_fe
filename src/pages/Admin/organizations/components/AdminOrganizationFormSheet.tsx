@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import * as z from "zod";
+import * as z from "zod/v4";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -60,7 +60,7 @@ export default function AdminOrganizationFormSheet({
       .trim()
       .min(1, { message: t("field_required") }),
     description: z.string().optional(),
-    org_type: z.nativeEnum(OrgType),
+    org_type: z.enum(OrgType),
   });
 
   const form = useForm({

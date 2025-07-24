@@ -4,7 +4,7 @@ import { navigate } from "raviger";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -57,7 +57,7 @@ const formSchema = z.object({
     .nullable()
     .optional(),
   extra_details: z.string(),
-  internal_type: z.nativeEnum(InternalType).optional(),
+  internal_type: z.enum(InternalType).optional(),
   locations: z.array(z.string()).min(1, "At least one location is required"),
 });
 

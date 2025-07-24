@@ -5,7 +5,7 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import * as z from "zod";
+import * as z from "zod/v4";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -51,7 +51,7 @@ import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 const formSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
-  status: z.nativeEnum(ChargeItemStatus),
+  status: z.enum(ChargeItemStatus),
   quantity: z
     .string()
     .refine((val) => !isNaN(Number(val)) && Number(val) >= 1, {

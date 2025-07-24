@@ -5,7 +5,7 @@ import { navigate } from "raviger";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import * as z from "zod";
+import * as z from "zod/v4";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,7 +47,7 @@ import { SpecimenDefinitionCreate } from "@/types/emr/specimenDefinition/specime
 
 const typeTestedSchema = z.object({
   is_derived: z.boolean(),
-  preference: z.nativeEnum(Preference),
+  preference: z.enum(Preference),
   container: z
     .object({
       description: z.string().optional(),
@@ -89,12 +89,9 @@ const typeTestedSchema = z.object({
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   slug: z.string().min(1, "Slug is required"),
-  status: z.nativeEnum(SpecimenDefinitionStatus),
+  status: z.enum(SpecimenDefinitionStatus),
   description: z.string().min(1, t("field_required")),
-  derived_from_uri: z
-    .string()
-    .url({ message: "Please enter a valid URL" })
-    .optional(),
+  derived_from_uri: z.url({ message: "Please enter a valid URL" }).optional(),
   type_collected: CodeSchema,
   patient_preparation: z.array(CodeSchema).min(0),
   collection: CodeSchema.optional(),
