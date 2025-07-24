@@ -106,6 +106,17 @@ function _isAppleDevice() {
  */
 export const isAppleDevice = _isAppleDevice();
 
+function hasTouch() {
+  try {
+    document.createEvent("TouchEvent");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export const isTouchDevice = hasTouch();
+
 export const isUserOnline = (user: { last_login: DateLike }) => {
   return user.last_login
     ? dayjs().subtract(5, "minutes").isBefore(user.last_login)

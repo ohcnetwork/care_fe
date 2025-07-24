@@ -67,6 +67,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityRead } from "@/types/facility/facility";
 import {
   APPOINTMENT_STATUS_COLORS,
@@ -136,7 +137,7 @@ export default function AppointmentDetail(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFacilityLoading, facility, canViewAppointments, facilityId]);
 
-  const { mutate: updateAppointment, isPending } = useMutation<
+  const { mutate: updateAppointment, isPending: isUpdating } = useMutation<
     Appointment,
     unknown,
     AppointmentUpdateRequest
@@ -166,7 +167,7 @@ export default function AppointmentDetail(props: Props) {
         <div
           className={cn(
             "flex flex-col md:flex-col lg:flex-row",
-            isPending && "opacity-50 pointer-events-none animate-pulse",
+            isUpdating && "opacity-50 pointer-events-none animate-pulse",
           )}
         >
           <AppointmentDetails appointment={appointment} facility={facility} />
@@ -205,9 +206,10 @@ export default function AppointmentDetail(props: Props) {
                   <AppointmentActions
                     facilityId={facilityId}
                     appointment={appointment}
-                    onChange={(status) => updateAppointment({ status })}
+                    updateAppointment={updateAppointment}
                     onViewPatient={redirectToPatientPage}
                     canCreateAppointment={canCreateAppointment}
+                    isUpdating={isUpdating}
                   />
                 </div>
               </>
@@ -301,9 +303,9 @@ const AppointmentDetails = ({
           </div>
           <Separator />
           <div className="text-sm">
-            <p className="font-medium">{t("reason")}</p>
+            <p className="font-medium">{t("note")}</p>
             <p className="text-gray-600 whitespace-pre-wrap">
-              {appointment.reason_for_visit || t("no_reason_provided")}
+              {appointment.note || t("no_note_provided")}
             </p>
           </div>
           <div className="text-sm">
@@ -325,9 +327,8 @@ const AppointmentDetails = ({
             {appointment.tags?.length > 0 ? (
               <p className="text-gray-600 flex flex-wrap gap-1">
                 {appointment.tags.map((tag) => (
-                  <Badge key={tag.id} variant="secondary">
-                    {tag.parent ? `${tag.parent.display}: ` : ""}
-                    {tag.display}
+                  <Badge variant="outline" key={tag.id}>
+                    {getTagHierarchyDisplay(tag)}
                   </Badge>
                 ))}
               </p>
@@ -437,27 +438,28 @@ const AppointmentDetails = ({
 
 interface AppointmentActionsProps {
   facilityId: string;
-  appointment: Appointment;
-  onChange: (status: Appointment["status"]) => void;
+  appointment: AppointmentRead;
+  updateAppointment: (data: AppointmentUpdateRequest) => void;
   onViewPatient: () => void;
   canCreateAppointment: boolean;
+  isUpdating: boolean;
 }
 
 const AppointmentActions = ({
   facilityId,
   appointment,
-  onChange,
+  updateAppointment,
   onViewPatient,
   canCreateAppointment,
+  isUpdating,
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const [isRescheduleReasonOpen, setIsRescheduleReasonOpen] = useState(false);
-  const [rescheduleReason, setRescheduleReason] = useState(
-    appointment.reason_for_visit,
-  );
+  const [newNote, setNewVisitReason] = useState(appointment.note);
+  const [oldNote, setRescheduleReason] = useState(appointment.note);
   const [selectedPractitioner, setSelectedPractitioner] = useState(
     appointment.user,
   );
@@ -465,9 +467,7 @@ const AppointmentActions = ({
 
   const currentStatus = appointment.status;
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
-  const [reasonForCancellation, setReasonForCancellation] = useState(
-    appointment.reason_for_visit,
-  );
+  const [note, setNote] = useState(appointment.note);
 
   const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
     mutationFn: mutate(scheduleApis.appointments.cancel, {
@@ -532,7 +532,8 @@ const AppointmentActions = ({
                 </AlertDialogTitle>
                 <Label>{t("note")}</Label>
                 <Textarea
-                  value={rescheduleReason}
+                  value={oldNote}
+                  placeholder={t("reason_for_reschedule_placeholder")}
                   onChange={(e) => setRescheduleReason(e.target.value)}
                 />
               </AlertDialogHeader>
@@ -547,7 +548,7 @@ const AppointmentActions = ({
                     setIsRescheduleReasonOpen(false);
                     setIsRescheduleOpen(true);
                   }}
-                  disabled={!rescheduleReason}
+                  disabled={!oldNote}
                 >
                   {t("continue")}
                 </AlertDialogAction>
@@ -562,6 +563,43 @@ const AppointmentActions = ({
               </SheetHeader>
 
               <div className="mt-6">
+                <div className="text-sm">
+                  <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
+                    <Label className="font-medium">{t("tags")}</Label>
+                    <TagAssignmentSheet
+                      entityType="appointment"
+                      entityId={appointment.id}
+                      facilityId={facilityId}
+                      currentTags={appointment.tags}
+                      onUpdate={() => {
+                        queryClient.invalidateQueries({
+                          queryKey: ["appointment", appointment.id],
+                        });
+                      }}
+                      canWrite={true}
+                    />
+                  </div>
+                  {appointment.tags?.length > 0 ? (
+                    <p className="text-gray-600 flex flex-wrap gap-1">
+                      {appointment.tags.map((tag) => (
+                        <Badge key={tag.id} variant="secondary">
+                          {tag.parent ? `${tag.parent.display}: ` : ""}
+                          {tag.display}
+                        </Badge>
+                      ))}
+                    </p>
+                  ) : (
+                    <p className="text-gray-600 md:-mt-2">
+                      {t("no_tags_assigned")}
+                    </p>
+                  )}
+                </div>
+                <Label className="mb-2 aria-required mt-8">{t("note")}</Label>
+                <Textarea
+                  placeholder={t("appointment_note")}
+                  value={newNote}
+                  onChange={(e) => setNewVisitReason(e.target.value)}
+                />
                 <div className="my-4">
                   <Label className="mb-2">{t("select_practitioner")}</Label>
                   <PractitionerSelector
@@ -595,7 +633,9 @@ const AppointmentActions = ({
                       if (selectedSlotId) {
                         rescheduleAppointment({
                           new_slot: selectedSlotId,
-                          reason: rescheduleReason,
+                          previous_booking_note: oldNote,
+                          new_booking_note: newNote,
+                          tags: appointment.tags.map((tag) => tag.id),
                         });
                       }
                     }}
@@ -614,7 +654,7 @@ const AppointmentActions = ({
           <Button
             disabled={!isToday}
             variant="outline_primary"
-            onClick={() => onChange("checked_in")}
+            onClick={() => updateAppointment({ status: "checked_in" })}
             size="lg"
           >
             <EnterIcon className="size-4 mr-2" />
@@ -629,7 +669,7 @@ const AppointmentActions = ({
           variant={
             currentStatus === "checked_in" ? "outline_primary" : "outline"
           }
-          onClick={() => onChange("in_consultation")}
+          onClick={() => updateAppointment({ status: "in_consultation" })}
           size="lg"
         >
           <PlusCircledIcon className="size-4 mr-2" />
@@ -640,7 +680,7 @@ const AppointmentActions = ({
       {currentStatus === "in_consultation" && (
         <Button
           variant="outline_primary"
-          onClick={() => onChange("fulfilled")}
+          onClick={() => updateAppointment({ status: "fulfilled" })}
           size="lg"
         >
           <CheckCircledIcon className="size-4 mr-2" />
@@ -649,10 +689,50 @@ const AppointmentActions = ({
       )}
 
       {["booked", "checked_in"].includes(currentStatus) && (
-        <Button variant="outline" onClick={() => onChange("noshow")} size="lg">
-          <EyeNoneIcon className="size-4 mr-2" />
-          {t("mark_as_noshow")}
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="outline" size="lg">
+              <EyeNoneIcon className="size-4 mr-2" />
+              {t("mark_as_noshow")}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("mark_as_noshow")}</AlertDialogTitle>
+              <Label>{t("note")}</Label>
+              <Textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              />
+              <AlertDialogDescription>
+                <Alert variant="destructive">
+                  <AlertTitle>{t("warning")}</AlertTitle>
+                  <AlertDescription>
+                    {t("mark_as_noshow_warning")}
+                  </AlertDescription>
+                </Alert>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() =>
+                  updateAppointment({
+                    status: "noshow",
+                    note: note,
+                  })
+                }
+                className={cn(buttonVariants({ variant: "destructive" }))}
+              >
+                {isUpdating ? (
+                  <Loader2 className="size-4 animate-spin mr-2" />
+                ) : (
+                  t("confirm")
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
 
       {appointment.status !== "in_consultation" && (
@@ -668,8 +748,8 @@ const AppointmentActions = ({
               <AlertDialogTitle>{t("cancel_appointment")}</AlertDialogTitle>
               <Label>{t("note")}</Label>
               <Textarea
-                value={reasonForCancellation}
-                onChange={(e) => setReasonForCancellation(e.target.value)}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
               />
               <AlertDialogDescription>
                 <Alert variant="destructive">
@@ -686,7 +766,7 @@ const AppointmentActions = ({
                 onClick={() =>
                   cancelAppointment({
                     reason: "cancelled",
-                    reason_for_visit: reasonForCancellation,
+                    note: note,
                   })
                 }
                 className={cn(buttonVariants({ variant: "destructive" }))}
