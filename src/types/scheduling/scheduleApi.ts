@@ -160,7 +160,7 @@ export default {
       method: HttpMethod.GET,
       TRes: Type<{ users: UserBase[] }>(),
     },
-    getPublicScheduleAbleFacilityUser: {
+    getPublicScheduleableFacilityUser: {
       path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
       TRes: Type<UserBase>(),
     },
