@@ -761,7 +761,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       importQuestionnaire(importUrl);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        toast.error(error.message);
+        toast.error(error.issues[0].message);
       }
     }
   };

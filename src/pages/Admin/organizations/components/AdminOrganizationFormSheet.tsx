@@ -58,7 +58,7 @@ export default function AdminOrganizationFormSheet({
     name: z
       .string()
       .trim()
-      .min(1, { message: t("field_required") }),
+      .min(1, { error: t("field_required") }),
     description: z.string().optional(),
     org_type: z.enum(OrgType),
   });
