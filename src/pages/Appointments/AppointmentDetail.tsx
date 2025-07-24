@@ -655,7 +655,12 @@ const AppointmentActions = ({
           <Button
             disabled={!isToday}
             variant="outline_primary"
-            onClick={() => updateAppointment({ status: "checked_in" })}
+            onClick={() =>
+              updateAppointment({
+                status: "checked_in",
+                note: appointment.note,
+              })
+            }
             size="lg"
           >
             <EnterIcon className="size-4 mr-2" />
@@ -670,7 +675,12 @@ const AppointmentActions = ({
           variant={
             currentStatus === "checked_in" ? "outline_primary" : "outline"
           }
-          onClick={() => updateAppointment({ status: "in_consultation" })}
+          onClick={() =>
+            updateAppointment({
+              status: "in_consultation",
+              note: appointment.note,
+            })
+          }
           size="lg"
         >
           <PlusCircledIcon className="size-4 mr-2" />
@@ -681,7 +691,12 @@ const AppointmentActions = ({
       {currentStatus === "in_consultation" && (
         <Button
           variant="outline_primary"
-          onClick={() => updateAppointment({ status: "fulfilled" })}
+          onClick={() =>
+            updateAppointment({
+              status: "fulfilled",
+              note: appointment.note,
+            })
+          }
           size="lg"
         >
           <CheckCircledIcon className="size-4 mr-2" />
