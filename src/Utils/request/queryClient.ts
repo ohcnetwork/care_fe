@@ -42,6 +42,7 @@ const queryClient = new QueryClient({
 
 const localStoragePersister = createAsyncStoragePersister({
   storage: window.localStorage,
+  key: "care-query-cache",
 });
 
 persistQueryClient({
@@ -52,5 +53,9 @@ persistQueryClient({
   },
   buster: localStorage.getItem("app-version") ?? "0.0.0",
 });
+
+export function clearQueryPersistenceCache() {
+  localStorage.removeItem("care-query-cache");
+}
 
 export default queryClient;
