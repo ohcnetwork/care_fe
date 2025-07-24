@@ -162,7 +162,8 @@ export default {
     },
     getPublicScheduleableFacilityUser: {
       path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
-      TRes: Type<UserBase>(),
+      method: HttpMethod.GET,
+      TRes: Type<UserReadBase>(),
     },
     /**
      * Get appointments across facilities
