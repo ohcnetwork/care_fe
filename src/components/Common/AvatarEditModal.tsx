@@ -67,20 +67,22 @@ export default function AvatarEditModal({
   const [showCroppedPreview, setShowCroppedPreview] = useState(false);
   const [showCameraPreview, setShowCameraPreview] = useState(false);
 
-  const closeModal = (force = false) => {
-    if (force) {
-      setPreview(undefined);
-      setIsProcessing(false);
-      setIsDeleting(false);
-      setSelectedFile(undefined);
-      setIsCameraOpen(false);
-      setCroppedAreaPixels(null);
-      setCroppedPreview(null);
-      setShowCroppedPreview(false);
-      setShowCameraPreview(false);
-      setCrop({ x: 0, y: 0 });
-      setZoom(1);
-    }
+  const resetState = () => {
+    setPreview(undefined);
+    setIsProcessing(false);
+    setIsDeleting(false);
+    setSelectedFile(undefined);
+    setIsCameraOpen(false);
+    setCroppedAreaPixels(null);
+    setCroppedPreview(null);
+    setShowCroppedPreview(false);
+    setShowCameraPreview(false);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+  };
+
+  const closeModal = () => {
+    resetState();
     onOpenChange(false);
   };
 
@@ -417,7 +419,7 @@ export default function AvatarEditModal({
                     variant="outline"
                     onClick={(e) => {
                       e.stopPropagation();
-                      closeModal(true);
+                      closeModal();
                       dragProps.setFileDropError("");
                     }}
                     disabled={isProcessing || isDeleting}
