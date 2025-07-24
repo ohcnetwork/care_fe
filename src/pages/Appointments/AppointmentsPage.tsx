@@ -97,6 +97,7 @@ import {
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import {
   APPOINTMENT_STATUS_COLORS,
   Appointment,
@@ -312,7 +313,11 @@ export default function AppointmentsPage() {
   const [activeTab, setActiveTab] = useView("appointments", "board");
   const { open: isSidebarOpen } = useSidebar();
   const { facility, facilityId } = useCurrentFacility();
-  const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
+  const selectedTagIds = qParams.tags?.split(",") ?? [];
+  const tagConfigsQuery = useTagConfigs({ ids: selectedTagIds, facilityId });
+  const selectedTags = tagConfigsQuery
+    .map((q) => q.data)
+    .filter(Boolean) as TagConfig[];
 
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
@@ -469,7 +474,11 @@ export default function AppointmentsPage() {
             <TagSelectorPopover
               asFilter
               selected={selectedTags}
-              onChange={setSelectedTags}
+              onChange={(tags) => {
+                updateQuery({
+                  tags: tags.map((tag) => tag.id).join(","),
+                });
+              }}
               resource={TagResource.APPOINTMENT}
             />
           </div>
@@ -829,7 +838,7 @@ function AppointmentColumn(props: {
                 <FilterIcon className="size-4" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-60 p-0" align="start">
+            <PopoverContent className="w-60 p-0" align="end">
               <Command>
                 <CommandList>
                   <CommandEmpty>{t("no_status_found")}</CommandEmpty>
