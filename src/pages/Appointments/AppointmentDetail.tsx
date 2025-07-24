@@ -115,7 +115,7 @@ export default function AppointmentDetail(props: Props) {
   };
 
   useEffect(() => {
-    if (!canViewAppointments && !facility) {
+    if (!canViewAppointments && !facilityId) {
       toast.error(t("no_permission_to_view_page"));
       goBack(`/facility/${facilityId}/overview`);
     }
