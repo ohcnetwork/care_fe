@@ -33,13 +33,13 @@ export interface ChargeItemBase {
   title: string;
   description?: string;
   status: ChargeItemStatus;
-  quantity: number;
+  quantity: string;
   unit_price_components: MonetaryComponent[];
   note?: string;
   override_reason?: ChargeItemOverrideReason;
   service_resource?: "service_request";
   service_resource_id?: string;
-  total_price: number;
+  total_price: string;
   paid_invoice?: InvoiceRead;
 }
 
@@ -66,7 +66,7 @@ export interface ChargeItemUpsert
 
 export interface ApplyChargeItemDefinitionRequest {
   charge_item_definition: string;
-  quantity: number;
+  quantity: string;
   encounter: string;
 }
 
@@ -84,7 +84,7 @@ export interface ChargeItemUpdate
 
 export interface ChargeItemRead extends ChargeItemBase {
   total_price_components: MonetaryComponent[];
-  total_price: number;
+  total_price: string;
   charge_item_definition: ChargeItemDefinitionBase;
 }
 

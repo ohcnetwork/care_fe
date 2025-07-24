@@ -189,7 +189,7 @@ export function PrintPaymentReconciliation({
                       <td className="py-4">{payment.target_invoice.status}</td>
                       <td className="py-4 text-right">
                         <MonetaryDisplay
-                          amount={payment.target_invoice.total_gross}
+                          amount={String(payment.target_invoice.total_gross)}
                         />
                       </td>
                     </tr>

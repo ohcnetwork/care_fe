@@ -76,7 +76,7 @@ export default function ChargeItemPriceDisplay({
       <div className="space-y-1 text-xs">
         <div className="flex justify-between">
           <span>{t("base_amount")}</span>
-          <MonetaryDisplay amount={baseAmount} />
+          <MonetaryDisplay amount={String(baseAmount)} />
         </div>
 
         {surchargeComponents.map((component, index) => (
