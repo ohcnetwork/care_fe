@@ -34,6 +34,8 @@ export interface UserRead extends UserReadBase {
   flags: string[];
 }
 
+// Todo: Once backend adds a proper public user read spec, add it here and update the usages where applicable
+
 export interface UserUpdate extends Omit<UserBase, "id"> {
   geo_organization?: string;
 }

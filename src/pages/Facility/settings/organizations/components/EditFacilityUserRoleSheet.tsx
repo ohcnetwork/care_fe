@@ -69,7 +69,7 @@ export default function EditUserRoleSheet({
   });
 
   const { mutate: updateRole } = useMutation({
-    mutationFn: (body: { user: string; role: string }) =>
+    mutationFn: (body: { role: string }) =>
       mutate(facilityOrganizationApi.updateUserRole, {
         pathParams: {
           facilityId,
@@ -124,7 +124,6 @@ export default function EditUserRoleSheet({
     }
 
     updateRole({
-      user: userRole.user.id,
       role: selectedRole,
     });
   };

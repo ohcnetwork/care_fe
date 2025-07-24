@@ -1,4 +1,4 @@
-import { PaginatedResponse } from "@/Utils/request/types";
+import { RoleRead } from "@/types/emr/role/role";
 import { UserReadBase } from "@/types/user/user";
 
 export type OrgType = "root" | "dept" | "team";
@@ -36,20 +36,5 @@ export interface FacilityOrganizationCreate extends FacilityOrganizationBase {
 export interface FacilityOrganizationUserRole {
   id: string;
   user: UserReadBase;
-  role: {
-    id: string;
-    name: string;
-  };
+  role: RoleRead;
 }
-
-export interface Role {
-  id: string;
-  name: string;
-  description?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export type FacilityOrganizationUserRoleResponse =
-  PaginatedResponse<FacilityOrganizationUserRole>;
-export type RoleResponse = PaginatedResponse<Role>;

@@ -3,8 +3,8 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import {
   FacilityOrganizationCreate,
   FacilityOrganizationRead,
+  FacilityOrganizationUserRole,
 } from "@/types/facilityOrganization/facilityOrganization";
-import { OrganizationUserRole } from "@/types/organization/organization";
 
 export default {
   list: {
@@ -43,19 +43,19 @@ export default {
   listUsers: {
     path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<OrganizationUserRole>>(),
+    TRes: Type<PaginatedResponse<FacilityOrganizationUserRole>>(),
   },
   assignUser: {
     path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",
     method: HttpMethod.POST,
-    TRes: Type<OrganizationUserRole>(),
+    TRes: Type<FacilityOrganizationUserRole>(),
     TBody: Type<{ user: string; role: string }>(),
   },
   updateUserRole: {
     path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/{userRoleId}/",
     method: HttpMethod.PUT,
-    TRes: Type<OrganizationUserRole>(),
-    TBody: Type<{ user: string; role: string }>(),
+    TRes: Type<FacilityOrganizationUserRole>(),
+    TBody: Type<{ role: string }>(),
   },
   removeUserRole: {
     path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/{userRoleId}/",
