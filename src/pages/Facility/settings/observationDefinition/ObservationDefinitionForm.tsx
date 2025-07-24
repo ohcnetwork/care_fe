@@ -35,6 +35,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
+import { CodeSchema } from "@/types/base/code/code";
 import {
   OBSERVATION_DEFINITION_CATEGORY,
   OBSERVATION_DEFINITION_STATUS,
@@ -44,66 +45,6 @@ import {
   QuestionType,
 } from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
-
-const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  slug: z.string().min(1, "Slug is required"),
-  description: z.string().min(1, "Description is required"),
-  status: z.enum(OBSERVATION_DEFINITION_STATUS),
-  category: z.enum(OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]]),
-  permitted_data_type: z.enum(QuestionType),
-  code: z.object({
-    code: z.string().min(1, "Code is required"),
-    display: z.string().min(1, "Display name is required"),
-    system: z.string().min(1, "System is required"),
-  }),
-  body_site: z
-    .object({
-      code: z.string().min(1, "Code is required"),
-      display: z.string().min(1, "Display name is required"),
-      system: z.string().min(1, "System is required"),
-    })
-    .nullable(),
-  method: z
-    .object({
-      code: z.string().min(1, "Code is required"),
-      display: z.string().min(1, "Display name is required"),
-      system: z.string().min(1, "System is required"),
-    })
-    .nullable(),
-  permitted_unit: z
-    .object({
-      code: z.string().min(1, "Code is required"),
-      display: z.string().min(1, "Display name is required"),
-      system: z.string().min(1, "System is required"),
-    })
-    .nullable(),
-  component: z
-    .array(
-      z.object({
-        code: z
-          .object({
-            code: z.string(),
-            display: z.string(),
-            system: z.string(),
-          })
-          .refine((data) => data.code && data.display && data.system, {
-            error: "Required",
-          }),
-        permitted_data_type: z.enum(QuestionType),
-        permitted_unit: z
-          .object({
-            code: z.string(),
-            display: z.string(),
-            system: z.string(),
-          })
-          .refine((data) => data.code && data.display && data.system, {
-            error: "Required",
-          }),
-      }),
-    )
-    .prefault([]),
-});
 
 export default function ObservationDefinitionForm({
   facilityId,
@@ -171,6 +112,40 @@ function ObservationDefinitionFormContent({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(observationDefinitionId);
+
+  const formSchema = z.object({
+    title: z.string({ error: t("field_required") }).min(1, t("field_required")),
+    slug: z.string({ error: t("field_required") }).min(1, t("field_required")),
+    description: z
+      .string({ error: t("field_required") })
+      .min(1, t("field_required")),
+    status: z.enum(OBSERVATION_DEFINITION_STATUS),
+    category: z.enum(OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]], {
+      error: t("field_required"),
+    }),
+    permitted_data_type: z.enum(QuestionType, { error: t("field_required") }),
+    code: CodeSchema,
+    body_site: CodeSchema.nullable(),
+    method: CodeSchema.nullable(),
+    permitted_unit: CodeSchema.nullable(),
+    component: z
+      .array(
+        z.object({
+          code: CodeSchema,
+          permitted_data_type: z.enum(QuestionType),
+          permitted_unit: z
+            .object({
+              code: z.string(),
+              display: z.string(),
+              system: z.string(),
+            })
+            .refine((data) => data.code && data.display && data.system, {
+              error: "Required",
+            }),
+        }),
+      )
+      .prefault([]),
+  });
 
   const form = useForm({
     resolver: zodResolver(formSchema),

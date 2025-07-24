@@ -128,23 +128,23 @@ describe("Observation basic workflow", () => {
     cy.verifyErrorMessages([
       {
         label: "Title",
-        message: "Required",
+        message: "This field is required",
       },
       {
         label: "Slug",
-        message: "Required",
+        message: "This field is required",
       },
       {
         label: "Description",
-        message: "Required",
+        message: "This field is required",
       },
       {
         label: "Category",
-        message: "Required",
+        message: "This field is required",
       },
       {
         label: "Data Type",
-        message: "Required",
+        message: "This field is required",
       },
       {
         label: "LOINC Code",
