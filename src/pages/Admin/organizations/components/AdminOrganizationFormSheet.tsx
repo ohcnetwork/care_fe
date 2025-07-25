@@ -53,6 +53,7 @@ export default function AdminOrganizationFormSheet({
   const isEditMode = !!org;
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
 
   const formSchema = z.object({
     name: z
@@ -79,14 +80,29 @@ export default function AdminOrganizationFormSheet({
         description: org.description || "",
         org_type: org.org_type as OrgType,
       });
+      setHasChanges(false);
     } else if (!isEditMode && open) {
       form.reset({
         name: "",
         description: "",
         org_type: organizationType as OrgType,
       });
+      setHasChanges(false);
     }
   }, [isEditMode, org, open, organizationType]);
+
+  useEffect(() => {
+    if (!isEditMode || !org) return;
+
+    const subscription = form.watch((values) => {
+      const changed =
+        values.name?.trim() !== org.name?.trim() ||
+        values.description?.trim() !== org.description?.trim();
+      setHasChanges(changed);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form, isEditMode, org]);
 
   const { mutate: createOrganization, isPending: isCreating } = useMutation({
     mutationFn: (body: OrganizationCreate) =>
@@ -210,7 +226,11 @@ export default function AdminOrganizationFormSheet({
               )}
             />
 
-            <Button type="submit" className="w-full" disabled={isPending}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isPending || (isEditMode && !hasChanges)}
+            >
               {isPending
                 ? isEditMode
                   ? t("updating")
