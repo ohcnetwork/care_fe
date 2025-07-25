@@ -192,14 +192,16 @@ export default function ValueSetSearchContent({
           </TabsList>
         </Tabs>
       </div>
-      <CommandInput
-        ref={inputRef}
-        placeholder={placeholder}
-        className="outline-hidden border-none ring-0 shadow-none"
-        onValueChange={onSearchChange}
-        value={search}
-        autoFocus
-      />
+      <div className="border-b border-gray-200">
+        <CommandInput
+          ref={inputRef}
+          placeholder={placeholder}
+          className="outline-hidden border-none ring-0 shadow-none"
+          onValueChange={onSearchChange}
+          value={search}
+          autoFocus
+        />
+      </div>
       <CommandList className="h-75 overflow-hidden">
         <CommandEmpty>
           {search.length < 3 ? (
@@ -261,7 +263,7 @@ export default function ValueSetSearchContent({
               "border-gray-200",
             )}
           >
-            <CommandGroup>
+            <CommandGroup className="h-75 overflow-auto">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-normal text-gray-700 p-1">
                   {t("starred")}

@@ -109,6 +109,7 @@ export default function PatientRegistration(
           age_or_dob: z.enum(["dob", "age"]),
           date_of_birth: z
             .string()
+            .nonempty(t("date_of_birth_must_be_present"))
             .regex(/^\d{4}-\d{2}-\d{2}$/, t("date_of_birth_format"))
             .refine((date) => {
               const parsedDate = dayjs(date);
@@ -148,52 +149,56 @@ export default function PatientRegistration(
             }),
           ),
         })
-        .refine(
-          (data) => (data.age_or_dob === "dob" ? !!data.date_of_birth : true),
-          {
-            message: t("date_of_birth_must_be_present"),
-            path: ["date_of_birth"],
-          },
-        )
-        .refine((data) => (data.age_or_dob === "age" ? !!data.age : true), {
-          message: t("age_must_be_present"),
-          path: ["age"],
-        })
-        .refine(
-          (data) =>
-            data.nationality === defaultCountry
-              ? !!data.geo_organization
-              : true,
-          {
-            message: t("geo_organization_required"),
-            path: ["geo_organization"],
-          },
-        )
-        .refine(
-          (data) => {
-            if (!data.deceased_datetime) return true;
-
-            const deathDate = dayjs(data.deceased_datetime);
-            if (!deathDate.isValid()) return false;
-
-            const dob = data.date_of_birth
-              ? dayjs(data.date_of_birth)
-              : dayjs().subtract(data.age || 0, "years");
-
-            return data.date_of_birth
-              ? dob.isBefore(deathDate)
-              : dob.year() < deathDate.year();
-          },
-          (data) => ({
-            message: dayjs(data.deceased_datetime).isValid()
-              ? t("death_date_must_be_after_dob")
-              : t("invalid_date_format", { format: "DD-MM-YYYY HH:mm" }),
-            path: ["deceased_datetime"],
-          }),
-        )
         .superRefine((data, ctx) => {
-          // When an identifier is required, and it has no default_value, it should have a value
-          // The identifiers with errors are returned and errors are shown for all applicable identifiers
+          if (data.age_or_dob === "dob" && !data.date_of_birth) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("date_of_birth_must_be_present"),
+              path: ["date_of_birth"],
+            });
+          }
+          if (data.age_or_dob === "age" && !data.age) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("age_must_be_present"),
+              path: ["age"],
+            });
+          }
+
+          if (data.nationality === defaultCountry && !data.geo_organization) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("geo_organization_required"),
+              path: ["geo_organization"],
+            });
+          }
+          if (data.deceased_datetime) {
+            const deathDate = dayjs(data.deceased_datetime);
+            if (!deathDate.isValid()) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: t("invalid_date_format", {
+                  format: "DD-MM-YYYY HH:mm",
+                }),
+                path: ["deceased_datetime"],
+              });
+            } else {
+              const dob = data.date_of_birth
+                ? dayjs(data.date_of_birth)
+                : dayjs().subtract(data.age || 0, "years");
+              const valid = data.date_of_birth
+                ? dob.isBefore(deathDate)
+                : dob.year() < deathDate.year();
+              if (!valid) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: t("death_date_must_be_after_dob"),
+                  path: ["deceased_datetime"],
+                });
+              }
+            }
+          }
+
           const identifierConfigs =
             facility?.patient_instance_identifier_configs || [];
           const identifiers = data.identifiers || [];
@@ -225,6 +230,7 @@ export default function PatientRegistration(
       phone_number: phone_number || "",
       emergency_phone_number: "",
       age_or_dob: "dob",
+      date_of_birth: "",
       same_phone_number: false,
       same_address: true,
       _selected_levels: [],
