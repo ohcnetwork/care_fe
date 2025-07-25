@@ -64,7 +64,7 @@ export default function FacilityForm({
     facility_type: z.string().min(1, t("field_required")),
     name: z.string().trim().min(1, t("field_required")),
     description: z.string().optional(),
-    features: z.array(z.number()).prefault([]),
+    features: z.array(z.number()),
     pincode: validators().pincode,
     geo_organization: z.string().min(1, t("field_required")),
     address: z.string().trim().min(1, t("field_required")),
