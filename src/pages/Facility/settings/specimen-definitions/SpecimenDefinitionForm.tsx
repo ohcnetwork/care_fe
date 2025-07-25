@@ -380,6 +380,7 @@ export function SpecimenDefinitionForm({
                           onSelect={handleTypeCollectedSelect}
                           value={field.value}
                           disabled={isLoading}
+                          ref={field.ref}
                         />
                       </FormControl>
                       <FormMessage />

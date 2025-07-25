@@ -47,6 +47,7 @@ interface Props {
   title?: string;
   asSheet?: boolean;
   closeOnSelect?: boolean;
+  ref?: React.Ref<HTMLButtonElement>;
 }
 
 export default function ValueSetSelect({
@@ -63,6 +64,7 @@ export default function ValueSetSelect({
   showCode = false,
   title,
   asSheet = false,
+  ref,
 }: Props) {
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
@@ -134,6 +136,7 @@ export default function ValueSetSelect({
       <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
         <SheetTrigger asChild>
           <Button
+            ref={ref}
             variant="outline"
             role="combobox"
             onClick={() => setInternalOpen(true)}
@@ -179,6 +182,7 @@ export default function ValueSetSelect({
       <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
         <SheetTrigger asChild>
           <Button
+            ref={ref}
             variant="outline"
             role="combobox"
             className={cn(
@@ -242,6 +246,7 @@ export default function ValueSetSelect({
           <PopoverTrigger asChild disabled={disabled}>
             <div className="w-full">
               <Button
+                ref={ref}
                 type="button"
                 variant="outline"
                 role="combobox"
