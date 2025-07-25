@@ -127,7 +127,7 @@
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.2.0",
     "use-keyboard-shortcut": "^1.1.6",
-    "zod": "^3.25.67"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
