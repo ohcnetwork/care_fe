@@ -150,7 +150,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       publish("patient:upsert", data);
       createAppointment({
         patient: data.id,
-        note: reason ?? "",
+        reason_for_visit: reason ?? "",
       });
     },
   });
