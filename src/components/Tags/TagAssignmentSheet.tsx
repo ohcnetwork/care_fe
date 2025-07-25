@@ -298,7 +298,7 @@ export function TagSelectorPopover({
       )}
 
       {/* Tag selector popover */}
-      <Popover open={open} onOpenChange={setOpen} modal={false}>
+      <Popover open={open} onOpenChange={setOpen} modal={true}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"

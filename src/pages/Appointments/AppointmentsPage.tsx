@@ -1239,8 +1239,8 @@ const AppointmentStatusDropdown = ({
     <div className="w-32" onClick={(e) => e.stopPropagation()}>
       <Select
         value={currentStatus}
-        onValueChange={(value) =>
-          updateAppointment({ status: value as Appointment["status"] })
+        onValueChange={(status: Appointment["status"]) =>
+          updateAppointment({ status, note: appointment.note })
         }
       >
         <SelectTrigger>
