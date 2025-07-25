@@ -74,7 +74,7 @@ export default function FacilityForm({
     defaultValues: {
       facility_type: "",
       name: "",
-      description: undefined,
+      description: "",
       features: [],
       pincode: undefined,
       geo_organization: organizationId || "",
