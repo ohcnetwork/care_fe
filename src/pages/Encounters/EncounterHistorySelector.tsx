@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { CircleDashed } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -9,8 +10,9 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { FilterSelect } from "@/components/ui/filter-select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -21,18 +23,27 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+// import { DateRangeFilter } from "@/components/Common/DateRangeFilter";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
+
+import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
+  ENCOUNTER_STATUS,
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
-  completedEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
-import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
+import {
+  TagConfig,
+  TagResource,
+  getTagHierarchyDisplay,
+} from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 
 interface EncounterCardProps {
   encounter: EncounterRead;
@@ -111,6 +122,7 @@ interface Props {
 const EncounterHistoryList = ({ onSelect }: Props) => {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
+  const [showFilters, setShowFilters] = useState(false);
 
   const {
     currentEncounter,
@@ -120,6 +132,30 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     patientId,
     facilityId,
   } = useEncounter();
+
+  const { qParams, updateQuery } = useFilters({
+    limit: 0,
+    disableCache: true,
+  });
+
+  // Handle tags like AppointmentsPage.tsx
+  const selectedTagIds = qParams.tags?.split(",") ?? [];
+  const tagConfigsQuery = useTagConfigs({ ids: selectedTagIds, facilityId });
+  const selectedTags = tagConfigsQuery
+    .map((q) => q.data)
+    .filter(Boolean) as TagConfig[];
+
+  const handleStatusChange = (value: string | undefined) => {
+    updateQuery({ status: value || undefined });
+  };
+
+  const handleTagsChange = (tags: TagConfig[]) => {
+    updateQuery({ tags: tags.map((tag) => tag.id).join(",") });
+  };
+
+  // const handleDateFromChange = (date: Date | undefined) => {
+  //   updateQuery({ date_from: date?.toISOString() || undefined });
+  // };
 
   const handleSelect = (encounterId: string | null) => {
     setSelectedEncounter(encounterId);
@@ -132,16 +168,19 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["infinite-encounters", "past", patientId],
+    queryKey: ["infinite-encounters", "past", patientId, qParams],
     // Apply patient_filter only if the current encounter is completed
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(encounterApi.list, {
         queryParams: {
           limit: 14,
           offset: String(pageParam),
-          ...(completedEncounterStatus.includes(currentEncounter?.status ?? "")
-            ? { patient_filter: patientId, facility: facilityId }
-            : { patient: patientId, facility: facilityId }),
+          patient: patientId,
+          facility: facilityId,
+          ...(qParams.status && { status: qParams.status }),
+          ...(qParams.tags && { tags: qParams.tags }),
+          // ...(qParams.date_from && { date_from: qParams.date_from }),
+          // ...(qParams.date_to && { date_to: qParams.date_to }),
         },
       })({ signal });
       return response as PaginatedResponse<EncounterRead>;
@@ -151,7 +190,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
       const currentOffset = allPages.length * 14;
       return currentOffset < lastPage.count ? currentOffset : null;
     },
-    enabled: !!currentEncounter,
+    enabled: !!patientId && !!facilityId,
   });
 
   const past = encounters?.pages.flatMap((page) => page.results) ?? [];
@@ -159,6 +198,11 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
   const pastEncounters = past.filter(
     (encounter) => encounter.id !== currentEncounterId,
   );
+
+  // const dateFromFilter = qParams.date_from
+  //   ? new Date(qParams.date_from)
+  //   : undefined;
+  // const dateToFilter = qParams.date_to ? new Date(qParams.date_to) : undefined;
   useEffect(() => {
     if (inView && hasNextPage) {
       fetchNextPage();
@@ -171,8 +215,8 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
         <CardListSkeleton count={1} />
       ) : (
         <div>
-          <h2 className="px-4 mb-2 text-xs font-medium text-gray-600 uppercase">
-            {t("current_encounter")}
+          <h2 className="mb-2 text-xs font-medium text-gray-600 uppercase">
+            {t("chosen_encounter")}
           </h2>
           <div className="space-y-2">
             <EncounterCard
@@ -186,15 +230,67 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
 
       <Separator className="my-4" />
 
-      {!pastEncounters ? (
-        <CardListSkeleton count={5} />
-      ) : pastEncounters.length > 0 ? (
+      <div>
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xs font-medium text-gray-600 uppercase">
+              {t("other_encounters")}
+            </h2>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setShowFilters(!showFilters)}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "icon" }),
+                "h-8 w-8",
+                showFilters && "bg-gray-100",
+              )}
+              title={t("toggle_filters")}
+            >
+              <CareIcon icon="l-filter" className="size-4" />
+            </Button>
+          </div>
+
+          {/* Filters */}
+          {showFilters && (
+            <div className="flex flex-col gap-2 mb-4">
+              <FilterSelect
+                value={qParams.status || ""}
+                onValueChange={handleStatusChange}
+                options={[...ENCOUNTER_STATUS]}
+                label={t("status")}
+                onClear={() => updateQuery({ status: undefined })}
+                icon={<CircleDashed className="size-4 text-gray-600" />}
+                className="bg-white font-medium rounded-md hover:bg-gray-100 h-9"
+              />
+
+              <TagSelectorPopover
+                selected={selectedTags}
+                onChange={handleTagsChange}
+                resource={TagResource.ENCOUNTER}
+                asFilter
+                className="mt-0 bg-white font-medium rounded-md"
+              />
+              {/* TODO: Add date range filter once we have BE support */}
+              {/* <DateRangeFilter
+                dateFrom={dateFromFilter}
+                dateTo={dateToFilter}
+                onDateFromChange={handleDateFromChange}
+                onDateToChange={handleDateToChange}
+                onClear={() => {
+                  updateQuery({ date_from: undefined, date_to: undefined });
+                }}
+                className="bg-white font-medium rounded-md"
+              /> */}
+            </div>
+          )}
+        </div>
+
         <div>
-          <h2 className="px-4 mb-2 text-xs font-medium text-gray-600 uppercase">
-            {t("past_encounters")}
-          </h2>
-          <div>
-            {pastEncounters.reduce<React.ReactNode[]>(
+          {!encounters ? (
+            <CardListSkeleton count={5} />
+          ) : pastEncounters.length > 0 ? (
+            pastEncounters.reduce<React.ReactNode[]>(
               (acc, encounter, index) => {
                 const currentYear = new Date(
                   encounter.period.start!,
@@ -210,12 +306,13 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
                   acc.push(
                     <div
                       key={`year-${currentYear}`}
-                      className="px-4 mb-2 text-sm font-medium text-indigo-700"
+                      className=" mb-2 text-sm font-medium text-indigo-700"
                     >
                       {currentYear}
                     </div>,
                   );
                 }
+
                 acc.push(
                   <EncounterCard
                     key={encounter.id}
@@ -227,13 +324,17 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
                 return acc;
               },
               [],
-            )}
-            <div ref={ref} />
-            {isFetchingNextPage && <CardListSkeleton count={5} />}
-            {!hasNextPage && <div className="border-b border-gray-300 pb-2" />}
-          </div>
+            )
+          ) : (
+            <div className="px-4 py-8 text-center text-gray-500">
+              {t("no_encounters_found")}
+            </div>
+          )}
+          <div ref={ref} />
+          {isFetchingNextPage && <CardListSkeleton count={5} />}
+          {!hasNextPage && <div className="border-b border-gray-300 pb-2" />}
         </div>
-      ) : null}
+      </div>
     </div>
   );
 };
@@ -247,7 +348,7 @@ export default function EncounterHistorySelector() {
     <>
       <div className="lg:hidden">
         <h2 className="px-2 mb-2 text-xs font-medium text-gray-600 uppercase">
-          {t("selected_encounter")}
+          {t("chosen_encounter")}
         </h2>
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger className="w-full">

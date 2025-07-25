@@ -108,9 +108,16 @@ export const EncounterOverviewTab = () => {
                     <Badge variant="yellow">
                       <HandIcon className="size-4" />
                       <span>
-                        {allergies?.results
-                          .map((allergy) => allergy.code.display)
-                          .join(", ")}
+                        {allergies?.results.length > 2
+                          ? `${allergies.results
+                              .slice(0, 2)
+                              .map((allergy) => allergy.code.display)
+                              .join(
+                                ", ",
+                              )} ... +${allergies.results.length - 2} ${t("more")}`
+                          : allergies?.results
+                              .map((allergy) => allergy.code.display)
+                              .join(", ")}
                       </span>
                     </Badge>
                   </div>
