@@ -53,7 +53,7 @@ export function GenericRow<T>({
         <div
           key={col.key}
           className={cn(
-            "px-2 py-1 border-t border-b border-gray-200",
+            "px-2 py-1 border-t border-b border-gray-200 flex items-center",
             index === 0 && "border-l rounded-l",
             index !== 0 && "border-l",
             index === columns.length - 1 && "border-r",
