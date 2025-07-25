@@ -4,7 +4,7 @@ import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 import RadioInput from "@/components/ui/RadioInput";
 import { Button } from "@/components/ui/button";
@@ -23,12 +23,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { GENDERS, GENDER_TYPES } from "@/common/constants";
-import { validateAge, validateName } from "@/common/validation";
+import { validateName } from "@/common/validation";
 
 import { usePubSub } from "@/Utils/pubsubContext";
 import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
-import validators from "@/Utils/validatorsV4";
+import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { PatientRead } from "@/types/emr/patient/patient";
@@ -52,54 +52,44 @@ export function PatientRegistration(props: PatientRegistrationProps) {
 
   const patientUserContext = usePatientContext();
   const tokenData = patientUserContext?.tokenData;
+
   const patientSchema = z
     .object({
       name: z
         .string()
-        .min(1, { error: t("field_required") })
-        .refine(validateName, {
-          error: t("min_char_length_error", { min_length: 3 }),
-        }),
-      gender: z.enum(GENDERS, { error: t("field_required") }),
-      address: z.string().min(1, { error: t("field_required") }),
-      age: z.string().refine(
-        (val) => {
-          if (form.watch("ageInputType") === "age") {
-            return !!val;
-          }
-          return true;
-        },
-        {
-          error: t("field_required"),
-        },
-      ),
-      date_of_birth: z
-        .date()
-        .or(z.string())
-        .refine(
-          (val) => {
-            if (form.watch("ageInputType") === "date_of_birth") {
-              return !!val;
-            }
-            return true;
-          },
-          {
-            error: t("field_required"),
-          },
-        ),
+        .min(1, t("field_required"))
+        .refine(validateName, t("min_char_length_error", { min_length: 3 })),
+      gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
+      address: z.string().min(1, t("field_required")),
+      age: z.string().optional(),
+      date_of_birth: z.date().or(z.string()).optional(),
       pincode: validators().pincode,
-      geo_organization: z.string().min(1, { error: t("field_required") }),
+      geo_organization: z
+        .string()
+        .min(1, t("organization_required"))
+        .optional(),
       ageInputType: z.enum(["age", "date_of_birth"]),
     })
-    .check((ctx) => {
-      const data = ctx.value;
+    .superRefine((data, ctx) => {
       const field = data.ageInputType === "age" ? "age" : "date_of_birth";
-      if (field === "age" && data.age && !validateAge(Number(data.age))) {
-        ctx.issues.push({
-          code: "custom",
-          message: t("age_validation_message"),
+      if (!data[field]) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("field_required"),
+          path: [field],
+        });
+        return;
+      }
+      if (
+        field === "age" &&
+        data.age &&
+        !isNaN(Number(data.age)) &&
+        Number(data.age) < 0
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("age_less_than_0"),
           path: ["age"],
-          input: data,
         });
       }
     });
@@ -111,8 +101,8 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     defaultValues: {
       name: "",
       ageInputType: "date_of_birth",
-      age: "",
-      date_of_birth: "",
+      age: undefined,
+      date_of_birth: undefined,
       address: "",
       pincode: undefined,
       geo_organization: undefined,
@@ -144,7 +134,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       },
     });
 
-  const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
+  const { mutate: createPatient } = useMutation({
     mutationFn: (body: Partial<AppointmentPatientRegister>) =>
       mutate(publicPatientApi.createPatient, {
         body: { ...body, phone_number: tokenData.phoneNumber },
@@ -160,7 +150,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       publish("patient:upsert", data);
       createAppointment({
         patient: data.id,
-        reason_for_visit: reason ?? "",
+        note: reason ?? "",
       });
     },
   });
@@ -180,7 +170,6 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       geo_organization: data.geo_organization,
       is_active: true,
     };
-
     createPatient(formattedData);
   });
 
@@ -329,15 +318,21 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                         <span className="text-xs text-gray-500">
                           {t("age_notice")}
                         </span>
-                        {form.getValues("age") &&
-                          Number(form.watch("age")) > 0 &&
-                          Number(form.getValues("age")) < 120 && (
-                            <span className="text-sm font-bold text-violet-600">
-                              {t("year_of_birth")}:{" "}
-                              {new Date().getFullYear() -
-                                Number(form.getValues("age"))}
-                            </span>
-                          )}
+                        {form.getValues("age") && (
+                          <div className="text-sm font-bold">
+                            {Number(form.getValues("age")) <= 0 ? (
+                              <span className="text-red-600">
+                                {t("invalid_age")}
+                              </span>
+                            ) : (
+                              <span className="text-violet-600">
+                                {t("year_of_birth")}:{" "}
+                                {new Date().getFullYear() -
+                                  Number(form.getValues("age"))}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </FormItem>
                     )}
                   />
@@ -426,7 +421,6 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 variant="primary_gradient"
                 className="sm:w-1/5"
                 type="submit"
-                disabled={isCreatingPatient || !form.formState.isDirty}
               >
                 <span className="bg-linear-to-b from-white/15 to-transparent" />
                 {t("register_patient")}

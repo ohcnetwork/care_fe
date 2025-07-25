@@ -84,35 +84,8 @@ export default function UserForm({
             .min(1, { error: t("field_required") })
             .refine(validateUsername, t("username_not_valid")),
       password_setup_method: z.enum(["immediate", "email"]).optional(),
-      password: z
-        .string()
-        .refine(
-          (val) => {
-            if (
-              !isEditMode &&
-              form.watch("password_setup_method") == "immediate"
-            )
-              return !!val;
-            return true;
-          },
-          { error: t("field_required") },
-        )
-        .optional(),
-      c_password: z
-        .string()
-        .refine(
-          (val): boolean => {
-            if (
-              !isEditMode &&
-              form.watch("password_setup_method") == "immediate"
-            ) {
-              return !!val && val === form.watch("password");
-            }
-            return true;
-          },
-          { error: t("password_mismatch") },
-        )
-        .optional(),
+      password: z.string().optional(),
+      c_password: z.string().optional(),
       first_name: z.string().min(1, { error: t("field_required") }),
       last_name: z.string().min(1, { error: t("field_required") }),
       email: isEditMode
@@ -124,23 +97,57 @@ export default function UserForm({
       suffix: z.string().optional(),
       geo_organization: z.string().optional(),
     })
-    .check((ctx) => {
-      const data = ctx.value;
-      if (
-        !isEditMode &&
-        data.password_setup_method === "immediate" &&
-        data.password
-      ) {
-        if (!validatePassword(data.password)) {
-          ctx.issues.push({
-            code: "custom",
-            message: t("new_password_validation"),
-            path: ["password"],
-            input: data,
-          });
+    .refine(
+      (data) => {
+        if (!isEditMode && data.password_setup_method == "immediate") {
+          return !!data.password;
         }
-      }
-    });
+        return true;
+      },
+      {
+        message: t("field_required"),
+        path: ["password"],
+        when(payload): boolean {
+          return userFormSchema
+            .pick({ password: true })
+            .safeParse(payload.value).success;
+        },
+      },
+    )
+    .refine(
+      (data) => {
+        if (!isEditMode && data.password_setup_method == "immediate") {
+          return validatePassword(data.password as string);
+        }
+        return true;
+      },
+      {
+        message: t("new_password_validation"),
+        path: ["password"],
+        when(payload): boolean {
+          return userFormSchema
+            .pick({ password: true })
+            .safeParse(payload.value).success;
+        },
+      },
+    )
+    .refine(
+      (data) => {
+        if (!isEditMode && data.password_setup_method == "immediate") {
+          return !!data.password && data.password === data.c_password;
+        }
+        return true;
+      },
+      {
+        message: t("password_mismatch"),
+        path: ["c_password"],
+        when(payload): boolean {
+          return userFormSchema
+            .pick({ c_password: true })
+            .safeParse(payload.value).success;
+        },
+      },
+    );
 
   type UserFormValues = z.infer<typeof userFormSchema>;
 
@@ -160,6 +167,8 @@ export default function UserForm({
       password_setup_method: "immediate",
     },
   });
+
+  console.log(form.formState.errors);
 
   const { data: userData, isLoading: isLoadingUser } = useQuery({
     queryKey: ["user", existingUsername],
