@@ -1,5 +1,6 @@
 import { Code } from "@/types/base/code/code";
 import { Duration } from "@/types/base/duration/duration";
+import { QuantitySpec } from "@/types/emr/specimenDefinition/specimenDefinition";
 
 export enum ProductKnowledgeType {
   medication = "medication",
@@ -58,12 +59,31 @@ export interface DrugCharacteristic {
   value: string;
 }
 
+export interface Strength {
+  ratio: {
+    numerator: QuantitySpec;
+    denominator: QuantitySpec;
+  };
+  quantity: QuantitySpec;
+}
+
+export interface ProductIngredient {
+  is_active: boolean;
+  substance: Code;
+  strength: Strength;
+}
+
+export interface ProductNutrient {
+  item: Code;
+  amount: Strength;
+}
+
 export interface ProductDefinition {
   dosage_form: Code;
   intended_routes: Code[];
   // TODO: Add ingredients, nutrients, and drug_characteristic types when BE is ready
-  ingredients: Code[];
-  nutrients: Code[];
+  ingredients: ProductIngredient[];
+  nutrients: ProductNutrient[];
   drug_characteristic: DrugCharacteristic[];
 }
 

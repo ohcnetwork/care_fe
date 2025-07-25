@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -38,6 +39,7 @@ import { generateSlug } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import { DOSAGE_UNITS_CODES } from "@/types/emr/medicationRequest/medicationRequest";
 import {
+  DrugCharacteristicCode,
   ProductKnowledgeBase,
   ProductKnowledgeCreate,
   ProductKnowledgeStatus,
@@ -52,6 +54,35 @@ const codeSchema = z.object({
   code: z.string().min(1, "Code is required"),
   display: z.string().min(1, "Display name is required"),
   system: z.string().min(1, "System is required"),
+});
+
+const quantitySchema = z.object({
+  value: z.number(),
+  unit: codeSchema,
+});
+
+const strengthSchema = z.object({
+  ratio: z.object({
+    numerator: quantitySchema,
+    denominator: quantitySchema,
+  }),
+  quantity: quantitySchema,
+});
+
+const ingredientSchema = z.object({
+  is_active: z.boolean(),
+  substance: codeSchema,
+  strength: strengthSchema,
+});
+
+const nutrientSchema = z.object({
+  item: codeSchema,
+  amount: strengthSchema,
+});
+
+const drugCharacteristicSchema = z.object({
+  code: z.nativeEnum(DrugCharacteristicCode),
+  value: z.string(),
 });
 
 const formSchema = z.object({
@@ -85,6 +116,9 @@ const formSchema = z.object({
     .object({
       dosage_form: codeSchema.optional(),
       intended_routes: z.array(codeSchema).default([]),
+      ingredients: z.array(ingredientSchema).default([]),
+      nutrients: z.array(nutrientSchema).default([]),
+      drug_characteristic: z.array(drugCharacteristicSchema).default([]),
     })
     .nullable()
     .optional()
@@ -163,6 +197,12 @@ function ProductKnowledgeFormContent({
     system: "http://unitsofmeasure.org",
   };
 
+  const defaultProductUnitCode: Code = {
+    code: "mg",
+    display: "milligram",
+    system: "http://unitsofmeasure.org",
+  };
+
   // Handle form initialization with proper mapping of types
   const getDefaultValues = () => {
     if (isEditMode && existingData) {
@@ -223,6 +263,21 @@ function ProductKnowledgeFormContent({
   const intendedRoutesArray = useFieldArray({
     control: form.control,
     name: "definitional.intended_routes",
+  });
+
+  const ingredientsArray = useFieldArray({
+    control: form.control,
+    name: "definitional.ingredients",
+  });
+
+  const nutrientsArray = useFieldArray({
+    control: form.control,
+    name: "definitional.nutrients",
+  });
+
+  const drugCharacteristicArray = useFieldArray({
+    control: form.control,
+    name: "definitional.drug_characteristic",
   });
 
   const { mutate: createProductKnowledge, isPending: isCreating } = useMutation(
@@ -865,6 +920,479 @@ function ProductKnowledgeFormContent({
                       ) : (
                         <div className="rounded-md bg-gray-50 p-4 text-center text-sm text-gray-500">
                           {t("no_routes_added")}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-900">
+                            {t("ingredients")}
+                          </h3>
+                          <p className="mt-0.5 text-xs text-gray-500">
+                            {t("pk_form_ingredients_description")}
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            ingredientsArray.append({
+                              is_active: true,
+                              substance: {
+                                code: "",
+                                display: "",
+                                system: "",
+                              },
+                              strength: {
+                                ratio: {
+                                  numerator: {
+                                    value: 1,
+                                    unit: defaultProductUnitCode,
+                                  },
+                                  denominator: {
+                                    value: 1,
+                                    unit: defaultProductUnitCode,
+                                  },
+                                },
+                                quantity: {
+                                  value: 1,
+                                  unit: defaultProductUnitCode,
+                                },
+                              },
+                            });
+                          }}
+                        >
+                          <PlusCircle className="mr-2 size-4" />
+                          {t("add_ingredient")}
+                        </Button>
+                      </div>
+                      {ingredientsArray.fields.length > 0 ? (
+                        <div className="space-y-4">
+                          {ingredientsArray.fields.map((field, index) => (
+                            <div
+                              key={field.id}
+                              className="flex flex-col items-start gap-1 rounded-md border p-3"
+                            >
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="self-end"
+                                onClick={() => ingredientsArray.remove(index)}
+                              >
+                                <X className="size-4" />
+                              </Button>
+                              <div className="flex flex-col gap-3 w-full">
+                                <FormLabel>{t("substance")}</FormLabel>
+                                <div className="px-2 w-full">
+                                  <ValueSetSelect
+                                    system="system-substance"
+                                    value={field.substance}
+                                    placeholder={t("select_ingredient")}
+                                    onSelect={(code) => {
+                                      form.setValue(
+                                        `definitional.ingredients.${index}.substance`,
+                                        {
+                                          code: code.code,
+                                          display: code.display,
+                                          system: code.system,
+                                        },
+                                      );
+                                    }}
+                                    showCode={true}
+                                  />
+                                </div>
+
+                                <div className="flex flex-col gap-1 w-full">
+                                  <FormLabel aria-required>
+                                    {t("ingredient_strength")}
+                                  </FormLabel>
+                                  <div className="flex flex-row gap-1 items-center w-full">
+                                    <FormField
+                                      control={form.control}
+                                      name={`definitional.ingredients.${index}.strength.ratio.numerator`}
+                                      render={({ field }) => (
+                                        <FormItem className="flex flex-col w-full">
+                                          <FormControl>
+                                            <ComboboxQuantityInput
+                                              quantity={
+                                                field.value
+                                                  ? {
+                                                      value: field.value.value,
+                                                      unit: field.value.unit,
+                                                    }
+                                                  : undefined
+                                              }
+                                              onChange={(value) => {
+                                                field.onChange(value);
+                                              }}
+                                              placeholder={t(
+                                                "enter_minimum_volume",
+                                              )}
+                                            />
+                                          </FormControl>
+                                        </FormItem>
+                                      )}
+                                    />
+                                    <span className="text-gray-500 self-center">
+                                      {"/"}
+                                    </span>
+                                    <FormField
+                                      control={form.control}
+                                      name={`definitional.ingredients.${index}.strength.ratio.denominator`}
+                                      render={({ field }) => (
+                                        <FormItem className="flex flex-col w-full">
+                                          <FormControl>
+                                            <ComboboxQuantityInput
+                                              quantity={
+                                                field.value
+                                                  ? {
+                                                      value: field.value.value,
+                                                      unit: field.value.unit,
+                                                    }
+                                                  : undefined
+                                              }
+                                              onChange={(value) => {
+                                                field.onChange(value);
+                                              }}
+                                              placeholder={t(
+                                                "enter_minimum_volume",
+                                              )}
+                                            />
+                                          </FormControl>
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </div>
+                                </div>
+
+                                <FormField
+                                  control={form.control}
+                                  name={`definitional.ingredients.${index}.strength.quantity`}
+                                  render={({ field }) => (
+                                    <FormItem className="flex flex-col w-full">
+                                      <FormLabel aria-required>
+                                        {t("quantity")}
+                                      </FormLabel>
+                                      <FormControl>
+                                        <ComboboxQuantityInput
+                                          quantity={
+                                            field.value
+                                              ? {
+                                                  value: field.value.value,
+                                                  unit: field.value.unit,
+                                                }
+                                              : undefined
+                                          }
+                                          onChange={(value) => {
+                                            field.onChange(value);
+                                          }}
+                                          placeholder={t("enter_quantity")}
+                                        />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="rounded-md bg-gray-50 p-4 text-center text-sm text-gray-500">
+                          {t("no_ingredients_added")}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-900">
+                            {t("nutrients")}
+                          </h3>
+                          <p className="mt-0.5 text-xs text-gray-500">
+                            {t("pk_form_nutrients_description")}
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            nutrientsArray.append({
+                              item: {
+                                code: "",
+                                display: "",
+                                system: "",
+                              },
+                              amount: {
+                                ratio: {
+                                  numerator: {
+                                    value: 1,
+                                    unit: defaultProductUnitCode,
+                                  },
+                                  denominator: {
+                                    value: 1,
+                                    unit: defaultProductUnitCode,
+                                  },
+                                },
+                                quantity: {
+                                  value: 1,
+                                  unit: defaultProductUnitCode,
+                                },
+                              },
+                            });
+                          }}
+                        >
+                          <PlusCircle className="mr-2 size-4" />
+                          {t("add_nutrient")}
+                        </Button>
+                      </div>
+
+                      {nutrientsArray.fields.length > 0 ? (
+                        <div className="space-y-2">
+                          {nutrientsArray.fields.map((field, index) => (
+                            <div
+                              key={field.id}
+                              className="flex flex-col items-start gap-1 rounded-md border p-3"
+                            >
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="self-end"
+                                onClick={() => nutrientsArray.remove(index)}
+                              >
+                                <X className="size-4" />
+                              </Button>
+                              <div className="flex flex-col gap-3 w-full">
+                                <FormLabel>{t("item")}</FormLabel>
+                                <div className="px-2 w-full">
+                                  <ValueSetSelect
+                                    system="system-nutrients"
+                                    value={field.item}
+                                    placeholder={t("select_nutrient")}
+                                    onSelect={(code) => {
+                                      form.setValue(
+                                        `definitional.nutrients.${index}.item`,
+                                        {
+                                          code: code.code,
+                                          display: code.display,
+                                          system: code.system,
+                                        },
+                                      );
+                                    }}
+                                    showCode={true}
+                                  />
+                                </div>
+
+                                <div className="flex flex-col gap-1 w-full">
+                                  <FormLabel aria-required>
+                                    {t("amount")}
+                                  </FormLabel>
+                                  <div className="flex flex-row gap-1 items-center w-full">
+                                    <FormField
+                                      control={form.control}
+                                      name={`definitional.nutrients.${index}.amount.ratio.numerator`}
+                                      render={({ field }) => (
+                                        <FormItem className="flex flex-col w-full">
+                                          <FormControl>
+                                            <ComboboxQuantityInput
+                                              quantity={
+                                                field.value
+                                                  ? {
+                                                      value: field.value.value,
+                                                      unit: field.value.unit,
+                                                    }
+                                                  : undefined
+                                              }
+                                              onChange={(value) => {
+                                                field.onChange(value);
+                                              }}
+                                              placeholder={t(
+                                                "enter_minimum_volume",
+                                              )}
+                                            />
+                                          </FormControl>
+                                        </FormItem>
+                                      )}
+                                    />
+                                    <span className="text-gray-500 self-center">
+                                      {"/"}
+                                    </span>
+                                    <FormField
+                                      control={form.control}
+                                      name={`definitional.nutrients.${index}.amount.ratio.denominator`}
+                                      render={({ field }) => (
+                                        <FormItem className="flex flex-col w-full">
+                                          <FormControl>
+                                            <ComboboxQuantityInput
+                                              quantity={
+                                                field.value
+                                                  ? {
+                                                      value: field.value.value,
+                                                      unit: field.value.unit,
+                                                    }
+                                                  : undefined
+                                              }
+                                              onChange={(value) => {
+                                                field.onChange(value);
+                                              }}
+                                              placeholder={t(
+                                                "enter_minimum_volume",
+                                              )}
+                                            />
+                                          </FormControl>
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </div>
+                                </div>
+
+                                <FormField
+                                  control={form.control}
+                                  name={`definitional.nutrients.${index}.amount.quantity`}
+                                  render={({ field }) => (
+                                    <FormItem className="flex flex-col w-full">
+                                      <FormLabel aria-required>
+                                        {t("quantity")}
+                                      </FormLabel>
+                                      <FormControl>
+                                        <ComboboxQuantityInput
+                                          quantity={
+                                            field.value
+                                              ? {
+                                                  value: field.value.value,
+                                                  unit: field.value.unit,
+                                                }
+                                              : undefined
+                                          }
+                                          onChange={(value) => {
+                                            field.onChange(value);
+                                          }}
+                                          placeholder={t("enter_quantity")}
+                                        />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="rounded-md bg-gray-50 p-4 text-center text-sm text-gray-500">
+                          {t("no_nutrients_added")}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-900">
+                            {t("drug_characteristics")}
+                          </h3>
+                          <p className="mt-0.5 text-xs text-gray-500">
+                            {t("pk_form_drug_characteristics_description")}
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            drugCharacteristicArray.append({
+                              code: DrugCharacteristicCode.imprint_code,
+                              value: "",
+                            });
+                          }}
+                        >
+                          <PlusCircle className="mr-2 size-4" />
+                          {t("add_drug_characteristic")}
+                        </Button>
+                      </div>
+                      {drugCharacteristicArray.fields.length > 0 ? (
+                        <div className="space-y-4">
+                          {drugCharacteristicArray.fields.map(
+                            (field, index) => (
+                              <div
+                                key={field.id}
+                                className="flex flex-col items-start gap-2 rounded-md border p-3"
+                              >
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="self-end"
+                                  onClick={() =>
+                                    drugCharacteristicArray.remove(index)
+                                  }
+                                >
+                                  <X className="size-4" />
+                                </Button>
+
+                                <FormField
+                                  control={form.control}
+                                  name={`definitional.drug_characteristic.${index}.code`}
+                                  render={({ field }) => (
+                                    <FormItem className="flex flex-col w-full">
+                                      <FormLabel aria-required>
+                                        {t("code")}
+                                      </FormLabel>
+                                      <FormControl>
+                                        <Select
+                                          value={field.value}
+                                          onValueChange={field.onChange}
+                                        >
+                                          <SelectTrigger>
+                                            <SelectValue
+                                              placeholder={t(
+                                                "select_drug_characteristic",
+                                              )}
+                                            />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            {Object.values(
+                                              DrugCharacteristicCode,
+                                            ).map((code) => (
+                                              <SelectItem
+                                                key={code}
+                                                value={code}
+                                              >
+                                                {t(code)}
+                                              </SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={form.control}
+                                  name={`definitional.drug_characteristic.${index}.value`}
+                                  render={({ field }) => (
+                                    <FormItem className="flex flex-col w-full">
+                                      <FormLabel aria-required>
+                                        {t("value")}
+                                      </FormLabel>
+                                      <FormControl>
+                                        <Input {...field} />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      ) : (
+                        <div className="rounded-md bg-gray-50 p-4 text-center text-sm text-gray-500">
+                          {t("no_drug_characteristics_added")}
                         </div>
                       )}
                     </div>
