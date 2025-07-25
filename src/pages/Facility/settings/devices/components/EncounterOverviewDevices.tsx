@@ -1,8 +1,8 @@
 import { usePluginDevices } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 
 interface Props {
-  encounter: Encounter;
+  encounter: EncounterRead;
 }
 
 export default function EncounterOverviewDevices({ encounter }: Props) {

@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { ChevronDown, ExternalLink } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -81,7 +82,7 @@ export function EncounterHeader() {
                 : t("ongoing")}
             </span>
           </div>
-          {patient.instance_identifiers.map((identifier) => (
+          {patient.instance_identifiers?.map((identifier) => (
             <div
               key={identifier.config.id}
               className="flex md:flex-col gap-0.5 items-center md:items-start"
@@ -117,6 +118,15 @@ export function EncounterHeader() {
         <div className="md:hidden">
           <EncounterProperties encounter={encounter} canEdit={false} />
         </div>
+        {patient.deceased_datetime && (
+          <Badge variant="destructive" className="w-fit sm:self-center">
+            <h3 className="text-sm font-normal">
+              {t("time_of_death")}
+              {": "}
+              {dayjs(patient.deceased_datetime).format("DD MMM YYYY, hh:mm A")}
+            </h3>
+          </Badge>
+        )}
       </div>
 
       {!readOnly && (
