@@ -29,6 +29,7 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
+  completedEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
@@ -117,6 +118,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     selectedEncounterId,
     setSelectedEncounter,
     patientId,
+    facilityId,
   } = useEncounter();
 
   const handleSelect = (encounterId: string | null) => {
@@ -131,12 +133,15 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ["infinite-encounters", "past", patientId],
+    // Apply patient_filter only if the current encounter is completed
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(encounterApi.list, {
         queryParams: {
-          patient: patientId,
           limit: 14,
           offset: String(pageParam),
+          ...(completedEncounterStatus.includes(currentEncounter?.status ?? "")
+            ? { patient_filter: patientId, facility: facilityId }
+            : { patient: patientId, facility: facilityId }),
         },
       })({ signal });
       return response as PaginatedResponse<EncounterRead>;
@@ -146,6 +151,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
       const currentOffset = allPages.length * 14;
       return currentOffset < lastPage.count ? currentOffset : null;
     },
+    enabled: !!currentEncounter,
   });
 
   const past = encounters?.pages.flatMap((page) => page.results) ?? [];
