@@ -629,6 +629,7 @@ const Login = (props: LoginProps) => {
                               className="h-auto p-0 text-primary-600"
                               onClick={() => {
                                 setIsOtpSent(false);
+                                setOtp("");
                                 setOtpError("");
                                 setOtpValidationError("");
                               }}
