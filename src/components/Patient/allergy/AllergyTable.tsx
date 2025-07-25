@@ -203,7 +203,7 @@ export const AllergyTable = ({
               item={allergy}
               patientId={patientId}
               facilityId={facilityId}
-              getEncounterId={(item) => item.encounter}
+              encounterId={allergy.encounter}
               note={allergy.note}
               createdBy={allergy.created_by}
               columns={[

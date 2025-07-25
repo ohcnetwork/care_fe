@@ -205,7 +205,7 @@ export const DiagnosisTable = ({
               item={diagnosis}
               patientId={patientId}
               facilityId={facilityId}
-              getEncounterId={(d) => d.encounter}
+              encounterId={diagnosis.encounter}
               note={diagnosis.note}
               createdBy={diagnosis.created_by}
               columns={[

@@ -213,7 +213,7 @@ export const SymptomTable = ({
               item={symptom}
               patientId={patientId}
               facilityId={facilityId}
-              getEncounterId={(item) => item.encounter}
+              encounterId={symptom.encounter}
               note={symptom.note}
               createdBy={symptom.created_by}
               columns={[

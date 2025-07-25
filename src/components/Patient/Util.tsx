@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { formatName } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
 
 type ColumnConfig<T> = {
@@ -29,7 +30,7 @@ interface RowProps<T> {
   patientId: string;
   facilityId?: string;
   columns: ColumnConfig<T>[];
-  getEncounterId: (item: T) => string;
+  encounterId: string;
   note?: string;
   createdBy: UserBase;
 }
@@ -39,7 +40,7 @@ export function GenericRow<T>({
   patientId,
   facilityId,
   columns,
-  getEncounterId,
+  encounterId,
   note,
   createdBy,
 }: RowProps<T>) {
@@ -87,7 +88,6 @@ export function GenericRow<T>({
 
             <DropdownMenuItem
               onClick={() => {
-                const encounterId = getEncounterId(item);
                 navigate(
                   facilityId
                     ? `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`
@@ -106,12 +106,12 @@ export function GenericRow<T>({
               <div className="text-gray-500">{t("reported_by")}:</div>
               <div className="mt-1 flex items-center gap-2">
                 <Avatar
-                  name={`${createdBy.first_name} ${createdBy.last_name}`}
+                  name={formatName(createdBy)}
                   className="size-6"
                   imageUrl={createdBy.profile_picture_url}
                 />
                 <span className="font-semibold text-gray-900">
-                  {`${createdBy.first_name} ${createdBy.last_name}`}
+                  {formatName(createdBy)}
                 </span>
               </div>
             </div>
