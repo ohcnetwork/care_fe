@@ -1,9 +1,4 @@
-import {
-  MutationCache,
-  QueryCache,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useLocationChange } from "raviger";
 import { Suspense, useEffect } from "react";
@@ -18,34 +13,9 @@ import AuthUserProvider from "@/Providers/AuthUserProvider";
 import HistoryAPIProvider from "@/Providers/HistoryAPIProvider";
 import Routers from "@/Routers";
 import { displayCareConsoleArt } from "@/Utils/consoleArt";
-import { handleHttpError } from "@/Utils/request/errorHandler";
-import { HTTPError } from "@/Utils/request/types";
+import queryClient from "@/Utils/request/queryClient";
 
 import { PubSubProvider } from "./Utils/pubsubContext";
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: (failureCount, error) => {
-        // Only retry network errors or server errors (502, 503, 504) up to 3 times
-        if (
-          error.message === "Network Error" ||
-          (error instanceof HTTPError && [502, 503, 504].includes(error.status))
-        ) {
-          return failureCount < 3;
-        }
-        return false;
-      },
-      refetchOnWindowFocus: false,
-    },
-  },
-  queryCache: new QueryCache({
-    onError: handleHttpError,
-  }),
-  mutationCache: new MutationCache({
-    onError: handleHttpError,
-  }),
-});
 
 const ScrollToTop = () => {
   useLocationChange(() => {
