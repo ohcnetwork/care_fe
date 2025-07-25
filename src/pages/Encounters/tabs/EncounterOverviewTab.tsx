@@ -111,18 +111,11 @@ export const EncounterOverviewTab = () => {
                         alt="allergy"
                         className="size-5 m-0.5"
                       />
-                      <div>
+                      <span>
                         {allergies?.results
-                          .slice(0, 3)
                           .map((allergy) => allergy.code.display)
                           .join(", ")}
-                        {allergies && allergies.results.length > 3 && (
-                          <>
-                            {" "}
-                            + {allergies.results.length - 3} {t("more")}
-                          </>
-                        )}
-                      </div>
+                      </span>
                     </Badge>
                   </div>
                 )}
