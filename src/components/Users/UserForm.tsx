@@ -168,8 +168,6 @@ export default function UserForm({
     },
   });
 
-  console.log(form.formState.errors);
-
   const { data: userData, isLoading: isLoadingUser } = useQuery({
     queryKey: ["user", existingUsername],
     queryFn: query(userApi.get, {
