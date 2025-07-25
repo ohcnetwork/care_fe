@@ -507,9 +507,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
         if (!existingDate || adminDate > new Date(existingDate)) {
           acc.dates[admin.request] = admin.occurrence_period_start;
-          acc.performers[admin.request] = admin.created_by
-            ? formatName(admin.created_by)
-            : "";
+          acc.performers[admin.request] = formatName(admin.created_by);
         }
 
         return acc;

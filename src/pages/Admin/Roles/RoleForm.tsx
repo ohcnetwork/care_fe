@@ -81,7 +81,7 @@ export default function RoleForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
-        <div>
+        <div className="space-y-2">
           <Label htmlFor="name">{t("name")}</Label>
           <Input
             id="name"
@@ -94,7 +94,7 @@ export default function RoleForm({
           />
         </div>
 
-        <div>
+        <div className="space-y-2">
           <Label htmlFor="description">{t("description")}</Label>
           <Textarea
             id="description"
