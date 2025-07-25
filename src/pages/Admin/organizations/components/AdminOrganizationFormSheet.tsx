@@ -213,7 +213,7 @@ export default function AdminOrganizationFormSheet({
             <Button
               type="submit"
               className="w-full"
-              disabled={isPending || (isEditMode && !form.formState.isDirty)}
+              disabled={isPending || !form.formState.isDirty}
             >
               {isPending
                 ? isEditMode
