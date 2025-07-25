@@ -1251,7 +1251,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                       </div>
                     </CardContent>
                     <CardFooter className="flex flex-row items-center justify-end px-0 py-2">
-                      {rootQuestions.length > 3 && (
+                      {rootQuestions.length > 0 && (
                         <Button
                           variant="outline"
                           size="sm"
