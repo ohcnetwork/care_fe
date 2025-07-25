@@ -23,10 +23,10 @@ export interface InvoiceBase {
   id: string;
   number: string;
   status: InvoiceStatus;
-  cancelled_reason?: (typeof INVOICE_CANCEL_REASONS)[number] | null;
-  payment_terms?: string | null;
-  note?: string | null;
-  issue_date?: string | null;
+  cancelled_reason?: (typeof INVOICE_CANCEL_REASONS)[number];
+  payment_terms?: string;
+  note?: string;
+  issue_date?: string;
 }
 
 export interface InvoiceCreate extends Omit<InvoiceBase, "id" | "number"> {

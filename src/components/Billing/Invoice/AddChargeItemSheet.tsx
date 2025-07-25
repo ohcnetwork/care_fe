@@ -30,7 +30,8 @@ import useFilters from "@/hooks/useFilters";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { ChargeItemBase } from "@/types/billing/chargeItem/chargeItem";
+import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
 interface AddChargeItemSheetProps {
@@ -56,6 +57,18 @@ export default function AddChargeItemSheet({
     limit: 10,
     disableCache: true,
   });
+
+  const getBaseComponent = (item: ChargeItemRead) => {
+    return item.unit_price_components?.find(
+      (c) => c.monetary_component_type === MonetaryComponentType.base,
+    );
+  };
+
+  const getTotalComponent = (item: ChargeItemRead) => {
+    return item.total_price_components?.find(
+      (c) => c.monetary_component_type === MonetaryComponentType.base,
+    );
+  };
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["charge-items", qParams],
@@ -88,7 +101,7 @@ export default function AddChargeItemSheet({
     },
   });
 
-  const items = (response?.results as ChargeItemBase[]) || [];
+  const items = (response?.results as ChargeItemRead[]) || [];
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -175,21 +188,12 @@ export default function AddChargeItemSheet({
                           <TableCell>{item.quantity}</TableCell>
                           <TableCell>
                             <MonetaryDisplay
-                              value={item.unit_price_components.reduce(
-                                (sum, comp) => sum + (comp.amount ?? 0),
-                                0,
-                              )}
+                              amount={getBaseComponent(item)?.amount || "0"}
                             />
                           </TableCell>
                           <TableCell>
                             <MonetaryDisplay
-                              value={
-                                item.quantity *
-                                item.unit_price_components.reduce(
-                                  (sum, comp) => sum + (comp.amount ?? 0),
-                                  0,
-                                )
-                              }
+                              amount={getTotalComponent(item)?.amount || "0"}
                             />
                           </TableCell>
                         </TableRow>

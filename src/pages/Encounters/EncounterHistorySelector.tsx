@@ -1,6 +1,8 @@
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useInView } from "react-intersection-observer";
 
 import { cn } from "@/lib/utils";
 
@@ -21,15 +23,19 @@ import {
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   ENCOUNTER_STATUS_COLORS,
-  Encounter,
+  EncounterRead,
+  completedEncounterStatus,
 } from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 interface EncounterCardProps {
-  encounter: Encounter;
+  encounter: EncounterRead;
   isSelected: boolean;
   onSelect: (encounterId: string) => void;
 }
@@ -104,19 +110,60 @@ interface Props {
 
 const EncounterHistoryList = ({ onSelect }: Props) => {
   const { t } = useTranslation();
+  const { ref, inView } = useInView();
 
   const {
     currentEncounter,
     currentEncounterId,
     selectedEncounterId,
     setSelectedEncounter,
-    pastEncounters,
+    patientId,
+    facilityId,
   } = useEncounter();
 
   const handleSelect = (encounterId: string | null) => {
     setSelectedEncounter(encounterId);
     onSelect?.();
   };
+
+  const {
+    data: encounters,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["infinite-encounters", "past", patientId],
+    // Apply patient_filter only if the current encounter is completed
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(encounterApi.list, {
+        queryParams: {
+          limit: 14,
+          offset: String(pageParam),
+          ...(completedEncounterStatus.includes(currentEncounter?.status ?? "")
+            ? { patient_filter: patientId, facility: facilityId }
+            : { patient: patientId, facility: facilityId }),
+        },
+      })({ signal });
+      return response as PaginatedResponse<EncounterRead>;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * 14;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
+    enabled: !!currentEncounter,
+  });
+
+  const past = encounters?.pages.flatMap((page) => page.results) ?? [];
+
+  const pastEncounters = past.filter(
+    (encounter) => encounter.id !== currentEncounterId,
+  );
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, fetchNextPage]);
 
   return (
     <div className="space-y-4 pt-2">
@@ -141,13 +188,13 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
 
       {!pastEncounters ? (
         <CardListSkeleton count={5} />
-      ) : pastEncounters.results.length > 0 ? (
+      ) : pastEncounters.length > 0 ? (
         <div>
           <h2 className="px-4 mb-2 text-xs font-medium text-gray-600 uppercase">
             {t("past_encounters")}
           </h2>
           <div>
-            {pastEncounters.results.reduce<React.ReactNode[]>(
+            {pastEncounters.reduce<React.ReactNode[]>(
               (acc, encounter, index) => {
                 const currentYear = new Date(
                   encounter.period.start!,
@@ -155,7 +202,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
                 const prevYear =
                   index > 0
                     ? new Date(
-                        pastEncounters.results[index - 1].period.start!,
+                        pastEncounters[index - 1].period.start!,
                       ).getFullYear()
                     : null;
 
@@ -169,7 +216,6 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
                     </div>,
                   );
                 }
-
                 acc.push(
                   <EncounterCard
                     key={encounter.id}
@@ -182,6 +228,9 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
               },
               [],
             )}
+            <div ref={ref} />
+            {isFetchingNextPage && <CardListSkeleton count={5} />}
+            {!hasNextPage && <div className="border-b border-gray-300 pb-2" />}
           </div>
         </div>
       ) : null}
@@ -204,13 +253,14 @@ export default function EncounterHistorySelector() {
           <SheetTrigger className="w-full">
             <EncounterSheetTrigger />
           </SheetTrigger>
-          <SheetContent side="bottom" className="max-h-[85vh] rounded-t-3xl">
+          <SheetContent
+            side="bottom"
+            className="max-h-[85vh] rounded-t-3xl overflow-y-auto mb-2"
+          >
             <SheetHeader className="px-4 pb-2">
               <SheetTitle>{t("past_encounters")}</SheetTitle>
             </SheetHeader>
-            <div className="overflow-y-auto h-full">
-              <EncounterHistoryList onSelect={() => setIsOpen(false)} />
-            </div>
+            <EncounterHistoryList onSelect={() => setIsOpen(false)} />
           </SheetContent>
         </Sheet>
       </div>
