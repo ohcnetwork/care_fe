@@ -1,5 +1,5 @@
 import { BadgeInfo, ExternalLink, File, X } from "lucide-react";
-import { navigate, usePathParams } from "raviger";
+import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -21,6 +21,7 @@ import { GenericRow } from "@/components/Patient/Util";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 import { formatName } from "@/Utils/utils";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
   SYMPTOM_CLINICAL_STATUS_COLORS,
   SYMPTOM_SEVERITY_COLORS,
@@ -140,21 +141,19 @@ const SymptomCard = ({
         </div>
       </div>
       {showNote && symptom.note && (
-        <div className="col-span-full p-2 bg-gray-50 rounded mt-2">
-          <div className="flex flex-row w-full justify-between">
-            <div className="text-sm font-semibold text-gray-800">
-              {t("note")} :
-            </div>
-            <Button
-              variant={null}
-              className="size-6"
-              onClick={() => setShowNote(false)}
-            >
-              <X size={14} />
-              <span className="sr-only">{t("close")}</span>
-            </Button>
-          </div>
-          <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8 max-w-full break-words">
+        <div className="col-span-full relative border border-gray-200 p-2 pt-4 bg-gray-50 rounded mt-2 rounded-t-none">
+          <div className="font-semibold text-gray-800">{t("note")}:</div>
+
+          <Button
+            variant={null}
+            className="absolute top-2 right-4 flex items-center gap-1 p-0 text-sm"
+            onClick={() => setShowNote(false)}
+          >
+            <X size={14} />
+            <span className="underline">{t("hide_note")}</span>
+          </Button>
+
+          <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8 max-w-full break-words mt-2">
             {symptom.note}
           </p>
         </div>
@@ -171,7 +170,7 @@ export const SymptomTable = ({
   patientId: string;
 }) => {
   const { t } = useTranslation();
-  const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
+  const { facilityId } = useCurrentFacilitySilently();
   const isMobile = useIsMobile();
   const baseHeaderClasses =
     "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700";
