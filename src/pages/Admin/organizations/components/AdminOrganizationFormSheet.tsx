@@ -95,9 +95,15 @@ export default function AdminOrganizationFormSheet({
     if (!isEditMode || !org) return;
 
     const subscription = form.watch((values) => {
+      // Normalize values to handle null/undefined consistently
+      const currentName = values.name?.trim() || "";
+      const originalName = org.name?.trim() || "";
+      const currentDesc = values.description?.trim() || "";
+      const originalDesc = org.description?.trim() || "";
+
       const changed =
-        values.name?.trim() !== org.name?.trim() ||
-        values.description?.trim() !== org.description?.trim();
+        currentName !== originalName || currentDesc !== originalDesc;
+
       setHasChanges(changed);
     });
 
