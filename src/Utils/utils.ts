@@ -48,7 +48,7 @@ export const relativeDate = (date: DateLike, withoutSuffix = false) => {
 };
 
 export const formatName = (
-  user: {
+  user?: {
     first_name: string;
     last_name: string;
     prefix?: string | null;
@@ -57,17 +57,17 @@ export const formatName = (
   },
   hidePrefixSuffix: boolean = false,
 ) => {
-  return (
-    [
-      hidePrefixSuffix ? undefined : user.prefix,
-      user.first_name,
-      user.last_name,
-      hidePrefixSuffix ? undefined : user.suffix,
-    ]
-      .map((s) => s?.trim())
-      .filter(Boolean)
-      .join(" ") || user.username
-  );
+  if (!user) return "-";
+  const name = [
+    hidePrefixSuffix ? undefined : user.prefix,
+    user.first_name,
+    user.last_name,
+    hidePrefixSuffix ? undefined : user.suffix,
+  ]
+    .map((s) => s?.trim())
+    .filter(Boolean)
+    .join(" ");
+  return name || user.username || "-";
 };
 
 export const relativeTime = (time?: DateLike) => {
@@ -105,6 +105,17 @@ function _isAppleDevice() {
  * `true` if device is an Apple device, else `false`
  */
 export const isAppleDevice = _isAppleDevice();
+
+function hasTouch() {
+  try {
+    document.createEvent("TouchEvent");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export const isTouchDevice = hasTouch();
 
 export const isUserOnline = (user: { last_login: DateLike }) => {
   return user.last_login

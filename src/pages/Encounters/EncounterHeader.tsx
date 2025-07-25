@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { ChevronDown, ExternalLink } from "lucide-react";
 import { Link } from "raviger";
 import React, { useState } from "react";
@@ -128,6 +129,15 @@ export function EncounterHeader() {
         <div className="md:hidden">
           <EncounterProperties encounter={encounter} canEdit={false} />
         </div>
+        {patient.deceased_datetime && (
+          <Badge variant="destructive" className="w-fit sm:self-center">
+            <h3 className="text-sm font-normal">
+              {t("time_of_death")}
+              {": "}
+              {dayjs(patient.deceased_datetime).format("DD MMM YYYY, hh:mm A")}
+            </h3>
+          </Badge>
+        )}
       </div>
 
       {!readOnly && (
