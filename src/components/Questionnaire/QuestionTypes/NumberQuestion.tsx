@@ -51,11 +51,7 @@ export function NumberQuestion({
       value={questionnaireResponse.values[index]?.value?.toString() || ""}
       onChange={(e) => handleChange(e.target.value)}
       onKeyDown={(e) => {
-        if (
-          e.key === "e" ||
-          e.key === "E" ||
-          (e.key === "." && question.type === "integer")
-        ) {
+        if (e.key === "." && question.type === "integer") {
           e.preventDefault();
         }
       }}
