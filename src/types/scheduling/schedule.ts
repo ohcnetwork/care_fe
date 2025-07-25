@@ -194,7 +194,7 @@ export interface AppointmentCreatePublicRequest {
 
 export interface AppointmentUpdateRequest {
   status: Appointment["status"];
-  note?: string;
+  note: string;
 }
 
 export interface CreateAppointmentQuestion {

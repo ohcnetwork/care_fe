@@ -83,7 +83,7 @@ export const EncounterOverviewTab = () => {
       {/* Main Content Area */}
       <div className="flex flex-col xl:flex-row gap-4">
         {/* Left Column - Symptoms, Diagnoses, and Questionnaire Responses */}
-        <div className="flex-1 space-y-4">
+        <div className="flex-1 space-y-4 h-[calc(100vh-14rem)] overflow-y-auto">
           <div className="bg-white rounded-lg p-4 border border-gray-200">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex flex-row gap-3">
@@ -210,11 +210,13 @@ export const EncounterOverviewTab = () => {
 
         {/* Right Column */}
         {encounter ? (
-          <SideOverview
-            encounter={encounter}
-            canAccess={canAccess}
-            canEdit={canEdit}
-          />
+          <div className="h-[calc(100vh-14rem)] overflow-y-auto">
+            <SideOverview
+              encounter={encounter}
+              canAccess={canAccess}
+              canEdit={canEdit}
+            />
+          </div>
         ) : (
           <div className="flex-1 space-y-4 max-w-[18rem]">
             <CardListSkeleton count={3} />
