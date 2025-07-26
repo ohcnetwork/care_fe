@@ -1,9 +1,11 @@
 import { Link } from "raviger";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import AudioPlayer, { AudioPlayerRef } from "@/components/Common/AudioPlayer";
 
 import { useMediaStream } from "@/hooks/useMediaStream";
 import { useTimer } from "@/hooks/useTimer";
@@ -24,10 +26,11 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
     | "PERMISSION_DENIED"
     | "RECORDED";
 
-  const { show, onHide, onCapture, autoRecord = false } = props;
+  const { show, onHide, onCapture, autoRecord: _autoRecord = false } = props;
   const [status, setStatus] = useState<Status | null>(null);
   const { t } = useTranslation();
   const timer = useTimer();
+  const audioPlayerRef = useRef<AudioPlayerRef>(null);
 
   const { audioURL, resetRecording, startRecording, stopRecording } =
     useVoiceRecorder((permission: boolean) => {
@@ -46,7 +49,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
     },
   });
 
-  const handleStartRecording = async () => {
+  const handleStartRecording = useCallback(async () => {
     if (status === "RECORDING") return;
 
     try {
@@ -60,23 +63,24 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
       toast.error(t("audio__permission_message"));
       setStatus("PERMISSION_DENIED");
     }
-  };
+  }, [status, startStream, startRecording, timer, t]);
 
-  const handleStopRecording = () => {
+  const handleStopRecording = useCallback(() => {
     if (status !== "RECORDING") return;
     setStatus("RECORDED");
     stopRecording();
     stopStream();
     timer.stop();
-  };
+  }, [status, stopRecording, stopStream, timer]);
 
-  const handleRestartRecording = () => {
+  const handleRestartRecording = useCallback(() => {
     if (status !== "RECORDED") return;
     resetRecording();
     handleStartRecording();
-  };
+  }, [status, resetRecording, handleStartRecording]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
+    audioPlayerRef.current?.stopPlayback();
     const response = await fetch(audioURL);
     const blob = await response.blob();
     const fileName = `recording_${new Date().toISOString().replaceAll(".", "_").replaceAll(":", "_")}.mp3`;
@@ -84,7 +88,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
     resetRecording();
     onHide();
     onCapture(file, fileName);
-  };
+  }, [audioURL, resetRecording, onHide, onCapture]);
 
   useEffect(() => {
     const checkMicPermission = async () => {
@@ -108,12 +112,6 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
       setStatus(null);
     };
   }, [show]);
-
-  useEffect(() => {
-    if (autoRecord && show && status === "RECORDING") {
-      handleStartRecording();
-    }
-  }, [autoRecord, show, status]);
 
   return (
     <div
@@ -181,12 +179,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
           <div className="text-secondary-200">
             {audioURL && (
               <div className="my-4">
-                <audio
-                  className="m-auto max-h-full max-w-full object-contain"
-                  src={audioURL}
-                  controls
-                  autoPlay
-                />
+                <AudioPlayer ref={audioPlayerRef} src={audioURL} />
               </div>
             )}
           </div>
@@ -214,6 +207,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
       <button
         onClick={() => {
           handleStopRecording();
+          audioPlayerRef.current?.stopPlayback();
           onHide();
           resetRecording();
         }}

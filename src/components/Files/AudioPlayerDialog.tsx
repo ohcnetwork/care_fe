@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -8,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import AudioPlayer from "@/components/Common/AudioPlayer";
+import AudioPlayer, { AudioPlayerRef } from "@/components/Common/AudioPlayer";
 import { FileUploadModel } from "@/components/Patient/models";
 
 import routes from "@/Utils/request/api";
@@ -28,6 +29,7 @@ export default function AudioPlayerDialog({
   associatingId: string;
 }) {
   const { t } = useTranslation();
+  const audioPlayerRef = useRef<AudioPlayerRef>(null);
 
   const { data: fileData } = useQuery({
     queryKey: [routes.retrieveUpload, type, file?.id],
@@ -37,15 +39,12 @@ export default function AudioPlayerDialog({
     }),
     enabled: !!file?.id,
   });
-  const { Player, stopPlayback } = AudioPlayer({
-    src: fileData?.read_signed_url || "",
-  });
 
   return (
     <Dialog
       open={open}
       onOpenChange={() => {
-        stopPlayback();
+        audioPlayerRef.current?.stopPlayback();
         onOpenChange(false);
       }}
       aria-labelledby="audio-player-dialog"
@@ -57,7 +56,10 @@ export default function AudioPlayerDialog({
         <DialogHeader>
           <DialogTitle>{t("play_audio")}</DialogTitle>
         </DialogHeader>
-        <Player />
+        <AudioPlayer
+          ref={audioPlayerRef}
+          src={fileData?.read_signed_url || ""}
+        />
       </DialogContent>
     </Dialog>
   );
