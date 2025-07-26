@@ -4,8 +4,10 @@ import {
   BeakerIcon,
   CookingPotIcon,
   HeartPulseIcon,
+  History,
   LeafIcon,
 } from "lucide-react";
+import { Link, usePath } from "raviger";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -17,6 +19,7 @@ import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordio
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
   AllergyCategory,
   AllergyIntolerance,
@@ -64,7 +67,8 @@ export function AllergyList({
   const { t } = useTranslation();
 
   const LIMIT = showTimeline ? 30 : 14;
-
+  const { facilityId } = useCurrentFacilitySilently();
+  const sourceUrl = usePath();
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["infinite-allergies", patientId, encounterId, encounterStatus],
@@ -172,6 +176,19 @@ export function AllergyList({
       readOnly={readOnly}
       className={className}
       editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
+      actionButton={
+        <Button size="xs" variant={"link"} asChild>
+          <Link
+            href={
+              facilityId
+                ? `/facility/${facilityId}/patient/${patientId}/history/allergies?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
+                : `/patient/${patientId}/history/allergies?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
+            }
+          >
+            <History className="size-4" />
+          </Link>
+        </Button>
+      }
     >
       <AllergyTable allergies={allergies} />
       {hasNextPage && (

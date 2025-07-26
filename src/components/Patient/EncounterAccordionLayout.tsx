@@ -1,10 +1,9 @@
+import { SquarePen } from "lucide-react";
 import { Link } from "raviger";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import {
   Accordion,
@@ -35,30 +34,25 @@ export function EncounterAccordionLayout({
   const { t } = useTranslation();
 
   return (
-    <Card className={cn("border-none rounded-sm", className)}>
+    <Card className={cn("border-none rounded-md", className)}>
       <Accordion defaultValue={title.toLowerCase()} type="single" collapsible>
         <AccordionItem value={title.toLowerCase()}>
-          <AccordionTrigger className="p-4 py-2 hover:no-underline flex items-center">
-            <CardHeader className="w-full flex flex-row justify-between p-0 m-0 translate-y-0.5">
-              <CardTitle className="text-base font-semibold">
-                {t(title)}
-              </CardTitle>
-              {!readOnly && editLink ? (
-                <Button variant="outline" size="xs">
-                  <Link
-                    href={editLink}
-                    className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
-                  >
-                    <CareIcon icon="l-pen" className="size-4" />
-                    {t("edit")}
-                  </Link>
-                </Button>
-              ) : (
-                actionButton && actionButton
-              )}
+          <AccordionTrigger className="px-2 py-1 hover:no-underline flex items-center gap-2">
+            <CardHeader className="w-full flex flex-row items-center justify-between p-0 translate-y-0.5 pl-2">
+              <CardTitle className="text-base pt-1">{t(title)}:</CardTitle>
+              <div>
+                {!readOnly && editLink && (
+                  <Button variant="link" size="xs">
+                    <Link href={editLink}>
+                      <SquarePen className="size-4" />
+                    </Link>
+                  </Button>
+                )}
+                {actionButton && actionButton}
+              </div>
             </CardHeader>
           </AccordionTrigger>
-          <AccordionContent className="p-0">
+          <AccordionContent className="p-0 mt-2">
             <CardContent className="px-2 pb-2">{children}</CardContent>
           </AccordionContent>
         </AccordionItem>
