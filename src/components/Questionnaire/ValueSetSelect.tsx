@@ -240,7 +240,7 @@ export default function ValueSetSelect({
       >
         {!hideTrigger && (
           <PopoverTrigger asChild disabled={disabled}>
-            <div className="w-full px-0!">
+            <div className="w-full">
               <Button
                 type="button"
                 variant="outline"
