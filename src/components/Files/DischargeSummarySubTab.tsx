@@ -348,37 +348,32 @@ export const DischargeTab = ({
             onSelect={(e) => {
               e.preventDefault();
             }}
+            aria-label={t("choose_file")}
           >
             <Label
               htmlFor={`file_upload_${type}`}
-              className="py-1 flex flex-row items-center cursor-pointer text-primary-900  w-full"
+              className="flex items-center w-full text-primary-900 hover:text-black py-1 font-medium"
             >
-              <CareIcon icon="l-file-upload-alt" className="mr-1" />
+              <CareIcon icon="l-file-upload-alt" />
               <span>{t("choose_file")}</span>
             </Label>
             {fileUpload.Input({ className: "hidden" })}
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => fileUpload.handleCameraCapture()}
-              className="flex flex-row justify-stretch items-center w-full text-primary-900"
-            >
-              <CareIcon icon="l-camera" />
-              <span>{t("open_camera")}</span>
-            </Button>
+          <DropdownMenuItem
+            onSelect={() => fileUpload.handleCameraCapture()}
+            className="flex items-center text-primary-900 font-medium"
+            aria-label={t("open_camera")}
+          >
+            <CareIcon icon="l-camera" />
+            <span>{t("open_camera")}</span>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => fileUpload.handleAudioCapture()}
-              className="flex flex-row justify-stretch items-center w-full text-primary-900"
-            >
-              <CareIcon icon="l-microphone" />
-              <span>{t("record")}</span>
-            </Button>
+          <DropdownMenuItem
+            onSelect={() => fileUpload.handleAudioCapture()}
+            className="flex items-center text-primary-900 font-medium"
+            aria-label={t("record")}
+          >
+            <CareIcon icon="l-microphone" />
+            <span>{t("record")}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

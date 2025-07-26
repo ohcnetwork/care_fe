@@ -574,16 +574,19 @@ export function InvoiceShow({
                             >
                               <div className="flex flex-col items-end gap-0.5">
                                 <MonetaryDisplay
-                                  amount={item.total_price_components
-                                    .filter(
-                                      (c) =>
-                                        c.monetary_component_type ===
-                                        MonetaryComponentType.discount,
-                                    )
-                                    .reduce(
-                                      (acc, curr) => acc + (curr.amount || 0),
-                                      0,
-                                    )}
+                                  amount={String(
+                                    item.total_price_components
+                                      .filter(
+                                        (c) =>
+                                          c.monetary_component_type ===
+                                          MonetaryComponentType.discount,
+                                      )
+                                      .reduce(
+                                        (acc, curr) =>
+                                          acc + Number(curr.amount || 0),
+                                        0,
+                                      ),
+                                  )}
                                   hideCurrency
                                 />
                                 {item.unit_price_components
@@ -804,7 +807,7 @@ export function InvoiceShow({
                   {/* Subtotal */}
                   <div className="flex w-64 justify-between">
                     <span className="text-gray-500">{t("net_amount")}</span>
-                    <MonetaryDisplay amount={invoice.total_net} />
+                    <MonetaryDisplay amount={String(invoice.total_net)} />
                   </div>
 
                   <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
@@ -812,7 +815,7 @@ export function InvoiceShow({
                   {/* Total */}
                   <div className="flex w-64 justify-between font-bold">
                     <span>{t("total")}</span>
-                    <MonetaryDisplay amount={invoice.total_gross} />
+                    <MonetaryDisplay amount={String(invoice.total_gross)} />
                   </div>
                   <div className="p-1 border-b-2 border-dashed border-gray-200 w-full" />
                 </div>
@@ -886,7 +889,7 @@ export function InvoiceShow({
                           <p className="font-semibold text-gray-900 text-sm">
                             {getCurrencySymbol()}{" "}
                             <MonetaryDisplay
-                              amount={payment.amount || 0}
+                              amount={String(payment.amount || "0")}
                               hideCurrency
                             />{" "}
                             {t("paid_via")}{" "}

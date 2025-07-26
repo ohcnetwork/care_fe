@@ -22,14 +22,15 @@ import Loading from "@/components/Common/Loading";
 import useAppHistory from "@/hooks/useAppHistory";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString, formatName } from "@/Utils/utils";
 import { TokenSlotButton } from "@/pages/Appointments/components/AppointmentSlotPicker";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
+import facilityApi from "@/types/facility/facilityApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { Appointment, TokenSlot } from "@/types/scheduling/schedule";
+import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface AppointmentsProps {
   facilityId: string;
@@ -72,13 +73,13 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
   useEffect(() => {
     if (appointment) {
-      setReason(appointment.reason_for_visit);
+      setReason(appointment.note);
     }
   }, [appointment]);
 
   const { data: facilityResponse, error: facilityError } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(routes.getAnyFacility, {
+    queryFn: query(facilityApi.getAnyFacility, {
       pathParams: { id: facilityId },
       silent: true,
     }),
@@ -90,9 +91,12 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
   const { data: userData, error: userError } = useQuery({
     queryKey: ["user", facilityId, staffId],
-    queryFn: query(routes.getScheduleAbleFacilityUser, {
-      pathParams: { facility_id: facilityId, user_id: staffId },
-    }),
+    queryFn: query(
+      scheduleApis.appointments.getPublicScheduleableFacilityUser,
+      {
+        pathParams: { facility_id: facilityId, user_id: staffId },
+      },
+    ),
     enabled: !!facilityId && !!staffId,
   });
 
@@ -178,7 +182,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
           queryKey: ["appointment", tokenData.phoneNumber],
         });
         createAppointment({
-          reason_for_visit: reason,
+          note: reason,
           patient: appointment.patient.id,
         });
       },
@@ -272,9 +276,9 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 {formatName(userData)}
               </span>
               <div>
-                <Label className="mb-2">{t("reason_for_visit")}</Label>
+                <Label className="mb-2">{t("note")}</Label>
                 <Textarea
-                  placeholder={t("reason_for_visit_placeholder")}
+                  placeholder={t("appointment_note")}
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                 />

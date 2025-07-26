@@ -519,7 +519,7 @@ function ActivityDefinitionFormContent({
                             onChange={(e) => {
                               const sanitizedValue = e.target.value
                                 .toLowerCase()
-                                .replace(/[^a-z0-9-]/g, "");
+                                .replace(/[^a-z0-9_-]/g, "");
                               field.onChange(sanitizedValue);
                             }}
                           />
@@ -804,7 +804,12 @@ function ActivityDefinitionFormContent({
                         createForm={(onSuccess) => (
                           <CreateSpecimenDefinition
                             facilityId={facilityId}
-                            onSuccess={onSuccess}
+                            onSuccess={() => {
+                              queryClient.invalidateQueries({
+                                queryKey: ["specimenDefinitions"],
+                              });
+                              onSuccess();
+                            }}
                           />
                         )}
                       />
@@ -867,7 +872,12 @@ function ActivityDefinitionFormContent({
                           <div className="py-2">
                             <ObservationDefinitionForm
                               facilityId={facilityId}
-                              onSuccess={onSuccess}
+                              onSuccess={() => {
+                                queryClient.invalidateQueries({
+                                  queryKey: ["observationDefinitions"],
+                                });
+                                onSuccess();
+                              }}
                             />
                           </div>
                         )}
@@ -916,7 +926,12 @@ function ActivityDefinitionFormContent({
                           <div className="py-2">
                             <ChargeItemDefinitionForm
                               facilityId={facilityId}
-                              onSuccess={onSuccess}
+                              onSuccess={() => {
+                                queryClient.invalidateQueries({
+                                  queryKey: ["chargeItemDefinitions"],
+                                });
+                                onSuccess();
+                              }}
                             />
                           </div>
                         )}
