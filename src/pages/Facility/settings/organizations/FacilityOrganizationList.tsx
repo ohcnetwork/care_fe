@@ -158,7 +158,7 @@ export default function FacilityOrganizationList({
                 defaultSize={20}
                 minSize={15}
                 maxSize={30}
-                className="h-full hidden md:block"
+                className="h-full"
               >
                 <FacilityOrganizationNavbar
                   facilityId={facilityId}
