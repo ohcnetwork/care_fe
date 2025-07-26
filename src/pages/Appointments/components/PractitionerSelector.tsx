@@ -41,6 +41,7 @@ export const PractitionerSelector = ({
   clearSelection = false,
 }: PractitionerSelectorProps) => {
   const { t } = useTranslation();
+  const isPreview = facilityId === "preview";
   const [open, setOpen] = useState(false);
   const {
     data: practitioners,
@@ -51,6 +52,7 @@ export const PractitionerSelector = ({
     queryFn: query(scheduleApi.appointments.availableUsers, {
       pathParams: { facilityId },
     }),
+    enabled: !isPreview,
   });
 
   return (
