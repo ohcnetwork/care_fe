@@ -212,6 +212,7 @@ export function ChargeItemQuestion({
   errors,
 }: ChargeItemQuestionProps) {
   const { t } = useTranslation();
+  const isPreview = facilityId === "preview";
   const [selectedChargeItemDefinition, setSelectedChargeItemDefinition] =
     useState<string | null>(null);
   const [chargeItems, setChargeItems] = useState<ChargeItemUpsert[]>(
@@ -225,6 +226,7 @@ export function ChargeItemQuestion({
       pathParams: { facilityId },
       queryParams: { limit: 100, status: "active", title: cidSearch },
     }),
+    enabled: !isPreview,
   });
 
   const {

@@ -137,6 +137,7 @@ function ServiceRequestForm({
         search: locationSearch,
       },
     }),
+    enabled: !isPreview,
   });
 
   const renderInfoSection = () => (
@@ -434,6 +435,7 @@ export function ServiceRequestQuestion({
   errors,
 }: ServiceRequestQuestionProps) {
   const { t } = useTranslation();
+  const isPreview = facilityId === "preview";
   const [selectedActivityDefinition, setSelectedActivityDefinition] = useState<
     string | null
   >(null);
@@ -453,6 +455,7 @@ export function ServiceRequestQuestion({
       pathParams: { facility_id: facilityId },
       queryParams: { limit: 100 },
     }),
+    enabled: !isPreview,
   });
 
   const { data: activityDefinitions } = useQuery({
@@ -461,6 +464,7 @@ export function ServiceRequestQuestion({
       pathParams: { facilityId: facilityId },
       queryParams: { limit: 100, title: activityDefinitionSearch },
     }),
+    enabled: !isPreview,
   });
 
   const {
@@ -474,7 +478,7 @@ export function ServiceRequestQuestion({
         activityDefinitionId: selectedActivityDefinition || "",
       },
     }),
-    enabled: !!selectedActivityDefinition,
+    enabled: !!selectedActivityDefinition && !isPreview,
   });
 
   useEffect(() => {

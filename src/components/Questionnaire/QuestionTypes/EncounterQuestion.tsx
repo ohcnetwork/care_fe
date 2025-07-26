@@ -85,6 +85,7 @@ export function EncounterQuestion({
   patientId = "",
   facilityId,
 }: EncounterQuestionProps) {
+  const isPreview = encounterId === "preview";
   // Fetch encounter data
   const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounter", encounterId],
@@ -92,7 +93,7 @@ export function EncounterQuestion({
       pathParams: { id: encounterId },
       queryParams: { facility: facilityId },
     }),
-    enabled: !!encounterId,
+    enabled: !!encounterId && !isPreview,
   });
   const { t } = useTranslation();
 
