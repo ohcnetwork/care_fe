@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import * as z from "zod";
+import * as z from "zod/v4";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -67,12 +67,18 @@ interface PaymentReconciliationSheetProps {
 
 // Add schema before the component
 const formSchema = z.object({
-  reconciliation_type: z.nativeEnum(PaymentReconciliationType),
-  status: z.nativeEnum(PaymentReconciliationStatus),
-  kind: z.nativeEnum(PaymentReconciliationKind),
-  issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
-  outcome: z.nativeEnum(PaymentReconciliationOutcome),
-  method: z.nativeEnum(PaymentReconciliationPaymentMethod),
+  reconciliation_type: z.enum(PaymentReconciliationType, {
+    error: t("field_required"),
+  }),
+  status: z.enum(PaymentReconciliationStatus, { error: t("field_required") }),
+  kind: z.enum(PaymentReconciliationKind, { error: t("field_required") }),
+  issuer_type: z.enum(PaymentReconciliationIssuerType, {
+    error: t("field_required"),
+  }),
+  outcome: z.enum(PaymentReconciliationOutcome, { error: t("field_required") }),
+  method: z.enum(PaymentReconciliationPaymentMethod, {
+    error: t("field_required"),
+  }),
   payment_datetime: z.string(),
   amount: z.string().refine(
     (val) => {
