@@ -27,12 +27,12 @@ import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import facilityApi from "@/types/facility/facilityApi";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
-import { UserReadBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
 
 interface Props {
-  selected?: UserReadBase;
-  onChange: (user: UserReadBase) => void;
+  selected?: UserReadMinimal;
+  onChange: (user: UserReadMinimal) => void;
   placeholder?: string;
   noOptionsMessage?: string;
   popoverClassName?: string;
@@ -150,7 +150,7 @@ export default function UserSelector({
                 : noOptionsMessage || t("no_results")}
             </CommandEmpty>
             <CommandGroup>
-              {usersList?.map((user: UserReadBase, i) => (
+              {usersList?.map((user: UserReadMinimal, i) => (
                 <CommandItem
                   key={user.id}
                   value={`${formatName(user)} ${user.username ?? ""}`}

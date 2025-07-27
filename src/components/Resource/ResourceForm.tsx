@@ -52,7 +52,7 @@ import validators from "@/Utils/validators";
 import patientApi from "@/types/emr/patient/patientApi";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
-import { UserReadBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface ResourceProps {
   facilityId: number;
@@ -64,7 +64,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const { goBack } = useAppHistory();
   const { t } = useTranslation();
   const [{ related_patient }] = useQueryParams();
-  const [assignedToUser, setAssignedToUser] = useState<UserReadBase>();
+  const [assignedToUser, setAssignedToUser] = useState<UserReadMinimal>();
   const authUser = useAuthUser();
 
   const resourceFormSchema = z.object({
@@ -199,7 +199,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     value: facility.id,
   }));
 
-  const handleUserChange = (user: UserReadBase) => {
+  const handleUserChange = (user: UserReadMinimal) => {
     form.setValue("assigned_to", user.id, { shouldDirty: true });
     setAssignedToUser(user);
   };

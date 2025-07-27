@@ -2,7 +2,7 @@ import { UserBareMinimum } from "@/components/Users/models";
 
 import { PatientRead } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
-import { UserReadBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export interface ResourceRequest {
   approving_facility: FacilityRead | null;
@@ -18,9 +18,9 @@ export interface ResourceRequest {
   requested_quantity: number;
   status: string;
   title: string;
-  assigned_to: UserReadBase | null;
-  created_by: UserReadBase;
-  updated_by: UserReadBase;
+  assigned_to: UserReadMinimal | null;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
   created_date: string;
   modified_date: string;
   related_patient: PatientRead | null;

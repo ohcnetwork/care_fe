@@ -48,11 +48,11 @@ import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
-import { UserCreate, UserReadBase, UserUpdate } from "@/types/user/user";
+import { UserCreate, UserReadMinimal, UserUpdate } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 
 interface Props {
-  onSubmitSuccess?: (user: UserReadBase) => void;
+  onSubmitSuccess?: (user: UserReadMinimal) => void;
   existingUsername?: string;
   organizationId?: string;
 }
@@ -238,7 +238,7 @@ export default function UserForm({
   const { mutate: createUser, isPending: createPending } = useMutation({
     mutationKey: ["create_user"],
     mutationFn: mutate(userApi.create),
-    onSuccess: (resp: UserReadBase) => {
+    onSuccess: (resp: UserReadMinimal) => {
       toast.success(t("user_added_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["facilityUsers"],
@@ -261,7 +261,7 @@ export default function UserForm({
     mutationFn: mutate(userApi.update, {
       pathParams: { username: existingUsername! },
     }),
-    onSuccess: (resp: UserReadBase) => {
+    onSuccess: (resp: UserReadMinimal) => {
       toast.success(t("user_updated_successfully"));
       [
         ["facilityUsers"],

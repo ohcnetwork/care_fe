@@ -6,7 +6,7 @@ import { Time } from "@/Utils/types";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
-import { UserReadBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export type ScheduleSlotType = "appointment" | "open" | "closed";
 
@@ -22,8 +22,8 @@ export interface ScheduleTemplate {
   valid_from: string;
   valid_to: string;
   availabilities: ScheduleAvailability[];
-  created_by: UserReadBase;
-  updated_by: UserReadBase;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
 }
 
 type ScheduleAvailabilityBase = {
@@ -169,15 +169,15 @@ export interface Appointment {
   booked_on: string;
   status: AppointmentNonCancelledStatus;
   note: string;
-  user: UserReadBase;
-  booked_by: UserReadBase | null; // This is null if the appointment was booked by the patient itself.
+  user: UserReadMinimal;
+  booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
   facility: FacilityBareMinimum;
 }
 
 export interface AppointmentRead extends Appointment {
   tags: TagConfig[];
-  updated_by: UserReadBase | null;
-  created_by: UserReadBase;
+  updated_by: UserReadMinimal | null;
+  created_by: UserReadMinimal;
   modified_date: string;
 }
 

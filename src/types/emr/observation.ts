@@ -1,5 +1,5 @@
 import { Code } from "@/types/base/code/code";
-import { UserReadBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export interface ObservationValue {
   value?: string;
@@ -32,9 +32,9 @@ export interface Observation {
 }
 
 export interface ObservationWithUser extends Observation {
-  created_by: UserReadBase;
-  updated_by: UserReadBase;
-  data_entered_by: UserReadBase;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
+  data_entered_by: UserReadMinimal;
 }
 
 export interface ObservationAnalyzeGroup {

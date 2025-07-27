@@ -1,6 +1,6 @@
 import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/element/src/types";
 
-import { UserReadBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 type DrawingValue = {
   application: "excalidraw";
@@ -31,7 +31,7 @@ export type MetaArtifactResponse = MetaArtifactBase & {
   associating_id: string;
   created_date: string;
   modified_date: string;
-  created_by: UserReadBase;
-  updated_by: UserReadBase;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
   username: string;
 } & ObjectTypeValues;

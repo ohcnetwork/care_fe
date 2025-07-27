@@ -12,7 +12,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import { UserReadBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export function AppointmentSuccess(props: { appointmentId: string }) {
   const { appointmentId } = props;
@@ -21,7 +21,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
   const patientUserContext = usePatientContext();
   const tokenData = patientUserContext?.tokenData;
 
-  const userData: UserReadBase = JSON.parse(
+  const userData: UserReadMinimal = JSON.parse(
     localStorage.getItem("user") ?? "{}",
   );
 

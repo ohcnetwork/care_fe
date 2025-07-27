@@ -25,11 +25,11 @@ import { Avatar } from "@/components/Common/Avatar";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import scheduleApi from "@/types/scheduling/scheduleApi";
-import { UserReadBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface PractitionerSelectorProps {
-  selected: UserReadBase | null;
-  onSelect: (user: UserReadBase | null) => void;
+  selected: UserReadMinimal | null;
+  onSelect: (user: UserReadMinimal | null) => void;
   facilityId: string;
   clearSelection?: boolean;
 }

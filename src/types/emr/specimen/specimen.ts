@@ -5,7 +5,7 @@ import {
   SpecimenDefinitionRead,
   TypeTestedSpec,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
-import { UserReadBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum SpecimenStatus {
   draft = "draft",
@@ -83,8 +83,8 @@ export interface SpecimenFromDefinitionCreate {
 }
 
 export interface SpecimenRead extends SpecimenBase {
-  created_by: UserReadBase;
-  updated_by: UserReadBase;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
   created_at: string;
   updated_at: string;
   type_tested: TypeTestedSpec | null;

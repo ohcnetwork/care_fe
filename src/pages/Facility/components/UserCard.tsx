@@ -13,10 +13,10 @@ import { Avatar } from "@/components/Common/Avatar";
 import { useAuthContext } from "@/hooks/useAuthUser";
 
 import { formatName } from "@/Utils/utils";
-import { UserReadBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface Props {
-  user: UserReadBase;
+  user: UserReadMinimal;
   className?: string;
   facilityId: string;
 }

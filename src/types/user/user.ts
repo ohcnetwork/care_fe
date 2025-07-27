@@ -20,16 +20,16 @@ export interface UserBase {
   gender: (typeof GENDER_TYPES)[number]["id"];
 }
 
-export interface UserReadBase extends UserBase {
+export interface UserReadMinimal extends UserBase {
   last_login: string;
   profile_picture_url: string;
   mfa_enabled: boolean;
   deleted: boolean;
 }
 
-export interface UserRead extends UserReadBase {
+export interface UserRead extends UserReadMinimal {
   geo_organization: Organization;
-  created_by: UserReadBase;
+  created_by: UserReadMinimal;
   email: string;
   flags: string[];
 }

@@ -31,11 +31,11 @@ import { Avatar } from "@/components/Common/Avatar";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import scheduleApi from "@/types/scheduling/scheduleApi";
-import { UserReadBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface MultiPractitionerSelectorProps {
-  selected: UserReadBase[] | null;
-  onSelect: (users: UserReadBase[] | null) => void;
+  selected: UserReadMinimal[] | null;
+  onSelect: (users: UserReadMinimal[] | null) => void;
   facilityId: string;
   clearSelection?: string;
 }
@@ -65,7 +65,7 @@ export const MultiPractitionerSelector = ({
     (user) => !selected?.some((s) => s.id === user.id),
   );
 
-  const getItemValue = (user: UserReadBase) => {
+  const getItemValue = (user: UserReadMinimal) => {
     return `${formatName(user)} ${user.username}`;
   };
 

@@ -16,10 +16,10 @@ import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { formatName, isUserOnline } from "@/Utils/utils";
-import { UserReadBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface UserCardProps {
-  user: UserReadBase;
+  user: UserReadMinimal;
   roleName: string;
   actions?: React.ReactNode;
   facility?: string;
@@ -30,7 +30,7 @@ export const UserStatusIndicator = ({
   addPadding = false,
   className = "",
 }: {
-  user: UserReadBase;
+  user: UserReadMinimal;
   className?: string;
   addPadding?: boolean;
 }) => {
@@ -135,7 +135,7 @@ export function UserCard(props: UserCardProps) {
     </Card>
   );
 }
-export const UserGrid = ({ users }: { users?: UserReadBase[] }) => {
+export const UserGrid = ({ users }: { users?: UserReadMinimal[] }) => {
   const { facilityId } = usePathParams("/facility/:facilityId/*")!;
 
   return (
@@ -167,7 +167,7 @@ const UserListHeader = () => {
   );
 };
 
-const UserListRow = ({ user }: { user: UserReadBase }) => {
+const UserListRow = ({ user }: { user: UserReadMinimal }) => {
   const { facilityId } = usePathParams("/facility/:facilityId/*")!;
   const { t } = useTranslation();
 
@@ -224,7 +224,7 @@ const UserListRow = ({ user }: { user: UserReadBase }) => {
     </tr>
   );
 };
-export const UserList = ({ users }: { users?: UserReadBase[] }) => {
+export const UserList = ({ users }: { users?: UserReadMinimal[] }) => {
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-200">
       <table className="relative min-w-full divide-y divide-gray-200">
@@ -237,7 +237,7 @@ export const UserList = ({ users }: { users?: UserReadBase[] }) => {
   );
 };
 interface UserListAndCardViewProps {
-  users: UserReadBase[];
+  users: UserReadMinimal[];
   activeTab: "card" | "list";
 }
 

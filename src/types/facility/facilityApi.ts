@@ -2,7 +2,7 @@ import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
 import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryComponent";
-import { UserReadBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 import { FacilityCreate, FacilityListRead, FacilityRead } from "./facility";
 
@@ -67,6 +67,6 @@ export default {
   getUsers: {
     path: "/api/v1/facility/{id}/users/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<UserReadBase>>(),
+    TRes: Type<PaginatedResponse<UserReadMinimal>>(),
   },
 } as const;

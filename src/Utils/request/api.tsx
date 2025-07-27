@@ -19,7 +19,7 @@ import {
   ResourceRequest,
   UpdateResourceRequest,
 } from "@/types/resourceRequest/resourceRequest";
-import { UserReadBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -146,12 +146,12 @@ const routes = {
 
   getScheduleAbleFacilityUser: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
-    TRes: Type<UserReadBase>(),
+    TRes: Type<UserReadMinimal>(),
   },
 
   getScheduleAbleFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/",
-    TRes: Type<PaginatedResponse<UserReadBase>>(),
+    TRes: Type<PaginatedResponse<UserReadMinimal>>(),
   },
 
   // FileUpload Create

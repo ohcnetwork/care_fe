@@ -7,7 +7,7 @@ import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { DeviceDetail } from "@/types/device/device";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
-import { UserReadBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 import { AppRoutes } from "./Routers/AppRouter";
 import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
@@ -15,7 +15,7 @@ import { pluginMap } from "./pluginMap";
 import { FacilityRead } from "./types/facility/facility";
 
 export type DoctorConnectButtonComponentType = React.FC<{
-  user: UserReadBase;
+  user: UserReadMinimal;
 }>;
 
 export type ScribeComponentType = React.FC<{

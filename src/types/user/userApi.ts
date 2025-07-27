@@ -3,7 +3,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import {
   UserCreate,
   UserRead,
-  UserReadBase,
+  UserReadMinimal,
   UserUpdate,
 } from "@/types/user/user";
 
@@ -11,12 +11,12 @@ export default {
   list: {
     path: "/api/v1/users/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<UserReadBase>>(),
+    TRes: Type<PaginatedResponse<UserReadMinimal>>(),
   },
   create: {
     path: "/api/v1/users/",
     method: HttpMethod.POST,
-    TRes: Type<UserReadBase>(),
+    TRes: Type<UserReadMinimal>(),
     TBody: Type<UserCreate>(),
   },
   get: {
@@ -32,7 +32,7 @@ export default {
   update: {
     path: "/api/v1/users/{username}/",
     method: HttpMethod.PUT,
-    TRes: Type<UserReadBase>(),
+    TRes: Type<UserReadMinimal>(),
     TBody: Type<UserUpdate>(),
   },
 } as const;

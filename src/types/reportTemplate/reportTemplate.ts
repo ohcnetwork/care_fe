@@ -1,5 +1,5 @@
 import { FacilityRead } from "@/types/facility/facility";
-import { UserReadBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export type AlignmentOptions =
   | "left"
@@ -294,8 +294,8 @@ export type ReportTemplateUpdate = Pick<ReportTemplateBase, "config">;
 
 export interface ReportTemplateModel extends ReportTemplateBase {
   facility: FacilityRead;
-  created_by: UserReadBase;
-  updated_by: UserReadBase;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
   derived_from_url?: string;
 }
 

@@ -1,5 +1,5 @@
 import { Code } from "@/types/base/code/code";
-import { UserReadBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export type AllergyVerificationStatus =
   | "unconfirmed"
@@ -26,9 +26,9 @@ export interface AllergyIntolerance {
   criticality: AllergyCriticality;
   last_occurrence?: string;
   note?: string;
-  created_by: UserReadBase;
+  created_by: UserReadMinimal;
   encounter: string;
-  edited_by?: UserReadBase;
+  edited_by?: UserReadMinimal;
   created_date: string;
   modified_date: string;
 }

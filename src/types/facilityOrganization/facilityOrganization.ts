@@ -1,5 +1,5 @@
 import { RoleRead } from "@/types/emr/role/role";
-import { UserReadBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export type OrgType = "root" | "dept" | "team";
 
@@ -35,6 +35,6 @@ export interface FacilityOrganizationCreate extends FacilityOrganizationBase {
 
 export interface FacilityOrganizationUserRole {
   id: string;
-  user: UserReadBase;
+  user: UserReadMinimal;
   role: RoleRead;
 }
