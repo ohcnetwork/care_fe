@@ -300,6 +300,7 @@ export default function SearchInput({
                             return (
                               <CommandItem
                                 key={option.key}
+                                value={option.display}
                                 onSelect={() =>
                                   handleOptionChange(
                                     options.findIndex(
