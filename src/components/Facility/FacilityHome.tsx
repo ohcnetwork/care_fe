@@ -42,9 +42,6 @@ import { getPermissions } from "@/common/Permissions";
 import { PLUGIN_Component } from "@/PluginEngine";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import uploadFile from "@/Utils/request/uploadFile";
-import { getAuthorizationHeader, makeUrl } from "@/Utils/request/utils";
-import { sleep } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { FeatureBadge } from "@/pages/Facility/Utils";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
@@ -132,38 +129,32 @@ export const FacilityHome = ({ facilityId }: Props) => {
     },
   });
 
+  const { mutateAsync: uploadCoverImage } = useMutation({
+    mutationFn: mutate(facilityApi.uploadCoverImage, {
+      pathParams: { id: facilityId },
+    }),
+    onSuccess: () => {
+      setEditCoverImage(false);
+      queryClient.invalidateQueries({
+        queryKey: ["facility", facilityId],
+      });
+      toast.success(t("cover_image_updated"));
+    },
+  });
+
   const handleCoverImageUpload = async (
     file: File,
     onSuccess: () => void,
     onError: () => void,
   ) => {
-    const formData = new FormData();
-    formData.append("cover_image", file);
-    const url = `${careConfig.apiUrl}${makeUrl(facilityApi.uploadCoverImage.path, undefined, { id: facilityId })}`;
-
-    await uploadFile(
-      url,
-      formData,
-      facilityApi.uploadCoverImage.method,
-      { Authorization: getAuthorizationHeader() },
-      async (xhr: XMLHttpRequest) => {
-        if (xhr.status === 200) {
-          setEditCoverImage(false);
-          await sleep(1000);
-          queryClient.invalidateQueries({
-            queryKey: ["facility", facilityId],
-          });
-          toast.success(t("cover_image_updated"));
-          onSuccess();
-        } else {
-          onError();
-        }
-      },
-      null,
-      () => {
-        onError();
-      },
-    );
+    try {
+      const formData = new FormData();
+      formData.append("cover_image", file);
+      await uploadCoverImage(formData);
+      onSuccess();
+    } catch {
+      onError();
+    }
   };
   const handleCoverImageDelete = async (
     onSuccess: () => void,
