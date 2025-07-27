@@ -160,13 +160,13 @@ export const structuredHandlers: {
   },
   appointment: {
     getRequests: async (appointment, { facilityId, patientId }) => {
-      const { reason_for_visit, slot_id, tags } = appointment[0];
+      const { note, slot_id, tags } = appointment[0];
       return [
         {
           url: `/api/v1/facility/${facilityId}/slots/${slot_id}/create_appointment/`,
           method: "POST",
           body: {
-            reason_for_visit,
+            note,
             patient: patientId,
             tags,
           },

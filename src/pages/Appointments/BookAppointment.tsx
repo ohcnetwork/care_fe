@@ -80,7 +80,7 @@ export default function BookAppointment({ patientId }: Props) {
     try {
       const data = await createAppointment({
         patient: patientId,
-        reason_for_visit: reason,
+        note: reason,
         tags: selectedTags.map((tag) => tag.id),
       });
       toast.success("Appointment created successfully");
@@ -110,9 +110,9 @@ export default function BookAppointment({ patientId }: Props) {
             />
           </div>
           <div className="max-w-md">
-            <Label className="mb-2">{t("reason_for_visit")}</Label>
+            <Label className="mb-2">{t("note")}</Label>
             <Textarea
-              placeholder={t("reason_for_visit_placeholder")}
+              placeholder={t("appointment_note")}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />

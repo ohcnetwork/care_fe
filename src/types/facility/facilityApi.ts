@@ -20,6 +20,11 @@ export default {
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<FacilityData>>(),
   },
+  getAnyFacility: {
+    path: "/api/v1/getallfacilities/{id}/",
+    method: "GET",
+    TRes: Type<FacilityModel>(),
+  },
   deleteFacility: {
     path: "/api/v1/facility/{id}/",
     method: HttpMethod.DELETE,
