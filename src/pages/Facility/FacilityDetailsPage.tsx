@@ -17,7 +17,7 @@ import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import PublicFacilityApi from "@/types/facility/PublicFacilityApi";
+import publicFacilityApi from "@/types/facility/publicFacilityApi";
 
 import { FeatureBadge } from "./Utils";
 import { UserCard } from "./components/UserCard";
@@ -31,7 +31,7 @@ export function FacilityDetailsPage({ id }: Props) {
   const { goBack } = useAppHistory();
   const { data: facilityResponse, isLoading } = useQuery({
     queryKey: ["facility", id],
-    queryFn: query(PublicFacilityApi.getAny, {
+    queryFn: query(publicFacilityApi.getAny, {
       pathParams: { id },
     }),
   });

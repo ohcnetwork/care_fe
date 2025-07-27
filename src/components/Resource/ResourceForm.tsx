@@ -50,7 +50,7 @@ import query from "@/Utils/request/query";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import patientApi from "@/types/emr/patient/patientApi";
-import PublicFacilityApi from "@/types/facility/PublicFacilityApi";
+import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 import { UserReadBase } from "@/types/user/user";
 
@@ -186,7 +186,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   };
   const { data: facilities } = useQuery({
     queryKey: ["facilities", facilitySearch],
-    queryFn: query.debounced(PublicFacilityApi.getAll, {
+    queryFn: query.debounced(publicFacilityApi.getAll, {
       queryParams: {
         search_text: facilitySearch ? facilitySearch : undefined,
         limit: 50,
