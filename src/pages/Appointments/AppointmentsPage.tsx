@@ -990,14 +990,18 @@ function AppointmentCard({
       </div>
       <div className="flex flex-wrap gap-1">
         {appointment.tags.map((tag) => (
-          <Badge variant="primary" className="text-xs" key={tag.id}>
+          <Badge
+            variant="primary"
+            className="text-xs px-2 py-1 leading-none flex items-center justify-center"
+            key={tag.id}
+          >
             {tag.display}
           </Badge>
         ))}
         {showStatus && (
           <Badge
             variant={APPOINTMENT_STATUS_COLORS[appointment.status]}
-            className="text-xs"
+            className="text-xs px-2 py-1 leading-none flex items-center justify-center"
           >
             {t(appointment.status)}
           </Badge>
