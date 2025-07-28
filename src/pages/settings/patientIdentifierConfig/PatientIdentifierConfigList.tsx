@@ -107,7 +107,7 @@ export default function PatientIdentifierConfigList({
           ...(facilityId && { facility: facilityId }),
           limit: resultsPerPage,
           offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-          search: qParams.search,
+          display: qParams.search,
           status: qParams.status,
           ordering: "-created_date",
         },

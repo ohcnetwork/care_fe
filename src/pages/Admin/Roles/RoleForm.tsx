@@ -55,7 +55,7 @@ export default function RoleForm({
     e.preventDefault();
     const payload = {
       name: formData.name,
-      description: formData.description,
+      description: formData.description.trim(),
       permissions: formData.permissions,
     };
 

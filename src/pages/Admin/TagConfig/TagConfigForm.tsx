@@ -45,7 +45,7 @@ const tagConfigSchema = z.object({
   category: z.nativeEnum(TagCategory, {
     required_error: "Category is required",
   }),
-  description: z.string().optional(),
+  description: z.string().trim().optional(),
   priority: z.number().min(0, "Priority must be non-negative"),
   status: z.nativeEnum(TagStatus, {
     required_error: "Status is required",
