@@ -281,6 +281,7 @@ export class PatientEncounter {
       .within(() => {
         cy.get("[data-slot='dropdown-menu-trigger']")
           .first()
+          .should("not.be.disabled")
           .scrollIntoView()
           .click();
       });
