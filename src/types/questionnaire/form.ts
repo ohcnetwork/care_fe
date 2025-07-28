@@ -4,7 +4,7 @@ import { Code } from "@/types/base/code/code";
 import { ChargeItemUpsert } from "@/types/billing/chargeItem/chargeItem";
 import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
-import { EncounterEditRequest } from "@/types/emr/encounter/encounter";
+import { EncounterEdit } from "@/types/emr/encounter/encounter";
 import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
@@ -33,7 +33,7 @@ export type ResponseValue =
   | RV<"medication_statement", MedicationStatementRequest[]>
   | RV<"symptom", SymptomRequest[]>
   | RV<"diagnosis", DiagnosisRequest[]>
-  | RV<"encounter", EncounterEditRequest[]>
+  | RV<"encounter", EncounterEdit[]>
   | RV<"appointment", CreateAppointmentQuestion[]>
   | RV<"time_of_death", string[]>
   | RV<"files", FileUploadQuestion[]>

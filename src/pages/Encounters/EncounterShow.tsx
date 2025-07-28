@@ -28,18 +28,18 @@ import { EncounterOverviewTab } from "@/pages/Encounters/tabs/EncounterOverviewT
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
-  Encounter,
+  EncounterRead,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 
 import { EncounterDiagnosticReportsTab } from "./tabs/EncounterDiagnosticReportsTab";
 import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
 import { EncounterServiceRequestTab } from "./tabs/EncounterServiceRequestTab";
 
 export interface PluginEncounterTabProps {
-  encounter: Encounter;
-  patient: Patient;
+  encounter: EncounterRead;
+  patient: PatientRead;
 }
 
 const defaultTabs = {
@@ -125,12 +125,12 @@ export const EncounterShow = (props: Props) => {
   return (
     <Page title={t("encounter")} className="block" hideTitleOnPage>
       <EncounterHeader />
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-2 mt-4">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-2 mt-4 h-[calc(100vh-10rem)]">
         {!inactiveEncounterStatus.includes(currentEncounter.status) && (
           <EncounterHistorySelector />
         )}
         <div className="w-full overflow-x-auto">
-          <div className="w-full border-b-2 border-secondary-200">
+          <div className="w-full border-b-2 border-secondary-200 ">
             <div className="overflow-x-auto sm:flex sm:items-baseline">
               <div className="mt-4 sm:mt-0">
                 <nav
@@ -160,7 +160,7 @@ export const EncounterShow = (props: Props) => {
               </div>
             </div>
           </div>
-          <div className="mt-4">
+          <div className="mt-4 h-[calc(100vh-14rem)] overflow-y-auto">
             <PageHeadTitle title={t(`ENCOUNTER_TAB__${props.tab}`)} />
             {CareTab && <CareTab />}
             {PluginTab &&
