@@ -558,7 +558,7 @@ export default function PatientIdentifierConfigForm({
             <Button
               type="submit"
               className="w-full mt-6"
-              disabled={isCreating || isUpdating}
+              disabled={!form.formState.isDirty || isCreating || isUpdating}
             >
               {isCreating || isUpdating ? (
                 <span className="flex items-center gap-2">

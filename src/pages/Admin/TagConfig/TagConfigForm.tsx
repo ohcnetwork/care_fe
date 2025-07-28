@@ -403,7 +403,7 @@ export default function TagConfigForm({
         )}
 
         <div className="flex justify-end space-x-2">
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading || !form.formState.isDirty}>
             {isLoading
               ? t("saving")
               : isEditing
