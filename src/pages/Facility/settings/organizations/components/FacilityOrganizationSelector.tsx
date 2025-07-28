@@ -47,6 +47,27 @@ interface FacilityOrganizationSelectorProps {
   singleSelection?: boolean;
 }
 
+interface OrganizationPopoverProps {
+  className?: string;
+  t: (key: string) => string;
+  facilityOrgSearch: string;
+  setFacilityOrgSearch: (value: string) => void;
+  isLoadingRoot: boolean;
+  organizationQueries: UseQueryResult<
+    { results: FacilityOrganization[] },
+    Error
+  >[];
+  navigationLevels: FacilityOrganization[];
+  getCurrentLevelOrganizations: () => FacilityOrganization[];
+  currentSelection: FacilityOrganization | null;
+  handleSelect: (org: FacilityOrganization) => void;
+  alreadySelected: boolean;
+  pendingSelection: FacilityOrganization | null;
+  handleCancelSelection: () => void;
+  handleConfirmSelection: () => void;
+  isDisabled: boolean;
+}
+
 const getCurrentSelectionPathLabel = (
   navigationLevels: FacilityOrganization[],
   currentSelection: FacilityOrganization | null,
@@ -77,23 +98,24 @@ const getCurrentSelectionPathLabel = (
   );
 };
 
-const renderOrganizationPopover = (
-  className: string | undefined,
-  t: (key: string) => string,
-  facilityOrgSearch: string,
-  setFacilityOrgSearch: (value: string) => void,
-  isLoadingRoot: boolean,
-  organizationQueries: UseQueryResult<any, Error>[],
-  navigationLevels: FacilityOrganization[],
-  getCurrentLevelOrganizations: () => FacilityOrganization[],
-  currentSelection: FacilityOrganization | null,
-  handleSelect: (org: FacilityOrganization) => void,
-  alreadySelected: boolean,
-  pendingSelection: FacilityOrganization | null,
-  handleCancelSelection: () => void,
-  handleConfirmSelection: () => void,
-  isDisabled: boolean,
-) => {
+const OrganizationPopover = (props: OrganizationPopoverProps) => {
+  const {
+    className,
+    t,
+    facilityOrgSearch,
+    setFacilityOrgSearch,
+    isLoadingRoot,
+    organizationQueries,
+    navigationLevels,
+    getCurrentLevelOrganizations,
+    currentSelection,
+    handleSelect,
+    pendingSelection,
+    handleCancelSelection,
+    handleConfirmSelection,
+    isDisabled,
+  } = props;
+
   return (
     <Command className={className}>
       <div className="flex items-center border-b px-3 bg-white z-10">
@@ -407,23 +429,25 @@ export default function FacilityOrganizationSelector(
                       className="p-0 h-auto overflow-auto min-h-48"
                       side="bottom"
                     >
-                      {renderOrganizationPopover(
-                        "mb-4",
-                        t,
-                        facilityOrgSearch,
-                        setFacilityOrgSearch,
-                        isLoadingRoot,
-                        organizationQueries,
-                        navigationLevels,
-                        getCurrentLevelOrganizations,
-                        currentSelection,
-                        handleSelect,
-                        alreadySelected,
-                        pendingSelection,
-                        handleCancelSelection,
-                        handleConfirmSelection,
-                        isDisabled,
-                      )}
+                      <OrganizationPopover
+                        className="mb-4"
+                        t={t}
+                        facilityOrgSearch={facilityOrgSearch}
+                        setFacilityOrgSearch={setFacilityOrgSearch}
+                        isLoadingRoot={isLoadingRoot}
+                        organizationQueries={organizationQueries}
+                        navigationLevels={navigationLevels}
+                        getCurrentLevelOrganizations={
+                          getCurrentLevelOrganizations
+                        }
+                        currentSelection={currentSelection}
+                        handleSelect={handleSelect}
+                        alreadySelected={alreadySelected}
+                        pendingSelection={pendingSelection}
+                        handleCancelSelection={handleCancelSelection}
+                        handleConfirmSelection={handleConfirmSelection}
+                        isDisabled={isDisabled}
+                      />
                     </SheetContent>
                   </Sheet>
                 </>
@@ -452,23 +476,24 @@ export default function FacilityOrganizationSelector(
                     sideOffset={4}
                     className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh]"
                   >
-                    {renderOrganizationPopover(
-                      undefined,
-                      t,
-                      facilityOrgSearch,
-                      setFacilityOrgSearch,
-                      isLoadingRoot,
-                      organizationQueries,
-                      navigationLevels,
-                      getCurrentLevelOrganizations,
-                      currentSelection,
-                      handleSelect,
-                      alreadySelected,
-                      pendingSelection,
-                      handleCancelSelection,
-                      handleConfirmSelection,
-                      isDisabled,
-                    )}
+                    <OrganizationPopover
+                      t={t}
+                      facilityOrgSearch={facilityOrgSearch}
+                      setFacilityOrgSearch={setFacilityOrgSearch}
+                      isLoadingRoot={isLoadingRoot}
+                      organizationQueries={organizationQueries}
+                      navigationLevels={navigationLevels}
+                      getCurrentLevelOrganizations={
+                        getCurrentLevelOrganizations
+                      }
+                      currentSelection={currentSelection}
+                      handleSelect={handleSelect}
+                      alreadySelected={alreadySelected}
+                      pendingSelection={pendingSelection}
+                      handleCancelSelection={handleCancelSelection}
+                      handleConfirmSelection={handleConfirmSelection}
+                      isDisabled={isDisabled}
+                    />
                   </PopoverContent>
                 </Popover>
               ))}
