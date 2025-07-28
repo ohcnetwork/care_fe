@@ -399,6 +399,7 @@ export default function PatientRegistration(
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
         deceased_datetime: null,
+        tags: [], // This is only used for create patient
         identifiers: facility.patient_instance_identifier_configs.map(
           (identifierConfig) => {
             const identifier = patientQuery.data.instance_identifiers?.find(
