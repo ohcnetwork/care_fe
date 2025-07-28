@@ -60,6 +60,7 @@ export default {
   removeUserRole: {
     path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/{userRoleId}/",
     method: HttpMethod.DELETE,
-    TRes: Type<Record<string, never>>(),
+    TBody: Type<void>(),
+    TRes: Type<void>(),
   },
 };

@@ -69,15 +69,13 @@ export default function EditUserRoleSheet({
   });
 
   const { mutate: updateRole } = useMutation({
-    mutationFn: (body: { role: string }) =>
-      mutate(facilityOrganizationApi.updateUserRole, {
-        pathParams: {
-          facilityId,
-          organizationId: organizationId,
-          userRoleId: userRole.id,
-        },
-        body,
-      })(body),
+    mutationFn: mutate(facilityOrganizationApi.updateUserRole, {
+      pathParams: {
+        facilityId,
+        organizationId: organizationId,
+        userRoleId: userRole.id,
+      },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["facilityOrganizationUsers", facilityId, organizationId],
@@ -94,14 +92,13 @@ export default function EditUserRoleSheet({
   });
 
   const { mutate: removeRole } = useMutation({
-    mutationFn: () =>
-      mutate(facilityOrganizationApi.removeUserRole, {
-        pathParams: {
-          facilityId,
-          organizationId: organizationId,
-          userRoleId: userRole.id,
-        },
-      })({}),
+    mutationFn: mutate(facilityOrganizationApi.removeUserRole, {
+      pathParams: {
+        facilityId,
+        organizationId: organizationId,
+        userRoleId: userRole.id,
+      },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["facilityOrganizationUsers", facilityId, organizationId],
