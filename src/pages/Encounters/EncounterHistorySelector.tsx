@@ -23,7 +23,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-// import { DateRangeFilter } from "@/components/Common/DateRangeFilter";
+import { DateRangeFilter } from "@/components/Common/DateRangeFilter";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
@@ -31,6 +31,7 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { dateTimeQueryString } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   ENCOUNTER_STATUS,
@@ -153,9 +154,17 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     updateQuery({ tags: tags.map((tag) => tag.id).join(",") });
   };
 
-  // const handleDateFromChange = (date: Date | undefined) => {
-  //   updateQuery({ date_from: date?.toISOString() || undefined });
-  // };
+  const handleDateFromChange = (date: Date | undefined) => {
+    updateQuery({
+      created_date_after: date ? dateTimeQueryString(date) : undefined,
+    });
+  };
+
+  const handleDateToChange = (date: Date | undefined) => {
+    updateQuery({
+      created_date_before: date ? dateTimeQueryString(date, true) : undefined,
+    });
+  };
 
   const handleSelect = (encounterId: string | null) => {
     setSelectedEncounter(encounterId);
@@ -179,8 +188,12 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
           facility: facilityId,
           ...(qParams.status && { status: qParams.status }),
           ...(qParams.tags && { tags: qParams.tags }),
-          // ...(qParams.date_from && { date_from: qParams.date_from }),
-          // ...(qParams.date_to && { date_to: qParams.date_to }),
+          ...(qParams.created_date_after && {
+            created_date_after: qParams.created_date_after,
+          }),
+          ...(qParams.created_date_before && {
+            created_date_before: qParams.created_date_before,
+          }),
         },
       })({ signal });
       return response as PaginatedResponse<EncounterRead>;
@@ -199,10 +212,12 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     (encounter) => encounter.id !== currentEncounterId,
   );
 
-  // const dateFromFilter = qParams.date_from
-  //   ? new Date(qParams.date_from)
-  //   : undefined;
-  // const dateToFilter = qParams.date_to ? new Date(qParams.date_to) : undefined;
+  const dateFromFilter = qParams.created_date_after
+    ? new Date(qParams.created_date_after)
+    : undefined;
+  const dateToFilter = qParams.created_date_before
+    ? new Date(qParams.created_date_before)
+    : undefined;
   useEffect(() => {
     if (inView && hasNextPage) {
       fetchNextPage();
@@ -272,16 +287,30 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
                 className="mt-0 bg-white font-medium rounded-md"
               />
               {/* TODO: Add date range filter once we have BE support */}
-              {/* <DateRangeFilter
+              <DateRangeFilter
                 dateFrom={dateFromFilter}
                 dateTo={dateToFilter}
                 onDateFromChange={handleDateFromChange}
                 onDateToChange={handleDateToChange}
-                onClear={() => {
-                  updateQuery({ date_from: undefined, date_to: undefined });
+                onDateRangeChange={(from, to) => {
+                  updateQuery({
+                    created_date_after: from
+                      ? dateTimeQueryString(from)
+                      : undefined,
+                    created_date_before: to
+                      ? dateTimeQueryString(to, true)
+                      : undefined,
+                  });
                 }}
+                onClear={() => {
+                  updateQuery({
+                    created_date_after: undefined,
+                    created_date_before: undefined,
+                  });
+                }}
+                popoverPlaceholder={t("select_created_date_range")}
                 className="bg-white font-medium rounded-md"
-              /> */}
+              />
             </div>
           )}
         </div>
