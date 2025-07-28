@@ -214,3 +214,11 @@ export interface AppointmentRescheduleRequest {
   new_booking_note: string;
   tags: string[];
 }
+
+export const getUserFromLocalStorage = (): UserReadMinimal => {
+  return JSON.parse(localStorage.getItem("user") ?? "{}");
+};
+
+export const storeUserInLocalStorage = (user: UserReadMinimal) => {
+  localStorage.setItem("user", JSON.stringify(user));
+};

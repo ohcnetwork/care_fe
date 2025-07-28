@@ -13,6 +13,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import { useAuthContext } from "@/hooks/useAuthUser";
 
 import { formatName } from "@/Utils/utils";
+import { storeUserInLocalStorage } from "@/types/scheduling/schedule";
 import { UserReadMinimal } from "@/types/user/user";
 
 interface Props {
@@ -61,7 +62,7 @@ export function UserCard({ user, className, facilityId }: Props) {
             <Button
               variant="outline"
               onClick={() => {
-                localStorage.setItem("user", JSON.stringify(user));
+                storeUserInLocalStorage(user);
                 navigate(returnLink);
               }}
             >
