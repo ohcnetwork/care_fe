@@ -23,6 +23,7 @@ interface LocationTreeNodeProps {
   level?: number;
   facilityId: string;
   searchQuery: string;
+  visited?: Set<string>;
 }
 
 function LocationTreeNode({
@@ -34,7 +35,11 @@ function LocationTreeNode({
   level = 0,
   facilityId,
   searchQuery,
+  visited = new Set(),
 }: LocationTreeNodeProps) {
+  const nextVisited = new Set(visited);
+  nextVisited.add(location.id);
+
   const isExpanded = expandedLocations.has(location.id);
   const isSelected = selectedLocationIds.includes(location.id);
   const Icon =
@@ -54,6 +59,10 @@ function LocationTreeNode({
 
     staleTime: 5 * 60 * 1000,
   });
+
+  if (visited.has(location.id)) {
+    return null;
+  }
 
   const hasChildren = children?.results && children.results.length > 0;
 
@@ -133,6 +142,7 @@ function LocationTreeNode({
               level={level}
               facilityId={facilityId}
               searchQuery={searchQuery}
+              visited={nextVisited}
             />
           ))}
         </div>
