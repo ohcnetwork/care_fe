@@ -28,6 +28,7 @@ interface Props<TabKey extends string> {
   setPageTitle?: boolean;
   tabTriggerClassName?: string;
   showMoreAfterIndex?: number;
+  tabContentClassName?: string;
 }
 
 const getTabsToShowAndShowMore = <TabKey extends string>(
@@ -61,6 +62,7 @@ export const NavTabs = <TabKey extends string>({
   tabs,
   currentTab,
   onTabChange,
+  tabContentClassName,
   setPageTitle = true,
   tabTriggerClassName,
   showMoreAfterIndex,
@@ -120,7 +122,7 @@ export const NavTabs = <TabKey extends string>({
         )}
       </TabsList>
       {entriesOf(tabs).map(([key, tab]) => (
-        <TabsContent key={key} value={key}>
+        <TabsContent key={key} value={key} className={tabContentClassName}>
           {setPageTitle && <PageTitle title={tab.label} />}
           {tab.component}
         </TabsContent>

@@ -174,6 +174,7 @@ export const EncounterShow = (props: Props) => {
         <NavTabs
           showMoreAfterIndex={showMoreAfterIndex}
           className="w-full overflow-x-auto"
+          tabContentClassName="flex-none h-[calc(100vh-14rem)] overflow-y-auto"
           tabs={tabs}
           currentTab={props.tab}
           tabTriggerClassName="max-w-36"
