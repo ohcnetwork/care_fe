@@ -10,6 +10,7 @@ import Page from "@/components/Common/Page";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
 import useAppHistory from "@/hooks/useAppHistory";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
 import { useSidebarAutoCollapse } from "@/hooks/useSidebarAutoCollapse";
 
@@ -64,6 +65,13 @@ export const EncounterShow = (props: Props) => {
   const { hasPermission } = usePermissions();
   const pluginTabs = useCareAppEncounterTabs();
   const { goBack } = useAppHistory();
+  const showMoreAfterIndex = useBreakpoints({
+    default: 1,
+    xs: 2,
+    sm: 6,
+    xl: 9,
+    "2xl": 12,
+  });
 
   const { canViewEncounter } = getPermissions(
     hasPermission,
@@ -159,14 +167,16 @@ export const EncounterShow = (props: Props) => {
   return (
     <Page title={t("encounter")} className="block" hideTitleOnPage>
       <EncounterHeader />
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-2 mt-4 h-[calc(100vh-10rem)]">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-2 mt-4">
         {!inactiveEncounterStatus.includes(currentEncounter.status) && (
           <EncounterHistorySelector />
         )}
         <NavTabs
+          showMoreAfterIndex={showMoreAfterIndex}
           className="w-full overflow-x-auto"
           tabs={tabs}
           currentTab={props.tab}
+          tabTriggerClassName="max-w-36"
           onTabChange={(tab) =>
             navigate(tab, {
               query:
