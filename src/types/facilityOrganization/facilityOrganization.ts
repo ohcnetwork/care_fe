@@ -1,13 +1,17 @@
 import { RoleRead } from "@/types/emr/role/role";
 import { UserReadMinimal } from "@/types/user/user";
 
-export type OrgType = "root" | "dept" | "team";
+export enum FacilityOrganizationType {
+  ROOT = "root",
+  DEPT = "dept",
+  TEAM = "team",
+}
 
 export interface FacilityOrganizationParent {
   id: string;
   name: string;
   description?: string;
-  org_type: OrgType;
+  org_type: FacilityOrganizationType;
   level_cache: number;
   parent?: FacilityOrganizationParent;
 }
@@ -15,7 +19,7 @@ export interface FacilityOrganizationParent {
 export interface FacilityOrganizationBase {
   name: string;
   description: string;
-  org_type: OrgType;
+  org_type: FacilityOrganizationType;
   active: boolean;
 }
 

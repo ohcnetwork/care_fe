@@ -39,7 +39,10 @@ import {
 } from "@/components/ui/tooltip";
 
 import mutate from "@/Utils/request/mutate";
-import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
+import {
+  FacilityOrganizationRead,
+  FacilityOrganizationType,
+} from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface Props {
@@ -51,13 +54,6 @@ interface Props {
 
   tooltip?: string;
 }
-
-const ORG_TYPES = [
-  { value: "dept", label: "department" },
-  { value: "team", label: "team" },
-] as const;
-
-type OrgType = (typeof ORG_TYPES)[number]["value"];
 
 export default function FacilityOrganizationFormSheet({
   facilityId,
@@ -78,7 +74,17 @@ export default function FacilityOrganizationFormSheet({
       .trim()
       .min(1, { message: t("field_required") }),
     description: z.string().trim(),
-    org_type: z.enum(["dept", "team"] as const),
+    org_type: z.nativeEnum(FacilityOrganizationType).refine(
+      (val) => {
+        return (
+          val === FacilityOrganizationType.DEPT ||
+          val === FacilityOrganizationType.TEAM
+        );
+      },
+      {
+        message: t("invalid_organization_type"),
+      },
+    ),
     active: z.boolean(),
   });
 
@@ -87,7 +93,7 @@ export default function FacilityOrganizationFormSheet({
     defaultValues: {
       name: "",
       description: "",
-      org_type: "dept" as OrgType,
+      org_type: FacilityOrganizationType.DEPT,
       active: true,
     },
   });
@@ -97,7 +103,7 @@ export default function FacilityOrganizationFormSheet({
       form.reset({
         name: org.name || "",
         description: org.description || "",
-        org_type: org.org_type as OrgType,
+        org_type: org.org_type,
         active: org.active,
       });
     }
@@ -220,11 +226,19 @@ export default function FacilityOrganizationFormSheet({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {ORG_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {t(type.label)}
-                        </SelectItem>
-                      ))}
+                      {Object.values(FacilityOrganizationType)
+                        .filter(
+                          (type) => type !== FacilityOrganizationType.ROOT,
+                        )
+                        .map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {t(
+                              type === FacilityOrganizationType.DEPT
+                                ? t("department")
+                                : t("team"),
+                            )}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
