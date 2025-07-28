@@ -48,17 +48,19 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
     >
       <CardHeader className="space-y-1 pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">
-            {encounter.patient.name}
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0 flex-1">
+            <CardTitle className="text-lg font-semibold">
+              {encounter.patient.name}
+            </CardTitle>
             {encounter.patient.deceased_datetime && (
               <Badge
                 variant="destructive"
-                className="ml-2 py-0 border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
+                className="py-0 border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
               >
                 <h3 className="text-xs font-medium">{t("deceased")}</h3>
               </Badge>
             )}
-          </CardTitle>
+          </div>
         </div>
         <CardDescription className="flex items-center">
           <CareIcon icon="l-clock" className="mr-2 size-4" />

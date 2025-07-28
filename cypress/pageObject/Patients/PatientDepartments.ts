@@ -266,7 +266,7 @@ export class PatientDepartments {
   }
 
   clickAddOrganization() {
-    cy.verifyAndClickElement("#root", "Update Department");
+    cy.get("#root").contains("Update Department").scrollIntoView().click();
     return this;
   }
 
