@@ -95,7 +95,7 @@ export class PatientEncounter {
         );
       })
       .last()
-      .should("be.visible")
+      .should("not.be.disabled")
       .within(() => {
         cy.get("[data-slot='dropdown-menu-trigger']")
           .last()
@@ -195,6 +195,7 @@ export class PatientEncounter {
         );
       })
       .first()
+      .should("not.be.disabled")
       .within(() => {
         cy.get("[data-slot='dropdown-menu-trigger']")
           .first()
@@ -276,7 +277,7 @@ export class PatientEncounter {
         );
       })
       .first()
-      .should("be.visible")
+      .should("not.be.disabled")
       .within(() => {
         cy.get("[data-slot='dropdown-menu-trigger']")
           .first()

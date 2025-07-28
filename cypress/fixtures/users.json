@@ -11,6 +11,10 @@
     "username": "staff_2_0",
     "password": "Coronasafe@123"
   },
+  "test":{
+    "username": "test-dev",
+    "password": "Test@123"
+  },
   "nurse": {
     "username": "nurse_2_0",
     "password": "Coronasafe@123"
