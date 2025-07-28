@@ -627,10 +627,10 @@ export function ChargeItemDefinitionForm({
             <div className="rounded-lg border p-4 bg-gray-50 space-y-2">
               <div>
                 <h4 className="text-lg font-medium text-gray-900">
-                  Base Price
+                  {t("base_price")}
                 </h4>
                 <p className="text-sm text-gray-600">
-                  Enter the base service cost before discounts or taxes.
+                  {t("base_price_explanation")}
                 </p>
               </div>
 
