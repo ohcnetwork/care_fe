@@ -250,7 +250,7 @@ export default function ValueSetSelect({
                   !value?.display && "text-gray-400",
                 )}
               >
-                <span className="truncate block max-w-full">
+                <span>
                   {value?.display || placeholder}
                   {value?.display && showCode && (
                     <span className="text-xs ml-1">({value?.code})</span>
