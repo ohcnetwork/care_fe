@@ -22,13 +22,14 @@ export interface OfflineWritesEntry {
   clientTimestamp: number;
   serverTimestamp?: string;
   lastAttemptAt?: number;
-  syncStatus: "pending" | "success" | "failed" | "conflict";
+  syncStatus: "pending" | "success" | "failed" | "conflict" | "blocked";
   lastError?: string;
   retries?: number;
   conflictData?: unknown;
   useQueryRouteKey?: string;
   useQueryPathParams?: Record<string, any>;
   useQueryParams?: Record<string, any>;
+  isPermanentFailure?: boolean;
 }
 
 export class AppCacheDB extends Dexie {

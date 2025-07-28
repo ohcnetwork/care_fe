@@ -638,7 +638,7 @@ const AppointmentActions = ({
       ? `${appointment.id}-cancel`
       : `offline-${appointment.id}-cancel`;
 
-    const baseEntry: saveOfflineWriteData = {
+    const offlineEntry: saveOfflineWriteData = {
       id: cancelAppointmentID,
       userId: authUser?.external_id,
       mutationSyncRouteKey: OfflineKeyMap.cancel_appointment,
@@ -651,17 +651,17 @@ const AppointmentActions = ({
       payload: cancelAppointmentData,
     };
 
-    const offlineEntry: saveOfflineWriteData = !isOfflineId(appointment.id)
-      ? {
-          ...baseEntry,
-          useQueryRouteKey: "cancelAppointmentQuery",
-          serverTimestamp: appointment.modified_date,
-          useQueryPathParams: {
-            facility_id: appointment.facility.id,
-            id: appointment.id,
-          },
-        }
-      : baseEntry;
+    // const offlineEntry: saveOfflineWriteData = !isOfflineId(appointment.id)
+    //   ? {
+    //       ...baseEntry,
+    //       useQueryRouteKey: "cancelAppointmentQuery",
+    //       serverTimestamp: appointment.modified_date,
+    //       useQueryPathParams: {
+    //         facility_id: appointment.facility.id,
+    //         id: appointment.id,
+    //       },
+    //     }
+    //   : baseEntry;
 
     const prevTokenSlot = appointment.token_slot; //prev slot
     const prevDate = new Date(appointment.token_slot.start_datetime); // previous date

@@ -240,7 +240,7 @@ export default function BookAppointment({ patientId }: Props) {
         reason_for_visit: reason,
         tags: selectedTags.map((tag) => tag.id),
       };
-      console.log("selectedtag: ", selectedTags);
+
       if (!onlineManager.isOnline()) {
         const status = "booked";
         await queueAppointmentRecordOffline(
