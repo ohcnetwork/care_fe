@@ -46,6 +46,10 @@ jobs:
 
             const prState = context.payload.pull_request.state;
 
+            if (checked.length > 0 && prState === 'open') {
+              return;
+            }
+
             if (checked.length === 0 && prState === 'open') {
               const commentBody = [
                 'This PR has been automatically closed because the merge checklist was not completed.',
