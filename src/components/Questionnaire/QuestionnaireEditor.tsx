@@ -268,8 +268,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     Map<string, Set<{ question: Question; path: string[] }>>
   >(new Map());
   const [expandPath, setExpandPath] = useState<string[]>([]);
+  const [isSubmitted, setSubmitted] = useState(false);
   const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-  const [hasGroupError, setGroupError] = useState(false);
 
   const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
     const errorData = (
@@ -491,7 +491,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       version: questionnaire?.version,
       tags: questionnaire?.tags,
     },
-    mode: "onChange",
   });
   const { isDirty } = form.formState;
 
@@ -682,8 +681,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     let isValid = await form.trigger();
     const hasOrganizations = validateOrganizations();
     const hasValidStructuredType = validateStructuredType();
+    setSubmitted(true);
     if (!isValid) {
-      setGroupError(true);
       const questionsErrors = form.formState.errors.questions as
         | any[]
         | undefined;
@@ -775,7 +774,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       }, 0); // delay lets react-hook-form update `formState.errors`
       return;
     }
-    setGroupError(false);
     if (id) {
       updateQuestionnaire({
         ...form.getValues(),
@@ -1200,7 +1198,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                         size="sm"
                         onClick={(e) => {
                           e.preventDefault();
-                          setGroupError(false);
+                          setSubmitted(false);
                           const newQuestion: Question = {
                             id: crypto.randomUUID(),
                             link_id: `Q-${Date.now()}`,
@@ -1240,7 +1238,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               selectedQuestions={selectedQuestions}
                               onToggleSelection={handleToggleSelection}
                               form={form}
-                              questionPath={[index]}
                               onChange={(updatedQuestion) => {
                                 const newQuestions = rootQuestions.map(
                                   (q, i) => (i === index ? updatedQuestion : q),
@@ -1248,7 +1245,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                 updateQuestions(newQuestions);
                               }}
                               onDelete={() => {
-                                setGroupError(false);
                                 const newQuestions = rootQuestions.filter(
                                   (_, i) => i !== index,
                                 );
@@ -1298,8 +1294,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               }
                               expandPath={expandPath}
                               questionRefs={questionRefs}
-                              hasSubmitted={hasGroupError}
-                              setGroupError={setGroupError}
+                              isSubmitted={isSubmitted}
+                              setHasAttemptedSubmit={setSubmitted}
                             />
                           </div>
                         ))}
@@ -1575,10 +1571,9 @@ interface QuestionEditorProps {
   >;
   handleEnableWhenDependentClick: (path: string[], targetId: string) => void;
   expandPath?: string[];
-  questionPath?: number[];
-  hasSubmitted: boolean;
-  setGroupError: (value: boolean) => void;
   questionRefs: React.RefObject<{ [key: string]: HTMLDivElement | null }>;
+  isSubmitted: boolean;
+  setHasAttemptedSubmit?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 function QuestionEditor({
@@ -1603,10 +1598,9 @@ function QuestionEditor({
   enableWhenDependencies,
   handleEnableWhenDependentClick,
   expandPath,
-  questionPath,
   questionRefs,
-  hasSubmitted,
-  setGroupError,
+  isSubmitted,
+  setHasAttemptedSubmit,
 }: QuestionEditorProps): React.ReactElement {
   const { t } = useTranslation();
   const {
@@ -1626,17 +1620,6 @@ function QuestionEditor({
     name: "questions",
   }) as Question[];
 
-  const getGroupError = (errors: any, path: number[]) => {
-    let current = errors;
-    for (const idx of path) {
-      if (!current?.questions || !Array.isArray(current.questions))
-        return undefined;
-      current = current.questions[idx];
-    }
-    return current;
-  };
-
-  const groupError = getGroupError(form.formState.errors, questionPath || []);
   // Memoize answer options to ensure unique IDs to avoid unnecessary re-renders in value field of AnwserOption
 
   const annotatedAnswerOptions = useMemo(() => {
@@ -2721,8 +2704,8 @@ function QuestionEditor({
                   size="sm"
                   className="underline text-gray-950 font-semibold"
                   onClick={(e) => {
-                    setGroupError(false);
                     e.preventDefault();
+                    setHasAttemptedSubmit?.(false);
                     const newQuestion: Question = {
                       id: crypto.randomUUID(),
                       link_id: `Q-${Date.now()}`,
@@ -2746,82 +2729,87 @@ function QuestionEditor({
                   {t("add_sub_question")}
                 </Button>
               </div>
-              {hasSubmitted && groupError?.questions?.message && (
-                <div className="text-red-500 text-sm mb-2">
-                  {groupError?.questions?.message}
-                </div>
-              )}
-              <div className="space-y-4">
-                {(questions || []).map((subQuestion, idx) => (
-                  <div
-                    key={subQuestion.id}
-                    id={`question-${subQuestion.link_id}`}
-                    className="relative bg-white rounded-lg shadow-md"
-                    ref={(el) => {
-                      questionRefs.current[subQuestion.link_id] = el;
-                    }}
-                  >
-                    <QuestionEditor
-                      name={`${name}.questions.${idx}`}
-                      handleEnableWhenDependentClick={
-                        handleEnableWhenDependentClick
-                      }
-                      enableWhenDependencies={enableWhenDependencies}
-                      form={form}
-                      index={idx}
-                      key={subQuestion.link_id}
-                      onToggleSelection={onToggleSelection}
-                      selectedQuestions={selectedQuestions}
-                      question={subQuestion}
-                      questionPath={[...(questionPath || []), idx]}
-                      onChange={(updated) => {
-                        const newQuestions = [...(questions || [])];
-                        newQuestions[idx] = updated;
-                        updateField("questions", newQuestions);
-                      }}
-                      onDelete={() => {
-                        setGroupError(false);
-                        const newQuestions = questions?.filter(
-                          (_, i) => i !== idx,
-                        );
-                        updateField("questions", newQuestions);
-                      }}
-                      isExpanded={expandedSubQuestions.has(subQuestion.link_id)}
-                      onToggleExpand={() =>
-                        toggleSubQuestionExpanded(subQuestion.link_id)
-                      }
-                      depth={depth + 1}
-                      parentId={getQuestionPath()}
-                      onMoveUp={() => {
-                        if (idx > 0) {
-                          const newQuestions = swapElements<Question>(
-                            questions || [],
-                            idx,
-                            idx - 1,
-                          );
-                          updateField("questions", newQuestions);
-                        }
-                      }}
-                      onMoveDown={() => {
-                        if (idx < (questions?.length || 0) - 1) {
-                          const newQuestions = swapElements<Question>(
-                            questions || [],
-                            idx,
-                            idx + 1,
-                          );
-                          updateField("questions", newQuestions);
-                        }
-                      }}
-                      isFirst={idx === 0}
-                      isLast={idx === (questions?.length || 0) - 1}
-                      expandPath={expandPath?.slice(1)}
-                      questionRefs={questionRefs}
-                      hasSubmitted={hasSubmitted}
-                      setGroupError={setGroupError}
-                    />
-                  </div>
-                ))}
-              </div>
+
+              <FormField
+                control={form.control}
+                name={`${name}.questions`}
+                render={() => (
+                  <FormItem>
+                    <div className="space-y-4">
+                      {(questions || []).map((subQuestion, idx) => (
+                        <div
+                          key={subQuestion.id}
+                          id={`question-${subQuestion.link_id}`}
+                          className="relative bg-white rounded-lg shadow-md"
+                          ref={(el) => {
+                            questionRefs.current[subQuestion.link_id] = el;
+                          }}
+                        >
+                          <QuestionEditor
+                            name={`${name}.questions.${idx}`}
+                            handleEnableWhenDependentClick={
+                              handleEnableWhenDependentClick
+                            }
+                            enableWhenDependencies={enableWhenDependencies}
+                            form={form}
+                            index={idx}
+                            key={subQuestion.link_id}
+                            onToggleSelection={onToggleSelection}
+                            selectedQuestions={selectedQuestions}
+                            question={subQuestion}
+                            onChange={(updated) => {
+                              const newQuestions = [...(questions || [])];
+                              newQuestions[idx] = updated;
+                              updateField("questions", newQuestions);
+                            }}
+                            onDelete={() => {
+                              const newQuestions = questions?.filter(
+                                (_, i) => i !== idx,
+                              );
+                              updateField("questions", newQuestions);
+                            }}
+                            isExpanded={expandedSubQuestions.has(
+                              subQuestion.link_id,
+                            )}
+                            onToggleExpand={() =>
+                              toggleSubQuestionExpanded(subQuestion.link_id)
+                            }
+                            depth={depth + 1}
+                            parentId={getQuestionPath()}
+                            onMoveUp={() => {
+                              if (idx > 0) {
+                                const newQuestions = swapElements<Question>(
+                                  questions || [],
+                                  idx,
+                                  idx - 1,
+                                );
+                                updateField("questions", newQuestions);
+                              }
+                            }}
+                            onMoveDown={() => {
+                              if (idx < (questions?.length || 0) - 1) {
+                                const newQuestions = swapElements<Question>(
+                                  questions || [],
+                                  idx,
+                                  idx + 1,
+                                );
+                                updateField("questions", newQuestions);
+                              }
+                            }}
+                            isFirst={idx === 0}
+                            isLast={idx === (questions?.length || 0) - 1}
+                            expandPath={expandPath?.slice(1)}
+                            questionRefs={questionRefs}
+                            isSubmitted={isSubmitted}
+                            setHasAttemptedSubmit={setHasAttemptedSubmit}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    {isSubmitted && <FormMessage />}
+                  </FormItem>
+                )}
+              />
             </div>
           )}
 
