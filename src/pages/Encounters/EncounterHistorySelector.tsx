@@ -37,6 +37,7 @@ import {
   ENCOUNTER_STATUS,
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
+  completedEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import {
@@ -184,8 +185,9 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
         queryParams: {
           limit: 14,
           offset: String(pageParam),
-          patient: patientId,
-          facility: facilityId,
+          ...(completedEncounterStatus.includes(currentEncounter?.status ?? "")
+            ? { patient_filter: patientId, facility: facilityId }
+            : { patient: patientId }),
           ...(qParams.status && { status: qParams.status }),
           ...(qParams.tags && { tags: qParams.tags }),
           ...(qParams.created_date_after && {
