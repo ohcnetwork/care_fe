@@ -138,8 +138,7 @@ export function AppointmentQuestion({
     }
   };
 
-  const tagIds = value.tags;
-  const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
+  const tagQueries = useTagConfigs({ ids: value.tags, facilityId });
   const selectedTags = tagQueries
     .map((query) => query.data)
     .filter(Boolean) as TagConfig[];
