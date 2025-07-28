@@ -37,19 +37,14 @@ function LocationTreeNode({
   searchQuery,
   visited = new Set(),
 }: LocationTreeNodeProps) {
-  if (visited.has(location.id)) {
-    return null;
-  }
-  const nextVisited = new Set(visited);
-  nextVisited.add(location.id);
-
   const isExpanded = expandedLocations.has(location.id);
+  const isVisited = visited.has(location.id);
   const isSelected = selectedLocationIds.includes(location.id);
   const Icon =
     LocationTypeIcons[location.form as keyof typeof LocationTypeIcons];
 
   // Only fetch children when expanded
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+
   const { data: children, isLoading } = useQuery({
     queryKey: ["locations", facilityId, "children", location.id, "kind"],
     queryFn: query(locationApi.list, {
@@ -62,8 +57,14 @@ function LocationTreeNode({
     }),
 
     staleTime: 5 * 60 * 1000,
+    enabled: isExpanded && !isVisited,
   });
 
+  if (isVisited) {
+    return null;
+  }
+  const nextVisited = new Set(visited);
+  nextVisited.add(location.id);
   const hasChildren = children?.results && children.results.length > 0;
 
   // Filter children based on search query
