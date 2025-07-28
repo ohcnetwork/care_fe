@@ -45,6 +45,7 @@ import {
   ChargeItemRead,
   ChargeItemStatus,
   ChargeItemUpdate,
+  MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
@@ -112,6 +113,9 @@ export function EditChargeItemSheet({
   };
 
   const baseComponent = getComponentsByType(MonetaryComponentType.base)[0];
+  const mrpComponent = getComponentsByType(
+    MonetaryComponentType.informational,
+  ).find((c) => c.code?.code === MRP_CODE);
   const totalBaseComponent = getTotalComponentsByType(
     MonetaryComponentType.base,
   )[0];
@@ -315,6 +319,14 @@ export function EditChargeItemSheet({
                               </span>
                             </div>
                           ))}
+
+                          {mrpComponent && (
+                            <div className="flex justify-between">
+                              <span>{t("mrp")}</span>
+
+                              <MonetaryDisplay amount={mrpComponent.amount} />
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

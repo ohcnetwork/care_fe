@@ -99,3 +99,5 @@ export function extractChargeItemsFromBatchResponse(
     .map((item) => item.data?.charge_item)
     .filter((item): item is ChargeItemRead => !!item);
 }
+
+export const MRP_CODE = "mrp";
