@@ -1,13 +1,12 @@
-import { Link } from "raviger";
+import { navigate } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
+import { NavTabs } from "@/components/ui/nav-tabs";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import PageHeadTitle from "@/components/Common/PageHeadTitle";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -16,6 +15,7 @@ import { useSidebarAutoCollapse } from "@/hooks/useSidebarAutoCollapse";
 
 import { getPermissions } from "@/common/Permissions";
 
+import { entriesOf } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { EncounterHeader } from "@/pages/Encounters/EncounterHeader";
 import EncounterHistorySelector from "@/pages/Encounters/EncounterHistorySelector";
@@ -42,19 +42,6 @@ export interface PluginEncounterTabProps {
   patient: PatientRead;
 }
 
-const defaultTabs = {
-  updates: EncounterOverviewTab,
-  plots: EncounterPlotsTab,
-  observations: EncounterObservationsTab,
-  medicines: EncounterMedicinesTab,
-  files: EncounterFilesTab,
-  notes: EncounterNotesTab,
-  devices: EncounterDevicesTab,
-  consents: EncounterConsentsTab,
-  service_requests: EncounterServiceRequestTab,
-  diagnostic_reports: EncounterDiagnosticReportsTab,
-} as const;
-
 interface Props {
   tab?: string;
 }
@@ -77,11 +64,6 @@ export const EncounterShow = (props: Props) => {
   const { hasPermission } = usePermissions();
   const pluginTabs = useCareAppEncounterTabs();
   const { goBack } = useAppHistory();
-
-  const availableTabs = [
-    ...Object.keys(defaultTabs),
-    ...Object.keys(pluginTabs),
-  ];
 
   const { canViewEncounter } = getPermissions(
     hasPermission,
@@ -111,16 +93,68 @@ export const EncounterShow = (props: Props) => {
     return <Loading />;
   }
 
-  if (!props.tab || !availableTabs.includes(props.tab)) {
-    return <ErrorPage />;
-  }
-
   if (!patient) {
     return <Loading />;
   }
 
-  const CareTab = defaultTabs[props.tab as keyof typeof defaultTabs];
-  const PluginTab = pluginTabs[props.tab as keyof typeof pluginTabs];
+  const tabs = {
+    updates: {
+      label: t(`ENCOUNTER_TAB__updates`),
+      component: <EncounterOverviewTab />,
+    },
+    plots: {
+      label: t(`ENCOUNTER_TAB__plots`),
+      component: <EncounterPlotsTab />,
+    },
+    observations: {
+      label: t(`ENCOUNTER_TAB__observations`),
+      component: <EncounterObservationsTab />,
+    },
+    medicines: {
+      label: t(`ENCOUNTER_TAB__medicines`),
+      component: <EncounterMedicinesTab />,
+    },
+    files: {
+      label: t(`ENCOUNTER_TAB__files`),
+      component: <EncounterFilesTab />,
+    },
+    notes: {
+      label: t(`ENCOUNTER_TAB__notes`),
+      component: <EncounterNotesTab />,
+    },
+    devices: {
+      label: t(`ENCOUNTER_TAB__devices`),
+      component: <EncounterDevicesTab />,
+    },
+    consents: {
+      label: t(`ENCOUNTER_TAB__consents`),
+      component: <EncounterConsentsTab />,
+    },
+    service_requests: {
+      label: t(`ENCOUNTER_TAB__service_requests`),
+      component: <EncounterServiceRequestTab />,
+    },
+    diagnostic_reports: {
+      label: t(`ENCOUNTER_TAB__diagnostic_reports`),
+      component: <EncounterDiagnosticReportsTab />,
+    },
+
+    ...Object.fromEntries(
+      entriesOf(pluginTabs).map(([key, Component]) => [
+        key,
+        {
+          label: t(`ENCOUNTER_TAB__${key}`),
+          component: (
+            <Component encounter={selectedEncounter!} patient={patient!} />
+          ),
+        },
+      ]),
+    ),
+  } as const;
+
+  if (!props.tab || !Object.keys(tabs).includes(props.tab)) {
+    return <ErrorPage />;
+  }
 
   return (
     <Page title={t("encounter")} className="block" hideTitleOnPage>
@@ -129,48 +163,19 @@ export const EncounterShow = (props: Props) => {
         {!inactiveEncounterStatus.includes(currentEncounter.status) && (
           <EncounterHistorySelector />
         )}
-        <div className="w-full overflow-x-auto">
-          <div className="w-full border-b-2 border-secondary-200 ">
-            <div className="overflow-x-auto sm:flex sm:items-baseline">
-              <div className="mt-4 sm:mt-0">
-                <nav
-                  className="flex space-x-6 overflow-x-auto pb-2 pl-2"
-                  id="encounter_tab_nav"
-                >
-                  {availableTabs.map((tab) => (
-                    <Link
-                      key={tab}
-                      data-cy={`tab-${tab}`}
-                      className={cn(
-                        "capitalize min-w-max-content cursor-pointer font-bold whitespace-nowrap",
-                        props.tab === tab
-                          ? "border-primary-500 hover:border-secondary-300 text-primary-600 border-b-2"
-                          : "text-secondary-700 hover:text-secondary-700",
-                      )}
-                      href={
-                        currentEncounterId === selectedEncounterId
-                          ? `${tab}`
-                          : `${tab}?selectedEncounter=${selectedEncounterId}`
-                      }
-                    >
-                      {t(`ENCOUNTER_TAB__${tab}`)}
-                    </Link>
-                  ))}
-                </nav>
-              </div>
-            </div>
-          </div>
-          <div className="mt-4 h-[calc(100vh-14rem)] overflow-y-auto">
-            <PageHeadTitle title={t(`ENCOUNTER_TAB__${props.tab}`)} />
-            {CareTab && <CareTab />}
-            {PluginTab &&
-              (selectedEncounter ? (
-                <PluginTab encounter={selectedEncounter} patient={patient} />
-              ) : (
-                <Loading />
-              ))}
-          </div>
-        </div>
+        <NavTabs
+          className="w-full overflow-x-auto"
+          tabs={tabs}
+          currentTab={props.tab}
+          onTabChange={(tab) =>
+            navigate(tab, {
+              query:
+                currentEncounterId !== selectedEncounterId
+                  ? { selectedEncounter: selectedEncounterId }
+                  : undefined,
+            })
+          }
+        />
       </div>
     </Page>
   );
