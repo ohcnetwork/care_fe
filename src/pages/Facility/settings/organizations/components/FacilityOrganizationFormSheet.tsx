@@ -39,10 +39,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import mutate from "@/Utils/request/mutate";
-import {
-  FacilityOrganizationCreate,
-  FacilityOrganizationRead,
-} from "@/types/facilityOrganization/facilityOrganization";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface Props {
@@ -107,11 +104,9 @@ export default function FacilityOrganizationFormSheet({
   }, [isEditMode, org, open]);
 
   const { mutate: createOrganization, isPending: isCreating } = useMutation({
-    mutationFn: (body: FacilityOrganizationCreate) =>
-      mutate(facilityOrganizationApi.create, {
-        pathParams: { facilityId },
-        body,
-      })(body),
+    mutationFn: mutate(facilityOrganizationApi.create, {
+      pathParams: { facilityId },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["facilityOrganization"],
@@ -129,11 +124,9 @@ export default function FacilityOrganizationFormSheet({
   });
 
   const { mutate: updateOrganization, isPending: isUpdating } = useMutation({
-    mutationFn: (body: FacilityOrganizationCreate) =>
-      mutate(facilityOrganizationApi.update, {
-        pathParams: { facilityId, organizationId: org?.id },
-        body,
-      })(body),
+    mutationFn: mutate(facilityOrganizationApi.update, {
+      pathParams: { facilityId, organizationId: org?.id },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["facilityOrganization"],

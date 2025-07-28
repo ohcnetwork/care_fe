@@ -58,7 +58,9 @@ export default function UserSelector({
 
   const getPathParams = () => {
     if (!facilityId) return undefined;
-    return organizationId ? { facilityId, organizationId } : { id: facilityId };
+    return organizationId
+      ? { facilityId, organizationId }
+      : { facilityId: facilityId };
   };
 
   const getQueryParams = (pageParam: number) => ({

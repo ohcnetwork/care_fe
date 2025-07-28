@@ -31,7 +31,7 @@ export default function ReportBuilderList({
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
     queryFn: query(facilityApi.get, {
-      pathParams: { id: facilityId },
+      pathParams: { facilityId },
     }),
   });
 

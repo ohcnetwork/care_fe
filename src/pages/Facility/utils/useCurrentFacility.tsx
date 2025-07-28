@@ -26,7 +26,7 @@ export default function useCurrentFacility() {
   const { data: facility, isLoading: isFacilityLoading } = useQuery({
     queryKey: ["facility", facilityId],
     queryFn: query(facilityApi.get, {
-      pathParams: { id: facilityId ?? "" },
+      pathParams: { facilityId: facilityId ?? "" },
     }),
     staleTime: 1000 * 60 * 30, // cache for 30 minutes
   });

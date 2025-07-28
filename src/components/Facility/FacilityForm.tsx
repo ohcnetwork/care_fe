@@ -111,7 +111,7 @@ export default function FacilityForm({
   });
   const { mutate: updateFacility, isPending: isUpdatePending } = useMutation({
     mutationFn: mutate(facilityApi.update, {
-      pathParams: { id: facilityId || "" },
+      pathParams: { facilityId: facilityId || "" },
     }),
     onSuccess: (_data: FacilityRead) => {
       toast.success(t("facility_updated_successfully"));
@@ -132,7 +132,7 @@ export default function FacilityForm({
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
     queryFn: query(facilityApi.get, {
-      pathParams: { id: facilityId || "" },
+      pathParams: { facilityId: facilityId || "" },
     }),
     enabled: !!facilityId,
   });

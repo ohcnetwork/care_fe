@@ -54,7 +54,7 @@ export default function LocationSettings({
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
     queryFn: query(facilityApi.get, {
-      pathParams: { id: facilityId },
+      pathParams: { facilityId },
     }),
   });
 

@@ -60,7 +60,7 @@ export default function UserHome(props: UserHomeProps) {
   const { data: facilityData } = useQuery({
     queryKey: ["getFacilityDetails", props.facilityId],
     queryFn: query(facilityApi.get, {
-      pathParams: { id: facilityId ?? "" },
+      pathParams: { facilityId: facilityId ?? "" },
     }),
     enabled: !!facilityId,
   });

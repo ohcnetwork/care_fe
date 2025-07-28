@@ -19,36 +19,36 @@ export default {
     TBody: Type<FacilityCreate>(),
   },
   update: {
-    path: "/api/v1/facility/{id}/",
+    path: "/api/v1/facility/{facilityId}/",
     method: HttpMethod.PUT,
     TRes: Type<FacilityRead>(),
     TBody: Type<FacilityCreate>(),
   },
   delete: {
-    path: "/api/v1/facility/{id}/",
+    path: "/api/v1/facility/{facilityId}/",
     method: HttpMethod.DELETE,
     TRes: Type<Record<string, never>>(),
     TBody: Type<void>(),
   },
   get: {
-    path: "/api/v1/facility/{id}/",
+    path: "/api/v1/facility/{facilityId}/",
     method: HttpMethod.GET,
     TRes: Type<FacilityRead>(),
   },
   uploadCoverImage: {
-    path: "/api/v1/facility/{id}/cover_image/",
+    path: "/api/v1/facility/{facilityId}/cover_image/",
     method: HttpMethod.POST,
     TRes: Type<FacilityRead>(),
     TBody: Type<FormData>(),
   },
   deleteCoverImage: {
-    path: "/api/v1/facility/{id}/cover_image/",
+    path: "/api/v1/facility/{facilityId}/cover_image/",
     method: HttpMethod.DELETE,
     TRes: Type<Record<string, never>>(),
     TBody: Type<void>(),
   },
   setInvoiceExpression: {
-    path: "/api/v1/facility/{id}/set_invoice_expression/",
+    path: "/api/v1/facility/{facilityId}/set_invoice_expression/",
     method: HttpMethod.POST,
     TRes: Type<FacilityRead>(),
     TBody: Type<{
@@ -56,7 +56,7 @@ export default {
     }>(),
   },
   setMonetaryComponents: {
-    path: "/api/v1/facility/{id}/set_monetary_codes/",
+    path: "/api/v1/facility/{facilityId}/set_monetary_codes/",
     method: HttpMethod.POST,
     TRes: Type<FacilityRead>(),
     TBody: Type<{
@@ -65,7 +65,7 @@ export default {
     }>(),
   },
   getUsers: {
-    path: "/api/v1/facility/{id}/users/",
+    path: "/api/v1/facility/{facilityId}/users/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<UserReadMinimal>>(),
   },

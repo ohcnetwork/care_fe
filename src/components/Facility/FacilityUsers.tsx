@@ -35,7 +35,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
   const { data: userListData, isFetching: userListFetching } = useQuery({
     queryKey: ["facilityUsers", facilityId, qParams, resultsPerPage],
     queryFn: query.debounced(facilityApi.getUsers, {
-      pathParams: { id: facilityId },
+      pathParams: { facilityId },
       queryParams: {
         username: qParams.username,
         limit: resultsPerPage,

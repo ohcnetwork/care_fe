@@ -76,7 +76,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const { data: facilityData, isLoading } = useQuery({
     queryKey: ["facility", facilityId],
     queryFn: query(facilityApi.get, {
-      pathParams: { id: facilityId },
+      pathParams: { facilityId },
     }),
   });
 
@@ -87,7 +87,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
   const { mutate: deleteFacility, isPending: isDeleting } = useMutation({
     mutationFn: mutate(facilityApi.delete, {
-      pathParams: { id: facilityId },
+      pathParams: { facilityId },
     }),
     onSuccess: () => {
       toast.success(
@@ -118,7 +118,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
   const { mutateAsync: deleteAvatar } = useMutation({
     mutationFn: mutate(facilityApi.deleteCoverImage, {
-      pathParams: { id: facilityId },
+      pathParams: { facilityId },
     }),
     onSuccess: () => {
       toast.success(t("cover_image_deleted"));
@@ -131,7 +131,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
   const { mutateAsync: uploadCoverImage } = useMutation({
     mutationFn: mutate(facilityApi.uploadCoverImage, {
-      pathParams: { id: facilityId },
+      pathParams: { facilityId },
     }),
     onSuccess: () => {
       setEditCoverImage(false);

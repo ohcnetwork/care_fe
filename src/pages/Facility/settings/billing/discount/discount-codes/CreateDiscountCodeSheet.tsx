@@ -26,7 +26,7 @@ export function CreateDiscountCodeSheet() {
 
   const { mutate: createCode } = useMutation({
     mutationFn: mutate(facilityApi.setMonetaryComponents, {
-      pathParams: { id: facilityId },
+      pathParams: { facilityId },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["facility", facility?.id] });
