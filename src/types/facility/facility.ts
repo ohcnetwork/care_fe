@@ -21,33 +21,26 @@ export interface FacilityBase extends FacilityBareMinimum {
   phone_number: string;
   facility_type: string;
   is_public: boolean;
-  latitude?: number;
-  longitude?: number;
+  latitude?: string;
+  longitude?: string;
   middleware_address?: string;
   pincode?: number;
 }
 
-export interface FacilityPublicRead
-  extends Omit<FacilityBase, "latitude" | "longitude"> {
+export interface FacilityPublicRead extends FacilityBase {
   features: number[];
   read_cover_image_url?: string;
   cover_image_url?: string;
   geo_organization: Organization;
-  latitude?: string;
-  longitude?: string;
 }
 
-export interface FacilityRead
-  extends Omit<FacilityBase, "latitude" | "longitude">,
-    FacilityPermissions {
+export interface FacilityRead extends FacilityBase, FacilityPermissions {
   id: string;
   read_cover_image_url?: string;
   cover_image_url?: string;
   created_date?: string;
   modified_date?: string;
   geo_organization: Organization;
-  latitude?: string;
-  longitude?: string;
   instance_discount_codes: Code[];
   instance_discount_monetary_components: MonetaryComponentRead[];
   instance_informational_codes: Code[];

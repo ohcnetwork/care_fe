@@ -62,8 +62,12 @@ export default function FacilityForm({
     geo_organization: z.string().min(1, t("field_required")),
     address: z.string().min(1, t("address_is_required")),
     phone_number: validators().phoneNumber.required,
-    latitude: validators().coordinates.latitude.optional(),
-    longitude: validators().coordinates.longitude.optional(),
+    latitude: validators()
+      .coordinates.latitude.transform((val) => (val ? Number(val) : undefined))
+      .optional(),
+    longitude: validators()
+      .coordinates.longitude.transform((val) => (val ? Number(val) : undefined))
+      .optional(),
     is_public: z.boolean().default(false),
   });
 
@@ -143,11 +147,15 @@ export default function FacilityForm({
     if (facilityId) {
       updateFacility({
         ...data,
-        latitude: data.latitude ?? 0,
-        longitude: data.longitude ?? 0,
+        latitude: data.latitude ? String(data.latitude) : undefined,
+        longitude: data.longitude ? String(data.longitude) : undefined,
       });
     } else {
-      createFacility(data);
+      createFacility({
+        ...data,
+        latitude: data.latitude ? String(data.latitude) : undefined,
+        longitude: data.longitude ? String(data.longitude) : undefined,
+      });
     }
   };
 
