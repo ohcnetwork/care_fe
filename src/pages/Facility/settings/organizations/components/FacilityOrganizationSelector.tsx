@@ -1,5 +1,5 @@
 import { DotFilledIcon } from "@radix-ui/react-icons";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { UseQueryResult, useQueries, useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
   Building,
@@ -46,6 +46,167 @@ interface FacilityOrganizationSelectorProps {
   currentOrganizations?: FacilityOrganization[];
   singleSelection?: boolean;
 }
+
+const getCurrentSelectionPathLabel = (
+  navigationLevels: FacilityOrganization[],
+  currentSelection: FacilityOrganization | null,
+  t: (key: string) => string,
+) => {
+  const path = [...navigationLevels];
+
+  if (
+    currentSelection &&
+    (!path.length || path[path.length - 1].id !== currentSelection.id)
+  ) {
+    path.push(currentSelection);
+  }
+
+  if (path.length === 0) return t("select_department");
+
+  return (
+    <div className="flex items-center gap-1 flex-wrap">
+      {path.map((org, index) => (
+        <div key={org.id} className="flex items-center">
+          <span className="truncate">{org.name}</span>
+          {index !== path.length - 1 && (
+            <ArrowRight className="mx-1 h-4 w-4 text-gray-400" />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const renderOrganizationPopover = (
+  className: string | undefined,
+  t: (key: string) => string,
+  facilityOrgSearch: string,
+  setFacilityOrgSearch: (value: string) => void,
+  isLoadingRoot: boolean,
+  organizationQueries: UseQueryResult<any, Error>[],
+  navigationLevels: FacilityOrganization[],
+  getCurrentLevelOrganizations: () => FacilityOrganization[],
+  currentSelection: FacilityOrganization | null,
+  handleSelect: (org: FacilityOrganization) => void,
+  alreadySelected: boolean,
+  pendingSelection: FacilityOrganization | null,
+  handleCancelSelection: () => void,
+  handleConfirmSelection: () => void,
+  isDisabled: boolean,
+) => {
+  return (
+    <Command className={className}>
+      <div className="flex items-center border-b px-3 bg-white z-10">
+        <CommandInput
+          placeholder={t("search_organizations")}
+          onValueChange={setFacilityOrgSearch}
+          value={facilityOrgSearch}
+          className="border-none focus:ring-0"
+        />
+      </div>
+      <CommandList
+        className="max-h-48 mb-4 overflow-y-auto"
+        onWheel={(e) => e.stopPropagation()}
+      >
+        <CommandEmpty>
+          {isLoadingRoot ||
+          organizationQueries[navigationLevels.length - 1]?.isLoading ? (
+            <div className="flex items-center justify-center py-6">
+              <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+              <span className="ml-2 text-sm text-gray-500">
+                {t("loading_organizations")}
+              </span>
+            </div>
+          ) : (
+            t("no_organizations_found")
+          )}
+        </CommandEmpty>
+        <CommandGroup>
+          {!(
+            isLoadingRoot ||
+            organizationQueries[navigationLevels.length - 1]?.isLoading
+          ) &&
+            getCurrentLevelOrganizations().map((org) => {
+              const isSelected = currentSelection?.id === org.id;
+              return (
+                <CommandItem
+                  key={org.id}
+                  value={org.name}
+                  onSelect={() => handleSelect(org)}
+                  className={cn(
+                    "flex items-center justify-between",
+                    isSelected && "bg-sky-50/50",
+                  )}
+                >
+                  <div className="flex items-center">
+                    <span>{org.name}</span>
+                    {isSelected && (
+                      <CareIcon
+                        icon="l-check"
+                        className="ml-2 h-4 w-4 text-sky-600"
+                      />
+                    )}
+                  </div>
+                  {org.has_children ? (
+                    <ChevronRight className="h-4 w-4 font-bold" />
+                  ) : (
+                    <DotFilledIcon className="h-4 w-4 font-bold" />
+                  )}
+                </CommandItem>
+              );
+            })}
+        </CommandGroup>
+      </CommandList>
+      {currentSelection && (
+        <div className="md:m-0 m-2 flex flex-wrap sm:justify-between justify-center px-2 py-2  bg-blue-100 border-sky-200 rounded-md ">
+          <div className="flex flex-col">
+            <span className="text-xs text-gray-500 mb-0.5">
+              {t("selected")}
+            </span>
+            <span className="font-medium text-sm text-sky-900">
+              {getCurrentSelectionPathLabel(
+                navigationLevels,
+                currentSelection,
+                t,
+              )}
+            </span>
+          </div>
+          {pendingSelection && (
+            <div className="flex items-center justify-between px-3 py-2 border-sky-200 rounded-md">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="link"
+                  className="h-8 underline font-semibold"
+                  onClick={handleCancelSelection}
+                >
+                  {t("cancel")}
+                </Button>
+                <Button
+                  variant="white"
+                  className="h-8 w-auto font-semibold text-center border border-green-600 text-green-800"
+                  onClick={handleConfirmSelection}
+                  disabled={isDisabled}
+                >
+                  {isDisabled ? (
+                    <>
+                      <span>{t("already_selected")}</span>
+                      <CareIcon icon="l-multiply" className="h-4 w-4" />
+                    </>
+                  ) : (
+                    <>
+                      <CareIcon icon="l-check" className="h-4 w-4" />
+                      <span>{t("confirm")}</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </Command>
+  );
+};
 
 export default function FacilityOrganizationSelector(
   props: FacilityOrganizationSelectorProps,
@@ -185,31 +346,6 @@ export default function FacilityOrganizationSelector(
     return lastQuery?.data?.results || [];
   };
 
-  const getCurrentSelectionPathLabel = () => {
-    const path = [...navigationLevels];
-
-    if (
-      currentSelection &&
-      (!path.length || path[path.length - 1].id !== currentSelection.id)
-    ) {
-      path.push(currentSelection);
-    }
-
-    if (path.length === 0) return t("select_department");
-
-    return (
-      <div className="flex items-center gap-1 flex-wrap">
-        {path.map((org, index) => (
-          <div key={org.id} className="flex items-center">
-            <span className="truncate">{org.name}</span>
-            {index !== path.length - 1 && (
-              <ArrowRight className="mx-1 h-4 w-4 text-gray-400" />
-            )}
-          </div>
-        ))}
-      </div>
-    );
-  };
   const isDisabled = useMemo(() => {
     const selectedIds = selectedOrganizations.map(
       (path) => path[path.length - 1].id,
@@ -220,129 +356,6 @@ export default function FacilityOrganizationSelector(
         currentOrganizations.some((org) => org.id === pendingSelection?.id))
     );
   }, [pendingSelection, currentOrganizations, selectedOrganizations]);
-
-  const renderOrganizationPopover = (className?: string) => {
-    return (
-      <Command className={className}>
-        <div className="flex items-center border-b px-3 bg-white z-10">
-          <CommandInput
-            placeholder={t("search_organizations")}
-            onValueChange={setFacilityOrgSearch}
-            value={facilityOrgSearch}
-            className="border-none focus:ring-0"
-          />
-        </div>
-        <CommandList
-          className="max-h-48 mb-4 overflow-y-auto"
-          onWheel={(e) => e.stopPropagation()}
-        >
-          <CommandEmpty>
-            {isLoadingRoot ||
-            organizationQueries[navigationLevels.length - 1]?.isLoading ? (
-              <div className="flex items-center justify-center py-6">
-                <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
-                <span className="ml-2 text-sm text-gray-500">
-                  {t("loading_organizations")}
-                </span>
-              </div>
-            ) : (
-              t("no_organizations_found")
-            )}
-          </CommandEmpty>
-          <CommandGroup>
-            {!(
-              isLoadingRoot ||
-              organizationQueries[navigationLevels.length - 1]?.isLoading
-            ) &&
-              getCurrentLevelOrganizations().map((org) => {
-                const isSelected = currentSelection?.id === org.id;
-                return (
-                  <CommandItem
-                    key={org.id}
-                    value={org.name}
-                    onSelect={() => handleSelect(org)}
-                    className={cn(
-                      "flex items-center justify-between",
-                      isSelected && "bg-sky-50/50",
-                    )}
-                  >
-                    <div className="flex items-center">
-                      <span>{org.name}</span>
-                      {isSelected && (
-                        <CareIcon
-                          icon="l-check"
-                          className="ml-2 h-4 w-4 text-sky-600"
-                        />
-                      )}
-                    </div>
-                    {org.has_children ? (
-                      <ChevronRight className="h-4 w-4 font-bold" />
-                    ) : (
-                      <DotFilledIcon className="h-4 w-4 font-bold" />
-                    )}
-                  </CommandItem>
-                );
-              })}
-          </CommandGroup>
-        </CommandList>
-        {currentSelection && (
-          <div className="md:m-0 m-2 flex flex-wrap sm:justify-between justify-center px-2 py-2  bg-blue-100 border-sky-200 rounded-md ">
-            <div className="flex flex-col">
-              <span className="text-xs text-gray-500 mb-0.5">
-                {t("selected")}
-              </span>
-              <span className="font-medium text-sm text-sky-900">
-                {getCurrentSelectionPathLabel()}
-              </span>
-            </div>
-            {alreadySelected && !currentSelection.has_children && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8"
-                disabled={alreadySelected}
-                data-cy="confirm-organization"
-              >
-                <span>{t("already_selected")}</span>
-                <CareIcon icon="l-multiply" className="h-4 w-4" />
-              </Button>
-            )}
-            {pendingSelection && (
-              <div className="flex items-center justify-between px-3 py-2 border-sky-200 rounded-md">
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="link"
-                    className="h-8 underline font-semibold"
-                    onClick={handleCancelSelection}
-                  >
-                    {t("cancel")}
-                  </Button>
-                  <Button
-                    variant="white"
-                    className="h-8 w-auto font-semibold text-center border border-green-600 text-green-800"
-                    onClick={handleConfirmSelection}
-                    disabled={isDisabled}
-                  >
-                    {isDisabled ? (
-                      <>
-                        <span>{t("already_selected")}</span>
-                        <CareIcon icon="l-multiply" className="h-4 w-4" />
-                      </>
-                    ) : (
-                      <>
-                        <CareIcon icon="l-check" className="h-4 w-4" />
-                        <span>{t("confirm")}</span>
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </Command>
-    );
-  };
 
   return (
     <div className="space-y-2">
@@ -380,7 +393,11 @@ export default function FacilityOrganizationSelector(
                         type="button"
                       >
                         <span className="truncate text-gray-500">
-                          {getCurrentSelectionPathLabel()}
+                          {getCurrentSelectionPathLabel(
+                            navigationLevels,
+                            currentSelection,
+                            t,
+                          )}
                         </span>
                         <ChevronDown className="ml-2 size-4 shrink-0 opacity-50" />
                       </Button>
@@ -390,7 +407,23 @@ export default function FacilityOrganizationSelector(
                       className="p-0 h-auto overflow-auto min-h-48"
                       side="bottom"
                     >
-                      {renderOrganizationPopover("mb-4")}
+                      {renderOrganizationPopover(
+                        "mb-4",
+                        t,
+                        facilityOrgSearch,
+                        setFacilityOrgSearch,
+                        isLoadingRoot,
+                        organizationQueries,
+                        navigationLevels,
+                        getCurrentLevelOrganizations,
+                        currentSelection,
+                        handleSelect,
+                        alreadySelected,
+                        pendingSelection,
+                        handleCancelSelection,
+                        handleConfirmSelection,
+                        isDisabled,
+                      )}
                     </SheetContent>
                   </Sheet>
                 </>
@@ -405,7 +438,11 @@ export default function FacilityOrganizationSelector(
                       data-cy="facility-organization"
                     >
                       <span className="truncate text-gray-500">
-                        {getCurrentSelectionPathLabel()}
+                        {getCurrentSelectionPathLabel(
+                          navigationLevels,
+                          currentSelection,
+                          t,
+                        )}
                       </span>
                       <ChevronRight className="ml-2 size-4 shrink-0 opacity-50" />
                     </Button>
@@ -415,7 +452,23 @@ export default function FacilityOrganizationSelector(
                     sideOffset={4}
                     className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh]"
                   >
-                    {renderOrganizationPopover()}
+                    {renderOrganizationPopover(
+                      undefined,
+                      t,
+                      facilityOrgSearch,
+                      setFacilityOrgSearch,
+                      isLoadingRoot,
+                      organizationQueries,
+                      navigationLevels,
+                      getCurrentLevelOrganizations,
+                      currentSelection,
+                      handleSelect,
+                      alreadySelected,
+                      pendingSelection,
+                      handleCancelSelection,
+                      handleConfirmSelection,
+                      isDisabled,
+                    )}
                   </PopoverContent>
                 </Popover>
               ))}
