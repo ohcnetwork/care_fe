@@ -2,7 +2,7 @@
 // This doesn't account for nested locations.
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight, Plus, Search, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -243,6 +243,24 @@ export default function LocationMultiSelect({
     return map;
   }, [allLocations?.results]);
 
+  useEffect(() => {
+    if (!allLocations?.results) return;
+
+    if (!searchQuery) {
+      setExpandedLocations(new Set());
+      return;
+    }
+
+    const matchedPaths = findMatchingPaths(allLocations.results, searchQuery);
+    const expanded = new Set<string>();
+
+    for (const path of matchedPaths) {
+      path.forEach((id) => expanded.add(id));
+    }
+
+    setExpandedLocations(expanded);
+  }, [searchQuery, allLocations?.results]);
+
   const handleToggleExpand = (locationId: string) => {
     setExpandedLocations((prev) => {
       const next = new Set(prev);
@@ -266,6 +284,37 @@ export default function LocationMultiSelect({
   const handleRemove = (locationId: string) => {
     onChange(value.filter((id) => id !== locationId));
   };
+
+  function findMatchingPaths(
+    allLocations: LocationList[],
+    searchQuery: string,
+  ): string[][] {
+    const results: string[][] = [];
+    const parentMap = new Map<string, string | null>();
+
+    for (const loc of allLocations) {
+      const parentId =
+        typeof loc.parent === "object" ? loc.parent?.id : loc.parent;
+
+      parentMap.set(loc.id, (parentId ?? null) as string | null);
+    }
+
+    for (const loc of allLocations) {
+      if (loc.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+        const path: string[] = [];
+        let currentId: string | null = loc.id;
+
+        while (currentId) {
+          path.unshift(currentId);
+          currentId = parentMap.get(currentId) || null;
+        }
+
+        results.push(path);
+      }
+    }
+
+    return results;
+  }
 
   return (
     <div className="h-full flex flex-col gap-2">
