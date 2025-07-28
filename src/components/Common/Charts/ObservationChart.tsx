@@ -31,10 +31,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { ObservationAnalyzeResponse } from "@/types/emr/observation";
-import { Code } from "@/types/questionnaire/code";
+import { Code } from "@/types/base/code/code";
+import patientApi from "@/types/emr/patient/patientApi";
 
 import { ObservationHistoryTable } from "./ObservationHistoryTable";
 
@@ -118,14 +117,14 @@ export const ObservationVisualizer = ({
   // Flatten all codes for a single API request
   const allCodes = codeGroups.flatMap((group) => group.codes);
 
-  const { data, isLoading } = useQuery<ObservationAnalyzeResponse>({
+  const { data, isLoading } = useQuery({
     queryKey: [
       "observations",
       patientId,
       encounterId,
       allCodes.map((c) => c.code).join(","),
     ],
-    queryFn: query(routes.observationsAnalyse, {
+    queryFn: query(patientApi.observationsAnalyse, {
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,

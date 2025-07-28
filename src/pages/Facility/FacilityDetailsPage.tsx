@@ -11,7 +11,6 @@ import { Markdown } from "@/components/ui/markdown";
 import { Avatar } from "@/components/Common/Avatar";
 import { LoginHeader } from "@/components/Common/LoginHeader";
 import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
-import { FacilityModel } from "@/components/Facility/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useFilters from "@/hooks/useFilters";
@@ -29,7 +28,7 @@ interface Props {
 export function FacilityDetailsPage({ id }: Props) {
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
-  const { data: facilityResponse, isLoading } = useQuery<FacilityModel>({
+  const { data: facilityResponse, isLoading } = useQuery({
     queryKey: ["facility", id],
     queryFn: query(routes.getAnyFacility, {
       pathParams: { id },
@@ -143,7 +142,7 @@ export function FacilityDetailsPage({ id }: Props) {
                 <UserCard key={user.username} user={user} facilityId={id} />
               ))}
             </div>
-            <Pagination totalCount={users.length ?? 0} />
+            <Pagination totalCount={docResponse?.count ?? 0} />
           </>
         )}
         {users.length === 0 && (

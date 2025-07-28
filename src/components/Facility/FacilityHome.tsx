@@ -50,7 +50,6 @@ import { sleep } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { FeatureBadge } from "@/pages/Facility/Utils";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
-import { FacilityData } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 import { renderGeoOrganizations } from "@/types/organization/organization";
 
@@ -78,7 +77,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const { hasPermission } = usePermissions();
   const { history, goBack } = useAppHistory();
 
-  const { data: facilityData, isLoading } = useQuery<FacilityData>({
+  const { data: facilityData, isLoading } = useQuery({
     queryKey: ["facility", facilityId],
     queryFn: query(routes.facility.show, {
       pathParams: { id: facilityId },

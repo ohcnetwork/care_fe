@@ -18,6 +18,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 
 import { Avatar } from "@/components/Common/Avatar";
 
@@ -27,8 +28,6 @@ import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { formatName } from "@/Utils/utils";
-
-import { NavigationLink } from "./facility-nav";
 
 export function FacilityNavUser({
   selectedFacilityId,
@@ -57,7 +56,7 @@ export function FacilityNavUser({
               <Avatar
                 className="size-8 rounded-lg"
                 name={`${user.first_name} ${user.last_name}`}
-                imageUrl={user.read_profile_picture_url}
+                imageUrl={user.profile_picture_url}
               />
               {(open || isMobile) && (
                 <>
@@ -83,7 +82,7 @@ export function FacilityNavUser({
                 <Avatar
                   className="size-8 rounded-lg"
                   name={`${user.first_name} ${user.last_name}`}
-                  imageUrl={user.read_profile_picture_url}
+                  imageUrl={user.profile_picture_url}
                 />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">

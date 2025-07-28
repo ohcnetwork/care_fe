@@ -48,6 +48,7 @@ import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
 import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
+import MedicationValueSetSelect from "@/components/Questionnaire/MedicationValueSetSelect";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -55,6 +56,8 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
+import { Code } from "@/types/base/code/code";
 import {
   DoseRange,
   INACTIVE_MEDICATION_STATUSES,
@@ -65,13 +68,14 @@ import {
   MedicationRequestIntent,
   MedicationRequestRead,
   UCUM_TIME_UNITS,
+  displayMedicationName,
   parseMedicationStringToRequest,
-} from "@/types/emr/medicationRequest";
+} from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
+import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
-import { Code } from "@/types/questionnaire/code";
 import {
   QuestionnaireResponse,
   ResponseValue,
@@ -199,7 +203,7 @@ export function MedicationRequestQuestion({
   errors,
 }: MedicationRequestQuestionProps) {
   const { t } = useTranslation();
-
+  const { facilityId } = useCurrentFacilitySilently();
   const isPreview = patientId === "preview";
   const medications =
     (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
@@ -211,6 +215,7 @@ export function MedicationRequestQuestion({
       queryParams: {
         encounter: encounterId,
         limit: 100,
+        facility: facilityId,
       },
     }),
     enabled: !isPreview,
@@ -219,7 +224,16 @@ export function MedicationRequestQuestion({
   useEffect(() => {
     if (patientMedications?.results) {
       updateQuestionnaireResponseCB(
-        [{ type: "medication_request", value: patientMedications.results }],
+        [
+          {
+            type: "medication_request",
+            value: patientMedications.results.map((medication) => ({
+              ...medication,
+              requested_product_internal: medication.requested_product,
+              requested_product: medication.requested_product?.id,
+            })),
+          },
+        ],
         questionnaireResponse.question_id,
       );
     }
@@ -250,6 +264,20 @@ export function MedicationRequestQuestion({
     }
   };
 
+  const handleAddProductMedication = (
+    productKnowledge: ProductKnowledgeBase,
+  ) => {
+    const initialDetails = {
+      ...parseMedicationStringToRequest(undefined, productKnowledge),
+    };
+
+    if (desktopLayout) {
+      addNewMedication(initialDetails);
+    } else {
+      setNewMedicationInSheet(initialDetails);
+    }
+  };
+
   const addNewMedication = (medication: MedicationRequest) => {
     const newMedications: MedicationRequest[] = [...medications, medication];
 
@@ -268,13 +296,21 @@ export function MedicationRequestQuestion({
   };
 
   const handleAddHistoricalMedications = (
-    selected: (MedicationRequest | MedicationStatementRead)[],
+    selected: (MedicationRequestRead | MedicationStatementRead)[],
   ) => {
     // Filter and convert MedicationStatement to MedicationRequest if needed
     const medicationRequests = selected.map((record) => {
       if ("dosage_instruction" in record) {
-        const { id: _id, ...request } = record as MedicationRequest;
-        return request;
+        const {
+          id: _id,
+          requested_product,
+          ...request
+        } = record as MedicationRequestRead;
+        return {
+          ...request,
+          requested_product: requested_product?.id,
+          requested_product_internal: requested_product,
+        };
       } else {
         const statement = record as MedicationStatementRead;
         return {
@@ -389,8 +425,9 @@ export function MedicationRequestQuestion({
             <AlertDialogTitle>{t("remove_medication")}</AlertDialogTitle>
             <AlertDialogDescription>
               {t("remove_medication_confirmation", {
-                medication:
-                  medications[medicationToDelete!]?.medication?.display,
+                medication: displayMedicationName(
+                  medications[medicationToDelete!],
+                ),
               })}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -413,9 +450,9 @@ export function MedicationRequestQuestion({
             type: t("past_prescriptions"),
             displayFields: [
               {
-                key: "medication",
+                key: "",
                 label: t("medicine"),
-                render: (med) => med?.display,
+                render: (med) => displayMedicationName(med),
               },
               {
                 key: "dosage_instruction",
@@ -459,7 +496,7 @@ export function MedicationRequestQuestion({
                   limit,
                   offset,
                   status:
-                    "active,on-hold,draft,unknown,ended,completed,cancelled",
+                    "active,on_hold,draft,unknown,ended,completed,cancelled",
                   ordering: "-created_date",
                 },
               })({ signal: new AbortController().signal });
@@ -619,9 +656,15 @@ export function MedicationRequestQuestion({
                                             medication.status !== "ended" &&
                                             "line-through",
                                         )}
-                                        title={medication.medication?.display}
+                                        title={
+                                          medication.medication?.display ||
+                                          medication.requested_product_internal
+                                            ?.name
+                                        }
                                       >
-                                        {medication.medication?.display}
+                                        {medication.medication?.display ||
+                                          medication.requested_product_internal
+                                            ?.name}
                                       </CardTitle>
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">
@@ -740,17 +783,17 @@ export function MedicationRequestQuestion({
           onEntitySelected={handleAddMedication}
           onConfirm={handleConfirmMedicationInSheet}
           placeholder={addMedicationPlaceholder}
+          onProductEntitySelected={handleAddProductMedication}
         >
           {newMedicationSheetContent}
         </EntitySelectionSheet>
       ) : (
         <div className="max-w-4xl" data-cy="add-medication-request">
-          <ValueSetSelect
-            system="system-medication"
+          <MedicationValueSetSelect
             placeholder={addMedicationPlaceholder}
             onSelect={handleAddMedication}
+            onProductSelect={handleAddProductMedication}
             disabled={disabled}
-            searchPostFix=" clinical drug"
             title={t("select_medication")}
           />
         </div>
@@ -784,6 +827,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   const dosageInstruction = medication.dosage_instruction[0] || {};
   const isReadOnly = !!medication.id;
   const { hasError } = useFieldError(questionId, errors, index);
+  const unitDisabled =
+    !!medication.requested_product_internal?.definitional?.dosage_form;
 
   const [currentInstructions, setCurrentInstructions] = useState<Code[]>(
     dosageInstruction?.additional_instruction || [],
@@ -821,9 +866,13 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
 
   interface DosageDialogProps {
     dosageRange: DoseRange;
+    unitDisabled?: boolean;
   }
 
-  const DosageDialog: React.FC<DosageDialogProps> = ({ dosageRange }) => {
+  const DosageDialog: React.FC<DosageDialogProps> = ({
+    dosageRange,
+    unitDisabled,
+  }) => {
     const [localDoseRange, setLocalDoseRange] =
       useState<DoseRange>(dosageRange);
 
@@ -835,16 +884,20 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           <ComboboxQuantityInput
             quantity={localDoseRange.low}
             onChange={(value) => {
-              setLocalDoseRange((prev) => ({
-                ...prev,
-                low: value,
-                high: {
-                  ...prev.high,
-                  unit: value.unit,
-                },
-              }));
+              if (value) {
+                setLocalDoseRange((prev) => ({
+                  ...prev,
+                  low: value,
+                  high: {
+                    ...prev.high,
+                    unit: value.unit || prev.high.unit,
+                  },
+                }));
+              }
             }}
             disabled={disabled || isReadOnly}
+            unitDisabled={unitDisabled}
+            className="lg:max-w-[200px]"
           />
         </div>
         <div>
@@ -852,16 +905,20 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           <ComboboxQuantityInput
             quantity={localDoseRange.high}
             onChange={(value) => {
-              setLocalDoseRange((prev) => ({
-                ...prev,
-                high: value,
-                low: {
-                  ...prev.low,
-                  unit: value.unit,
-                },
-              }));
+              if (value) {
+                setLocalDoseRange((prev) => ({
+                  ...prev,
+                  high: value,
+                  low: {
+                    ...prev.low,
+                    unit: value.unit || prev.low.unit,
+                  },
+                }));
+              }
             }}
             disabled={disabled || !localDoseRange.low.value || isReadOnly}
+            unitDisabled={unitDisabled}
+            className="lg:max-w-[200px]"
           />
         </div>
         <div className="flex justify-end gap-2">
@@ -942,7 +999,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 "line-through",
             )}
           >
-            {medication.medication?.display}
+            {displayMedicationName(medication)}
           </span>
         </div>
       )}
@@ -978,19 +1035,23 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                   data-cy="dosage-input"
                   quantity={dosageInstruction?.dose_and_rate?.dose_quantity}
                   onChange={(value) => {
-                    if (!value.value || !value.unit) return;
-                    handleUpdateDosageInstruction({
-                      dose_and_rate: {
-                        type: "ordered",
-                        dose_quantity: {
-                          value: value.value,
-                          unit: value.unit,
+                    if (value) {
+                      handleUpdateDosageInstruction({
+                        dose_and_rate: {
+                          type: "ordered",
+                          dose_quantity: value,
+                          dose_range: undefined,
                         },
-                        dose_range: undefined,
-                      },
-                    });
+                      });
+                    } else {
+                      handleUpdateDosageInstruction({
+                        dose_and_rate: undefined,
+                      });
+                    }
                   }}
                   disabled={disabled || isReadOnly}
+                  unitDisabled={unitDisabled}
+                  className="lg:max-w-[200px]"
                 />
               </div>
               <div className="flex justify-end">
@@ -1023,6 +1084,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               <PopoverContent className="w-55 p-4" align="start">
                 <DosageDialog
                   dosageRange={dosageInstruction.dose_and_rate.dose_range}
+                  unitDisabled={unitDisabled}
                 />
               </PopoverContent>
             </Popover>
@@ -1031,6 +1093,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               <DialogContent>
                 <DosageDialog
                   dosageRange={dosageInstruction.dose_and_rate.dose_range}
+                  unitDisabled={unitDisabled}
                 />
               </DialogContent>
             </Dialog>
@@ -1265,7 +1328,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onSelect={(site) => handleUpdateDosageInstruction({ site })}
           placeholder={t("select_site")}
           disabled={disabled || isReadOnly}
-          wrapTextForSmallScreen={true}
           asSheet
         />
       </div>

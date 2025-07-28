@@ -144,7 +144,7 @@ export default function CreateScheduleExceptionSheet({
 
   const { mutate: createException, isPending } = useMutation({
     mutationFn: mutate(scheduleApis.exceptions.create, {
-      pathParams: { facility_id: facilityId },
+      pathParams: { facilityId },
     }),
     onSuccess: () => {
       toast.success(t("exception_created"));
