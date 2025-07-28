@@ -59,7 +59,7 @@ export interface CollectionSpec {
 }
 
 export interface CollectionReadSpec extends CollectionSpec {
-  collector_object?: UserBase | null;
+  collector_object?: UserReadMinimal | null;
 }
 
 export interface ProcessingSpec {
@@ -70,7 +70,7 @@ export interface ProcessingSpec {
 }
 
 export interface ProcessingReadSpec extends ProcessingSpec {
-  performer_object?: UserBase | null;
+  performer_object?: UserReadMinimal | null;
 }
 
 export interface SpecimenBase {
