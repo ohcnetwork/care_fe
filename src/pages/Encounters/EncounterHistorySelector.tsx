@@ -288,7 +288,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
                 asFilter
                 className="mt-0 bg-white font-medium rounded-md"
               />
-              {/* TODO: Add date range filter once we have BE support */}
+
               <DateRangeFilter
                 dateFrom={dateFromFilter}
                 dateTo={dateToFilter}
@@ -337,7 +337,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
                   acc.push(
                     <div
                       key={`year-${currentYear}`}
-                      className=" mb-2 text-sm font-medium text-indigo-700"
+                      className="mb-2 text-sm font-medium text-indigo-700"
                     >
                       {currentYear}
                     </div>,

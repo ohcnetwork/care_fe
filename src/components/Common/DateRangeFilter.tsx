@@ -53,42 +53,42 @@ export function DateRangeFilter({
 
   const dateRangeOptions: DateRangeOption[] = [
     {
-      label: "Last 7 days",
+      label: t("last_count_days", { count: 7 }),
       getDateRange: () => ({
         from: subDays(new Date(), 7),
         to: new Date(),
       }),
     },
     {
-      label: "Last 3 weeks",
+      label: t("last_count_weeks", { count: 3 }),
       getDateRange: () => ({
         from: subWeeks(new Date(), 3),
         to: new Date(),
       }),
     },
     {
-      label: "Last month",
+      label: t("last_month"),
       getDateRange: () => ({
         from: subMonths(new Date(), 1),
         to: new Date(),
       }),
     },
     {
-      label: "Last 3 months",
+      label: t("last_count_months", { count: 3 }),
       getDateRange: () => ({
         from: subMonths(new Date(), 3),
         to: new Date(),
       }),
     },
     {
-      label: "Last 6 months",
+      label: t("last_count_months", { count: 6 }),
       getDateRange: () => ({
         from: subMonths(new Date(), 6),
         to: new Date(),
       }),
     },
     {
-      label: "Last year",
+      label: t("last_year"),
       getDateRange: () => ({
         from: subYears(new Date(), 1),
         to: new Date(),
