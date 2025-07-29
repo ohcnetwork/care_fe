@@ -93,7 +93,7 @@ export const PatientHome = (props: {
       }
     >
       <div
-        className="w-full max-w-full md:max-w-[calc(100vw-8rem)] mx-auto mt-3 overflow-x-auto"
+        className="w-full max-w-full md:max-w-[calc(100vw-8rem)] mx-auto mt-3 overflow-y-auto"
         data-testid="patient-dashboard"
       >
         <div className="px-3 md:px-0">
