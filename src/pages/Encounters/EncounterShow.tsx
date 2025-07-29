@@ -125,7 +125,7 @@ export const EncounterShow = (props: Props) => {
   return (
     <Page title={t("encounter")} className="block" hideTitleOnPage>
       <EncounterHeader />
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-2 mt-4">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-2 mt-4 h-[calc(100vh-10rem)]">
         {!inactiveEncounterStatus.includes(currentEncounter.status) && (
           <EncounterHistorySelector />
         )}
@@ -160,7 +160,7 @@ export const EncounterShow = (props: Props) => {
               </div>
             </div>
           </div>
-          <div className="mt-4">
+          <div className="mt-4 h-[calc(100vh-14rem)] overflow-y-auto">
             <PageHeadTitle title={t(`ENCOUNTER_TAB__${props.tab}`)} />
             {CareTab && <CareTab />}
             {PluginTab &&

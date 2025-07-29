@@ -93,7 +93,7 @@ export const PatientHome = (props: {
       }
     >
       <div
-        className="md:w-[calc(100vw-8rem)] mt-3 overflow-y-auto"
+        className="w-full max-w-full md:max-w-[calc(100vw-8rem)] mx-auto mt-3 overflow-x-auto"
         data-testid="patient-dashboard"
       >
         <div className="px-3 md:px-0">
@@ -149,7 +149,6 @@ export const PatientHome = (props: {
             </div>
           </div>
         </div>
-
         <div
           className="sticky top-0 z-9 mt-4 w-full border-b border-gray-200 bg-gray-50"
           role="navigation"
