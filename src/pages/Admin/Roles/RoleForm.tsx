@@ -31,7 +31,7 @@ export default function RoleForm({
   const queryClient = useQueryClient();
 
   const roleSchema = z.object({
-    name: z.string().trim().min(1, "Name is required"),
+    name: z.string().trim().min(1, t("name_required")),
     description: z.string().trim().optional(),
     permissions: z
       .array(z.string(), {
@@ -80,7 +80,7 @@ export default function RoleForm({
     const payload = {
       name: data.name,
       description: data.description,
-      permissions: data.permissions || [],
+      permissions: data.permissions,
     };
 
     if (role?.id) {
