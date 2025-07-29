@@ -57,12 +57,12 @@ import {
   saveOfflineWrite,
   saveOfflineWriteData,
 } from "@/OfflineSupport/offlineWriteHelpers";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import patientApi from "@/types/emr/patient/patientApi";
 import roleApi from "@/types/emr/role/roleApi";
 import { UserBase } from "@/types/user/user";
 
@@ -93,7 +93,7 @@ function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
 
   const { mutate: assignUser } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
-      mutate(routes.patient.users.addUser, {
+      mutate(patientApi.addUser, {
         pathParams: { patientId },
         body,
       })(body),
@@ -134,7 +134,7 @@ function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
         userId: authUser.external_id,
         mutationSyncRouteKey: OfflineKeyMap.assign_user_to_patient,
         mutationPathParams: { patientId } satisfies PathParamsObject<
-          typeof routes.patient.users.addUser
+          typeof patientApi.addUser
         >,
         type: OfflineKeyMap.assign_user_to_patient,
         resourceType: "patient",
@@ -282,7 +282,7 @@ function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
                   <SelectContent className="w-[var(--radix-select-trigger-width)]">
                     {roles?.results?.map((role) => (
                       <SelectItem key={role.id} value={role.id}>
-                        <div className="flex flex-col">
+                        <div className="flex flex-col items-start">
                           <span>{role.name}</span>
                           {role.description && (
                             <span className="text-xs text-gray-500">
@@ -327,7 +327,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
 
   const { data: users } = useQuery({
     queryKey: ["patientUsers", patientId],
-    queryFn: query(routes.patient.users.listUsers, {
+    queryFn: query(patientApi.listUsers, {
       pathParams: { patientId },
     }),
     meta: { persist: true },
@@ -342,7 +342,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
         userId: authUser.external_id,
         mutationSyncRouteKey: OfflineKeyMap.remove_user_from_patient,
         mutationPathParams: { patientId } satisfies PathParamsObject<
-          typeof routes.patient.users.removeUser
+          typeof patientApi.removeUser
         >,
         type: OfflineKeyMap.remove_user_from_patient,
         resourceType: "patient",
@@ -392,7 +392,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
 
   const { mutate: removeUser } = useMutation({
     mutationFn: (user: string) =>
-      mutate(routes.patient.users.removeUser, {
+      mutate(patientApi.removeUser, {
         pathParams: { patientId },
         body: { user },
       })({ user }),

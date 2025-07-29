@@ -16,14 +16,18 @@ import { Textarea } from "@/components/ui/textarea";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
+import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
-import { ProcessingSpec } from "@/types/emr/specimen/specimen";
+import {
+  ProcessingReadSpec,
+  ProcessingSpec,
+} from "@/types/emr/specimen/specimen";
 
 interface ProcessSpecimenProps {
   onAddProcessing: (processing: ProcessingSpec) => void;
   onUpdateProcessing: (index: number, processing: ProcessingSpec) => void;
-  existingProcessing?: ProcessingSpec[];
+  existingProcessing?: ProcessingReadSpec[];
   diagnosticReports?: DiagnosticReportRead[];
 }
 
@@ -125,9 +129,9 @@ export function ProcessSpecimen({
                   )}
               </div>
               <div>
-                {process.performer && (
+                {process.performer_object && (
                   <div className="text-sm text-gray-600 mt-0.5">
-                    {t("performed_by")}: {process.performer}
+                    {t("performed_by")}: {formatName(process.performer_object)}
                   </div>
                 )}
                 <div className="text-sm text-gray-600 mt-0.5">
@@ -161,11 +165,11 @@ export function ProcessSpecimen({
           {!hasReport && (
             <div className="space-y-2">
               <label className="text-sm font-medium">
-                {t("PROCESS_SPECIMEN__step_heading")}
+                {t("process_specimen__step_heading")}
               </label>
               <ValueSetSelect
                 system="system-specimen-processing-method-code"
-                placeholder={t("PROCESS_SPECIMEN__valusetselect_placeholder")}
+                placeholder={t("process_specimen__valusetselect_placeholder")}
                 onSelect={handleSelectStep}
                 value={null}
               />
@@ -184,10 +188,10 @@ export function ProcessSpecimen({
           <DialogHeader>
             <DialogTitle>
               {noteDialog.index === -1
-                ? t("PROCESS_SPECIMEN__dialog_action_title", {
+                ? t("process_specimen__dialog_action_title", {
                     action: t("add"),
                   })
-                : t("PROCESS_SPECIMEN__dialog_action_title", {
+                : t("process_specimen__dialog_action_title", {
                     action: t("edit"),
                   })}
             </DialogTitle>
@@ -213,11 +217,11 @@ export function ProcessSpecimen({
                     description: e.target.value,
                   }))
                 }
-                placeholder={t("PROCESS_SPECIMEN__textarea_placeholder")}
+                placeholder={t("process_specimen__textarea_placeholder")}
                 className="min-h-[100px]"
               />
               <p className="text-sm text-gray-500">
-                {t("PROCESS_SPECIMEN__dialog_text_area_description")}
+                {t("process_specimen__dialog_text_area_description")}
               </p>
             </div>
           </div>

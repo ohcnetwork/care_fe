@@ -281,7 +281,7 @@ export function SpecimenDefinitionForm({
                           onChange={(e) => {
                             const sanitizedValue = e.target.value
                               .toLowerCase()
-                              .replace(/[^a-z0-9-]/g, "");
+                              .replace(/[^a-z0-9_-]/g, "");
                             field.onChange(sanitizedValue);
                           }}
                         />

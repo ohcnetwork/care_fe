@@ -1,11 +1,4 @@
-import careConfig from "@careConfig";
-import {
-  MutationCache,
-  QueryCache,
-  QueryClient,
-  defaultShouldDehydrateQuery,
-  onlineManager,
-} from "@tanstack/react-query";
+import { defaultShouldDehydrateQuery, onlineManager } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { useLocationChange } from "raviger";
@@ -21,40 +14,14 @@ import AuthUserProvider from "@/Providers/AuthUserProvider";
 import HistoryAPIProvider from "@/Providers/HistoryAPIProvider";
 import Routers from "@/Routers";
 import { displayCareConsoleArt } from "@/Utils/consoleArt";
-import { handleHttpError } from "@/Utils/request/errorHandler";
-import { HTTPError } from "@/Utils/request/types";
+import queryClient from "@/Utils/request/queryClient";
 
 import { createUserPersister } from "./OfflineSupport/createUserPersister";
 import { PubSubProvider } from "./Utils/pubsubContext";
+import careConfig from "@careConfig";
 
 onlineManager.setEventListener(() => {
   return () => {};
-});
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: (failureCount, error) => {
-        // Only retry network errors or server errors (502, 503, 504) up to 3 times
-        if (
-          error.message === "Network Error" ||
-          (error instanceof HTTPError && [502, 503, 504].includes(error.status))
-        ) {
-          return failureCount < 3;
-        }
-        return false;
-      },
-      gcTime: careConfig.queryGcTime,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
-    },
-  },
-  queryCache: new QueryCache({
-    onError: handleHttpError,
-  }),
-  mutationCache: new MutationCache({
-    onError: handleHttpError,
-  }),
 });
 
 const ScrollToTop = () => {

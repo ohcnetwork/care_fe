@@ -35,14 +35,14 @@ import useAppHistory from "@/hooks/useAppHistory";
 import { getPermissions } from "@/common/Permissions";
 
 import { PendingSyncBadge } from "@/OfflineSupport/pendingSyncbadge";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
 import { formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { Patient } from "@/types/emr/patient/patient";
+import encounterApi from "@/types/emr/encounter/encounterApi";
+import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 
 interface SearchPatientParams {
@@ -60,11 +60,11 @@ export default function VerifyPatient() {
   const { hasPermission } = usePermissions();
   const queryClient = useQueryClient();
   const [offlinePatientPayload, setOfflinePatientPayload] =
-    useState<Patient | null>(null);
+    useState<PatientRead | null>(null);
   const [hasReachedEncounterLimitOffline, setHasReachedEncounterLimitOffline] =
     useState(false);
 
-  const { data: patientverificationdata } = useQuery<Patient>({
+  const { data: patientverificationdata } = useQuery<PatientRead>({
     queryKey: ["PatientVerification", phone_number, year_of_birth, partial_id],
     queryFn: async () => {
       throw new Error("Should not fetch online");
@@ -82,7 +82,7 @@ export default function VerifyPatient() {
     data: onlinepatientData,
     isPending: isVerifyingPatient,
     isError,
-  } = useMutation<Patient, HTTPError, SearchPatientParams>({
+  } = useMutation<PatientRead, HTTPError, SearchPatientParams>({
     mutationFn: mutate(patientApi.searchRetrieve),
     onSuccess: async (data) => {
       queryClient.setQueryData(
@@ -117,7 +117,7 @@ export default function VerifyPatient() {
 
   const { data: encounters, isLoading: encounterLoading } = useQuery({
     queryKey: ["encounters", "live", patientData?.id],
-    queryFn: query(routes.encounter.list, {
+    queryFn: query(encounterApi.list, {
       queryParams: {
         patient: patientData?.id,
         live: false,
@@ -140,7 +140,7 @@ export default function VerifyPatient() {
     const loadOfflineCreatedPatient = async () => {
       if (!onlineManager.isOnline() && partial_id) {
         try {
-          const record = queryClient.getQueryData<Patient>([
+          const record = queryClient.getQueryData<PatientRead>([
             "patient",
             partial_id,
           ]);

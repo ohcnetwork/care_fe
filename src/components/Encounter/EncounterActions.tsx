@@ -40,18 +40,18 @@ import {
   updateActiveEncounterList,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import { PLUGIN_Component } from "@/PluginEngine";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { usePermissions } from "@/context/PermissionContext";
 import {
-  Encounter,
-  EncounterEditRequest,
+  EncounterEdit,
+  EncounterRead,
   EncounterStatus,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 
 interface EncounterActionsProps {
-  encounter: Encounter;
+  encounter: EncounterRead;
   variant?: "default" | "outline" | "ghost";
   size?: "default" | "sm" | "lg" | "icon";
   disableButtons?: boolean;
@@ -81,7 +81,7 @@ export default function EncounterActions({
     canWriteEncounter && !inactiveEncounterStatus.includes(encounter.status);
 
   const { mutate: updateEncounter } = useMutation({
-    mutationFn: mutate(routes.encounter.update, {
+    mutationFn: mutate(encounterApi.update, {
       pathParams: { id: encounter.id },
     }),
     onSuccess: () => {
@@ -94,17 +94,17 @@ export default function EncounterActions({
   });
 
   const queueMarkAscompleteRecord = async (
-    encounterUpdatedData: EncounterEditRequest,
+    encounterUpdatedData: EncounterEdit,
   ) => {
     if (isOfflineId(encounter.id)) {
       toast.error(t("cannot_mark_offline_created_encounter_as_complete"));
       return;
     }
 
-    const useQueryParams: QueryParamsObject<typeof routes.encounter.get> =
-      encounter.facility.id
-        ? { facility: encounter.facility.id }
-        : { patient: encounter.patient.id };
+    const useQueryParams: QueryParamsObject<typeof encounterApi.get> = encounter
+      .facility.id
+      ? { facility: encounter.facility.id }
+      : { patient: encounter.patient.id };
 
     const offlineWrite: saveOfflineWriteData = {
       id: encounter.id,
@@ -113,13 +113,13 @@ export default function EncounterActions({
       type: OfflineKeyMap.mark_encounter_as_complete,
       resourceType: "Encounter",
       mutationPathParams: { id: encounter.id } satisfies PathParamsObject<
-        typeof routes.encounter.update
+        typeof encounterApi.update
       >,
       payload: encounterUpdatedData,
       serverTimestamp: encounter.modified_date,
       useQueryRouteKey: "getEncounter",
       useQueryPathParams: { id: encounter.id } satisfies PathParamsObject<
-        typeof routes.encounter.get
+        typeof encounterApi.get
       >,
       useQueryParams: useQueryParams,
     };
@@ -131,7 +131,7 @@ export default function EncounterActions({
         return;
       }
 
-      const updatedEncounter: Encounter = {
+      const updatedEncounter: EncounterRead = {
         ...encounter,
         status: "completed",
         updated_by: normalizeUserBase(authUser),
@@ -157,8 +157,9 @@ export default function EncounterActions({
   const handleMarkAsComplete = async () => {
     const encounterUpdatedData = {
       ...encounter,
+
       status: "completed" as EncounterStatus,
-      organizations: encounter.organizations.map((org) => org.id),
+
       patient: encounter.patient.id,
       encounter_class: encounter.encounter_class,
       period: {

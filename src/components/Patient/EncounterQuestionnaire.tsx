@@ -12,11 +12,11 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 
 interface Props {
   facilityId?: string;
@@ -38,7 +38,7 @@ export default function EncounterQuestionnaire({
   const { goBack } = useAppHistory();
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId],
-    queryFn: query(routes.encounter.get, {
+    queryFn: query(encounterApi.get, {
       pathParams: { id: encounterId ?? "" },
       queryParams: { facility: facilityId! },
     }),

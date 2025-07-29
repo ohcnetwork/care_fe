@@ -49,7 +49,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -87,6 +86,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityData } from "@/types/facility/facility";
 import {
   APPOINTMENT_STATUS_COLORS,
@@ -96,6 +96,7 @@ import {
   AppointmentFinalStatuses,
   AppointmentNonCancelledStatus,
   AppointmentRead,
+  AppointmentRescheduleRequest,
   AppointmentUpdateRequest,
   TokenSlot,
 } from "@/types/scheduling/schedule";
@@ -111,7 +112,7 @@ interface Props {
 export default function AppointmentDetail(props: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const { facility, facilityId } = useCurrentFacility();
+  const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
 
@@ -148,14 +149,28 @@ export default function AppointmentDetail(props: Props) {
   };
 
   useEffect(() => {
-    if (!canViewAppointments && !facility) {
+    // Don't redirect while facility is still loading
+    if (isFacilityLoading) {
+      return;
+    }
+
+    // If facility query failed (no access to facility)
+    if (!facility) {
       toast.error(t("no_permission_to_view_page"));
-      goBack(`/facility/${facilityId}/overview`);
+      goBack(`/`);
+      return;
+    }
+
+    // If facility is loaded but user doesn't have permission to view appointments
+    if (facility && !canViewAppointments) {
+      toast.error(t("no_permission_to_view_page"));
+      goBack(`/facility/${facility.id}/overview`);
+      return;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canViewAppointments, facility]);
+  }, [isFacilityLoading, facility, canViewAppointments, facilityId]);
 
-  const { mutate: updateAppointment, isPending } = useMutation<
+  const { mutate: updateAppointment, isPending: isUpdating } = useMutation<
     Appointment,
     unknown,
     AppointmentUpdateRequest
@@ -271,26 +286,24 @@ export default function AppointmentDetail(props: Props) {
     }
   };
 
-  const handleUpdateAppointment = async ({
-    status,
-  }: {
-    status: Appointment["status"];
-  }) => {
-    if (!status || !appointment) {
+  const handleUpdateAppointment = async (
+    appointmentUpdateData: AppointmentUpdateRequest,
+  ) => {
+    if (!appointmentUpdateData.status || !appointment) {
       return;
     }
 
     if (!onlineManager.isOnline()) {
       queueUpdateAppointmentRecordOffline(
-        { status },
+        appointmentUpdateData,
         appointment,
         authUser,
-        status,
+        appointmentUpdateData.status,
       );
       return;
     }
 
-    updateAppointment({ status });
+    updateAppointment(appointmentUpdateData);
   };
 
   if (!facility || !appointment) {
@@ -305,7 +318,7 @@ export default function AppointmentDetail(props: Props) {
         <div
           className={cn(
             "flex flex-col md:flex-col lg:flex-row",
-            isPending && "opacity-50 pointer-events-none animate-pulse",
+            isUpdating && "opacity-50 pointer-events-none animate-pulse",
           )}
         >
           <AppointmentDetails appointment={appointment} facility={facility} />
@@ -344,11 +357,10 @@ export default function AppointmentDetail(props: Props) {
                   <AppointmentActions
                     facilityId={facilityId}
                     appointment={appointment}
-                    onChange={(status) => {
-                      handleUpdateAppointment({ status });
-                    }}
+                    handleUpdateAppointment={handleUpdateAppointment}
                     onViewPatient={redirectToPatientPage}
                     canCreateAppointment={canCreateAppointment}
+                    isUpdating={isUpdating}
                     db={db}
                     authUser={authUser}
                   />
@@ -445,38 +457,39 @@ const AppointmentDetails = ({
           </div>
           <Separator />
           <div className="text-sm">
-            <p className="font-medium">{t("reason")}</p>
+            <p className="font-medium">{t("note")}</p>
             <p className="text-gray-600 whitespace-pre-wrap">
-              {appointment.reason_for_visit || t("no_reason_provided")}
+              {appointment.note || t("no_note_provided")}
             </p>
           </div>
-          {appointment.tags?.length > 0 && (
-            <div className="text-sm">
-              <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
-                <p className="font-medium">{t("tags")}</p>
-                <TagAssignmentSheet
-                  entityType="appointment"
-                  entityId={appointment.id}
-                  facilityId={facility.id}
-                  currentTags={appointment.tags}
-                  onUpdate={() => {
-                    queryClient.invalidateQueries({
-                      queryKey: ["appointment", appointment.id],
-                    });
-                  }}
-                  canWrite={true}
-                />
-              </div>
+          <div className="text-sm">
+            <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
+              <p className="font-medium">{t("tags")}</p>
+              <TagAssignmentSheet
+                entityType="appointment"
+                entityId={appointment.id}
+                facilityId={facility.id}
+                currentTags={appointment.tags}
+                onUpdate={() => {
+                  queryClient.invalidateQueries({
+                    queryKey: ["appointment", appointment.id],
+                  });
+                }}
+                canWrite={true}
+              />
+            </div>
+            {appointment.tags?.length > 0 ? (
               <p className="text-gray-600 flex flex-wrap gap-1">
                 {appointment.tags.map((tag) => (
-                  <Badge key={tag.id} variant="secondary">
-                    {tag.parent ? `${tag.parent.display}: ` : ""}
-                    {tag.display}
+                  <Badge variant="outline" key={tag.id}>
+                    {getTagHierarchyDisplay(tag)}
                   </Badge>
                 ))}
               </p>
-            </div>
-          )}
+            ) : (
+              <p className="text-gray-600 md:-mt-2">{t("no_tags_assigned")}</p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -580,28 +593,35 @@ const AppointmentDetails = ({
 
 interface AppointmentActionsProps {
   facilityId: string;
-  appointment: Appointment;
-  onChange: (status: Appointment["status"]) => void;
+  appointment: AppointmentRead;
+  handleUpdateAppointment: (data: AppointmentUpdateRequest) => void;
   onViewPatient: () => void;
   canCreateAppointment: boolean;
+
   authUser: AuthUserModel;
   db: AppCacheDB;
+
+  isUpdating: boolean;
 }
 
 const AppointmentActions = ({
   facilityId,
   appointment,
-  onChange,
+  handleUpdateAppointment,
   onViewPatient,
   canCreateAppointment,
   authUser,
   db,
+  isUpdating,
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedMonthOffline, setSelectedMonthOffline] = useState(new Date());
   const [selectedDateOffline, setSelectedDateOffline] = useState(new Date());
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
+  const [isRescheduleReasonOpen, setIsRescheduleReasonOpen] = useState(false);
+  const [newNote, setNewVisitReason] = useState(appointment.note);
+  const [oldNote, setRescheduleReason] = useState(appointment.note);
   const [selectedPractitioner, setSelectedPractitioner] = useState(
     appointment.user,
   );
@@ -612,9 +632,7 @@ const AppointmentActions = ({
   const currentStatus = appointment.status;
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
 
-  const [reasonForCancellation, setReasonForCancellation] = useState(
-    appointment.reason_for_visit,
-  );
+  const [note, setNote] = useState(appointment.note);
 
   const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
     mutationFn: mutate(scheduleApis.appointments.cancel, {
@@ -738,18 +756,15 @@ const AppointmentActions = ({
 
   const handleAppointmentCancel = async ({
     reason,
-    reason_for_visit,
-  }: {
-    reason: "cancelled" | "entered_in_error";
-    reason_for_visit?: string;
-  }) => {
+    note,
+  }: AppointmentCancelRequest) => {
     if (!reason || !appointment) {
       return;
     }
 
     if (!onlineManager.isOnline()) {
       queueCancelAppointmentRecord(
-        { reason: reason, reason_for_visit: reason_for_visit },
+        { reason: reason, note: note },
         appointment,
         authUser,
         reason,
@@ -757,7 +772,7 @@ const AppointmentActions = ({
       return;
     }
 
-    cancelAppointment({ reason: reason, reason_for_visit: reason_for_visit });
+    cancelAppointment({ reason: reason, note: note });
   };
 
   const { mutate: rescheduleAppointment, isPending: isRescheduling } =
@@ -772,6 +787,7 @@ const AppointmentActions = ({
         });
         setIsRescheduleOpen(false);
         setSelectedSlotId(undefined);
+        setRescheduleReason("");
         navigate(
           `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${newAppointment.id}`,
         );
@@ -779,7 +795,7 @@ const AppointmentActions = ({
     });
 
   const queuerescheduleOfflineRecord = async (
-    rescheduleAppointmentData: { new_slot: string },
+    rescheduleAppointmentData: AppointmentRescheduleRequest,
     selectedSlot: TokenSlot | undefined,
     selectedPracticioner: UserBase,
     authUser: AuthUserModel,
@@ -938,13 +954,13 @@ const AppointmentActions = ({
     }
   };
 
-  const handleRescheduleSubmit = async () => {
+  const handleRescheduleSubmit = async (
+    rescheduleAppointmentData: AppointmentRescheduleRequest,
+  ) => {
     if (!selectedSlotId) {
       toast.error(t("slot_is_not_selected"));
       return;
     }
-
-    const rescheduleAppointmentData = { new_slot: selectedSlotId };
 
     if (!onlineManager.isOnline()) {
       await queuerescheduleOfflineRecord(
@@ -972,66 +988,144 @@ const AppointmentActions = ({
       </Button>
 
       {canCreateAppointment && (
-        <Sheet open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
-          <SheetTrigger asChild>
-            {appointment.status !== "in_consultation" && (
-              <Button variant="outline" size="lg">
-                <CalendarIcon className="size-4 mr-2" />
-                {t("reschedule")}
-              </Button>
-            )}
-          </SheetTrigger>
-          <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
-            </SheetHeader>
-
-            <div className="mt-6">
-              <div className="my-4">
-                <Label className="mb-2">{t("select_practitioner")}</Label>
-                <PractitionerSelector
-                  facilityId={facilityId}
-                  selected={selectedPractitioner}
-                  onSelect={(user) => user && setSelectedPractitioner(user)}
-                  clearSelection={t("show_all")}
+        <>
+          <AlertDialog
+            open={isRescheduleReasonOpen}
+            onOpenChange={setIsRescheduleReasonOpen}
+          >
+            <AlertDialogTrigger asChild>
+              {appointment.status !== "in_consultation" && (
+                <Button variant="outline" size="lg">
+                  <CalendarIcon className="size-4 mr-2" />
+                  {t("reschedule")}
+                </Button>
+              )}
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {t("reschedule_appointment")}
+                </AlertDialogTitle>
+                <Label>{t("note")}</Label>
+                <Textarea
+                  value={oldNote}
+                  placeholder={t("reason_for_reschedule_placeholder")}
+                  onChange={(e) => setRescheduleReason(e.target.value)}
                 />
-              </div>
-              <AppointmentSlotPicker
-                facilityId={facilityId}
-                resourceId={selectedPractitioner?.id}
-                selectedSlotId={selectedSlotId}
-                setOfflineSelectedSlot={setOfflineSelectedSlot}
-                onSlotSelect={setSelectedSlotId}
-                setSelectedMonthOffline={setSelectedMonthOffline}
-                setSelectedDateOffline={setSelectedDateOffline}
-                currentAppointment={appointment}
-              />
-
-              <div className="flex justify-end gap-2 mt-6">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setIsRescheduleOpen(false);
-                    setSelectedSlotId(undefined);
-                  }}
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel
+                  onClick={() => setIsRescheduleReasonOpen(false)}
                 >
                   {t("cancel")}
-                </Button>
-                <Button
-                  variant="default"
-                  disabled={!selectedSlotId || isRescheduling}
+                </AlertDialogCancel>
+                <AlertDialogAction
                   onClick={() => {
-                    if (selectedSlotId) {
-                      handleRescheduleSubmit();
-                    }
+                    setIsRescheduleReasonOpen(false);
+                    setIsRescheduleOpen(true);
                   }}
+                  disabled={!oldNote}
                 >
-                  {isRescheduling ? t("rescheduling") : t("reschedule")}
-                </Button>
+                  {t("continue")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <Sheet open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
+            <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
+              </SheetHeader>
+
+              <div className="mt-6">
+                <div className="text-sm">
+                  <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
+                    <Label className="font-medium">{t("tags")}</Label>
+                    <TagAssignmentSheet
+                      entityType="appointment"
+                      entityId={appointment.id}
+                      facilityId={facilityId}
+                      currentTags={appointment.tags}
+                      onUpdate={() => {
+                        queryClient.invalidateQueries({
+                          queryKey: ["appointment", appointment.id],
+                        });
+                      }}
+                      canWrite={true}
+                    />
+                  </div>
+                  {appointment.tags?.length > 0 ? (
+                    <p className="text-gray-600 flex flex-wrap gap-1">
+                      {appointment.tags.map((tag) => (
+                        <Badge key={tag.id} variant="secondary">
+                          {tag.parent ? `${tag.parent.display}: ` : ""}
+                          {tag.display}
+                        </Badge>
+                      ))}
+                    </p>
+                  ) : (
+                    <p className="text-gray-600 md:-mt-2">
+                      {t("no_tags_assigned")}
+                    </p>
+                  )}
+                </div>
+                <Label className="mb-2 aria-required mt-8">{t("note")}</Label>
+                <Textarea
+                  placeholder={t("appointment_note")}
+                  value={newNote}
+                  onChange={(e) => setNewVisitReason(e.target.value)}
+                />
+                <div className="my-4">
+                  <Label className="mb-2">{t("select_practitioner")}</Label>
+                  <PractitionerSelector
+                    facilityId={facilityId}
+                    selected={selectedPractitioner}
+                    onSelect={(user) => user && setSelectedPractitioner(user)}
+                  />
+                </div>
+                <AppointmentSlotPicker
+                  facilityId={facilityId}
+                  resourceId={selectedPractitioner?.id}
+                  selectedSlotId={selectedSlotId}
+                  onSlotSelect={setSelectedSlotId}
+                  currentAppointment={appointment}
+                  setOfflineSelectedSlot={setOfflineSelectedSlot}
+                  setSelectedMonthOffline={setSelectedMonthOffline}
+                  setSelectedDateOffline={setSelectedDateOffline}
+                />
+
+                <div className="flex justify-end gap-2 mt-6">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsRescheduleOpen(false);
+                      setSelectedSlotId(undefined);
+                    }}
+                  >
+                    {t("cancel")}
+                  </Button>
+                  <Button
+                    variant="default"
+                    disabled={!selectedSlotId || isRescheduling}
+                    onClick={() => {
+                      if (selectedSlotId) {
+                        handleRescheduleSubmit({
+                          new_slot: selectedSlotId,
+                          previous_booking_note: oldNote,
+                          new_booking_note: newNote,
+                          tags: appointment.tags.map((tag) => tag.id),
+                        });
+                      }
+                    }}
+                  >
+                    {isRescheduling ? t("rescheduling") : t("reschedule")}
+                  </Button>
+                </div>
               </div>
-            </div>
-          </SheetContent>
-        </Sheet>
+            </SheetContent>
+          </Sheet>
+        </>
       )}
 
       {currentStatus === "booked" && (
@@ -1039,7 +1133,12 @@ const AppointmentActions = ({
           <Button
             disabled={!isToday}
             variant="outline_primary"
-            onClick={() => onChange("checked_in")}
+            onClick={() =>
+              handleUpdateAppointment({
+                status: "checked_in",
+                note: appointment.note,
+              })
+            }
             size="lg"
           >
             <EnterIcon className="size-4 mr-2" />
@@ -1054,7 +1153,12 @@ const AppointmentActions = ({
           variant={
             currentStatus === "checked_in" ? "outline_primary" : "outline"
           }
-          onClick={() => onChange("in_consultation")}
+          onClick={() =>
+            handleUpdateAppointment({
+              status: "in_consultation",
+              note: appointment.note,
+            })
+          }
           size="lg"
         >
           <PlusCircledIcon className="size-4 mr-2" />
@@ -1065,7 +1169,12 @@ const AppointmentActions = ({
       {currentStatus === "in_consultation" && (
         <Button
           variant="outline_primary"
-          onClick={() => onChange("fulfilled")}
+          onClick={() =>
+            handleUpdateAppointment({
+              status: "fulfilled",
+              note: appointment.note,
+            })
+          }
           size="lg"
         >
           <CheckCircledIcon className="size-4 mr-2" />
@@ -1074,10 +1183,50 @@ const AppointmentActions = ({
       )}
 
       {["booked", "checked_in"].includes(currentStatus) && (
-        <Button variant="outline" onClick={() => onChange("noshow")} size="lg">
-          <EyeNoneIcon className="size-4 mr-2" />
-          {t("mark_as_noshow")}
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="outline" size="lg">
+              <EyeNoneIcon className="size-4 mr-2" />
+              {t("mark_as_noshow")}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("mark_as_noshow")}</AlertDialogTitle>
+              <Label>{t("note")}</Label>
+              <Textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              />
+              <AlertDialogDescription>
+                <Alert variant="destructive">
+                  <AlertTitle>{t("warning")}</AlertTitle>
+                  <AlertDescription>
+                    {t("mark_as_noshow_warning")}
+                  </AlertDescription>
+                </Alert>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() =>
+                  handleUpdateAppointment({
+                    status: "noshow",
+                    note: note,
+                  })
+                }
+                className={cn(buttonVariants({ variant: "destructive" }))}
+              >
+                {isUpdating ? (
+                  <Loader2 className="size-4 animate-spin mr-2" />
+                ) : (
+                  t("confirm")
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
 
       {appointment.status !== "in_consultation" && (
@@ -1093,8 +1242,8 @@ const AppointmentActions = ({
               <AlertDialogTitle>{t("cancel_appointment")}</AlertDialogTitle>
               <Label>{t("note")}</Label>
               <Textarea
-                value={reasonForCancellation}
-                onChange={(e) => setReasonForCancellation(e.target.value)}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
               />
               <AlertDialogDescription>
                 <Alert variant="destructive">
@@ -1111,7 +1260,7 @@ const AppointmentActions = ({
                 onClick={() =>
                   handleAppointmentCancel({
                     reason: "cancelled",
-                    reason_for_visit: reasonForCancellation,
+                    note: note,
                   })
                 }
                 className={cn(buttonVariants({ variant: "destructive" }))}
@@ -1166,3 +1315,4 @@ const AppointmentActions = ({
     </div>
   );
 };
+

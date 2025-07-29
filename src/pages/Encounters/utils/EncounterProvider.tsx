@@ -5,12 +5,11 @@ import { createContext, useContext } from "react";
 import { Permissions, getPermissions } from "@/common/Permissions";
 
 import { QueryParamsObject } from "@/OfflineSupport/offlineKeys";
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { usePermissions } from "@/context/PermissionContext";
-import { Encounter } from "@/types/emr/encounter/encounter";
-import { Patient } from "@/types/emr/patient/patient";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
+import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 
 type EncounterContextType = {
@@ -19,14 +18,12 @@ type EncounterContextType = {
   patientId: string;
   selectedEncounterId: string;
 
-  patient: Patient | undefined;
-  currentEncounter: Encounter | undefined;
-  pastEncounters: PaginatedResponse<Encounter> | undefined;
-  selectedEncounter: Encounter | undefined;
+  patient: PatientRead | undefined;
+  currentEncounter: EncounterRead | undefined;
+  selectedEncounter: EncounterRead | undefined;
   isPatientLoading: boolean;
   isCurrentEncounterLoading: boolean;
   isSelectedEncounterLoading: boolean;
-  isPastEncountersLoading: boolean;
   setSelectedEncounter: (encounterId: string | null) => void;
   currentEncounterPermissions: Permissions;
   selectedEncounterPermissions: Permissions;
@@ -61,14 +58,14 @@ export function EncounterProvider({
     networkMode: "online",
   });
 
-  const queryParams: QueryParamsObject<typeof routes.encounter.get> = facilityId
+  const queryParams: QueryParamsObject<typeof encounterApi.get> = facilityId
     ? { facility: facilityId }
     : { patient: patientId };
 
   const { data: currentEncounter, isLoading: isCurrentEncounterLoading } =
     useQuery({
       queryKey: ["encounter", currentEncounterId],
-      queryFn: query(routes.encounter.get, {
+      queryFn: query(encounterApi.get, {
         pathParams: { id: currentEncounterId },
         queryParams: queryParams,
       }),
@@ -79,22 +76,13 @@ export function EncounterProvider({
   const { data: selectedEncounter, isLoading: isSelectedEncounterLoading } =
     useQuery({
       queryKey: ["encounter", selectedEncounterId],
-      queryFn: query(routes.encounter.get, {
+      queryFn: query(encounterApi.get, {
         pathParams: { id: selectedEncounterId },
         queryParams: queryParams,
       }),
       meta: { persist: true },
       networkMode: "online",
     });
-
-  const { data: encounters, isLoading: isPastEncountersLoading } = useQuery({
-    queryKey: ["encounters", "past", patientId],
-    queryFn: query(routes.encounter.list, {
-      queryParams: { patient: patientId },
-    }),
-    meta: { persist: true },
-    networkMode: "online",
-  });
 
   const setSelectedEncounter = (encounterId: string | null) => {
     setQParams(
@@ -129,18 +117,10 @@ export function EncounterProvider({
         selectedEncounterId,
         patient,
         currentEncounter,
-        pastEncounters: encounters && {
-          ...encounters,
-          results:
-            encounters?.results.filter(
-              (encounter) => encounter.id !== currentEncounterId,
-            ) ?? [],
-        },
         selectedEncounter,
         isPatientLoading,
         isCurrentEncounterLoading,
         isSelectedEncounterLoading,
-        isPastEncountersLoading,
         setSelectedEncounter,
         currentEncounterPermissions,
         selectedEncounterPermissions,

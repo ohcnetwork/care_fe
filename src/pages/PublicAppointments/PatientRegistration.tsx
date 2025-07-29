@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { navigate, useNavigationPrompt } from "raviger";
+import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -23,21 +23,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { GENDERS, GENDER_TYPES } from "@/common/constants";
-import { validateName, validatePincode } from "@/common/validation";
+import { validateName } from "@/common/validation";
 
 import { usePubSub } from "@/Utils/pubsubContext";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
+import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
+import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import {
-  Appointment,
-  AppointmentCreateRequest,
-  TokenSlot,
-} from "@/types/scheduling/schedule";
+import { Appointment } from "@/types/scheduling/schedule";
 
 type PatientRegistrationProps = {
   facilityId: string;
@@ -46,12 +43,8 @@ type PatientRegistrationProps = {
 
 export function PatientRegistration(props: PatientRegistrationProps) {
   const { staffId } = props;
-  const selectedSlot = JSON.parse(
-    localStorage.getItem("selectedSlot") ?? "",
-  ) as TokenSlot;
-  const reason = localStorage.getItem("reason");
-
   const { t } = useTranslation();
+  const [{ slotId, reason }] = useQueryParams();
 
   const queryClient = useQueryClient();
 
@@ -70,13 +63,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       address: z.string().min(1, t("field_required")),
       age: z.string().optional(),
       date_of_birth: z.date().or(z.string()).optional(),
-      pincode: z
-        .string()
-        .min(1, t("field_required"))
-        .refine((pincode) => {
-          if (!pincode) return true;
-          return validatePincode(pincode);
-        }, t("invalid_pincode_msg")),
+      pincode: validators().pincode,
       geo_organization: z
         .string()
         .min(1, t("organization_required"))
@@ -117,21 +104,19 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       age: undefined,
       date_of_birth: undefined,
       address: "",
-      pincode: "",
+      pincode: undefined,
       geo_organization: undefined,
     },
   });
 
   const { mutate: createAppointment, isPending: isCreatingAppointment } =
     useMutation({
-      mutationFn: (body: AppointmentCreateRequest) =>
-        mutate(PublicAppointmentApi.createAppointment, {
-          pathParams: { id: selectedSlot?.id },
-          body,
-          headers: {
-            Authorization: `Bearer ${tokenData.token}`,
-          },
-        })(body),
+      mutationFn: mutate(PublicAppointmentApi.createAppointment, {
+        pathParams: { id: slotId },
+        headers: {
+          Authorization: `Bearer ${tokenData.token}`,
+        },
+      }),
       onSuccess: (data: Appointment) => {
         toast.success(t("appointment_created_success"));
         queryClient.invalidateQueries({
@@ -151,13 +136,13 @@ export function PatientRegistration(props: PatientRegistrationProps) {
 
   const { mutate: createPatient } = useMutation({
     mutationFn: (body: Partial<AppointmentPatientRegister>) =>
-      mutate(routes.otp.createPatient, {
+      mutate(publicPatientApi.createPatient, {
         body: { ...body, phone_number: tokenData.phoneNumber },
         headers: {
           Authorization: `Bearer ${tokenData.token}`,
         },
       })(body),
-    onSuccess: (data: Patient) => {
+    onSuccess: (data: PatientRead) => {
       toast.success(t("patient_created_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["patients"],
@@ -165,7 +150,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       publish("patient:upsert", data);
       createAppointment({
         patient: data.id,
-        reason_for_visit: reason ?? "",
+        note: reason ?? "",
       });
     },
   });
@@ -377,7 +362,18 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   <FormItem className="flex flex-col">
                     <FormLabel aria-required>{t("pincode")}</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input
+                        {...field}
+                        onChange={(e) => {
+                          const value = e.target.value
+                            ? Number(e.target.value)
+                            : undefined;
+                          field.onChange(value);
+                        }}
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        type="number"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

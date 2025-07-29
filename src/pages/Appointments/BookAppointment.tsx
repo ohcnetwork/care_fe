@@ -35,7 +35,6 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { Patient } from "@/types/emr/patient/patient";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityData } from "@/types/facility/facility";
 import {
@@ -48,6 +47,7 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserBase } from "@/types/user/user";
 
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
+import { PatientRead } from "@/types/emr/patient/patient";
 
 interface Props {
   patientId: string;
@@ -157,7 +157,7 @@ export default function BookAppointment({ patientId }: Props) {
         name: facilityData?.name ?? "-",
       };
 
-      const Patientdata = queryClient.getQueryData<Patient>([
+      const Patientdata = queryClient.getQueryData<PatientRead>([
         "patient",
         patientId,
       ]);
@@ -237,7 +237,7 @@ export default function BookAppointment({ patientId }: Props) {
     try {
       const createAppointmentData: AppointmentCreateRequest = {
         patient: patientId,
-        reason_for_visit: reason,
+        note: reason,
         tags: selectedTags.map((tag) => tag.id),
       };
 
@@ -283,9 +283,9 @@ export default function BookAppointment({ patientId }: Props) {
             />
           </div>
           <div className="max-w-md">
-            <Label className="mb-2">{t("reason_for_visit")}</Label>
+            <Label className="mb-2">{t("note")}</Label>
             <Textarea
-              placeholder={t("reason_for_visit_placeholder")}
+              placeholder={t("appointment_note")}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />
@@ -298,10 +298,11 @@ export default function BookAppointment({ patientId }: Props) {
                 facilityId={facilityId}
                 selected={resource ?? null}
                 onSelect={(user) => {
-                  setResourceId(user?.id ?? undefined);
-                  setSelectedPracticioner(user ?? null);
+                  if (user) {
+                    setResourceId(user.id);
+                    setSelectedPracticioner(user ?? null);
+                  }
                 }}
-                clearSelection={t("show_all")}
               />
             </div>
           </div>

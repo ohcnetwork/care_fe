@@ -30,6 +30,7 @@ import {
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { formatDateTime } from "@/Utils/utils";
 
 export interface FileManagerOptions {
@@ -69,10 +70,8 @@ export default function useFileManager(
     isImage: false,
     name: "",
     extension: "",
-    zoom: 4,
     isZoomInDisabled: false,
     isZoomOutDisabled: false,
-    rotation: 0,
   });
   const [fileUrl, setFileUrl] = useState<string>("");
   const [downloadURL, setDownloadURL] = useState<string>("");
@@ -203,7 +202,6 @@ export default function useFileManager(
     setFileState({
       ...file_state,
       open: false,
-      zoom: 4,
       isZoomInDisabled: false,
       isZoomOutDisabled: false,
     });
@@ -260,7 +258,6 @@ export default function useFileManager(
         show={file_state.open}
         fileUrl={fileUrl}
         file_state={file_state}
-        setFileState={setFileState}
         downloadURL={downloadURL}
         uploadedFiles={uploadedFiles}
         onClose={handleFilePreviewClose}
@@ -369,7 +366,7 @@ export default function useFileManager(
               },
               {
                 label: "Uploaded By",
-                content: archiveDialogueOpen?.uploaded_by?.username,
+                content: formatName(archiveDialogueOpen?.uploaded_by),
                 icon: "l-user",
               },
               {
@@ -384,7 +381,7 @@ export default function useFileManager(
               },
               {
                 label: "Archived By",
-                content: archiveDialogueOpen?.archived_by?.username,
+                content: formatName(archiveDialogueOpen?.archived_by),
                 icon: "l-user",
               },
               {
@@ -454,7 +451,7 @@ export default function useFileManager(
             className="flex w-full flex-col"
           >
             <div>
-              <Label>{t("enter_the_file_name")}</Label>
+              <Label className="mb-3">{t("enter_the_file_name")}</Label>
               <Input
                 name="editFileName"
                 id="edit-file-name"

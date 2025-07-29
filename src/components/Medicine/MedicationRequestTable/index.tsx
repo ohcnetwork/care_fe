@@ -90,7 +90,7 @@ export default function MedicationRequestTable() {
       queryParams: {
         encounter: encounterId,
         limit: 100,
-        status: ["active", "on-hold", "draft", "unknown"].join(","),
+        status: ["active", "on_hold", "draft", "unknown"].join(","),
         facility: facilityId,
       },
     }),
