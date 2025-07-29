@@ -1,6 +1,8 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +15,18 @@ import mutate from "@/Utils/request/mutate";
 import { Permission } from "@/types/emr/permission/permission";
 import { Role } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
+
+const roleSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+  permissions: z
+    .array(z.string(), {
+      required_error: "At least one permission is required",
+    })
+    .min(1, "At least one permission is required"),
+});
+
+type RoleFormValues = z.infer<typeof roleSchema>;
 
 interface RoleFormProps {
   role: Role | null;
@@ -27,11 +41,23 @@ export default function RoleForm({
 }: RoleFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [formData, setFormData] = React.useState({
-    name: role?.name || "",
-    description: role?.description || "",
-    permissions: role?.permissions.map((p) => p.slug) || [],
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<RoleFormValues>({
+    resolver: zodResolver(roleSchema),
+    defaultValues: {
+      name: role?.name || "",
+      description: role?.description || "",
+      permissions: role?.permissions.map((p) => p.slug) || [],
+    },
   });
+
+  const watchedPermissions = watch("permissions");
 
   const createRoleMutation = useMutation({
     mutationFn: mutate(roleApi.createRole),
@@ -51,12 +77,11 @@ export default function RoleForm({
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = (data: RoleFormValues) => {
     const payload = {
-      name: formData.name,
-      description: formData.description,
-      permissions: formData.permissions,
+      name: data.name,
+      description: data.description,
+      permissions: data.permissions || [],
     };
 
     if (role?.id) {
@@ -66,42 +91,52 @@ export default function RoleForm({
     }
   };
 
-  const handlePermissionToggle = (permissionSlug: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      permissions: prev.permissions.includes(permissionSlug)
-        ? prev.permissions.filter((p) => p !== permissionSlug)
-        : [...prev.permissions, permissionSlug],
-    }));
-  };
-
   const isLoading =
     createRoleMutation.isPending || updateRoleMutation.isPending;
 
+  const handlePermissionToggle = (slug: string) => {
+    const current = watch("permissions") || [];
+    if (current.includes(slug)) {
+      setValue(
+        "permissions",
+        current.filter((s) => s !== slug),
+      );
+    } else {
+      setValue("permissions", [...current, slug]);
+    }
+  };
+
+  const handleSelectAll = () => {
+    setValue(
+      "permissions",
+      permissions.map((p) => p.slug),
+    );
+  };
+
+  const handleClearAll = () => {
+    setValue("permissions", []);
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="name">{t("name")}</Label>
           <Input
             id="name"
-            value={formData.name}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, name: e.target.value }))
-            }
+            {...register("name")}
             placeholder={t("enter_role_name")}
-            required
           />
+          {errors.name && (
+            <p className="text-sm text-red-500">{errors.name.message}</p>
+          )}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="description">{t("description")}</Label>
           <Textarea
             id="description"
-            value={formData.description}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, description: e.target.value }))
-            }
+            {...register("description")}
             placeholder={t("enter_role_description")}
             rows={3}
           />
@@ -117,12 +152,7 @@ export default function RoleForm({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    permissions: permissions.map((p) => p.slug),
-                  }))
-                }
+                onClick={handleSelectAll}
               >
                 {t("select_all")}
               </Button>
@@ -130,12 +160,7 @@ export default function RoleForm({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    permissions: [],
-                  }))
-                }
+                onClick={handleClearAll}
               >
                 {t("clear")}
               </Button>
@@ -151,7 +176,7 @@ export default function RoleForm({
               >
                 <Checkbox
                   id={permission.slug}
-                  checked={formData.permissions.includes(permission.slug)}
+                  checked={watchedPermissions?.includes(permission.slug)}
                   onCheckedChange={() =>
                     handlePermissionToggle(permission.slug)
                   }
@@ -172,6 +197,9 @@ export default function RoleForm({
               </div>
             ))}
           </div>
+          {errors.permissions && (
+            <p className="text-sm text-red-500">{errors.permissions.message}</p>
+          )}
         </CardContent>
       </Card>
 
