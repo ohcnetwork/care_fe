@@ -131,7 +131,9 @@ export default function ValueSetSelect({
     return (
       <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
         <SheetTrigger asChild>
-          {!mobileTrigger ? (
+          {mobileTrigger ? (
+            mobileTrigger
+          ) : (
             <Button
               variant="outline"
               role="combobox"
@@ -144,13 +146,11 @@ export default function ValueSetSelect({
               <span>{value?.display || placeholder}</span>
               <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
             </Button>
-          ) : (
-            mobileTrigger
           )}
         </SheetTrigger>
         <SheetContent
           side="bottom"
-          className="px-0 pt-2 pb-0 rounded-t-3xl h-[50vh]"
+          className="h-[50vh] px-0 pt-2 pb-0 rounded-t-3xl"
         >
           <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto bg-gray-300 mt-2" />
           <div className="mt-6 h-full">
