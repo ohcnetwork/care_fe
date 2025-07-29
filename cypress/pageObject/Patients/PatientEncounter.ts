@@ -98,7 +98,7 @@ export class PatientEncounter {
           ) && !row.classList.contains("pointer-events-none")
         );
       })
-      .last()
+      .first()
       .should("not.be.disabled")
       .within(() => {
         cy.get("[data-slot='dropdown-menu-trigger']")
