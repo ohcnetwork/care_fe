@@ -161,7 +161,7 @@ function OrganizationCard({
         </div>
 
         <Badge variant="indigo" className="w-fit">
-          {org.org_type}
+          {t(org.org_type)}
         </Badge>
 
         <div className="flex gap-2 flex-wrap justify-end">
