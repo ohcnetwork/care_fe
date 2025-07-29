@@ -3803,6 +3803,7 @@
   "search_by_identifier": "Search by {{name}}",
   "search_by_item": "Search by item",
   "search_by_name": "Search by name",
+  "search_by_organization_name": "Search by organization name",
   "search_by_patient_name": "Search by patient name",
   "search_by_patient_name_id_or_prescription": "Search by patient name, ID, or prescription...",
   "search_by_patient_name_or_id_or_pn": "Search by patient name/℞ ID/phone number",

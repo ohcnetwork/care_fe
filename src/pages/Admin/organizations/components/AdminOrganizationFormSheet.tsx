@@ -27,6 +27,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import mutate from "@/Utils/request/mutate";
 import {
@@ -41,12 +46,16 @@ interface Props {
   organizationType: string;
   parentId?: string;
   org?: Organization;
+  trigger?: React.ReactNode;
+  tooltip?: string;
 }
 
 export default function AdminOrganizationFormSheet({
   organizationType,
   parentId,
   org,
+  trigger,
+  tooltip,
 }: Props) {
   const { t } = useTranslation();
 
@@ -147,15 +156,35 @@ export default function AdminOrganizationFormSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        {isEditMode ? (
-          <Button variant="white" size="sm" className="font-semibold">
-            {t("edit")}
-          </Button>
+        {tooltip ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              {trigger ||
+                (isEditMode ? (
+                  <Button variant="white" size="sm" className="font-semibold">
+                    {t("edit")}
+                  </Button>
+                ) : (
+                  <Button>
+                    <CareIcon icon="l-plus" className="mr-2 size-4" />
+                    {t("add_organization")}
+                  </Button>
+                ))}
+            </TooltipTrigger>
+            <TooltipContent>{tooltip}</TooltipContent>
+          </Tooltip>
         ) : (
-          <Button>
-            <CareIcon icon="l-plus" className="mr-2 size-4" />
-            {t("add_organization")}
-          </Button>
+          trigger ||
+          (isEditMode ? (
+            <Button variant="white" size="sm" className="font-semibold">
+              {t("edit")}
+            </Button>
+          ) : (
+            <Button>
+              <CareIcon icon="l-plus" className="mr-2 size-4" />
+              {t("add_organization")}
+            </Button>
+          ))
         )}
       </SheetTrigger>
       <SheetContent>
