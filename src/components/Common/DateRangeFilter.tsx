@@ -101,7 +101,6 @@ export function DateRangeFilter({
     if (onDateRangeChange) {
       onDateRangeChange(from, to);
     } else {
-      // Fallback to individual updates if onDateRangeChange is not provided
       onDateFromChange(from);
       onDateToChange(to);
     }
@@ -171,7 +170,10 @@ export function DateRangeFilter({
           </div>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-80" align="start">
+      <PopoverContent
+        className="p-0 w-[var(--radix-popover-trigger-width)]"
+        align="start"
+      >
         <div className="p-2 pb-1">
           <span className="text-sm text-gray-950">
             {popoverPlaceholder || t("select_date_range")}

@@ -391,3 +391,30 @@ export function generateSlug(title: string, maxLength: number = 50): string {
       .replace(/-+$/, "")
   );
 }
+
+/**
+ * Returns a formatted string of items, truncated if longer than maxItems
+ * Eg.Formatted string like "item1, item2 ... +{count} more"
+ * @param items Array of items to format
+ * @param maxItems Maximum number of items to show before truncating
+ * @param getDisplayValue Function to get display value from each item
+ * @param moreText Text to show for additional items (e.g. "more" default is more)
+ * @returns Formatted string like "item1, item2 ... +{count} more"
+ */
+export function formatTruncatedList<T>(
+  items: T[],
+  maxItems: number,
+  getDisplayValue: (item: T) => string,
+  moreText?: string,
+): string {
+  if (!items?.length) return "";
+
+  if (items.length <= maxItems) {
+    return items.map(getDisplayValue).join(", ");
+  }
+
+  const displayedItems = items.slice(0, maxItems);
+  const remainingCount = items.length - maxItems;
+
+  return `${displayedItems.map(getDisplayValue).join(", ")} ... +${remainingCount} ${t("more") || moreText}`;
+}
