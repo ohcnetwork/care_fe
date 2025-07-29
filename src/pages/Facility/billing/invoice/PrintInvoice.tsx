@@ -330,13 +330,13 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
           {/* Subtotal */}
           <div className="flex w-64 justify-between">
             <span className="text-gray-500">{t("net_amount")}</span>
-            <MonetaryDisplay amount={invoice.total_net} />
+            <MonetaryDisplay amount={String(invoice.total_net)} />
           </div>
 
           {/* Total */}
           <div className="flex w-64 justify-between font-bold">
             <span>{t("total")}</span>
-            <MonetaryDisplay amount={invoice.total_gross} />
+            <MonetaryDisplay amount={String(invoice.total_gross)} />
           </div>
         </div>
 

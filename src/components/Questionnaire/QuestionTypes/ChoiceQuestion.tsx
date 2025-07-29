@@ -2,6 +2,8 @@ import { t } from "i18next";
 import { memo } from "react";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import RadioInput from "@/components/ui/RadioInput";
@@ -11,7 +13,6 @@ import { MultiSelect } from "@/components/ui/multi-select";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import { properCase } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import type {
   QuestionnaireResponse,
@@ -124,7 +125,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
       <>
         {questionnaireResponse.values.map((value, idx) => {
           return (
-            <div key={idx} className="flex items-center gap-2 mb-2">
+            <div key={idx} className="flex items-center mb-2">
               <div className="flex-1">
                 <ValueSetSelect
                   system={question.answer_value_set!}
@@ -152,7 +153,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
           );
         })}
 
-        <div>
+        <div className={cn(questionnaireResponse.values.length && "mr-9")}>
           <ValueSetSelect
             closeOnSelect={false}
             system={question.answer_value_set}
@@ -172,7 +173,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
         )}
         onValueChange={handleMultiSelectChange}
         options={options.map((option) => ({
-          label: properCase(option.display || option.value),
+          label: option.display || option.value,
           value: option.value.toString(),
         }))}
         placeholder={t("select_an_option")}
@@ -189,7 +190,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
         value={currentValue || ""}
         onChange={handleValueChange}
         options={options.map((option) => ({
-          label: properCase(option.display || option.value),
+          label: option.display || option.value,
           value: option.value.toString(),
         }))}
         placeholder={t("select_an_option")}
@@ -204,7 +205,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
     <div className="mt-2">
       <RadioInput
         options={options.map((option) => ({
-          label: properCase(option.display || option.value),
+          label: option.display || option.value,
           value: option.value.toString(),
         }))}
         value={selectedValue ?? ""}

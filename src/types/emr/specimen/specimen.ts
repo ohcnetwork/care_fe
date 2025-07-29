@@ -58,11 +58,19 @@ export interface CollectionSpec {
   fasting_status_duration: DurationSpec | null;
 }
 
+export interface CollectionReadSpec extends CollectionSpec {
+  collector_object?: UserBase | null;
+}
+
 export interface ProcessingSpec {
   description: string;
   method: Code | null;
   performer: string | null;
   time_date_time: string | null;
+}
+
+export interface ProcessingReadSpec extends ProcessingSpec {
+  performer_object?: UserBase | null;
 }
 
 export interface SpecimenBase {
@@ -71,7 +79,7 @@ export interface SpecimenBase {
   status: SpecimenStatus;
   specimen_type: Code | null;
   received_time: string | null;
-  collection: CollectionSpec | null;
+  collection: CollectionReadSpec | null;
   processing: ProcessingSpec[];
   condition: Code[];
   note: string | null;
