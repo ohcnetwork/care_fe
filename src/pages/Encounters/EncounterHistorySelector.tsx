@@ -27,8 +27,6 @@ import { DateRangeFilter } from "@/components/Common/DateRangeFilter";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
-import useFilters from "@/hooks/useFilters";
-
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { dateTimeQueryString } from "@/Utils/utils";
@@ -126,6 +124,11 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
   const { ref, inView } = useInView();
   const [showFilters, setShowFilters] = useState(false);
 
+  const [status, setStatus] = useState<string>();
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [dateFrom, setDateFrom] = useState<Date>();
+  const [dateTo, setDateTo] = useState<Date>();
+
   const {
     currentEncounter,
     currentEncounterId,
@@ -135,36 +138,25 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     facilityId,
   } = useEncounter();
 
-  const { qParams, updateQuery } = useFilters({
-    limit: 0,
-    disableCache: true,
-  });
-
-  // Handle tags like AppointmentsPage.tsx
-  const selectedTagIds = qParams.tags?.split(",") ?? [];
   const tagConfigsQuery = useTagConfigs({ ids: selectedTagIds, facilityId });
   const selectedTags = tagConfigsQuery
     .map((q) => q.data)
     .filter(Boolean) as TagConfig[];
 
   const handleStatusChange = (value: string | undefined) => {
-    updateQuery({ status: value || undefined });
+    setStatus(value);
   };
 
   const handleTagsChange = (tags: TagConfig[]) => {
-    updateQuery({ tags: tags.map((tag) => tag.id).join(",") });
+    setSelectedTagIds(tags.map((tag) => tag.id));
   };
 
   const handleDateFromChange = (date: Date | undefined) => {
-    updateQuery({
-      created_date_after: date ? dateTimeQueryString(date) : undefined,
-    });
+    setDateFrom(date);
   };
 
   const handleDateToChange = (date: Date | undefined) => {
-    updateQuery({
-      created_date_before: date ? dateTimeQueryString(date, true) : undefined,
-    });
+    setDateTo(date);
   };
 
   const handleSelect = (encounterId: string | null) => {
@@ -178,8 +170,15 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["infinite-encounters", "past", patientId, qParams],
-    // Apply patient_filter only if the current encounter is completed
+    queryKey: [
+      "infinite-encounters",
+      "past",
+      patientId,
+      status,
+      selectedTagIds,
+      dateFrom,
+      dateTo,
+    ],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(encounterApi.list, {
         queryParams: {
@@ -188,13 +187,13 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
           ...(completedEncounterStatus.includes(currentEncounter?.status ?? "")
             ? { patient_filter: patientId, facility: facilityId }
             : { patient: patientId }),
-          ...(qParams.status && { status: qParams.status }),
-          ...(qParams.tags && { tags: qParams.tags }),
-          ...(qParams.created_date_after && {
-            created_date_after: qParams.created_date_after,
+          ...(status && { status }),
+          ...(selectedTagIds.length > 0 && { tags: selectedTagIds.join(",") }),
+          ...(dateFrom && {
+            created_date_after: dateTimeQueryString(dateFrom),
           }),
-          ...(qParams.created_date_before && {
-            created_date_before: qParams.created_date_before,
+          ...(dateTo && {
+            created_date_before: dateTimeQueryString(dateTo, true),
           }),
         },
       })({ signal });
@@ -214,12 +213,6 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     (encounter) => encounter.id !== currentEncounterId,
   );
 
-  const dateFromFilter = qParams.created_date_after
-    ? new Date(qParams.created_date_after)
-    : undefined;
-  const dateToFilter = qParams.created_date_before
-    ? new Date(qParams.created_date_before)
-    : undefined;
   useEffect(() => {
     if (inView && hasNextPage) {
       fetchNextPage();
@@ -272,11 +265,11 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
           {showFilters && (
             <div className="flex flex-col gap-2 mb-4">
               <FilterSelect
-                value={qParams.status || ""}
+                value={status || ""}
                 onValueChange={handleStatusChange}
                 options={[...ENCOUNTER_STATUS]}
                 label={t("status")}
-                onClear={() => updateQuery({ status: undefined })}
+                onClear={() => setStatus(undefined)}
                 icon={<CircleDashed className="size-4 text-gray-600" />}
                 className="bg-white font-medium rounded-md hover:bg-gray-100 h-9"
               />
@@ -290,25 +283,17 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
               />
 
               <DateRangeFilter
-                dateFrom={dateFromFilter}
-                dateTo={dateToFilter}
+                dateFrom={dateFrom}
+                dateTo={dateTo}
                 onDateFromChange={handleDateFromChange}
                 onDateToChange={handleDateToChange}
                 onDateRangeChange={(from, to) => {
-                  updateQuery({
-                    created_date_after: from
-                      ? dateTimeQueryString(from)
-                      : undefined,
-                    created_date_before: to
-                      ? dateTimeQueryString(to, true)
-                      : undefined,
-                  });
+                  setDateFrom(from);
+                  setDateTo(to);
                 }}
                 onClear={() => {
-                  updateQuery({
-                    created_date_after: undefined,
-                    created_date_before: undefined,
-                  });
+                  setDateFrom(undefined);
+                  setDateTo(undefined);
                 }}
                 popoverPlaceholder={t("select_created_date_range")}
                 className="bg-white font-medium rounded-md"
