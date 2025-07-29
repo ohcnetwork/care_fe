@@ -116,7 +116,7 @@ export class PatientEncounter {
   verifyAllergy(details: AllergyDetails) {
     const { allergyName, criticality, status } = details;
     const texts = [allergyName, criticality, status];
-
+    cy.wait(500); // Wait for the allergies to be updated in the UI
     cy.verifyContentPresence("[data-slot='table']", texts);
 
     return this;
@@ -220,6 +220,7 @@ export class PatientEncounter {
   verifySymptom(details: SymptomDetails) {
     const { symptomName, severity, status } = details;
     const texts = [symptomName, severity, status];
+    cy.wait(500); // Wait for the symptoms to be updated in the UI
     cy.verifyContentPresence("[data-slot='table']", texts);
 
     return this;
@@ -318,6 +319,7 @@ export class PatientEncounter {
   verifyDiagnoses(details: DiagnosisDetails) {
     const { diagnosisName, verification, status } = details;
     const texts = [diagnosisName, verification, status];
+    cy.wait(500); // Wait for the diagnoses to be updated in the UI
     cy.verifyContentPresence("[data-slot='table']", texts);
 
     return this;
