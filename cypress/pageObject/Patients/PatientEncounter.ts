@@ -55,12 +55,9 @@ export class PatientEncounter {
     const { allergyName } = details;
     cy.contains("button", /Add (another )?Allergy/i)
       .scrollIntoView()
-      .then(($el) => {
-        $el.attr("data-cy", "add-allergy");
-      })
-      .then(() => {
-        cy.typeAndSelectOption('[data-cy="add-allergy"]', allergyName, false);
-      });
+      .click();
+
+    cy.typeAndSelectOption('[data-cy="add-allergy"]', allergyName, false);
 
     return this;
   }
@@ -138,13 +135,9 @@ export class PatientEncounter {
     const { symptomName } = details;
     cy.contains("button", /Add (another )?Symptom/i)
       .scrollIntoView()
-      .then(($el) => {
-        $el.attr("data-cy", "add-symptom");
-      })
-      .then(() => {
-        cy.typeAndSelectOption('[data-cy="add-symptom"]', symptomName, false);
-      });
+      .click();
 
+    cy.typeAndSelectOption('[data-cy="add-symptom"]', symptomName, false);
     return this;
   }
   verifyDuplicateSymptom(symptomName: string) {
@@ -243,16 +236,9 @@ export class PatientEncounter {
     const { diagnosisName } = details;
     cy.contains("button", /Add (another )?Diagnosis/i)
       .scrollIntoView()
-      .then(($el) => {
-        $el.attr("data-cy", "add-diagnosis");
-      })
-      .then(() => {
-        cy.typeAndSelectOption(
-          '[data-cy="add-diagnosis"]',
-          diagnosisName,
-          false,
-        );
-      });
+      .click();
+
+    cy.typeAndSelectOption('[data-cy="add-diagnosis"]', diagnosisName, false);
 
     return this;
   }
