@@ -156,18 +156,11 @@ export function EntitySelectionSheet({
             <Button
               variant="outline"
               role="combobox"
-              className="w-full justify-between border border-primary rounded-md px-2 h-auto whitespace-normal text-left"
+              className="w-full border border-primary rounded-md px-2 text-primary-700"
               disabled={disabled}
             >
-              <div className="flex items-center">
-                <CareIcon
-                  icon="l-plus"
-                  className="mr-2 text-primary-700 font-normal"
-                />
-                <span className="text-primary-700 flex items-center font-semibold text-wrap text-sm md:text-base">
-                  {placeholder}
-                </span>
-              </div>
+              <CareIcon icon="l-plus" className="mr-2" />
+              <span className="font-semibold">{placeholder}</span>
             </Button>
           }
         />
