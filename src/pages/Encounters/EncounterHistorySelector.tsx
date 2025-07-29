@@ -252,7 +252,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
               onClick={() => setShowFilters(!showFilters)}
               className={cn(
                 buttonVariants({ variant: "outline", size: "icon" }),
-                "h-8 w-8",
+                "size-8",
                 showFilters && "bg-gray-100",
               )}
               title={t("toggle_filters")}
