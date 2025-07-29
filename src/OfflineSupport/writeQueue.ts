@@ -1,14 +1,10 @@
 import { AppCacheDB, OfflineWritesEntry } from "./AppcacheDB";
 
-// You should import or define OfflineWriteRecord type from your codebase
-// import { OfflineWriteRecord } from "./types";
+
 
 const db = new AppCacheDB();
 const MAX_RETRIES = 5;
 
-/**
- * Load all pending and retryable writes for a user.
- */
 export async function getPendingAndRetryableWrites(
   userId: string,
 ): Promise<OfflineWritesEntry[]> {
@@ -23,9 +19,7 @@ export async function getPendingAndRetryableWrites(
     .toArray();
 }
 
-/**
- * Update the status (and optionally other fields) of a write.
- */
+
 export async function markWriteStatus(
   writeId: string,
   status: OfflineWritesEntry["syncStatus"],

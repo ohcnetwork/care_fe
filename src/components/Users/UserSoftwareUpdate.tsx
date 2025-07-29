@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 
 import UpdatableApp, { checkForUpdate } from "@/components/Common/UpdatableApp";
 
-import { clearQueryPersistenceCache } from "@/Utils/request/queryClient";
+// import { clearQueryPersistenceCache } from "@/Utils/request/queryClient";
 
 export default function UserSoftwareUpdate() {
   const [updateStatus, setUpdateStatus] = useState({
@@ -18,7 +18,7 @@ export default function UserSoftwareUpdate() {
   const { t } = useTranslation();
 
   const checkUpdates = async () => {
-    clearQueryPersistenceCache();
+    // clearQueryPersistenceCache();
     setUpdateStatus({ ...updateStatus, isChecking: true });
     await new Promise((resolve) => setTimeout(resolve, 500));
     if ((await checkForUpdate()) != null) {

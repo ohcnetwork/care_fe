@@ -5,6 +5,7 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 
 import { OfflineWritesEntry } from "./AppcacheDB";
 import { markWriteStatus } from "./writeQueue";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 
 /**
  * queryMap: Used for conflict detection and fetching current server data.
@@ -12,16 +13,32 @@ import { markWriteStatus } from "./writeQueue";
  */
 export const queryMap = {
   getPatient: patientApi.getPatient,
-  getEncounter: routes.encounter.get,
+  getEncounter: encounterApi.get,
   getResourceDetails: routes.getResourceDetails,
   getAppointment: scheduleApis.appointments.retrieve,
-};
+} as const;
 
-/**
- * Detects conflict for an update write by fetching the current server record and comparing modified_date.
- * If a conflict is detected, marks the write as conflict and stores the server data.
- * Returns true if a conflict was detected, false otherwise.
- */
+// function to fetch data for a given route key and path parameters
+async function fetchDataForRoute(
+  routeKey: keyof typeof queryMap,
+  pathParams: Record<string, any>,
+  queryParams?: Record<string, any>,
+) {
+  const fetchFn = queryMap[routeKey];
+  if (!fetchFn) return null;
+
+  
+  const fetchData = query(fetchFn, {
+    pathParams: pathParams as any,
+    queryParams,
+  });
+  
+  return await fetchData({
+    signal: new AbortController().signal,
+  });
+}
+
+
 export async function detectAndMarkConflict(
   write: OfflineWritesEntry,
 ): Promise<boolean> {
@@ -30,17 +47,12 @@ export async function detectAndMarkConflict(
   }
 
   try {
-    const fetchFn = queryMap[write.useQueryRouteKey as keyof typeof queryMap];
-    if (!fetchFn) return false;
-
-    // Use your query utility to fetch the server data
-    const fetchData = query(fetchFn, {
-      pathParams: write.useQueryPathParams,
-      queryParams: write.useQueryParams,
-    });
-    const serverData = await fetchData({
-      signal: new AbortController().signal,
-    });
+    const routeKey = write.useQueryRouteKey as keyof typeof queryMap;
+    const serverData = await fetchDataForRoute(
+      routeKey,
+      write.useQueryPathParams || {},
+      write.useQueryParams,
+    );
 
     if (serverData && serverData.modified_date !== write.serverTimestamp) {
       await markWriteStatus(write.id, "conflict", {

@@ -3020,6 +3020,7 @@
   "operator": "Operator",
   "option_value": "Option Value",
   "optional": "Optional",
+  "offline_patient_payload_fetch_error": "Error while fetching offline patient payload",
   "or": "or",
   "or_enter_manually_below": "or enter the ID manually",
   "oral_issue_for_non_oral_nutrition_route_error": "Can be specified only if nutrition route is set to Oral",

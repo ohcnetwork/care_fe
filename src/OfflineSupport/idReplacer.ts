@@ -2,10 +2,8 @@ import { OfflineWritesEntry } from "./AppcacheDB";
 import { DependencySchema } from "./dependencySchema";
 import { IdMap } from "./idMap";
 
-/**
- * Recursively walk an object along a path and replace offline IDs with server IDs.
- * Handles arrays ("*") in the path.
- */
+// Recursively walk an object along a path and replace offline IDs with server IDs.
+
 function walkAndReplace(obj: any, path: string[], idMap: IdMap) {
   if (!obj || path.length === 0) return;
   const [key, ...rest] = path;
@@ -23,10 +21,7 @@ function walkAndReplace(obj: any, path: string[], idMap: IdMap) {
   }
 }
 
-/**
- * Replace offline IDs in URLs (special case).
- * Looks for any offline ID in the URL and replaces it with the server ID.
- */
+
 function replaceOfflineIdsInUrl(url: string, idMap: IdMap): string {
   return url.replace(
     /offline-[\w-]+/g,
@@ -34,10 +29,6 @@ function replaceOfflineIdsInUrl(url: string, idMap: IdMap): string {
   );
 }
 
-/**
- * Replace offline IDs in a write's payload/body, mutationPathParams, and URLs using the dependency schema and IdMap.
- * Returns a new write object with replacements applied.
- */
 export function replaceOfflineIdsInWrite(
   write: OfflineWritesEntry,
   dependencySchema: DependencySchema,
@@ -46,7 +37,6 @@ export function replaceOfflineIdsInWrite(
   const deps = dependencySchema[write.type];
   if (!deps) return write;
 
-  // Deep clone the write to avoid mutating the original
   const newWrite: OfflineWritesEntry = JSON.parse(JSON.stringify(write));
 
   for (const dep of deps) {
@@ -69,16 +59,16 @@ export function replaceOfflineIdsInWrite(
     }
   }
 
-  // Also handle mutationPathParams if present and not covered by schema
-  if (newWrite.mutationPathParams) {
-    for (const key in newWrite.mutationPathParams) {
-      const val = newWrite.mutationPathParams[key];
-      if (typeof val === "string" && val.startsWith("offline-")) {
-        const serverId = idMap.getServerId(val);
-        if (serverId) newWrite.mutationPathParams[key] = serverId;
-      }
-    }
-  }
+
+  // if (newWrite.mutationPathParams) {
+  //   for (const key in newWrite.mutationPathParams) {
+  //     const val = newWrite.mutationPathParams[key];
+  //     if (typeof val === "string" && val.startsWith("offline-")) {
+  //       const serverId = idMap.getServerId(val);
+  //       if (serverId) newWrite.mutationPathParams[key] = serverId;
+  //     }
+  //   }
+  // }
 
   return newWrite;
 }

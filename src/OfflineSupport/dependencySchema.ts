@@ -1,6 +1,4 @@
-// Dependency schema for offline sync manager
-// Key: mutation type (from OfflineKeyMap)
-// Value: array of dependency descriptors { location, path, resourceType }
+
 import { OfflineKey } from "./offlineKeys";
 
 type DependencyDescriptor = {
@@ -54,7 +52,7 @@ export const dependencySchema: DependencySchema = {
   create_appointment: [
     { location: "payload", path: ["patient"], resourceType: "patient" },
   ],
-  // reschedule_appointment is defined only to satisfy the type system; it will never fall for dependency resolution.
+
   reschedule_appointment: [
     {
       location: "mutationPathParams",

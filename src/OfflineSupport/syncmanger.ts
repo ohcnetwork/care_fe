@@ -15,16 +15,17 @@ import { IdMap } from "./idMap";
 import { replaceOfflineIdsInWrite } from "./idReplacer";
 import { OfflineKey } from "./offlineKeys";
 import { getPendingAndRetryableWrites, markWriteStatus } from "./writeQueue";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 
 export const mutationMap = {
   create_patient: patientApi.addPatient,
   update_patient: patientApi.updatePatient,
-  create_encounter: routes.encounter.create,
-  mark_encounter_as_complete: routes.encounter.update,
+  create_encounter: encounterApi.create,
+  mark_encounter_as_complete: encounterApi.update,
   create_resource_request: routes.createResource,
   update_resource_request: routes.updateResource,
-  assign_user_to_patient: routes.patient.users.addUser,
-  remove_user_from_patient: routes.patient.users.removeUser,
+  assign_user_to_patient: patientApi.addUser,
+  remove_user_from_patient: patientApi.removeUser,
   create_appointment: scheduleApis.slots.createAppointment,
   reschedule_appointment: scheduleApis.appointments.reschedule,
   update_appointment_status: scheduleApis.appointments.update,
@@ -34,16 +35,7 @@ export const mutationMap = {
   structured_questionnair: routes.batchRequest,
 } satisfies Record<OfflineKey, ApiRoute<any, any>>;
 
-/**
- * queryMap (useQueryMap): Used for conflict detection and fetching current server data.
- * Maps logical query keys to API functions/routes.
- */
-export const queryMap = {
-  getPatient: patientApi.getPatient,
-  getEncounter: routes.encounter.get,
-  getResourceRequest: routes.getResourceDetails,
-  // Add more as needed for your resources
-};
+
 
 interface SyncManagerOptions {
   userId: string;
@@ -70,9 +62,8 @@ export class SyncManager {
     this.idMap = new IdMap();
   }
 
-  /**
-   * Main sync loop that orchestrates the entire sync process
-   */
+  // Main sync loop that start the entire sync process
+ 
   async sync(): Promise<SyncResult> {
     if (this.isRunning) {
       throw new Error("Sync is already running");
@@ -155,9 +146,8 @@ export class SyncManager {
     return result;
   }
 
-  /**
-   * Process a single write through the sync pipeline
-   */
+ /// Process a single write through the sync pipeline
+   
   private async processWrite(write: any): Promise<{
     status: "success" | "failed" | "conflict" | "blocked";
     error?: string;
@@ -232,9 +222,8 @@ export class SyncManager {
     }
   }
 
-  /**
-   * Execute the actual API mutation
-   */
+  // Execute the actual API mutation
+
   private async executeMutation(write: any): Promise<any> {
     const route = mutationMap[write.type as keyof typeof mutationMap];
 
@@ -251,9 +240,8 @@ export class SyncManager {
     return response;
   }
 
-  /**
-   * Check if any parent writes are permanently failed
-   */
+  // Check if any parent writes are permanently failed
+   
   private async checkBlockedParents(parentIds: string[]): Promise<string[]> {
     const db = new AppCacheDB();
     const blockedParents: string[] = [];
@@ -268,23 +256,21 @@ export class SyncManager {
     return blockedParents;
   }
 
-  /**
-   * Mark all dependent writes as blocked when a parent fails permanently
-   */
+  // Mark all dependent writes as blocked when a parent fails permanently
+
   private async markDependentWritesAsBlocked(
     failedParentId: string,
   ): Promise<void> {
     const db = new AppCacheDB();
 
-    // Find all writes that depend on this failed parent
-    // parentMutationIds is an array, so we need to check if it contains the failed parent
+    
     const allWrites = await db.OfflineWrites.toArray();
     const dependentWrites = allWrites.filter((write) => {
-      // Check if the failed parent ID is in the parentMutationIds array
+     
       return write.parentMutationIds?.includes(failedParentId) || false;
     });
 
-    // Mark them as blocked
+   
     for (const dependent of dependentWrites) {
       await markWriteStatus(dependent.id, "blocked", {
         lastError: `Blocked by failed parent: ${failedParentId}`,
@@ -295,9 +281,8 @@ export class SyncManager {
     console.log(`Marked ${dependentWrites.length} dependent writes as blocked`);
   }
 
-  /**
-   * Determine if an error is permanent (should not retry)
-   */
+  //  check if an error is permanent (should not retry)
+
   private isPermanentFailure(error: any): boolean {
     if (error instanceof HTTPError) {
       const statusCode = error.status;
@@ -317,36 +302,29 @@ export class SyncManager {
     return false;
   }
 
-  /**
-   * Cleanup after sync
-   */
+  //  Cleanup after sync
+
   private async cleanup(): Promise<void> {
     // TODO: Implement cleanup logic
-    // - Remove old successful writes
-    // - Prune unused ID mappings
+
     console.log("Sync cleanup completed");
   }
 
-  /**
-   * Stop the current sync operation
-   */
+ 
   stop(): void {
     if (this.abortController) {
       this.abortController.abort();
     }
   }
 
-  /**
-   * Check if sync is currently running
-   */
+ 
   isSyncRunning(): boolean {
     return this.isRunning;
   }
 }
 
-/**
- * Convenience function to run a one-time sync
- */
+ // Convenience function to run a one-time sync
+
 export async function syncOfflineRecords(userId: string): Promise<SyncResult> {
   const syncManager = new SyncManager({
     userId,
