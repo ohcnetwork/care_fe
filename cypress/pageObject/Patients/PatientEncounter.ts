@@ -155,11 +155,13 @@ export class PatientEncounter {
   clickAndSelectOption(position: number, value: string) {
     cy.get("[data-slot='select-trigger']")
       .eq(position)
+      .should("exist")
       .should("be.enabled")
       .scrollIntoView()
       .click();
 
     cy.get('[data-slot="select-content"]')
+      .should("exist")
       .should("be.visible")
       .within(() => {
         cy.contains('[data-slot="select-item"]', value).click();
