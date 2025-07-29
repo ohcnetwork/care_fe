@@ -25,6 +25,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,7 +43,6 @@ import {
 } from "@/components/ui/select";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
-import { DateTimeInput } from "@/components/Common/DateTimeInput";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
@@ -1377,11 +1377,15 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("authored_on")}
         </Label>
-        <DateTimeInput
-          value={medication.authored_on}
-          onDateChange={(val) => onUpdate?.({ authored_on: val })}
+        <CombinedDatePicker
+          value={
+            medication.authored_on
+              ? new Date(medication.authored_on)
+              : undefined
+          }
+          onChange={(value: any) => onUpdate?.({ authored_on: value })}
           disabled={disabled || isReadOnly}
-          max={new Date().toISOString()}
+          blockDate={(date) => date > new Date()}
         />
       </div>
       {/* Notes */}
