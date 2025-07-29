@@ -72,8 +72,10 @@ export class PatientEncounter {
 
     cy.get("[data-slot='table-row']")
       .filter((_, row) => {
-        return Array.from(row.querySelectorAll("td")).some((td) =>
-          td.textContent.includes(allergyName),
+        return (
+          Array.from(row.querySelectorAll("td")).some((td) =>
+            td.textContent.includes(allergyName),
+          ) && !row.classList.contains("pointer-events-none")
         );
       })
       .first()
@@ -90,8 +92,10 @@ export class PatientEncounter {
     cy.wait(600);
     cy.get("[data-slot='table-row']")
       .filter((_, row) => {
-        return Array.from(row.querySelectorAll("td")).some((td) =>
-          td.textContent.includes(allergyName),
+        return (
+          Array.from(row.querySelectorAll("td")).some((td) =>
+            td.textContent.includes(allergyName),
+          ) && !row.classList.contains("pointer-events-none")
         );
       })
       .last()
@@ -170,8 +174,10 @@ export class PatientEncounter {
 
     cy.get("[data-slot='table-row']")
       .filter((_, row) => {
-        return Array.from(row.querySelectorAll("td")).some((td) =>
-          td.textContent.includes(symptomName),
+        return (
+          Array.from(row.querySelectorAll("td")).some((td) =>
+            td.textContent.includes(symptomName),
+          ) && !row.classList.contains("pointer-events-none")
         );
       })
       .first()
@@ -190,8 +196,10 @@ export class PatientEncounter {
 
     cy.get("[data-slot='table-row']")
       .filter((_, row) => {
-        return Array.from(row.querySelectorAll("td")).some((td) =>
-          td.textContent.includes(symptomName),
+        return (
+          Array.from(row.querySelectorAll("td")).some((td) =>
+            td.textContent.includes(symptomName),
+          ) && !row.classList.contains("pointer-events-none")
         );
       })
       .first()
@@ -253,8 +261,10 @@ export class PatientEncounter {
 
     cy.get("[data-slot='table-row']")
       .filter((_, row) => {
-        return Array.from(row.querySelectorAll("td")).some((td) =>
-          td.textContent.includes(diagnosisName),
+        return (
+          Array.from(row.querySelectorAll("td")).some((td) =>
+            td.textContent.includes(diagnosisName),
+          ) && !row.classList.contains("pointer-events-none")
         );
       })
       .first()
@@ -272,8 +282,10 @@ export class PatientEncounter {
 
     cy.get("[data-slot='table-row']")
       .filter((_, row) => {
-        return Array.from(row.querySelectorAll("td")).some((td) =>
-          td.textContent.includes(diagnosisName),
+        return (
+          Array.from(row.querySelectorAll("td")).some((td) =>
+            td.textContent.includes(diagnosisName),
+          ) && !row.classList.contains("pointer-events-none")
         );
       })
       .first()
