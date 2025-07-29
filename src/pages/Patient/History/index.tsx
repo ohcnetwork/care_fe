@@ -4,10 +4,12 @@ import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { NavTabs } from "@/components/ui/nav-tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
+
+import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
 import { MedicationHistory } from "@/pages/Patient/History/MedicationHistory";
@@ -46,6 +48,33 @@ export function ClinicalHistoryPage({
     });
   };
 
+  const showMoreAfterIndex = useBreakpoints({
+    default: 1,
+    xs: 2,
+    sm: 6,
+    xl: 9,
+    "2xl": 12,
+  });
+
+  const tabs = {
+    symptoms: {
+      label: t("past_symptoms"),
+      component: <SymptomsHistory patientId={patientId} />,
+    },
+    diagnoses: {
+      label: t("past_diagnoses"),
+      component: <DiagnosesHistory patientId={patientId} />,
+    },
+    allergies: {
+      label: t("allergies"),
+      component: <AllergyHistory patientId={patientId} />,
+    },
+    medications: {
+      label: t("past_medications"),
+      component: <MedicationHistory patientId={patientId} />,
+    },
+  } as const;
+
   return (
     <Page
       title={
@@ -72,47 +101,15 @@ export function ClinicalHistoryPage({
         </div>
       </div>
       <section>
-        <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto mb-4">
-            <TabsTrigger
-              className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-              value="symptoms"
-            >
-              {t("past_symptoms")}
-            </TabsTrigger>
-            <TabsTrigger
-              className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-              value="diagnoses"
-            >
-              {t("past_diagnoses")}
-            </TabsTrigger>
-            <TabsTrigger
-              className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-              value="allergies"
-            >
-              {t("allergies")}
-            </TabsTrigger>
-            <TabsTrigger
-              className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-              value="medications"
-            >
-              {t("past_medications")}
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="symptoms">
-            <SymptomsHistory patientId={patientId} />
-          </TabsContent>
-          <TabsContent value="diagnoses">
-            <DiagnosesHistory patientId={patientId} />
-          </TabsContent>
-          <TabsContent value="allergies">
-            <AllergyHistory patientId={patientId} />
-          </TabsContent>
-          <TabsContent value="medications">
-            <MedicationHistory patientId={patientId} />
-          </TabsContent>
-        </Tabs>
+        <NavTabs
+          className="w-full mt-4"
+          tabContentClassName="mt-8"
+          tabs={tabs}
+          currentTab={tab}
+          onTabChange={handleTabChange}
+          setPageTitle={false}
+          showMoreAfterIndex={showMoreAfterIndex}
+        />
       </section>
     </Page>
   );
