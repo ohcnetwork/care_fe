@@ -140,6 +140,7 @@ export default function ValueSetSelect({
               className={cn(
                 "w-full justify-between",
                 "h-auto md:h-9 whitespace-normal text-left md:truncate",
+                !value?.display && "text-gray-400",
               )}
               disabled={disabled}
             >
@@ -164,6 +165,7 @@ export default function ValueSetSelect({
                   inputRef.current?.focus();
                 }
               }}
+              placeholder={placeholder}
               count={count}
               searchPostFix={searchPostFix}
               showCode={showCode}
