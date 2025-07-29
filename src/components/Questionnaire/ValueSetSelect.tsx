@@ -246,17 +246,19 @@ export default function ValueSetSelect({
                 variant="outline"
                 role="combobox"
                 className={cn(
-                  "justify-between truncate",
+                  "w-full text-left items-start px-3 py-2 whitespace-normal h-auto",
                   !value?.display && "text-gray-400",
                 )}
               >
-                <span className="block max-w-full whitespace-normal break-words">
-                  {value?.display || placeholder}
-                  {value?.display && showCode && (
-                    <span className="text-xs ml-1">({value?.code})</span>
-                  )}
-                </span>
-                <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+                <div className="flex-1 w-full">
+                  <span className="block text-sm break-words leading-snug w-full">
+                    {value?.display || placeholder}
+                    {value?.display && showCode && (
+                      <span className="text-xs ml-1">({value?.code})</span>
+                    )}
+                  </span>
+                </div>
+                <CaretSortIcon className="ml-2 mt-1 size-4 shrink-0 opacity-50" />
               </Button>
             </div>
           </PopoverTrigger>
