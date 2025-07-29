@@ -46,7 +46,7 @@ export function FilterSelect({
       >
         <SelectTrigger className="border-0 hover:bg-transparent rounded-none focus:ring-0 focus:ring-offset-0">
           <div className="flex w-full items-center gap-2">
-            {icon ? icon : <CareIcon icon="l-filter" className="size-4" />}
+            {icon || <CareIcon icon="l-filter" className="size-4" />}
             {value ? (
               <>
                 <span className="text-gray-950">{t(label)}</span>

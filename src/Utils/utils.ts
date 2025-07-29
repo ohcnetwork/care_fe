@@ -81,11 +81,14 @@ export const dateQueryString = (date: DateLike) => {
 
 export const dateTimeQueryString = (date: DateLike, isEndDate = false) => {
   if (!date || !dayjs(date).isValid()) return "";
-  return dayjs(date)
-    .set("hour", isEndDate ? 23 : 0)
-    .set("minute", isEndDate ? 59 : 0)
-    .set("second", isEndDate ? 59 : 0)
-    .format("YYYY-MM-DDTHH:mm:ss");
+  const d = dayjs(date).toDate();
+  if (isEndDate) {
+    d.setDate(d.getDate() + 1);
+    d.setHours(0, 0, 0, 0);
+  } else {
+    d.setHours(0, 0, 0, 0);
+  }
+  return d.toISOString();
 };
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

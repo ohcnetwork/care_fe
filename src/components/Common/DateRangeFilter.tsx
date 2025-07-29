@@ -160,9 +160,8 @@ export function DateRangeFilter({
                 }}
                 size="icon"
                 variant="ghost"
-                className={cn(
-                  "pl-2 size-8 border-l border-gray-400 rounded-none",
-                )}
+                className="pl-2 size-8 border-l border-gray-400 rounded-none"
+                title={t("clear")}
               >
                 <X className="text-gray-950" />
               </Button>
