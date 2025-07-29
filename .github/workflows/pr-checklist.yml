@@ -55,7 +55,7 @@ jobs:
                 'This PR has been automatically closed because the merge checklist was not completed.',
                 '',
                 'To fix this:',
-                'Mark the checklist items in your PR body by changing `- [ ]` to `- [x]`.',
+                'Mark the checklist items in your PR body by changing `- [ ]` to `- [x]` (make sure to only check relevant items).',
                 '',
                 'Once updated, the PR will reopen automatically.'
               ].join('\n');
