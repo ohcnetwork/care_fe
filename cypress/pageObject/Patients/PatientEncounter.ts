@@ -160,7 +160,7 @@ export class PatientEncounter {
       .click();
 
     cy.get('[data-slot="select-content"]').should("be.visible");
-    cy.wait(500); // Wait for the dropdown to be fully rendered
+    cy.wait(700); // Wait for the dropdown to be fully rendered
     cy.get('[data-slot="select-content"]')
       .find('[data-slot="select-item"]')
       .contains(value)
