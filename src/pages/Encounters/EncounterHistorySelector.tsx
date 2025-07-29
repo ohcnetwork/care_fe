@@ -141,7 +141,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
           offset: String(pageParam),
           ...(completedEncounterStatus.includes(currentEncounter?.status ?? "")
             ? { patient_filter: patientId, facility: facilityId }
-            : { patient: patientId, facility: facilityId }),
+            : { patient: patientId }),
         },
       })({ signal });
       return response as PaginatedResponse<EncounterRead>;
