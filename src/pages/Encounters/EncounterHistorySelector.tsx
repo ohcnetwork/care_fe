@@ -250,11 +250,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
               variant="outline"
               size="icon"
               onClick={() => setShowFilters(!showFilters)}
-              className={cn(
-                buttonVariants({ variant: "outline", size: "icon" }),
-                "size-8",
-                showFilters && "bg-gray-100",
-              )}
+              className={cn(showFilters && "bg-gray-100")}
               title={t("toggle_filters")}
             >
               <CareIcon icon="l-filter" className="size-4" />
