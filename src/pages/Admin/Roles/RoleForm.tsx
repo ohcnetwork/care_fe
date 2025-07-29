@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -18,12 +19,12 @@ import roleApi from "@/types/emr/role/roleApi";
 
 const roleSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  description: z.string().optional(),
+  description: z.string().trim().optional(),
   permissions: z
     .array(z.string(), {
-      required_error: "At least one permission is required",
+      required_error: t("at_least_one_permission_required"),
     })
-    .min(1, "At least one permission is required"),
+    .min(1, t("at_least_one_permission_required")),
 });
 
 type RoleFormValues = z.infer<typeof roleSchema>;
