@@ -246,7 +246,7 @@ export default function ValueSetSelect({
                 variant="outline"
                 role="combobox"
                 className={cn(
-                  "w-full text-left items-start px-3 py-2 whitespace-normal h-auto",
+                  "w-full text-left items-center px-3 py-2 whitespace-normal h-auto",
                   !value?.display && "text-gray-400",
                 )}
               >
@@ -258,7 +258,7 @@ export default function ValueSetSelect({
                     )}
                   </span>
                 </div>
-                <CaretSortIcon className="ml-2 mt-1 size-4 shrink-0 opacity-50" />
+                <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
               </Button>
             </div>
           </PopoverTrigger>
