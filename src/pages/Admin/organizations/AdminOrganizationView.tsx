@@ -137,7 +137,7 @@ function OrganizationCard({
   return (
     <Card key={org.id}>
       <CardContent className="p-4 space-y-4">
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Building className="size-4" />
             <span className="text-lg font-semibold hover:underline hover:decoration-green-600 hover:text-green-600">
@@ -158,6 +158,11 @@ function OrganizationCard({
               </TooltipProvider>
             )}
           </div>
+          <DeleteOrgDialog
+            org={org}
+            organizationType={organizationType}
+            parentId={parentId}
+          />
         </div>
 
         <Badge variant="indigo" className="w-fit">
