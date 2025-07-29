@@ -205,7 +205,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
       const currentOffset = allPages.length * 14;
       return currentOffset < lastPage.count ? currentOffset : null;
     },
-    enabled: !!patientId && !!facilityId,
+    enabled: !!currentEncounter,
   });
 
   const past = encounters?.pages.flatMap((page) => page.results) ?? [];
