@@ -20,12 +20,12 @@ export interface FacilityOrganizationBase {
   name: string;
   description: string;
   org_type: FacilityOrganizationType;
-  active: boolean;
 }
 
 export interface FacilityOrganizationRead extends FacilityOrganizationBase {
   id: string;
   parent?: FacilityOrganizationParent;
+  active: boolean;
   level_cache: number;
   has_children: boolean;
   created_at: string;

@@ -85,7 +85,6 @@ export default function FacilityOrganizationFormSheet({
         message: t("invalid_organization_type"),
       },
     ),
-    active: z.boolean(),
   });
 
   const form = useForm({
@@ -94,7 +93,6 @@ export default function FacilityOrganizationFormSheet({
       name: "",
       description: "",
       org_type: FacilityOrganizationType.DEPT,
-      active: true,
     },
   });
 
@@ -104,7 +102,6 @@ export default function FacilityOrganizationFormSheet({
         name: org.name || "",
         description: org.description || "",
         org_type: org.org_type,
-        active: org.active,
       });
     }
   }, [isEditMode, org, open]);
@@ -148,7 +145,6 @@ export default function FacilityOrganizationFormSheet({
       description: values.description.trim(),
       org_type: values.org_type,
       parent: parentId,
-      active: values.active,
     };
 
     if (isEditMode) {
