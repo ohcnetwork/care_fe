@@ -351,7 +351,7 @@ export default function LocationMultiSelect({
         <input
           type="text"
           placeholder={t("search_locations")}
-          className="w-full rounded-md border border-input bg-background pl-8 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="w-full rounded-md border border-input bg-background pl-8 py-2 text-sm ring-offset-background focus:ring-primary-500 focus:border-primary-500 focus-visible:outline-none dark:focus-visible:ring-gray-300"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
