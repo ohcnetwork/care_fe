@@ -17,6 +17,8 @@
 import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -150,6 +152,24 @@ export function EntitySelectionSheet({
           disabled={disabled}
           searchPostFix={searchPostFix}
           title={t(`select_${entityType}`)}
+          mobileTrigger={
+            <Button
+              variant="outline"
+              role="combobox"
+              className="w-full justify-between border border-primary rounded-md px-2 h-auto whitespace-normal text-left"
+              disabled={disabled}
+            >
+              <div className="flex items-center">
+                <CareIcon
+                  icon="l-plus"
+                  className="mr-2 text-primary-700 font-normal"
+                />
+                <span className="text-primary-700 flex items-center font-semibold text-wrap text-sm md:text-base">
+                  {placeholder}
+                </span>
+              </div>
+            </Button>
+          }
         />
       )}
       <Sheet open={open} onOpenChange={onOpenChange}>
