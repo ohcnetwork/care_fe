@@ -534,7 +534,6 @@ const AppointmentActions = ({
                 <Label>{t("note")}</Label>
                 <Textarea
                   value={oldNote}
-                  placeholder={t("reason_for_reschedule_placeholder")}
                   onChange={(e) => setRescheduleReason(e.target.value)}
                 />
                 <AlertDialogDescription>
@@ -562,7 +561,7 @@ const AppointmentActions = ({
                     setIsRescheduleReasonOpen(false);
                     setIsRescheduleOpen(true);
                   }}
-                  disabled={oldNote === newNote || !oldNote.trim()}
+                  disabled={oldNote === appointment.note || !oldNote.trim()}
                 >
                   {t("continue")}
                 </AlertDialogAction>
