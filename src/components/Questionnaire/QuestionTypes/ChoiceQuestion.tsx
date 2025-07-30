@@ -2,6 +2,8 @@ import { t } from "i18next";
 import { memo } from "react";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import RadioInput from "@/components/ui/RadioInput";
@@ -123,7 +125,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
       <>
         {questionnaireResponse.values.map((value, idx) => {
           return (
-            <div key={idx} className="flex items-center gap-2 mb-2">
+            <div key={idx} className="flex items-center mb-2">
               <div className="flex-1">
                 <ValueSetSelect
                   system={question.answer_value_set!}
@@ -151,7 +153,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
           );
         })}
 
-        <div>
+        <div className={cn(questionnaireResponse.values.length && "mr-9")}>
           <ValueSetSelect
             closeOnSelect={false}
             system={question.answer_value_set}

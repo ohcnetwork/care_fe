@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { DropletIcon, HandIcon, Plus } from "lucide-react";
 import { Link, navigate } from "raviger";
@@ -6,12 +7,14 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+import { ObservationPlotConfig } from "@/components/Common/Charts/ObservationChart";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import SideOverview from "@/components/Facility/ConsultationDetails/OverviewSideBar";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
+import { VitalsList } from "@/components/Patient/vitals/list";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -76,6 +79,13 @@ export const EncounterOverviewTab = () => {
     canSubmitEncounterQuestionnaire &&
     !inactiveEncounterStatus.includes(encounter?.status ?? "");
 
+  const { data: plotsConfig } = useQuery<ObservationPlotConfig>({
+    queryKey: ["plots-config"],
+    queryFn: () => fetch(careConfig.plotsConfigUrl).then((res) => res.json()),
+  });
+
+  const vitalGroups =
+    plotsConfig?.find((plot) => plot.id === "primary-parameters")?.groups || [];
   const isMobile = useIsMobile();
 
   return (
@@ -83,7 +93,7 @@ export const EncounterOverviewTab = () => {
       {/* Main Content Area */}
       <div className="flex flex-col xl:flex-row gap-4">
         {/* Left Column - Symptoms, Diagnoses, and Questionnaire Responses */}
-        <div className="flex-1 space-y-4">
+        <div className="flex-1 space-y-4 h-[calc(100vh-14rem)] overflow-y-auto">
           <div className="bg-white rounded-lg p-4 border border-gray-200">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex flex-row gap-3">
@@ -198,6 +208,16 @@ export const EncounterOverviewTab = () => {
               readOnly={!canEdit}
             />
           </div>
+
+          {/* Vitals Section */}
+          <div>
+            <VitalsList
+              patientId={patientId}
+              encounterId={encounterId}
+              codeGroups={vitalGroups}
+            />
+          </div>
+
           {/* Questionnaire Responses Section */}
           <div>
             <QuestionnaireResponsesList
@@ -210,11 +230,13 @@ export const EncounterOverviewTab = () => {
 
         {/* Right Column */}
         {encounter ? (
-          <SideOverview
-            encounter={encounter}
-            canAccess={canAccess}
-            canEdit={canEdit}
-          />
+          <div className="h-[calc(100vh-14rem)] overflow-y-auto">
+            <SideOverview
+              encounter={encounter}
+              canAccess={canAccess}
+              canEdit={canEdit}
+            />
+          </div>
         ) : (
           <div className="flex-1 space-y-4 max-w-[18rem]">
             <CardListSkeleton count={3} />
