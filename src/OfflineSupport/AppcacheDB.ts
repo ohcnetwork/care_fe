@@ -24,6 +24,7 @@ export interface OfflineWritesEntry {
   lastAttemptAt?: number;
   syncStatus: "pending" | "success" | "failed" | "conflict" | "blocked";
   lastError?: string;
+  lastErrorDetails?: unknown;
   retries?: number;
   conflictData?: unknown;
   useQueryRouteKey?: string;
@@ -37,7 +38,7 @@ export class AppCacheDB extends Dexie {
   OfflineWrites!: Dexie.Table<OfflineWritesEntry, string>;
   constructor() {
     super("AppCacheDB");
-    this.version(2).stores({
+    this.version(3).stores({
       querycache: "cacheKey, timestamp",
       OfflineWrites:
         "id, userId, type, resourceType, mutationSyncRouteKey, syncStatus, clientTimestamp, retries",

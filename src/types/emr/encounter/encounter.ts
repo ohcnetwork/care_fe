@@ -241,9 +241,7 @@ export interface EncounterCreate extends Omit<EncounterBase, "id"> {
   tags?: string[];
 }
 
-
 export type EncounterEdit = Omit<EncounterBase, "id">;
-
 
 export const completedEncounterStatus = ["completed"];
 export const inactiveEncounterStatus = [

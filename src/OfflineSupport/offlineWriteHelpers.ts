@@ -10,15 +10,10 @@ import { dateQueryString, getMonthStartAndEnd } from "@/Utils/utils";
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import { AllergyIntolerance } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
-import {
-  Encounter,
-  EncounterEditRequest,
-  EncounterRequest,
-} from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 import {
-  Patient,
   PatientCreate,
   PatientRead,
   PatientUpdate,
@@ -219,7 +214,7 @@ export const normalizeOfflinePatientRecord = (
       last_name: user.last_name,
       user_type: user.user_type,
       last_login: user.last_login ?? "",
-      read_profile_picture_url: user.read_profile_picture_url ?? "",
+      profile_picture_url: user.profile_picture_url ?? "",
       external_id: user.external_id,
       suffix: user.suffix,
       prefix: user.prefix,
@@ -233,7 +228,7 @@ export const normalizeOfflinePatientRecord = (
       last_name: user.last_name,
       user_type: user.user_type,
       last_login: user.last_login ?? "",
-      read_profile_picture_url: user.read_profile_picture_url ?? "",
+      profile_picture_url: user.profile_picture_url ?? "",
       external_id: user.external_id,
       suffix: user.suffix,
       prefix: user.prefix,
@@ -247,14 +242,15 @@ export const normalizeOfflinePatientRecord = (
 export const normalizeOfflineEncounterRecord = (
   queryClient: QueryClient,
   entry: OfflineWritesEntry,
-  patientData: Patient,
+  patientData: PatientRead,
   authUser: AuthUserModel,
+  selectedTags: TagConfig[],
   permissions?: string[],
   created_by?: UserBase,
   created_date?: string,
   modified_date?: string,
-): Encounter => {
-  const payload = entry.payload as EncounterEditRequest | EncounterRequest; // Encounter Request in case use normalizing function after updating encounter
+): EncounterRead => {
+  const payload = entry.payload as EncounterRead;
 
   const facilityData = queryClient.getQueryData<FacilityData>([
     "facility",
@@ -264,7 +260,7 @@ export const normalizeOfflineEncounterRecord = (
     id: entry.id,
     patient: patientData,
     facility: {
-      id: facilityData?.id ?? payload.facility,
+      id: facilityData?.id ?? "Unknown(offline)",
       name: facilityData?.name ?? "Unknown(offline)",
     },
     status: payload.status ?? "Unknown (offline)",
@@ -297,13 +293,13 @@ export const normalizeOfflineEncounterRecord = (
     care_team: [],
     discharge_summary_advice: payload?.discharge_summary_advice ?? undefined,
     is_updated_offline: true,
-    tags: [],
+    tags: selectedTags ?? [],
   };
 };
 
 export const normaliZedResourcerequestRecord = (
   entry: OfflineWritesEntry,
-  patientData: Patient | undefined,
+  patientData: PatientRead | undefined,
   assigned_facility: FacilityModel | undefined,
   assignToUser: UserBase | undefined,
   queryClient: QueryClient,
@@ -355,7 +351,7 @@ export const normaliZedResourcerequestRecord = (
 export const normalizedAppointmentRecord = (
   entry: OfflineWritesEntry,
   selectedTokenSlot: TokenSlot,
-  patientData: Patient,
+  patientData: PatientRead,
   bookedBy: AuthUserModel | null,
   status: AppointmentNonCancelledStatus,
   practitioner: UserBase,
@@ -371,7 +367,7 @@ export const normalizedAppointmentRecord = (
     booked_on: nowIso,
     booked_by: bookedBy ? normalizeUserBase(bookedBy) : null,
     status: status,
-    reason_for_visit: payload?.reason_for_visit,
+    note: payload?.note,
     user: practitioner,
     facility: facility,
     is_updated_offline: true,
@@ -504,7 +500,7 @@ export function normalizeUserBase(authUser: AuthUserModel): UserBase {
     last_name: authUser?.last_name,
     user_type: authUser?.user_type,
     last_login: authUser?.last_login ?? "",
-    profile_picture_url: authUser?.read_profile_picture_url ?? "",
+    profile_picture_url: authUser?.profile_picture_url ?? "",
     phone_number: authUser?.phone_number ?? "unknown(offline)",
     gender: authUser?.gender ?? "male",
     suffix: authUser?.suffix,
@@ -523,28 +519,28 @@ export const updateActiveEncounterList = ({
   queryClient: QueryClient;
   action: string;
   patientID: string;
-  normalizeEncounter: Encounter;
+  normalizeEncounter: EncounterRead;
 }) => {
   const addEncounterToList = (
-    EncouterList: PaginatedResponse<Encounter> | undefined,
-    newEncounter: Encounter,
-  ): PaginatedResponse<Encounter> => {
-    const updatedList: PaginatedResponse<Encounter> = EncouterList?.results
+    EncouterList: PaginatedResponse<EncounterRead> | undefined,
+    newEncounter: EncounterRead,
+  ): PaginatedResponse<EncounterRead> => {
+    const updatedList: PaginatedResponse<EncounterRead> = EncouterList?.results
       ? {
           ...EncouterList,
-          results: [...EncouterList.results, newEncounter as Encounter],
+          results: [...EncouterList.results, newEncounter as EncounterRead],
           count: (EncouterList.count ?? EncouterList.results.length) + 1,
         }
       : {
           count: 1,
-          results: [newEncounter as Encounter],
+          results: [newEncounter as EncounterRead],
         };
     return updatedList;
   };
 
   if (action == "createEncounter" && normalizeEncounter) {
     const ActiveEncouterList = queryClient.getQueryData<
-      PaginatedResponse<Encounter>
+      PaginatedResponse<EncounterRead>
     >(["encounters", "live", patientID]);
 
     const newList = addEncounterToList(ActiveEncouterList, normalizeEncounter);
@@ -552,10 +548,10 @@ export const updateActiveEncounterList = ({
     queryClient.setQueryData(["encounters", "live", patientID], newList);
   } else if (action === "markAsCompleteEncounter" && normalizeEncounter) {
     const ActiveEncouterList = queryClient.getQueryData<
-      PaginatedResponse<Encounter>
+      PaginatedResponse<EncounterRead>
     >(["encounters", "live", patientID]);
 
-    const UpdatedActiveEncounterList: PaginatedResponse<Encounter> =
+    const UpdatedActiveEncounterList: PaginatedResponse<EncounterRead> =
       ActiveEncouterList?.results
         ? {
             ...ActiveEncouterList,
@@ -639,19 +635,47 @@ function replaceEncounterScopedInPaginatedCache<
   encounterID: string | undefined,
   newEntries: T[],
 ) {
-  const prevData = queryClient.getQueryData<PaginatedResponse<T>>(key);
+  const prevData = queryClient.getQueryData(key);
 
-  const filteredResults = (prevData?.results ?? []).filter(
-    (entry) => entry.encounter !== encounterID,
-  );
+  // Check if this is an infinite query (has pages structure)
+  if (prevData && typeof prevData === "object" && "pages" in prevData) {
+    // Handle infinite query data
+    queryClient.setQueryData(key, (prev: any) => {
+      if (!prev?.pages) return prev;
 
-  const updatedData: PaginatedResponse<T> = {
-    ...prevData,
-    count: filteredResults.length + newEntries.length,
-    results: [...filteredResults, ...newEntries],
-  };
+      const updatedPages = prev.pages.map((page: any) => {
+        const filteredResults = (page.results || []).filter(
+          (entry: any) => entry.encounter !== encounterID,
+        );
+        const merged = [...filteredResults, ...newEntries];
 
-  queryClient.setQueryData(key, updatedData);
+        return {
+          ...page,
+          results: merged,
+          count: merged.length,
+        };
+      });
+
+      return {
+        ...prev,
+        pages: updatedPages,
+      };
+    });
+  } else {
+    // Handle regular paginated data
+    const paginatedData = prevData as PaginatedResponse<T> | undefined;
+    const filteredResults = (paginatedData?.results ?? []).filter(
+      (entry) => entry.encounter !== encounterID,
+    );
+
+    const updatedData: PaginatedResponse<T> = {
+      ...paginatedData,
+      count: filteredResults.length + newEntries.length,
+      results: [...filteredResults, ...newEntries],
+    };
+
+    queryClient.setQueryData(key, updatedData);
+  }
 }
 
 export const normalizeAndUpdateDiagnosis = (
@@ -683,40 +707,75 @@ export const normalizeAndUpdateDiagnosis = (
 
   const newCodes = new Set(normalizedDiagnosisResult.map((d) => d.code.code));
 
-  const cacheKeys = [
-    ["encounter_diagnosis", patientID, encounterID],
-    ["diagnoses", patientID, encounterID],
-  ];
+  // Update infinite query cache
+  queryClient.setQueryData(
+    ["infinite-encounter_diagnosis", patientID, encounterID],
+    (prev: any) => {
+      if (!prev?.pages) {
+        // If no existing cache, create a new one
+        return {
+          pages: [
+            {
+              count: normalizedDiagnosisResult.length,
+              results: normalizedDiagnosisResult,
+            },
+          ],
+          pageParams: [0],
+        };
+      }
 
-  for (const key of cacheKeys) {
-    const prev = queryClient.getQueryData<PaginatedResponse<Diagnosis>>(key);
+      const updatedPages = prev.pages.map((page: any) => {
+        const filteredResults = page.results.filter(
+          (entry: any) => !newCodes.has(entry.code.code),
+        );
+        const merged = [...filteredResults, ...normalizedDiagnosisResult];
 
-    const filteredResults = prev
-      ? prev.results.filter((entry) => !newCodes.has(entry.code.code))
-      : [];
+        return {
+          ...page,
+          results: merged,
+          count: merged.length,
+        };
+      });
 
-    const merged = [...filteredResults, ...normalizedDiagnosisResult];
-    console.log("merged : ", key, merged);
-    queryClient.setQueryData<PaginatedResponse<Diagnosis>>(key, {
-      ...prev,
-      count: merged.length,
-      results: merged,
-    });
-    console.log(key, queryClient.getQueryData(key));
-  }
-  // Update patietn-scoped cache
-  const encounterDiagnosisResults =
+      return {
+        ...prev,
+        pages: updatedPages,
+      };
+    },
+  );
+
+  // Get existing diagnoses for this encounter to create merged data
+  const existingDiagnoses =
     queryClient.getQueryData<PaginatedResponse<Diagnosis>>([
-      "encounter_diagnosis",
+      "diagnoses",
       patientID,
       encounterID,
-    ])?.results ?? normalizedDiagnosisResult;
+    ])?.results ?? [];
 
+  const filteredResults = existingDiagnoses.filter(
+    (entry) => !newCodes.has(entry.code.code),
+  );
+
+  const mergedDiagnoses = [...filteredResults, ...normalizedDiagnosisResult];
+
+  // Update regular paginated cache
+  queryClient.setQueryData(
+    ["diagnoses", patientID, encounterID],
+    (prev: PaginatedResponse<Diagnosis> | undefined) => {
+      return {
+        ...prev,
+        count: mergedDiagnoses.length,
+        results: mergedDiagnoses,
+      };
+    },
+  );
+
+  // Update patient-scoped cache with merged diagnoses
   replaceEncounterScopedInPaginatedCache<Diagnosis>(
     queryClient,
-    ["encounter_diagnosis", patientID, undefined],
+    ["infinite-encounter_diagnosis", patientID, undefined],
     encounterID,
-    encounterDiagnosisResults,
+    mergedDiagnoses,
   );
 };
 
@@ -802,16 +861,58 @@ export const normalizeAndUpdateSymptom = async (
     },
   );
 
-  queryClient.removeQueries({ queryKey: ["symptoms", patientID, encounterID] });
+  // Update infinite query cache
+  queryClient.setQueryData(
+    ["infinite-symptoms", patientID, encounterID],
+    (prev: any) => {
+      if (!prev?.pages) {
+        // If no existing cache, create a new one
+        return {
+          pages: [
+            {
+              count: normalizedSymptomResult.length,
+              results: normalizedSymptomResult,
+            },
+          ],
+          pageParams: [0],
+        };
+      }
 
-  mergeAndUpdatePaginatedCache<Symptom>(
-    queryClient,
-    [["symptoms", patientID, encounterID]],
-    normalizedSymptomResult,
+      const updatedPages = prev.pages.map((page: any) => ({
+        ...page,
+        results: normalizedSymptomResult,
+        count: normalizedSymptomResult.length,
+      }));
+
+      return {
+        ...prev,
+        pages: updatedPages,
+      };
+    },
   );
+
+  // Update regular paginated cache
+  queryClient.setQueryData(
+    ["symptoms", patientID, encounterID],
+    (prev: PaginatedResponse<Symptom> | undefined) => {
+      if (!prev) {
+        return {
+          count: normalizedSymptomResult.length,
+          results: normalizedSymptomResult,
+        };
+      }
+
+      return {
+        ...prev,
+        results: normalizedSymptomResult,
+        count: normalizedSymptomResult.length,
+      };
+    },
+  );
+
   replaceEncounterScopedInPaginatedCache<Symptom>(
     queryClient,
-    ["symptoms", patientID, undefined],
+    ["infinite-symptoms", patientID, undefined],
     encounterID,
     normalizedSymptomResult,
   );
@@ -843,17 +944,58 @@ export const normalizeAndUpdateMedication_Statement = (
       };
     });
 
-  queryClient.removeQueries({
-    queryKey: ["medication_statements", patientID, encounterID],
-  });
-  mergeAndUpdatePaginatedCache<MedicationStatementRead>(
-    queryClient,
-    [["medication_statements", patientID, encounterID]],
-    normalizeMedication_Statement,
+  // Update infinite query cache
+  queryClient.setQueryData(
+    ["infinite-medication_statements", patientID, encounterID],
+    (prev: any) => {
+      if (!prev?.pages) {
+        // If no existing cache, create a new one
+        return {
+          pages: [
+            {
+              count: normalizeMedication_Statement.length,
+              results: normalizeMedication_Statement,
+            },
+          ],
+          pageParams: [0],
+        };
+      }
+
+      const updatedPages = prev.pages.map((page: any) => ({
+        ...page,
+        results: normalizeMedication_Statement,
+        count: normalizeMedication_Statement.length,
+      }));
+
+      return {
+        ...prev,
+        pages: updatedPages,
+      };
+    },
   );
+
+  // Update regular paginated cache
+  queryClient.setQueryData(
+    ["medication_statements", patientID, encounterID],
+    (prev: PaginatedResponse<MedicationStatementRead> | undefined) => {
+      if (!prev) {
+        return {
+          count: normalizeMedication_Statement.length,
+          results: normalizeMedication_Statement,
+        };
+      }
+
+      return {
+        ...prev,
+        results: normalizeMedication_Statement,
+        count: normalizeMedication_Statement.length,
+      };
+    },
+  );
+
   replaceEncounterScopedInPaginatedCache<MedicationStatementRead>(
     queryClient,
-    ["medication_statements", patientID, undefined],
+    ["infinite-medication_statements", patientID, undefined],
     encounterID,
     normalizeMedication_Statement,
   );
@@ -887,14 +1029,50 @@ export const normalizeAndUpdateAllergy_Intolerance = (
     },
   );
 
-  queryClient.removeQueries({
-    queryKey: ["allergies", patientID],
+  // Update infinite query cache
+  queryClient.setQueryData(["infinite-allergies", patientID], (prev: any) => {
+    if (!prev?.pages) {
+      // If no existing cache, create a new one
+      return {
+        pages: [
+          {
+            count: normalizedAllergyResult.length,
+            results: normalizedAllergyResult,
+          },
+        ],
+        pageParams: [0],
+      };
+    }
+
+    const updatedPages = prev.pages.map((page: any) => ({
+      ...page,
+      results: normalizedAllergyResult,
+      count: normalizedAllergyResult.length,
+    }));
+
+    return {
+      ...prev,
+      pages: updatedPages,
+    };
   });
 
-  mergeAndUpdatePaginatedCache<AllergyIntolerance>(
-    queryClient,
-    [["allergies", patientID]],
-    normalizedAllergyResult,
+  // Update regular paginated cache
+  queryClient.setQueryData(
+    ["allergies", patientID],
+    (prev: PaginatedResponse<AllergyIntolerance> | undefined) => {
+      if (!prev) {
+        return {
+          count: normalizedAllergyResult.length,
+          results: normalizedAllergyResult,
+        };
+      }
+
+      return {
+        ...prev,
+        results: normalizedAllergyResult,
+        count: normalizedAllergyResult.length,
+      };
+    },
   );
 };
 
@@ -904,12 +1082,12 @@ export const normalizeAndUpdateEncounter = (
   patientID: string,
   encounterID?: string,
 ) => {
-  const PrevEncounterData = queryClient.getQueryData<Encounter>([
+  const PrevEncounterData = queryClient.getQueryData<EncounterRead>([
     "encounter",
     encounterID,
   ]);
   if (!PrevEncounterData) return;
-  const updatedEncounterData: Encounter = {
+  const updatedEncounterData: EncounterRead = {
     ...PrevEncounterData,
     status: q.body?.status,
     encounter_class: q.body?.encounter_class,

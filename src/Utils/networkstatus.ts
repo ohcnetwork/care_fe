@@ -48,12 +48,12 @@ export default function useNetworkStatus() {
 
       setIsOnline(online);
       onlineManager.setOnline(online);
-      toast.info(t("You are online"));
+      toast.info(t("You_are_online"));
     } catch {
       setIsOnline(false);
 
       onlineManager.setOnline(false);
-      toast.info(t("you are offline"));
+      toast.info(t("you_are_offline"));
       await restorePersistedCache();
     } finally {
       setIsChecked(true);
@@ -68,7 +68,7 @@ export default function useNetworkStatus() {
     const handleOffline = async () => {
       setIsOnline(false);
       onlineManager.setOnline(false);
-      toast.info(t("you are offline"));
+      toast.info(t("you_are_offline"));
       setIsChecked(true);
       await restorePersistedCache();
     };

@@ -1,7 +1,5 @@
 import { AppCacheDB, OfflineWritesEntry } from "./AppcacheDB";
 
-
-
 const db = new AppCacheDB();
 const MAX_RETRIES = 5;
 
@@ -18,7 +16,6 @@ export async function getPendingAndRetryableWrites(
     })
     .toArray();
 }
-
 
 export async function markWriteStatus(
   writeId: string,

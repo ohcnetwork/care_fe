@@ -1315,4 +1315,3 @@ const AppointmentActions = ({
     </div>
   );
 };
-

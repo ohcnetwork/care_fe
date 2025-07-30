@@ -29,6 +29,7 @@ const queryClient = new QueryClient({
         return false;
       },
       refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
       gcTime: careConfig.queryGcTime,
     },
   },

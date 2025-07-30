@@ -223,8 +223,8 @@ export default function AuthUserProvider({
     if (!onlineManager.isOnline() || !user?.external_id) return;
 
     const timeout = setTimeout(() => {
-      toast.info(" sync start");
-      syncOfflineRecords();
+      toast.info(" sync properly start");
+      syncOfflineRecords(user.external_id);
     }, 3000);
 
     return () => clearTimeout(timeout);

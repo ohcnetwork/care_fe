@@ -50,6 +50,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -61,10 +62,6 @@ import {
   saveOfflineWriteData,
   updateActiveEncounterList,
 } from "@/OfflineSupport/offlineWriteHelpers";
-import routes from "@/Utils/request/api";
-
-import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
-
 import mutate from "@/Utils/request/mutate";
 import { PaginatedResponse } from "@/Utils/request/types";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
@@ -77,8 +74,8 @@ import {
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
+import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
-import { Patient } from "@/types/emr/patient/patient";
 
 interface Props {
   patientId: string;
@@ -140,7 +137,6 @@ export default function CreateEncounterForm({
     },
   });
 
-
   const queueNewEncounterOffline = async (
     encounterRequestData: EncounterCreate,
   ) => {
@@ -163,7 +159,7 @@ export default function CreateEncounterForm({
         return;
       }
 
-      const patientData = queryClient.getQueryData<Patient>([
+      const patientData = queryClient.getQueryData<PatientRead>([
         "patient",
         patientId,
       ]);
@@ -182,6 +178,7 @@ export default function CreateEncounterForm({
         saveResult.entry,
         patientData,
         authUser,
+        selectedTags,
         permissions,
       );
 

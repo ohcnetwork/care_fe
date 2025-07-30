@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
   BeakerIcon,
@@ -65,13 +65,17 @@ export function AllergyList({
   showTimeline = false,
 }: AllergyListProps) {
   const { t } = useTranslation();
-
+  const queryClient = useQueryClient();
+  console.log(
+    "Allergy cache",
+    queryClient.getQueryData(["infinite-allergies", patientId]),
+  );
   const LIMIT = showTimeline ? 30 : 14;
   const { facilityId } = useCurrentFacilitySilently();
   const sourceUrl = usePath();
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: ["infinite-allergies", patientId, encounterId, encounterStatus],
+      queryKey: ["infinite-allergies", patientId],
       queryFn: async ({ pageParam = 0, signal }) => {
         const response = await query(allergyIntoleranceApi.getAllergy, {
           pathParams: { patientId },
@@ -92,6 +96,9 @@ export function AllergyList({
       networkMode: "online",
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
+        if (!lastPage || !allPages || typeof lastPage.count !== "number") {
+          return null;
+        }
         const currentOffset = allPages.length * LIMIT;
         return currentOffset < lastPage.count ? currentOffset : null;
       },

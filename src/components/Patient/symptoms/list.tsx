@@ -44,6 +44,7 @@ export function SymptomsList({
   const LIMIT = showTimeline ? 30 : 14;
   const { facilityId } = useCurrentFacilitySilently();
   const sourceUrl = usePath();
+
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["infinite-symptoms", patientId, encounterId],

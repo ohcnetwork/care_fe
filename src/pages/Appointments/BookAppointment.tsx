@@ -35,6 +35,7 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityData } from "@/types/facility/facility";
 import {
@@ -47,7 +48,6 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserBase } from "@/types/user/user";
 
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
-import { PatientRead } from "@/types/emr/patient/patient";
 
 interface Props {
   patientId: string;

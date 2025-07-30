@@ -1,11 +1,11 @@
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 import { OfflineWritesEntry } from "./AppcacheDB";
 import { markWriteStatus } from "./writeQueue";
-import encounterApi from "@/types/emr/encounter/encounterApi";
 
 /**
  * queryMap: Used for conflict detection and fetching current server data.
@@ -27,17 +27,15 @@ async function fetchDataForRoute(
   const fetchFn = queryMap[routeKey];
   if (!fetchFn) return null;
 
-  
   const fetchData = query(fetchFn, {
     pathParams: pathParams as any,
     queryParams,
   });
-  
+
   return await fetchData({
     signal: new AbortController().signal,
   });
 }
-
 
 export async function detectAndMarkConflict(
   write: OfflineWritesEntry,
@@ -57,6 +55,12 @@ export async function detectAndMarkConflict(
     if (serverData && serverData.modified_date !== write.serverTimestamp) {
       await markWriteStatus(write.id, "conflict", {
         conflictData: serverData,
+        lastError: "Data conflict detected - server data has been modified",
+        lastErrorDetails: {
+          serverModifiedDate: serverData.modified_date,
+          clientTimestamp: write.serverTimestamp,
+          conflictType: "data_modified",
+        },
         lastAttemptAt: Date.now(),
       });
       return true;

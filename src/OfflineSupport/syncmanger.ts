@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { ApiRoute, HTTPError } from "@/Utils/request/types";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
@@ -15,7 +16,6 @@ import { IdMap } from "./idMap";
 import { replaceOfflineIdsInWrite } from "./idReplacer";
 import { OfflineKey } from "./offlineKeys";
 import { getPendingAndRetryableWrites, markWriteStatus } from "./writeQueue";
-import encounterApi from "@/types/emr/encounter/encounterApi";
 
 export const mutationMap = {
   create_patient: patientApi.addPatient,
@@ -34,8 +34,6 @@ export const mutationMap = {
   update_encounter_questionnair: routes.batchRequest,
   structured_questionnair: routes.batchRequest,
 } satisfies Record<OfflineKey, ApiRoute<any, any>>;
-
-
 
 interface SyncManagerOptions {
   userId: string;
@@ -63,7 +61,7 @@ export class SyncManager {
   }
 
   // Main sync loop that start the entire sync process
- 
+
   async sync(): Promise<SyncResult> {
     if (this.isRunning) {
       throw new Error("Sync is already running");
@@ -146,8 +144,8 @@ export class SyncManager {
     return result;
   }
 
- /// Process a single write through the sync pipeline
-   
+  /// Process a single write through the sync pipeline
+
   private async processWrite(write: any): Promise<{
     status: "success" | "failed" | "conflict" | "blocked";
     error?: string;
@@ -199,8 +197,24 @@ export class SyncManager {
       console.log(`Successfully synced write ${write.id}`);
       return { status: "success" };
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
+      // Store the complete error information
+      let errorMessage = "Unknown error";
+      let errorDetails = error;
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      if (error instanceof HTTPError) {
+        // For HTTP errors, store both the error object and the cause
+        errorDetails = {
+          error: error,
+          cause: error.cause,
+          status: error.status,
+          message: error.message,
+        };
+      }
+
       toast.error(`Failed to sync write ${write.type}`);
 
       // Determine if this is a permanent failure
@@ -208,6 +222,7 @@ export class SyncManager {
 
       await markWriteStatus(write.id, "failed", {
         lastError: errorMessage,
+        lastErrorDetails: errorDetails,
         lastAttemptAt: Date.now(),
         retries: (write.retries || 0) + 1,
         isPermanentFailure,
@@ -241,7 +256,7 @@ export class SyncManager {
   }
 
   // Check if any parent writes are permanently failed
-   
+
   private async checkBlockedParents(parentIds: string[]): Promise<string[]> {
     const db = new AppCacheDB();
     const blockedParents: string[] = [];
@@ -263,17 +278,18 @@ export class SyncManager {
   ): Promise<void> {
     const db = new AppCacheDB();
 
-    
     const allWrites = await db.OfflineWrites.toArray();
     const dependentWrites = allWrites.filter((write) => {
-     
       return write.parentMutationIds?.includes(failedParentId) || false;
     });
 
-   
     for (const dependent of dependentWrites) {
       await markWriteStatus(dependent.id, "blocked", {
         lastError: `Blocked by failed parent: ${failedParentId}`,
+        lastErrorDetails: {
+          blockedBy: failedParentId,
+          reason: "parent_failed",
+        },
         lastAttemptAt: Date.now(),
       });
     }
@@ -310,20 +326,18 @@ export class SyncManager {
     console.log("Sync cleanup completed");
   }
 
- 
   stop(): void {
     if (this.abortController) {
       this.abortController.abort();
     }
   }
 
- 
   isSyncRunning(): boolean {
     return this.isRunning;
   }
 }
 
- // Convenience function to run a one-time sync
+// Convenience function to run a one-time sync
 
 export async function syncOfflineRecords(userId: string): Promise<SyncResult> {
   const syncManager = new SyncManager({

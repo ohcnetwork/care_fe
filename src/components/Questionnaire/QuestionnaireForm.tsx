@@ -44,7 +44,7 @@ import { dateQueryString } from "@/Utils/utils";
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import { FileUploadQuestion } from "@/types/files/files";
 import {
   DetailedValidationError,
@@ -633,13 +633,16 @@ export function QuestionnaireForm({
         const deceasedDatetime = req.body?.deceased_datetime;
 
         if (deceasedDatetime) {
-          queryClient.setQueryData<Patient>(["patient", patientID], (prev) => {
-            if (!prev) return prev;
-            return {
-              ...prev,
-              deceased_datetime: deceasedDatetime,
-            };
-          });
+          queryClient.setQueryData<PatientRead>(
+            ["patient", patientID],
+            (prev) => {
+              if (!prev) return prev;
+              return {
+                ...prev,
+                deceased_datetime: deceasedDatetime,
+              };
+            },
+          );
         }
       }
     }

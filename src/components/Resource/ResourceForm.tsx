@@ -215,7 +215,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       facility.latitude !== undefined && facility.longitude !== undefined
         ? { latitude: facility.latitude, longitude: facility.longitude }
         : undefined,
-    pincode: facility.pincode?.toString(),
+    pincode: facility.pincode,
     geo_organization: facility.geo_organization?.id ?? undefined,
     is_public: facility.is_public,
   });

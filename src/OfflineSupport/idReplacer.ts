@@ -21,7 +21,6 @@ function walkAndReplace(obj: any, path: string[], idMap: IdMap) {
   }
 }
 
-
 function replaceOfflineIdsInUrl(url: string, idMap: IdMap): string {
   return url.replace(
     /offline-[\w-]+/g,
@@ -58,7 +57,6 @@ export function replaceOfflineIdsInWrite(
       }
     }
   }
-
 
   // if (newWrite.mutationPathParams) {
   //   for (const key in newWrite.mutationPathParams) {
