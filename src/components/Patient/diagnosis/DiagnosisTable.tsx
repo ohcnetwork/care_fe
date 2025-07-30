@@ -200,11 +200,15 @@ export const DiagnosisTable = ({
             <ClinicalInformationRow
               key={diagnosis.id}
               item={diagnosis}
-              patientId={patientId}
-              facilityId={facilityId}
-              encounterId={diagnosis.encounter}
               note={diagnosis.note}
               createdBy={diagnosis.created_by}
+              onViewEncounter={() =>
+                navigate(
+                  facilityId
+                    ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
+                    : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
+                )
+              }
               columns={[
                 {
                   key: "display",

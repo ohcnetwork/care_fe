@@ -1,5 +1,4 @@
 import { BadgeInfo, ExternalLink, File, X } from "lucide-react";
-import { navigate } from "raviger";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -26,22 +25,18 @@ type ColumnConfig<T> = {
 
 interface RowProps<T> {
   item: T;
-  patientId: string;
-  facilityId?: string;
   columns: ColumnConfig<T>[];
-  encounterId: string;
   note?: string;
   createdBy: UserBase;
+  onViewEncounter?: () => void;
 }
 
 export default function ClinicalInformationRow<T>({
   item,
-  patientId,
-  facilityId,
   columns,
-  encounterId,
   note,
   createdBy,
+  onViewEncounter,
 }: RowProps<T>) {
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
@@ -86,13 +81,7 @@ export default function ClinicalInformationRow<T>({
             )}
 
             <DropdownMenuItem
-              onClick={() => {
-                navigate(
-                  facilityId
-                    ? `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`
-                    : `/organization/organizationId/patient/${patientId}/encounter/${encounterId}/updates`,
-                );
-              }}
+              onClick={onViewEncounter}
               className="flex items-center gap-2 px-3 py-2 font-semibold"
             >
               <ExternalLink className="size-4" />

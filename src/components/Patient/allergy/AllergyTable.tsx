@@ -200,9 +200,13 @@ export const AllergyTable = ({
             <ClinicalInformationRow
               key={allergy.id}
               item={allergy}
-              patientId={patientId}
-              facilityId={facilityId}
-              encounterId={allergy.encounter}
+              onViewEncounter={() =>
+                navigate(
+                  facilityId
+                    ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
+                    : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
+                )
+              }
               note={allergy.note}
               createdBy={allergy.created_by}
               columns={[

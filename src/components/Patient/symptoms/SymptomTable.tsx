@@ -208,11 +208,15 @@ export const SymptomTable = ({
             <ClinicalInformationRow
               key={symptom.id}
               item={symptom}
-              patientId={patientId}
-              facilityId={facilityId}
-              encounterId={symptom.encounter}
               note={symptom.note}
               createdBy={symptom.created_by}
+              onViewEncounter={() =>
+                navigate(
+                  facilityId
+                    ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
+                    : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
+                )
+              }
               columns={[
                 {
                   key: "display",
