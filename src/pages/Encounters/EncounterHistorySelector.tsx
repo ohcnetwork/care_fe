@@ -1,14 +1,18 @@
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import React, { useState } from "react";
+import { CircleDashed } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useInView } from "react-intersection-observer";
 
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { FilterSelect } from "@/components/ui/filter-select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -19,14 +23,27 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { DateRangeFilter } from "@/components/Common/DateRangeFilter";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { dateTimeQueryString } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
+  ENCOUNTER_STATUS,
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
+  completedEncounterStatus,
 } from "@/types/emr/encounter/encounter";
-import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
+import encounterApi from "@/types/emr/encounter/encounterApi";
+import {
+  TagConfig,
+  TagResource,
+  getTagHierarchyDisplay,
+} from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 
 interface EncounterCardProps {
   encounter: EncounterRead;
@@ -104,19 +121,103 @@ interface Props {
 
 const EncounterHistoryList = ({ onSelect }: Props) => {
   const { t } = useTranslation();
+  const { ref, inView } = useInView();
+  const [showFilters, setShowFilters] = useState(false);
+
+  const [status, setStatus] = useState<string>();
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [dateFrom, setDateFrom] = useState<Date>();
+  const [dateTo, setDateTo] = useState<Date>();
 
   const {
     currentEncounter,
     currentEncounterId,
     selectedEncounterId,
     setSelectedEncounter,
-    pastEncounters,
+    patientId,
+    facilityId,
   } = useEncounter();
+
+  const tagConfigsQuery = useTagConfigs({ ids: selectedTagIds, facilityId });
+  const selectedTags = tagConfigsQuery
+    .map((q) => q.data)
+    .filter(Boolean) as TagConfig[];
+
+  const handleStatusChange = (value: string | undefined) => {
+    setStatus(value);
+  };
+
+  const handleTagsChange = (tags: TagConfig[]) => {
+    setSelectedTagIds(tags.map((tag) => tag.id));
+  };
+
+  const handleDateFromChange = (date: Date | undefined) => {
+    setDateFrom(date);
+  };
+
+  const handleDateToChange = (date: Date | undefined) => {
+    setDateTo(date);
+  };
 
   const handleSelect = (encounterId: string | null) => {
     setSelectedEncounter(encounterId);
     onSelect?.();
   };
+
+  const {
+    data: encounters,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: [
+      "infinite-encounters",
+      "past",
+      patientId,
+      status,
+      selectedTagIds,
+      dateFrom,
+      dateTo,
+    ],
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(encounterApi.list, {
+        queryParams: {
+          limit: 14,
+          offset: String(pageParam),
+          ...(completedEncounterStatus.includes(currentEncounter?.status ?? "")
+            ? { patient_filter: patientId, facility: facilityId }
+            : { patient: patientId }),
+          ...(status && { status }),
+          ...(selectedTagIds.length > 0 && { tags: selectedTagIds.join(",") }),
+          ...(dateFrom && {
+            created_date_after: dateTimeQueryString(dateFrom),
+          }),
+          ...(dateTo && {
+            created_date_before: dateTimeQueryString(dateTo, true),
+          }),
+        },
+      })({ signal });
+      return response as PaginatedResponse<EncounterRead>;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * 14;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
+    enabled: !!currentEncounter,
+  });
+
+  const past = encounters?.pages.flatMap((page) => page.results) ?? [];
+
+  const pastEncounters = past.filter(
+    (encounter) => encounter.id !== currentEncounterId,
+  );
+
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, fetchNextPage]);
 
   return (
     <div className="space-y-4 pt-2">
@@ -124,8 +225,8 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
         <CardListSkeleton count={1} />
       ) : (
         <div>
-          <h2 className="px-4 mb-2 text-xs font-medium text-gray-600 uppercase">
-            {t("current_encounter")}
+          <h2 className="mb-2 text-xs font-medium text-gray-600 uppercase">
+            {t("chosen_encounter")}
           </h2>
           <div className="space-y-2">
             <EncounterCard
@@ -139,15 +240,69 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
 
       <Separator className="my-4" />
 
-      {!pastEncounters ? (
-        <CardListSkeleton count={5} />
-      ) : pastEncounters.results.length > 0 ? (
+      <div>
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xs font-medium text-gray-600 uppercase">
+              {t("other_encounters")}
+            </h2>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setShowFilters(!showFilters)}
+              className={cn(showFilters && "bg-gray-100")}
+              title={t("toggle_filters")}
+            >
+              <CareIcon icon="l-filter" className="size-4" />
+            </Button>
+          </div>
+
+          {/* Filters */}
+          {showFilters && (
+            <div className="flex flex-col gap-2 mb-4">
+              <FilterSelect
+                value={status || ""}
+                onValueChange={handleStatusChange}
+                options={[...ENCOUNTER_STATUS]}
+                label={t("status")}
+                onClear={() => setStatus(undefined)}
+                icon={<CircleDashed className="size-4 text-gray-600" />}
+                className="bg-white font-medium rounded-md hover:bg-gray-100 h-9"
+              />
+
+              <TagSelectorPopover
+                selected={selectedTags}
+                onChange={handleTagsChange}
+                resource={TagResource.ENCOUNTER}
+                asFilter
+                className="mt-0 bg-white font-medium rounded-md"
+              />
+
+              <DateRangeFilter
+                dateFrom={dateFrom}
+                dateTo={dateTo}
+                onDateFromChange={handleDateFromChange}
+                onDateToChange={handleDateToChange}
+                onDateRangeChange={(from, to) => {
+                  setDateFrom(from);
+                  setDateTo(to);
+                }}
+                onClear={() => {
+                  setDateFrom(undefined);
+                  setDateTo(undefined);
+                }}
+                popoverPlaceholder={t("select_created_date_range")}
+                className="bg-white font-medium rounded-md"
+              />
+            </div>
+          )}
+        </div>
+
         <div>
-          <h2 className="px-4 mb-2 text-xs font-medium text-gray-600 uppercase">
-            {t("past_encounters")}
-          </h2>
-          <div>
-            {pastEncounters.results.reduce<React.ReactNode[]>(
+          {!encounters ? (
+            <CardListSkeleton count={5} />
+          ) : pastEncounters.length > 0 ? (
+            pastEncounters.reduce<React.ReactNode[]>(
               (acc, encounter, index) => {
                 const currentYear = new Date(
                   encounter.period.start!,
@@ -155,7 +310,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
                 const prevYear =
                   index > 0
                     ? new Date(
-                        pastEncounters.results[index - 1].period.start!,
+                        pastEncounters[index - 1].period.start!,
                       ).getFullYear()
                     : null;
 
@@ -163,7 +318,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
                   acc.push(
                     <div
                       key={`year-${currentYear}`}
-                      className="px-4 mb-2 text-sm font-medium text-indigo-700"
+                      className="mb-2 text-sm font-medium text-indigo-700"
                     >
                       {currentYear}
                     </div>,
@@ -181,10 +336,17 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
                 return acc;
               },
               [],
-            )}
-          </div>
+            )
+          ) : (
+            <div className="px-4 py-8 text-center text-gray-500">
+              {t("no_encounters_found")}
+            </div>
+          )}
+          <div ref={ref} />
+          {isFetchingNextPage && <CardListSkeleton count={5} />}
+          {!hasNextPage && <div className="border-b border-gray-300 pb-2" />}
         </div>
-      ) : null}
+      </div>
     </div>
   );
 };
@@ -198,7 +360,7 @@ export default function EncounterHistorySelector() {
     <>
       <div className="lg:hidden">
         <h2 className="px-2 mb-2 text-xs font-medium text-gray-600 uppercase">
-          {t("selected_encounter")}
+          {t("chosen_encounter")}
         </h2>
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger className="w-full">

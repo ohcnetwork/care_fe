@@ -5,12 +5,11 @@ import { createContext, useContext } from "react";
 import { Permissions, getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { usePermissions } from "@/context/PermissionContext";
-import { completedEncounterStatus } from "@/types/emr/encounter/encounter";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { PatientRead } from "@/types/emr/patient/patient";
+import patientApi from "@/types/emr/patient/patientApi";
 
 type EncounterContextType = {
   currentEncounterId: string;
@@ -20,12 +19,10 @@ type EncounterContextType = {
 
   patient: PatientRead | undefined;
   currentEncounter: EncounterRead | undefined;
-  pastEncounters: PaginatedResponse<EncounterRead> | undefined;
   selectedEncounter: EncounterRead | undefined;
   isPatientLoading: boolean;
   isCurrentEncounterLoading: boolean;
   isSelectedEncounterLoading: boolean;
-  isPastEncountersLoading: boolean;
   setSelectedEncounter: (encounterId: string | null) => void;
   currentEncounterPermissions: Permissions;
   selectedEncounterPermissions: Permissions;
@@ -51,6 +48,13 @@ export function EncounterProvider({
   const [{ selectedEncounter: selectedEncounterId = encounterId }, setQParams] =
     useQueryParams();
 
+  const { data: patient, isLoading: isPatientLoading } = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: query(patientApi.getPatient, {
+      pathParams: { id: patientId },
+    }),
+  });
+
   const { data: currentEncounter, isLoading: isCurrentEncounterLoading } =
     useQuery({
       queryKey: ["encounter", currentEncounterId],
@@ -72,22 +76,6 @@ export function EncounterProvider({
           : { patient: patientId },
       }),
     });
-
-  const { data: encounters, isLoading: isPastEncountersLoading } = useQuery({
-    queryKey: ["encounters", "past", patientId],
-    // Apply patient_filter only if the current encounter is completed
-    queryFn: query(encounterApi.list, {
-      queryParams: completedEncounterStatus.includes(
-        currentEncounter?.status ?? "",
-      )
-        ? { patient_filter: patientId, facility: facilityId }
-        : { patient: patientId, facility: facilityId },
-    }),
-    enabled: !!currentEncounter,
-  });
-
-  const patient = currentEncounter?.patient;
-  const isPatientLoading = isCurrentEncounterLoading;
 
   const setSelectedEncounter = (encounterId: string | null) => {
     setQParams(
@@ -122,18 +110,10 @@ export function EncounterProvider({
         selectedEncounterId,
         patient,
         currentEncounter,
-        pastEncounters: encounters && {
-          ...encounters,
-          results:
-            encounters?.results.filter(
-              (encounter) => encounter.id !== currentEncounterId,
-            ) ?? [],
-        },
         selectedEncounter,
         isPatientLoading,
         isCurrentEncounterLoading,
         isSelectedEncounterLoading,
-        isPastEncountersLoading,
         setSelectedEncounter,
         currentEncounterPermissions,
         selectedEncounterPermissions,
