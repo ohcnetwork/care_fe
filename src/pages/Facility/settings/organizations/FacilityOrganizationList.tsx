@@ -157,7 +157,7 @@ export default function FacilityOrganizationList({
               defaultSize={20}
               minSize={15}
               maxSize={30}
-              className="h-full hidden md:block"
+              className="h-full hidden lg:block"
             >
               <FacilityOrganizationNavbar
                 facilityId={facilityId}
@@ -169,7 +169,7 @@ export default function FacilityOrganizationList({
             </ResizablePanel>
             <ResizableHandle
               withHandle
-              className="hidden md:flex items-center justify-center"
+              className="hidden lg:flex items-center justify-center"
             />
             <ResizablePanel defaultSize={80} className="pl-0 h-full">
               <div className="flex-1 space-y-3 sm:space-y-4 rounded-lg md:shadow-lg overflow-hidden ml-0 md:ml-4 md:bg-white">
