@@ -373,7 +373,7 @@ const AppointmentDetails = ({
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-4 text-sm ">
+          <div className="flex items-center space-x-4 text-sm">
             <MobileIcon className="size-5 text-gray-600" />
             <div>
               <p className="font-medium">
