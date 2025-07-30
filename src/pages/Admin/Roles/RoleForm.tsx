@@ -37,7 +37,7 @@ export default function RoleForm({
       .array(z.string())
       .min(1, t("at_least_one_permission_required")),
   });
-  type RoleFormValues = z.infer<typeof roleSchema>;
+  // type RoleFormValues = z.infer<typeof roleSchema>;
 
   const {
     register,
@@ -45,7 +45,7 @@ export default function RoleForm({
     setValue,
     watch,
     formState: { errors },
-  } = useForm<RoleFormValues>({
+  } = useForm({
     resolver: zodResolver(roleSchema),
     defaultValues: {
       name: role?.name || "",
