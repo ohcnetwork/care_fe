@@ -47,6 +47,7 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
+import { ClickableAddress } from "@/components/Common/ClickableAddress";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
@@ -398,13 +399,17 @@ const AppointmentDetails = ({
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-4 text-sm">
-            <DrawingPinIcon className="size-5 text-gray-600" />
-            <div>
-              <p className="font-medium">
-                {appointment.patient.address || t("no_address_provided")}
+          <div className="flex flex-row items-start gap-4 text-sm">
+            <DrawingPinIcon className="size-5 text-gray-600 mt-1" />
+            <div className="min-w-0 flex-1">
+              <p className="font-medium break-words">
+                <ClickableAddress
+                  address={
+                    appointment.patient.address || t("no_address_provided")
+                  }
+                />
               </p>
-              <p className="text-gray-600">
+              <p className="text-gray-600 break-words">
                 {stringifyNestedObject(appointment.patient.geo_organization)}
               </p>
               <p className="text-gray-600">

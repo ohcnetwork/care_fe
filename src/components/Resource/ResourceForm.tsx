@@ -76,7 +76,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     }),
     emergency: z.enum(["true", "false"]),
     title: z.string().min(1, { message: t("field_required") }),
-    reason: z.string().min(1, { message: t("field_required") }),
+    reason: z
+      .string()
+      .trim()
+      .min(1, { message: t("field_required") }),
     referring_facility_contact_name: z
       .string()
       .min(1, { message: t("field_required") }),
