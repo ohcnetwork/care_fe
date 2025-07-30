@@ -119,7 +119,7 @@ export default function ObservationDefinitionForm({
   const isEditMode = Boolean(observationDefinitionId);
 
   const { data: existingData, isFetching } = useQuery({
-    queryKey: ["observationDefinition", observationDefinitionId],
+    queryKey: ["observationDefinitions", observationDefinitionId],
     queryFn: query(observationDefinitionApi.retrieveObservationDefinition, {
       pathParams: {
         observationDefinitionId: observationDefinitionId!,
@@ -228,9 +228,6 @@ function ObservationDefinitionFormContent({
       }),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["observationDefinitions"] });
-        queryClient.invalidateQueries({
-          queryKey: ["observationDefinition", observationDefinitionId],
-        });
         toast.success(t("observation_definition_updated"));
         navigate(
           `/facility/${facilityId}/settings/observation_definitions/${observationDefinitionId}`,

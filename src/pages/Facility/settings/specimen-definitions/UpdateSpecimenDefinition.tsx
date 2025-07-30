@@ -23,7 +23,7 @@ export function UpdateSpecimenDefinition({
   const queryClient = useQueryClient();
 
   const { data: specimenDefinition, isFetching } = useQuery({
-    queryKey: ["specimen_definitions", facilityId, specimenDefinitionId],
+    queryKey: ["specimenDefinitions", facilityId, specimenDefinitionId],
     queryFn: query(specimenDefinitionApi.retrieveSpecimenDefinition, {
       pathParams: { facilityId, specimenDefinitionId },
     }),
@@ -37,10 +37,7 @@ export function UpdateSpecimenDefinition({
       onSuccess: () => {
         toast.success(t("specimen_definition_updated"));
         queryClient.invalidateQueries({
-          queryKey: ["specimen_definitions", facilityId],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["specimen_definitions", facilityId, specimenDefinitionId],
+          queryKey: ["specimenDefinitions", facilityId],
         });
         navigate(`/specimen_definitions/${specimenDefinitionId}`);
       },

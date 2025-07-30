@@ -80,7 +80,7 @@ export default function ObservationDefinitionView({
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["observationDefinition", observationDefinitionId],
+    queryKey: ["observationDefinitions", observationDefinitionId],
     queryFn: query(observationDefinitionApi.retrieveObservationDefinition, {
       pathParams: { observationDefinitionId },
     }),
@@ -93,10 +93,7 @@ export default function ObservationDefinitionView({
       }),
       onSuccess: () => {
         toast.success(t("definition_deleted_successfully"));
-        queryClient.invalidateQueries({ queryKey: ["observationDefinition"] });
-        queryClient.invalidateQueries({
-          queryKey: ["observationDefinition", observationDefinitionId],
-        });
+        queryClient.invalidateQueries({ queryKey: ["observationDefinitions"] });
         navigate(`/facility/${facilityId}/settings/observation_definitions`);
       },
     });

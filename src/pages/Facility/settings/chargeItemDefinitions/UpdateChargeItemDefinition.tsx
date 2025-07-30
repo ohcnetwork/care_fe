@@ -29,7 +29,7 @@ export function UpdateChargeItemDefinition({
     isFetching,
     error,
   } = useQuery({
-    queryKey: ["charge_item_definition", chargeItemDefinitionId],
+    queryKey: ["chargeItemDefinitions", chargeItemDefinitionId],
     queryFn: query(chargeItemDefinitionApi.retrieveChargeItemDefinition, {
       pathParams: { facilityId, chargeItemDefinitionId },
     }),

@@ -29,7 +29,7 @@ export function CreateSpecimenDefinition({
     onSuccess: () => {
       toast.success(t("specimen_definition_created"));
       queryClient.invalidateQueries({
-        queryKey: ["specimen_definitions", facilityId],
+        queryKey: ["specimenDefinitions", facilityId],
       });
       onSuccess?.();
     },

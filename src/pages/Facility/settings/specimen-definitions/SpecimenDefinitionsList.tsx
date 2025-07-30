@@ -98,7 +98,7 @@ export function SpecimenDefinitionsList({
   }, []);
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["specimen_definitions", facilityId, qParams],
+    queryKey: ["specimenDefinitions", facilityId, qParams],
     queryFn: query.debounced(specimenDefinitionApi.listSpecimenDefinitions, {
       pathParams: { facilityId },
       queryParams: {
