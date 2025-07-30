@@ -37,7 +37,6 @@ export default function RoleForm({
       .array(z.string())
       .min(1, t("at_least_one_permission_required")),
   });
-  // type RoleFormValues = z.infer<typeof roleSchema>;
 
   const {
     register,
@@ -74,7 +73,7 @@ export default function RoleForm({
     },
   });
 
-  const onSubmit = (data: RoleFormValues) => {
+  const onSubmit = (data: z.infer<typeof roleSchema>) => {
     const payload = {
       name: data.name,
       description: data.description,
