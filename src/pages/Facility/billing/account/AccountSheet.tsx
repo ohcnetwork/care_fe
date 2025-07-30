@@ -274,7 +274,12 @@ export function AccountSheet({
               <SheetFooter>
                 <Button
                   type="submit"
-                  disabled={isCreating || updateMutation.isPending}
+                  disabled={
+                    isCreating ||
+                    updateMutation.isPending ||
+                    !methods.formState.isValid ||
+                    !methods.formState.isDirty
+                  }
                 >
                   {isEdit ? t("update") : t("create")}
                 </Button>
