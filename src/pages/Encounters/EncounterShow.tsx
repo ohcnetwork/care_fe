@@ -28,10 +28,7 @@ import { EncounterObservationsTab } from "@/pages/Encounters/tabs/EncounterObser
 import { EncounterOverviewTab } from "@/pages/Encounters/tabs/EncounterOverviewTab";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import {
-  EncounterRead,
-  inactiveEncounterStatus,
-} from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 
 import { EncounterDiagnosticReportsTab } from "./tabs/EncounterDiagnosticReportsTab";
@@ -168,9 +165,7 @@ export const EncounterShow = (props: Props) => {
     <Page title={t("encounter")} className="block" hideTitleOnPage>
       <EncounterHeader />
       <div className="flex flex-col lg:flex-row gap-6 lg:gap-2 mt-4">
-        {!inactiveEncounterStatus.includes(currentEncounter.status) && (
-          <EncounterHistorySelector />
-        )}
+        <EncounterHistorySelector />
         <NavTabs
           showMoreAfterIndex={showMoreAfterIndex}
           className="w-full overflow-x-auto"
