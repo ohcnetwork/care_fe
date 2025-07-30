@@ -277,7 +277,7 @@ export default function FacilityOrganizationView({
           {children?.results?.length ? (
             <>
               <div
-                className="hidden sm:block rounded-lg border overflow-x-auto"
+                className="hidden sm:block rounded-lg border"
                 data-cy="department-team-list"
               >
                 <Table>
