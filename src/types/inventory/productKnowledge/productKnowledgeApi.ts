@@ -1,5 +1,5 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { PaginatedResponse, UpsertRequest } from "@/Utils/request/types";
 import {
   ProductKnowledgeBase,
   ProductKnowledgeCreate,
@@ -28,5 +28,12 @@ export default {
     method: HttpMethod.PUT,
     TRes: Type<ProductKnowledgeBase>(),
     TBody: Type<ProductKnowledgeUpdate>(),
+  },
+  upsertProductKnowledge: {
+    path: "/api/v1/product_knowledge/upsert/",
+    method: HttpMethod.POST,
+    TRes: Type<ProductKnowledgeBase>(),
+    TBody:
+      Type<UpsertRequest<ProductKnowledgeCreate, ProductKnowledgeUpdate>>(),
   },
 } as const;

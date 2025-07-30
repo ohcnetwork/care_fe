@@ -194,6 +194,24 @@ export const humanizeStrings = (strings: readonly string[], empty = "") => {
 };
 
 /**
+ * Parses a string value to an enum value.
+ * @param enumObj - The enum object to parse.
+ * @param value - The string value to parse.
+ * @returns The enum value.
+ */
+export function parseEnum<TEnum extends Record<string, string | number>>(
+  enumObj: TEnum,
+  value: string | number | undefined,
+) {
+  if (
+    value !== undefined &&
+    Object.values(enumObj).includes(value as TEnum[keyof TEnum])
+  ) {
+    return value as TEnum[keyof TEnum];
+  }
+}
+
+/**
  * Although same as `Objects.keys(...)`, this provides better type-safety.
  */
 export const keysOf = <T extends object>(obj: T) => {

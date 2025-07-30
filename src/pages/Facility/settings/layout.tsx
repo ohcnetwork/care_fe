@@ -11,6 +11,7 @@ import CreateDevice from "@/pages/Facility/settings/devices/CreateDevice";
 import DeviceDetail from "@/pages/Facility/settings/devices/DeviceShow";
 import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
 import UpdateDevice from "@/pages/Facility/settings/devices/UpdateDevice";
+import ProductKnowledgeImport from "@/pages/Facility/settings/productKnowledge/ProductKnowledgeImport";
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
 
@@ -148,6 +149,9 @@ const getRoutes = (facilityId: string) => ({
   "/product_knowledge": () => <ProductKnowledgeList facilityId={facilityId} />,
   "/product_knowledge/new": () => (
     <ProductKnowledgeForm facilityId={facilityId} />
+  ),
+  "/product_knowledge/import": () => (
+    <ProductKnowledgeImport facilityId={facilityId} />
   ),
   "/product_knowledge/:id": ({ id }: { id: string }) => (
     <ProductKnowledgeView facilityId={facilityId} productKnowledgeId={id} />
