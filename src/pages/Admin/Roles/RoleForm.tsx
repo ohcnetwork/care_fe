@@ -31,12 +31,10 @@ export default function RoleForm({
   const queryClient = useQueryClient();
 
   const roleSchema = z.object({
-    name: z.string().trim().min(1, t("name_required")),
+    name: z.string().trim().min(1, t("name_is_required")),
     description: z.string().trim().optional(),
     permissions: z
-      .array(z.string(), {
-        required_error: t("at_least_one_permission_required"),
-      })
+      .array(z.string())
       .min(1, t("at_least_one_permission_required")),
   });
   type RoleFormValues = z.infer<typeof roleSchema>;
