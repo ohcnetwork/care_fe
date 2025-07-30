@@ -142,7 +142,17 @@ export function EntitySelectionSheet({
           disabled={disabled}
           placeholder={placeholder || t(`select_${entityType}`)}
           title={t(`select_${entityType}`)}
-          value={selectedEntity || undefined}
+          mobileTrigger={
+            <Button
+              variant="outline"
+              role="combobox"
+              className="w-full border border-primary rounded-md px-2 text-primary-700"
+              disabled={disabled}
+            >
+              <CareIcon icon="l-plus" className="mr-2" />
+              <span className="font-semibold">{placeholder}</span>
+            </Button>
+          }
         />
       ) : (
         <ValueSetSelect

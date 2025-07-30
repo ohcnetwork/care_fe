@@ -41,6 +41,7 @@ interface Props {
   value?: Code;
   hideTrigger?: boolean;
   wrapTextForSmallScreen?: boolean;
+  mobileTrigger?: React.ReactNode;
 }
 
 export default function MedicationValueSetSelect({
@@ -52,6 +53,7 @@ export default function MedicationValueSetSelect({
   value,
   hideTrigger = false,
   wrapTextForSmallScreen = false,
+  mobileTrigger,
 }: Props) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
@@ -161,21 +163,25 @@ export default function MedicationValueSetSelect({
     return (
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            className={cn(
-              "w-full justify-between",
-              wrapTextForSmallScreen
-                ? "h-auto whitespace-normal text-left"
-                : "truncate",
-              !value?.display && "text-gray-400",
-            )}
-            disabled={disabled}
-          >
-            <span>{value?.display || placeholder}</span>
-            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-          </Button>
+          {mobileTrigger ? (
+            mobileTrigger
+          ) : (
+            <Button
+              variant="outline"
+              role="combobox"
+              className={cn(
+                "w-full justify-between",
+                wrapTextForSmallScreen
+                  ? "h-auto whitespace-normal text-left"
+                  : "truncate",
+                !value?.display && "text-gray-400",
+              )}
+              disabled={disabled}
+            >
+              <span>{value?.display || placeholder}</span>
+              <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+            </Button>
+          )}
         </SheetTrigger>
         <SheetContent side="bottom" className="px-0 pt-2 pb-0 rounded-t-2xl">
           <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto bg-gray-300 mt-2" />
