@@ -179,6 +179,32 @@ export default function ValueSetSelect({
     );
   }
 
+  if (hideTrigger) {
+    return (
+      <>
+        <ValueSetSearchContent
+          system={system}
+          onSelect={(selected) => {
+            onSelect(selected);
+            if (closeOnSelect) {
+              setInternalOpen(false);
+            } else {
+              inputRef.current?.focus();
+            }
+          }}
+          count={count}
+          searchPostFix={searchPostFix}
+          showCode={showCode}
+          search={search}
+          onSearchChange={setSearch}
+          title={title}
+          placeholder={placeholder}
+        />
+        {alert}
+      </>
+    );
+  }
+
   return (
     <>
       <Popover
@@ -186,31 +212,28 @@ export default function ValueSetSelect({
         onOpenChange={setInternalOpen}
         modal={true}
       >
-        {!hideTrigger && (
-          <PopoverTrigger asChild disabled={disabled}>
-            <div className="w-full">
-              <Button
-                type="button"
-                variant="outline"
-                role="combobox"
-                className={cn(
-                  "justify-between truncate",
-                  !value?.display && "text-gray-400",
+        <PopoverTrigger asChild disabled={disabled}>
+          <div className="w-full">
+            <Button
+              type="button"
+              variant="outline"
+              role="combobox"
+              className={cn(
+                "justify-between truncate",
+                !value?.display && "text-gray-400",
+              )}
+            >
+              <span>
+                {value?.display || placeholder}
+                {value?.display && showCode && (
+                  <span className="text-xs ml-1">({value?.code})</span>
                 )}
-              >
-                <span>
-                  {value?.display || placeholder}
-                  {value?.display && showCode && (
-                    <span className="text-xs ml-1">({value?.code})</span>
-                  )}
-                </span>
-                <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-              </Button>
-            </div>
-          </PopoverTrigger>
-        )}
-
-        {hideTrigger ? (
+              </span>
+              <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+            </Button>
+          </div>
+        </PopoverTrigger>
+        <PopoverContent className="transition-all w-150 p-0" align="start">
           <ValueSetSearchContent
             system={system}
             onSelect={(selected) => {
@@ -221,6 +244,7 @@ export default function ValueSetSelect({
                 inputRef.current?.focus();
               }
             }}
+            placeholder={placeholder}
             count={count}
             searchPostFix={searchPostFix}
             showCode={showCode}
@@ -228,28 +252,7 @@ export default function ValueSetSelect({
             onSearchChange={setSearch}
             title={title}
           />
-        ) : (
-          <PopoverContent className="transition-all w-150 p-0" align="start">
-            <ValueSetSearchContent
-              system={system}
-              onSelect={(selected) => {
-                onSelect(selected);
-                if (closeOnSelect) {
-                  setInternalOpen(false);
-                } else {
-                  inputRef.current?.focus();
-                }
-              }}
-              placeholder={placeholder}
-              count={count}
-              searchPostFix={searchPostFix}
-              showCode={showCode}
-              search={search}
-              onSearchChange={setSearch}
-              title={title}
-            />
-          </PopoverContent>
-        )}
+        </PopoverContent>
       </Popover>
       {alert}
     </>

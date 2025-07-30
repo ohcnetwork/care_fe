@@ -154,6 +154,7 @@ export default function MedicationValueSetSelect({
           title={title}
           search={search}
           onSearchChange={setSearch}
+          placeholder={placeholder}
         />
       </TabsContent>
     </Tabs>
