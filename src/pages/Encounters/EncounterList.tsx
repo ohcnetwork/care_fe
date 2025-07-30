@@ -273,75 +273,80 @@ export function EncounterList({
                       <SelectItem value="all">{t("all_priorities")}</SelectItem>
                       <SelectItem value="asap">
                         <div className="flex items-center">
-                          <span className="mr-2">🟡</span> {t("asap")}
+                          <span className="mr-2">🟡</span>{" "}
+                          {t("encounter_priority__ASAP")}
                         </div>
                       </SelectItem>
                       <SelectItem value="callback_results">
                         <div className="flex items-center">
                           <span className="mr-2">🔵</span>
-                          {t("callback_results")}
+                          {t("encounter_priority__callback_results")}
                         </div>
                       </SelectItem>
                       <SelectItem value="callback_for_scheduling">
                         <div className="flex items-center">
                           <span className="mr-2">🟣</span>
-                          {t("callback_for_scheduling")}
+                          {t("encounter_priority__callback_for_scheduling")}
                         </div>
                       </SelectItem>
                       <SelectItem value="elective">
                         <div className="flex items-center">
                           <span className="mr-2">🟤</span>
-                          {t("elective")}
+                          {t("encounter_priority__elective")}
                         </div>
                       </SelectItem>
                       <SelectItem value="emergency">
                         <div className="flex items-center">
-                          <span className="mr-2">🔴</span> {t("emergency")}
+                          <span className="mr-2">🔴</span>{" "}
+                          {t("encounter_priority__emergency")}
                         </div>
                       </SelectItem>
                       <SelectItem value="preop">
                         <div className="flex items-center">
-                          <span className="mr-2">🟠</span> {t("pre_op")}
+                          <span className="mr-2">🟠</span>{" "}
+                          {t("encounter_priority__preop")}
                         </div>
                       </SelectItem>
                       <SelectItem value="as_needed">
                         <div className="flex items-center">
                           <span className="mr-2">⚫️</span>
-                          {t("as_needed")}
+                          {t("encounter_priority__as_needed")}
                         </div>
                       </SelectItem>
                       <SelectItem value="routine">
                         <div className="flex items-center">
                           <span className="mr-2">⚪️</span>
-                          {t("routine")}
+                          {t("encounter_priority__routine")}
                         </div>
                       </SelectItem>
                       <SelectItem value="rush_reporting">
                         <div className="flex items-center">
                           <span className="mr-2">🟤</span>
-                          {t("rush_reporting")}
+                          {t("encounter_priority__rush_reporting")}
                         </div>
                       </SelectItem>
                       <SelectItem value="stat">
                         <div className="flex items-center">
-                          <span className="mr-2">🔴</span> {t("stat")}
+                          <span className="mr-2">🔴</span>{" "}
+                          {t("encounter_priority__stat")}
                         </div>
                       </SelectItem>
                       <SelectItem value="timing_critical">
                         <div className="flex items-center">
                           <span className="mr-2">🟡</span>
-                          {t("timing_critical")}
+                          {t("encounter_priority__timing_critical")}
                         </div>
                       </SelectItem>
                       <SelectItem value="use_as_directed">
                         <div className="flex items-center">
                           <span className="mr-2">🔵</span>
-                          {t("use_as_directed")}
+                          {t("encounter_priority__use_as_directed")}
                         </div>
                       </SelectItem>
                       <SelectItem value="urgent">
                         <div className="flex items-center">
-                          <span className="mr-2">🟠</span> {t("urgent")}
+                          <span className="mr-2">🟠</span>{" "}
+                          {t("encounter_priority__urgent")}
                         </div>
                       </SelectItem>
                     </SelectContent>
