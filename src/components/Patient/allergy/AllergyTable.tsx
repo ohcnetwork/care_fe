@@ -33,7 +33,7 @@ const AllergyCard = ({
   onViewEncounter,
 }: {
   allergy: AllergyIntolerance;
-  onViewEncounter: () => void;
+  onViewEncounter?: () => void;
 }) => {
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
@@ -74,13 +74,15 @@ const AllergyCard = ({
                 </DropdownMenuItem>
               )}
 
-              <DropdownMenuItem
-                onClick={onViewEncounter}
-                className="flex items-center gap-2 px-3 py-2 font-semibold"
-              >
-                <ExternalLink className="size-4" />
-                <span>{t("go_to_encounter")}</span>
-              </DropdownMenuItem>
+              {!!onViewEncounter && (
+                <DropdownMenuItem
+                  onClick={onViewEncounter}
+                  className="flex items-center gap-2 px-3 py-2 font-semibold"
+                >
+                  <ExternalLink className="size-4" />
+                  <span>{t("go_to_encounter")}</span>
+                </DropdownMenuItem>
+              )}
 
               <div className="my-2 border-t border-dashed border-gray-300" />
 
@@ -147,9 +149,11 @@ const AllergyCard = ({
 export const AllergyTable = ({
   allergies,
   patientId,
+  showViewEncounter = true,
 }: {
   allergies: AllergyIntolerance[];
   patientId: string;
+  showViewEncounter?: boolean;
 }) => {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
@@ -164,13 +168,14 @@ export const AllergyTable = ({
           <AllergyCard
             key={allergy.id}
             allergy={allergy}
-            onViewEncounter={() =>
-              navigate(
-                facilityId
-                  ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
-                  : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
-              )
-            }
+            {...(showViewEncounter && {
+              onViewEncounter: () =>
+                navigate(
+                  facilityId
+                    ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
+                    : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
+                ),
+            })}
           />
         );
       })}
@@ -199,13 +204,14 @@ export const AllergyTable = ({
           {allergies.map((allergy) => (
             <ClinicalInformationRow
               key={allergy.id}
-              onViewEncounter={() =>
-                navigate(
-                  facilityId
-                    ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
-                    : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
-                )
-              }
+              {...(showViewEncounter && {
+                onViewEncounter: () =>
+                  navigate(
+                    facilityId
+                      ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
+                      : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
+                  ),
+              })}
               note={allergy.note}
               createdBy={allergy.created_by}
               columns={[

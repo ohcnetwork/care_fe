@@ -40,6 +40,7 @@ interface AllergyListProps {
   readOnly?: boolean;
   encounterStatus?: EncounterStatus;
   showTimeline?: boolean;
+  showViewEncounter?: boolean;
 }
 interface GroupedAllergies {
   [year: string]: {
@@ -63,6 +64,7 @@ export function AllergyList({
   readOnly = false,
   encounterStatus,
   showTimeline = false,
+  showViewEncounter = true,
 }: AllergyListProps) {
   const { t } = useTranslation();
 
@@ -193,7 +195,11 @@ export function AllergyList({
         </Button>
       }
     >
-      <AllergyTable allergies={allergies} patientId={patientId} />
+      <AllergyTable
+        allergies={allergies}
+        patientId={patientId}
+        showViewEncounter={showViewEncounter}
+      />
       {hasNextPage && (
         <div className="flex justify-center">
           <Button

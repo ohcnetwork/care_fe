@@ -33,7 +33,7 @@ const DiagnosisCard = ({
   onViewEncounter,
 }: {
   diagnosis: Diagnosis;
-  onViewEncounter: () => void;
+  onViewEncounter?: () => void;
 }) => {
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
@@ -73,13 +73,15 @@ const DiagnosisCard = ({
                 </DropdownMenuItem>
               )}
 
-              <DropdownMenuItem
-                onClick={onViewEncounter}
-                className="flex items-center gap-2 px-3 py-2 font-semibold"
-              >
-                <ExternalLink className="size-4" />
-                <span>{t("go_to_encounter")}</span>
-              </DropdownMenuItem>
+              {!!onViewEncounter && (
+                <DropdownMenuItem
+                  onClick={onViewEncounter}
+                  className="flex items-center gap-2 px-3 py-2 font-semibold"
+                >
+                  <ExternalLink className="size-4" />
+                  <span>{t("go_to_encounter")}</span>
+                </DropdownMenuItem>
+              )}
 
               <div className="my-2 border-t border-dashed border-gray-300" />
 
@@ -150,9 +152,11 @@ const DiagnosisCard = ({
 export const DiagnosisTable = ({
   diagnoses,
   patientId,
+  showViewEncounter = true,
 }: {
   diagnoses: Diagnosis[];
   patientId: string;
+  showViewEncounter?: boolean;
 }) => {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
@@ -166,13 +170,14 @@ export const DiagnosisTable = ({
         <DiagnosisCard
           key={diagnosis.id}
           diagnosis={diagnosis}
-          onViewEncounter={() =>
-            navigate(
-              facilityId
-                ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
-                : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
-            )
-          }
+          {...(showViewEncounter && {
+            onViewEncounter: () =>
+              navigate(
+                facilityId
+                  ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
+                  : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
+              ),
+          })}
         />
       ))}
     </div>
@@ -201,13 +206,14 @@ export const DiagnosisTable = ({
               key={diagnosis.id}
               note={diagnosis.note}
               createdBy={diagnosis.created_by}
-              onViewEncounter={() =>
-                navigate(
-                  facilityId
-                    ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
-                    : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
-                )
-              }
+              {...(showViewEncounter && {
+                onViewEncounter: () =>
+                  navigate(
+                    facilityId
+                      ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
+                      : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
+                  ),
+              })}
               columns={[
                 {
                   key: "display",

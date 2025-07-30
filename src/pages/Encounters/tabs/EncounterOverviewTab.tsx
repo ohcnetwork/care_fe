@@ -197,6 +197,7 @@ export const EncounterOverviewTab = () => {
               encounterId={encounterId}
               readOnly={!canEdit}
               encounterStatus={encounter?.status}
+              showViewEncounter={false}
             />
           </div>
           {/* Symptoms Section */}
@@ -205,6 +206,7 @@ export const EncounterOverviewTab = () => {
               patientId={patientId}
               encounterId={encounterId}
               readOnly={!canEdit}
+              showViewEncounter={false}
             />
           </div>
           {/* Diagnoses Section */}
@@ -213,6 +215,7 @@ export const EncounterOverviewTab = () => {
               patientId={patientId}
               encounterId={encounterId}
               readOnly={!canEdit}
+              showViewEncounter={false}
             />
           </div>
 

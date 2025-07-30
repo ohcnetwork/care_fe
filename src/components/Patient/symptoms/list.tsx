@@ -24,6 +24,7 @@ interface SymptomsListProps {
   className?: string;
   readOnly?: boolean;
   showTimeline?: boolean;
+  showViewEncounter?: boolean;
 }
 
 interface GroupedSymptoms {
@@ -38,6 +39,7 @@ export function SymptomsList({
   className,
   readOnly = false,
   showTimeline = false,
+  showViewEncounter = true,
 }: SymptomsListProps) {
   const { t } = useTranslation();
 
@@ -165,7 +167,11 @@ export function SymptomsList({
         </Button>
       }
     >
-      <SymptomTable symptoms={symptoms} patientId={patientId} />
+      <SymptomTable
+        symptoms={symptoms}
+        patientId={patientId}
+        showViewEncounter={showViewEncounter}
+      />
       {hasNextPage && (
         <div className="flex justify-center">
           <Button variant="ghost" size="xs" onClick={() => fetchNextPage()}>

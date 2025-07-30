@@ -27,6 +27,7 @@ interface DiagnosisListProps {
   className?: string;
   readOnly?: boolean;
   showTimeline?: boolean;
+  showViewEncounter?: boolean;
 }
 
 interface GroupedDiagnoses {
@@ -41,6 +42,7 @@ export function DiagnosisList({
   className = "",
   readOnly = false,
   showTimeline = false,
+  showViewEncounter = true,
 }: DiagnosisListProps) {
   const { t } = useTranslation();
 
@@ -173,7 +175,11 @@ export function DiagnosisList({
     >
       <div className="space-y-2">
         {diagnoses.length ? (
-          <DiagnosisTable diagnoses={diagnoses} patientId={patientId} />
+          <DiagnosisTable
+            diagnoses={diagnoses}
+            patientId={patientId}
+            showViewEncounter={showViewEncounter}
+          />
         ) : null}
       </div>
       {hasNextPage && (

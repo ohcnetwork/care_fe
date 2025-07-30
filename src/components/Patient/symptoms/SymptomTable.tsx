@@ -34,7 +34,7 @@ const SymptomCard = ({
   onViewEncounter,
 }: {
   symptom: Symptom;
-  onViewEncounter: () => void;
+  onViewEncounter?: () => void;
 }) => {
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
@@ -72,13 +72,15 @@ const SymptomCard = ({
                 </DropdownMenuItem>
               )}
 
-              <DropdownMenuItem
-                onClick={onViewEncounter}
-                className="flex items-center gap-2 px-3 py-2 font-semibold"
-              >
-                <ExternalLink className="size-4" />
-                <span>{t("go_to_encounter")}</span>
-              </DropdownMenuItem>
+              {!!onViewEncounter && (
+                <DropdownMenuItem
+                  onClick={onViewEncounter}
+                  className="flex items-center gap-2 px-3 py-2 font-semibold"
+                >
+                  <ExternalLink className="size-4" />
+                  <span>{t("go_to_encounter")}</span>
+                </DropdownMenuItem>
+              )}
 
               <div className="my-2 border-t border-dashed border-gray-300" />
 
@@ -157,9 +159,11 @@ const SymptomCard = ({
 export const SymptomTable = ({
   symptoms,
   patientId,
+  showViewEncounter = true,
 }: {
   symptoms: Symptom[];
   patientId: string;
+  showViewEncounter?: boolean;
 }) => {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
@@ -172,13 +176,14 @@ export const SymptomTable = ({
         <SymptomCard
           key={symptom.id}
           symptom={symptom}
-          onViewEncounter={() =>
-            navigate(
-              facilityId
-                ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
-                : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
-            )
-          }
+          {...(showViewEncounter && {
+            onViewEncounter: () =>
+              navigate(
+                facilityId
+                  ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
+                  : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
+              ),
+          })}
         />
       ))}
     </div>
@@ -209,13 +214,14 @@ export const SymptomTable = ({
               key={symptom.id}
               note={symptom.note}
               createdBy={symptom.created_by}
-              onViewEncounter={() =>
-                navigate(
-                  facilityId
-                    ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
-                    : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
-                )
-              }
+              {...(showViewEncounter && {
+                onViewEncounter: () =>
+                  navigate(
+                    facilityId
+                      ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
+                      : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
+                  ),
+              })}
               columns={[
                 {
                   key: "display",

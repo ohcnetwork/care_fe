@@ -78,13 +78,15 @@ export default function ClinicalInformationRow({
               </DropdownMenuItem>
             )}
 
-            <DropdownMenuItem
-              onClick={onViewEncounter}
-              className="flex items-center gap-2 px-3 py-2 font-semibold"
-            >
-              <ExternalLink className="size-4" />
-              <span>{t("go_to_encounter")}</span>
-            </DropdownMenuItem>
+            {!!onViewEncounter && (
+              <DropdownMenuItem
+                onClick={onViewEncounter}
+                className="flex items-center gap-2 px-3 py-2 font-semibold"
+              >
+                <ExternalLink className="size-4" />
+                <span>{t("go_to_encounter")}</span>
+              </DropdownMenuItem>
+            )}
 
             <div className="my-2 border-t border-dashed border-gray-300" />
 
