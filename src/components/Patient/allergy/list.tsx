@@ -14,8 +14,8 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import EmptyState from "@/components/Patient/Common/EmptyState";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
-import { EmptyState } from "@/components/Patient/Util";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";

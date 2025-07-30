@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { GenericRow } from "@/components/Patient/Util";
+import ClinicalInformationRow from "@/components/Patient/Common/ClinicalInformationRow";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -198,7 +198,7 @@ export const AllergyTable = ({
             )}
           ></div>
           {allergies.map((allergy) => (
-            <GenericRow
+            <ClinicalInformationRow
               key={allergy.id}
               item={allergy}
               patientId={patientId}

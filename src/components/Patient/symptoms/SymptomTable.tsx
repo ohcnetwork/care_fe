@@ -16,7 +16,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
-import { GenericRow } from "@/components/Patient/Util";
+import ClinicalInformationRow from "@/components/Patient/Common/ClinicalInformationRow";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -208,7 +208,7 @@ export const SymptomTable = ({
           ></div>
 
           {symptoms.map((symptom) => (
-            <GenericRow
+            <ClinicalInformationRow
               key={symptom.id}
               item={symptom}
               patientId={patientId}
