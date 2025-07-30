@@ -71,7 +71,7 @@ const consentFormSchema = (isEdit: boolean) =>
         start: z.iso.datetime({ offset: true }).optional(),
         end: z.iso.datetime({ offset: true }).optional(),
       }),
-      note: z.string().optional(),
+      note: z.string().trim().optional(),
       fileEntries: z
         .array(
           z.object({
