@@ -44,6 +44,7 @@ import {
   ProductKnowledgeType,
   ProductKnowledgeUpdate,
   ProductNameTypes,
+  UCUM_TIME_UNITS_CODES,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 
@@ -651,31 +652,62 @@ function ProductKnowledgeFormContent({
                               )}
                             />
 
-                            <div>
-                              <FormLabel aria-required>
-                                {t("duration_unit")}
-                              </FormLabel>
-                              <div className="mt-2">
-                                <ValueSetSelect
-                                  system="system-ucum-units"
-                                  value={form.watch(
-                                    `storage_guidelines.${index}.stability_duration.unit`,
-                                  )}
-                                  placeholder={t("duration_unit_placeholder")}
-                                  onSelect={(code) => {
-                                    form.setValue(
-                                      `storage_guidelines.${index}.stability_duration.unit`,
-                                      {
-                                        code: code.code,
-                                        display: code.display,
-                                        system: code.system,
-                                      },
-                                    );
-                                  }}
-                                  showCode={true}
-                                />
-                              </div>
-                            </div>
+                            <FormField
+                              control={form.control}
+                              name={`storage_guidelines.${index}.stability_duration.unit`}
+                              render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                  <FormLabel aria-required>
+                                    {t("duration_unit")}
+                                  </FormLabel>
+                                  <Select
+                                    value={field.value.code}
+                                    defaultValue={field.value.code}
+                                    onValueChange={(value) => {
+                                      const selectedUnit =
+                                        UCUM_TIME_UNITS_CODES.find(
+                                          (unit) => unit.code === value,
+                                        );
+                                      if (selectedUnit)
+                                        form.setValue(
+                                          `storage_guidelines.${index}.stability_duration.unit`,
+                                          {
+                                            code: selectedUnit.code,
+                                            display: selectedUnit.display,
+                                            system: selectedUnit.system,
+                                          },
+                                        );
+                                    }}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue
+                                          placeholder={t(
+                                            "duration_unit_placeholder",
+                                          )}
+                                        />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {UCUM_TIME_UNITS_CODES.map((duration) => (
+                                        <SelectItem
+                                          key={duration.code}
+                                          value={duration.code}
+                                        >
+                                          <span>
+                                            {t(`unit_${duration.code}`)}
+                                            <span className="text-sm italic ml-1">
+                                              {`(${duration.code})`}
+                                            </span>
+                                          </span>
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
                           </div>
                         </div>
                         <Button
