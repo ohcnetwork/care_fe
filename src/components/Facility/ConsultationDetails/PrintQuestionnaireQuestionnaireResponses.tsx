@@ -12,7 +12,7 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Separator } from "@/components/ui/separator";
 
 import query from "@/Utils/request/query";
-import { formatDateTime, properCase } from "@/Utils/utils";
+import { formatDateTime } from "@/Utils/utils";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -210,8 +210,6 @@ function formatValue(value: ResponseValue["value"], type: string): string {
       return formatDateTime(value as string, "hh:mm A; DD/MM/YYYY");
     case "date":
       return formatDateTime(value as string, "DD/MM/YYYY");
-    case "choice":
-      return properCase(value.toString());
     case "decimal":
     case "integer":
     default:

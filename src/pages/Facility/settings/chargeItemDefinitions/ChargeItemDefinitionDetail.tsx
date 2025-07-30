@@ -91,9 +91,9 @@ export function ChargeItemDefinitionDetail({
         </div>
         <div className="text-right">
           {component.amount ? (
-            <p className="font-medium">₹{component.amount.toFixed(2)}</p>
+            <p className="font-medium">₹{component.amount}</p>
           ) : component.factor ? (
-            <p className="font-medium">{component.factor.toFixed(1)}%</p>
+            <p className="font-medium">{component.factor}%</p>
           ) : (
             <p className="text-sm text-gray-500">{t("not_specified")}</p>
           )}
