@@ -207,7 +207,6 @@ export const SymptomTable = ({
           {symptoms.map((symptom) => (
             <ClinicalInformationRow
               key={symptom.id}
-              item={symptom}
               note={symptom.note}
               createdBy={symptom.created_by}
               onViewEncounter={() =>
@@ -222,53 +221,55 @@ export const SymptomTable = ({
                   key: "display",
                   className:
                     "bg-gray-100 break-words whitespace-normal text-base font-semibold text-gray-900 rounded-l",
-                  render: (item) => item.code.display,
+                  render: () => symptom.code.display,
                 },
                 {
                   key: "severity",
-                  render: (item) => (
+                  render: () => (
                     <Badge
-                      variant={SYMPTOM_SEVERITY_COLORS[item.severity]}
+                      variant={SYMPTOM_SEVERITY_COLORS[symptom.severity]}
                       className="whitespace-nowrap"
                     >
-                      {t(item.severity)}
+                      {t(symptom.severity)}
                     </Badge>
                   ),
                 },
                 {
                   key: "status",
-                  render: (item) => (
+                  render: () => (
                     <Badge
                       variant={
-                        SYMPTOM_CLINICAL_STATUS_COLORS[item.clinical_status]
+                        SYMPTOM_CLINICAL_STATUS_COLORS[symptom.clinical_status]
                       }
                       className="whitespace-nowrap"
                     >
-                      {t(item.clinical_status)}
+                      {t(symptom.clinical_status)}
                     </Badge>
                   ),
                 },
                 {
                   key: "verification",
-                  render: (item) => (
+                  render: () => (
                     <Badge
                       variant={
                         SYMPTOM_VERIFICATION_STATUS_COLORS[
-                          item.verification_status
+                          symptom.verification_status
                         ]
                       }
                       className="whitespace-nowrap"
                     >
-                      {t(item.verification_status)}
+                      {t(symptom.verification_status)}
                     </Badge>
                   ),
                 },
                 {
                   key: "onset",
                   className: "bg-gray-100",
-                  render: (item) =>
-                    item.onset?.onset_datetime ? (
-                      <RelativeDateTooltip date={item.onset.onset_datetime} />
+                  render: () =>
+                    symptom.onset?.onset_datetime ? (
+                      <RelativeDateTooltip
+                        date={symptom.onset.onset_datetime}
+                      />
                     ) : (
                       "-"
                     ),

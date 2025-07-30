@@ -199,7 +199,6 @@ export const AllergyTable = ({
           {allergies.map((allergy) => (
             <ClinicalInformationRow
               key={allergy.id}
-              item={allergy}
               onViewEncounter={() =>
                 navigate(
                   facilityId
@@ -214,44 +213,44 @@ export const AllergyTable = ({
                   key: "display",
                   className:
                     "bg-gray-100 break-words whitespace-normal text-base font-semibold text-gray-900 rounded-l",
-                  render: (item) => item.code.display,
+                  render: () => allergy.code.display,
                 },
                 {
                   key: "status",
-                  render: (item) => (
+                  render: () => (
                     <Badge
                       variant={
-                        ALLERGY_CLINICAL_STATUS_COLORS[item.clinical_status]
+                        ALLERGY_CLINICAL_STATUS_COLORS[allergy.clinical_status]
                       }
                       className="whitespace-nowrap"
                     >
-                      {t(item.clinical_status)}
+                      {t(allergy.clinical_status)}
                     </Badge>
                   ),
                 },
                 {
                   key: "criticality",
-                  render: (item) => (
+                  render: () => (
                     <Badge
-                      variant={ALLERGY_CRITICALITY_COLORS[item.criticality]}
+                      variant={ALLERGY_CRITICALITY_COLORS[allergy.criticality]}
                       className="whitespace-nowrap"
                     >
-                      {t(item.criticality)}
+                      {t(allergy.criticality)}
                     </Badge>
                   ),
                 },
                 {
                   key: "verification",
-                  render: (item) => (
+                  render: () => (
                     <Badge
                       variant={
                         ALLERGY_VERIFICATION_STATUS_COLORS[
-                          item.verification_status
+                          allergy.verification_status
                         ]
                       }
                       className="whitespace-nowrap"
                     >
-                      {t(item.verification_status)}
+                      {t(allergy.verification_status)}
                     </Badge>
                   ),
                 },

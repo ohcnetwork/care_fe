@@ -199,7 +199,6 @@ export const DiagnosisTable = ({
           {diagnoses.map((diagnosis) => (
             <ClinicalInformationRow
               key={diagnosis.id}
-              item={diagnosis}
               note={diagnosis.note}
               createdBy={diagnosis.created_by}
               onViewEncounter={() =>
@@ -214,42 +213,46 @@ export const DiagnosisTable = ({
                   key: "display",
                   className:
                     "bg-gray-100 break-words whitespace-normal text-base font-semibold text-gray-900 rounded-l",
-                  render: (d) => d.code.display,
+                  render: () => diagnosis.code.display,
                 },
                 {
                   key: "status",
-                  render: (d) => (
+                  render: () => (
                     <Badge
                       variant={
-                        DIAGNOSIS_CLINICAL_STATUS_COLORS[d.clinical_status]
+                        DIAGNOSIS_CLINICAL_STATUS_COLORS[
+                          diagnosis.clinical_status
+                        ]
                       }
                       className="whitespace-nowrap"
                     >
-                      {t(d.clinical_status)}
+                      {t(diagnosis.clinical_status)}
                     </Badge>
                   ),
                 },
                 {
                   key: "verification",
-                  render: (d) => (
+                  render: () => (
                     <Badge
                       variant={
                         DIAGNOSIS_VERIFICATION_STATUS_COLORS[
-                          d.verification_status
+                          diagnosis.verification_status
                         ]
                       }
                       className="whitespace-nowrap"
                     >
-                      {t(d.verification_status)}
+                      {t(diagnosis.verification_status)}
                     </Badge>
                   ),
                 },
                 {
                   key: "onset",
                   className: "bg-gray-100",
-                  render: (d) =>
-                    d.onset?.onset_datetime ? (
-                      <RelativeDateTooltip date={d.onset.onset_datetime} />
+                  render: () =>
+                    diagnosis.onset?.onset_datetime ? (
+                      <RelativeDateTooltip
+                        date={diagnosis.onset.onset_datetime}
+                      />
                     ) : (
                       "-"
                     ),

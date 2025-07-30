@@ -17,27 +17,25 @@ import { Avatar } from "@/components/Common/Avatar";
 import { formatName } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
 
-type ColumnConfig<T> = {
+type Column = {
   key: string;
-  render: (item: T) => React.ReactNode;
+  render: () => React.ReactNode;
   className?: string;
 };
 
-interface RowProps<T> {
-  item: T;
-  columns: ColumnConfig<T>[];
+interface RowProps {
+  columns: Column[];
   note?: string;
   createdBy: UserBase;
   onViewEncounter?: () => void;
 }
 
-export default function ClinicalInformationRow<T>({
-  item,
+export default function ClinicalInformationRow({
   columns,
   note,
   createdBy,
   onViewEncounter,
-}: RowProps<T>) {
+}: RowProps) {
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
 
@@ -54,7 +52,7 @@ export default function ClinicalInformationRow<T>({
             col.className,
           )}
         >
-          {col.render(item)}
+          {col.render()}
         </div>
       ))}
 
