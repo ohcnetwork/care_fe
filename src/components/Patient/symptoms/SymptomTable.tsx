@@ -31,12 +31,10 @@ import {
 
 const SymptomCard = ({
   symptom,
-  patientId,
-  facilityId,
+  onViewEncounter,
 }: {
   symptom: Symptom;
-  patientId: string;
-  facilityId?: string;
+  onViewEncounter: () => void;
 }) => {
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
@@ -75,13 +73,7 @@ const SymptomCard = ({
               )}
 
               <DropdownMenuItem
-                onClick={() =>
-                  navigate(
-                    facilityId
-                      ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
-                      : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
-                  )
-                }
+                onClick={onViewEncounter}
                 className="flex items-center gap-2 px-3 py-2 font-semibold"
               >
                 <ExternalLink className="size-4" />
@@ -180,8 +172,13 @@ export const SymptomTable = ({
         <SymptomCard
           key={symptom.id}
           symptom={symptom}
-          patientId={patientId}
-          facilityId={facilityId}
+          onViewEncounter={() =>
+            navigate(
+              facilityId
+                ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
+                : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
+            )
+          }
         />
       ))}
     </div>

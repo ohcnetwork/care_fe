@@ -30,12 +30,10 @@ import {
 
 const AllergyCard = ({
   allergy,
-  patientId,
-  facilityId,
+  onViewEncounter,
 }: {
   allergy: AllergyIntolerance;
-  patientId: string;
-  facilityId?: string;
+  onViewEncounter: () => void;
 }) => {
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
@@ -77,13 +75,7 @@ const AllergyCard = ({
               )}
 
               <DropdownMenuItem
-                onClick={() =>
-                  navigate(
-                    facilityId
-                      ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
-                      : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
-                  )
-                }
+                onClick={onViewEncounter}
                 className="flex items-center gap-2 px-3 py-2 font-semibold"
               >
                 <ExternalLink className="size-4" />
@@ -167,14 +159,21 @@ export const AllergyTable = ({
 
   return isMobile ? (
     <div className="space-y-3">
-      {allergies.map((allergy) => (
-        <AllergyCard
-          key={allergy.id}
-          allergy={allergy}
-          patientId={patientId}
-          facilityId={facilityId}
-        />
-      ))}
+      {allergies.map((allergy) => {
+        return (
+          <AllergyCard
+            key={allergy.id}
+            allergy={allergy}
+            onViewEncounter={() =>
+              navigate(
+                facilityId
+                  ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
+                  : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
+              )
+            }
+          />
+        );
+      })}
     </div>
   ) : (
     <div className="max-w-6xl mb-4 overflow-x-auto">
