@@ -59,11 +59,13 @@ export function AccountList({
   facilityId,
   patientId,
   hideTitleOnPage = false,
+  hidePatientName = false,
   className,
 }: {
   facilityId: string;
   patientId?: string;
   hideTitleOnPage?: boolean;
+  hidePatientName?: boolean;
   className?: string;
 }) {
   const { t } = useTranslation();
@@ -221,7 +223,7 @@ export function AccountList({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t("patient")}</TableHead>
+                <TableHead>{t("account")}</TableHead>
                 <TableHead>{t("balance")}</TableHead>
                 <TableHead>{t("account_status")}</TableHead>
                 <TableHead>{t("billing_status")}</TableHead>
@@ -239,13 +241,28 @@ export function AccountList({
                         <div className="text-base font-semibold leading-6">
                           {account.name}
                         </div>
+                        {!hidePatientName && (
+                          <div className="flex items-center gap-1 text-sm text-gray-600">
+                            <span
+                              className="inline-flex text-sm text-gray-600 cursor-pointer underline"
+                              onClick={() =>
+                                navigate(
+                                  `/facility/${facilityId}/patient/${account.patient.id}`,
+                                )
+                              }
+                            >
+                              {account.patient.name}
+                              <ArrowUpRightSquare className="size-4 ml-1 mt-0.5" />
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </TableCell>
                   <TableCell
                     className={cn(
                       "border-x p-3 text-base font-medium leading-6",
-                      account.total_balance > 0
+                      Number(account.total_balance) > 0
                         ? "text-gray-950"
                         : "text-green-700 italic",
                     )}

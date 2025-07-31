@@ -3,7 +3,7 @@ import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
 import { Badge } from "@/components/ui/badge";
 
 import { Time } from "@/Utils/types";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { UserBase } from "@/types/user/user";
@@ -165,10 +165,10 @@ export type AppointmentStatus = (typeof AppointmentStatuses)[number];
 export interface Appointment {
   id: string;
   token_slot: TokenSlot;
-  patient: Patient;
+  patient: PatientRead;
   booked_on: string;
   status: AppointmentNonCancelledStatus;
-  reason_for_visit: string;
+  note: string;
   user: UserBase;
   booked_by: UserBase | null; // This is null if the appointment was booked by the patient itself.
   facility: FacilityBareMinimum;
@@ -183,20 +183,34 @@ export interface AppointmentRead extends Appointment {
 
 export interface AppointmentCreateRequest {
   patient: string;
-  reason_for_visit: string;
-  tags?: string[];
+  note: string;
+  tags: string[];
+}
+
+export interface AppointmentCreatePublicRequest {
+  patient: string;
+  note: string;
 }
 
 export interface AppointmentUpdateRequest {
   status: Appointment["status"];
+  note: string;
 }
 
 export interface CreateAppointmentQuestion {
-  reason_for_visit: string;
+  note: string;
   slot_id: string;
+  tags: string[];
 }
 
 export interface AppointmentCancelRequest {
   reason: "cancelled" | "entered_in_error";
-  reason_for_visit?: string;
+  note?: string;
+}
+
+export interface AppointmentRescheduleRequest {
+  new_slot: string;
+  previous_booking_note: string;
+  new_booking_note: string;
+  tags: string[];
 }

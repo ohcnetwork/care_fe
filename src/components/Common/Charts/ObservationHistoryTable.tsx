@@ -14,10 +14,10 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { Code } from "@/types/base/code/code";
 import { ObservationWithUser } from "@/types/emr/observation";
+import patientApi from "@/types/emr/patient/patientApi";
 
 interface PaginatedResponse<T> {
   count: number;
@@ -54,9 +54,13 @@ export const ObservationHistoryTable = ({
   const { data, isLoading, hasNextPage, fetchNextPage } = useInfiniteQuery<
     PaginatedResponse<ObservationWithUser>
   >({
-    queryKey: ["observations", patientId, codes.map((c) => c.code).join(",")],
+    queryKey: [
+      "infinite-observations",
+      patientId,
+      codes.map((c) => c.code).join(","),
+    ],
     queryFn: async ({ pageParam = 0 }) => {
-      const response = await query(routes.listObservations, {
+      const response = await query(patientApi.listObservations, {
         pathParams: { patientId },
         queryParams: {
           encounter: encounterId,

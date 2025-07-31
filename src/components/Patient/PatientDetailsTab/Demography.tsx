@@ -9,6 +9,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
+import { ClickableAddress } from "@/components/Common/ClickableAddress";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
@@ -37,7 +38,6 @@ export const Demography = (props: PatientProps) => {
   );
 
   const [activeSection, _setActiveSection] = useState<string | null>(null);
-
   const patientGender = GENDER_TYPES.find(
     (i) => i.id === patientData.gender,
   )?.text;
@@ -171,7 +171,7 @@ export const Demography = (props: PatientProps) => {
                 className="text-sm font-normal text-sky-600 hover:text-sky-300"
                 rel="noreferrer"
               >
-                <CareIcon icon="l-whatsapp" /> Chat on WhatsApp
+                <CareIcon icon="l-whatsapp" /> {t("chat_on_whatsapp")}
               </a>
             </div>
           ),
@@ -203,11 +203,13 @@ export const Demography = (props: PatientProps) => {
         />,
         {
           label: t("current_address"),
-          value: patientData.address,
+          value: <ClickableAddress address={patientData.address || ""} />,
         },
         {
           label: t("permanent_address"),
-          value: patientData.permanent_address,
+          value: (
+            <ClickableAddress address={patientData.permanent_address || ""} />
+          ),
         },
         ...getGeoOrgDetails(patientData.geo_organization),
       ],
@@ -215,7 +217,7 @@ export const Demography = (props: PatientProps) => {
     {
       id: "identifiers",
       allowEdit: false,
-      details: patientData.instance_identifiers.map((i) => ({
+      details: patientData.instance_identifiers?.map((i) => ({
         label: i.config.config.display,
         value: i.value,
       })),

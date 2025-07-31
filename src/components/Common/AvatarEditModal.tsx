@@ -1,16 +1,9 @@
 import careConfig from "@careConfig";
 import DOMPurify from "dompurify";
 import { Crop } from "lucide-react";
-import {
-  ChangeEventHandler,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { ChangeEventHandler, useEffect, useState } from "react";
 import Cropper, { type Area } from "react-easy-crop";
 import { useTranslation } from "react-i18next";
-import Webcam from "react-webcam";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -26,11 +19,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import CameraCaptureDialog from "@/components/Files/CameraCaptureDialog";
+
 import useDragAndDrop from "@/hooks/useDragAndDrop";
-import { useMediaStream } from "@/hooks/useMediaStream";
 
 import { getCroppedImg } from "@/Utils/getCroppedImg";
-import { useMediaDevicePermission } from "@/Utils/useMediaDevicePermission";
 
 interface Props {
   title: string;
@@ -47,36 +40,8 @@ interface Props {
   aspectRatio: number;
 }
 
-const VideoConstraints = {
-  user: {
-    width: {
-      min: 400,
-      max: 1024,
-    },
-    height: {
-      min: 400,
-      max: 1024,
-    },
-    facingMode: "user",
-  },
-  environment: {
-    width: {
-      min: 400,
-      max: 1024,
-    },
-    height: {
-      min: 400,
-      max: 1024,
-    },
-    facingMode: "environment",
-  },
-} as const;
-
 const MAX_FILE_SIZE = careConfig.imageUploadMaxSizeInMB * 1024 * 1024; // 2MB
 const isImageFile = (file?: File) => file?.type.split("/")[0] === "image";
-
-type IVideoConstraint =
-  (typeof VideoConstraints)[keyof typeof VideoConstraints];
 
 export default function AvatarEditModal({
   title,
@@ -89,90 +54,23 @@ export default function AvatarEditModal({
   aspectRatio = 1,
 }: Props) {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File>();
   const [preview, setPreview] = useState<string>();
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
-  const webRef = useRef<Webcam>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [croppedPreview, setCroppedPreview] = useState<string | null>(null);
-  const [constraint, setConstraint] = useState<IVideoConstraint>(
-    VideoConstraints.user,
-  );
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
-  const { requestPermission } = useMediaDevicePermission();
   const [showCroppedPreview, setShowCroppedPreview] = useState(false);
   const [showCameraPreview, setShowCameraPreview] = useState(false);
-
-  const { startStream, stopStream } = useMediaStream({
-    constraints: { video: { facingMode: constraint.facingMode } },
-  });
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (isCameraOpen) {
-      timer = setTimeout(() => {
-        startStream();
-      }, 100);
-    }
-
-    return () => {
-      clearTimeout(timer);
-      stopStream();
-    };
-  }, [isCameraOpen]);
-
-  const handleSwitchCamera = useCallback(() => {
-    setConstraint(
-      constraint.facingMode === "user"
-        ? VideoConstraints.environment
-        : VideoConstraints.user,
-    );
-  }, []);
-
-  const captureImage = () => {
-    if (webRef.current) {
-      const video = webRef.current.video;
-      if (!video) return;
-
-      const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d");
-      if (!context) return;
-
-      const width = Math.min(Math.max(video.videoWidth, 400), 1024);
-      const height = Math.min(Math.max(video.videoHeight, 400), 1024);
-
-      canvas.width = width;
-      canvas.height = height;
-
-      context.drawImage(video, 0, 0, width, height);
-
-      const imageData = canvas.toDataURL("image/jpeg");
-      setPreview(imageData);
-      setShowCameraPreview(true);
-
-      canvas.toBlob(
-        (blob) => {
-          if (blob) {
-            const myFile = new File([blob], "image.png", {
-              type: blob.type,
-            });
-            setSelectedFile(myFile);
-          } else {
-            toast.error(t("failed_to_capture_image"));
-          }
-        },
-        "image/jpeg",
-        1.0,
-      );
-    }
-  };
 
   const closeModal = () => {
     setPreview(undefined);
     setIsProcessing(false);
+    setIsDeleting(false);
     setSelectedFile(undefined);
     setIsCameraOpen(false);
     setCroppedAreaPixels(null);
@@ -202,6 +100,10 @@ export default function AvatarEditModal({
       return;
     }
     const file = e.target.files[0];
+    if (file.type === "image/gif") {
+      toast.error(t("avatar_gif_not_allowed"));
+      return;
+    }
     if (file.size > MAX_FILE_SIZE) {
       toast.error(
         t("image_size_error", { size: careConfig.imageUploadMaxSizeInMB }),
@@ -211,6 +113,8 @@ export default function AvatarEditModal({
     setSelectedFile(file);
     setShowCroppedPreview(false);
     setShowCameraPreview(false);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
   };
 
   const cropImage = async () => {
@@ -261,14 +165,14 @@ export default function AvatarEditModal({
   };
 
   const deleteAvatar = async () => {
-    setIsProcessing(true);
+    setIsDeleting(true);
     await handleDelete(
       () => {
-        setIsProcessing(false);
+        setIsDeleting(false);
         setPreview(undefined);
         closeModal();
       },
-      () => setIsProcessing(false),
+      () => setIsDeleting(false),
     );
   };
 
@@ -280,6 +184,10 @@ export default function AvatarEditModal({
     const droppedFile = e?.dataTransfer?.files[0];
     if (!isImageFile(droppedFile))
       return dragProps.setFileDropError(t("please_upload_an_image_file"));
+    if (droppedFile.type === "image/gif") {
+      dragProps.setFileDropError(t("avatar_gif_not_allowed"));
+      return;
+    }
     if (droppedFile.size > MAX_FILE_SIZE) {
       dragProps.setFileDropError(
         t("image_size_error", { size: careConfig.imageUploadMaxSizeInMB }),
@@ -468,6 +376,7 @@ export default function AvatarEditModal({
                       id="upload-cover-image"
                       variant="primary"
                       className="w-full"
+                      disabled={isProcessing || isDeleting}
                       asChild
                     >
                       <label className="cursor-pointer">
@@ -482,6 +391,7 @@ export default function AvatarEditModal({
                           accept="image/*"
                           className="hidden"
                           onChange={onSelectFile}
+                          disabled={isProcessing || isDeleting}
                         />
                       </label>
                     </Button>
@@ -502,7 +412,7 @@ export default function AvatarEditModal({
                       closeModal();
                       dragProps.setFileDropError("");
                     }}
-                    disabled={isProcessing}
+                    disabled={isProcessing || isDeleting}
                   >
                     {t("cancel")}
                   </Button>
@@ -510,9 +420,15 @@ export default function AvatarEditModal({
                     <Button
                       variant="destructive"
                       onClick={deleteAvatar}
-                      disabled={isProcessing}
+                      disabled={isProcessing || isDeleting}
                     >
-                      {t("delete")}
+                      {isDeleting ? (
+                        <CareIcon
+                          icon="l-spinner"
+                          className="animate-spin text-lg mr-1"
+                        />
+                      ) : null}
+                      {isDeleting ? `${t("deleting")}...` : t("delete")}
                     </Button>
                   )}
                   <Button
@@ -522,6 +438,7 @@ export default function AvatarEditModal({
                     disabled={
                       (!!imageUrl && !preview) ||
                       isProcessing ||
+                      isDeleting ||
                       !selectedFile ||
                       (!croppedAreaPixels && !showCroppedPreview)
                     }
@@ -538,72 +455,32 @@ export default function AvatarEditModal({
                     )}
                     <span>
                       {isProcessing
-                        ? `${t("uploading")}...`
+                        ? showCroppedPreview
+                          ? t("uploading_indicator")
+                          : t("cropping_indicator")
                         : showCroppedPreview
-                          ? `${t("upload")}`
-                          : `${t("crop")}`}
+                          ? t("upload")
+                          : t("crop")}
                     </span>
                   </Button>
                 </div>
               </>
             ) : (
-              <>
-                <div className="flex flex-1 items-center justify-center">
-                  <Webcam
-                    audio={false}
-                    screenshotFormat="image/jpeg"
-                    ref={webRef}
-                    videoConstraints={{
-                      ...constraint,
-                      width: {
-                        ...constraint.width,
-                        ideal: window.innerWidth,
-                      },
-                      height: {
-                        ...constraint.height,
-                        ideal: window.innerHeight,
-                      },
-                    }}
-                    onUserMediaError={async () => {
-                      const requestValue = await requestPermission({
-                        video: { facingMode: "user" },
-                      });
-                      if (!requestValue.hasPermission) {
-                        setIsCameraOpen(false);
-                      }
-                    }}
-                  />
-                </div>
-                <div className="flex flex-col gap-2 pt-4 sm:flex-row">
-                  <Button variant="primary" onClick={handleSwitchCamera}>
-                    <CareIcon icon="l-camera-change" className="text-lg" />
-                    {`${t("switch")} ${t("camera")}`}
-                  </Button>
-                  <Button
-                    variant="primary"
-                    onClick={() => {
-                      captureImage();
-                      setIsCameraOpen(false);
-                    }}
-                  >
-                    <CareIcon icon="l-capture" className="text-lg" />
-                    {t("capture")}
-                  </Button>
-                  <div className="sm:flex-1"></div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setIsCameraOpen(false);
-                      setPreview(undefined);
-                      closeModal();
-                    }}
-                    disabled={isProcessing}
-                  >
-                    {t("close")}
-                  </Button>
-                </div>
-              </>
+              <CameraCaptureDialog
+                open={isCameraOpen}
+                onOpenChange={setIsCameraOpen}
+                onCapture={(file) => {
+                  setSelectedFile(file);
+                  setShowCameraPreview(true);
+                }}
+                onResetCapture={() => {
+                  setSelectedFile(undefined);
+                  setShowCameraPreview(false);
+                }}
+                setPreview={(isPreview) => {
+                  setShowCameraPreview(isPreview);
+                }}
+              />
             )}
           </div>
         </div>

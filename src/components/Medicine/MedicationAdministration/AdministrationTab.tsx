@@ -26,7 +26,7 @@ import { formatDosage } from "@/components/Medicine/utils";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
   MedicationAdministrationRead,
   MedicationAdministrationRequest,
@@ -400,7 +400,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   const { t } = useTranslation();
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;
-  const { facilityId } = useCurrentFacility();
+  const { facilityId } = useCurrentFacilitySilently();
 
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
@@ -507,9 +507,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
         if (!existingDate || adminDate > new Date(existingDate)) {
           acc.dates[admin.request] = admin.occurrence_period_start;
-          acc.performers[admin.request] = admin.created_by
-            ? formatName(admin.created_by)
-            : "";
+          acc.performers[admin.request] = formatName(admin.created_by);
         }
 
         return acc;

@@ -13,6 +13,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -107,6 +109,7 @@ interface TagSelectorProps {
   onChange: (tags: TagConfig[]) => void;
   resource: TagResource;
   asFilter?: boolean;
+  className?: string;
 }
 
 export function TagSelectorPopover({
@@ -114,10 +117,12 @@ export function TagSelectorPopover({
   onChange,
   asFilter = false,
   resource,
+  className,
 }: TagSelectorProps) {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
+  const { t } = useTranslation();
 
   // Fetch top-level tags
   const { data: rootTags, isLoading } = useQuery({
@@ -126,9 +131,12 @@ export function TagSelectorPopover({
       queryParams: {
         resource,
         parent_is_null: true,
+        status: "active",
+        ordering: "priority",
         ...(search ? { search } : {}),
       },
     }),
+    enabled: open,
   });
 
   // Helper to fetch children for a tag
@@ -136,7 +144,12 @@ export function TagSelectorPopover({
     return useQuery({
       queryKey: ["tags", resource, "parent", parentId],
       queryFn: query(tagConfigApi.list, {
-        queryParams: { resource, parent: parentId },
+        queryParams: {
+          resource,
+          parent: parentId,
+          status: "active",
+          ordering: "priority",
+        },
       }),
       enabled: expanded.has(parentId),
     });
@@ -158,31 +171,34 @@ export function TagSelectorPopover({
               handleSelect(tag);
             }
           }}
-          className={`flex items-center justify-between cursor-pointer ${isGroup ? "font-medium" : ""}`}
+          className={cn(
+            "flex items-center justify-between cursor-pointer",
+            isGroup && "font-medium",
+          )}
         >
           <div className="flex items-center gap-2">
             {isGroup ? (
-              <Folder className="h-4 w-4 text-muted-foreground" />
+              <Folder className="size-4 text-muted-foreground" />
             ) : (
-              <TagIcon className="h-4 w-4 text-muted-foreground" />
+              <TagIcon className="size-4 text-muted-foreground" />
             )}
             <span>{tag.display}</span>
             {isGroup && (
               <Badge variant="outline" className="text-xs ml-2">
-                Group
+                {t("group")}
               </Badge>
             )}
           </div>
           {isGroup ? (
             expanded.has(tag.id) ? (
-              <ChevronDown className="h-4 w-4" />
+              <ChevronDown className="size-4" />
             ) : (
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="size-4" />
             )
           ) : (
             selected.some((t) => t.id === tag.id) && (
               <Badge variant="secondary" className="text-xs">
-                Selected
+                {t("selected")}
               </Badge>
             )
           )}
@@ -192,12 +208,14 @@ export function TagSelectorPopover({
           <div className="ml-6 border-l border-border pl-2">
             {loadingChildren ? (
               <div className="text-xs text-muted-foreground p-2">
-                Loading...
+                {t("loading")}
               </div>
             ) : children?.results?.length ? (
               <TagTree tags={children.results} />
             ) : (
-              <div className="text-xs text-muted-foreground p-2">No tags</div>
+              <div className="text-xs text-muted-foreground p-2">
+                {t("no_tags")}
+              </div>
             )}
           </div>
         )}
@@ -256,7 +274,7 @@ export function TagSelectorPopover({
   }
 
   return (
-    <div>
+    <>
       {/* Selected tags */}
       {selected.length > 0 && !asFilter && (
         <div className="mt-2 flex flex-wrap gap-2">
@@ -266,13 +284,13 @@ export function TagSelectorPopover({
               variant="secondary"
               className="flex items-center gap-1"
             >
-              {tag.parent ? `${tag.parent.display}: ` : ""}
+              {tag.parent && `${tag.parent.display}: `}
               {tag.display}
               <button
                 onClick={() => handleRemove(tag.id)}
                 className="ml-1 hover:bg-black/10 rounded-full p-0.5"
               >
-                <X className="h-3 w-3" />
+                <X className="size-3" />
               </button>
             </Badge>
           ))}
@@ -280,24 +298,59 @@ export function TagSelectorPopover({
       )}
 
       {/* Tag selector popover */}
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={setOpen} modal={true}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="mt-2 w-full justify-between bg-transparent"
+            className={cn(
+              "mt-2 justify-between bg-transparent overflow-hidden",
+              className,
+            )}
           >
             {asFilter ? (
-              <div className="flex items-center gap-2">
-                {selected.length === 0
-                  ? "No filters selected"
-                  : selected.length === 1
-                    ? `Filtering by ${selected[0].display}`
-                    : `${selected.length} filters selected`}
+              <div className="flex items-center justify-between w-full gap-2 -mr-2">
+                <div className="flex items-center gap-2">
+                  <TagIcon className="size-4 text-gray-600" />
+                  {selected.length > 0 ? (
+                    <div className="flex items-center gap-1">
+                      <div className="text-sm font-medium text-gray-950">
+                        {t("tags")}
+                      </div>
+                      <span className="text-sm text-gray-600 underline lowercase">
+                        {t("include")}
+                      </span>
+                      <span className="text-sm text-gray-950 underline">
+                        {selected.length === 1
+                          ? selected[0].display
+                          : `${selected.length} ${t("tags")}`}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-sm text-gray-500 mr-2">
+                      {t("filter_by_tags")}
+                    </span>
+                  )}
+                </div>
+                {selected.length > 0 && (
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onChange([]);
+                    }}
+                    size="icon"
+                    variant="ghost"
+                    className={cn(
+                      "pl-2 size-8 border-l border-gray-400 rounded-none",
+                    )}
+                  >
+                    <X className="text-gray-950" />
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Select tags or browse groups...
+                <Plus className="size-4" />
+                {t("select_tags_browse_group")}
               </div>
             )}
           </Button>
@@ -311,25 +364,19 @@ export function TagSelectorPopover({
               onValueChange={setSearch}
             />
             <CommandList>
-              <CommandEmpty>No tags or groups found.</CommandEmpty>
-              <CommandGroup heading="Tags">
-                {isLoading ? (
-                  <div className="text-xs text-muted-foreground p-2">
-                    Loading...
-                  </div>
-                ) : rootTags?.results?.length ? (
+              <CommandEmpty>
+                {isLoading ? t("loading") : t("no_tags_group")}
+              </CommandEmpty>
+              {!!rootTags?.results?.length && (
+                <CommandGroup heading="Tags">
                   <TagTree tags={rootTags.results} />
-                ) : (
-                  <div className="text-xs text-muted-foreground p-2">
-                    No tags
-                  </div>
-                )}
-              </CommandGroup>
+                </CommandGroup>
+              )}
             </CommandList>
           </Command>
         </PopoverContent>
       </Popover>
-    </div>
+    </>
   );
 }
 
@@ -353,7 +400,7 @@ export default function TagAssignmentSheet({
     mutationFn: mutate(entityConfig.setTagsApi, {
       pathParams: {
         external_id: entityId,
-        facilityId: facilityId,
+        facilityId: facilityId || "",
       },
     }),
     onSuccess: () => {
@@ -371,7 +418,7 @@ export default function TagAssignmentSheet({
     mutationFn: mutate(entityConfig.removeTagsApi, {
       pathParams: {
         external_id: entityId,
-        facilityId: facilityId,
+        facilityId: facilityId || "",
       },
     }),
     onSuccess: () => {
@@ -421,7 +468,7 @@ export default function TagAssignmentSheet({
   const isLoadingTags = isSettingTags || isRemovingTags;
 
   return (
-    <Sheet open={open} onOpenChange={setOpen} modal={false}>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         {trigger || (
           <Button variant="outline" size="sm" disabled={!canWrite}>

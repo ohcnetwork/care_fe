@@ -45,17 +45,20 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import routes from "@/Utils/request/api";
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
+
 import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
   ENCOUNTER_CLASS,
   ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_PRIORITY,
-  Encounter,
   EncounterClass,
-  EncounterRequest,
+  EncounterCreate,
+  EncounterRead,
 } from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 
 interface Props {
   patientId: string;
@@ -77,6 +80,7 @@ export default function CreateEncounterForm({
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
 
   const encounterFormSchema = z.object({
     status: z.enum(["planned", "in_progress", "on_hold"] as const),
@@ -100,8 +104,8 @@ export default function CreateEncounterForm({
   });
 
   const { mutate: createEncounter, isPending } = useMutation({
-    mutationFn: mutate(routes.encounter.create),
-    onSuccess: (data: Encounter) => {
+    mutationFn: mutate(encounterApi.create),
+    onSuccess: (data: EncounterRead) => {
       toast.success(t("encounter_created"));
       setIsOpen(false);
       form.reset();
@@ -114,13 +118,14 @@ export default function CreateEncounterForm({
   });
 
   function onSubmit(data: z.infer<typeof encounterFormSchema>) {
-    const encounterRequest: EncounterRequest = {
+    const encounterRequest: EncounterCreate = {
       ...data,
       patient: patientId,
       facility: facilityId,
       period: {
         start: data.start_date,
       },
+      tags: selectedTags.map((tag) => tag.id),
     };
 
     createEncounter(encounterRequest);
@@ -187,7 +192,7 @@ export default function CreateEncounterForm({
                               updatedDate.setMinutes(date.getMinutes());
                               field.onChange(updatedDate.toISOString());
                             }}
-                            initialFocus
+                            autoFocus
                           />
                         </PopoverContent>
                       </Popover>
@@ -317,6 +322,14 @@ export default function CreateEncounterForm({
                   </FormItem>
                 )}
               />
+              <div>
+                <h3 className="text-sm font-medium">{t("tags")}</h3>
+                <TagSelectorPopover
+                  selected={selectedTags}
+                  onChange={setSelectedTags}
+                  resource={TagResource.ENCOUNTER}
+                />
+              </div>
             </div>
             <FormField
               control={form.control}
