@@ -229,6 +229,7 @@ export default function PatientRegistration(
       nationality: defaultCountry,
       phone_number: phone_number || "",
       emergency_phone_number: "",
+      deceased_datetime: null,
       age_or_dob: "dob",
       date_of_birth: "",
       same_phone_number: false,
@@ -755,7 +756,7 @@ export default function PatientRegistration(
                         form.setValue("_is_deceased", checked as boolean);
                         form.setValue(
                           "deceased_datetime",
-                          checked ? form.getValues("deceased_datetime") : "",
+                          checked ? form.getValues("deceased_datetime") : null,
                         );
                       }}
                       data-cy="is-deceased-checkbox"
