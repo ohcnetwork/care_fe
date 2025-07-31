@@ -24,6 +24,7 @@ import valuesetRoutes from "@/types/valueset/valuesetApi";
 interface Props {
   system: string;
   onSelect: (value: Code) => void;
+  onFavouriteRemove?: (favourite: Code) => void;
   count?: number;
   searchPostFix?: string;
   showCode?: boolean;
@@ -77,6 +78,7 @@ const Item = ({
 export default function ValueSetSearchContent({
   system,
   onSelect,
+  onFavouriteRemove,
   count = 10,
   searchPostFix = "",
   showCode = false,
@@ -236,11 +238,18 @@ export default function ValueSetSearchContent({
                     addRecentMutation.mutate(option);
                   }}
                   onFavourite={() => {
-                    favouritesQuery.data?.find(
+                    const isFavourite = favouritesQuery.data?.find(
                       (favourite) => favourite.code === option.code,
-                    )
-                      ? removeFavouriteMutation.mutate(option)
-                      : addFavouriteMutation.mutate(option);
+                    );
+                    if (isFavourite) {
+                      if (onFavouriteRemove) {
+                        onFavouriteRemove(option);
+                      } else {
+                        removeFavouriteMutation.mutate(option);
+                      }
+                    } else {
+                      addFavouriteMutation.mutate(option);
+                    }
                   }}
                   isFavourite={
                     !!favouritesQuery.data?.find(
@@ -291,11 +300,18 @@ export default function ValueSetSearchContent({
                     addRecentMutation.mutate(option);
                   }}
                   onFavourite={() => {
-                    favouritesQuery.data?.find(
+                    const isFavourite = favouritesQuery.data?.find(
                       (favourite) => favourite.code === option.code,
-                    )
-                      ? removeFavouriteMutation.mutate(option)
-                      : addFavouriteMutation.mutate(option);
+                    );
+                    if (isFavourite) {
+                      if (onFavouriteRemove) {
+                        onFavouriteRemove(option);
+                      } else {
+                        removeFavouriteMutation.mutate(option);
+                      }
+                    } else {
+                      addFavouriteMutation.mutate(option);
+                    }
                   }}
                   isFavourite={
                     !!favouritesQuery.data?.find(

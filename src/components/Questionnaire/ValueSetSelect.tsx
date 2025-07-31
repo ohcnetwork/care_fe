@@ -69,6 +69,7 @@ export default function ValueSetSelect({
   const [search, setSearch] = useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
   const [isClearingFavourites, setIsClearingFavourites] = useState(false);
+  const [favouriteToRemove, setFavouriteToRemove] = useState<Code | null>(null);
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -81,6 +82,18 @@ export default function ValueSetSelect({
         queryKey: ["valueset", system, "favourites"],
       });
       setIsClearingFavourites(false);
+    },
+  });
+
+  const removeFavouriteMutation = useMutation({
+    mutationFn: mutate(valuesetRoutes.removeFavourite, {
+      pathParams: { slug: system },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["valueset", system, "favourites"],
+      });
+      setFavouriteToRemove(null);
     },
   });
 
@@ -101,24 +114,45 @@ export default function ValueSetSelect({
 
   const alert = (
     <AlertDialog
-      open={isClearingFavourites}
-      onOpenChange={(open) => setIsClearingFavourites(open)}
+      open={isClearingFavourites || !!favouriteToRemove}
+      onOpenChange={(open) => {
+        if (!open) {
+          setIsClearingFavourites(false);
+          setFavouriteToRemove(null);
+        }
+      }}
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{t("are_you_sure_clear_starred")}</AlertDialogTitle>
+          <AlertDialogTitle>
+            {favouriteToRemove
+              ? t("are_you_sure_want_to_clear_favourite", {
+                  name: favouriteToRemove.display,
+                })
+              : t("are_you_sure_clear_starred")}
+          </AlertDialogTitle>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setIsClearingFavourites(false)}>
+          <AlertDialogCancel
+            onClick={() => {
+              setIsClearingFavourites(false);
+              setFavouriteToRemove(null);
+            }}
+          >
             {t("cancel")}
           </AlertDialogCancel>
           <AlertDialogAction
             className={cn(buttonVariants({ variant: "destructive" }))}
             onClick={() => {
-              clearFavouritesMutation.mutate({});
+              if (favouriteToRemove) {
+                removeFavouriteMutation.mutate(favouriteToRemove);
+              } else {
+                clearFavouritesMutation.mutate({});
+              }
             }}
           >
-            {clearFavouritesMutation.isPending ? (
+            {clearFavouritesMutation.isPending ||
+            removeFavouriteMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
             ) : (
               t("confirm")
@@ -161,6 +195,7 @@ export default function ValueSetSelect({
                   inputRef.current?.focus();
                 }
               }}
+              onFavouriteRemove={(favourite) => setFavouriteToRemove(favourite)}
               count={count}
               searchPostFix={searchPostFix}
               showCode={showCode}
@@ -217,6 +252,7 @@ export default function ValueSetSelect({
                   inputRef.current?.focus();
                 }
               }}
+              onFavouriteRemove={(favourite) => setFavouriteToRemove(favourite)}
               placeholder={placeholder}
               count={count}
               searchPostFix={searchPostFix}
@@ -273,6 +309,7 @@ export default function ValueSetSelect({
                 inputRef.current?.focus();
               }
             }}
+            onFavouriteRemove={(favourite) => setFavouriteToRemove(favourite)}
             count={count}
             searchPostFix={searchPostFix}
             showCode={showCode}
@@ -292,6 +329,7 @@ export default function ValueSetSelect({
                   inputRef.current?.focus();
                 }
               }}
+              onFavouriteRemove={(favourite) => setFavouriteToRemove(favourite)}
               placeholder={placeholder}
               count={count}
               searchPostFix={searchPostFix}

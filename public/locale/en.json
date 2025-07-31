@@ -647,6 +647,7 @@
   "are_you_sure_mark_as_error_active_bed": "Are you sure you want to mark the active bed assignment as an error?",
   "are_you_sure_want_to_cancel_invoice": "Are you sure you want to mark this invoice as cancelled?",
   "are_you_sure_want_to_delete": "Are you sure you want to delete {{name}}?",
+  "are_you_sure_want_to_clear_favourite": "Are you sure you want to clear {{name}} from favourites?",
   "are_you_sure_want_to_delete_this_record": "Are you sure want to delete this record?",
   "are_you_sure_want_to_mark_as_balanced": "Are you sure you want to mark this invoice as balanced?",
   "are_you_sure_want_to_mark_as_error": "Are you sure you want to mark this invoice as entered in error?",
