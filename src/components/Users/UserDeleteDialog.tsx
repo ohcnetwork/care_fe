@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
@@ -87,20 +86,23 @@ const UserDeleteDialog = (props: ConfirmDialogProps) => {
           <p>
             <Trans
               i18nKey="this_action_is_permanent_and_cannot_be_undone"
-              components={{ strong: <strong /> }}
+              components={{ strong: <strong className="font-semibold" /> }}
             />
           </p>
-          <div className="space-y-2">
-            <Label>
-              <span>
-                <Trans
-                  i18nKey="account_delete_confirm_input_label"
-                  components={{ code: <code className="font-mono" /> }}
-                  values={{ confirmationText: CONFIRMATION_TEXT }}
-                />
-              </span>
-            </Label>
+          <div>
+            <span>
+              <Trans
+                i18nKey="account_delete_confirm_input_label"
+                components={{
+                  code: (
+                    <code className="font-mono px-1 py-0.5 bg-gray-100 rounded" />
+                  ),
+                }}
+                values={{ confirmationText: CONFIRMATION_TEXT }}
+              />
+            </span>
             <Input
+              className="mt-2"
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
             />
