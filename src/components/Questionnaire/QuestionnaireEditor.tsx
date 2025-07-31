@@ -2675,7 +2675,7 @@ function QuestionEditor({
               </div>
               <FormField
                 control={form.control}
-                name={`questions.${index}.questions`}
+                name={`${name}.questions`}
                 render={() => <FormMessage />}
               />
               <div className="space-y-4">
