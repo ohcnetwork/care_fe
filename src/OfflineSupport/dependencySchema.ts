@@ -81,12 +81,28 @@ export const dependencySchema: DependencySchema = {
       path: ["requests", "*", "body", "datapoints", "*", "encounter"],
       resourceType: "encounter",
     },
+
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "patient"],
+      resourceType: "patient",
+    },
   ],
   non_structured_questionnaire: [
     {
       location: "payload",
       path: ["requests", "*", "body", "encounter"],
       resourceType: "encounter",
+    },
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "patient"],
+      resourceType: "patient",
+    },
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "resource_id"],
+      resourceType: "patient",
     },
   ],
 

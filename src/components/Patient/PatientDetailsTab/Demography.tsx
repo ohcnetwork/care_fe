@@ -78,7 +78,6 @@ export const Demography = (props: PatientProps) => {
       }
     }
   };
-  console.log("instance_identifiers", patientData.instance_identifiers);
 
   const EmergencyContact = (props: { number?: string; name?: string }) => (
     <div className="sm:col-span-2">

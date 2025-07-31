@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
   BeakerIcon,
@@ -65,11 +65,7 @@ export function AllergyList({
   showTimeline = false,
 }: AllergyListProps) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  console.log(
-    "Allergy cache",
-    queryClient.getQueryData(["infinite-allergies", patientId]),
-  );
+
   const LIMIT = showTimeline ? 30 : 14;
   const { facilityId } = useCurrentFacilitySilently();
   const sourceUrl = usePath();

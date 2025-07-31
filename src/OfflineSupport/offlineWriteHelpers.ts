@@ -643,17 +643,24 @@ function replaceEncounterScopedInPaginatedCache<
     queryClient.setQueryData(key, (prev: any) => {
       if (!prev?.pages) return prev;
 
-      const updatedPages = prev.pages.map((page: any) => {
-        const filteredResults = (page.results || []).filter(
-          (entry: any) => entry.encounter !== encounterID,
-        );
-        const merged = [...filteredResults, ...newEntries];
+      // Only update the first page with new entries, keep other pages unchanged
+      const updatedPages = prev.pages.map((page: any, index: number) => {
+        if (index === 0) {
+          // First page gets filtered and merged data
+          const filteredResults = (page.results || []).filter(
+            (entry: any) => entry.encounter !== encounterID,
+          );
+          const merged = [...filteredResults, ...newEntries];
 
-        return {
-          ...page,
-          results: merged,
-          count: merged.length,
-        };
+          return {
+            ...page,
+            results: merged,
+            count: merged.length,
+          };
+        } else {
+          // Other pages remain unchanged
+          return page;
+        }
       });
 
       return {
@@ -878,11 +885,20 @@ export const normalizeAndUpdateSymptom = async (
         };
       }
 
-      const updatedPages = prev.pages.map((page: any) => ({
-        ...page,
-        results: normalizedSymptomResult,
-        count: normalizedSymptomResult.length,
-      }));
+      // Only update the first page with new symptoms, keep other pages unchanged
+      const updatedPages = prev.pages.map((page: any, index: number) => {
+        if (index === 0) {
+          // First page gets all the normalized symptoms
+          return {
+            ...page,
+            results: normalizedSymptomResult,
+            count: normalizedSymptomResult.length,
+          };
+        } else {
+          // Other pages remain unchanged
+          return page;
+        }
+      });
 
       return {
         ...prev,
@@ -961,11 +977,20 @@ export const normalizeAndUpdateMedication_Statement = (
         };
       }
 
-      const updatedPages = prev.pages.map((page: any) => ({
-        ...page,
-        results: normalizeMedication_Statement,
-        count: normalizeMedication_Statement.length,
-      }));
+      // Only update the first page with new medication statements, keep other pages unchanged
+      const updatedPages = prev.pages.map((page: any, index: number) => {
+        if (index === 0) {
+          // First page gets all the normalized medication statements
+          return {
+            ...page,
+            results: normalizeMedication_Statement,
+            count: normalizeMedication_Statement.length,
+          };
+        } else {
+          // Other pages remain unchanged
+          return page;
+        }
+      });
 
       return {
         ...prev,
@@ -1044,11 +1069,20 @@ export const normalizeAndUpdateAllergy_Intolerance = (
       };
     }
 
-    const updatedPages = prev.pages.map((page: any) => ({
-      ...page,
-      results: normalizedAllergyResult,
-      count: normalizedAllergyResult.length,
-    }));
+    // Only update the first page with new allergies, keep other pages unchanged
+    const updatedPages = prev.pages.map((page: any, index: number) => {
+      if (index === 0) {
+        // First page gets all the normalized allergies
+        return {
+          ...page,
+          results: normalizedAllergyResult,
+          count: normalizedAllergyResult.length,
+        };
+      } else {
+        // Other pages remain unchanged
+        return page;
+      }
+    });
 
     return {
       ...prev,

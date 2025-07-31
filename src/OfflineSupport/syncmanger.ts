@@ -90,11 +90,8 @@ export class SyncManager {
       );
 
       if (pendingWrites.length === 0) {
-        console.log("No pending writes to sync");
         return result;
       }
-
-      toast.info(`Starting sync for ${pendingWrites.length} writes`);
 
       // Step 2: Sort by dependencies (topological sort)
       const sortedWrites = topologicalSort(pendingWrites);
@@ -102,7 +99,6 @@ export class SyncManager {
       // Step 3: Process writes in dependency order
       for (const write of sortedWrites) {
         if (this.abortController?.signal.aborted) {
-          console.log("Sync aborted");
           break;
         }
 
@@ -157,9 +153,6 @@ export class SyncManager {
           write.parentMutationIds,
         );
         if (blockedParents.length > 0) {
-          console.log(
-            `Write ${write.id} blocked by failed parents: ${blockedParents.join(", ")}`,
-          );
           return { status: "blocked" };
         }
       }
@@ -168,7 +161,6 @@ export class SyncManager {
       if (this.options.enableConflictDetection && write.useQueryRouteKey) {
         const hasConflict = await detectAndMarkConflict(write);
         if (hasConflict) {
-          console.log(`Write ${write.id} has conflicts`);
           return { status: "conflict" };
         }
       }
@@ -194,7 +186,6 @@ export class SyncManager {
         this.idMap.addMapping(write.id, response.id);
       }
 
-      console.log(`Successfully synced write ${write.id}`);
       return { status: "success" };
     } catch (error) {
       // Store the complete error information
@@ -293,8 +284,6 @@ export class SyncManager {
         lastAttemptAt: Date.now(),
       });
     }
-
-    console.log(`Marked ${dependentWrites.length} dependent writes as blocked`);
   }
 
   //  check if an error is permanent (should not retry)
@@ -322,8 +311,7 @@ export class SyncManager {
 
   private async cleanup(): Promise<void> {
     // TODO: Implement cleanup logic
-
-    console.log("Sync cleanup completed");
+    console.log("cleanup");
   }
 
   stop(): void {

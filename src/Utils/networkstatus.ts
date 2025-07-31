@@ -48,12 +48,12 @@ export default function useNetworkStatus() {
 
       setIsOnline(online);
       onlineManager.setOnline(online);
-      toast.info(t("You_are_online"));
+      await restorePersistedCache();
     } catch {
       setIsOnline(false);
 
       onlineManager.setOnline(false);
-      toast.info(t("you_are_offline"));
+      toast.warning(t("you_are_offline"));
       await restorePersistedCache();
     } finally {
       setIsChecked(true);

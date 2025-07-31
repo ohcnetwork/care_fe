@@ -230,6 +230,7 @@ export default function AuthUserProvider({
     return () => clearTimeout(timeout);
   }, [user?.external_id, onlineManager.isOnline()]);
 
+  console.log("user : ", user, onlineManager.isOnline());
   if (isLoading || isRestoring || !isChecked) {
     return <Loading />;
   }
