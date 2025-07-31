@@ -1,12 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
-import { SkullIcon } from "lucide-react";
+import { SkullIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import {
   AlertDialog,
@@ -69,8 +67,8 @@ const UserDeleteDialog = (props: ConfirmDialogProps) => {
         <AlertDialogTrigger
           className={buttonVariants({ variant: "destructive" })}
         >
-          <CareIcon icon="l-trash" className="mr-2" />
-          {t("delete")}
+          <Trash2Icon />
+          {t("delete_account")}
         </AlertDialogTrigger>
       )}
       <AlertDialogContent>
