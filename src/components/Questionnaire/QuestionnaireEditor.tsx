@@ -665,6 +665,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
         if (question.type === "group" && Array.isArray(question.questions)) {
           validateQuestions(question.questions, `${currentPath}.questions`);
+          if (question.questions.length === 0) {
+            form.setError(`${currentPath}.questions`, {
+              type: "manual",
+              message: t("group_must_have_sub_questions"),
+            });
+            isValid = false;
+          }
         }
       });
     };
@@ -1204,7 +1211,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               depth={0}
                               onMoveUp={() => {
                                 if (index > 0) {
-                                  const newQuestions = swapElements<Question>(
+                                  const newQuestions = swapElements(
                                     rootQuestions,
                                     index,
                                     index - 1,
@@ -1214,7 +1221,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               }}
                               onMoveDown={() => {
                                 if (index < rootQuestions.length - 1) {
-                                  const newQuestions = swapElements<Question>(
+                                  const newQuestions = swapElements(
                                     rootQuestions,
                                     index,
                                     index + 1,
@@ -2666,6 +2673,11 @@ function QuestionEditor({
                   {t("add_sub_question")}
                 </Button>
               </div>
+              <FormField
+                control={form.control}
+                name={`questions.${index}.questions`}
+                render={() => <FormMessage />}
+              />
               <div className="space-y-4">
                 {(questions || []).map((subQuestion, idx) => (
                   <div

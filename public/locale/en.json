@@ -2077,6 +2077,7 @@
   "greater_or_equals": "Greater Than or Equal",
   "group": "Group",
   "group_layout_options": "Group layout options",
+  "group_must_have_sub_questions": "Group question must have one or more sub-questions",
   "gst": "GST",
   "handed_over_on": "Handed over on",
   "has_allergies": "Has Allergies",
