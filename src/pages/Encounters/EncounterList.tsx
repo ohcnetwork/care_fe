@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -40,6 +40,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 
 interface EncounterListProps {
   encounters?: EncounterRead[];
@@ -71,14 +72,15 @@ const buildQueryParams = (
 };
 
 function EmptyState() {
+  const { t } = useTranslation();
   return (
     <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
       <div className="rounded-full bg-primary/10 p-3 mb-4">
         <CareIcon icon="l-folder-open" className="size-6 text-primary" />
       </div>
-      <h3 className="text-lg font-semibold mb-1">No encounters found</h3>
+      <h3 className="text-lg font-semibold mb-1">{t("no_encounters_found")}</h3>
       <p className="text-sm text-gray-500 mb-4">
-        Try adjusting your filters or create a new encounter
+        {t("no_encounters_found_description")}
       </p>
     </Card>
   );
@@ -112,7 +114,6 @@ export function EncounterList({
       tags: qParams.tags,
     });
   };
-  const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
 
   const handleSearch = useCallback(
     (key: string, value: string) => {
@@ -182,6 +183,12 @@ export function EncounterList({
     propEncounters ||
     queryEncounters?.results ||
     (queryEncounter ? [queryEncounter] : []);
+
+  const tagIds = qParams.tags?.split(",") || [];
+  const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
+  const selectedTags = tagQueries
+    .map((query) => query.data)
+    .filter(Boolean) as TagConfig[];
 
   return (
     <Page
@@ -263,71 +270,83 @@ export function EncounterList({
                       <SelectValue placeholder={t("priority")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Priorities</SelectItem>
+                      <SelectItem value="all">{t("all_priorities")}</SelectItem>
                       <SelectItem value="asap">
                         <div className="flex items-center">
-                          <span className="mr-2">🟡</span> ASAP
+                          <span className="mr-2">🟡</span>{" "}
+                          {t("encounter_priority__ASAP")}
                         </div>
                       </SelectItem>
                       <SelectItem value="callback_results">
                         <div className="flex items-center">
-                          <span className="mr-2">🔵</span> Callback Results
+                          <span className="mr-2">🔵</span>
+                          {t("encounter_priority__callback_results")}
                         </div>
                       </SelectItem>
                       <SelectItem value="callback_for_scheduling">
                         <div className="flex items-center">
-                          <span className="mr-2">🟣</span> Callback for
-                          Scheduling
+                          <span className="mr-2">🟣</span>
+                          {t("encounter_priority__callback_for_scheduling")}
                         </div>
                       </SelectItem>
                       <SelectItem value="elective">
                         <div className="flex items-center">
-                          <span className="mr-2">🟤</span> Elective
+                          <span className="mr-2">🟤</span>
+                          {t("encounter_priority__elective")}
                         </div>
                       </SelectItem>
                       <SelectItem value="emergency">
                         <div className="flex items-center">
-                          <span className="mr-2">🔴</span> Emergency
+                          <span className="mr-2">🔴</span>{" "}
+                          {t("encounter_priority__emergency")}
                         </div>
                       </SelectItem>
                       <SelectItem value="preop">
                         <div className="flex items-center">
-                          <span className="mr-2">🟠</span> Pre-op
+                          <span className="mr-2">🟠</span>{" "}
+                          {t("encounter_priority__preop")}
                         </div>
                       </SelectItem>
                       <SelectItem value="as_needed">
                         <div className="flex items-center">
-                          <span className="mr-2">⚫️</span> As Needed
+                          <span className="mr-2">⚫️</span>
+                          {t("encounter_priority__as_needed")}
                         </div>
                       </SelectItem>
                       <SelectItem value="routine">
                         <div className="flex items-center">
-                          <span className="mr-2">⚪️</span> Routine
+                          <span className="mr-2">⚪️</span>
+                          {t("encounter_priority__routine")}
                         </div>
                       </SelectItem>
                       <SelectItem value="rush_reporting">
                         <div className="flex items-center">
-                          <span className="mr-2">🟤</span> Rush Reporting
+                          <span className="mr-2">🟤</span>
+                          {t("encounter_priority__rush_reporting")}
                         </div>
                       </SelectItem>
                       <SelectItem value="stat">
                         <div className="flex items-center">
-                          <span className="mr-2">🔴</span> Stat
+                          <span className="mr-2">🔴</span>{" "}
+                          {t("encounter_priority__stat")}
                         </div>
                       </SelectItem>
                       <SelectItem value="timing_critical">
                         <div className="flex items-center">
-                          <span className="mr-2">🟡</span> Timing Critical
+                          <span className="mr-2">🟡</span>
+                          {t("encounter_priority__timing_critical")}
                         </div>
                       </SelectItem>
                       <SelectItem value="use_as_directed">
                         <div className="flex items-center">
-                          <span className="mr-2">🔵</span> Use as Directed
+                          <span className="mr-2">🔵</span>
+                          {t("encounter_priority__use_as_directed")}
                         </div>
                       </SelectItem>
                       <SelectItem value="urgent">
                         <div className="flex items-center">
-                          <span className="mr-2">🟠</span> Urgent
+                          <span className="mr-2">🟠</span>{" "}
+                          {t("encounter_priority__urgent")}
                         </div>
                       </SelectItem>
                     </SelectContent>
@@ -338,9 +357,8 @@ export function EncounterList({
                   asFilter
                   selected={selectedTags}
                   onChange={(tags) => {
-                    setSelectedTags(tags);
                     updateQuery({
-                      tags: tags.map((tag) => tag.id).join(","),
+                      tags: tags.map((tag) => tag.id),
                     });
                   }}
                   resource={TagResource.ENCOUNTER}
@@ -359,32 +377,32 @@ export function EncounterList({
                     }}
                   >
                     <SelectTrigger className="h-8 w-[120px]">
-                      <SelectValue placeholder="Status" />
+                      <SelectValue placeholder={t("status")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="all">{t("all_status")}</SelectItem>
                       <SelectItem value="planned">
                         <div className="flex items-center">
                           <CareIcon icon="l-calender" className="mr-2 size-4" />
-                          Planned
+                          {t("planned")}
                         </div>
                       </SelectItem>
                       <SelectItem value="in_progress">
                         <div className="flex items-center">
                           <CareIcon icon="l-spinner" className="mr-2 size-4" />
-                          In Progress
+                          {t("in_progress")}
                         </div>
                       </SelectItem>
                       <SelectItem value="completed">
                         <div className="flex items-center">
                           <CareIcon icon="l-check" className="mr-2 size-4" />
-                          Completed
+                          {t("completed")}
                         </div>
                       </SelectItem>
                       <SelectItem value="cancelled">
                         <div className="flex items-center">
                           <CareIcon icon="l-x" className="mr-2 size-4" />
-                          Cancelled
+                          {t("cancelled")}
                         </div>
                       </SelectItem>
                     </SelectContent>
@@ -404,26 +422,26 @@ export function EncounterList({
                     }}
                   >
                     <SelectTrigger className="h-8 w-[120px]">
-                      <SelectValue placeholder="Type" />
+                      <SelectValue placeholder={t("type")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="all">{t("all_types")}</SelectItem>
                       <SelectItem value="imp">
                         <div className="flex items-center">
                           <CareIcon icon="l-hospital" className="mr-2 size-4" />
-                          Inpatient
+                          {t("inpatient")}
                         </div>
                       </SelectItem>
                       <SelectItem value="amb">
                         <div className="flex items-center">
                           <CareIcon icon="l-user" className="mr-2 size-4" />
-                          Ambulatory
+                          {t("ambulatory")}
                         </div>
                       </SelectItem>
                       <SelectItem value="obsenc">
                         <div className="flex items-center">
                           <CareIcon icon="l-eye" className="mr-2 size-4" />
-                          Observation
+                          {t("observation")}
                         </div>
                       </SelectItem>
                       <SelectItem value="emer">
@@ -432,19 +450,19 @@ export function EncounterList({
                             icon="l-ambulance"
                             className="mr-2 size-4"
                           />
-                          Emergency
+                          {t("emergency")}
                         </div>
                       </SelectItem>
                       <SelectItem value="vr">
                         <div className="flex items-center">
                           <CareIcon icon="l-video" className="mr-2 size-4" />
-                          Virtual
+                          {t("virtual")}
                         </div>
                       </SelectItem>
                       <SelectItem value="hh">
                         <div className="flex items-center">
                           <CareIcon icon="l-home" className="mr-2 size-4" />
-                          Home Health
+                          {t("home_health")}
                         </div>
                       </SelectItem>
                     </SelectContent>
