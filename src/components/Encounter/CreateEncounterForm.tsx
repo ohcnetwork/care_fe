@@ -349,27 +349,27 @@ export default function CreateEncounterForm({
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="organizations"
+                render={({ field }) => (
+                  <FormItem>
+                    <FacilityOrganizationSelector
+                      facilityId={facilityId}
+                      value={field.value}
+                      onChange={(value) => {
+                        if (value === null) {
+                          form.setValue("organizations", []);
+                        } else {
+                          form.setValue("organizations", value);
+                        }
+                      }}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-            <FormField
-              control={form.control}
-              name="organizations"
-              render={({ field }) => (
-                <FormItem>
-                  <FacilityOrganizationSelector
-                    facilityId={facilityId}
-                    value={field.value}
-                    onChange={(value) => {
-                      if (value === null) {
-                        form.setValue("organizations", []);
-                      } else {
-                        form.setValue("organizations", value);
-                      }
-                    }}
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <div className="flex justify-end mt-6 space-x-2">
               <Button
                 type="button"
