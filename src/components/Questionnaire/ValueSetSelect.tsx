@@ -185,27 +185,24 @@ export default function ValueSetSelect({
 
   if (hideTrigger) {
     return (
-      <>
-        <ValueSetSearchContent
-          system={system}
-          onSelect={(selected) => {
-            onSelect(selected);
-            if (closeOnSelect) {
-              setInternalOpen(false);
-            } else {
-              inputRef.current?.focus();
-            }
-          }}
-          count={count}
-          searchPostFix={searchPostFix}
-          showCode={showCode}
-          search={search}
-          onSearchChange={setSearch}
-          title={title}
-          placeholder={placeholder}
-        />
-        {alert}
-      </>
+      <ValueSetSearchContent
+        system={system}
+        onSelect={(selected) => {
+          onSelect(selected);
+          if (closeOnSelect) {
+            setInternalOpen(false);
+          } else {
+            inputRef.current?.focus();
+          }
+        }}
+        count={count}
+        searchPostFix={searchPostFix}
+        showCode={showCode}
+        search={search}
+        onSearchChange={setSearch}
+        title={title}
+        placeholder={placeholder}
+      />
     );
   }
 
