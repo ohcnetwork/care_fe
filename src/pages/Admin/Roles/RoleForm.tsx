@@ -1,6 +1,9 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +16,14 @@ import mutate from "@/Utils/request/mutate";
 import { Permission } from "@/types/emr/permission/permission";
 import { Role } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
+
+const RoleSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().optional(),
+  permissions: z.array(z.string()).min(1, "Select at least one permission"),
+});
+
+type RoleFormValues = z.infer<typeof RoleSchema>;
 
 interface RoleFormProps {
   role: Role | null;
@@ -27,12 +38,23 @@ export default function RoleForm({
 }: RoleFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [error, setError] = React.useState("");
-  const [formData, setFormData] = React.useState({
-    name: role?.name || "",
-    description: role?.description || "",
-    permissions: role?.permissions.map((p) => p.slug) || [],
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<RoleFormValues>({
+    resolver: zodResolver(RoleSchema),
+    defaultValues: {
+      name: role?.name || "",
+      description: role?.description || "",
+      permissions: role?.permissions.map((p) => p.slug) || [],
+    },
   });
+
+  const selectedPermissions = watch("permissions");
 
   const createRoleMutation = useMutation({
     mutationFn: mutate(roleApi.createRole),
@@ -52,62 +74,45 @@ export default function RoleForm({
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (formData.permissions.length === 0) {
-      setError(t("please_select_at_least_one_permission"));
-      return;
-    }
-    setError("");
-    const payload = {
-      name: formData.name,
-      description: formData.description,
-      permissions: formData.permissions,
-    };
-
+  const onSubmit = (data: RoleFormValues) => {
     if (role?.id) {
-      updateRoleMutation.mutate(payload);
+      updateRoleMutation.mutate(data);
     } else {
-      createRoleMutation.mutate(payload);
+      createRoleMutation.mutate(data);
     }
   };
 
-  const handlePermissionToggle = (permissionSlug: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      permissions: prev.permissions.includes(permissionSlug)
-        ? prev.permissions.filter((p) => p !== permissionSlug)
-        : [...prev.permissions, permissionSlug],
-    }));
+  const handlePermissionToggle = (slug: string) => {
+    const updated = selectedPermissions.includes(slug)
+      ? selectedPermissions.filter((p) => p !== slug)
+      : [...selectedPermissions, slug];
+    setValue("permissions", updated, { shouldValidate: true });
   };
 
   const isLoading =
     createRoleMutation.isPending || updateRoleMutation.isPending;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="name">{t("name")}</Label>
           <Input
             id="name"
-            value={formData.name}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, name: e.target.value }))
-            }
+            {...register("name")}
             placeholder={t("enter_role_name")}
             required
           />
+          {errors.name && (
+            <div className="text-red-500 text-sm">{errors.name.message}</div>
+          )}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="description">{t("description")}</Label>
           <Textarea
             id="description"
-            value={formData.description}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, description: e.target.value }))
-            }
+            {...register("description")}
             placeholder={t("enter_role_description")}
             rows={3}
           />
@@ -124,10 +129,11 @@ export default function RoleForm({
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    permissions: permissions.map((p) => p.slug),
-                  }))
+                  setValue(
+                    "permissions",
+                    permissions.map((p) => p.slug),
+                    { shouldValidate: true },
+                  )
                 }
               >
                 {t("select_all")}
@@ -137,10 +143,7 @@ export default function RoleForm({
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    permissions: [],
-                  }))
+                  setValue("permissions", [], { shouldValidate: true })
                 }
               >
                 {t("clear")}
@@ -157,7 +160,7 @@ export default function RoleForm({
               >
                 <Checkbox
                   id={permission.slug}
-                  checked={formData.permissions.includes(permission.slug)}
+                  checked={selectedPermissions.includes(permission.slug)}
                   onCheckedChange={() =>
                     handlePermissionToggle(permission.slug)
                   }
@@ -178,6 +181,11 @@ export default function RoleForm({
               </div>
             ))}
           </div>
+          {errors.permissions && (
+            <div className="text-red-500 text-sm mt-2">
+              {errors.permissions.message}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -198,9 +206,6 @@ export default function RoleForm({
               : t("create_role")}
         </Button>
       </div>
-      {error && (
-        <div className="text-red-500 text-sm mt-2 text-right">{error}</div>
-      )}
     </form>
   );
 }
