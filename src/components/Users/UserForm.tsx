@@ -109,13 +109,25 @@ export default function UserForm({
     .refine(
       (data) => {
         if (!isEditMode && data.password_setup_method === "immediate") {
+          return !!data.password;
+        }
+        return true;
+      },
+      {
+        message: t("password_required"),
+        path: ["password"],
+      },
+    )
+    .refine(
+      (data) => {
+        if (!isEditMode && data.password_setup_method === "immediate") {
           return data.password && data.password === data.c_password;
         }
         return true;
       },
       {
         message: t("password_mismatch"),
-        path: ["c_password"],
+        path: ["password"],
       },
     )
     .refine(
