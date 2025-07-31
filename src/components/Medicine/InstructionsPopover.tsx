@@ -111,7 +111,7 @@ const TriggerButton = (
       variant={null}
       data-cy="instructions"
       className={cn(
-        "w-full justify-between border border-gray-300 font-normal shadow-xs",
+        "w-full justify-between border border-gray-300 font-normal shadow-xs h-auto",
         currentInstructions.length === 0 && "text-gray-500",
       )}
       disabled={disabledButton}
