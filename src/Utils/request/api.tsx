@@ -146,13 +146,6 @@ const routes = {
     TBody: Type<void>(),
   },
 
-  deleteUser: {
-    path: "/api/v1/users/{username}/",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<void>(),
-  },
-
   getPermittedFacility: {
     path: "/api/v1/facility/{id}/",
     method: "GET",
