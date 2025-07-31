@@ -63,7 +63,7 @@ export const EncounterOverviewTab = () => {
   } = useEncounter();
 
   const { data: allergies } = useQuery({
-    queryKey: ["allergy-intolerance", patientId, "confirmed"],
+    queryKey: ["allergies", patientId, "confirmed"],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
       queryParams: { verification_status: "confirmed" },
