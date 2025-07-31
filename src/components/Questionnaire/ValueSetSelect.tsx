@@ -138,13 +138,17 @@ export default function ValueSetSelect({
               variant="outline"
               role="combobox"
               className={cn(
-                "w-full justify-between",
-                "h-auto md:h-9 whitespace-normal text-left md:truncate",
+                "w-full flex justify-between h-auto whitespace-normal text-left",
                 !value?.display && "text-gray-400",
               )}
               disabled={disabled}
             >
-              <span>{value?.display || placeholder}</span>
+              <span>
+                {value?.display || placeholder}
+                {value?.display && showCode && (
+                  <span className="text-xs ml-1">({value?.code})</span>
+                )}
+              </span>
               <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
             </Button>
           )}
@@ -223,7 +227,7 @@ export default function ValueSetSelect({
                 !value?.display && "text-gray-400",
               )}
             >
-              <span>
+              <span className="truncate">
                 {value?.display || placeholder}
                 {value?.display && showCode && (
                   <span className="text-xs ml-1">({value?.code})</span>
