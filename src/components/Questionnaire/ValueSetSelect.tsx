@@ -135,11 +135,11 @@ export default function ValueSetSelect({
             mobileTrigger
           ) : (
             <Button
-              variant="outline"
+              variant={null}
               role="combobox"
               className={cn(
-                "w-full flex justify-between h-auto whitespace-normal text-left",
-                !value?.display && "text-gray-400",
+                "w-full flex justify-between h-auto whitespace-normal text-left font-normal border border-gray-300 shadow-xs",
+                !value?.display && "text-gray-500",
               )}
               disabled={disabled}
             >
@@ -219,12 +219,13 @@ export default function ValueSetSelect({
         <PopoverTrigger asChild disabled={disabled}>
           <Button
             type="button"
-            variant="outline"
+            variant={null}
             role="combobox"
             className={cn(
-              "justify-between truncate",
-              !value?.display && "text-gray-400",
+              "justify-between truncate font-normal border border-gray-300 shadow-xs",
+              !value?.display && "text-gray-500",
             )}
+            disabled={disabled}
           >
             <span className="truncate">
               {value?.display || placeholder}
