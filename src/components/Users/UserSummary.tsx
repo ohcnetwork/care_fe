@@ -69,8 +69,6 @@ export default function UserSummaryTab({
     );
   };
 
-  console.log({ permissions });
-
   return (
     <>
       <EditUserSheet
