@@ -24,13 +24,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Collapsible,
@@ -52,6 +46,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Form,
   FormControl,
@@ -1161,14 +1156,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           </p>
                         </CardTitle>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleAddQuestion}
-                      >
-                        <CareIcon icon="l-plus" className="mr-2 size-4" />
-                        {t("add_question")}
-                      </Button>
                     </CardHeader>
                     <CardContent className="p-0">
                       <div className="space-y-6">
@@ -1250,8 +1237,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                         ))}
                       </div>
                     </CardContent>
-                    <CardFooter className="flex flex-row items-center justify-end px-0 py-2">
-                      {rootQuestions.length > 0 && (
+                  </Card>
+                  <div className="mt-4">
+                    {rootQuestions.length > 0 ? (
+                      <div className="flex justify-end">
                         <Button
                           variant="outline"
                           size="sm"
@@ -1260,9 +1249,20 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           <CareIcon icon="l-plus" className="mr-2 size-4" />
                           {t("add_question")}
                         </Button>
-                      )}
-                    </CardFooter>
-                  </Card>
+                      </div>
+                    ) : (
+                      <div
+                        className="cursor-pointer"
+                        onClick={handleAddQuestion}
+                      >
+                        <EmptyState
+                          icon="l-question"
+                          title={t("no_questions_yet")}
+                          description={t("click_to_add_first_question")}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </form>
               </Form>
             </div>
