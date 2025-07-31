@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -25,6 +26,9 @@ interface Props {
   system: string;
   onSelect: (value: Code) => void;
   onFavouriteRemove?: (favourite: Code) => void;
+  onClearAllFavourites?: () => void;
+  removeFavouriteRef?: { current: ((favourite: Code) => void) | null };
+  clearFavouritesRef?: { current: (() => void) | null };
   count?: number;
   searchPostFix?: string;
   showCode?: boolean;
@@ -79,6 +83,9 @@ export default function ValueSetSearchContent({
   system,
   onSelect,
   onFavouriteRemove,
+  onClearAllFavourites,
+  removeFavouriteRef,
+  clearFavouritesRef,
   count = 10,
   searchPostFix = "",
   showCode = false,
@@ -126,6 +133,34 @@ export default function ValueSetSearchContent({
       });
     },
   });
+
+  const clearFavouritesMutation = useMutation({
+    mutationFn: mutate(valuesetRoutes.clearFavourites, {
+      pathParams: { slug: system },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["valueset", system, "favourites"],
+      });
+    },
+  });
+
+  // Expose mutation functions to parent via refs
+  useEffect(() => {
+    if (removeFavouriteRef) {
+      removeFavouriteRef.current = (favourite: Code) => {
+        removeFavouriteMutation.mutate(favourite);
+      };
+    }
+  }, [removeFavouriteRef, removeFavouriteMutation]);
+
+  useEffect(() => {
+    if (clearFavouritesRef) {
+      clearFavouritesRef.current = () => {
+        clearFavouritesMutation.mutate({});
+      };
+    }
+  }, [clearFavouritesRef, clearFavouritesMutation]);
 
   const recentsQuery = useQuery({
     queryKey: ["valueset", system, "recents"],
@@ -277,6 +312,16 @@ export default function ValueSetSearchContent({
                 <span className="text-xs font-normal text-gray-700 p-1">
                   {t("starred")}
                 </span>
+                {favouritesQuery.data && favouritesQuery.data.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs h-6 px-2 text-gray-500 hover:text-red-600"
+                    onClick={() => onClearAllFavourites?.()}
+                  >
+                    {t("clear_all")}
+                  </Button>
+                )}
               </div>
               {favouritesQuery.isFetched &&
                 favouritesQuery.data?.length === 0 && (

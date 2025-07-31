@@ -1,6 +1,4 @@
 import { CaretSortIcon } from "@radix-ui/react-icons";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -29,9 +27,7 @@ import ValueSetSearchContent from "@/components/Questionnaire/ValueSetSearchCont
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
-import mutate from "@/Utils/request/mutate";
 import { Code } from "@/types/base/code/code";
-import valuesetRoutes from "@/types/valueset/valuesetApi";
 
 interface Props {
   system: string;
@@ -70,32 +66,11 @@ export default function ValueSetSelect({
   const isMobile = useBreakpoints({ default: true, sm: false });
   const [isClearingFavourites, setIsClearingFavourites] = useState(false);
   const [favouriteToRemove, setFavouriteToRemove] = useState<Code | null>(null);
-  const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const clearFavouritesMutation = useMutation({
-    mutationFn: mutate(valuesetRoutes.clearFavourites, {
-      pathParams: { slug: system },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["valueset", system, "favourites"],
-      });
-      setIsClearingFavourites(false);
-    },
-  });
-
-  const removeFavouriteMutation = useMutation({
-    mutationFn: mutate(valuesetRoutes.removeFavourite, {
-      pathParams: { slug: system },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["valueset", system, "favourites"],
-      });
-      setFavouriteToRemove(null);
-    },
-  });
+  // Refs to access mutation functions from ValueSetSearchContent
+  const removeFavouriteRef = useRef<((favourite: Code) => void) | null>(null);
+  const clearFavouritesRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     if (controlledOpen || internalOpen) {
@@ -144,19 +119,16 @@ export default function ValueSetSelect({
           <AlertDialogAction
             className={cn(buttonVariants({ variant: "destructive" }))}
             onClick={() => {
-              if (favouriteToRemove) {
-                removeFavouriteMutation.mutate(favouriteToRemove);
-              } else {
-                clearFavouritesMutation.mutate({});
+              if (favouriteToRemove && removeFavouriteRef.current) {
+                removeFavouriteRef.current(favouriteToRemove);
+                setFavouriteToRemove(null);
+              } else if (clearFavouritesRef.current) {
+                clearFavouritesRef.current();
+                setIsClearingFavourites(false);
               }
             }}
           >
-            {clearFavouritesMutation.isPending ||
-            removeFavouriteMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              t("confirm")
-            )}
+            {t("confirm")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -196,6 +168,9 @@ export default function ValueSetSelect({
                 }
               }}
               onFavouriteRemove={(favourite) => setFavouriteToRemove(favourite)}
+              onClearAllFavourites={() => setIsClearingFavourites(true)}
+              removeFavouriteRef={removeFavouriteRef}
+              clearFavouritesRef={clearFavouritesRef}
               count={count}
               searchPostFix={searchPostFix}
               showCode={showCode}
@@ -253,6 +228,9 @@ export default function ValueSetSelect({
                 }
               }}
               onFavouriteRemove={(favourite) => setFavouriteToRemove(favourite)}
+              onClearAllFavourites={() => setIsClearingFavourites(true)}
+              removeFavouriteRef={removeFavouriteRef}
+              clearFavouritesRef={clearFavouritesRef}
               placeholder={placeholder}
               count={count}
               searchPostFix={searchPostFix}
@@ -310,6 +288,8 @@ export default function ValueSetSelect({
               }
             }}
             onFavouriteRemove={(favourite) => setFavouriteToRemove(favourite)}
+            removeFavouriteRef={removeFavouriteRef}
+            clearFavouritesRef={clearFavouritesRef}
             count={count}
             searchPostFix={searchPostFix}
             showCode={showCode}
@@ -330,6 +310,9 @@ export default function ValueSetSelect({
                 }
               }}
               onFavouriteRemove={(favourite) => setFavouriteToRemove(favourite)}
+              onClearAllFavourites={() => setIsClearingFavourites(true)}
+              removeFavouriteRef={removeFavouriteRef}
+              clearFavouritesRef={clearFavouritesRef}
               placeholder={placeholder}
               count={count}
               searchPostFix={searchPostFix}
