@@ -218,7 +218,11 @@ function findFirstErrorPath(errors: any, path: number[] = []): number[] | null {
 
     if (current && typeof current === "object") {
       const hasOwnErrors = Object.entries(current).some(([key, value]) => {
-        return key !== "questions" && value !== undefined;
+        // Ignore nested question arrays (they will be traversed separately)
+        if (key === "questions" && Array.isArray(value)) return false;
+
+        // Any defined value (including objects holding a "message") indicates an error on the current node
+        return value !== undefined;
       });
 
       if (hasOwnErrors) {
