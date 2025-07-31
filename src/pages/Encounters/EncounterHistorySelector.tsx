@@ -13,6 +13,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FilterSelect } from "@/components/ui/filter-select";
+import {
+  MultiFilterSelector,
+  createEncounterClassFilter,
+  createEncounterStatusFilter,
+  createTagFilter,
+} from "@/components/ui/multi-filter-selector";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -219,6 +225,30 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
+  const [selectedFilters, setSelectedFilters] = useState<
+    Record<string, string[] | TagConfig[]>
+  >({});
+
+  const filters = [
+    createEncounterStatusFilter(),
+    createEncounterClassFilter(),
+    createTagFilter(TagResource.ENCOUNTER),
+  ];
+
+  const handleFilterChange = (
+    filterKey: string,
+    values: string[] | TagConfig[],
+  ) => {
+    setSelectedFilters((prev) => ({
+      ...prev,
+      [filterKey]: values,
+    }));
+  };
+
+  const handleClearAll = () => {
+    setSelectedFilters({});
+  };
+
   return (
     <div className="space-y-4 pt-2">
       {!currentEncounter ? (
@@ -258,6 +288,16 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
           </div>
 
           {/* Filters */}
+
+          <MultiFilterSelector
+            filters={filters}
+            selectedFilters={selectedFilters}
+            onFilterChange={handleFilterChange}
+            onClearAll={handleClearAll}
+            placeholder="Filter encounters"
+            selectedTags={selectedFilters.tags as TagConfig[]}
+          />
+
           {showFilters && (
             <div className="flex flex-col gap-2 mb-4">
               <FilterSelect
