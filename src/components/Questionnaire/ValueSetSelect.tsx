@@ -217,25 +217,23 @@ export default function ValueSetSelect({
         modal={true}
       >
         <PopoverTrigger asChild disabled={disabled}>
-          <div className="w-full">
-            <Button
-              type="button"
-              variant="outline"
-              role="combobox"
-              className={cn(
-                "justify-between truncate",
-                !value?.display && "text-gray-400",
+          <Button
+            type="button"
+            variant="outline"
+            role="combobox"
+            className={cn(
+              "justify-between truncate",
+              !value?.display && "text-gray-400",
+            )}
+          >
+            <span className="truncate">
+              {value?.display || placeholder}
+              {value?.display && showCode && (
+                <span className="text-xs ml-1">({value?.code})</span>
               )}
-            >
-              <span className="truncate">
-                {value?.display || placeholder}
-                {value?.display && showCode && (
-                  <span className="text-xs ml-1">({value?.code})</span>
-                )}
-              </span>
-              <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-            </Button>
-          </div>
+            </span>
+            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+          </Button>
         </PopoverTrigger>
         <PopoverContent className="transition-all w-150 p-0" align="start">
           <ValueSetSearchContent
