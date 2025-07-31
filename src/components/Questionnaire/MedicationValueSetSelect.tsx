@@ -168,14 +168,14 @@ export default function MedicationValueSetSelect({
             mobileTrigger
           ) : (
             <Button
-              variant="outline"
+              variant={null}
               role="combobox"
               className={cn(
-                "w-full justify-between",
+                "w-full justify-between font-normal border border-gray-300 shadow-xs",
                 wrapTextForSmallScreen
                   ? "h-auto whitespace-normal text-left"
                   : "truncate",
-                !value?.display && "text-gray-400",
+                !value?.display && "text-gray-500",
               )}
               disabled={disabled}
             >
@@ -202,14 +202,17 @@ export default function MedicationValueSetSelect({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          variant={null}
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className={cn(
+            "w-full justify-between font-normal border border-gray-300 shadow-xs",
+            !value?.display && "text-gray-500",
+          )}
           disabled={disabled}
         >
           <span className="truncate">{value?.display || placeholder}</span>
-          <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[600px] p-0" align="start">
