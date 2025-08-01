@@ -1,10 +1,21 @@
 import { StarFilledIcon, StarIcon } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -89,6 +100,8 @@ export default function ValueSetSearchContent({
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState(0);
+  const [itemToRemove, setItemToRemove] = useState<Code | null>(null);
+  const [showBulkClearConfirm, setShowBulkClearConfirm] = useState(false);
 
   const searchQuery = useQuery({
     queryKey: ["valueset", system, "expand", count, search],
@@ -122,6 +135,25 @@ export default function ValueSetSearchContent({
       queryClient.invalidateQueries({
         queryKey: ["valueset", system, "favourites"],
       });
+      setItemToRemove(null);
+    },
+    onError: () => {
+      setItemToRemove(null);
+    },
+  });
+
+  const clearFavouritesMutation = useMutation({
+    mutationFn: mutate(valuesetRoutes.clearFavourites, {
+      pathParams: { slug: system },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["valueset", system, "favourites"],
+      });
+      setShowBulkClearConfirm(false);
+    },
+    onError: () => {
+      setShowBulkClearConfirm(false);
     },
   });
 
@@ -236,11 +268,14 @@ export default function ValueSetSearchContent({
                     addRecentMutation.mutate(option);
                   }}
                   onFavourite={() => {
-                    favouritesQuery.data?.find(
+                    const isFavorited = favouritesQuery.data?.find(
                       (favourite) => favourite.code === option.code,
-                    )
-                      ? removeFavouriteMutation.mutate(option)
-                      : addFavouriteMutation.mutate(option);
+                    );
+                    if (isFavorited) {
+                      setItemToRemove(option);
+                    } else {
+                      addFavouriteMutation.mutate(option);
+                    }
                   }}
                   isFavourite={
                     !!favouritesQuery.data?.find(
@@ -268,6 +303,16 @@ export default function ValueSetSearchContent({
                 <span className="text-xs font-normal text-gray-700 p-1">
                   {t("starred")}
                 </span>
+                {favouritesQuery.data && favouritesQuery.data.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowBulkClearConfirm(true)}
+                    className="h-6 px-1 text-xs text-gray-500 hover:text-gray-700"
+                  >
+                    {t("clear")}
+                  </Button>
+                )}
               </div>
               {favouritesQuery.isFetched &&
                 favouritesQuery.data?.length === 0 && (
@@ -291,11 +336,14 @@ export default function ValueSetSearchContent({
                     addRecentMutation.mutate(option);
                   }}
                   onFavourite={() => {
-                    favouritesQuery.data?.find(
+                    const isFavorited = favouritesQuery.data?.find(
                       (favourite) => favourite.code === option.code,
-                    )
-                      ? removeFavouriteMutation.mutate(option)
-                      : addFavouriteMutation.mutate(option);
+                    );
+                    if (isFavorited) {
+                      setItemToRemove(option);
+                    } else {
+                      addFavouriteMutation.mutate(option);
+                    }
                   }}
                   isFavourite={
                     !!favouritesQuery.data?.find(
@@ -308,6 +356,78 @@ export default function ValueSetSearchContent({
           </div>
         </div>
       </CommandList>
+
+      {/* Individual Item Removal Confirmation */}
+      <AlertDialog
+        open={!!itemToRemove && !showBulkClearConfirm}
+        onOpenChange={(open) => {
+          if (!open) {
+            setItemToRemove(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("are_you_sure_want_to_clear_favourite", {
+                name: itemToRemove?.display,
+              })}
+            </AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              className={cn(buttonVariants({ variant: "destructive" }))}
+              onClick={() => {
+                if (itemToRemove) {
+                  removeFavouriteMutation.mutate(itemToRemove);
+                }
+              }}
+            >
+              {removeFavouriteMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                t("confirm")
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Clear Confirmation */}
+      <AlertDialog
+        open={showBulkClearConfirm && !itemToRemove}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowBulkClearConfirm(false);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("are_you_sure_clear_starred")}
+            </AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowBulkClearConfirm(false)}>
+              {t("cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className={cn(buttonVariants({ variant: "destructive" }))}
+              onClick={() => {
+                clearFavouritesMutation.mutate({});
+              }}
+            >
+              {clearFavouritesMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                t("confirm")
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Command>
   );
 }
