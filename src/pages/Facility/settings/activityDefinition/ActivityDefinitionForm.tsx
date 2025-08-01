@@ -677,13 +677,11 @@ function ActivityDefinitionFormContent({
                     name="code"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
-                        <FormLabel>
-                          {t("code")} <span className="text-red-500">*</span>
-                        </FormLabel>
-                        <div className="mt-2">
+                        <FormLabel aria-required>{t("code")}</FormLabel>
+                        <FormControl>
                           <ValueSetSelect
+                            {...field}
                             system="activity-definition-procedure-code"
-                            value={field.value}
                             placeholder={t("search_for_activity_codes")}
                             onSelect={(code) => {
                               field.onChange({
@@ -694,7 +692,7 @@ function ActivityDefinitionFormContent({
                             }}
                             showCode={true}
                           />
-                        </div>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -715,24 +713,30 @@ function ActivityDefinitionFormContent({
                   </h2>
                 </div>
 
-                <div>
-                  <FormLabel>{t("body_site")}</FormLabel>
-                  <div className="mt-2">
-                    <ValueSetSelect
-                      system="system-body-site"
-                      value={form.watch("body_site")}
-                      placeholder={t("select_body_site")}
-                      onSelect={(code) => {
-                        form.setValue("body_site", {
-                          code: code.code,
-                          display: code.display,
-                          system: code.system,
-                        });
-                      }}
-                      showCode={true}
-                    />
-                  </div>
-                </div>
+                <FormField
+                  control={form.control}
+                  name="body_site"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("body_site")}</FormLabel>
+                      <FormControl>
+                        <ValueSetSelect
+                          {...field}
+                          system="system-body-site"
+                          placeholder={t("select_body_site")}
+                          onSelect={(code) => {
+                            form.setValue("body_site", {
+                              code: code.code,
+                              display: code.display,
+                              system: code.system,
+                            });
+                          }}
+                          showCode={true}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
 

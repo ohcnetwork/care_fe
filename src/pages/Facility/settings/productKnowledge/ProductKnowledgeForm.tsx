@@ -403,24 +403,32 @@ function ProductKnowledgeFormContent({
                     )}
                   />
 
-                  <div>
-                    <FormLabel>{t("code")}</FormLabel>
-                    <div className="mt-2">
-                      <ValueSetSelect
-                        system="system-medication"
-                        value={form.watch("code")}
-                        placeholder={t("search_for_product_codes")}
-                        onSelect={(code) => {
-                          form.setValue("code", {
-                            code: code.code,
-                            display: code.display,
-                            system: code.system,
-                          });
-                        }}
-                        showCode={true}
-                      />
-                    </div>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("code")}</FormLabel>
+                        <FormControl>
+                          <ValueSetSelect
+                            ref={field.ref}
+                            system="system-medication"
+                            value={field.value}
+                            placeholder={t("search_for_product_codes")}
+                            onSelect={(code) => {
+                              field.onChange({
+                                code: code.code,
+                                display: code.display,
+                                system: code.system,
+                              });
+                            }}
+                            showCode={true}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
@@ -636,7 +644,7 @@ function ProductKnowledgeFormContent({
                                       onChange={(e) =>
                                         field.onChange(
                                           e.target.value
-                                            ? parseInt(e.target.value)
+                                            ? Number.parseInt(e.target.value)
                                             : "",
                                         )
                                       }
@@ -651,31 +659,36 @@ function ProductKnowledgeFormContent({
                               )}
                             />
 
-                            <div>
-                              <FormLabel aria-required>
-                                {t("duration_unit")}
-                              </FormLabel>
-                              <div className="mt-2">
-                                <ValueSetSelect
-                                  system="system-ucum-units"
-                                  value={form.watch(
-                                    `storage_guidelines.${index}.stability_duration.unit`,
-                                  )}
-                                  placeholder={t("duration_unit_placeholder")}
-                                  onSelect={(code) => {
-                                    form.setValue(
-                                      `storage_guidelines.${index}.stability_duration.unit`,
-                                      {
-                                        code: code.code,
-                                        display: code.display,
-                                        system: code.system,
-                                      },
-                                    );
-                                  }}
-                                  showCode={true}
-                                />
-                              </div>
-                            </div>
+                            <FormField
+                              control={form.control}
+                              name={`storage_guidelines.${index}.stability_duration.unit`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel aria-required>
+                                    {t("duration_unit")}
+                                  </FormLabel>
+                                  <FormControl>
+                                    <ValueSetSelect
+                                      ref={field.ref}
+                                      system="system-ucum-units"
+                                      value={field.value}
+                                      placeholder={t(
+                                        "duration_unit_placeholder",
+                                      )}
+                                      onSelect={(code) => {
+                                        field.onChange({
+                                          code: code.code,
+                                          display: code.display,
+                                          system: code.system,
+                                        });
+                                      }}
+                                      showCode={true}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
                           </div>
                         </div>
                         <Button
@@ -747,40 +760,37 @@ function ProductKnowledgeFormContent({
                             <FormLabel aria-required>
                               {t("dosage_form")}
                             </FormLabel>
-                            <FormControl>
-                              <Select
-                                value={field.value?.code || ""}
-                                onValueChange={(value) => {
-                                  const selectedUnit = DOSAGE_UNITS_CODES.find(
-                                    (unit) => unit.code === value,
-                                  );
-                                  if (selectedUnit)
-                                    field.onChange(selectedUnit);
-                                }}
-                              >
+                            <Select
+                              value={field.value?.code || ""}
+                              onValueChange={(value) => {
+                                const selectedUnit = DOSAGE_UNITS_CODES.find(
+                                  (unit) => unit.code === value,
+                                );
+                                if (selectedUnit) field.onChange(selectedUnit);
+                              }}
+                            >
+                              <FormControl>
                                 <SelectTrigger>
                                   <SelectValue
                                     placeholder={t("dosage_form_placeholder")}
                                   />
                                 </SelectTrigger>
-                                <SelectContent>
-                                  {DOSAGE_UNITS_CODES.map((unit) => (
-                                    <SelectItem
-                                      key={unit.code}
-                                      value={unit.code}
-                                    >
-                                      {unit.display}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </FormControl>
+                              </FormControl>
+                              <SelectContent>
+                                {DOSAGE_UNITS_CODES.map((unit) => (
+                                  <SelectItem key={unit.code} value={unit.code}>
+                                    {unit.display}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage>
+                              {form.formState.errors.definitional &&
+                                t("required")}
+                            </FormMessage>
                           </FormItem>
                         )}
                       />
-                      <FormMessage>
-                        {form.formState.errors.definitional && t("required")}
-                      </FormMessage>
                     </div>
 
                     <div className="space-y-4">
@@ -828,6 +838,7 @@ function ProductKnowledgeFormContent({
                                       </FormLabel>
                                       <FormControl>
                                         <ValueSetSelect
+                                          ref={routeField.ref}
                                           system="system-route"
                                           value={routeField.value}
                                           placeholder={t("select_route")}
@@ -841,13 +852,14 @@ function ProductKnowledgeFormContent({
                                           showCode={true}
                                         />
                                       </FormControl>
+                                      <FormMessage>
+                                        {form.formState.errors.definitional
+                                          ?.intended_routes?.[index] &&
+                                          t("required")}
+                                      </FormMessage>
                                     </FormItem>
                                   )}
                                 />
-                                <FormMessage>
-                                  {form.formState.errors.definitional
-                                    ?.intended_routes?.[index] && t("required")}
-                                </FormMessage>
                               </div>
                               <Button
                                 type="button"

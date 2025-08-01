@@ -1,7 +1,7 @@
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -47,6 +47,8 @@ interface Props {
   title?: string;
   asSheet?: boolean;
   closeOnSelect?: boolean;
+  ref?: React.RefCallback<HTMLButtonElement | null>;
+  "aria-invalid"?: boolean;
 }
 
 export default function ValueSetSelect({
@@ -63,6 +65,8 @@ export default function ValueSetSelect({
   showCode = false,
   title,
   asSheet = false,
+  ref,
+  ...props
 }: Props) {
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
@@ -134,6 +138,8 @@ export default function ValueSetSelect({
       <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
         <SheetTrigger asChild>
           <Button
+            ref={ref}
+            aria-invalid={props["aria-invalid"]}
             variant="outline"
             role="combobox"
             onClick={() => setInternalOpen(true)}
@@ -179,6 +185,8 @@ export default function ValueSetSelect({
       <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
         <SheetTrigger asChild>
           <Button
+            ref={ref}
+            aria-invalid={props["aria-invalid"]}
             variant="outline"
             role="combobox"
             className={cn(
@@ -242,6 +250,8 @@ export default function ValueSetSelect({
           <PopoverTrigger asChild disabled={disabled}>
             <div className="w-full">
               <Button
+                ref={ref}
+                aria-invalid={props["aria-invalid"]}
                 type="button"
                 variant="outline"
                 role="combobox"

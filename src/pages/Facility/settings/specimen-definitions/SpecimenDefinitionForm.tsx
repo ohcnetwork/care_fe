@@ -255,9 +255,7 @@ export function SpecimenDefinitionForm({
                   name="title"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>
-                        {t("title")} <span className="text-red-500">*</span>
-                      </FormLabel>
+                      <FormLabel aria-required>{t("title")}</FormLabel>
                       <FormControl>
                         <Input placeholder={t("title")} {...field} />
                       </FormControl>
@@ -271,9 +269,7 @@ export function SpecimenDefinitionForm({
                   name="slug"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>
-                        {t("slug")} <span className="text-red-500">*</span>
-                      </FormLabel>
+                      <FormLabel aria-required>{t("slug")}</FormLabel>
                       <FormControl>
                         <Input
                           placeholder={t("unique_identifier")}
@@ -301,9 +297,7 @@ export function SpecimenDefinitionForm({
                   name="status"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>
-                        {t("status")} <span className="text-red-500">*</span>
-                      </FormLabel>
+                      <FormLabel aria-required>{t("status")}</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -348,9 +342,7 @@ export function SpecimenDefinitionForm({
                 name="description"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>
-                      {t("description")} <span className="text-red-500">*</span>
-                    </FormLabel>
+                    <FormLabel aria-required>{t("description")}</FormLabel>
                     <FormControl>
                       <Textarea placeholder={t("description")} {...field} />
                     </FormControl>
@@ -369,16 +361,13 @@ export function SpecimenDefinitionForm({
                   name="type_collected"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>
-                        {t("type_collected")}{" "}
-                        <span className="text-red-500">*</span>
-                      </FormLabel>
+                      <FormLabel aria-required>{t("type_collected")}</FormLabel>
                       <FormControl>
                         <ValueSetSelect
+                          {...field}
                           system="system-specimen_type-code"
                           placeholder={t("select_type_collected")}
                           onSelect={handleTypeCollectedSelect}
-                          value={field.value}
                           disabled={isLoading}
                         />
                       </FormControl>
@@ -395,10 +384,10 @@ export function SpecimenDefinitionForm({
                       <FormLabel>{t("collection")}</FormLabel>
                       <FormControl>
                         <ValueSetSelect
+                          {...field}
                           system="system-specimen_collection_code"
                           placeholder={t("select_collection")}
                           onSelect={handleCollectionMethodSelect}
-                          value={field.value}
                           disabled={isLoading}
                         />
                       </FormControl>
@@ -420,6 +409,7 @@ export function SpecimenDefinitionForm({
                           <div key={index} className="flex items-center gap-2">
                             <FormControl>
                               <ValueSetSelect
+                                ref={field.ref}
                                 system="system-prepare_patient_prior_specimen_code"
                                 placeholder={t("select_patient_preparation")}
                                 onSelect={(code) =>
@@ -606,10 +596,10 @@ export function SpecimenDefinitionForm({
                           <FormLabel>{t("cap")}</FormLabel>
                           <FormControl>
                             <ValueSetSelect
+                              {...field}
                               system="system-container_cap-code"
                               placeholder={t("select_cap")}
                               onSelect={handleCapTypeSelect}
-                              value={field.value}
                               disabled={isLoading}
                             />
                           </FormControl>
