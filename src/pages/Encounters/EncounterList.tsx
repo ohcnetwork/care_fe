@@ -203,6 +203,14 @@ export function EncounterList({
     "cancelled",
   ] as const;
 
+  const ENCOUNTER_STATUS_ICONS = {
+    planned: "l-calender",
+    in_progress: "l-spinner",
+    discharged: "l-home",
+    completed: "l-check",
+    cancelled: "l-x",
+  } as const;
+
   const encounters =
     propEncounters ||
     queryEncounters?.results ||
@@ -401,10 +409,10 @@ export function EncounterList({
                             })
                           }
                         >
-                          {/* <CareIcon
+                          <CareIcon
                             icon={ENCOUNTER_STATUS_ICONS[status]}
                             className="size-4"
-                          /> */}
+                          />
                           {t(`encounter_status__${status}`)}
                         </TabsTrigger>
                       ))}
