@@ -407,13 +407,12 @@ function ProductKnowledgeFormContent({
                     control={form.control}
                     name="code"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel>{t("code")}</FormLabel>
                         <FormControl>
                           <ValueSetSelect
-                            ref={field.ref}
+                            {...field}
                             system="system-medication"
-                            value={field.value}
                             placeholder={t("search_for_product_codes")}
                             onSelect={(code) => {
                               field.onChange({
@@ -644,7 +643,7 @@ function ProductKnowledgeFormContent({
                                       onChange={(e) =>
                                         field.onChange(
                                           e.target.value
-                                            ? Number.parseInt(e.target.value)
+                                            ? parseInt(e.target.value)
                                             : "",
                                         )
                                       }
@@ -663,15 +662,14 @@ function ProductKnowledgeFormContent({
                               control={form.control}
                               name={`storage_guidelines.${index}.stability_duration.unit`}
                               render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="flex flex-col">
                                   <FormLabel aria-required>
                                     {t("duration_unit")}
                                   </FormLabel>
                                   <FormControl>
                                     <ValueSetSelect
-                                      ref={field.ref}
+                                      {...field}
                                       system="system-ucum-units"
-                                      value={field.value}
                                       placeholder={t(
                                         "duration_unit_placeholder",
                                       )}
@@ -838,9 +836,8 @@ function ProductKnowledgeFormContent({
                                       </FormLabel>
                                       <FormControl>
                                         <ValueSetSelect
-                                          ref={routeField.ref}
+                                          {...routeField}
                                           system="system-route"
-                                          value={routeField.value}
                                           placeholder={t("select_route")}
                                           onSelect={(code) => {
                                             routeField.onChange({

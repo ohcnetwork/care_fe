@@ -434,7 +434,7 @@ function ObservationDefinitionFormContent({
                     control={form.control}
                     name="code"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel aria-required>{t("loinc_code")}</FormLabel>
                         <FormControl>
                           <ValueSetSelect
@@ -480,7 +480,7 @@ function ObservationDefinitionFormContent({
                     control={form.control}
                     name="body_site"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel>{t("body_site")}</FormLabel>
                         <FormControl>
                           <ValueSetSelect
@@ -507,13 +507,12 @@ function ObservationDefinitionFormContent({
                     control={form.control}
                     name="method"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel>{t("method")}</FormLabel>
                         <FormControl>
                           <ValueSetSelect
-                            ref={field.ref}
+                            {...field}
                             system="system-collection-method"
-                            value={field.value}
                             placeholder={t("method_placeholder")}
                             onSelect={(code) => {
                               field.onChange({
@@ -534,13 +533,12 @@ function ObservationDefinitionFormContent({
                     control={form.control}
                     name="permitted_unit"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel>{t("unit")}</FormLabel>
                         <FormControl>
                           <ValueSetSelect
-                            ref={field.ref}
+                            {...field}
                             system="system-ucum-units"
-                            value={field.value}
                             placeholder={t("unit_placeholder")}
                             onSelect={(code) => {
                               field.onChange({
@@ -671,16 +669,15 @@ function ObservationDefinitionFormContent({
                             control={form.control}
                             name={`component.${index}.code`}
                             render={({ field }) => (
-                              <FormItem>
+                              <FormItem className="flex flex-col">
                                 <FormLabel aria-required>{t("code")}</FormLabel>
                                 <FormControl>
                                   <ValueSetSelect
-                                    ref={field.ref}
+                                    {...field}
                                     system="system-observation"
                                     placeholder={t(
                                       "search_for_observation_codes",
                                     )}
-                                    value={field.value}
                                     showCode={true}
                                     onSelect={(code) => {
                                       field.onChange({
@@ -731,16 +728,15 @@ function ObservationDefinitionFormContent({
                               control={form.control}
                               name={`component.${index}.permitted_unit`}
                               render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="flex flex-col">
                                   <FormLabel aria-required>
                                     {t("unit")}
                                   </FormLabel>
                                   <FormControl>
                                     <ValueSetSelect
-                                      ref={field.ref}
+                                      {...field}
                                       system="system-ucum-units"
                                       placeholder={t("search_for_units")}
-                                      value={field.value}
                                       showCode={true}
                                       onSelect={(code) => {
                                         field.onChange({
