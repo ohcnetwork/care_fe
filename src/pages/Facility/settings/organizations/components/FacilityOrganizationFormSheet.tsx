@@ -73,7 +73,7 @@ export default function FacilityOrganizationFormSheet({
       .string()
       .trim()
       .min(1, { message: t("field_required") }),
-    description: z.string().trim(),
+    description: z.string().trim().default(""),
     org_type: z.nativeEnum(FacilityOrganizationType).refine(
       (val) => {
         return (

@@ -56,7 +56,7 @@ export default function FacilityForm({
   const facilityFormSchema = z.object({
     facility_type: z.string().min(1, t("facility_type_required")),
     name: z.string().min(1, t("name_is_required")),
-    description: z.string().default(""),
+    description: z.string().trim().default(""),
     features: z.array(z.number()).default([]),
     pincode: validators().pincode,
     geo_organization: z.string().min(1, t("field_required")),
