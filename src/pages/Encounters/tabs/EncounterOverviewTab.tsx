@@ -20,6 +20,7 @@ import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSea
 import { useIsMobile } from "@/hooks/use-mobile";
 
 import query from "@/Utils/request/query";
+import { formatTruncatedList } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import EncounterOverviewDevices from "@/pages/Facility/settings/devices/components/EncounterOverviewDevices";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
@@ -62,7 +63,7 @@ export const EncounterOverviewTab = () => {
   } = useEncounter();
 
   const { data: allergies } = useQuery({
-    queryKey: ["allergy-intolerance", patientId, "confirmed"],
+    queryKey: ["allergies", patientId, "confirmed"],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
       queryParams: { verification_status: "confirmed" },
@@ -118,9 +119,11 @@ export const EncounterOverviewTab = () => {
                     <Badge variant="yellow">
                       <HandIcon className="size-4" />
                       <span>
-                        {allergies?.results
-                          .map((allergy) => allergy.code.display)
-                          .join(", ")}
+                        {formatTruncatedList(
+                          allergies?.results || [],
+                          2,
+                          (allergy) => allergy.code.display,
+                        )}
                       </span>
                     </Badge>
                   </div>
