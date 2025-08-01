@@ -204,7 +204,6 @@ export default function RoleForm({
                         />
                         <Label
                           htmlFor={permission.slug}
-                          aria-required="true"
                           className="flex-1 cursor-pointer"
                         >
                           <div>
