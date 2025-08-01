@@ -119,7 +119,6 @@ export default function ValueSetSelect({
               if (favouriteToRemove && removeFavouriteRef.current) {
                 removeFavouriteRef.current(favouriteToRemove);
               }
-              setFavouriteToRemove(null);
             }}
           >
             {t("confirm")}
@@ -157,7 +156,6 @@ export default function ValueSetSelect({
               if (clearFavouritesRef.current) {
                 clearFavouritesRef.current();
               }
-              setIsClearingFavourites(false);
             }}
           >
             {t("confirm")}
@@ -206,6 +204,8 @@ export default function ValueSetSelect({
                 onClearAllFavourites={() => setIsClearingFavourites(true)}
                 removeFavouriteRef={removeFavouriteRef}
                 clearFavouritesRef={clearFavouritesRef}
+                onFavouriteRemoved={() => setFavouriteToRemove(null)}
+                onFavouritesCleared={() => setIsClearingFavourites(false)}
                 count={count}
                 searchPostFix={searchPostFix}
                 showCode={showCode}
@@ -272,6 +272,8 @@ export default function ValueSetSelect({
                 onClearAllFavourites={() => setIsClearingFavourites(true)}
                 removeFavouriteRef={removeFavouriteRef}
                 clearFavouritesRef={clearFavouritesRef}
+                onFavouriteRemoved={() => setFavouriteToRemove(null)}
+                onFavouritesCleared={() => setIsClearingFavourites(false)}
                 placeholder={placeholder}
                 count={count}
                 searchPostFix={searchPostFix}
@@ -335,6 +337,8 @@ export default function ValueSetSelect({
             onClearAllFavourites={() => setIsClearingFavourites(true)}
             removeFavouriteRef={removeFavouriteRef}
             clearFavouritesRef={clearFavouritesRef}
+            onFavouriteRemoved={() => setFavouriteToRemove(null)}
+            onFavouritesCleared={() => setIsClearingFavourites(false)}
             count={count}
             searchPostFix={searchPostFix}
             showCode={showCode}
@@ -358,6 +362,8 @@ export default function ValueSetSelect({
               onClearAllFavourites={() => setIsClearingFavourites(true)}
               removeFavouriteRef={removeFavouriteRef}
               clearFavouritesRef={clearFavouritesRef}
+              onFavouriteRemoved={() => setFavouriteToRemove(null)}
+              onFavouritesCleared={() => setIsClearingFavourites(false)}
               placeholder={placeholder}
               count={count}
               searchPostFix={searchPostFix}

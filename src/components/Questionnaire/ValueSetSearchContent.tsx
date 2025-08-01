@@ -36,6 +36,8 @@ interface Props {
   onSearchChange: (value: string) => void;
   title?: string;
   placeholder?: string;
+  onFavouriteRemoved?: () => void;
+  onFavouritesCleared?: () => void;
 }
 
 interface ItemProps {
@@ -86,6 +88,8 @@ export default function ValueSetSearchContent({
   onClearAllFavourites,
   removeFavouriteRef,
   clearFavouritesRef,
+  onFavouriteRemoved,
+  onFavouritesCleared,
   count = 10,
   searchPostFix = "",
   showCode = false,
@@ -131,6 +135,7 @@ export default function ValueSetSearchContent({
       queryClient.invalidateQueries({
         queryKey: ["valueset", system, "favourites"],
       });
+      onFavouriteRemoved?.();
     },
   });
 
@@ -142,6 +147,7 @@ export default function ValueSetSearchContent({
       queryClient.invalidateQueries({
         queryKey: ["valueset", system, "favourites"],
       });
+      onFavouritesCleared?.();
     },
   });
 
