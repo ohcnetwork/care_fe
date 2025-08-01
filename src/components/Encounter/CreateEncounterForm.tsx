@@ -59,6 +59,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 
 interface Props {
   patientId: string;
@@ -80,7 +81,6 @@ export default function CreateEncounterForm({
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const { t } = useTranslation();
-  const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
 
   const encounterFormSchema = z.object({
     status: z.enum(["planned", "in_progress", "on_hold"] as const),
@@ -90,6 +90,7 @@ export default function CreateEncounterForm({
       message: t("at_least_one_department_is_required"),
     }),
     start_date: z.string(),
+    tags: z.array(z.string()),
   });
 
   const form = useForm({
@@ -100,8 +101,15 @@ export default function CreateEncounterForm({
       priority: "routine",
       organizations: [],
       start_date: new Date().toISOString(),
+      tags: [],
     },
   });
+
+  const tagIds = form.watch("tags");
+  const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
+  const selectedTags = tagQueries
+    .map((query) => query.data)
+    .filter(Boolean) as TagConfig[];
 
   const { mutate: createEncounter, isPending } = useMutation({
     mutationFn: mutate(encounterApi.create),
@@ -125,7 +133,7 @@ export default function CreateEncounterForm({
       period: {
         start: data.start_date,
       },
-      tags: selectedTags.map((tag) => tag.id),
+      tags: data.tags,
     };
 
     createEncounter(encounterRequest);
@@ -322,35 +330,46 @@ export default function CreateEncounterForm({
                   </FormItem>
                 )}
               />
-              <div>
-                <h3 className="text-sm font-medium">{t("tags")}</h3>
-                <TagSelectorPopover
-                  selected={selectedTags}
-                  onChange={setSelectedTags}
-                  resource={TagResource.ENCOUNTER}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="tags"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("tags")}</FormLabel>
+                    <FormControl>
+                      <TagSelectorPopover
+                        selected={selectedTags}
+                        onChange={(tags) => {
+                          field.onChange(tags.map((tag) => tag.id));
+                        }}
+                        resource={TagResource.ENCOUNTER}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="organizations"
+                render={({ field }) => (
+                  <FormItem>
+                    <FacilityOrganizationSelector
+                      facilityId={facilityId}
+                      value={field.value}
+                      onChange={(value) => {
+                        if (value === null) {
+                          form.setValue("organizations", []);
+                        } else {
+                          form.setValue("organizations", value);
+                        }
+                      }}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-            <FormField
-              control={form.control}
-              name="organizations"
-              render={({ field }) => (
-                <FormItem>
-                  <FacilityOrganizationSelector
-                    facilityId={facilityId}
-                    value={field.value}
-                    onChange={(value) => {
-                      if (value === null) {
-                        form.setValue("organizations", []);
-                      } else {
-                        form.setValue("organizations", value);
-                      }
-                    }}
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <div className="flex justify-end mt-6 space-x-2">
               <Button
                 type="button"
