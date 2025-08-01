@@ -734,6 +734,7 @@ function ActivityDefinitionFormContent({
                           showCode={true}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
