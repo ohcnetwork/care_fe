@@ -24,6 +24,7 @@ import Page from "@/components/Common/Page";
 import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useFilters from "@/hooks/useFilters";
@@ -91,7 +92,13 @@ export function EncounterList({
 }: EncounterListProps) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    cacheBlacklist: ["name", "encounter_id", "external_identifier", "tags"],
+    cacheBlacklist: [
+      "name",
+      "encounter_id",
+      "external_identifier",
+      "tags",
+      "patient_filter",
+    ],
   });
   const { t } = useTranslation();
   const {
@@ -101,6 +108,7 @@ export function EncounterList({
     name,
     encounter_id,
     external_identifier,
+    patient_filter,
   } = qParams;
   const handleFieldChange = () => {
     updateQuery({
@@ -111,6 +119,7 @@ export function EncounterList({
       encounter_id: undefined,
       external_identifier: undefined,
       tags: qParams.tags,
+      patient_filter: undefined,
     });
   };
 
@@ -122,11 +131,19 @@ export function EncounterList({
           encounter_class: encounterClass,
           priority,
           tags: qParams.tags,
+          patient: patient_filter,
         },
         [key]: value || undefined,
       });
     },
-    [status, encounterClass, priority, updateQuery],
+    [
+      status,
+      encounterClass,
+      priority,
+      updateQuery,
+      qParams.tags,
+      patient_filter,
+    ],
   );
 
   const { data: queryEncounters, isLoading } = useQuery({
@@ -139,6 +156,7 @@ export function EncounterList({
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         tags: qParams.tags,
+        patient: patient_filter,
       },
     }),
     enabled: !propEncounters && !encounter_id,
@@ -257,6 +275,15 @@ export function EncounterList({
                     </div>
                   </PopoverContent>
                 </Popover>
+
+                <PatientIdentifierFilter
+                  onSelect={(patientId) =>
+                    updateQuery({ patient_filter: patientId })
+                  }
+                  placeholder={t("filter_by_identifier")}
+                  className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+                  patientId={qParams.patient_filter}
+                />
 
                 <div className="sm:w-auto w-full">
                   <FilterSelect
