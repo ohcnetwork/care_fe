@@ -2,6 +2,7 @@ import { Code } from "@/types/base/code/code";
 import { UserBase } from "@/types/user/user";
 
 export interface ObservationValue {
+  unit?: Code;
   value?: string;
   value_quantity?: {
     code: Code;
