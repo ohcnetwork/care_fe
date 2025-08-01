@@ -20,9 +20,9 @@ import { SymptomsHistory } from "./SymptomsHistory";
 export function ClinicalHistoryPage({
   patientId,
   tab = "symptoms",
-  facilityId,
+  fallBackUrl,
 }: {
-  facilityId?: string;
+  fallBackUrl?: string;
   patientId: string;
   tab: string;
 }) {
@@ -37,12 +37,7 @@ export function ClinicalHistoryPage({
   });
 
   const handleClose = () => {
-    navigate(
-      sourceUrl ||
-        (facilityId
-          ? `/facility/${facilityId}/patient/${patientId}`
-          : `/patient/${patientId}`),
-    );
+    navigate(sourceUrl || fallBackUrl);
   };
 
   const handleTabChange = (value: string) => {
