@@ -164,12 +164,12 @@ export const EncounterShow = (props: Props) => {
   return (
     <Page title={t("encounter")} className="block" hideTitleOnPage>
       <EncounterHeader />
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-2 mt-4 sm:h-[calc(100vh-10rem)]">
+      <div className="flex flex-col lg:flex-row mt-4 sm:h-[calc(100vh-10rem)]">
         <EncounterHistorySelector />
         <NavTabs
           showMoreAfterIndex={showMoreAfterIndex}
           className="w-full overflow-x-auto"
-          tabContentClassName="flex-none sm:h-[calc(100vh-14rem)] overflow-y-auto"
+          tabContentClassName="flex-none sm:h-[calc(100vh-24rem)] overflow-y-auto"
           tabs={tabs}
           currentTab={props.tab}
           tabTriggerClassName="max-w-36"
