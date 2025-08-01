@@ -233,7 +233,7 @@ export const EncounterOverviewTab = () => {
 
         {/* Right Column */}
         {encounter ? (
-          <div className="sm:h-[calc(100vh-14rem)] sm:overflow-y-auto">
+          <div className="lg:h-[calc(100vh-14rem)] xl:overflow-y-auto">
             <SideOverview
               encounter={encounter}
               canAccess={canAccess}
