@@ -34,7 +34,6 @@ import {
   ENCOUNTER_CLASS,
   ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_PRIORITY,
-  ENCOUNTER_STATUS_ICONS,
   EncounterPriority,
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
@@ -402,10 +401,10 @@ export function EncounterList({
                             })
                           }
                         >
-                          <CareIcon
+                          {/* <CareIcon
                             icon={ENCOUNTER_STATUS_ICONS[status]}
                             className="size-4"
-                          />
+                          /> */}
                           {t(`encounter_status__${status}`)}
                         </TabsTrigger>
                       ))}
