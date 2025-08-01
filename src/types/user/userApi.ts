@@ -35,4 +35,10 @@ export default {
     TRes: Type<UserReadMinimal>(),
     TBody: Type<UserUpdate>(),
   },
+  delete: {
+    path: "/api/v1/users/{username}/",
+    method: HttpMethod.DELETE,
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<void>(),
+  },
 } as const;
