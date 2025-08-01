@@ -6,7 +6,6 @@ function Input({
   className,
   type,
   inputMode,
-  onKeyDown,
   ...props
 }: React.ComponentProps<"input">) {
   return (
@@ -19,17 +18,20 @@ function Input({
       )}
       {...props}
       inputMode={inputMode}
+      {...(type === "number" &&
+        inputMode === "numeric" && {
+          onBeforeInput: (e) => {
+            const inputEvent = e.nativeEvent as InputEvent;
+            if (inputEvent.data === ".") {
+              e.preventDefault();
+            }
+          },
+        })}
       onFocus={(e) => {
         if (type === "date") {
           e.target.showPicker();
         }
         props.onFocus?.(e);
-      }}
-      onKeyDown={(e) => {
-        if (type === "number" && inputMode === "numeric" && e.key === ".") {
-          e.preventDefault();
-        }
-        onKeyDown?.(e);
       }}
       onWheel={(e) => {
         e.currentTarget.blur();
