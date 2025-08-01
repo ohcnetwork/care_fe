@@ -3,11 +3,7 @@ import {
   FacilityModel,
   FacilityRequest,
 } from "@/components/Facility/models";
-import {
-  CreateFileRequest,
-  CreateFileResponse,
-  FileUploadModel,
-} from "@/components/Patient/models";
+import { FileUploadModel } from "@/components/Patient/models";
 import { AuthUserModel, UpdatePasswordForm } from "@/components/Users/models";
 
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -190,13 +186,6 @@ const routes = {
     TRes: Type<UserBase>(),
   },
 
-  // FileUpload Create
-  createUpload: {
-    path: "/api/v1/files/",
-    method: "POST",
-    TBody: Type<CreateFileRequest>(),
-    TRes: Type<CreateFileResponse>(),
-  },
   viewUpload: {
     path: "/api/v1/files/",
     method: "GET",
@@ -211,11 +200,6 @@ const routes = {
     path: "/api/v1/files/{id}/",
     method: "PUT",
     TBody: Type<Partial<FileUploadModel>>(),
-    TRes: Type<FileUploadModel>(),
-  },
-  markUploadCompleted: {
-    path: "/api/v1/files/{id}/mark_upload_completed/",
-    method: "POST",
     TRes: Type<FileUploadModel>(),
   },
   archiveUpload: {
