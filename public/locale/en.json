@@ -2011,6 +2011,7 @@
   "filter_by_date": "Filter by Date",
   "filter_by_delivery": "Filter by delivery",
   "filter_by_department_or_team_name": "Filter by department or team name",
+  "filter_by_identifier": "Filter by Identifier",
   "filter_by_locations": "Filter by Locations",
   "filter_by_patient": "Filter by Patient",
   "filter_by_priority": "Filter by Priority",
