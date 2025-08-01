@@ -50,11 +50,6 @@ export function NumberQuestion({
       pattern={"[0-9]*[.]?[0-9]*"}
       value={questionnaireResponse.values[index]?.value?.toString() || ""}
       onChange={(e) => handleChange(e.target.value)}
-      onKeyDown={(e) => {
-        if (e.key === "." && question.type === "integer") {
-          e.preventDefault();
-        }
-      }}
       step={question.type === "decimal" ? "0.01" : "1"}
       disabled={disabled}
     />

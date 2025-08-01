@@ -2,7 +2,13 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+function Input({
+  className,
+  type,
+  inputMode,
+  onKeyDown,
+  ...props
+}: React.ComponentProps<"input">) {
   return (
     <input
       data-slot="input"
@@ -12,11 +18,18 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
         className,
       )}
       {...props}
+      inputMode={inputMode}
       onFocus={(e) => {
         if (type === "date") {
           e.target.showPicker();
         }
         props.onFocus?.(e);
+      }}
+      onKeyDown={(e) => {
+        if (type === "number" && inputMode === "numeric" && e.key === ".") {
+          e.preventDefault();
+        }
+        onKeyDown?.(e);
       }}
       onWheel={(e) => {
         e.currentTarget.blur();
