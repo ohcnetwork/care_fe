@@ -298,8 +298,8 @@ export default function UserForm({
         first_name: data.first_name,
         last_name: data.last_name,
         phone_number: data.phone_number,
-        prefix: data.prefix || undefined,
-        suffix: data.suffix || undefined,
+        prefix: data.prefix || "",
+        suffix: data.suffix || "",
         gender: data.gender,
         geo_organization: data.geo_organization || undefined,
       };
@@ -316,8 +316,8 @@ export default function UserForm({
         last_name: data.last_name,
         email: data.email!,
         phone_number: data.phone_number,
-        prefix: data.prefix || undefined,
-        suffix: data.suffix || undefined,
+        prefix: data.prefix || "",
+        suffix: data.suffix || "",
         gender: data.gender,
         geo_organization: data.geo_organization || undefined,
       };
