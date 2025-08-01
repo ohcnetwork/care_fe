@@ -1,7 +1,7 @@
 import { Menu } from "lucide-react";
-import { ActiveLink, useFullPath, useRoutes } from "raviger";
+import { ActiveLink, navigate, useFullPath, useRoutes } from "raviger";
 import { Link } from "raviger";
-import { useMemo } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -92,17 +92,23 @@ export function BillingSettingsLayout() {
     routeProps: { facilityId },
   });
   const fullPath = useFullPath();
-  const fullPathMap = useMemo(
-    () =>
-      fullPath.split("/").reduce(
-        (acc, part) => ({
-          ...acc,
-          [part]: true,
-        }),
-        {} as Record<string, boolean>,
-      ),
-    [fullPath],
-  );
+
+  useEffect(() => {
+    const baseBillingPath = `/facility/${facilityId}/settings/billing`;
+    if (fullPath === baseBillingPath || fullPath === `${baseBillingPath}/`) {
+      navigate(`${baseBillingPath}/discount_codes`);
+    }
+  }, [fullPath, facilityId]);
+
+  const subpath = (() => {
+    const idx = fullPath.indexOf("/settings/billing");
+    if (idx !== -1) {
+      let suffix = fullPath.substring(idx + "/settings/billing".length);
+      if (!suffix || suffix === "/") return "/settings";
+      return suffix.startsWith("/") ? suffix : `/${suffix}`;
+    }
+    return "/settings";
+  })();
 
   return (
     <div className="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
@@ -146,7 +152,7 @@ export function BillingSettingsLayout() {
                 <h4 className="px-2 text-sm uppercase font-bold tracking-tight">
                   {category.category}
                 </h4>
-                <div className="space-y-1">
+                <div className="space-y-1 ">
                   {category.items.map((item) => (
                     <ActiveLink
                       key={item.href}
@@ -154,14 +160,9 @@ export function BillingSettingsLayout() {
                       className={cn(
                         buttonVariants({ variant: "ghost" }),
                         "w-full justify-start",
-                      )}
-                      activeClass={cn(
-                        item.href
-                          .split("/")
-                          .every((part) => fullPathMap[part]) &&
+                        subpath === item.href &&
                           "bg-white text-green-700 shadow",
                       )}
-                      exactActiveClass="bg-white text-green-700 shadow"
                     >
                       {item.title}
                     </ActiveLink>
