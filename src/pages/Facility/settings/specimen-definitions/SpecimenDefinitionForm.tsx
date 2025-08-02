@@ -98,16 +98,7 @@ const formSchema = z.object({
     .url({ message: "Please enter a valid URL" })
     .optional(),
   type_collected: CodeSchema,
-  patient_preparation: z
-    .array(CodeSchema.optional())
-    .min(0)
-    .refine(
-      (arr) => {
-        const codes = arr.filter(Boolean).map((item) => item!.code);
-        return new Set(codes).size === codes.length;
-      },
-      { message: t("duplicate_patient_preparation_not_allowed") },
-    ),
+  patient_preparation: z.array(CodeSchema.optional()).min(0),
   collection: CodeSchema.optional(),
   type_tested: typeTestedSchema.optional(),
 });
@@ -446,7 +437,7 @@ export function SpecimenDefinitionForm({
                               variant="ghost"
                               size="icon"
                               onClick={() => remove(index)}
-                              className="h-10 w-10"
+                              className="size-10"
                             >
                               <XCircle className="h-5 w-5" />
                             </Button>
