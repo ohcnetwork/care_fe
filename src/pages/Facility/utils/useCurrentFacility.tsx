@@ -23,7 +23,7 @@ export default function useCurrentFacility() {
   const path = useFullPath();
   const facilityId = extractFacilityId(path);
 
-  const { data: facility } = useQuery({
+  const { data: facility, isLoading: isFacilityLoading } = useQuery({
     queryKey: ["facility", facilityId],
     queryFn: query(routes.getPermittedFacility, {
       pathParams: { id: facilityId ?? "" },
@@ -31,7 +31,7 @@ export default function useCurrentFacility() {
     staleTime: 1000 * 60 * 30, // cache for 30 minutes
   });
 
-  return { facilityId, facility };
+  return { facilityId, facility, isFacilityLoading };
 }
 
 export function useCurrentFacilitySilently() {

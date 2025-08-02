@@ -480,14 +480,14 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             const [startHour] = firstSlot.start.split(":").map(Number);
             const date = new Date(firstSlot.date);
             date.setHours(startHour, 0, 0, 0);
-            return format(date, "yyyy-MM-dd'T'HH:mm:ss");
+            return date.toISOString();
           })(),
           occurrence_period_start_before: (() => {
             const lastSlot = visibleSlots[visibleSlots.length - 1];
             const [endHour] = lastSlot.end.split(":").map(Number);
             const date = new Date(lastSlot.date);
             date.setHours(endHour, 0, 0, 0);
-            return format(date, "yyyy-MM-dd'T'HH:mm:ss");
+            return date.toISOString();
           })(),
         }),
       },
@@ -507,9 +507,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
         if (!existingDate || adminDate > new Date(existingDate)) {
           acc.dates[admin.request] = admin.occurrence_period_start;
-          acc.performers[admin.request] = admin.created_by
-            ? formatName(admin.created_by)
-            : "";
+          acc.performers[admin.request] = formatName(admin.created_by);
         }
 
         return acc;

@@ -96,7 +96,7 @@ export default function RolesIndex() {
       queryParams: {
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        search: qParams.search,
+        name: qParams.search,
         ordering: "name",
       },
     }),
@@ -159,7 +159,7 @@ export default function RolesIndex() {
                   {t("add_role")}
                 </Button>
               </SheetTrigger>
-              <SheetContent className="overflow-y-auto">
+              <SheetContent>
                 <SheetHeader>
                   <SheetTitle>
                     {selectedRole && selectedRole.id

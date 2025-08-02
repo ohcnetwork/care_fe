@@ -68,6 +68,7 @@ import {
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { Organization } from "@/types/organization/organization";
 
 interface PatientRegistrationPageProps {
@@ -92,7 +93,6 @@ export default function PatientRegistration(
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
-  const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
 
   const formSchema = useMemo(
     () =>
@@ -109,6 +109,7 @@ export default function PatientRegistration(
           age_or_dob: z.enum(["dob", "age"]),
           date_of_birth: z
             .string()
+            .nonempty(t("date_of_birth_must_be_present"))
             .regex(/^\d{4}-\d{2}-\d{2}$/, t("date_of_birth_format"))
             .refine((date) => {
               const parsedDate = dayjs(date);
@@ -147,53 +148,58 @@ export default function PatientRegistration(
               value: z.string().optional(),
             }),
           ),
+          tags: z.array(z.string()),
         })
-        .refine(
-          (data) => (data.age_or_dob === "dob" ? !!data.date_of_birth : true),
-          {
-            message: t("date_of_birth_must_be_present"),
-            path: ["date_of_birth"],
-          },
-        )
-        .refine((data) => (data.age_or_dob === "age" ? !!data.age : true), {
-          message: t("age_must_be_present"),
-          path: ["age"],
-        })
-        .refine(
-          (data) =>
-            data.nationality === defaultCountry
-              ? !!data.geo_organization
-              : true,
-          {
-            message: t("geo_organization_required"),
-            path: ["geo_organization"],
-          },
-        )
-        .refine(
-          (data) => {
-            if (!data.deceased_datetime) return true;
-
-            const deathDate = dayjs(data.deceased_datetime);
-            if (!deathDate.isValid()) return false;
-
-            const dob = data.date_of_birth
-              ? dayjs(data.date_of_birth)
-              : dayjs().subtract(data.age || 0, "years");
-
-            return data.date_of_birth
-              ? dob.isBefore(deathDate)
-              : dob.year() < deathDate.year();
-          },
-          (data) => ({
-            message: dayjs(data.deceased_datetime).isValid()
-              ? t("death_date_must_be_after_dob")
-              : t("invalid_date_format", { format: "DD-MM-YYYY HH:mm" }),
-            path: ["deceased_datetime"],
-          }),
-        )
         .superRefine((data, ctx) => {
-          // When an identifier is required, and it has no default_value, it should have a value
-          // The identifiers with errors are returned and errors are shown for all applicable identifiers
+          if (data.age_or_dob === "dob" && !data.date_of_birth) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("date_of_birth_must_be_present"),
+              path: ["date_of_birth"],
+            });
+          }
+          if (data.age_or_dob === "age" && !data.age) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("age_must_be_present"),
+              path: ["age"],
+            });
+          }
+
+          if (data.nationality === defaultCountry && !data.geo_organization) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("geo_organization_required"),
+              path: ["geo_organization"],
+            });
+          }
+          if (data.deceased_datetime) {
+            const deathDate = dayjs(data.deceased_datetime);
+            if (!deathDate.isValid()) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: t("invalid_date_format", {
+                  format: "DD-MM-YYYY HH:mm",
+                }),
+                path: ["deceased_datetime"],
+              });
+            } else {
+              const dob = data.date_of_birth
+                ? dayjs(data.date_of_birth)
+                : dayjs().subtract(data.age || 0, "years");
+              const valid = data.date_of_birth
+                ? dob.isBefore(deathDate)
+                : dob.year() < deathDate.year();
+              if (!valid) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: t("death_date_must_be_after_dob"),
+                  path: ["deceased_datetime"],
+                });
+              }
+            }
+          }
+
           const identifierConfigs =
             facility?.patient_instance_identifier_configs || [];
           const identifiers = data.identifiers || [];
@@ -225,13 +231,21 @@ export default function PatientRegistration(
       phone_number: phone_number || "",
       emergency_phone_number: "",
       age_or_dob: "dob",
+      date_of_birth: "",
       same_phone_number: false,
       same_address: true,
       _selected_levels: [],
       _is_deceased: false,
+      tags: [],
     },
     mode: "onSubmit",
   });
+
+  const tagIds = form.watch("tags");
+  const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
+  const selectedTags = tagQueries
+    .map((query) => query.data)
+    .filter(Boolean) as TagConfig[];
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
     mutationKey: ["create_patient"],
@@ -304,7 +318,7 @@ export default function PatientRegistration(
           : values.permanent_address,
         facility: facilityId,
         pincode: values.pincode || undefined,
-        tags: selectedTags.map((tag) => tag.id),
+        tags: values.tags,
         identifiers: editableIdentifiers,
       });
     }
@@ -385,9 +399,10 @@ export default function PatientRegistration(
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
         deceased_datetime: null,
+        tags: [], // This is only used for create patient
         identifiers: facility.patient_instance_identifier_configs.map(
           (identifierConfig) => {
-            const identifier = patientQuery.data.instance_identifiers.find(
+            const identifier = patientQuery.data.instance_identifiers?.find(
               (i) => i.config.id === identifierConfig.id,
             );
             return {
@@ -617,14 +632,25 @@ export default function PatientRegistration(
 
               {/* Tag Selector (only for create) */}
               {!patientId && (
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">{t("tags")}</h3>
-                  <TagSelectorPopover
-                    selected={selectedTags}
-                    onChange={setSelectedTags}
-                    resource={TagResource.PATIENT}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("tags")}</FormLabel>
+                      <FormControl>
+                        <TagSelectorPopover
+                          selected={selectedTags}
+                          onChange={(tags) => {
+                            field.onChange(tags.map((tag) => tag.id));
+                          }}
+                          resource={TagResource.PATIENT}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
 
               <Tabs
