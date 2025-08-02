@@ -99,11 +99,11 @@ const formSchema = z.object({
     .optional(),
   type_collected: CodeSchema,
   patient_preparation: z
-    .array(CodeSchema)
+    .array(CodeSchema.optional())
     .min(0)
     .refine(
       (arr) => {
-        const codes = arr.map((item) => item.code);
+        const codes = arr.filter(Boolean).map((item) => item!.code);
         return new Set(codes).size === codes.length;
       },
       { message: t("duplicate_patient_preparation_not_allowed") },
@@ -138,7 +138,9 @@ export function SpecimenDefinitionForm({
       description: initialData?.description,
       derived_from_uri: initialData?.derived_from_uri ?? undefined,
       type_collected: initialData?.type_collected,
-      patient_preparation: initialData?.patient_preparation ?? [],
+      patient_preparation: (initialData?.patient_preparation ?? []).filter(
+        Boolean,
+      ),
       collection: initialData?.collection ?? undefined,
       type_tested: initialData?.type_tested ?? {
         is_derived: false,
@@ -212,11 +214,13 @@ export function SpecimenDefinitionForm({
     return cleanedContainer;
   };
 
-  const handleSubmit = (data: SpecimenDefinitionCreate) => {
+  const handleSubmit = (data: FormValues) => {
     onSubmit({
       ...data,
       patient_preparation:
-        data.patient_preparation?.filter((item) => item && item.code) || [],
+        data.patient_preparation?.filter(
+          (item): item is Code => !!item && !!item.code,
+        ) || [],
       type_tested: data.type_tested
         ? {
             ...data.type_tested,
@@ -452,9 +456,7 @@ export function SpecimenDefinitionForm({
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() =>
-                          append({ code: "", display: "", system: "" })
-                        }
+                        onClick={() => append(undefined)}
                         className="w-full"
                       >
                         <PlusCircle className="mr-2 h-4 w-4" />
