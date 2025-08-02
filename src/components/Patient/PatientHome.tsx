@@ -270,7 +270,7 @@ const PatientTags = ({
   return (
     <div className={cn("flex flex-col gap-0.5 items-start", className)}>
       <span className="text-xs text-gray-600 w-32 md:w-auto">
-        {t("tags")}:{" "}
+        {t("tags", { count: 2 })}:{" "}
       </span>
       {tags.length ? (
         <div className="flex flex-wrap gap-1">

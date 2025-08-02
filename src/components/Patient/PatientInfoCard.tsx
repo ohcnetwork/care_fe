@@ -476,7 +476,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                             icon="l-tag-alt"
                             className="size-4 text-green-600"
                           />
-                          {t("tags")}
+                          {t("tags", { count: 2 })}
                         </div>
                       }
                       canWrite={canWrite}

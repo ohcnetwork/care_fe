@@ -133,7 +133,7 @@ export default function EncounterProperties({ encounter, canEdit }: Props) {
       </div>
 
       <div className="flex flex-col gap-1">
-        <span className="text-xs font-medium">{t("tags")}: </span>
+        <span className="text-xs font-medium">{t("tags", { count: 2 })}: </span>
         <div className="flex flex-wrap gap-2">
           {encounter.tags.length > 0 ? (
             <>

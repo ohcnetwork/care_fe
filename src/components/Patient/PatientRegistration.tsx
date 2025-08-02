@@ -637,7 +637,7 @@ export default function PatientRegistration(
                   name="tags"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("tags")}</FormLabel>
+                      <FormLabel>{t("tags", { count: 2 })}</FormLabel>
                       <FormControl>
                         <TagSelectorPopover
                           selected={selectedTags}

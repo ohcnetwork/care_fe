@@ -314,7 +314,7 @@ export function TagSelectorPopover({
                   {selected.length > 0 ? (
                     <div className="flex items-center gap-1">
                       <div className="text-sm font-medium text-gray-950">
-                        {t("tags")}
+                        {t("tags", { count: 2 })}
                       </div>
                       <span className="text-sm text-gray-600 underline lowercase">
                         {t("include")}
@@ -322,7 +322,7 @@ export function TagSelectorPopover({
                       <span className="text-sm text-gray-950 underline">
                         {selected.length === 1
                           ? selected[0].display
-                          : `${selected.length} ${t("tags")}`}
+                          : `${selected.length} ${t("tags", { count: selected.length })}`}
                       </span>
                     </div>
                   ) : (

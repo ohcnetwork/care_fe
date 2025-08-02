@@ -14,11 +14,12 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FilterSelect } from "@/components/ui/filter-select";
 import {
-  MultiFilterSelector,
-  createEncounterClassFilter,
-  createEncounterStatusFilter,
-  createTagFilter,
-} from "@/components/ui/multi-filter-selector";
+  FilterState,
+  MultiFilterSelectorDropdown,
+  encounterClassFilter,
+  encounterStatusFilter,
+  tagFilter,
+} from "@/components/ui/multi-filter-selector-dropdown";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -225,28 +226,70 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
+  const filters = [encounterStatusFilter, encounterClassFilter, tagFilter];
   const [selectedFilters, setSelectedFilters] = useState<
-    Record<string, string[] | TagConfig[]>
-  >({});
-
-  const filters = [
-    createEncounterStatusFilter(),
-    createEncounterClassFilter(),
-    createTagFilter(TagResource.ENCOUNTER),
-  ];
+    Record<string, FilterState>
+  >(
+    filters.reduce(
+      (acc, filter) => ({
+        ...acc,
+        [filter.key]: {
+          filter,
+          selected: [],
+          operation: { selectedOperation: null, availableOperations: [] },
+        },
+      }),
+      {},
+    ),
+  );
 
   const handleFilterChange = (
     filterKey: string,
     values: string[] | TagConfig[],
   ) => {
+    const filter = filters.find((f) => f.key === filterKey);
+    const operations = filter?.getOperations?.(values) ?? [];
+    const firstOperation = operations?.[0] ?? null;
+    const selectedOperation =
+      selectedFilters[filterKey]?.operation.selectedOperation ?? firstOperation;
+    if (filter) {
+      setSelectedFilters((prev) => ({
+        ...prev,
+        [filterKey]: {
+          ...(selectedFilters[filterKey] ?? { filter }),
+          selected: values,
+          operation: {
+            selectedOperation,
+            availableOperations: operations,
+          },
+        },
+      }));
+    }
+  };
+
+  const handleOperationChange = (filterKey: string, operation: string) => {
     setSelectedFilters((prev) => ({
       ...prev,
-      [filterKey]: values,
+      [filterKey]: {
+        ...prev[filterKey],
+        operation: {
+          ...prev[filterKey].operation,
+          selectedOperation: operation,
+        },
+      },
     }));
   };
 
   const handleClearAll = () => {
-    setSelectedFilters({});
+    setSelectedFilters((prev) => {
+      const newState = { ...prev };
+      Object.keys(newState).forEach((key) => {
+        newState[key].selected = [];
+        newState[key].operation.selectedOperation = null;
+        newState[key].operation.availableOperations = [];
+      });
+      return newState;
+    });
   };
 
   return (
@@ -289,13 +332,12 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
 
           {/* Filters */}
 
-          <MultiFilterSelector
-            filters={filters}
+          <MultiFilterSelectorDropdown
             selectedFilters={selectedFilters}
             onFilterChange={handleFilterChange}
+            onOperationChange={handleOperationChange}
             onClearAll={handleClearAll}
             placeholder="Filter encounters"
-            selectedTags={selectedFilters.tags as TagConfig[]}
           />
 
           {showFilters && (

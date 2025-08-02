@@ -102,7 +102,7 @@ export default function BookAppointment({ patientId }: Props) {
 
         <div className="space-y-8">
           <div className="max-w-md">
-            <Label className="mb-2">{t("tags")}</Label>
+            <Label className="mb-2">{t("tags", { count: 2 })}</Label>
             <TagSelectorPopover
               selected={selectedTags}
               onChange={setSelectedTags}
