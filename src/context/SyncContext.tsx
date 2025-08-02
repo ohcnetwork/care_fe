@@ -16,11 +16,13 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncedCount, setSyncedCount] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
+  const [syncInProgress, setSyncInProgress] = useState(false);
 
   const startSync = useCallback(
     async (userId: string) => {
-      if (isSyncing) return;
+      if (isSyncing || syncInProgress) return;
 
+      setSyncInProgress(true);
       try {
         const result = await syncOfflineRecords(
           userId,
@@ -43,9 +45,11 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         console.error("Sync failed:", error);
         setIsSyncing(false);
+      } finally {
+        setSyncInProgress(false);
       }
     },
-    [isSyncing],
+    [], // Remove isSyncing dependency to prevent recreation
   );
 
   const resetSync = useCallback(() => {

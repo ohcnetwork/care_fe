@@ -15,7 +15,11 @@ import { dependencySchema } from "./dependencySchema";
 import { IdMap } from "./idMap";
 import { replaceOfflineIdsInWrite } from "./idReplacer";
 import { OfflineKey } from "./offlineKeys";
-import { getPendingAndRetryableWrites, markWriteStatus } from "./writeQueue";
+import {
+  getPendingAndRetryableWrites,
+  markWriteStatus,
+  unblockDependentWrites,
+} from "./writeQueue";
 
 export const mutationMap = {
   create_patient: patientApi.addPatient,
@@ -96,14 +100,30 @@ export class SyncManager {
         return result;
       }
 
-      // Step 2: Sort by dependencies (topological sort)
+      // Step 2: Pre-populate IdMap with all successful sync records
+      // Get ALL writes (including successful ones) to build the mapping
+      const db = new AppCacheDB();
+      const allWrites = await db.OfflineWrites.where("userId")
+        .equals(this.options.userId)
+        .toArray();
+
+      const successfulWrites = allWrites.filter(
+        (write) => write.syncStatus === "success",
+      );
+      this.idMap.prePopulateFromSuccessfulSyncs(successfulWrites);
+
+      // Debug: Show available mappings
+      const allMappings = this.idMap.getAllMappings();
+      console.log(`Available ID mappings for this sync session:`, allMappings);
+
+      // Step 3: Sort by dependencies (topological sort)
       const sortedWrites = topologicalSort(pendingWrites);
       const totalWrites = sortedWrites.length;
 
       // Notify that sync is starting with pending writes
       this.options.onSyncStart?.(totalWrites);
 
-      // Step 3: Process writes in dependency order
+      // Step 4: Process writes in dependency order
       for (let i = 0; i < sortedWrites.length; i++) {
         const write = sortedWrites[i];
 
@@ -144,7 +164,7 @@ export class SyncManager {
         );
       }
 
-      // Step 4: Cleanup and finalize
+      // Step 5: Cleanup and finalize
       await this.cleanup();
     } catch (error) {
       result.success = false;
@@ -206,6 +226,9 @@ export class SyncManager {
       if (response?.id && write.id.startsWith("offline-")) {
         this.idMap.addMapping(write.id, response.id);
       }
+
+      // Step 7: Unblock dependent writes that were blocked by this write
+      await unblockDependentWrites(write.id);
 
       return { status: "success" };
     } catch (error) {

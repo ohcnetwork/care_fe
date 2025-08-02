@@ -52,7 +52,7 @@ export default function AuthUserProvider({
   otpAuthorized,
 }: Props) {
   const queryClient = useQueryClient();
-  const { startSync } = useSync();
+  const { startSync, isSyncing } = useSync();
   const [accessToken, setAccessToken] = useState(
     localStorage.getItem(LocalStorageKeys.accessToken),
   );
@@ -220,14 +220,43 @@ export default function AuthUserProvider({
   console.log(isLoading, !isRestoring, !isChecked);
 
   useEffect(() => {
-    if (!onlineManager.isOnline() || !user?.external_id) return;
+    // Don't start sync if user is on session expired page
+    const isOnSessionExpiredPage = location.pathname === "/session-expired";
 
+    if (
+      !onlineManager.isOnline() ||
+      !user?.external_id ||
+      isSyncing ||
+      localStorage.getItem(LocalStorageKeys.accessToken) === null ||
+      isOnSessionExpiredPage
+    ) {
+      console.log("Sync skipped:", {
+        isOnline: onlineManager.isOnline(),
+        hasUser: !!user?.external_id,
+        isSyncing,
+        isOnSessionExpiredPage,
+        currentPath: location.pathname,
+      });
+      return;
+    }
+
+    console.log("Setting up automatic sync in 3 seconds...");
     const timeout = setTimeout(() => {
+      console.log("Triggering automatic sync for user:", user.external_id);
       startSync(user.external_id);
     }, 3000);
 
-    return () => clearTimeout(timeout);
-  }, [user?.external_id, onlineManager.isOnline(), startSync]);
+    return () => {
+      console.log("Clearing sync timeout");
+      clearTimeout(timeout);
+    };
+  }, [
+    user?.external_id,
+    onlineManager.isOnline(),
+    startSync,
+    isSyncing,
+    location.pathname,
+  ]);
 
   console.log("user : ", user, onlineManager.isOnline());
   if (isLoading || isRestoring || !isChecked) {

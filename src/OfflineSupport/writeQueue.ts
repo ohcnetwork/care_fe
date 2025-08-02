@@ -12,7 +12,8 @@ export async function getPendingAndRetryableWrites(
       const isPending = w.syncStatus === "pending";
       const isFailedButRetryable =
         w.syncStatus === "failed" && (w.retries || 0) < MAX_RETRIES;
-      return isPending || isFailedButRetryable;
+      const isBlocked = w.syncStatus === "blocked";
+      return isPending || isFailedButRetryable || isBlocked;
     })
     .toArray();
 }
@@ -26,6 +27,30 @@ export async function markWriteStatus(
     syncStatus: status,
     ...(extra || {}),
   });
+}
+
+/**
+ * Unblock writes that were blocked by a failed parent
+ * Call this when a parent write succeeds
+ */
+export async function unblockDependentWrites(
+  succeededParentId: string,
+): Promise<void> {
+  const allWrites = await db.OfflineWrites.toArray();
+  const dependentWrites = allWrites.filter((write) => {
+    return write.parentMutationIds?.includes(succeededParentId) || false;
+  });
+
+  for (const dependent of dependentWrites) {
+    if (dependent.syncStatus === "blocked") {
+      await markWriteStatus(dependent.id, "pending", {
+        lastError: undefined,
+        lastErrorDetails: undefined,
+        lastAttemptAt: undefined,
+      });
+      console.log(`Unblocked write ${dependent.id} (${dependent.type})`);
+    }
+  }
 }
 
 /**
