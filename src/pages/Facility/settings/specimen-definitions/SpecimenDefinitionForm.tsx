@@ -4,7 +4,9 @@ import { PlusCircle, XCircle } from "lucide-react";
 import { navigate } from "raviger";
 import React from "react";
 import { useForm } from "react-hook-form";
+import { useFieldArray } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -96,7 +98,7 @@ const formSchema = z.object({
     .url({ message: "Please enter a valid URL" })
     .optional(),
   type_collected: CodeSchema,
-  patient_preparation: z.array(CodeSchema).min(0),
+  patient_preparation: z.array(CodeSchema.optional()).min(0),
   collection: CodeSchema.optional(),
   type_tested: typeTestedSchema.optional(),
 });
@@ -127,7 +129,9 @@ export function SpecimenDefinitionForm({
       description: initialData?.description,
       derived_from_uri: initialData?.derived_from_uri ?? undefined,
       type_collected: initialData?.type_collected,
-      patient_preparation: initialData?.patient_preparation ?? [],
+      patient_preparation: (initialData?.patient_preparation ?? []).filter(
+        Boolean,
+      ),
       collection: initialData?.collection ?? undefined,
       type_tested: initialData?.type_tested ?? {
         is_derived: false,
@@ -144,6 +148,11 @@ export function SpecimenDefinitionForm({
         single_use: false,
       },
     },
+  });
+
+  const { fields, append, remove, update } = useFieldArray({
+    control: form.control,
+    name: "patient_preparation",
   });
 
   React.useEffect(() => {
@@ -171,27 +180,6 @@ export function SpecimenDefinitionForm({
     form.setValue("type_tested.container.cap", code);
   };
 
-  const handlePatientPreparationSelect = (code: Code, index: number) => {
-    const currentPreparations = form.getValues("patient_preparation");
-    const newPreparations = [...currentPreparations];
-    newPreparations[index] = code;
-    form.setValue("patient_preparation", newPreparations);
-  };
-
-  const addPatientPreparation = () => {
-    const currentPreparations = form.getValues("patient_preparation");
-    form.setValue("patient_preparation", [
-      ...currentPreparations,
-      { code: "", system: "", display: "" },
-    ]);
-  };
-
-  const removePatientPreparation = (index: number) => {
-    const currentPreparations = form.getValues("patient_preparation");
-    const newPreparations = currentPreparations.filter((_, i) => i !== index);
-    form.setValue("patient_preparation", newPreparations);
-  };
-
   const cleanContainerData = (container: ContainerSpec | null | undefined) => {
     if (!container) return undefined;
 
@@ -217,11 +205,13 @@ export function SpecimenDefinitionForm({
     return cleanedContainer;
   };
 
-  const handleSubmit = (data: SpecimenDefinitionCreate) => {
+  const handleSubmit = (data: FormValues) => {
     onSubmit({
       ...data,
       patient_preparation:
-        data.patient_preparation?.filter((item) => item && item.code) || [],
+        data.patient_preparation?.filter(
+          (item): item is Code => !!item && !!item.code,
+        ) || [],
       type_tested: data.type_tested
         ? {
             ...data.type_tested,
@@ -411,42 +401,53 @@ export function SpecimenDefinitionForm({
               <FormField
                 control={form.control}
                 name="patient_preparation"
-                render={({ field }) => (
+                render={() => (
                   <FormItem className="flex flex-col">
                     <FormLabel>{t("patient_preparation")}</FormLabel>
                     <div className="space-y-2">
-                      {field.value.map(
-                        (preparation: Code | null, index: number) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <FormControl>
-                              <ValueSetSelect
-                                system="system-prepare_patient_prior_specimen_code"
-                                placeholder={t("select_patient_preparation")}
-                                onSelect={(code) =>
-                                  handlePatientPreparationSelect(code, index)
+                      {fields.map((field, index) => (
+                        <div key={field.id} className="flex items-center gap-2">
+                          <FormControl>
+                            <ValueSetSelect
+                              system="system-prepare_patient_prior_specimen_code"
+                              placeholder={t("select_patient_preparation")}
+                              value={field}
+                              onSelect={(code) => {
+                                const current = form.getValues(
+                                  "patient_preparation",
+                                );
+                                const isDuplicate = current.some(
+                                  (prep, i) =>
+                                    prep?.code === code.code && i !== index,
+                                );
+                                if (!isDuplicate) {
+                                  update(index, code);
+                                } else {
+                                  toast.error(
+                                    t("duplicate_patient_preparation"),
+                                  );
                                 }
-                                value={preparation}
-                                disabled={isLoading}
-                              />
-                            </FormControl>
-                            {field.value.length > 1 && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => removePatientPreparation(index)}
-                                className="h-10 w-10"
-                              >
-                                <XCircle className="h-5 w-5" />
-                              </Button>
-                            )}
-                          </div>
-                        ),
-                      )}
+                              }}
+                              disabled={isLoading}
+                            />
+                          </FormControl>
+                          {fields.length > 1 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => remove(index)}
+                              className="size-10"
+                            >
+                              <XCircle className="h-5 w-5" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={addPatientPreparation}
+                        onClick={() => append(undefined)}
                         className="w-full"
                       >
                         <PlusCircle className="mr-2 h-4 w-4" />
