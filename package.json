@@ -120,6 +120,7 @@
     "react-phone-number-input": "^3.4.12",
     "react-qr-barcode-scanner": "^2.1.2",
     "react-resizable-panels": "^3.0.2",
+    "react-toastify": "^11.0.5",
     "react-webcam": "^7.2.0",
     "react-zoom-pan-pinch": "^3.7.0",
     "reactflow": "^11.11.4",
