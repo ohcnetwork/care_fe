@@ -40,6 +40,9 @@ interface SyncManagerOptions {
   maxRetries?: number;
   retryDelayMs?: number;
   enableConflictDetection?: boolean;
+  onProgress?: (syncedCount: number, totalCount: number) => void;
+  onSyncStart?: (totalCount: number) => void;
+  onSyncComplete?: () => void;
 }
 
 interface SyncResult {
@@ -95,12 +98,21 @@ export class SyncManager {
 
       // Step 2: Sort by dependencies (topological sort)
       const sortedWrites = topologicalSort(pendingWrites);
+      const totalWrites = sortedWrites.length;
+
+      // Notify that sync is starting with pending writes
+      this.options.onSyncStart?.(totalWrites);
 
       // Step 3: Process writes in dependency order
-      for (const write of sortedWrites) {
+      for (let i = 0; i < sortedWrites.length; i++) {
+        const write = sortedWrites[i];
+
         if (this.abortController?.signal.aborted) {
           break;
         }
+
+        // Add 1 second delay for testing banner visibility
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         const writeResult = await this.processWrite(write);
 
@@ -121,6 +133,15 @@ export class SyncManager {
             result.blockedCount++;
             break;
         }
+
+        // Report progress
+        this.options.onProgress?.(
+          result.syncedCount +
+            result.failedCount +
+            result.conflictCount +
+            result.blockedCount,
+          totalWrites,
+        );
       }
 
       // Step 4: Cleanup and finalize
@@ -134,7 +155,7 @@ export class SyncManager {
     } finally {
       this.isRunning = false;
       this.abortController = null;
-      toast.info("sync completed");
+      this.options.onSyncComplete?.();
     }
 
     return result;
@@ -327,12 +348,20 @@ export class SyncManager {
 
 // Convenience function to run a one-time sync
 
-export async function syncOfflineRecords(userId: string): Promise<SyncResult> {
+export async function syncOfflineRecords(
+  userId: string,
+  onProgress?: (syncedCount: number, totalCount: number) => void,
+  onSyncStart?: (totalCount: number) => void,
+  onSyncComplete?: () => void,
+): Promise<SyncResult> {
   const syncManager = new SyncManager({
     userId,
     maxRetries: 3,
     retryDelayMs: 1000,
     enableConflictDetection: true,
+    onProgress,
+    onSyncStart,
+    onSyncComplete,
   });
 
   return syncManager.sync();

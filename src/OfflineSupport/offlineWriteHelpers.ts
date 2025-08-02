@@ -637,11 +637,24 @@ function replaceEncounterScopedInPaginatedCache<
 ) {
   const prevData = queryClient.getQueryData(key);
 
-  // Check if this is an infinite query (has pages structure)
-  if (prevData && typeof prevData === "object" && "pages" in prevData) {
+  // Check if this is an infinite query by key pattern (starts with "infinite-")
+  const isInfiniteQuery = key[0]?.startsWith("infinite-");
+
+  if (isInfiniteQuery) {
     // Handle infinite query data
     queryClient.setQueryData(key, (prev: any) => {
-      if (!prev?.pages) return prev;
+      if (!prev?.pages) {
+        // If no existing cache, create a new infinite query structure
+        return {
+          pages: [
+            {
+              count: newEntries.length,
+              results: newEntries,
+            },
+          ],
+          pageParams: [0],
+        };
+      }
 
       // Only update the first page with new entries, keep other pages unchanged
       const updatedPages = prev.pages.map((page: any, index: number) => {

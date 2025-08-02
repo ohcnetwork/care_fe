@@ -70,6 +70,7 @@ export function MedicationStatementList({
       enabled: canAccess,
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
+        if (!lastPage || !lastPage.count) return null;
         const currentOffset = allPages.length * 100;
         return currentOffset < lastPage.count ? currentOffset : null;
       },

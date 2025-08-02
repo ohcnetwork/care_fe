@@ -65,6 +65,7 @@ export function SymptomsList({
       networkMode: "online",
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
+        if (!lastPage || !lastPage.count) return null;
         const currentOffset = allPages.length * LIMIT;
         return currentOffset < lastPage.count ? currentOffset : null;
       },

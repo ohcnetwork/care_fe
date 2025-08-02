@@ -11,6 +11,7 @@ import { Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 
 import Loading from "@/components/Common/Loading";
+import { SyncBannerWrapper } from "@/components/Common/SyncBannerWrapper";
 
 import Integrations from "@/Integrations";
 import PluginEngine from "@/PluginEngine";
@@ -19,6 +20,7 @@ import HistoryAPIProvider from "@/Providers/HistoryAPIProvider";
 import Routers from "@/Routers";
 import { displayCareConsoleArt } from "@/Utils/consoleArt";
 import queryClient from "@/Utils/request/queryClient";
+import { SyncProvider } from "@/context/SyncContext";
 
 import { createUserPersister } from "./OfflineSupport/createUserPersister";
 import { PubSubProvider } from "./Utils/pubsubContext";
@@ -60,23 +62,26 @@ const App = () => {
         <Suspense fallback={<Loading />}>
           <PubSubProvider>
             <PluginEngine>
-              <HistoryAPIProvider>
-                <AuthUserProvider
-                  unauthorized={<Routers.PublicRouter />}
-                  otpAuthorized={<Routers.PatientRouter />}
-                >
-                  <Routers.AppRouter />
-                </AuthUserProvider>
-              </HistoryAPIProvider>
-              <Toaster
-                position="top-right"
-                theme="light"
-                richColors
-                expand
-                // For `richColors` to work, pass at-least an empty object.
-                // Refer: https://github.com/shadcn-ui/ui/issues/2234.
-                toastOptions={{ closeButton: true }}
-              />
+              <SyncProvider>
+                <HistoryAPIProvider>
+                  <AuthUserProvider
+                    unauthorized={<Routers.PublicRouter />}
+                    otpAuthorized={<Routers.PatientRouter />}
+                  >
+                    <Routers.AppRouter />
+                  </AuthUserProvider>
+                </HistoryAPIProvider>
+                <SyncBannerWrapper />
+                <Toaster
+                  position="top-right"
+                  theme="light"
+                  richColors
+                  expand
+                  // For `richColors` to work, pass at-least an empty object.
+                  // Refer: https://github.com/shadcn-ui/ui/issues/2234.
+                  toastOptions={{ closeButton: true }}
+                />
+              </SyncProvider>
             </PluginEngine>
           </PubSubProvider>
         </Suspense>

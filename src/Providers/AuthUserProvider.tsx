@@ -9,7 +9,6 @@ import {
 import { useSetAtom } from "jotai";
 import { navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
 
 import Loading from "@/components/Common/Loading";
 
@@ -18,7 +17,6 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 import { LocalStorageKeys } from "@/common/constants";
 
 import { createUserPersister } from "@/OfflineSupport/createUserPersister";
-import { syncOfflineRecords } from "@/OfflineSupport/syncmanger";
 import useNetworkStatus from "@/Utils/networkstatus";
 import routes, {
   JwtTokenObtainPair,
@@ -28,6 +26,7 @@ import routes, {
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { userAtom } from "@/atoms/user-atom";
+import { useSync } from "@/context/SyncContext";
 import authApi from "@/types/auth/authApi";
 import { MFAAuthenticationToken, TokenData } from "@/types/auth/otp";
 
@@ -53,6 +52,7 @@ export default function AuthUserProvider({
   otpAuthorized,
 }: Props) {
   const queryClient = useQueryClient();
+  const { startSync } = useSync();
   const [accessToken, setAccessToken] = useState(
     localStorage.getItem(LocalStorageKeys.accessToken),
   );
@@ -223,12 +223,11 @@ export default function AuthUserProvider({
     if (!onlineManager.isOnline() || !user?.external_id) return;
 
     const timeout = setTimeout(() => {
-      toast.info(" sync properly start");
-      syncOfflineRecords(user.external_id);
+      startSync(user.external_id);
     }, 3000);
 
     return () => clearTimeout(timeout);
-  }, [user?.external_id, onlineManager.isOnline()]);
+  }, [user?.external_id, onlineManager.isOnline(), startSync]);
 
   console.log("user : ", user, onlineManager.isOnline());
   if (isLoading || isRestoring || !isChecked) {
