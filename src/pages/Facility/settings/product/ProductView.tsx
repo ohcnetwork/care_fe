@@ -174,8 +174,8 @@ export default function ProductView({ facilityId, productId }: Props) {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2">
+              <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-start">
+                <div className="space-y-2 flex-1">
                   <div className="flex items-center gap-2">
                     <Badge
                       variant={
@@ -197,6 +197,7 @@ export default function ProductView({ facilityId, productId }: Props) {
                 <Button
                   variant="outline"
                   size="sm"
+                  className="w-full sm:w-auto"
                   onClick={() =>
                     navigate(
                       `/facility/${facilityId}/settings/product_knowledge/${product.product_knowledge.id}`,
@@ -221,8 +222,8 @@ export default function ProductView({ facilityId, productId }: Props) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2">
+                <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-start">
+                  <div className="space-y-2 flex-1">
                     <h3 className="font-medium">
                       {product.charge_item_definition.title ||
                         product.charge_item_definition.id}
@@ -234,6 +235,7 @@ export default function ProductView({ facilityId, productId }: Props) {
                   <Button
                     variant="outline"
                     size="sm"
+                    className="w-full sm:w-auto"
                     onClick={() =>
                       navigate(
                         `/facility/${facilityId}/settings/charge_item_definitions/${product.charge_item_definition.id}`,
