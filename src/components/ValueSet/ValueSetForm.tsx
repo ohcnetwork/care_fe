@@ -419,7 +419,6 @@ export function ValueSetForm({
       </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* name */}
         <FormField
           control={form.control}
           name="name"
@@ -435,7 +434,6 @@ export function ValueSetForm({
           )}
         />
 
-        {/* slug */}
         <FormField
           control={form.control}
           name="slug"
@@ -451,7 +449,6 @@ export function ValueSetForm({
           )}
         />
 
-        {/* description */}
         <FormField
           control={form.control}
           name="description"
@@ -467,7 +464,6 @@ export function ValueSetForm({
           )}
         />
 
-        {/* status */}
         <FormField
           control={form.control}
           name="status"
@@ -496,7 +492,6 @@ export function ValueSetForm({
           )}
         />
 
-        {/* rules */}
         <div className="space-y-6">
           <RuleFields type="include" form={form} disabled={isSystemDefined} />
           <RuleFields type="exclude" form={form} disabled={isSystemDefined} />
@@ -508,7 +503,6 @@ export function ValueSetForm({
           </div>
         )}
 
-        {/* actions */}
         <div className="flex gap-2 w-full justify-end">
           <Button
             variant="outline"
