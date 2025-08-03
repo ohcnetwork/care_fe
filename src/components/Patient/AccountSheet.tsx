@@ -66,11 +66,13 @@ export function AccountSheetButton({
     setCreateAccountOpen(true);
   };
 
-  const handleEditAccount = (account: AccountRead) => {
+  const handleEditAccount = (account: AccountRead, e: React.MouseEvent) => {
+    e.stopPropagation();
     setEditingAccount(account);
   };
 
-  const handleViewAccount = (account: AccountRead) => {
+  const handleViewAccount = (account: AccountRead, e: React.MouseEvent) => {
+    e.stopPropagation();
     navigate(
       `/facility/${encounter.facility.id}/billing/account/${account.id}`,
     );
@@ -102,7 +104,7 @@ export function AccountSheetButton({
                     variant="outline"
                     size="sm"
                     className="flex items-center gap-1"
-                    onClick={() => handleViewAccount(accounts[0])}
+                    onClick={(e) => handleViewAccount(accounts[0], e)}
                   >
                     <ExternalLink className="size-4" />
                     {t("more_details")}
@@ -112,7 +114,7 @@ export function AccountSheetButton({
                       variant="outline"
                       size="sm"
                       className="flex items-center gap-1"
-                      onClick={() => handleEditAccount(accounts[0])}
+                      onClick={(e) => handleEditAccount(accounts[0], e)}
                     >
                       <Edit className="size-4" />
                       {t("edit")}
