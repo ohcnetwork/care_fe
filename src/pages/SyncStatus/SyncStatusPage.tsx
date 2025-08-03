@@ -14,15 +14,39 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSidebar } from "@/components/ui/sidebar";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import { getPendingAndRetryableWrites } from "@/OfflineSupport/writeQueue";
 import { useSync } from "@/context/SyncContext";
+
+// Helper function to get writes by status
+async function getWritesByStatus(
+  userId: string,
+  facilityId: string | undefined,
+  status: OfflineWritesEntry["syncStatus"],
+): Promise<OfflineWritesEntry[]> {
+  const db = new AppCacheDB();
+  let query = db.OfflineWrites.where("userId").equals(userId);
+
+  if (facilityId) {
+    query = query.and((w) => w.facilityId === facilityId);
+  }
+
+  return query.and((w) => w.syncStatus === status).toArray();
+}
 
 // Custom hook to fetch actual sync data
 function useSyncData(facilityId?: string) {
@@ -287,6 +311,321 @@ const SyncStatusOverview: React.FC<{ facilityId?: string }> = ({
   );
 };
 
+// Shared helper functions for table components
+const formatTimeAgo = (timestamp: number) => {
+  const now = Date.now();
+  const diffInMinutes = Math.floor((now - timestamp) / (1000 * 60));
+
+  if (diffInMinutes < 1) return "Just now";
+  if (diffInMinutes < 60) return `${diffInMinutes} mins ago`;
+
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours} hours ago`;
+
+  const diffInDays = Math.floor(diffInHours / 24);
+  return `${diffInDays} days ago`;
+};
+
+const getResourceTypeDisplay = (entry: OfflineWritesEntry) => {
+  // Map the type to a more readable display name
+  const typeMap: Record<string, string> = {
+    createPatient: "Patient",
+    updatePatient: "Patient Update",
+    createEncounter: "Encounter",
+    mark_encounter_as_complete: "Encounter Complete",
+    create_resource_request: "Resource Request",
+    update_resource_request: "Resource Update",
+    assign_user_to_patient: "User Assignment",
+    remove_user_from_patient: "User Removal",
+    createAppointment: "Appointment",
+    updateAppointment: "Appointment Update",
+    cancelAppointment: "Appointment Cancel",
+    rescheduleAppointment: "Appointment Reschedule",
+  };
+
+  return typeMap[entry.type] || entry.resourceType || entry.type;
+};
+
+// Pending writes table component
+const PendingWritesTable: React.FC<{ facilityId?: string }> = ({
+  facilityId,
+}) => {
+  const [pendingWrites, setPendingWrites] = React.useState<
+    OfflineWritesEntry[]
+  >([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const user = useAuthUser();
+
+  React.useEffect(() => {
+    async function fetchPendingWrites() {
+      try {
+        setIsLoading(true);
+        const writes = await getWritesByStatus(
+          user.external_id,
+          facilityId,
+          "pending",
+        );
+        setPendingWrites(writes);
+      } catch (error) {
+        console.error("Failed to fetch pending writes:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchPendingWrites();
+  }, [user.external_id, facilityId]);
+
+  const handleView = (entry: OfflineWritesEntry) => {
+    console.log("View entry:", entry);
+    // TODO: Implement view functionality
+  };
+
+  const handleEdit = (entry: OfflineWritesEntry) => {
+    console.log("Edit entry:", entry);
+    // TODO: Implement edit functionality
+  };
+
+  const handleRetry = (entry: OfflineWritesEntry) => {
+    console.log("Retry entry:", entry);
+    // TODO: Implement retry functionality
+  };
+
+  const handleDelete = (entry: OfflineWritesEntry) => {
+    console.log("Delete entry:", entry);
+    // TODO: Implement delete functionality
+  };
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <CareIcon
+          icon="l-spinner"
+          className="w-8 h-8 mx-auto mb-2 text-gray-400 animate-spin"
+        />
+        <p>Loading pending writes...</p>
+      </div>
+    );
+  }
+
+  if (pendingWrites.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <CareIcon
+          icon="l-check-circle"
+          className="w-8 h-8 mx-auto mb-2 text-gray-400"
+        />
+        <p>No pending writes found</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader className="bg-gray-100">
+          <TableRow className="divide-gray-200">
+            <TableHead>Type</TableHead>
+            <TableHead>Created</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody className="bg-white">
+          {pendingWrites.map((entry) => (
+            <TableRow key={entry.id} className="divide-x divide-gray-200">
+              <TableCell className="font-medium">
+                <div className="font-semibold text-gray-900">
+                  {getResourceTypeDisplay(entry)}
+                </div>
+                <div className="text-xs text-gray-500">ID: {entry.id}</div>
+              </TableCell>
+              <TableCell>
+                <div className="text-sm text-gray-900">
+                  {formatTimeAgo(entry.clientTimestamp)}
+                </div>
+              </TableCell>
+
+              <TableCell className="text-left">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleView(entry)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <CareIcon icon="l-eye" className="size-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEdit(entry)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <CareIcon icon="l-edit" className="size-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleRetry(entry)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <CareIcon icon="l-refresh" className="size-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(entry)}
+                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                  >
+                    <CareIcon icon="l-trash" className="size-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+};
+
+// Failed writes table component
+const FailedWritesTable: React.FC<{ facilityId?: string }> = ({
+  facilityId,
+}) => {
+  const [failedWrites, setFailedWrites] = React.useState<OfflineWritesEntry[]>(
+    [],
+  );
+  const [isLoading, setIsLoading] = React.useState(true);
+  const user = useAuthUser();
+
+  React.useEffect(() => {
+    async function fetchFailedWrites() {
+      try {
+        setIsLoading(true);
+        const writes = await getWritesByStatus(
+          user.external_id,
+          facilityId,
+          "failed",
+        );
+        setFailedWrites(writes);
+      } catch (error) {
+        console.error("Failed to fetch failed writes:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchFailedWrites();
+  }, [user.external_id, facilityId]);
+
+  const handleView = (entry: OfflineWritesEntry) => {
+    console.log("View failed entry:", entry);
+    // TODO: Implement view functionality
+  };
+
+  const handleRetry = (entry: OfflineWritesEntry) => {
+    console.log("Retry failed entry:", entry);
+    // TODO: Implement retry functionality
+  };
+
+  const handleDelete = (entry: OfflineWritesEntry) => {
+    console.log("Delete failed entry:", entry);
+    // TODO: Implement delete functionality
+  };
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <CareIcon
+          icon="l-spinner"
+          className="w-8 h-8 mx-auto mb-2 text-gray-400 animate-spin"
+        />
+        <p>Loading failed writes...</p>
+      </div>
+    );
+  }
+
+  if (failedWrites.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <CareIcon
+          icon="l-check-circle"
+          className="w-8 h-8 mx-auto mb-2 text-gray-400"
+        />
+        <p>No failed writes found</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader className="bg-gray-100">
+          <TableRow className="divide-gray-200">
+            <TableHead>Type</TableHead>
+            <TableHead>Failed At</TableHead>
+            <TableHead>Error</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody className="bg-white">
+          {failedWrites.map((entry) => (
+            <TableRow key={entry.id} className="divide-x divide-gray-200">
+              <TableCell className="font-medium">
+                <div className="font-semibold text-gray-900">
+                  {getResourceTypeDisplay(entry)}
+                </div>
+                <div className="text-xs text-gray-500">ID: {entry.id}</div>
+              </TableCell>
+              <TableCell>
+                <div className="text-sm text-gray-900">
+                  {entry.lastAttemptAt
+                    ? formatTimeAgo(entry.lastAttemptAt)
+                    : formatTimeAgo(entry.clientTimestamp)}
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="text-sm text-red-600 max-w-xs truncate">
+                  {entry.lastError}
+                </div>
+              </TableCell>
+              <TableCell className="text-left">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleView(entry)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <CareIcon icon="l-eye" className="size-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleRetry(entry)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <CareIcon icon="l-refresh" className="size-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(entry)}
+                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                  >
+                    <CareIcon icon="l-trash" className="size-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+};
+
 // Tabbed sync details component
 const SyncStatusTabs: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
   const [activeTab, setActiveTab] = React.useState("pending");
@@ -345,15 +684,32 @@ const SyncStatusTabs: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
         </div>
       </div>
 
-      {/* Tab content will be implemented next */}
+      {/* Tab content */}
       <div className="mt-6">
-        <div className="text-center py-8 text-gray-500">
-          <CareIcon
-            icon="l-clock"
-            className="w-8 h-8 mx-auto mb-2 text-gray-400"
-          />
-          <p>Table content for {activeTab} items will be implemented here.</p>
-        </div>
+        {activeTab === "pending" && (
+          <PendingWritesTable facilityId={facilityId} />
+        )}
+        {activeTab === "failed" && (
+          <FailedWritesTable facilityId={facilityId} />
+        )}
+        {activeTab === "conflicted" && (
+          <div className="text-center py-8 text-gray-500">
+            <CareIcon
+              icon="l-exclamation-circle"
+              className="w-8 h-8 mx-auto mb-2 text-gray-400"
+            />
+            <p>Conflicted writes table will be implemented here.</p>
+          </div>
+        )}
+        {activeTab === "blocked" && (
+          <div className="text-center py-8 text-gray-500">
+            <CareIcon
+              icon="l-ban"
+              className="w-8 h-8 mx-auto mb-2 text-gray-400"
+            />
+            <p>Blocked writes table will be implemented here.</p>
+          </div>
+        )}
       </div>
     </div>
   );

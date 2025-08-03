@@ -239,32 +239,23 @@ export class SyncManager {
 
       return { status: "success" };
     } catch (error) {
-      // Store the complete error information
-      let errorMessage = "Unknown error";
-      let errorDetails = error;
-
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-
-      if (error instanceof HTTPError) {
-        // For HTTP errors, store both the error object and the cause
-        errorDetails = {
-          error: error,
-          cause: error.cause,
-          status: error.status,
-          message: error.message,
-        };
-      }
-
+      console.log("error is here", error);
       toast.error(`Failed to sync write ${write.type}`);
 
+      let errorMessage = "Unknown error";
+      let serverResponse: any = null;
+      console.log("error", error);
+      if (error instanceof HTTPError) {
+        serverResponse = error.cause;
+        errorMessage =
+          serverResponse?.errors?.[0]?.msg || error.message || "Unknown error";
+      }
       // Determine if this is a permanent failure
       const isPermanentFailure = this.isPermanentFailure(error);
 
       await markWriteStatus(write.id, "failed", {
         lastError: errorMessage,
-        lastErrorDetails: errorDetails,
+        lastErrorDetails: serverResponse,
         lastAttemptAt: Date.now(),
         retries: (write.retries || 0) + 1,
         isPermanentFailure,
@@ -280,32 +271,24 @@ export class SyncManager {
   // Execute the actual API mutation
 
   private async executeMutation(write: any): Promise<any> {
-    try {
-      const route = mutationMap[write.type as keyof typeof mutationMap];
+    const route = mutationMap[write.type as keyof typeof mutationMap];
 
-      if (!route) {
-        throw new Error(`Unknown mutation type: ${write.type}`);
-      }
-
-      // Validate payload before sending
-      if (!write.payload) {
-        throw new Error(`Missing payload for write type: ${write.type}`);
-      }
-
-      const runMutation = mutate(route, {
-        pathParams: write.mutationPathParams,
-        queryParams: write.mutationQueryParams,
-      });
-
-      const response = await runMutation(write.payload);
-      return response;
-    } catch (error) {
-      // Re-throw with additional context
-      if (error instanceof Error) {
-        throw new Error(`Mutation failed for ${write.type}: ${error.message}`);
-      }
-      throw error;
+    if (!route) {
+      throw new Error(`Unknown mutation type: ${write.type}`);
     }
+
+    // Validate payload before sending
+    if (!write.payload) {
+      throw new Error(`Missing payload for write type: ${write.type}`);
+    }
+
+    const runMutation = mutate(route, {
+      pathParams: write.mutationPathParams,
+      queryParams: write.mutationQueryParams,
+    });
+
+    const response = await runMutation(write.payload);
+    return response;
   }
 
   // Check if any parent writes are failed (permanently or temporarily)
