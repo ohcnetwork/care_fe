@@ -274,7 +274,7 @@ export function TagSelectorPopover({
   }
 
   return (
-    <div>
+    <>
       {/* Selected tags */}
       {selected.length > 0 && !asFilter && (
         <div className="mt-2 flex flex-wrap gap-2">
@@ -303,19 +303,49 @@ export function TagSelectorPopover({
           <Button
             variant="outline"
             className={cn(
-              "mt-2 w-full justify-between bg-transparent",
+              "mt-2 justify-between bg-transparent overflow-hidden",
               className,
             )}
           >
             {asFilter ? (
-              <div className="flex items-center gap-2">
-                {selected.length === 0
-                  ? t("no_filters_selected")
-                  : selected.length === 1
-                    ? t("filtering_by", { name: selected[0].display })
-                    : t("filter_selected_count", {
-                        count: selected.length,
-                      })}
+              <div className="flex items-center justify-between w-full gap-2 -mr-2">
+                <div className="flex items-center gap-2">
+                  <TagIcon className="size-4 text-gray-600" />
+                  {selected.length > 0 ? (
+                    <div className="flex items-center gap-1">
+                      <div className="text-sm font-medium text-gray-950">
+                        {t("tags")}
+                      </div>
+                      <span className="text-sm text-gray-600 underline lowercase">
+                        {t("include")}
+                      </span>
+                      <span className="text-sm text-gray-950 underline">
+                        {selected.length === 1
+                          ? selected[0].display
+                          : `${selected.length} ${t("tags")}`}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-sm text-gray-500 mr-2">
+                      {t("filter_by_tags")}
+                    </span>
+                  )}
+                </div>
+                {selected.length > 0 && (
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onChange([]);
+                    }}
+                    size="icon"
+                    variant="ghost"
+                    className={cn(
+                      "pl-2 size-8 border-l border-gray-400 rounded-none",
+                    )}
+                  >
+                    <X className="text-gray-950" />
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="flex items-center gap-2">
@@ -346,7 +376,7 @@ export function TagSelectorPopover({
           </Command>
         </PopoverContent>
       </Popover>
-    </div>
+    </>
   );
 }
 
