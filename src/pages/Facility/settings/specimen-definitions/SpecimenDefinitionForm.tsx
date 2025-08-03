@@ -98,7 +98,7 @@ const formSchema = z.object({
     .url({ message: "Please enter a valid URL" })
     .optional(),
   type_collected: CodeSchema,
-  patient_preparation: z.array(CodeSchema.optional()).min(0),
+  patient_preparation: z.array(CodeSchema).min(0),
   collection: CodeSchema.optional(),
   type_tested: typeTestedSchema.optional(),
 });
@@ -129,9 +129,7 @@ export function SpecimenDefinitionForm({
       description: initialData?.description,
       derived_from_uri: initialData?.derived_from_uri ?? undefined,
       type_collected: initialData?.type_collected,
-      patient_preparation: (initialData?.patient_preparation ?? []).filter(
-        Boolean,
-      ),
+      patient_preparation: initialData?.patient_preparation ?? [],
       collection: initialData?.collection ?? undefined,
       type_tested: initialData?.type_tested ?? {
         is_derived: false,
@@ -209,9 +207,7 @@ export function SpecimenDefinitionForm({
     onSubmit({
       ...data,
       patient_preparation:
-        data.patient_preparation?.filter(
-          (item): item is Code => !!item && !!item.code,
-        ) || [],
+        data.patient_preparation?.filter((item) => item && item.code) || [],
       type_tested: data.type_tested
         ? {
             ...data.type_tested,
@@ -439,7 +435,7 @@ export function SpecimenDefinitionForm({
                               onClick={() => remove(index)}
                               className="size-10"
                             >
-                              <XCircle className="h-5 w-5" />
+                              <XCircle className="size-5" />
                             </Button>
                           )}
                         </div>
@@ -447,7 +443,9 @@ export function SpecimenDefinitionForm({
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => append(undefined)}
+                        onClick={() =>
+                          append({ code: "", display: "", system: "" })
+                        }
                         className="w-full"
                       >
                         <PlusCircle className="mr-2 h-4 w-4" />
