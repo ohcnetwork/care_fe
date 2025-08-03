@@ -208,6 +208,7 @@ export default function AppointmentDetail(props: Props) {
     const baseEntry = {
       id: statusupdateId,
       userId: authUser.external_id,
+      facilityId: facilityId,
       mutationSyncRouteKey: OfflineKeyMap.update_appointment_status,
       mutationPathParams: {
         facilityId,
@@ -659,6 +660,7 @@ const AppointmentActions = ({
     const offlineEntry: saveOfflineWriteData = {
       id: cancelAppointmentID,
       userId: authUser?.external_id,
+      facilityId: facilityId,
       mutationSyncRouteKey: OfflineKeyMap.cancel_appointment,
       mutationPathParams: {
         facilityId,
@@ -846,6 +848,7 @@ const AppointmentActions = ({
         const offlineEntry: saveOfflineWriteData = {
           id: rescheduleID,
           userId: authUser?.external_id,
+          facilityId: facilityId,
           mutationSyncRouteKey: OfflineKeyMap.reschedule_appointment,
           mutationPathParams: {
             facilityId,

@@ -55,6 +55,7 @@ export type SaveOfflineWriteResult =
 export type saveOfflineWriteData = {
   id: string;
   userId: string;
+  facilityId?: string;
   mutationSyncRouteKey: OfflineKey;
   mutationPathParams?: Record<string, any>;
   mutationQueryParams?: Record<string, any>;
@@ -71,6 +72,7 @@ const db = new AppCacheDB();
 export const saveOfflineWrite = async ({
   id,
   userId,
+  facilityId,
   mutationSyncRouteKey,
   type,
   resourceType,
@@ -86,6 +88,7 @@ export const saveOfflineWrite = async ({
   const writeEntry = {
     id,
     userId,
+    facilityId,
     mutationSyncRouteKey,
     type,
     resourceType,

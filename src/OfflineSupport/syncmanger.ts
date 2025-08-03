@@ -41,6 +41,7 @@ export const mutationMap = {
 
 interface SyncManagerOptions {
   userId: string;
+  facilityId?: string; // Add optional facilityId
   maxRetries?: number;
   retryDelayMs?: number;
   enableConflictDetection?: boolean;
@@ -94,6 +95,7 @@ export class SyncManager {
       // Step 1: Get pending writes
       const pendingWrites = await getPendingAndRetryableWrites(
         this.options.userId,
+        this.options.facilityId, // Pass facilityId if provided
       );
 
       if (pendingWrites.length === 0) {
@@ -103,9 +105,14 @@ export class SyncManager {
       // Step 2: Pre-populate IdMap with all successful sync records
       // Get ALL writes (including successful ones) to build the mapping
       const db = new AppCacheDB();
-      const allWrites = await db.OfflineWrites.where("userId")
-        .equals(this.options.userId)
-        .toArray();
+      let query = db.OfflineWrites.where("userId").equals(this.options.userId);
+
+      // If facilityId is provided, filter by facilityId for the mapping
+      if (this.options.facilityId) {
+        query = query.and((w) => w.facilityId === this.options.facilityId);
+      }
+
+      const allWrites = await query.toArray();
 
       const successfulWrites = allWrites.filter(
         (write) => write.syncStatus === "success",
@@ -375,8 +382,14 @@ export class SyncManager {
       const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000; // 7 days
 
       // Clean up old successful writes (older than 30 days)
-      const oldSuccessfulWrites = await db.OfflineWrites.where("userId")
-        .equals(this.options.userId)
+      let query = db.OfflineWrites.where("userId").equals(this.options.userId);
+
+      // If facilityId is provided, filter by facilityId for cleanup
+      if (this.options.facilityId) {
+        query = query.and((w) => w.facilityId === this.options.facilityId);
+      }
+
+      const oldSuccessfulWrites = await query
         .and(
           (w) =>
             w.syncStatus === "success" && w.clientTimestamp < thirtyDaysAgo,
@@ -388,8 +401,18 @@ export class SyncManager {
       }
 
       // Clean up permanently failed writes (older than 7 days)
-      const oldFailedWrites = await db.OfflineWrites.where("userId")
-        .equals(this.options.userId)
+      let failedQuery = db.OfflineWrites.where("userId").equals(
+        this.options.userId,
+      );
+
+      // If facilityId is provided, filter by facilityId for cleanup
+      if (this.options.facilityId) {
+        failedQuery = failedQuery.and(
+          (w) => w.facilityId === this.options.facilityId,
+        );
+      }
+
+      const oldFailedWrites = await failedQuery
         .and(
           (w) =>
             w.syncStatus === "failed" &&
@@ -428,9 +451,11 @@ export async function syncOfflineRecords(
   onProgress?: (syncedCount: number, totalCount: number) => void,
   onSyncStart?: (totalCount: number) => void,
   onSyncComplete?: () => void,
+  facilityId?: string, // Add optional facilityId parameter
 ): Promise<SyncResult> {
   const syncManager = new SyncManager({
     userId,
+    facilityId, // Pass facilityId to SyncManager
     maxRetries: 3,
     retryDelayMs: 1000,
     enableConflictDetection: true,

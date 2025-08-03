@@ -26,7 +26,7 @@ import routes, {
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { userAtom } from "@/atoms/user-atom";
-import { useSync } from "@/context/SyncContext";
+// import { useSync } from "@/context/SyncContext";
 import authApi from "@/types/auth/authApi";
 import { MFAAuthenticationToken, TokenData } from "@/types/auth/otp";
 
@@ -52,7 +52,7 @@ export default function AuthUserProvider({
   otpAuthorized,
 }: Props) {
   const queryClient = useQueryClient();
-  const { startSync, isSyncing } = useSync();
+  // const { startSync, isSyncing } = useSync();
   const [accessToken, setAccessToken] = useState(
     localStorage.getItem(LocalStorageKeys.accessToken),
   );
@@ -219,44 +219,44 @@ export default function AuthUserProvider({
   const isRestoring = useIsRestoring();
   console.log(isLoading, !isRestoring, !isChecked);
 
-  useEffect(() => {
-    // Don't start sync if user is on session expired page
-    const isOnSessionExpiredPage = location.pathname === "/session-expired";
+  // useEffect(() => {
+  //   // Don't start sync if user is on session expired page
+  //   const isOnSessionExpiredPage = location.pathname === "/session-expired";
 
-    if (
-      !onlineManager.isOnline() ||
-      !user?.external_id ||
-      isSyncing ||
-      localStorage.getItem(LocalStorageKeys.accessToken) === null ||
-      isOnSessionExpiredPage
-    ) {
-      console.log("Sync skipped:", {
-        isOnline: onlineManager.isOnline(),
-        hasUser: !!user?.external_id,
-        isSyncing,
-        isOnSessionExpiredPage,
-        currentPath: location.pathname,
-      });
-      return;
-    }
+  //   if (
+  //     !onlineManager.isOnline() ||
+  //     !user?.external_id ||
+  //     isSyncing ||
+  //     localStorage.getItem(LocalStorageKeys.accessToken) === null ||
+  //     isOnSessionExpiredPage
+  //   ) {
+  //     console.log("Sync skipped:", {
+  //       isOnline: onlineManager.isOnline(),
+  //       hasUser: !!user?.external_id,
+  //       isSyncing,
+  //       isOnSessionExpiredPage,
+  //       currentPath: location.pathname,
+  //     });
+  //     return;
+  //   }
 
-    console.log("Setting up automatic sync in 3 seconds...");
-    const timeout = setTimeout(() => {
-      console.log("Triggering automatic sync for user:", user.external_id);
-      startSync(user.external_id);
-    }, 3000);
+  //   console.log("Setting up automatic sync in 3 seconds...");
+  //   const timeout = setTimeout(() => {
+  //     console.log("Triggering automatic sync for user:", user.external_id);
+  //     startSync(user.external_id);
+  //   }, 3000);
 
-    return () => {
-      console.log("Clearing sync timeout");
-      clearTimeout(timeout);
-    };
-  }, [
-    user?.external_id,
-    onlineManager.isOnline(),
-    startSync,
-    isSyncing,
-    location.pathname,
-  ]);
+  //   return () => {
+  //     console.log("Clearing sync timeout");
+  //     clearTimeout(timeout);
+  //   };
+  // }, [
+  //   user?.external_id,
+  //   onlineManager.isOnline(),
+  //   startSync,
+  //   isSyncing,
+  //   location.pathname,
+  // ]);
 
   console.log("user : ", user, onlineManager.isOnline());
   if (isLoading || isRestoring || !isChecked) {

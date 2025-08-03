@@ -146,6 +146,7 @@ export default function CreateEncounterForm({
       const offlineWrite: saveOfflineWriteData = {
         id: generatedId,
         userId: authUser.external_id,
+        facilityId: facilityId,
         mutationSyncRouteKey: OfflineKeyMap.create_encounter,
         type: OfflineKeyMap.create_encounter,
         resourceType: "Encounter",

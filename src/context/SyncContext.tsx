@@ -6,7 +6,7 @@ interface SyncContextType {
   isSyncing: boolean;
   syncedCount: number;
   totalCount: number;
-  startSync: (userId: string) => Promise<void>;
+  startSync: (userId: string, facilityId?: string) => Promise<void>;
   resetSync: () => void;
 }
 
@@ -19,7 +19,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   const [syncInProgress, setSyncInProgress] = useState(false);
 
   const startSync = useCallback(
-    async (userId: string) => {
+    async (userId: string, facilityId?: string) => {
       if (isSyncing || syncInProgress) return;
 
       setSyncInProgress(true);
@@ -36,6 +36,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
             setTotalCount(totalCount);
           },
           () => {},
+          facilityId, // Pass facilityId to syncOfflineRecords
         );
         console.log("Sync result:", result);
       } catch (error) {

@@ -305,6 +305,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         const offlineEntry: saveOfflineWriteData = {
           id: resourceId,
           userId: authUser.external_id,
+          facilityId: String(facilityId),
           mutationSyncRouteKey: OfflineKeyMap.update_resource_request,
           mutationPathParams: { id: String(id) } satisfies PathParamsObject<
             typeof routes.updateResource
@@ -364,6 +365,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       const offlineEntry: saveOfflineWriteData = {
         id: generatedId,
         userId: authUser.external_id,
+        facilityId: String(facilityId),
         mutationSyncRouteKey: OfflineKeyMap.create_resource_request,
         type: OfflineKeyMap.create_resource_request,
         resourceType: "resourceRequest",

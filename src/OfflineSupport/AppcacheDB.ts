@@ -11,6 +11,7 @@ export interface QueryCacheEntry {
 export interface OfflineWritesEntry {
   id: string;
   userId: string;
+  facilityId?: string;
   mutationSyncRouteKey: OfflineKey;
   type: OfflineKey;
   resourceType?: string;
@@ -38,10 +39,10 @@ export class AppCacheDB extends Dexie {
   OfflineWrites!: Dexie.Table<OfflineWritesEntry, string>;
   constructor() {
     super("AppCacheDB");
-    this.version(3).stores({
+    this.version(4).stores({
       querycache: "cacheKey, timestamp",
       OfflineWrites:
-        "id, userId, type, resourceType, mutationSyncRouteKey, syncStatus, clientTimestamp, retries",
+        "id, userId, facilityId, type, resourceType, mutationSyncRouteKey, syncStatus, clientTimestamp, retries",
     });
   }
 }

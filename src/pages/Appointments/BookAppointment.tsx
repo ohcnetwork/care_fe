@@ -127,6 +127,7 @@ export default function BookAppointment({ patientId }: Props) {
       const offlineEntry: saveOfflineWriteData = {
         id: generatedId,
         userId: authUser?.external_id,
+        facilityId: facilityId,
         mutationSyncRouteKey: OfflineKeyMap.create_appointment,
         mutationPathParams: {
           facilityId,

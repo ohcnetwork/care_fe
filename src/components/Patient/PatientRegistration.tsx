@@ -356,6 +356,7 @@ export default function PatientRegistration(
         const offlineWrite: saveOfflineWriteData = {
           id: patientId,
           userId: user.external_id,
+          facilityId: facilityId,
           mutationSyncRouteKey: OfflineKeyMap.update_patient,
           type: OfflineKeyMap.update_patient,
           resourceType: "patient",
@@ -405,6 +406,7 @@ export default function PatientRegistration(
       const offlineWrite: saveOfflineWriteData = {
         id: generatedId,
         userId: user.external_id,
+        facilityId: facilityId,
         mutationSyncRouteKey: OfflineKeyMap.create_patient,
         type: OfflineKeyMap.create_patient,
         resourceType: "patient",

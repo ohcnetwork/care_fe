@@ -5,9 +5,15 @@ const MAX_RETRIES = 5;
 
 export async function getPendingAndRetryableWrites(
   userId: string,
+  facilityId?: string,
 ): Promise<OfflineWritesEntry[]> {
-  return db.OfflineWrites.where("userId")
-    .equals(userId)
+  let query = db.OfflineWrites.where("userId").equals(userId);
+
+  if (facilityId) {
+    query = query.and((w) => w.facilityId === facilityId);
+  }
+
+  return query
     .and((w) => {
       const isPending = w.syncStatus === "pending";
       const isFailedButRetryable =

@@ -56,7 +56,7 @@ const getRoutes = (facilityId: string) => ({
   "/locations/:id": ({ id }: { id: string }) => (
     <LocationSettings facilityId={facilityId} locationId={id} />
   ),
-  "/sync-status": () => <SyncStatusPage />,
+  "/sync-status": () => <SyncStatusPage facilityId={facilityId} />,
   "/devices": () => <DevicesList facilityId={facilityId} />,
   "/devices/create": () => <CreateDevice facilityId={facilityId} />,
   "/devices/:id": ({ id }: { id: string }) => (

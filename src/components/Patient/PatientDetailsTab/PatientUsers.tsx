@@ -62,6 +62,7 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import patientApi from "@/types/emr/patient/patientApi";
 import roleApi from "@/types/emr/role/roleApi";
 import { UserBase } from "@/types/user/user";
@@ -78,6 +79,7 @@ interface AddUserSheetProps {
 function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { facilityId } = useCurrentFacility();
 
   const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserBase>();
@@ -132,6 +134,7 @@ function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
       const offlineWrite: saveOfflineWriteData = {
         id: generatedId,
         userId: authUser.external_id,
+        facilityId: facilityId,
         mutationSyncRouteKey: OfflineKeyMap.assign_user_to_patient,
         mutationPathParams: { patientId } satisfies PathParamsObject<
           typeof patientApi.addUser
@@ -318,6 +321,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
   const authUser = useAuthUser();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { facilityId } = useCurrentFacility();
 
   const { hasPermission } = usePermissions();
   const { canWritePatient } = getPermissions(
@@ -340,6 +344,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
       const offlineWrite = {
         id: generatedId,
         userId: authUser.external_id,
+        facilityId: facilityId,
         mutationSyncRouteKey: OfflineKeyMap.remove_user_from_patient,
         mutationPathParams: { patientId } satisfies PathParamsObject<
           typeof patientApi.removeUser

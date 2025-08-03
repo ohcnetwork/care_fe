@@ -109,6 +109,7 @@ export default function EncounterActions({
     const offlineWrite: saveOfflineWriteData = {
       id: encounter.id,
       userId: authUser.external_id,
+      facilityId: encounter.facility.id,
       mutationSyncRouteKey: OfflineKeyMap.mark_encounter_as_complete,
       type: OfflineKeyMap.mark_encounter_as_complete,
       resourceType: "Encounter",
