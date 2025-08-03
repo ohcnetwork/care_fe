@@ -156,6 +156,10 @@ function generateFacilityLinks(
           name: t("product"),
           url: `${baseUrl}/settings/product`,
         },
+        {
+          name: "Sync Status",
+          url: `${baseUrl}/settings/sync-status`,
+        },
         // {
         //   name: t("patient_identifier_config"),
         //   url: `${baseUrl}/settings/patient_identifier_config`,

@@ -11,6 +11,7 @@ import CreateDevice from "@/pages/Facility/settings/devices/CreateDevice";
 import DeviceDetail from "@/pages/Facility/settings/devices/DeviceShow";
 import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
 import UpdateDevice from "@/pages/Facility/settings/devices/UpdateDevice";
+import SyncStatusPage from "@/pages/SyncStatus/SyncStatusPage";
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
 
@@ -55,6 +56,7 @@ const getRoutes = (facilityId: string) => ({
   "/locations/:id": ({ id }: { id: string }) => (
     <LocationSettings facilityId={facilityId} locationId={id} />
   ),
+  "/sync-status": () => <SyncStatusPage />,
   "/devices": () => <DevicesList facilityId={facilityId} />,
   "/devices/create": () => <CreateDevice facilityId={facilityId} />,
   "/devices/:id": ({ id }: { id: string }) => (
