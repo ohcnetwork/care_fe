@@ -370,6 +370,7 @@ export function ValueSetForm({
 
   const form = useForm({
     resolver: zodResolver(valuesetFormSchema),
+    mode: "onChange",
     defaultValues: {
       name: initialData?.name || "",
       slug: initialData?.slug || "",
@@ -386,7 +387,7 @@ export function ValueSetForm({
   const [previewOpen, setPreviewOpen] = useState(false);
 
   const handlePreviewClick = async () => {
-    const isValid = await form.trigger(["name", "slug"]);
+    const isValid = await form.trigger();
     if (!isValid) {
       if (form.formState.errors.name) form.setFocus("name");
       else if (form.formState.errors.slug) form.setFocus("slug");
@@ -405,7 +406,7 @@ export function ValueSetForm({
               type="button"
               onClick={handlePreviewClick}
             >
-              <CareIcon icon={"l-eye"} className="h-4 w-4" />
+              <CareIcon icon={"l-eye"} className="size-4" />
               {t("valueset_preview")}
             </Button>
 
