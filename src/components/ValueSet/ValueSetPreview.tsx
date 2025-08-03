@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import Autocomplete from "@/components/ui/autocomplete";
@@ -26,6 +27,40 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
 
+  const {
+    trigger: validateFields,
+    setFocus,
+    watch,
+  } = useFormContext<ValuesetFormType>();
+
+  const [hasAttemptedPreview, setHasAttemptedPreview] = useState(false);
+
+  const watchedName = watch("name");
+  const watchedSlug = watch("slug");
+
+  useEffect(() => {
+    if (hasAttemptedPreview) {
+      validateFields(["name", "slug"]);
+    }
+  }, [watchedName, watchedSlug, hasAttemptedPreview, validateFields]);
+
+  const handlePreviewClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    const isValid = await validateFields(["name", "slug"]);
+    if (!isValid) {
+      setHasAttemptedPreview(true);
+      if (!watchedName?.trim()) {
+        setFocus("name");
+      } else if (!watchedSlug?.trim()) {
+        setFocus("slug");
+      }
+      return;
+    }
+
+    setOpen(true);
+  };
+
   const { data: searchQuery, isFetching } = useQuery({
     queryKey: ["valueset", "preview_search", search, valueset.compose],
     queryFn: query.debounced(valuesetApi.preview_search, {
@@ -47,7 +82,12 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>{trigger}</SheetTrigger>
+      <SheetTrigger asChild>
+        <button type="button" onClick={handlePreviewClick}>
+          {trigger}
+        </button>
+      </SheetTrigger>
+
       <SheetContent className="w-full sm:max-w-lg pr-2 pl-3">
         <SheetHeader className="space-y-1 px-1">
           <SheetTitle className="text-xl font-semibold">
@@ -57,6 +97,7 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
             {t("valueset_preview_description")}
           </p>
         </SheetHeader>
+
         <Autocomplete
           options={mergeAutocompleteOptions(
             searchQuery?.results?.map((option) => ({
