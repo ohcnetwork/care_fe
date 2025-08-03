@@ -114,14 +114,14 @@ export default function ProductView({ facilityId, productId }: Props) {
 
         <div className="flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold">Product ID: {product.id}</h1>
+            <h1 className="text-2xl font-bold">Product ID: {product.id}</h1>
+            <div className="mt-2">
               <Badge variant={PRODUCT_STATUS_COLORS[product.status]}>
                 {t(product.status)}
               </Badge>
             </div>
             {product.batch?.lot_number && (
-              <p className="mt-1 text-sm text-gray-600">
+              <p className="mt-2 text-sm text-gray-600">
                 {t("lot_number")}: {product.batch.lot_number}
               </p>
             )}
