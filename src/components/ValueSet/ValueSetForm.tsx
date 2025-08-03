@@ -389,8 +389,7 @@ export function ValueSetForm({
   const handlePreviewClick = async () => {
     const isValid = await form.trigger();
     if (!isValid) {
-      if (form.formState.errors.name) form.setFocus("name");
-      else if (form.formState.errors.slug) form.setFocus("slug");
+      form.trigger();
       return;
     }
     setPreviewOpen(true);
