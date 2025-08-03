@@ -132,7 +132,7 @@ export class SyncManager {
         }
 
         // Add 1 second delay for testing banner visibility
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         const writeResult = await this.processWrite(write);
 
@@ -263,10 +263,8 @@ export class SyncManager {
         isPermanentFailure,
       });
 
-      // If permanent failure, mark all dependent writes as blocked
-      if (isPermanentFailure) {
-        await this.markDependentWritesAsBlocked(write.id);
-      }
+      // Mark all dependent writes as blocked for ANY failure
+      await this.markDependentWritesAsBlocked(write.id);
 
       return { status: "failed", error: errorMessage };
     }
@@ -275,22 +273,35 @@ export class SyncManager {
   // Execute the actual API mutation
 
   private async executeMutation(write: any): Promise<any> {
-    const route = mutationMap[write.type as keyof typeof mutationMap];
+    try {
+      const route = mutationMap[write.type as keyof typeof mutationMap];
 
-    if (!route) {
-      throw new Error(`Unknown mutation type: ${write.type}`);
+      if (!route) {
+        throw new Error(`Unknown mutation type: ${write.type}`);
+      }
+
+      // Validate payload before sending
+      if (!write.payload) {
+        throw new Error(`Missing payload for write type: ${write.type}`);
+      }
+
+      const runMutation = mutate(route, {
+        pathParams: write.mutationPathParams,
+        queryParams: write.mutationQueryParams,
+      });
+
+      const response = await runMutation(write.payload);
+      return response;
+    } catch (error) {
+      // Re-throw with additional context
+      if (error instanceof Error) {
+        throw new Error(`Mutation failed for ${write.type}: ${error.message}`);
+      }
+      throw error;
     }
-
-    const runMutation = mutate(route, {
-      pathParams: write.mutationPathParams,
-      queryParams: write.mutationQueryParams,
-    });
-
-    const response = await runMutation(write.payload);
-    return response;
   }
 
-  // Check if any parent writes are permanently failed
+  // Check if any parent writes are failed (permanently or temporarily)
 
   private async checkBlockedParents(parentIds: string[]): Promise<string[]> {
     const db = new AppCacheDB();
@@ -298,7 +309,10 @@ export class SyncManager {
 
     for (const parentId of parentIds) {
       const parent = await db.OfflineWrites.get(parentId);
-      if (parent?.isPermanentFailure) {
+
+      // Block child if parent is failed (permanently OR temporarily failure)
+
+      if (parent?.syncStatus === "failed") {
         blockedParents.push(parentId);
       }
     }
@@ -306,7 +320,7 @@ export class SyncManager {
     return blockedParents;
   }
 
-  // Mark all dependent writes as blocked when a parent fails permanently
+  // Mark all dependent writes as blocked when a parent fails (permanently or temporarily)
 
   private async markDependentWritesAsBlocked(
     failedParentId: string,
@@ -354,8 +368,46 @@ export class SyncManager {
   //  Cleanup after sync
 
   private async cleanup(): Promise<void> {
-    // TODO: Implement cleanup logic
-    console.log("cleanup");
+    try {
+      const db = new AppCacheDB();
+      const now = Date.now();
+      const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000; // 30 days
+      const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000; // 7 days
+
+      // Clean up old successful writes (older than 30 days)
+      const oldSuccessfulWrites = await db.OfflineWrites.where("userId")
+        .equals(this.options.userId)
+        .and(
+          (w) =>
+            w.syncStatus === "success" && w.clientTimestamp < thirtyDaysAgo,
+        )
+        .toArray();
+
+      for (const write of oldSuccessfulWrites) {
+        await db.OfflineWrites.delete(write.id);
+      }
+
+      // Clean up permanently failed writes (older than 7 days)
+      const oldFailedWrites = await db.OfflineWrites.where("userId")
+        .equals(this.options.userId)
+        .and(
+          (w) =>
+            w.syncStatus === "failed" &&
+            w.isPermanentFailure === true &&
+            w.clientTimestamp < sevenDaysAgo,
+        )
+        .toArray();
+
+      for (const write of oldFailedWrites) {
+        await db.OfflineWrites.delete(write.id);
+      }
+
+      console.log(
+        `Cleanup: Removed ${oldSuccessfulWrites.length} old successful writes and ${oldFailedWrites.length} old failed writes`,
+      );
+    } catch (error) {
+      console.error("Cleanup failed:", error);
+    }
   }
 
   stop(): void {

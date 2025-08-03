@@ -31,15 +31,11 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
             setTotalCount(totalCount);
           },
           (totalCount) => {
-            // Only start showing banner when we have pending writes
             setIsSyncing(true);
             setSyncedCount(0);
             setTotalCount(totalCount);
           },
-          () => {
-            // Sync completed - let the banner handle its own timing
-            // setIsSyncing(false); // Commented out to let banner handle timing
-          },
+          () => {},
         );
         console.log("Sync result:", result);
       } catch (error) {
