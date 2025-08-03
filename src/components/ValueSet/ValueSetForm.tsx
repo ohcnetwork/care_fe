@@ -417,7 +417,6 @@ export function ValueSetForm({
           </>
         )}
       </div>
-
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
@@ -496,13 +495,11 @@ export function ValueSetForm({
           <RuleFields type="include" form={form} disabled={isSystemDefined} />
           <RuleFields type="exclude" form={form} disabled={isSystemDefined} />
         </div>
-
         {isSystemDefined && (
           <div className="text-red-600 text-sm flex justify-end">
             {t("saving_is_disabled_for_system_valuesets")}
           </div>
         )}
-
         <div className="flex gap-2 w-full justify-end">
           <Button
             variant="outline"
