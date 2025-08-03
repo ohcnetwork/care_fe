@@ -20,7 +20,7 @@ import valuesetApi from "@/types/valueset/valuesetApi";
 
 interface ValueSetPreviewProps {
   valueset: ValuesetFormType;
-  trigger: React.ReactElement<React.HTMLAttributes<HTMLButtonElement>>;
+  trigger: React.ReactElement<React.ButtonHTMLAttributes<HTMLButtonElement>>;
 }
 
 export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
@@ -84,15 +84,10 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        {React.cloneElement(
-          trigger as React.ReactElement<
-            React.ButtonHTMLAttributes<HTMLButtonElement>
-          >,
-          {
-            onClick: handlePreviewClick,
-            "aria-label": trigger.props["aria-label"] ?? "Preview Value Set",
-          },
-        )}
+        {React.cloneElement(trigger, {
+          onClick: handlePreviewClick,
+          "aria-label": trigger.props["aria-label"] ?? "Preview Value Set",
+        })}
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-lg pr-2 pl-3">
         <SheetHeader className="space-y-1 px-1">
