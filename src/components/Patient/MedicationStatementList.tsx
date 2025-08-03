@@ -2,13 +2,11 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
+import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -28,6 +26,7 @@ interface MedicationStatementListProps {
   showTimeLine?: boolean;
   encounterId?: string;
   status?: MedicationStatementStatus[];
+  readOnly?: boolean;
 }
 
 interface GroupedMedications {
@@ -45,9 +44,9 @@ export function MedicationStatementList({
   status = MEDICATION_STATEMENT_STATUS.filter(
     (status) => status !== "entered_in_error",
   ),
+  readOnly = false,
 }: MedicationStatementListProps) {
   const { t } = useTranslation();
-
   const LIMIT = showTimeLine ? 30 : 14;
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -77,9 +76,13 @@ export function MedicationStatementList({
 
   if (isLoading) {
     return (
-      <MedicationStatementListLayout className={className}>
+      <EncounterAccordionLayout
+        className={className}
+        title="medication_statements"
+        readOnly={readOnly}
+      >
         <TableSkeleton count={5} />
-      </MedicationStatementListLayout>
+      </EncounterAccordionLayout>
     );
   }
 
@@ -92,10 +95,15 @@ export function MedicationStatementList({
         />
       );
     }
+
     return (
-      <MedicationStatementListLayout className={className}>
+      <EncounterAccordionLayout
+        className={className}
+        title="medication_statements"
+        readOnly={readOnly}
+      >
         <p className="text-gray-500">{t("no_medication_statements")}</p>
-      </MedicationStatementListLayout>
+      </EncounterAccordionLayout>
     );
   }
 
@@ -110,44 +118,46 @@ export function MedicationStatementList({
     }, {} as GroupedMedications);
 
     return (
-      <div className="space-y-8">
-        {Object.entries(groupedByYear).map(([year, groupedByDate]) => {
-          return (
+      <EncounterAccordionLayout
+        className={className}
+        title="medication_statements"
+        readOnly={readOnly}
+      >
+        <div className="space-y-8">
+          {Object.entries(groupedByYear).map(([year, groupedByDate]) => (
             <div key={year}>
               <h2 className="text-sm font-medium text-indigo-700 border-y border-gray-300 py-2 w-fit pr-10">
                 {year}
               </h2>
               <div className="border-l border-gray-300 pt-5 ml-4">
-                {Object.entries(groupedByDate).map(([date, medications]) => {
-                  return (
-                    <div key={date} className="pb-6">
-                      <div className="flex items-start gap-4">
-                        <div className="flex flex-col items-center h-full">
-                          <div className="size-3 bg-cyan-300 ring-1 ring-cyan-700 rounded-full flex-shrink-0 -ml-1.5 mt-1"></div>
-                        </div>
-
-                        <div className="space-y-3 overflow-auto w-full">
-                          <h3 className="text-sm font-medium text-indigo-700">
-                            {format(date, "dd MMMM, yyyy")}
-                          </h3>
-                          <MedicationStatementTable statements={medications} />
-                        </div>
+                {Object.entries(groupedByDate).map(([date, meds]) => (
+                  <div key={date} className="pb-6">
+                    <div className="flex items-start gap-4">
+                      <div className="flex flex-col items-center h-full">
+                        <div className="size-3 bg-cyan-300 ring-1 ring-cyan-700 rounded-full flex-shrink-0 -ml-1.5 mt-1"></div>
+                      </div>
+                      <div className="space-y-3 overflow-auto w-full">
+                        <h3 className="text-sm font-medium text-indigo-700">
+                          {format(date, "dd MMMM, yyyy")}
+                        </h3>
+                        <MedicationStatementTable statements={meds} />
                       </div>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      </EncounterAccordionLayout>
     );
   }
 
   return (
-    <MedicationStatementListLayout
-      medicationsCount={medications.length}
+    <EncounterAccordionLayout
+      title="medication_statements"
       className={className}
+      readOnly={readOnly}
     >
       <MedicationStatementTable statements={medications} />
       {hasNextPage && (
@@ -162,30 +172,6 @@ export function MedicationStatementList({
           </Button>
         </div>
       )}
-    </MedicationStatementListLayout>
+    </EncounterAccordionLayout>
   );
 }
-
-const MedicationStatementListLayout = ({
-  children,
-  className,
-  medicationsCount,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  medicationsCount?: number | undefined;
-}) => {
-  const { t } = useTranslation();
-
-  return (
-    <Card className={cn("rounded-sm ", className)}>
-      <CardHeader className="px-4 pt-4 pb-2">
-        <CardTitle>
-          {t("medication_statements")}{" "}
-          {medicationsCount ? `(${medicationsCount})` : ""}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-2 pb-2">{children}</CardContent>
-    </Card>
-  );
-};
