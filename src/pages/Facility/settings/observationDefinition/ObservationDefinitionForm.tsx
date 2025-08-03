@@ -628,7 +628,7 @@ function ObservationDefinitionFormContent({
                         </div>
 
                         <div className="mb-2 text-sm font-medium text-gray-700">
-                          {t("component")} {index + 1}
+                          {t("component_with_index", { index: index + 1 })}
                         </div>
 
                         <div className="grid gap-4">
@@ -667,28 +667,26 @@ function ObservationDefinitionFormContent({
                               render={({ field }) => (
                                 <FormItem className="flex flex-col gap-1">
                                   <FormLabel>{t("data_type")}</FormLabel>
-                                  <FormControl>
-                                    <Select
-                                      onValueChange={field.onChange}
-                                      defaultValue={field.value}
-                                    >
-                                      <SelectTrigger className="h-[44px]">
+                                  <Select
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger>
                                         <SelectValue
                                           placeholder={t("select_data_type")}
                                         />
                                       </SelectTrigger>
-                                      <SelectContent>
-                                        {Object.keys(QuestionType).map(
-                                          (type) => (
-                                            <SelectItem key={type} value={type}>
-                                              {t(type)}
-                                            </SelectItem>
-                                          ),
-                                        )}
-                                      </SelectContent>
-                                    </Select>
-                                  </FormControl>
-                                  <FormMessage className="min-h-[1.25rem]" />
+                                    </FormControl>
+                                    <SelectContent>
+                                      {Object.keys(QuestionType).map((type) => (
+                                        <SelectItem key={type} value={type}>
+                                          {t(type)}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
@@ -702,23 +700,21 @@ function ObservationDefinitionFormContent({
                                     {t("unit")}
                                   </FormLabel>
                                   <FormControl>
-                                    <div className="h-[44px]">
-                                      <ValueSetSelect
-                                        system="system-ucum-units"
-                                        placeholder={t("search_for_units")}
-                                        value={field.value}
-                                        showCode={true}
-                                        onSelect={(code) => {
-                                          field.onChange({
-                                            code: code.code,
-                                            display: code.display,
-                                            system: code.system,
-                                          });
-                                        }}
-                                      />
-                                    </div>
+                                    <ValueSetSelect
+                                      system="system-ucum-units"
+                                      placeholder={t("search_for_units")}
+                                      value={field.value}
+                                      showCode={true}
+                                      onSelect={(code) => {
+                                        field.onChange({
+                                          code: code.code,
+                                          display: code.display,
+                                          system: code.system,
+                                        });
+                                      }}
+                                    />
                                   </FormControl>
-                                  <FormMessage className="min-h-[1.25rem]" />
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
