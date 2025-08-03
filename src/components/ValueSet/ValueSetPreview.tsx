@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -19,7 +20,7 @@ import valuesetApi from "@/types/valueset/valuesetApi";
 
 interface ValueSetPreviewProps {
   valueset: ValuesetFormType;
-  trigger: React.ReactNode;
+  trigger: React.ReactElement;
 }
 
 export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
@@ -83,11 +84,11 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <button type="button" onClick={handlePreviewClick}>
-          {trigger}
-        </button>
+        {React.cloneElement(trigger as React.ReactElement, {
+          onClick: handlePreviewClick,
+          "aria-label": trigger.props["aria-label"] ?? "Preview Value Set",
+        })}
       </SheetTrigger>
-
       <SheetContent className="w-full sm:max-w-lg pr-2 pl-3">
         <SheetHeader className="space-y-1 px-1">
           <SheetTitle className="text-xl font-semibold">
