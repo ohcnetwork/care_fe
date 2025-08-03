@@ -122,7 +122,7 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
               >
                 <h3 className="text-lg font-medium">{item.display}</h3>
                 <p className="text-sm text-gray-600">
-                  <strong>Code:</strong> {item.code}
+                  <strong>CODE:</strong> {item.code}
                 </p>
               </div>
             ))
