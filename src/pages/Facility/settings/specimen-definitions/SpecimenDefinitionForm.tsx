@@ -427,7 +427,7 @@ export function SpecimenDefinitionForm({
                               disabled={isLoading}
                             />
                           </FormControl>
-                          {fields.length > 1 && (
+                          {fields.length > 0 && (
                             <Button
                               type="button"
                               variant="ghost"
