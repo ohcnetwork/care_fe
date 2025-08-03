@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
+import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
@@ -382,22 +383,43 @@ export function ValueSetForm({
     },
   });
 
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  const handlePreviewClick = async () => {
+    const isValid = await form.trigger(["name", "slug"]);
+    if (!isValid) {
+      if (form.formState.errors.name) form.setFocus("name");
+      else if (form.formState.errors.slug) form.setFocus("slug");
+      return;
+    }
+    setPreviewOpen(true);
+  };
+
   return (
     <Form {...form}>
       <div className="flex justify-end">
         {!initialData?.id && (
-          <ValueSetPreview
-            valueset={form.watch()}
-            trigger={
-              <Button variant="outline_primary">
-                <CareIcon icon={"l-eye"} className="h-4 w-4" />
-                {t("valueset_preview")}
-              </Button>
-            }
-          />
+          <>
+            <Button
+              variant="outline_primary"
+              type="button"
+              onClick={handlePreviewClick}
+            >
+              <CareIcon icon={"l-eye"} className="h-4 w-4" />
+              {t("valueset_preview")}
+            </Button>
+
+            <ValueSetPreview
+              valueset={form.watch()}
+              open={previewOpen}
+              onOpenChange={setPreviewOpen}
+            />
+          </>
         )}
       </div>
+
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* name */}
         <FormField
           control={form.control}
           name="name"
@@ -413,6 +435,7 @@ export function ValueSetForm({
           )}
         />
 
+        {/* slug */}
         <FormField
           control={form.control}
           name="slug"
@@ -428,6 +451,7 @@ export function ValueSetForm({
           )}
         />
 
+        {/* description */}
         <FormField
           control={form.control}
           name="description"
@@ -443,6 +467,7 @@ export function ValueSetForm({
           )}
         />
 
+        {/* status */}
         <FormField
           control={form.control}
           name="status"
@@ -471,15 +496,19 @@ export function ValueSetForm({
           )}
         />
 
+        {/* rules */}
         <div className="space-y-6">
           <RuleFields type="include" form={form} disabled={isSystemDefined} />
           <RuleFields type="exclude" form={form} disabled={isSystemDefined} />
         </div>
+
         {isSystemDefined && (
           <div className="text-red-600 text-sm flex justify-end">
             {t("saving_is_disabled_for_system_valuesets")}
           </div>
         )}
+
+        {/* actions */}
         <div className="flex gap-2 w-full justify-end">
           <Button
             variant="outline"
