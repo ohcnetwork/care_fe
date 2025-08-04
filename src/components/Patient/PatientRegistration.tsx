@@ -497,7 +497,7 @@ export default function PatientRegistration(
                             form.setValue(
                               "emergency_phone_number",
                               value || "",
-                              { shouldDirty: true },
+                              { shouldDirty: true, shouldValidate: true },
                             );
                           }
                         }}
