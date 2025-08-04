@@ -410,13 +410,12 @@ export default function AppointmentsPage() {
   const slot = slots?.find((s) => s.id === qParams.slot);
 
   useEffect(() => {
-    if (isFacilityLoading) return;
-    if (!canViewAppointments && !facility) {
+    if (!isFacilityLoading && !canViewAppointments && !facility) {
       toast.error(t("no_permission_to_view_page"));
       goBack("/");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canViewAppointments, facility]);
+  }, [canViewAppointments, facility, isFacilityLoading]);
 
   if (schedulableUsersQuery.isLoading || !facility) {
     return <Loading />;
