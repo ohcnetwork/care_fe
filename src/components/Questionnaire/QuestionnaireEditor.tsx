@@ -656,7 +656,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     const hasOrganizations = validateOrganizations();
     const hasValidStructuredType = validateStructuredType();
 
-    const validateQuestions = (questions: any[], path = "questions") => {
+    const validateQuestions = (questions: Question[], path = "questions") => {
       questions.forEach((question, idx) => {
         const currentPath = `${path}.${idx}`;
 
@@ -690,7 +690,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           if (fieldName !== "questions") {
             const el = document.querySelector(`[name="${fieldName}"]`);
             if (el) {
-              el.scrollIntoView({ behavior: "smooth", block: "center" });
+              el.scrollIntoView();
               break;
             }
           } else {
@@ -719,10 +719,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   errorQuestion?.link_id &&
                   questionRefs.current[errorQuestion.link_id]
                 ) {
-                  questionRefs.current[errorQuestion.link_id]?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                  });
+                  questionRefs.current[errorQuestion.link_id]?.scrollIntoView();
                 }
               }, 200);
             }
@@ -2019,6 +2016,18 @@ function QuestionEditor({
                     } else {
                       updateField("type", val, {
                         repeats: false,
+                        questions:
+                          (question.questions?.length ?? 0) > 0
+                            ? question.questions
+                            : [
+                                {
+                                  id: crypto.randomUUID(),
+                                  link_id: `Q-${Date.now()}`,
+                                  text: "New Sub-Question",
+                                  type: "string",
+                                  questions: [],
+                                },
+                              ],
                       });
                     }
                   }}
