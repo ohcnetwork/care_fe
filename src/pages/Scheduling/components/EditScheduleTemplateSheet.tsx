@@ -559,8 +559,11 @@ const NewAvailabilityCard = ({
     .object({
       name: z.string().min(1, t("field_required")),
       slot_type: z.enum(["appointment", "open", "closed"]),
-      start_time: z.custom<Time>((val) => !!val, t("field_required")),
-      end_time: z.custom<Time>((val) => !!val, t("field_required")),
+      start_time: z.custom<Time | undefined>(
+        (val) => !!val,
+        t("field_required"),
+      ),
+      end_time: z.custom<Time | undefined>((val) => !!val, t("field_required")),
       slot_size_in_minutes: z.number().nullable(),
       tokens_per_slot: z.number().nullable(),
       reason: z.string().trim(),
@@ -687,11 +690,11 @@ const NewAvailabilityCard = ({
   const updateSlotDuration = () => {
     const isAutoFill = form.watch("is_auto_fill");
     if (isAutoFill) {
-      const duration = calculateSlotDuration(
-        form.watch("start_time"),
-        form.watch("end_time"),
-        form.watch("num_of_slots"),
-      );
+      const start = form.watch("start_time");
+      const end = form.watch("end_time");
+      const numOfSlots = form.watch("num_of_slots");
+      if (!start || !end) return;
+      const duration = calculateSlotDuration(start, end, numOfSlots);
       form.setValue("slot_size_in_minutes", duration);
     }
   };

@@ -101,8 +101,14 @@ export default function CreateScheduleTemplateSheet({
                 slot_type: z.literal("appointment"),
                 name: z.string().min(1, t("field_required")),
                 reason: z.string().trim(),
-                start_time: z.custom<Time>((val) => !!val, t("field_required")),
-                end_time: z.custom<Time>((val) => !!val, t("field_required")),
+                start_time: z.custom<Time | undefined>(
+                  (val) => !!val,
+                  t("field_required"),
+                ),
+                end_time: z.custom<Time | undefined>(
+                  (val) => !!val,
+                  t("field_required"),
+                ),
                 slot_size_in_minutes: z
                   .number({
                     error: t("field_required"),
@@ -252,11 +258,11 @@ export default function CreateScheduleTemplateSheet({
   const updateSlotDuration = (index: number) => {
     const isAutoFill = form.watch(`availabilities.${index}.is_auto_fill`);
     if (isAutoFill) {
-      const duration = calculateSlotDuration(
-        form.watch(`availabilities.${index}.start_time`),
-        form.watch(`availabilities.${index}.end_time`),
-        form.watch(`availabilities.${index}.num_of_slots`),
-      );
+      const start = form.watch(`availabilities.${index}.start_time`);
+      const end = form.watch(`availabilities.${index}.end_time`);
+      const numOfSlots = form.watch(`availabilities.${index}.num_of_slots`);
+      if (!start || !end) return;
+      const duration = calculateSlotDuration(start, end, numOfSlots);
       form.setValue(`availabilities.${index}.slot_size_in_minutes`, duration);
     }
   };
@@ -694,8 +700,8 @@ export default function CreateScheduleTemplateSheet({
                       name: "",
                       slot_type: "appointment",
                       reason: "",
-                      start_time: "00:00",
-                      end_time: "00:00",
+                      start_time: undefined,
+                      end_time: undefined,
                       tokens_per_slot: null as unknown as number,
                       slot_size_in_minutes: null as unknown as number,
                       is_auto_fill: false,
