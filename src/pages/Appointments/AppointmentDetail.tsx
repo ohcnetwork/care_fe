@@ -12,7 +12,7 @@ import {
   PlusCircledIcon,
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { differenceInYears, format, isSameDay } from "date-fns";
+import { addDays, differenceInYears, format, isBefore } from "date-fns";
 import { BanIcon, Loader2, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -472,7 +472,13 @@ const AppointmentActions = ({
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
   const currentStatus = appointment.status;
-  const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
+
+  // Allow check-in/start consultation as long as the appointment is before 24 hours ahead of slot's start time
+  const canCheckIn = isBefore(
+    appointment.token_slot.start_datetime,
+    addDays(new Date(), 1),
+  );
+
   const [note, setNote] = useState(appointment.note);
 
   const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
@@ -670,7 +676,7 @@ const AppointmentActions = ({
       {currentStatus === "booked" && (
         <>
           <Button
-            disabled={!isToday}
+            disabled={!canCheckIn}
             variant="outline_primary"
             onClick={() =>
               updateAppointment({
@@ -688,7 +694,7 @@ const AppointmentActions = ({
 
       {["booked", "checked_in"].includes(currentStatus) && (
         <Button
-          disabled={!isToday}
+          disabled={!canCheckIn}
           variant={
             currentStatus === "checked_in" ? "outline_primary" : "outline"
           }
