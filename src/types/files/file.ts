@@ -1,14 +1,5 @@
 import { UserReadMinimal } from "@/types/user/user";
 
-export interface FileUploadQuestion {
-  original_name: string;
-  file_data: File;
-  name: string;
-  associating_id: string;
-  file_type: string;
-  file_category: string;
-}
-
 export enum FileCategory {
   UNSPECIFIED = "unspecified",
   XRAY = "xray",
@@ -36,6 +27,10 @@ export interface FileBase {
 
 export interface FileCreate extends FileBase {
   original_name: string;
+}
+
+export interface FileUploadQuestion extends Omit<FileCreate, "mime_type"> {
+  file_data: File;
 }
 
 export interface FileUpdate {

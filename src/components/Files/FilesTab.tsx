@@ -60,7 +60,7 @@ export const FilesTab = ({
 
   const canEdit =
     !readOnly &&
-    (type === "encounter" ? canWriteCurrentEncounter : canWritePatient);
+    (type === FileType.ENCOUNTER ? canWriteCurrentEncounter : canWritePatient);
 
   const associatingId =
     {
@@ -124,7 +124,7 @@ export const FilesTab = ({
           <div>
             <DrawingPage
               type={type}
-              {...(type === "patient"
+              {...(type === FileType.PATIENT
                 ? { patientId: patient?.id }
                 : { encounter: encounter })}
               readOnly={readOnly}

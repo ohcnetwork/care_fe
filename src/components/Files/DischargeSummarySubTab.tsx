@@ -126,7 +126,7 @@ export const DischargeTab = ({
   });
 
   const fileUpload = useFileUpload({
-    type: FileType.ENCOUNTER,
+    type: type,
     multiple: true,
     allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
     allowNameFallback: false,
