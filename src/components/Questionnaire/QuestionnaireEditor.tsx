@@ -1262,16 +1262,16 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                         </Button>
                       </div>
                     ) : (
-                      <div
-                        className="cursor-pointer"
-                        onClick={handleAddQuestion}
-                      >
-                        <EmptyState
-                          icon="l-question"
-                          title={t("no_questions_yet")}
-                          description={t("click_to_add_first_question")}
-                        />
-                      </div>
+                      <EmptyState
+                        icon="l-plus"
+                        title={t("no_questions_yet")}
+                        description={t("click_to_add_first_question")}
+                        action={
+                          <Button variant="outline" onClick={handleAddQuestion}>
+                            {t("add_question")}
+                          </Button>
+                        }
+                      />
                     )}
                   </div>
                 </form>
