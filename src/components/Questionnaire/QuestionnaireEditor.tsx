@@ -46,6 +46,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Form,
   FormControl,
@@ -857,6 +858,22 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     setSelectedTags((current) => [...current, tag]);
   };
 
+  const handleAddQuestion = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const newQuestion: Question = {
+      id: crypto.randomUUID(),
+      link_id: `Q-${Date.now()}`,
+      text: "New Question",
+      type: "string",
+      questions: [],
+    };
+    updateQuestions([...rootQuestions, newQuestion]);
+    setExpandedQuestions((prev) => new Set([...prev, newQuestion.link_id]));
+    setTimeout(() => {
+      scrollToQuestion(newQuestion.link_id);
+    }, 100);
+  };
+
   return (
     <div className="container mx-auto px-4 py-6">
       <ScrollToTopButton className="fixed z-50 right-8 bottom-6" />
@@ -1139,30 +1156,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           </p>
                         </CardTitle>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          const newQuestion: Question = {
-                            id: crypto.randomUUID(),
-                            link_id: `Q-${Date.now()}`,
-                            text: "New Question",
-                            type: "string",
-                            questions: [],
-                          };
-                          updateQuestions([...rootQuestions, newQuestion]);
-                          setExpandedQuestions(
-                            (prev) => new Set([...prev, newQuestion.link_id]),
-                          );
-                          setTimeout(() => {
-                            scrollToQuestion(newQuestion.link_id);
-                          }, 100);
-                        }}
-                      >
-                        <CareIcon icon="l-plus" className="mr-2 size-4" />
-                        {t("add_question")}
-                      </Button>
                     </CardHeader>
                     <CardContent className="p-0">
                       <div className="space-y-6">
@@ -1245,6 +1238,31 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                       </div>
                     </CardContent>
                   </Card>
+                  <div className="mt-4">
+                    {rootQuestions.length > 0 ? (
+                      <div className="flex justify-end">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleAddQuestion}
+                        >
+                          <CareIcon icon="l-plus" className="mr-2 size-4" />
+                          {t("add_question")}
+                        </Button>
+                      </div>
+                    ) : (
+                      <div
+                        className="cursor-pointer"
+                        onClick={handleAddQuestion}
+                      >
+                        <EmptyState
+                          icon="l-question"
+                          title={t("no_questions_yet")}
+                          description={t("click_to_add_first_question")}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </form>
               </Form>
             </div>
