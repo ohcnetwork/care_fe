@@ -550,6 +550,7 @@ export function MedicationRequestQuestion({
         ]}
         buttonLabel={t("medication_history")}
         onAddSelected={handleAddHistoricalMedications}
+        isPreview={isPreview}
       />
       {medications.length > 0 && (
         <div className="md:overflow-x-auto w-auto">

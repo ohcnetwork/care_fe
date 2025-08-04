@@ -860,6 +860,7 @@ export function SymptomQuestion({
         ]}
         buttonLabel={t("symptom_history")}
         onAddSelected={handleAddHistoricalSymptoms}
+        isPreview={isPreview}
       />
       {symptoms.length > 0 && (
         <>

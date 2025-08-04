@@ -459,6 +459,7 @@ export function MedicationStatementQuestion({
         ]}
         buttonLabel={t("medication_history")}
         onAddSelected={handleAddHistoricalMedications}
+        isPreview={isPreview}
       />
 
       {medications.length > 0 && (

@@ -20,7 +20,7 @@ export default function QuestionnaireNavigation({
   const { t } = useTranslation();
   return (
     <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
-      <CardHeader className="p-0">
+      <CardHeader className="p-0 text-gray-600">
         <CardTitle>{t("navigation")}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">

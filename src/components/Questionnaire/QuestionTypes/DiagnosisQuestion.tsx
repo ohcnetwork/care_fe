@@ -561,6 +561,7 @@ export function DiagnosisQuestion({
         ]}
         buttonLabel={t("diagnosis_history")}
         onAddSelected={handleAddHistoricalDiagnoses}
+        isPreview={isPreview}
       />
 
       {sortedDiagnoses.length > 0 && (

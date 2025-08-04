@@ -50,6 +50,7 @@ interface HistoricalRecordSelectorProps<T extends BaseRecord> {
   onAddSelected: (selected: T[]) => void;
   buttonLabel?: string;
   title?: string;
+  isPreview?: boolean;
 }
 
 interface DateGroupedRecords<T extends BaseRecord> {
@@ -142,6 +143,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
   onAddSelected,
   buttonLabel,
   title,
+  isPreview = false,
 }: HistoricalRecordSelectorProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeType, setActiveType] = useState<string>(
@@ -179,7 +181,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
         count: response.count,
       };
     },
-    enabled: isOpen,
+    enabled: isOpen && !isPreview,
     staleTime: 0,
   });
 
