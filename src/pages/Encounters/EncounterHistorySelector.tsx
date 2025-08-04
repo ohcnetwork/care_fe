@@ -14,11 +14,13 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FilterSelect } from "@/components/ui/filter-select";
 import {
-  FilterState,
   MultiFilterSelectorDropdown,
+  completedDateFilter,
   encounterClassFilter,
   encounterStatusFilter,
+  startedDateFilter,
   tagFilter,
+  useFilterState,
 } from "@/components/ui/multi-filter-selector-dropdown";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -226,71 +228,20 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
-  const filters = [encounterStatusFilter, encounterClassFilter, tagFilter];
-  const [selectedFilters, setSelectedFilters] = useState<
-    Record<string, FilterState>
-  >(
-    filters.reduce(
-      (acc, filter) => ({
-        ...acc,
-        [filter.key]: {
-          filter,
-          selected: [],
-          operation: { selectedOperation: null, availableOperations: [] },
-        },
-      }),
-      {},
-    ),
-  );
-
-  const handleFilterChange = (
-    filterKey: string,
-    values: string[] | TagConfig[],
-  ) => {
-    const filter = filters.find((f) => f.key === filterKey);
-    const operations = filter?.getOperations?.(values) ?? [];
-    const firstOperation = operations?.[0] ?? null;
-    const selectedOperation =
-      selectedFilters[filterKey]?.operation.selectedOperation ?? firstOperation;
-    if (filter) {
-      setSelectedFilters((prev) => ({
-        ...prev,
-        [filterKey]: {
-          ...(selectedFilters[filterKey] ?? { filter }),
-          selected: values,
-          operation: {
-            selectedOperation,
-            availableOperations: operations,
-          },
-        },
-      }));
-    }
-  };
-
-  const handleOperationChange = (filterKey: string, operation: string) => {
-    setSelectedFilters((prev) => ({
-      ...prev,
-      [filterKey]: {
-        ...prev[filterKey],
-        operation: {
-          ...prev[filterKey].operation,
-          selectedOperation: operation,
-        },
-      },
-    }));
-  };
-
-  const handleClearAll = () => {
-    setSelectedFilters((prev) => {
-      const newState = { ...prev };
-      Object.keys(newState).forEach((key) => {
-        newState[key].selected = [];
-        newState[key].operation.selectedOperation = null;
-        newState[key].operation.availableOperations = [];
-      });
-      return newState;
-    });
-  };
+  const filters = [
+    encounterStatusFilter,
+    encounterClassFilter,
+    tagFilter,
+    startedDateFilter,
+    completedDateFilter,
+  ];
+  const {
+    selectedFilters,
+    handleFilterChange,
+    handleOperationChange,
+    handleClearAll,
+    handleClearFilter,
+  } = useFilterState(filters);
 
   return (
     <div className="space-y-4 pt-2">
@@ -337,6 +288,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             onFilterChange={handleFilterChange}
             onOperationChange={handleOperationChange}
             onClearAll={handleClearAll}
+            onClearFilter={handleClearFilter}
             placeholder="Filter encounters"
           />
 
