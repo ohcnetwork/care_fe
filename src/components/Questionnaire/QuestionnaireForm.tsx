@@ -17,10 +17,10 @@ import Loading from "@/components/Common/Loading";
 import { useActiveQuestion } from "@/hooks/useActiveQuestion";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
+import batchApi from "@/types/base/batch/batchApi";
 import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { FileUploadQuestion } from "@/types/files/files";
@@ -319,6 +319,28 @@ const STRUCTURED_TYPE_VALIDATORS = {
   },
 } as const;
 
+const initializeResponses = (
+  questions: Question[],
+): QuestionnaireResponse[] => {
+  const responses: QuestionnaireResponse[] = [];
+
+  const processQuestion = (q: Question) => {
+    if (q.type === "group" && q.questions) {
+      q.questions.forEach(processQuestion);
+    } else {
+      responses.push({
+        question_id: q.id,
+        link_id: q.link_id,
+        values: [],
+        structured_type: q.structured_type ?? null,
+      });
+    }
+  };
+
+  questions.forEach(processQuestion);
+  return responses;
+};
+
 export function QuestionnaireForm({
   questionnaireSlug,
   patientId,
@@ -360,7 +382,7 @@ export function QuestionnaireForm({
   });
 
   const { mutate: submitBatch, isPending } = useMutation({
-    mutationFn: mutate(routes.batchRequest, { silent: true }),
+    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       setServerErrors(undefined);
       toast.success(t("questionnaire_submitted_successfully"));
@@ -486,28 +508,6 @@ export function QuestionnaireForm({
       </Alert>
     );
   }
-
-  const initializeResponses = (
-    questions: Question[],
-  ): QuestionnaireResponse[] => {
-    const responses: QuestionnaireResponse[] = [];
-
-    const processQuestion = (q: Question) => {
-      if (q.type === "group" && q.questions) {
-        q.questions.forEach(processQuestion);
-      } else {
-        responses.push({
-          question_id: q.id,
-          link_id: q.link_id,
-          values: [],
-          structured_type: q.structured_type ?? null,
-        });
-      }
-    };
-
-    questions.forEach(processQuestion);
-    return responses;
-  };
 
   const handleSubmissionError = (results: ValidationErrorResponse[]) => {
     const updatedForms = [...questionnaireForms];

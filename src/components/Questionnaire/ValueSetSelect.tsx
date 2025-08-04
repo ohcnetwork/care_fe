@@ -242,7 +242,7 @@ export default function ValueSetSelect({
       >
         {!hideTrigger && (
           <PopoverTrigger asChild disabled={disabled}>
-            <div className="w-full px-0!">
+            <div className="w-full">
               <Button
                 type="button"
                 variant="outline"
@@ -252,7 +252,7 @@ export default function ValueSetSelect({
                   !value?.display && "text-gray-400",
                 )}
               >
-                <span>
+                <span className="truncate">
                   {value?.display || placeholder}
                   {value?.display && showCode && (
                     <span className="text-xs ml-1">({value?.code})</span>

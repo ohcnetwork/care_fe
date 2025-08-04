@@ -1,22 +1,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import {
-  Barcode,
   CheckCheck,
   CheckCircle2,
   ChevronsDownUp,
   ChevronsUpDown,
   CircleDashed,
-  Droplet,
   Eye,
   FileText,
   MoreVertical,
   PackageSearch,
   Plus,
   Receipt,
-  TestTubeDiagonal,
   Trash2,
-  User,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -66,11 +62,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { Avatar } from "@/components/Common/Avatar";
 import { PrintableQRCode } from "@/components/PrintableQRCode";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
 import mutate from "@/Utils/request/mutate";
+import { formatName } from "@/Utils/utils";
 import { ProcessSpecimen } from "@/pages/Facility/services/serviceRequests/components/ProcessSpecimen";
 import {
   ServiceRequestReadSpec,
@@ -239,27 +237,21 @@ export function SpecimenWorkflowCard({
               // --- Collected Header ---
               <div className="flex justify-between items-start overflow-x-auto">
                 <div className="space-y-1.5">
-                  <CardTitle className="text-lg font-semibold">
+                  <span className="text-sm text-gray-600">
+                    {t("collected_specimen")}:
+                  </span>
+                  <CardTitle className="text-base font-semibold">
                     {collectedSpecimen.specimen_definition.title}
                   </CardTitle>
                   {/* Mimic original UI structure */}
-                  <div className="flex flex-wrap gap-x-8 gap-y-1 text-sm text-gray-500 mt-4">
-                    {collectedSpecimen.accession_identifier && (
-                      <span className="flex  gap-1.5 flex-col">
-                        <span className="text-xs text-gray-500 flex items-center gap-1.5">
-                          <Barcode className="h-4 w-4" />
-                          {collectedSpecimen.accession_identifier}
-                        </span>
-                      </span>
-                    )}
+                  <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm text-gray-700 mt-4">
                     {collectedSpecimen.specimen_definition?.type_tested
                       ?.container?.cap?.display && (
-                      <span className="flex  gap-1.5 flex-col">
-                        <span className="text-xs text-gray-500 flex items-center gap-1.5">
-                          <Droplet className="h-4 w-4" />
-                          Container Cap:{" "}
+                      <span className="flex flex-col">
+                        <span className="text-sm text-gray-600 flex items-center">
+                          {t("container_cap")}:
                         </span>
-                        <span className="ml-6">
+                        <span className="text-base capitalize">
                           {
                             collectedSpecimen.specimen_definition.type_tested
                               .container.cap.display
@@ -268,25 +260,40 @@ export function SpecimenWorkflowCard({
                       </span>
                     )}
                     {collectedSpecimen.specimen_type?.display && (
-                      <span className="flex  gap-1.5 flex-col">
-                        <span className="text-xs text-gray-500 flex items-center gap-1.5">
-                          <TestTubeDiagonal className="h-4 w-4" />
-                          Specimen:{" "}
+                      <span className="flex flex-col">
+                        <span className="text-sm text-gray-600 flex items-center">
+                          {t("specimen")}:
                         </span>
-                        <span className="font-semibold ml-6">
+                        <span className="text-base font-semibold capitalize">
                           {collectedSpecimen.specimen_type.display}
                         </span>
                       </span>
                     )}
-                    {collectedSpecimen.collection?.collector && (
-                      <span className="flex  gap-1.5 flex-col">
-                        <span className="text-xs text-gray-500 flex items-center gap-1.5">
-                          <User className="h-4 w-4" />
-                          Collector:{" "}
+                    {collectedSpecimen.collection?.collector_object && (
+                      <span className="flex flex-col">
+                        <span className="text-sm text-gray-600 flex items-center">
+                          {t("collected_by")}:
                         </span>
-                        <span className="ml-6">
-                          {collectedSpecimen.collection.collector}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <Avatar
+                            imageUrl={
+                              collectedSpecimen.collection.collector_object
+                                .profile_picture_url
+                            }
+                            name={formatName(
+                              collectedSpecimen.collection.collector_object,
+                              true,
+                            )}
+                            className="size-5 rounded-full"
+                          />
+                          <span className="text-base">
+                            {collectedSpecimen.collection.collector_object
+                              ? formatName(
+                                  collectedSpecimen.collection.collector_object,
+                                )
+                              : "--"}
+                          </span>
+                        </div>
                       </span>
                     )}
                   </div>
@@ -301,10 +308,10 @@ export function SpecimenWorkflowCard({
                     >
                       {collectedSpecimen.status ===
                         SpecimenStatus.available && (
-                        <CheckCircle2 className="h-4 w-4 mr-1" />
+                        <CheckCircle2 className="size-4 mr-1" />
                       )}
                       {collectedSpecimen.status?.replace(/_/g, " ") ||
-                        "Unknown Status"}
+                        t("unknown")}
                     </Badge>
                     {isOpen ? (
                       <Button
@@ -328,7 +335,7 @@ export function SpecimenWorkflowCard({
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
-                          <MoreVertical className="h-4 w-4" />
+                          <MoreVertical className="size-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -341,7 +348,7 @@ export function SpecimenWorkflowCard({
                                 e.stopPropagation();
                               }}
                             >
-                              <Trash2 className="h-4 w-4 mr-2" />
+                              <Trash2 className="size-4 mr-2" />
                               {t("discard")}
                             </DropdownMenuItem>
                           </AlertDialogTrigger>
@@ -415,14 +422,14 @@ export function SpecimenWorkflowCard({
               // --- Pending Collection Header ---
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-2">
                 <CardTitle className="text-base font-medium flex items-center gap-2">
-                  <PackageSearch className="h-5 w-5 text-gray-600" />
+                  <PackageSearch className="size-5 text-gray-600" />
                   <span className="truncate">
                     {t("required")}: {requirement.title}
                   </span>
                 </CardTitle>
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="orange">
-                    <CircleDashed className="h-4 w-4 mr-1.5" />
+                    <CircleDashed className="size-4 mr-1.5" />
                     {t("collection_pending")}
                   </Badge>
 
@@ -439,7 +446,7 @@ export function SpecimenWorkflowCard({
                   variant="outline_primary"
                   disabled={request.status === Status.completed}
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="size-4" />
                   {t("collect_specimen")}
                 </Button>
               </div>
@@ -474,13 +481,13 @@ export function SpecimenWorkflowCard({
                   )}
                 >
                   <div className="flex items-center gap-2 flex-1 mr-4">
-                    <FileText className="h-4 w-4 text-gray-500" />
+                    <FileText className="size-4 text-gray-500" />
                     <span className="font-medium flex items-center gap-2 underline">
-                      Specimen Collection Instructions
+                      {t("specimen_collection_instructions")}
                       {hasCollected ? (
-                        <CheckCheck className="h-4 w-4 text-blue-500" />
+                        <CheckCheck className="size-4 text-blue-500" />
                       ) : (
-                        <Eye className="h-4 w-4 text-gray-500" />
+                        <Eye className="size-4 text-gray-500" />
                       )}
                     </span>
                   </div>
@@ -488,40 +495,40 @@ export function SpecimenWorkflowCard({
                 <AccordionContent className="px-4 pt-1 pb-4 space-y-4 bg-gray-50 rounded-b-lg">
                   <div className="space-y-1">
                     <p className="font-medium text-xs text-gray-950 uppercase tracking-wide">
-                      Specimen & Collection
+                      {t("specimen_collection")}
                     </p>
                     <Card className="rounded-xl overflow-clip">
                       <Table>
                         <TableHeader className="text-xs text-gray-700 bg-gray-100 uppercase tracking-wide">
                           <TableRow>
                             <TableHead className="w-[150px] text-gray-700 ">
-                              Field
+                              {t("field")}
                             </TableHead>
                             <TableHead className="text-gray-700">
-                              Details
+                              {t("details")}
                             </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           <TableRow>
                             <TableHead className="w-[150px] text-gray-700">
-                              Required Type
+                              {t("required_type")}
                             </TableHead>
                             <TableCell className="text-gray-950 font-semibold">
-                              {requirement.type_collected?.display ?? "N/A"}
+                              {requirement.type_collected?.display ?? t("na")}
                             </TableCell>
                           </TableRow>
                           <TableRow>
                             <TableHead className="text-gray-700">
-                              Required Method
+                              {t("required_method")}
                             </TableHead>
                             <TableCell className="text-gray-950 font-semibold">
-                              {requirement.collection?.display ?? "N/A"}
+                              {requirement.collection?.display ?? t("na")}
                             </TableCell>
                           </TableRow>
                           <TableRow>
                             <TableHead className="text-gray-700">
-                              Patient Prep
+                              {t("patient_prep")}
                             </TableHead>
                             <TableCell className="text-gray-950 font-semibold break-words whitespace-pre-wrap">
                               {requirement.patient_preparation &&
@@ -529,7 +536,7 @@ export function SpecimenWorkflowCard({
                                 ? requirement.patient_preparation
                                     .map((p) => p.display)
                                     .join(", ")
-                                : "N/A"}
+                                : t("na")}
                             </TableCell>
                           </TableRow>
                         </TableBody>
@@ -539,57 +546,57 @@ export function SpecimenWorkflowCard({
                   {container && (
                     <div className="space-y-1">
                       <p className="font-medium text-xs text-gray-950 uppercase tracking-wide">
-                        Required Container
+                        {t("required_container")}
                       </p>
                       <Card className="rounded-xl overflow-clip">
                         <Table>
                           <TableHeader className="text-xs text-gray-700 bg-gray-100 uppercase tracking-wide">
                             <TableRow>
                               <TableHead className="w-[150px] text-gray-700 ">
-                                Field
+                                {t("field")}
                               </TableHead>
                               <TableHead className="text-gray-700">
-                                Details
+                                {t("details")}
                               </TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             <TableRow>
                               <TableHead className="w-[150px] text-gray-700">
-                                Container
+                                {t("container")}
                               </TableHead>
                               <TableCell className="text-gray-950 font-semibold">
-                                {container.cap?.display ?? "N/A"}
+                                {container.cap?.display ?? t("na")}
                               </TableCell>
                             </TableRow>
                             <TableRow>
                               <TableHead className="text-gray-700">
-                                Capacity
+                                {t("capacity")}
                               </TableHead>
                               <TableCell className="text-gray-950 font-semibold">
                                 {container.capacity
                                   ? formatQuantity({
                                       quantity: container.capacity,
                                     })
-                                  : "N/A"}
+                                  : t("na")}
                               </TableCell>
                             </TableRow>
                             <TableRow>
                               <TableHead className="text-gray-700">
-                                Min. Volume
+                                {t("min_volume")}
                               </TableHead>
                               <TableCell className="text-gray-950 font-semibold">
                                 {container.minimum_volume
                                   ? formatQuantity(container.minimum_volume)
-                                  : "N/A"}
+                                  : t("na")}
                               </TableCell>
                             </TableRow>
                             <TableRow>
                               <TableHead className="text-gray-700">
-                                Preparation
+                                {t("preparation")}
                               </TableHead>
                               <TableCell className="text-gray-950 font-semibold">
-                                {container.preparation ?? "N/A"}
+                                {container.preparation ?? t("na")}
                               </TableCell>
                             </TableRow>
                           </TableBody>
@@ -599,17 +606,17 @@ export function SpecimenWorkflowCard({
                   )}
                   <div className="space-y-1">
                     <p className="font-medium text-xs text-gray-950 uppercase tracking-wide">
-                      Required Processing & Storage
+                      {t("required_processing_storage")}
                     </p>
                     <Card className="rounded-xl overflow-clip border">
                       <Table>
                         <TableHeader className="text-xs text-gray-700 bg-gray-100 uppercase tracking-wide">
                           <TableRow>
                             <TableHead className="w-[150px] text-gray-700">
-                              Field
+                              {t("field")}
                             </TableHead>
                             <TableHead className="text-gray-700">
-                              Details
+                              {t("details")}
                             </TableHead>
                           </TableRow>
                         </TableHeader>
@@ -621,7 +628,7 @@ export function SpecimenWorkflowCard({
                             <TableCell className="text-gray-950 font-semibold">
                               {requirement.type_tested?.retention_time
                                 ? `${requirement.type_tested.retention_time.value} ${requirement.type_tested.retention_time.unit.display}`
-                                : "N/A"}
+                                : t("na")}
                             </TableCell>
                           </TableRow>
                         </TableBody>
@@ -643,28 +650,28 @@ export function SpecimenWorkflowCard({
                     )}
                   >
                     <div className="flex items-center gap-2 flex-1 mr-4">
-                      <Receipt className="h-4 w-4 text-gray-500" />
+                      <Receipt className="size-4 text-gray-500" />
                       <span className="font-medium underline">
-                        Specimen Collection
+                        {t("specimen_collection")}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="green">1/1 Collected</Badge>
+                      <Badge variant="green"> 1/1 {t("collected")}</Badge>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="px-4 pt-1 pb-4 space-y-4 bg-gray-50 rounded-b-lg">
                     <p className="font-semibold text-xs mb-2 flex items-center gap-2">
-                      Collected Specimen Details
+                      {t("collected_specimen_details")}
                     </p>
                     <Card className="rounded-xl overflow-clip border-none shadow-md">
                       <Table>
                         <TableHeader className="text-xs text-gray-700 bg-gray-100 uppercase tracking-wide">
                           <TableRow>
                             <TableHead className="w-[150px] text-gray-700 ">
-                              Field
+                              {t("field")}
                             </TableHead>
                             <TableHead className="text-gray-700">
-                              Details
+                              {t("details")}
                             </TableHead>
                           </TableRow>
                         </TableHeader>
@@ -672,10 +679,15 @@ export function SpecimenWorkflowCard({
                           {collectedSpecimen.collection?.collector && (
                             <TableRow>
                               <TableHead className="w-[150px] text-gray-700">
-                                Collector
+                                {t("collector")}
                               </TableHead>
                               <TableCell className="text-gray-950 font-semibold">
-                                {collectedSpecimen.collection.collector}
+                                {collectedSpecimen.collection.collector_object
+                                  ? formatName(
+                                      collectedSpecimen.collection
+                                        .collector_object,
+                                    )
+                                  : "--"}
                               </TableCell>
                             </TableRow>
                           )}
@@ -683,7 +695,7 @@ export function SpecimenWorkflowCard({
                             ?.collected_date_time && (
                             <TableRow>
                               <TableHead className="text-gray-700">
-                                Collected Time
+                                {t("collected_time")}
                               </TableHead>
                               <TableCell className="text-gray-950 font-semibold">
                                 {new Date(
@@ -695,7 +707,7 @@ export function SpecimenWorkflowCard({
                           {collectedSpecimen.collection?.body_site && (
                             <TableRow>
                               <TableHead className="text-gray-700">
-                                Body Site
+                                {t("body_site")}
                               </TableHead>
                               <TableCell className="text-gray-950 font-semibold">
                                 {collectedSpecimen.collection.body_site.display}
@@ -705,7 +717,7 @@ export function SpecimenWorkflowCard({
                           {collectedSpecimen.collection?.quantity && (
                             <TableRow>
                               <TableHead className="text-gray-700">
-                                Quantity
+                                {t("quantity")}
                               </TableHead>
                               <TableCell className="text-gray-950 font-semibold">
                                 {formatQuantity({
@@ -719,7 +731,7 @@ export function SpecimenWorkflowCard({
                             ?.fasting_status_codeable_concept && (
                             <TableRow>
                               <TableHead className="text-gray-700">
-                                Fasting Status
+                                {t("fasting_status")}
                               </TableHead>
                               <TableCell className="text-gray-950 font-semibold">
                                 {

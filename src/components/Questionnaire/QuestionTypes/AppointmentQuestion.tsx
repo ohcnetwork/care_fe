@@ -20,6 +20,7 @@ import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 import { AppointmentSlotPicker } from "@/pages/Appointments/components/AppointmentSlotPicker";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
@@ -53,7 +54,7 @@ interface AppointmentQuestionProps {
 
 const APPOINTMENT_FIELDS: FieldDefinitions = {
   REASON: {
-    key: "reason_for_visit",
+    key: "note",
     required: true,
   },
   SLOT: {
@@ -78,7 +79,7 @@ export function validateAppointmentQuestion(
     },
     SLOT: {
       ...APPOINTMENT_FIELDS.SLOT,
-      required: required || value?.reason_for_visit !== undefined,
+      required: required || value?.note !== undefined,
     },
     TAGS: {
       ...APPOINTMENT_FIELDS.TAGS,
@@ -99,18 +100,17 @@ export function AppointmentQuestion({
   const { t } = useTranslation();
   const [resource, setResource] = useState<UserBase>();
   const [open, setOpen] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
   const { hasError } = useFieldError(question.id, errors);
 
   const values =
     (questionnaireResponse.values?.[0]?.value as CreateAppointmentQuestion[]) ||
     [];
-  const value = values[0] ?? {};
+  const value = values[0] ?? { tags: [] };
 
   const handleUpdate = (updates: Partial<CreateAppointmentQuestion>) => {
     const updatedValue = { ...value, ...updates };
     if (
-      !updatedValue.reason_for_visit?.trim() &&
+      !updatedValue.note?.trim() &&
       !updatedValue.slot_id &&
       !updatedValue.tags?.length
     ) {
@@ -140,6 +140,11 @@ export function AppointmentQuestion({
     }
   };
 
+  const tagQueries = useTagConfigs({ ids: value.tags, facilityId });
+  const selectedTags = tagQueries
+    .map((query) => query.data)
+    .filter(Boolean) as TagConfig[];
+
   return (
     <div className="space-y-4">
       <div>
@@ -148,7 +153,6 @@ export function AppointmentQuestion({
           <TagSelectorPopover
             selected={selectedTags}
             onChange={(tags) => {
-              setSelectedTags(tags);
               handleUpdate({ tags: tags.map((tag) => tag.id) });
             }}
             resource={TagResource.APPOINTMENT}
@@ -158,15 +162,15 @@ export function AppointmentQuestion({
           />
         </div>
         <Label className="mb-2">
-          {t("reason_for_visit")}
+          {t("note")}
           {question.required && <span className="text-red-500 ml-0.5">*</span>}
         </Label>
         <Textarea
-          placeholder={t("reason_for_visit_placeholder")}
-          value={value.reason_for_visit || ""}
+          placeholder={t("appointment_note")}
+          value={value.note || ""}
           onChange={(e) =>
             handleUpdate({
-              reason_for_visit: e.target.value || undefined,
+              note: e.target.value || undefined,
             })
           }
           disabled={disabled}
@@ -201,7 +205,7 @@ export function AppointmentQuestion({
                 setSelectedSlot(undefined);
               }
             }}
-            clearSelection={t("show_all")}
+            clearSelection
           />
         </div>
       </div>

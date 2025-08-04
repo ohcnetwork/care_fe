@@ -17,7 +17,7 @@ export interface FacilityModel {
   modified_date?: string;
   created_date?: string;
   geo_organization?: string;
-  pincode?: string;
+  pincode?: number;
   latitude?: number;
   longitude?: number;
   is_public?: boolean;

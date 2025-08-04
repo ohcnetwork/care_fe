@@ -45,17 +45,21 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import routes from "@/Utils/request/api";
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
+
 import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
   ENCOUNTER_CLASS,
   ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_PRIORITY,
-  Encounter,
   EncounterClass,
-  EncounterRequest,
+  EncounterCreate,
+  EncounterRead,
 } from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 
 interface Props {
   patientId: string;
@@ -86,6 +90,7 @@ export default function CreateEncounterForm({
       message: t("at_least_one_department_is_required"),
     }),
     start_date: z.string(),
+    tags: z.array(z.string()),
   });
 
   const form = useForm({
@@ -96,12 +101,19 @@ export default function CreateEncounterForm({
       priority: "routine",
       organizations: [],
       start_date: new Date().toISOString(),
+      tags: [],
     },
   });
 
+  const tagIds = form.watch("tags");
+  const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
+  const selectedTags = tagQueries
+    .map((query) => query.data)
+    .filter(Boolean) as TagConfig[];
+
   const { mutate: createEncounter, isPending } = useMutation({
-    mutationFn: mutate(routes.encounter.create),
-    onSuccess: (data: Encounter) => {
+    mutationFn: mutate(encounterApi.create),
+    onSuccess: (data: EncounterRead) => {
       toast.success(t("encounter_created"));
       setIsOpen(false);
       form.reset();
@@ -114,13 +126,14 @@ export default function CreateEncounterForm({
   });
 
   function onSubmit(data: z.infer<typeof encounterFormSchema>) {
-    const encounterRequest: EncounterRequest = {
+    const encounterRequest: EncounterCreate = {
       ...data,
       patient: patientId,
       facility: facilityId,
       period: {
         start: data.start_date,
       },
+      tags: data.tags,
     };
 
     createEncounter(encounterRequest);
@@ -187,7 +200,7 @@ export default function CreateEncounterForm({
                               updatedDate.setMinutes(date.getMinutes());
                               field.onChange(updatedDate.toISOString());
                             }}
-                            initialFocus
+                            autoFocus
                           />
                         </PopoverContent>
                       </Popover>
@@ -317,27 +330,46 @@ export default function CreateEncounterForm({
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="tags"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("tags")}</FormLabel>
+                    <FormControl>
+                      <TagSelectorPopover
+                        selected={selectedTags}
+                        onChange={(tags) => {
+                          field.onChange(tags.map((tag) => tag.id));
+                        }}
+                        resource={TagResource.ENCOUNTER}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="organizations"
+                render={({ field }) => (
+                  <FormItem>
+                    <FacilityOrganizationSelector
+                      facilityId={facilityId}
+                      value={field.value}
+                      onChange={(value) => {
+                        if (value === null) {
+                          form.setValue("organizations", []);
+                        } else {
+                          form.setValue("organizations", value);
+                        }
+                      }}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-            <FormField
-              control={form.control}
-              name="organizations"
-              render={({ field }) => (
-                <FormItem>
-                  <FacilityOrganizationSelector
-                    facilityId={facilityId}
-                    value={field.value}
-                    onChange={(value) => {
-                      if (value === null) {
-                        form.setValue("organizations", []);
-                      } else {
-                        form.setValue("organizations", value);
-                      }
-                    }}
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <div className="flex justify-end mt-6 space-x-2">
               <Button
                 type="button"

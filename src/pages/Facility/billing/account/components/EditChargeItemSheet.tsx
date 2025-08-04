@@ -40,7 +40,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
-import { summarizeMonetaryComponents } from "@/pages/Facility/settings/chargeItemDefinitions/utils";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   ChargeItemRead,
@@ -53,9 +52,11 @@ const formSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
   status: z.nativeEnum(ChargeItemStatus),
-  quantity: z.coerce
-    .number()
-    .min(1, { message: "Quantity must be at least 1" }),
+  quantity: z
+    .string()
+    .refine((val) => !isNaN(Number(val)) && Number(val) >= 1, {
+      message: "Quantity must be at least 1",
+    }),
   note: z.string().optional(),
 });
 
@@ -102,18 +103,24 @@ export function EditChargeItemSheet({
     );
   };
 
+  const getTotalComponentsByType = (type: MonetaryComponentType) => {
+    return (
+      item.total_price_components?.filter(
+        (c: any) => c.monetary_component_type === type,
+      ) || []
+    );
+  };
+
   const baseComponent = getComponentsByType(MonetaryComponentType.base)[0];
+  const totalBaseComponent = getTotalComponentsByType(
+    MonetaryComponentType.base,
+  )[0];
   const discounts = getComponentsByType(MonetaryComponentType.discount);
-  const taxes = getComponentsByType(MonetaryComponentType.tax);
-
-  const { totalAmount, netAmount, taxableAmount } = summarizeMonetaryComponents(
-    item.unit_price_components,
+  const totalDiscounts = getTotalComponentsByType(
+    MonetaryComponentType.discount,
   );
-
-  const currentTotal =
-    item.total_price !== null && item.total_price !== undefined
-      ? item.total_price
-      : totalAmount;
+  const taxes = getComponentsByType(MonetaryComponentType.tax);
+  const totalTaxes = getTotalComponentsByType(MonetaryComponentType.tax);
 
   const { mutate: updateChargeItem, isPending } = useMutation({
     mutationFn: (data: FormValues) => {
@@ -308,20 +315,11 @@ export function EditChargeItemSheet({
                               </span>
                             </div>
                           ))}
-
-                          <Separator className="my-2" />
-
-                          <div className="flex justify-between font-semibold">
-                            <span>{t("unit_total")}</span>
-                            <span className="text-green-600">
-                              <MonetaryDisplay amount={totalAmount} />
-                            </span>
-                          </div>
                         </div>
                       </div>
                     </div>
 
-                    {item.quantity > 1 && (
+                    {Number(item.quantity) > 1 && (
                       <div className="rounded-md border bg-card mt-4">
                         <div className="p-4 text-sm">
                           <div className="space-y-2">
@@ -339,39 +337,53 @@ export function EditChargeItemSheet({
                                 <span>{t("total_base_price")}</span>
                                 <span>
                                   <MonetaryDisplay
-                                    amount={
-                                      item.quantity *
-                                      (baseComponent?.amount || 0)
-                                    }
+                                    amount={totalBaseComponent?.amount || "0"}
                                   />
                                 </span>
                               </div>
-                              <div className="flex justify-between">
-                                <span>{t("total_discounts")}</span>
-                                <span className="text-red-600">
-                                  <MonetaryDisplay
-                                    amount={
-                                      item.quantity *
-                                      (netAmount - taxableAmount)
-                                    }
-                                  />
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>{t("total_taxes")}</span>
-                                <span className="text-green-600">
-                                  <MonetaryDisplay
-                                    amount={
-                                      item.quantity *
-                                      (totalAmount - taxableAmount)
-                                    }
-                                  />
-                                </span>
-                              </div>
+
+                              {totalDiscounts.map((discount, index) => (
+                                <div
+                                  key={`discount-${index}`}
+                                  className="flex justify-between"
+                                >
+                                  <div className="space-x-1">
+                                    <span>
+                                      {discount.code && discount.code.display}
+                                    </span>
+                                    <span className="text-red-600">
+                                      ({t("discount")})
+                                    </span>
+                                  </div>
+                                  <span className="text-red-600">
+                                    - <MonetaryDisplay {...discount} />
+                                  </span>
+                                </div>
+                              ))}
+
+                              {totalTaxes.map((tax, index) => (
+                                <div
+                                  key={`tax-${index}`}
+                                  className="flex justify-between"
+                                >
+                                  <div className="space-x-1">
+                                    <span>{tax.code && tax.code.display}</span>
+                                    <span className="text-green-600">
+                                      ({t("tax")})
+                                    </span>
+                                  </div>
+                                  <span className="text-green-600">
+                                    + <MonetaryDisplay {...tax} />
+                                  </span>
+                                </div>
+                              ))}
+
                               <div className="flex justify-between font-semibold">
                                 <span>{t("total_price")}</span>
                                 <span className="text-green-600">
-                                  <MonetaryDisplay amount={currentTotal} />
+                                  <MonetaryDisplay
+                                    amount={item.total_price || "0"}
+                                  />
                                 </span>
                               </div>
                             </div>
