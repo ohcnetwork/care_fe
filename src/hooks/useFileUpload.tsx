@@ -13,23 +13,24 @@ import { toast } from "sonner";
 
 import AudioCaptureDialog from "@/components/Files/AudioCaptureDialog";
 import CameraCaptureDialog from "@/components/Files/CameraCaptureDialog";
-import {
-  CreateFileResponse,
-  FileCategory,
-  FileUploadModel,
-} from "@/components/Patient/models";
 
 import { DEFAULT_ALLOWED_EXTENSIONS } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
 import uploadFile from "@/Utils/request/uploadFile";
-import filesApi from "@/types/files/filesApi";
+import {
+  FileCategory,
+  FileRead,
+  FileReadMinimal,
+  FileType,
+} from "@/types/files/file";
+import fileApi from "@/types/files/fileApi";
 
 export type FileUploadOptions = {
   multiple?: boolean;
-  type: string;
+  type: FileType;
   category?: FileCategory;
-  onUpload?: (file: FileUploadModel) => void;
+  onUpload?: (file: FileReadMinimal) => void;
   // if allowed, will fallback to the name of the file if a seperate filename is not defined.
   allowNameFallback?: boolean;
   compress?: boolean;
@@ -88,7 +89,7 @@ export default function useFileUpload(
   const {
     type: fileType,
     onUpload,
-    category = "unspecified",
+    category = FileCategory.UNSPECIFIED,
     multiple,
     allowNameFallback = true,
   } = options;
@@ -199,11 +200,8 @@ export default function useFileUpload(
   };
   const { mutateAsync: markUploadComplete, error: markUploadCompleteError } =
     useMutation({
-      mutationFn: (body: {
-        data: CreateFileResponse;
-        associating_id: string;
-      }) =>
-        mutate(filesApi.markUploadCompleted, {
+      mutationFn: (body: { data: FileRead; associating_id: string }) =>
+        mutate(fileApi.markUploadCompleted, {
           pathParams: { id: body.data.id },
         })(body),
       onSuccess: (_, { data, associating_id }) => {
@@ -217,7 +215,7 @@ export default function useFileUpload(
     });
 
   const uploadfile = async (
-    data: CreateFileResponse,
+    data: FileRead,
     file: File,
     associating_id: string,
   ) => {
@@ -265,13 +263,13 @@ export default function useFileUpload(
   const { mutateAsync: createUpload } = useMutation({
     mutationFn: (body: {
       original_name: string;
-      file_type: string;
+      file_type: FileType;
       name: string;
       associating_id: string;
       file_category: FileCategory;
       mime_type: string;
     }) =>
-      mutate(filesApi.createUpload, {
+      mutate(fileApi.create, {
         body: {
           original_name: body.original_name,
           file_type: body.file_type,
@@ -329,7 +327,7 @@ export default function useFileUpload(
       try {
         const data = await createUpload({
           original_name: file.name ?? "",
-          file_type: fileType,
+          file_type: fileType as FileType,
           name:
             allowNameFallback && uploadFileNames[index] === "" && file
               ? file.name

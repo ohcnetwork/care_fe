@@ -15,9 +15,10 @@ import {
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
+import { FileType } from "@/types/files/file";
 
 interface FilesTabsProps {
-  type: "encounter" | "patient";
+  type: FileType.ENCOUNTER | FileType.PATIENT;
   encounter?: EncounterRead;
   patient?: PatientRead;
   readOnly?: boolean;

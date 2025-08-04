@@ -1,44 +1,44 @@
-import {
-  CreateFileRequest,
-  CreateFileResponse,
-  FileUploadModel,
-} from "@/components/Patient/models";
-
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
+import {
+  FileCreate,
+  FileRead,
+  FileReadMinimal,
+  FileUpdate,
+} from "@/types/files/file";
 
 export default {
-  createUpload: {
+  create: {
     path: "/api/v1/files/",
     method: HttpMethod.POST,
-    TBody: Type<CreateFileRequest>(),
-    TRes: Type<CreateFileResponse>(),
+    TBody: Type<FileCreate>(),
+    TRes: Type<FileRead>(),
   },
-  viewUpload: {
+  list: {
     path: "/api/v1/files/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<FileUploadModel>>(),
+    TRes: Type<PaginatedResponse<FileReadMinimal>>(),
   },
-  retrieveUpload: {
+  get: {
     path: "/api/v1/files/{id}/",
     method: HttpMethod.GET,
-    TRes: Type<FileUploadModel>(),
+    TRes: Type<FileRead>(),
   },
-  editUpload: {
+  update: {
     path: "/api/v1/files/{id}/",
     method: HttpMethod.PUT,
-    TBody: Type<Partial<FileUploadModel>>(),
-    TRes: Type<FileUploadModel>(),
+    TBody: Type<FileUpdate>(),
+    TRes: Type<FileRead>(),
   },
   markUploadCompleted: {
     path: "/api/v1/files/{id}/mark_upload_completed/",
     method: HttpMethod.POST,
-    TRes: Type<FileUploadModel>(),
+    TRes: Type<FileReadMinimal>(),
   },
-  archiveUpload: {
+  archive: {
     path: "/api/v1/files/{id}/archive/",
     method: HttpMethod.POST,
-    TRes: Type<FileUploadModel>(),
     TBody: Type<{ archive_reason: string }>(),
+    TRes: Type<FileReadMinimal>(),
   },
 };

@@ -33,7 +33,6 @@ import Loading from "@/components/Common/Loading";
 import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
 import AudioPlayerDialog from "@/components/Files/AudioPlayerDialog";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
-import { FileUploadModel } from "@/components/Patient/models";
 
 import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
@@ -45,15 +44,16 @@ import {
   FILE_EXTENSIONS,
 } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
+import { FileReadMinimal, FileType } from "@/types/files/file";
+import fileApi from "@/types/files/fileApi";
 
 interface FilesTabProps {
-  type: "encounter" | "patient";
+  type: FileType.ENCOUNTER | FileType.PATIENT;
   encounter?: EncounterRead;
   patient?: PatientRead;
   associatingId: string;
@@ -70,9 +70,9 @@ export const FilesPage = ({
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [openArchivedFileDialog, setOpenArchivedFileDialog] = useState(false);
   const [selectedArchivedFile, setSelectedArchivedFile] =
-    useState<FileUploadModel | null>(null);
+    useState<FileReadMinimal | null>(null);
   const [selectedAudioFile, setSelectedAudioFile] =
-    useState<FileUploadModel | null>(null);
+    useState<FileReadMinimal | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
   const { hasPermission } = usePermissions();
   const { qParams, updateQuery, Pagination } = useFilters({
@@ -99,7 +99,7 @@ export const FilesPage = ({
     refetch,
   } = useQuery({
     queryKey: ["files", type, associatingId, qParams],
-    queryFn: query.debounced(routes.viewUpload, {
+    queryFn: query.debounced(fileApi.list, {
       queryParams: {
         file_type: type,
         associating_id: associatingId,
@@ -162,7 +162,7 @@ export const FilesPage = ({
     }
   }, [openUploadDialog]);
 
-  const getFileType = (file: FileUploadModel) => {
+  const getFileType = (file: FileReadMinimal) => {
     return fileManager.getFileType(file);
   };
 
@@ -175,7 +175,7 @@ export const FilesPage = ({
     DOCUMENT: "l-file-medical",
   };
 
-  const getArchivedMessage = (file: FileUploadModel) => {
+  const getArchivedMessage = (file: FileReadMinimal) => {
     return (
       <div className="flex flex-row gap-2 justify-end">
         <span className="text-gray-200/90 self-center uppercase font-bold">
@@ -197,7 +197,7 @@ export const FilesPage = ({
     );
   };
 
-  const DetailButtons = ({ file }: { file: FileUploadModel }) => {
+  const DetailButtons = ({ file }: { file: FileReadMinimal }) => {
     const filetype = getFileType(file);
     return (
       <>

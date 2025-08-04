@@ -12,9 +12,8 @@ import {
 } from "@/components/ui/dialog";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
-import { FileUploadModel } from "@/components/Patient/models";
-
 import { formatName } from "@/Utils/utils";
+import { FileReadMinimal } from "@/types/files/file";
 
 export default function ArchivedFileDialog({
   open,
@@ -23,7 +22,7 @@ export default function ArchivedFileDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  file: FileUploadModel | null;
+  file: FileReadMinimal | null;
 }) {
   const { t } = useTranslation();
 

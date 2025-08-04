@@ -8,7 +8,7 @@ import { EncounterEdit } from "@/types/emr/encounter/encounter";
 import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
-import { FileUploadQuestion } from "@/types/files/files";
+import { FileUploadQuestion } from "@/types/files/file";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 /**
