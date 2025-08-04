@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { isPast } from "date-fns";
-import { format } from "date-fns";
 import { List, Search } from "lucide-react";
 import { useNavigate, usePathParams } from "raviger";
 import { useState } from "react";
@@ -64,6 +63,11 @@ function ConsentCard({
   const primaryAttachment = consent.source_attachments[0];
   const totalAttachments = consent.source_attachments.length;
 
+  const renderDateTime = (date: Date | undefined | null) => {
+    if (!date) return <span>{t("na")}</span>;
+    return <>{formatDateTime(date, "DD MMM YYYY h:mm A")}</>;
+  };
+
   return (
     <Card className="overflow-hidden transition-all h-full flex flex-col">
       <div className="flex flex-wrap gap-2">
@@ -124,39 +128,21 @@ function ConsentCard({
           </div>
         </div>
 
-        <div className="flex justify-between items-start w-full gap-4 text-sm">
+        <div className="flex flex-col justify-between w-full gap-4 text-sm">
           <div className="flex flex-col gap-1">
             <span className="text-xs text-gray-500">
               {t("consent_given_on")}
             </span>
-            <p className="font-medium text-xs">
-              {formatDateTime(consent.date, "MMM D, YYYY")}
-              <br />
-              {format(consent.date, "h:mm a")}
+            <p className="font-medium text-xs w-full">
+              {renderDateTime(consent.date)}
             </p>
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-xs text-gray-500">{t("valid_period")}</span>
-            <p className="font-medium text-right text-xs">
-              {consent.period.start ? (
-                <>
-                  <span>
-                    {format(new Date(consent.period.start), "MMMM d, yyyy")}{" "}
-                    {format(new Date(consent.period.start), "h:mm a")} {" - "}
-                  </span>
-                  <br />
-                  <span>
-                    {consent.period.end
-                      ? `${format(new Date(consent.period.end), "MMMM d, yyyy")} ${format(
-                          new Date(consent.period.end),
-                          "h:mm a",
-                        )}`
-                      : t("na")}
-                  </span>
-                </>
-              ) : (
-                <span>{t("na")}</span>
-              )}
+            <p className="font-medium text-xs w-full">
+              {renderDateTime(consent.period.start)}
+              {" - "}
+              {renderDateTime(consent.period.end)}
             </p>
           </div>
         </div>

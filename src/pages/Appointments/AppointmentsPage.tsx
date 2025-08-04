@@ -1,11 +1,10 @@
 import careConfig from "@careConfig";
 import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
   addDays,
   format,
   formatDate,
-  isPast,
   isToday,
   isTomorrow,
   isYesterday,
@@ -17,6 +16,7 @@ import { Edit3Icon, FilterIcon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
+import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -36,7 +36,6 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -70,7 +69,10 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import {
+  CardListSkeleton,
+  TableSkeleton,
+} from "@/components/Common/SkeletonLoading";
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
@@ -80,7 +82,6 @@ import useFilters, { FilterState } from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
-import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
 import {
@@ -97,12 +98,12 @@ import {
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import {
   APPOINTMENT_STATUS_COLORS,
   Appointment,
   AppointmentRead,
   AppointmentStatus,
-  AppointmentStatuses,
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -312,7 +313,11 @@ export default function AppointmentsPage() {
   const [activeTab, setActiveTab] = useView("appointments", "board");
   const { open: isSidebarOpen } = useSidebar();
   const { facility, facilityId } = useCurrentFacility();
-  const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
+  const selectedTagIds = qParams.tags?.split(",") ?? [];
+  const tagConfigsQuery = useTagConfigs({ ids: selectedTagIds, facilityId });
+  const selectedTags = tagConfigsQuery
+    .map((q) => q.data)
+    .filter(Boolean) as TagConfig[];
 
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
@@ -469,7 +474,11 @@ export default function AppointmentsPage() {
             <TagSelectorPopover
               asFilter
               selected={selectedTags}
-              onChange={setSelectedTags}
+              onChange={(tags) => {
+                updateQuery({
+                  tags: tags.map((tag) => tag.id).join(","),
+                });
+              }}
               resource={TagResource.APPOINTMENT}
             />
           </div>
@@ -666,12 +675,6 @@ export default function AppointmentsPage() {
             className="w-full sm:w-auto"
             patientId={qParams.patient}
           />
-          <Input
-            className="md:w-xs w-full"
-            placeholder={t("search")}
-            value={qParams.search ?? ""}
-            onChange={(e) => updateQuery({ search: e.target.value })}
-          />
         </div>
       </div>
 
@@ -693,7 +696,6 @@ export default function AppointmentsPage() {
                 practitioners={qParams.practitioners || null}
                 date_from={qParams.date_from}
                 date_to={qParams.date_to}
-                search={qParams.search?.toLowerCase()}
                 canViewAppointments={canViewAppointments}
                 tags={selectedTags.map((tag) => tag.id)}
                 patient={qParams.patient}
@@ -710,7 +712,6 @@ export default function AppointmentsPage() {
           page={qParams.page}
           date_from={qParams.date_from}
           date_to={qParams.date_to}
-          search={qParams.search?.toLowerCase()}
           canViewAppointments={canViewAppointments}
           resultsPerPage={resultsPerPage}
           status={qParams.status}
@@ -730,7 +731,6 @@ function AppointmentColumn(props: {
   tags?: string[];
   date_from: string | null;
   date_to: string | null;
-  search?: string;
   canViewAppointments: boolean;
   patient?: string;
 }) {
@@ -739,10 +739,16 @@ function AppointmentColumn(props: {
   const [selectedStatuses, setSelectedStatuses] = useState<AppointmentStatus[]>(
     [],
   );
+  const { ref, inView } = useInView();
 
-  const { data } = useQuery({
+  const {
+    data: appointmentsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: [
-      "appointments",
+      "infinite-appointments",
       facilityId,
       selectedStatuses.length === 0
         ? props.statusGroup.statuses
@@ -752,36 +758,38 @@ function AppointmentColumn(props: {
       props.date_from,
       props.date_to,
       props.tags,
-      props.search,
       props.patient,
     ],
-    queryFn: query(scheduleApis.appointments.list, {
-      pathParams: { facilityId },
-      queryParams: {
-        status:
-          selectedStatuses.length === 0
-            ? props.statusGroup.statuses.join(",")
-            : selectedStatuses.join(","),
-        tags: props.tags?.join(","),
-        limit: 100,
-        slot: props.slot,
-        user: props.practitioners ?? undefined,
-        date_after: props.date_from,
-        date_before: props.date_to,
-        ordering: "token_slot__start_datetime",
-        patient: props.patient,
-      },
-    }),
-    enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(scheduleApis.appointments.list, {
+        pathParams: { facilityId },
+        queryParams: {
+          offset: pageParam,
+          status:
+            selectedStatuses.length === 0
+              ? props.statusGroup.statuses.join(",")
+              : selectedStatuses.join(","),
+          tags: props.tags?.join(","),
+          limit: 10,
+          slot: props.slot,
+          user: props.practitioners ?? undefined,
+          date_after: props.date_from,
+          date_before: props.date_to,
+          ordering: "token_slot__start_datetime",
+          patient: props.patient,
+        },
+      })({ signal });
+      return response;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * 10;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
   });
 
-  let appointments = data?.results ?? [];
-
-  if (props.search) {
-    appointments = appointments.filter(({ patient }) =>
-      patient.name.toLowerCase().includes(props.search!),
-    );
-  }
+  const appointments =
+    appointmentsData?.pages.flatMap((page) => page.results) ?? [];
 
   const toggleStatus = (status: AppointmentStatus) => {
     setSelectedStatuses((prev) =>
@@ -791,11 +799,17 @@ function AppointmentColumn(props: {
     );
   };
 
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, fetchNextPage]);
+
   return (
     <div
       className={cn(
         "bg-gray-100 py-4 rounded-lg w-[20rem] overflow-y-hidden",
-        !data && "animate-pulse",
+        !appointmentsData && "animate-pulse",
       )}
     >
       <div className="flex flex-row justify-between px-3 gap-2 mb-3">
@@ -804,16 +818,16 @@ function AppointmentColumn(props: {
             {props.statusGroup.label}
           </h2>
           <span className="bg-gray-200 px-2 py-1 rounded-md text-xs font-medium">
-            {data?.count == null ? (
+            {appointmentsData?.pages[0]?.count == null ? (
               "..."
-            ) : data.count === appointments.length ? (
-              data.count
+            ) : appointmentsData?.pages[0]?.count === appointments.length ? (
+              appointmentsData?.pages[0]?.count
             ) : (
               <Trans
                 i18nKey="showing_x_of_y"
                 values={{
                   x: appointments.length,
-                  y: data.count,
+                  y: appointmentsData?.pages[0]?.count,
                 }}
                 components={{
                   strong: <span className="font-bold" />,
@@ -829,7 +843,7 @@ function AppointmentColumn(props: {
                 <FilterIcon className="size-4" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-60 p-0" align="start">
+            <PopoverContent className="w-60 p-0" align="end">
               <Command>
                 <CommandList>
                   <CommandEmpty>{t("no_status_found")}</CommandEmpty>
@@ -885,8 +899,11 @@ function AppointmentColumn(props: {
       ) : (
         <ScrollArea>
           <ul className="space-y-3 px-3 pb-4 pt-1 h-[calc(100vh-18rem)]">
-            {appointments.map((appointment) => (
-              <li key={appointment.id}>
+            {appointments.map((appointment, index) => (
+              <li
+                key={appointment.id}
+                ref={index === appointments.length - 1 ? ref : undefined}
+              >
                 <Link
                   href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`}
                   className="text-inherit"
@@ -898,6 +915,7 @@ function AppointmentColumn(props: {
                 </Link>
               </li>
             ))}
+            {isFetchingNextPage && <CardListSkeleton count={5} />}
           </ul>
         </ScrollArea>
       )}
@@ -997,7 +1015,6 @@ function AppointmentRow(props: {
   status: string | null;
   date_from: string | null;
   date_to: string | null;
-  search?: string;
   canViewAppointments: boolean;
   tags?: string[];
   patient?: string;
@@ -1036,13 +1053,8 @@ function AppointmentRow(props: {
     enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
   });
 
-  let appointments = data?.results ?? [];
+  const appointments = data?.results ?? [];
 
-  if (props.search) {
-    appointments = appointments.filter(({ patient }) =>
-      patient.name.toLowerCase().includes(props.search!),
-    );
-  }
   return (
     <div className="overflow-x-auto">
       <div className={cn(!data && "animate-pulse")}>
@@ -1156,7 +1168,7 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
         {formatName(appointment.user)}
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        <AppointmentStatusDropdown appointment={appointment} />
+        {t(appointment.status)}
       </TableCell>
       {/* TODO: replace this with token number once that's ready... */}
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white rounded-r-lg">
@@ -1165,86 +1177,6 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
     </>
   );
 }
-
-const AppointmentStatusDropdown = ({
-  appointment,
-}: {
-  appointment: Appointment;
-}) => {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const { facilityId } = useCurrentFacility();
-
-  const currentStatus = appointment.status;
-  const hasStarted = isPast(appointment.token_slot.start_datetime);
-
-  const { mutate: updateAppointment } = useMutation({
-    mutationFn: mutate(scheduleApis.appointments.update, {
-      pathParams: { facilityId, id: appointment.id },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["appointments", facilityId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["appointment", appointment.id],
-      });
-    },
-  });
-
-  // Get available status options based on current status
-  const getAvailableStatuses = () => {
-    if (
-      ["fulfilled", "cancelled", "entered_in_error"].includes(currentStatus)
-    ) {
-      return [currentStatus];
-    }
-
-    if (currentStatus === "booked") {
-      return ["booked", "checked_in", "in_consultation", "noshow", "cancelled"];
-    }
-
-    if (currentStatus === "checked_in") {
-      return ["checked_in", "in_consultation", "noshow", "cancelled"];
-    }
-
-    if (currentStatus === "in_consultation") {
-      return ["in_consultation", "fulfilled", "cancelled"];
-    }
-
-    return AppointmentStatuses;
-  };
-
-  return (
-    <div className="w-32" onClick={(e) => e.stopPropagation()}>
-      <Select
-        value={currentStatus}
-        onValueChange={(value) =>
-          updateAppointment({ status: value as Appointment["status"] })
-        }
-      >
-        <SelectTrigger>
-          <CareIcon icon="l-schedule" className="size-4" />
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {getAvailableStatuses().map((status) => (
-            <SelectItem
-              key={status}
-              value={status}
-              disabled={
-                !hasStarted &&
-                ["checked_in", "in_consultation", "fulfilled"].includes(status)
-              }
-            >
-              {t(status)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-};
 
 interface SlotFilterProps {
   slots: TokenSlot[];
