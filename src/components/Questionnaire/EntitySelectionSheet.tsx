@@ -69,8 +69,12 @@ interface EntitySelectionSheetProps {
    */
   onEntitySelected: (code: Code) => void;
   /**
-   * Callback when a product entity is selected from the ValueSet
-   * @param product The selected product
+   * Callback fired when a product entity is selected from the ValueSet.
+   *
+   * If `onProductEntitySelected` is provided, the `MedicationValueSetSelect` will render
+   * and this callback will be called with the selected product.
+   *
+   * @param product The selected product entity.
    */
   onProductEntitySelected?: (product: ProductKnowledgeBase) => void;
   /**
@@ -133,7 +137,7 @@ export function EntitySelectionSheet({
 
   return (
     <>
-      {system === "system-medication" ? (
+      {onProductEntitySelected ? (
         <MedicationValueSetSelect
           onSelect={handleSelect}
           onProductSelect={handleProductSelect}
@@ -182,7 +186,7 @@ export function EntitySelectionSheet({
               </SheetHeader>
               <div className="flex-1 overflow-y-auto pb-safe">{children}</div>
             </div>
-          ) : system === "system-medication" ? (
+          ) : onProductEntitySelected ? (
             <MedicationValueSetSelect
               onSelect={handleSelect}
               onProductSelect={handleProductSelect}
