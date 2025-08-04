@@ -69,11 +69,8 @@ interface EntitySelectionSheetProps {
    */
   onEntitySelected: (code: Code) => void;
   /**
-   * Callback fired when a product entity is selected from the ValueSet.
-   *
+   * Callback when a product entity is selected from the ValueSet.
    * If `onProductEntitySelected` is provided, the `MedicationValueSetSelect` will render
-   * and this callback will be called with the selected product.
-   *
    * @param product The selected product entity.
    */
   onProductEntitySelected?: (product: ProductKnowledgeBase) => void;
