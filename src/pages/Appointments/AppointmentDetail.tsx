@@ -16,7 +16,7 @@ import { differenceInYears, format, isSameDay } from "date-fns";
 import { BanIcon, Loader2, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
@@ -539,9 +539,21 @@ const AppointmentActions = ({
                 <Label>{t("note")}</Label>
                 <Textarea
                   value={oldNote}
-                  placeholder={t("reason_for_reschedule_placeholder")}
                   onChange={(e) => setRescheduleReason(e.target.value)}
                 />
+                <AlertDialogDescription>
+                  <Alert variant="destructive">
+                    <AlertTitle>{t("warning")}</AlertTitle>
+                    <AlertDescription>
+                      <Trans
+                        i18nKey="reschedule_appointment_warning"
+                        components={{
+                          strong: <strong className="font-bold" />,
+                        }}
+                      />
+                    </AlertDescription>
+                  </Alert>
+                </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel
@@ -554,7 +566,7 @@ const AppointmentActions = ({
                     setIsRescheduleReasonOpen(false);
                     setIsRescheduleOpen(true);
                   }}
-                  disabled={!oldNote}
+                  disabled={oldNote === appointment.note || !oldNote.trim()}
                 >
                   {t("continue")}
                 </AlertDialogAction>
@@ -744,6 +756,7 @@ const AppointmentActions = ({
                   })
                 }
                 className={cn(buttonVariants({ variant: "destructive" }))}
+                disabled={!note.trim()}
               >
                 {isUpdating ? (
                   <Loader2 className="size-4 animate-spin mr-2" />
@@ -791,6 +804,7 @@ const AppointmentActions = ({
                   })
                 }
                 className={cn(buttonVariants({ variant: "destructive" }))}
+                disabled={!note.trim()}
               >
                 {isCancelling ? (
                   <Loader2 className="size-4 animate-spin mr-2" />
