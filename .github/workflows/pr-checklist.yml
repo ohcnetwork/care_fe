@@ -21,7 +21,7 @@ jobs:
           script: |
             const prAuthor = context.payload.pull_request.user.login;
 
-            if (prAuthor === 'renovate[bot]' || prAuthor === 'getsentry[bot]') {
+            if (context.payload.pull_request.user.type === 'Bot') {
               return;
             }
 
