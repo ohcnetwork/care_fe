@@ -67,7 +67,8 @@ const priceComponentSchema = z.object({
     .refine((val) => !val || Number(val) > 0, {
       message: "Amount must be greater than 0",
     })
-    .optional(),
+    .optional()
+    .nullable(),
 });
 
 interface ChargeItemDefinitionFormProps {

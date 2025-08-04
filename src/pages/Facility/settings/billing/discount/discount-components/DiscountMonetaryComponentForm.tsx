@@ -41,7 +41,8 @@ const formSchema = z
       .refine((val) => !val || Number(val) >= 0, {
         message: "Amount must be greater than or equal to 0",
       })
-      .optional(),
+      .optional()
+      .nullable(),
     title: z.string().min(1, { message: "field_required" }),
   })
   .refine((data) => data.factor != null || data.amount != null, {
