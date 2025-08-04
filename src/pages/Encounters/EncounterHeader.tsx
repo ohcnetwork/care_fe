@@ -17,11 +17,9 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterActions from "@/components/Encounter/EncounterActions";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import { formatDateTime, formatPatientAge } from "@/Utils/utils";
-import EncounterProperties from "@/pages/Encounters/EncounterProperties";
+import { formatPatientAge } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
-import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 export function EncounterHeader() {
   const { t } = useTranslation();
@@ -38,7 +36,6 @@ export function EncounterHeader() {
   const readOnly = selectedEncounterId !== currentEncounterId;
 
   const { patient, facility } = encounter;
-  const tags = [...patient.instance_tags, ...patient.facility_tags];
 
   return (
     <>
@@ -62,7 +59,7 @@ export function EncounterHeader() {
               </span>
             </Link>
           </div>
-          <div className="flex flex-col md:flex-row gap-1 md:gap-8 items-start">
+          {/* <div className="flex flex-col md:flex-row gap-1 md:gap-8 items-start">
             <div className="md:hidden flex md:flex-col gap-0.5 items-center md:items-start">
               <span className="text-xs text-gray-600 w-32 md:w-auto">
                 {t("start_date")}:{" "}
@@ -117,9 +114,48 @@ export function EncounterHeader() {
                 <span className="text-sm font-semibold">--</span>
               )}
             </div>
-          </div>
-          <div className="md:hidden">
+          </div> */}
+          {/* <div className="md:hidden">
             <EncounterProperties encounter={encounter} canEdit={false} />
+          </div> */}
+          <div className="flex flex-row gap-10 ml-3">
+            <div>
+              <span className="text-sm font-medium text-gray-700">
+                {t("patient_id_abha")}:
+              </span>
+              <div className="text-sm text-gray-950 font-semibold">"--"</div>
+            </div>
+            <div>
+              <span className="text-sm font-medium text-gray-700">
+                {t("hospital_identifier")}:
+              </span>
+              <div className="text-sm text-gray-950 font-semibold">
+                {encounter.external_identifier || "--"}
+              </div>
+            </div>
+          </div>
+          <div className="ml-3">
+            <span className="text-sm font-medium text-gray-700">
+              {t("encounter_tags")}:
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {encounter.tags.length > 0 ? (
+                <>
+                  {encounter.tags.map((tag) => (
+                    <Badge
+                      key={tag.id}
+                      variant="secondary"
+                      className="capitalize"
+                      title={tag.description}
+                    >
+                      {tag.display}
+                    </Badge>
+                  ))}
+                </>
+              ) : (
+                <p className="text-sm text-gray-500">{t("no_tags")}</p>
+              )}
+            </div>
           </div>
         </div>
 
@@ -134,8 +170,8 @@ export function EncounterHeader() {
             {!inactiveEncounterStatus.includes(encounter.status) && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="primary_gradient">
-                    {t("update")}
+                  <Button variant="primary_gradient" className="w-full">
+                    {t("encounter_actions")}
                     <ChevronDown className="ml-2 size-4" />
                   </Button>
                 </DropdownMenuTrigger>

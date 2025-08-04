@@ -195,7 +195,7 @@ export default function EncounterProperties({ encounter, canEdit }: Props) {
   );
 }
 
-const StatusBadge = ({ encounter }: { encounter: EncounterRead }) => {
+export const StatusBadge = ({ encounter }: { encounter: EncounterRead }) => {
   const { t } = useTranslation();
 
   return (

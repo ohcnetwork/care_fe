@@ -17,7 +17,7 @@ import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSea
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
 import { formatDateTime, formatName } from "@/Utils/utils";
-import EncounterProperties from "@/pages/Encounters/EncounterProperties";
+import EncounterPropertiesTest from "@/pages/Encounters/EncounterPropertiesTest";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 
@@ -33,9 +33,9 @@ export default function SideOverview({ encounter, canEdit }: Props) {
   const readOnly = selectedEncounterId !== currentEncounterId;
 
   return (
-    <div className="w-full md:max-w-[18rem] flex flex-col gap-4">
-      <div className="hidden md:block">
-        <EncounterProperties encounter={encounter} canEdit={canEdit} />
+    <div className="w-[21rem] flex flex-col gap-4">
+      <div className="hidden md:block ">
+        <EncounterPropertiesTest encounter={encounter} canEdit={canEdit} />
       </div>
       <div className="flex flex-col gap-8 md:mt-6">
         <Separator className="bg-slate-200" />
@@ -57,7 +57,7 @@ export default function SideOverview({ encounter, canEdit }: Props) {
   );
 }
 
-const Actions = () => {
+export const Actions = () => {
   const { t } = useTranslation();
   const { selectedEncounterId, currentEncounterId } = useEncounter();
   const readOnly = selectedEncounterId !== currentEncounterId;
