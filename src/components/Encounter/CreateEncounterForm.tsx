@@ -173,37 +173,17 @@ export default function CreateEncounterForm({
                     <FormItem>
                       <FormLabel>{t("date_and_time")}</FormLabel>
                       <div className="flex sm:gap-2 flex-wrap">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "flex-1 justify-start text-left font-normal h-8",
-                                !field.value && "text-gray-500",
-                              )}
-                            >
-                              <CareIcon
-                                icon="l-calender"
-                                className="mr-2 size-4"
-                              />
-                              {date.toLocaleDateString()}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={date}
-                              onSelect={(newDate) => {
-                                if (!newDate) return;
-                                const updatedDate = new Date(newDate);
-                                updatedDate.setHours(date.getHours());
-                                updatedDate.setMinutes(date.getMinutes());
-                                field.onChange(updatedDate.toISOString());
-                              }}
-                              autoFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
+                        <DatePicker
+                          date={date}
+                          onChange={(newDate) => {
+                            if (!newDate) return;
+                            const updatedDate = new Date(newDate);
+                            updatedDate.setHours(date.getHours());
+                            updatedDate.setMinutes(date.getMinutes());
+                            field.onChange(updatedDate.toISOString());
+                          }}
+                          className="flex-1"
+                        />
                         <Input
                           type="time"
                           className="sm:w-[150px] border-t-0 sm:border-t text-sm py-px border-gray-400 shadow-sm h-8"
@@ -234,38 +214,6 @@ export default function CreateEncounterForm({
                 name="encounter_class"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("date_and_time")}</FormLabel>
-                    <div className="flex sm:gap-2 flex-wrap">
-                      <DatePicker
-                        date={date}
-                        onChange={(newDate) => {
-                          if (!newDate) return;
-                          const updatedDate = new Date(newDate);
-                          updatedDate.setHours(date.getHours());
-                          updatedDate.setMinutes(date.getMinutes());
-                          field.onChange(updatedDate.toISOString());
-                        }}
-                        className="h-8"
-                      />
-                      <Input
-                        type="time"
-                        className="sm:w-[150px] border-t-0 sm:border-t text-gray-500 border-gray-200 h-8"
-                        value={date.toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: false,
-                        })}
-                        onChange={(e) => {
-                          const [hours, minutes] = e.target.value
-                            .split(":")
-                            .map(Number);
-                          if (isNaN(hours) || isNaN(minutes)) return;
-                          const updatedDate = new Date(date);
-                          updatedDate.setHours(hours);
-                          updatedDate.setMinutes(minutes);
-                          field.onChange(updatedDate.toISOString());
-                        }}
-                      />
                     <FormLabel>{t("type_of_encounter")}</FormLabel>
                     <div className="grid grid-cols-2 gap-3">
                       {ENCOUNTER_CLASS.map((value) => {
