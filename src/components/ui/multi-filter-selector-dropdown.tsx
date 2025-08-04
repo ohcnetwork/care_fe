@@ -11,8 +11,11 @@ import {
 import { ChevronDown, ChevronRight, Folder, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import { cn } from "@/lib/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -80,19 +83,43 @@ function FilterOptionsList({
   selectedValues,
   onOptionToggle,
   showColorIndicators,
+  focusItemIndex,
+  setFocusItemIndex,
 }: {
   options: FilterOption[];
   selectedValues: string[];
   onOptionToggle: (value: string, checked: boolean) => void;
   showColorIndicators?: boolean;
+  focusItemIndex: number | null;
+  setFocusItemIndex: (index: number) => void;
 }) {
   const { t } = useTranslation();
+  const [focusItemRef, setFocusItemRef] = useState<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (focusItemRef) {
+      focusItemRef.focus();
+    }
+  }, [focusItemRef]);
+
   return (
     <div>
       {options.map((option, index) => (
         <div
           key={option.value}
           className="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-50 transition-colors"
+          ref={index === focusItemIndex ? setFocusItemRef : null}
+          onFocus={() => setFocusItemIndex(index)}
+          tabIndex={index}
+          onKeyDown={(e) => {
+            if (e.key === " ") {
+              e.preventDefault();
+              onOptionToggle(
+                option.value,
+                !selectedValues.includes(option.value),
+              );
+            }
+          }}
         >
           <Checkbox
             checked={selectedValues.includes(option.value)}
@@ -306,6 +333,37 @@ export function useFilterState(filters: FilterConfig[]) {
   };
 }
 
+function useNavigationShortcuts(
+  optionsLength: number,
+  handleBack?: () => void,
+) {
+  const [focusItemIndex, setFocusItemIndex] = useState<number | null>(null);
+
+  useKeyboardShortcut(["ArrowUp"], () => {
+    if (focusItemIndex === null) {
+      setFocusItemIndex(optionsLength - 1);
+    } else {
+      const newIndex = (focusItemIndex - 1 + optionsLength) % optionsLength;
+      setFocusItemIndex(newIndex);
+    }
+  });
+
+  useKeyboardShortcut(["ArrowDown"], () => {
+    if (focusItemIndex === null) {
+      setFocusItemIndex(0);
+    } else {
+      const newIndex = (focusItemIndex + 1) % optionsLength;
+      setFocusItemIndex(newIndex);
+    }
+  });
+
+  useKeyboardShortcut(["ArrowLeft"], () => {
+    handleBack?.();
+  });
+
+  return { focusItemIndex, setFocusItemIndex };
+}
+
 export function MultiFilterSelectorDropdown({
   selectedFilters,
   onFilterChange,
@@ -319,6 +377,7 @@ export function MultiFilterSelectorDropdown({
   const [open, setOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
+  const { t } = useTranslation();
 
   const totalSelectedCount = Object.values(selectedFilters).reduce(
     (sum, filterState) => sum + filterState.selected.length,
@@ -352,6 +411,12 @@ export function MultiFilterSelectorDropdown({
     }
   }, [open]);
 
+  useKeyboardShortcut(["ArrowLeft"], () => {
+    if (!activeFilter) {
+      setOpen(false);
+    }
+  });
+
   return (
     <div className="flex flex-col gap-2">
       <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -381,8 +446,52 @@ export function MultiFilterSelectorDropdown({
             <RenderFilterList
               handleFilterSelect={handleFilterSelect}
               selectedFilters={selectedFilters}
+              setActiveFilter={setActiveFilter}
             />
           )}
+          <Separator orientation="horizontal" className="bg-gray-200 h-px" />
+          <div className="flex justify-between">
+            <div className="flex gap-1 my-2 mx-2">
+              {activeFilter && (
+                <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
+                  <CareIcon icon="l-arrow-left" className="h-4 w-4" />
+                </div>
+              )}
+              <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
+                <CareIcon icon="l-arrow-down" className="h-4 w-4" />
+              </div>
+              <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
+                <CareIcon icon="l-arrow-up" className="h-4 w-4" />
+              </div>
+              {!activeFilter && (
+                <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
+                  <CareIcon icon="l-arrow-right" className="h-4 w-4" />
+                </div>
+              )}
+              <span className="text-xs text-gray-500 self-center">
+                {t("navigate")}
+              </span>
+            </div>
+            {activeFilter ? (
+              <div className="flex gap-1 my-2 mx-2">
+                <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
+                  <CareIcon icon="l-space-key" className="h-4 w-4" />
+                </div>
+                <span className="text-xs text-gray-500 self-center">
+                  {t("select")}
+                </span>
+              </div>
+            ) : (
+              <div className="flex gap-1 my-2 mx-2">
+                <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
+                  <CareIcon icon="l-enter" className="h-4 w-4" />
+                </div>
+                <span className="text-xs text-gray-500 self-center">
+                  {t("open")}
+                </span>
+              </div>
+            )}
+          </div>
         </DropdownMenuContent>
       </DropdownMenu>
       {Object.entries(selectedFilters).map(([key, _]) => {
@@ -553,24 +662,51 @@ function RenderDateFilter({
 function RenderFilterList({
   handleFilterSelect,
   selectedFilters,
+  setActiveFilter,
 }: {
   handleFilterSelect: (filterKey: string) => void;
   selectedFilters: Record<string, FilterState>;
+  setActiveFilter: (filterKey: string | null) => void;
 }) {
   const { t } = useTranslation();
+  const [focusItemRef, setFocusItemRef] = useState<HTMLDivElement | null>(null);
+
+  const { focusItemIndex, setFocusItemIndex } = useNavigationShortcuts(
+    Object.keys(selectedFilters).length,
+    () => setActiveFilter(null),
+  );
+
+  useKeyboardShortcut(["ArrowRight"], () => {
+    if (focusItemIndex !== null) {
+      handleFilterSelect(Object.keys(selectedFilters)[focusItemIndex]);
+    }
+  });
+
+  useEffect(() => {
+    if (focusItemRef) {
+      focusItemRef.focus();
+    }
+  }, [focusItemRef]);
 
   return (
     <div className="p-2">
-      {Object.values(selectedFilters).map(({ filter }) => (
+      {Object.values(selectedFilters).map(({ filter }, index) => (
         <DropdownMenuItem
           key={filter.key}
+          ref={index === focusItemIndex ? setFocusItemRef : null}
           onSelect={(e) => {
             e.preventDefault();
             handleFilterSelect(filter.key);
           }}
-          className="flex items-center justify-between px-3 py-2 cursor-pointer"
+          className={cn(
+            "flex items-center justify-between px-3 py-2 cursor-pointer",
+          )}
+          onFocus={() => setFocusItemIndex(index)}
         >
-          <span className="text-sm">{t(filter.label)}</span>
+          <div className="flex items-center gap-2">
+            <span className="border border-dotted border-gray-600 rounded w-3 h-3"></span>
+            <span className="text-base">{t(filter.label)}</span>
+          </div>
           <div className="flex items-center gap-2">
             {selectedFilters[filter.key]?.selected.length > 0 && (
               <span className="text-xs text-gray-500">
@@ -609,6 +745,7 @@ function RenderTagFilter({
         }}
         resource={filter.resource!}
         placeholder={filter.placeholder}
+        handleBack={handleBack}
       />
     </div>
   );
@@ -699,6 +836,11 @@ function FilterOptionsDropdown({
     }
   };
 
+  const { focusItemIndex, setFocusItemIndex } = useNavigationShortcuts(
+    filteredOptions.length,
+    handleBack,
+  );
+
   return (
     <div className="p-0">
       {handleBack && <FilterHeader label={filter.label} onBack={handleBack} />}
@@ -720,6 +862,8 @@ function FilterOptionsDropdown({
               selectedValues={selectedValues}
               onOptionToggle={handleOptionToggle}
               showColorIndicators={showColorIndicators}
+              focusItemIndex={focusItemIndex}
+              setFocusItemIndex={setFocusItemIndex}
             />
           )}
         </div>
@@ -734,11 +878,13 @@ function TagFilterDropdown({
   onTagsChange,
   resource,
   placeholder: _placeholder,
+  handleBack,
 }: {
   selectedTags: TagConfig[];
   onTagsChange: (tags: TagConfig[]) => void;
   resource: TagResource;
   placeholder?: string;
+  handleBack?: () => void;
 }) {
   const [search, setSearch] = useState("");
   const { t } = useTranslation();
@@ -781,6 +927,14 @@ function TagFilterDropdown({
   const nonSelectedRootLevelTags = filteredTags.filter(
     (tag) => !tag.has_children && !selectedTags.some((t) => t.id === tag.id),
   );
+
+  const [hasOpenSubmenu, setHasOpenSubmenu] = useState(false);
+
+  useKeyboardShortcut(["ArrowLeft"], () => {
+    if (!hasOpenSubmenu) {
+      handleBack?.();
+    }
+  });
 
   return (
     <div className="p-3">
@@ -839,6 +993,9 @@ function TagFilterDropdown({
                 onTagToggle={handleTagToggle}
                 resource={resource}
                 getColorForTag={getColorForTag}
+                onSubMenuOpen={(open) => {
+                  setHasOpenSubmenu(open);
+                }}
               />
             ))}
             <DropdownMenuSeparator />
@@ -898,14 +1055,17 @@ function GroupSubmenu({
   onTagToggle,
   resource,
   getColorForTag,
+  onSubMenuOpen,
 }: {
   group: TagConfig;
   selectedTags: TagConfig[];
   onTagToggle: (tag: TagConfig) => void;
   resource: TagResource;
   getColorForTag: (tagId: string, index: number) => string;
+  onSubMenuOpen: (isOpen: boolean) => void;
 }) {
   const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
   const { data: children, isLoading: loadingChildren } = useQuery({
     queryKey: ["tags", resource, "parent", group.id],
     queryFn: query(tagConfigApi.list, {
@@ -919,8 +1079,23 @@ function GroupSubmenu({
     enabled: true,
   });
 
+  useEffect(() => {
+    if (!open) {
+      setTimeout(() => {
+        onSubMenuOpen(false);
+      }, 100);
+    } else {
+      onSubMenuOpen(true);
+    }
+  }, [open, onSubMenuOpen]);
+
   return (
-    <DropdownMenuSub>
+    <DropdownMenuSub
+      open={open}
+      onOpenChange={(open) => {
+        setOpen(open);
+      }}
+    >
       <DropdownMenuSubTrigger className="flex items-center gap-2 px-2 py-1">
         <div className="flex items-center gap-2 flex-1">
           <Folder className="h-4 w-4 text-muted-foreground" />
