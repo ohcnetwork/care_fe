@@ -29,6 +29,8 @@ import {
   getVideoMimeType,
 } from "@/types/files/file";
 
+import { FileReadMinimal } from "@/types/files/file";
+
 const PDFViewer = lazy(() => import("@/components/Common/PDFViewer"));
 export interface StateInterface {
   open: boolean;
