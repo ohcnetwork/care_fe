@@ -22,7 +22,6 @@ jobs:
             const prAuthor = context.payload.pull_request.user.login;
 
             if (prAuthor === 'renovate[bot]' || prAuthor === 'getsentry[bot]') {
-              console.log(`Skipping checklist validation for ${prAuthor}`);
               return;
             }
 
