@@ -144,15 +144,21 @@ export default function ValueSetSearchContent({
   });
 
   // Combine recents and search results, but only show each result once
+  const filteredRecents =
+    search.length < 3
+      ? recentsQuery.data || []
+      : recentsQuery.data?.filter(
+          (recent) =>
+            recent.display?.toLowerCase().includes(search.toLowerCase()) ||
+            recent.code?.toLowerCase().includes(search.toLowerCase()),
+        ) || [];
+
   const resultsWithRecents = [
-    ...(recentsQuery.data?.filter((recent) =>
-      recent.display?.toLowerCase().includes(search.toLowerCase()),
-    ) || []),
+    ...filteredRecents,
     ...(searchQuery.data?.results?.filter(
-      (r) => !recentsQuery.data?.find((recent) => recent.code === r.code),
+      (r) => !filteredRecents.find((recent) => recent.code === r.code),
     ) || []),
   ];
-
   // Filter favourites based on search
   const favourites = favouritesQuery.data?.filter((favourite) =>
     favourite.display?.toLowerCase().includes(search.toLowerCase()),
@@ -186,14 +192,16 @@ export default function ValueSetSearchContent({
           </TabsList>
         </Tabs>
       </div>
-      <CommandInput
-        ref={inputRef}
-        placeholder={placeholder}
-        className="outline-hidden border-none ring-0 shadow-none"
-        onValueChange={onSearchChange}
-        value={search}
-        autoFocus
-      />
+      <div className="border-b border-gray-200">
+        <CommandInput
+          ref={inputRef}
+          placeholder={placeholder}
+          className="outline-hidden border-none ring-0 shadow-none"
+          onValueChange={onSearchChange}
+          value={search}
+          autoFocus
+        />
+      </div>
       <CommandList className="h-75 overflow-hidden">
         <CommandEmpty>
           {search.length < 3 ? (
@@ -255,7 +263,7 @@ export default function ValueSetSearchContent({
               "border-gray-200",
             )}
           >
-            <CommandGroup>
+            <CommandGroup className="h-75 overflow-auto">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-normal text-gray-700 p-1">
                   {t("starred")}

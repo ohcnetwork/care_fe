@@ -471,7 +471,7 @@ export default function ReceiveItem({
 
               <div>
                 <Label className="text-sm font-medium text-gray-700">
-                  {t("expiry") + " " + t("date")}:
+                  {t("expiry_date")}:
                 </Label>
                 <div className="text-gray-950 text-normal font-semibold">
                   {delivery.supplied_item?.expiration_date
@@ -479,7 +479,7 @@ export default function ReceiveItem({
                         delivery.supplied_item.expiration_date,
                         "dd-MMM-yyyy",
                       )
-                    : t("n/a")}
+                    : t("na")}
                 </div>
               </div>
 
@@ -488,7 +488,7 @@ export default function ReceiveItem({
                   {t("dispatched_from")}:
                 </Label>
                 <div className="text-gray-950 text-normal font-semibold">
-                  {delivery.origin?.name || delivery.supplier?.name || t("N/A")}
+                  {delivery.origin?.name || delivery.supplier?.name || t("na")}
                 </div>
               </div>
 
@@ -499,7 +499,7 @@ export default function ReceiveItem({
                 <div className="text-gray-950 text-normal font-semibold">
                   {delivery.modified_date
                     ? formatDate(delivery.modified_date, "dd-MMM-yyyy, h:mm a")
-                    : t("n/a")}
+                    : t("na")}
                 </div>
               </div>
 
@@ -517,18 +517,18 @@ export default function ReceiveItem({
                             delivery.supplied_inventory_item.product
                               .product_knowledge.product_type,
                           )
-                        : t("n/a")}
+                        : t("na")}
                   </div>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-700">
-                    {t("lot") + "/" + t("batch") + " " + t("no")}:
+                    {t("lot_batch_no")}:
                   </Label>
                   <div className="text-gray-950 text-normal font-semibold break-all">
                     {delivery.supplied_item?.batch?.lot_number ||
                       delivery.supplied_inventory_item?.product?.batch
                         ?.lot_number ||
-                      t("n/a")}
+                      t("na")}
                   </div>
                 </div>
               </div>
@@ -899,8 +899,7 @@ export default function ReceiveItem({
                   )
                 }
               >
-                {t("view") + " " + t("request")}{" "}
-                <ArrowRightIcon className="size-4" />
+                {t("view_request")} <ArrowRightIcon className="size-4" />
               </Button>
             </div>
           </div>

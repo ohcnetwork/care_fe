@@ -36,6 +36,12 @@ export default {
     TRes: Type<FacilityOrganization>(),
     TBody: Type<FacilityOrganizationEdit>(),
   },
+  delete: {
+    path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/",
+    method: HttpMethod.DELETE,
+    TBody: Type<void>(),
+    TRes: Type<void>(),
+  },
   listUsers: {
     path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",
     method: HttpMethod.GET,

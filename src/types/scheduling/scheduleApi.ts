@@ -2,8 +2,10 @@ import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import {
   Appointment,
+  AppointmentCancelRequest,
   AppointmentCreateRequest,
   AppointmentRead,
+  AppointmentRescheduleRequest,
   AppointmentUpdateRequest,
   AvailabilityHeatmapRequest,
   AvailabilityHeatmapResponse,
@@ -125,7 +127,7 @@ export default {
     list: {
       path: "/api/v1/facility/{facilityId}/appointments/",
       method: HttpMethod.GET,
-      TRes: Type<PaginatedResponse<Appointment>>(),
+      TRes: Type<PaginatedResponse<AppointmentRead>>(),
     },
     retrieve: {
       path: "/api/v1/facility/{facilityId}/appointments/{id}/",
@@ -141,13 +143,13 @@ export default {
     cancel: {
       path: "/api/v1/facility/{facilityId}/appointments/{id}/cancel/",
       method: HttpMethod.POST,
-      TBody: Type<{ reason: "cancelled" | "entered_in_error" }>(),
+      TBody: Type<AppointmentCancelRequest>(),
       TRes: Type<Appointment>(),
     },
     reschedule: {
       path: "/api/v1/facility/{facilityId}/appointments/{id}/reschedule/",
       method: HttpMethod.POST,
-      TBody: Type<{ new_slot: string }>(),
+      TBody: Type<AppointmentRescheduleRequest>(),
       TRes: Type<Appointment>(),
     },
     /**
@@ -157,6 +159,10 @@ export default {
       path: "/api/v1/facility/{facilityId}/appointments/available_users/",
       method: HttpMethod.GET,
       TRes: Type<{ users: UserBase[] }>(),
+    },
+    getPublicScheduleableFacilityUser: {
+      path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
+      TRes: Type<UserBase>(),
     },
     /**
      * Get appointments across facilities

@@ -1,7 +1,7 @@
 import { UserBareMinimum } from "@/components/Users/models";
 
 import { Code } from "@/types/base/code/code";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 
@@ -10,7 +10,7 @@ export const MEDICATION_REQUEST_STATUS_COLORS = {
   completed: "blue",
   cancelled: "destructive",
   draft: "secondary",
-  "on-hold": "yellow",
+  on_hold: "yellow",
   unknown: "secondary",
   ended: "purple",
   entered_in_error: "destructive",
@@ -30,13 +30,18 @@ export const DOSAGE_UNITS_CODES = [
     system: "http://unitsofmeasure.org",
   },
   {
+    code: "g",
+    display: "gram",
+    system: "http://unitsofmeasure.org",
+  },
+  {
     code: "mg",
     display: "milligram",
     system: "http://unitsofmeasure.org",
   },
   {
-    code: "g",
-    display: "gram",
+    code: "ug",
+    display: "microgram",
     system: "http://unitsofmeasure.org",
   },
   {
@@ -50,8 +55,13 @@ export const DOSAGE_UNITS_CODES = [
     system: "http://unitsofmeasure.org",
   },
   {
-    code: "ug",
-    display: "microgram",
+    code: "[iU]",
+    display: "international unit",
+    system: "http://unitsofmeasure.org",
+  },
+  {
+    code: "{count}",
+    display: "count",
     system: "http://unitsofmeasure.org",
   },
 ] as const;
@@ -70,7 +80,7 @@ export const UCUM_TIME_UNITS = [
 
 export const ACTIVE_MEDICATION_STATUSES = [
   "active",
-  "on-hold", // Todo: check why it was on-hold instead of on_hold
+  "on_hold",
   "draft",
   "unknown",
 ] as const;
@@ -244,7 +254,7 @@ export interface MedicationRequestRead {
 }
 
 export interface MedicationRequestSummary {
-  encounter: Encounter;
+  encounter: EncounterRead;
   priority: MedicationPriority;
   count: number;
 }

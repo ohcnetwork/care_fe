@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useState } from "react";
+import { History } from "lucide-react";
+import { Link, usePath } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,8 @@ import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Symptom } from "@/types/emr/symptom/symptom";
 import symptomApi from "@/types/emr/symptom/symptomApi";
 
@@ -38,32 +41,39 @@ export function SymptomsList({
 }: SymptomsListProps) {
   const { t } = useTranslation();
 
-  const [showEnteredInError, setShowEnteredInError] = useState(false);
-  const { data: symptoms, isLoading } = useQuery({
-    queryKey: ["symptoms", patientId, encounterId],
-    queryFn: query(symptomApi.listSymptoms, {
-      pathParams: { patientId },
-      queryParams: {
-        encounter: encounterId,
-        ordering: "-created_date",
+  const LIMIT = showTimeline ? 30 : 14;
+  const { facilityId } = useCurrentFacilitySilently();
+  const sourceUrl = usePath();
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["infinite-symptoms", patientId, encounterId],
+      queryFn: async ({ pageParam = 0, signal }) => {
+        const response = await query(symptomApi.listSymptoms, {
+          pathParams: { patientId },
+          queryParams: {
+            encounter: encounterId,
+            ordering: "-created_date",
+            limit: LIMIT,
+            offset: String(pageParam),
+            exclude_verification_status: "entered_in_error",
+          },
+        })({ signal });
+        return response as PaginatedResponse<Symptom>;
       },
-    }),
-  });
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) => {
+        const currentOffset = allPages.length * LIMIT;
+        return currentOffset < lastPage.count ? currentOffset : null;
+      },
+    });
 
   if (isLoading) {
     return <TableSkeleton count={5} />;
   }
 
-  const filteredSymptoms = symptoms?.results?.filter(
-    (symptom) =>
-      showEnteredInError || symptom.verification_status !== "entered_in_error",
-  );
+  const symptoms = data?.pages.flatMap((page) => page.results) ?? [];
 
-  const hasEnteredInErrorRecords = symptoms?.results?.some(
-    (symptom) => symptom.verification_status === "entered_in_error",
-  );
-
-  if (!filteredSymptoms?.length) {
+  if (!symptoms?.length) {
     if (showTimeline) {
       return (
         <EmptyState
@@ -76,7 +86,7 @@ export function SymptomsList({
   }
 
   if (showTimeline) {
-    const groupedByYear = filteredSymptoms.reduce((acc, symptom) => {
+    const groupedByYear = symptoms.reduce((acc, symptom) => {
       const dateStr = format(symptom.created_date, "yyyy-MM-dd");
       const year = format(symptom.created_date, "yyyy");
       acc[year] ??= {};
@@ -116,6 +126,18 @@ export function SymptomsList({
             </div>
           );
         })}
+        {hasNextPage && (
+          <div className="flex justify-center">
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+            >
+              {t("load_more")}
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
@@ -126,34 +148,27 @@ export function SymptomsList({
       readOnly={readOnly}
       className={className}
       editLink={!readOnly ? "questionnaire/symptom" : undefined}
+      actionButton={
+        <Button variant="link" size="xs" asChild>
+          <Link
+            href={
+              facilityId
+                ? `/facility/${facilityId}/patient/${patientId}/history/symptoms?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
+                : `/patient/${patientId}/history/symptoms?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
+            }
+          >
+            <History className="size-4" />
+          </Link>
+        </Button>
+      }
     >
-      <SymptomTable
-        symptoms={[
-          ...filteredSymptoms.filter(
-            (symptom) => symptom.verification_status !== "entered_in_error",
-          ),
-          ...(showEnteredInError
-            ? filteredSymptoms.filter(
-                (symptom) => symptom.verification_status === "entered_in_error",
-              )
-            : []),
-        ]}
-      />
-
-      {hasEnteredInErrorRecords && !showEnteredInError && (
-        <>
-          <div className="border-b border-dashed border-gray-200 my-2" />
-          <div className="flex justify-center ">
-            <Button
-              variant="ghost"
-              size="xs"
-              onClick={() => setShowEnteredInError(true)}
-              className="text-xs underline text-gray-950"
-            >
-              {t("view_all")}
-            </Button>
-          </div>
-        </>
+      <SymptomTable symptoms={symptoms} />
+      {hasNextPage && (
+        <div className="flex justify-center">
+          <Button variant="ghost" size="xs" onClick={() => fetchNextPage()}>
+            {t("load_more")}
+          </Button>
+        </div>
       )}
     </EncounterAccordionLayout>
   );
