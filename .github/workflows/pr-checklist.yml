@@ -21,6 +21,10 @@ jobs:
           script: |
             const prAuthor = context.payload.pull_request.user.login;
 
+            if (context.payload.pull_request.user.type === 'Bot') {
+              return;
+            }
+
             const response = await fetch(`https://raw.githubusercontent.com/ohcnetwork/leaderboard-data/main/contributors/${prAuthor}.md`);
             if (response.ok) {
               const userData = await response.text();
