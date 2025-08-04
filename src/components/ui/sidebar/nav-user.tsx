@@ -40,7 +40,7 @@ export function FacilityNavUser({
   const { isMobile, open } = useSidebar();
   const { signOut } = useAuthContext();
   const careApps = useCareApps();
-  const { newVersion, updateApp } = useAppUpdates();
+  const { newVersion, updateApp } = useAppUpdates(false, undefined, true);
   const pluginNavItems = careApps
     .filter((c) => !!c.userNavItems)
     .flatMap((c) => c.userNavItems) as NavigationLink[];
@@ -102,7 +102,7 @@ export function FacilityNavUser({
                   onClick={updateApp}
                 >
                   <RefreshCw />
-                  {t("update")}
+                  {t("update_available")}
                 </DropdownMenuItem>
               </>
             )}
