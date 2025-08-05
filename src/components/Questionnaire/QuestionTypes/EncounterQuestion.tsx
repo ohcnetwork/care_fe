@@ -2,17 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
@@ -26,6 +19,8 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+
+import DischargeConfirmationDialog from "@/components/Patient/DischargeConfirmationDialog";
 
 import query from "@/Utils/request/query";
 import {
@@ -290,44 +285,11 @@ export function EncounterQuestion({
             <div className="space-y-1">
               <h3 className="text-sm font-medium">{t("discharge_patient")}</h3>
             </div>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="default" size="sm" disabled={disabled}>
-                  {t("mark_for_discharge")}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="w-full sm:max-w-xl">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>{t("confirm_discharge")}</AlertDialogTitle>
-                  <AlertDialogDescription className="space-y-2 text-left">
-                    <p>{t("discharge_confirmation_message")}</p>
-                    <ul className="list-disc list-inside space-y-1">
-                      <li>{t("discharge_confirmation_status_change")}</li>
-                      <li>{t("discharge_confirmation_summary_required")}</li>
-                      <li>{t("discharge_confirmation_date")}</li>
-                    </ul>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                  <AlertDialogCancel className="mt-0">
-                    {t("cancel")}
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => {
-                      handleUpdateEncounter({
-                        status: "discharged",
-                        period: {
-                          ...encounter.period,
-                          end: new Date().toISOString(),
-                        },
-                      });
-                    }}
-                  >
-                    {t("proceed")}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <DischargeConfirmationDialog
+              encounter={encounter}
+              onConfirm={handleUpdateEncounter}
+              disabled={disabled}
+            />
           </div>
         </div>
       )}
