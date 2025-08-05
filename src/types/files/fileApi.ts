@@ -31,9 +31,10 @@ export default {
     TRes: Type<FileRead>(),
   },
   markUploadCompleted: {
-    path: "/api/v1/files/{id}/mark_upload_completed/",
+    path: "/api/v1/files/{fileId}/mark_upload_completed/",
     method: HttpMethod.POST,
     TRes: Type<FileReadMinimal>(),
+    TBody: Type<void>(),
   },
   archive: {
     path: "/api/v1/files/{id}/archive/",

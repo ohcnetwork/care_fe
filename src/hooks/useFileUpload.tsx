@@ -200,13 +200,13 @@ export default function useFileUpload(
   };
   const { mutateAsync: markUploadComplete, error: markUploadCompleteError } =
     useMutation({
-      mutationFn: (body: { data: FileRead; associating_id: string }) =>
+      mutationFn: (fileId: string) =>
         mutate(fileApi.markUploadCompleted, {
-          pathParams: { id: body.data.id },
-        })(body),
-      onSuccess: (_, { data, associating_id }) => {
+          pathParams: { fileId },
+        })(undefined),
+      onSuccess: (data, fileId) => {
         queryClient.invalidateQueries({
-          queryKey: ["files", fileType, associating_id],
+          queryKey: ["files", fileType, fileId],
         });
         toast.success(t("file_uploaded"));
         setError(null);
@@ -214,11 +214,7 @@ export default function useFileUpload(
       },
     });
 
-  const uploadfile = async (
-    data: FileRead,
-    file: File,
-    associating_id: string,
-  ) => {
+  const uploadfile = async (data: FileRead, file: File) => {
     const url = data.signed_url;
     const internal_name = data.internal_name;
     const newFile = new File([file], `${internal_name}`);
@@ -232,10 +228,7 @@ export default function useFileUpload(
         async (xhr: XMLHttpRequest) => {
           if (xhr.status >= 200 && xhr.status < 300) {
             setProgress(null);
-            await markUploadComplete({
-              data,
-              associating_id: associating_id,
-            });
+            await markUploadComplete(data.id);
             if (markUploadCompleteError) {
               toast.error(t("file_error__mark_complete_failed"));
               reject();
@@ -261,24 +254,7 @@ export default function useFileUpload(
   };
 
   const { mutateAsync: createUpload } = useMutation({
-    mutationFn: (body: {
-      original_name: string;
-      file_type: FileType;
-      name: string;
-      associating_id: string;
-      file_category: FileCategory;
-      mime_type: string;
-    }) =>
-      mutate(fileApi.create, {
-        body: {
-          original_name: body.original_name,
-          file_type: body.file_type,
-          name: body.name,
-          associating_id: body.associating_id,
-          file_category: body.file_category,
-          mime_type: body.mime_type,
-        },
-      })(body),
+    mutationFn: mutate(fileApi.create),
   });
 
   const handleUpload = async (
@@ -338,7 +314,7 @@ export default function useFileUpload(
         });
 
         if (data) {
-          await uploadfile(data, file, associating_id);
+          await uploadfile(data, file);
         }
       } catch {
         errors.push(file);
