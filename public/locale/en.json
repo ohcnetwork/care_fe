@@ -2435,7 +2435,7 @@
   "location_order_updated": "Location order updated successfully",
   "location_removed_successfully": "Location removed successfully",
   "location_requirements": "Locations",
-  "location_requirements_description": "Location where the the activity is being performed.",
+  "location_requirements_description": "Location where the activity is being performed.",
   "location_status": "Location Status",
   "location_status__active": "Active",
   "location_status__inactive": "Inactive",
