@@ -12,11 +12,11 @@ import {
   PlusCircledIcon,
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { differenceInYears, format, isSameDay } from "date-fns";
+import { addDays, differenceInYears, format, isBefore } from "date-fns";
 import { BanIcon, Loader2, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
@@ -472,7 +472,13 @@ const AppointmentActions = ({
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
   const currentStatus = appointment.status;
-  const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
+
+  // Allow check-in/start consultation as long as the appointment is before 24 hours ahead of slot's start time
+  const canCheckIn = isBefore(
+    appointment.token_slot.start_datetime,
+    addDays(new Date(), 1),
+  );
+
   const [note, setNote] = useState(appointment.note);
 
   const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
@@ -539,9 +545,21 @@ const AppointmentActions = ({
                 <Label>{t("note")}</Label>
                 <Textarea
                   value={oldNote}
-                  placeholder={t("reason_for_reschedule_placeholder")}
                   onChange={(e) => setRescheduleReason(e.target.value)}
                 />
+                <AlertDialogDescription>
+                  <Alert variant="destructive">
+                    <AlertTitle>{t("warning")}</AlertTitle>
+                    <AlertDescription>
+                      <Trans
+                        i18nKey="reschedule_appointment_warning"
+                        components={{
+                          strong: <strong className="font-bold" />,
+                        }}
+                      />
+                    </AlertDescription>
+                  </Alert>
+                </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel
@@ -554,7 +572,7 @@ const AppointmentActions = ({
                     setIsRescheduleReasonOpen(false);
                     setIsRescheduleOpen(true);
                   }}
-                  disabled={!oldNote}
+                  disabled={oldNote === appointment.note || !oldNote.trim()}
                 >
                   {t("continue")}
                 </AlertDialogAction>
@@ -658,7 +676,7 @@ const AppointmentActions = ({
       {currentStatus === "booked" && (
         <>
           <Button
-            disabled={!isToday}
+            disabled={!canCheckIn}
             variant="outline_primary"
             onClick={() =>
               updateAppointment({
@@ -676,7 +694,7 @@ const AppointmentActions = ({
 
       {["booked", "checked_in"].includes(currentStatus) && (
         <Button
-          disabled={!isToday}
+          disabled={!canCheckIn}
           variant={
             currentStatus === "checked_in" ? "outline_primary" : "outline"
           }
@@ -744,6 +762,7 @@ const AppointmentActions = ({
                   })
                 }
                 className={cn(buttonVariants({ variant: "destructive" }))}
+                disabled={!note.trim()}
               >
                 {isUpdating ? (
                   <Loader2 className="size-4 animate-spin mr-2" />
@@ -791,6 +810,7 @@ const AppointmentActions = ({
                   })
                 }
                 className={cn(buttonVariants({ variant: "destructive" }))}
+                disabled={!note.trim()}
               >
                 {isCancelling ? (
                   <Loader2 className="size-4 animate-spin mr-2" />
