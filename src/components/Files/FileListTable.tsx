@@ -28,10 +28,8 @@ import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
 
 import useFileManager from "@/hooks/useFileManager";
 
-import { FILE_EXTENSIONS } from "@/common/constants";
-
 import { formatName } from "@/Utils/utils";
-import { FileReadMinimal } from "@/types/files/file";
+import { FILE_EXTENSIONS, FileReadMinimal } from "@/types/files/file";
 
 const icons: Record<keyof typeof FILE_EXTENSIONS | "UNKNOWN", IconName> = {
   AUDIO: "l-volume",

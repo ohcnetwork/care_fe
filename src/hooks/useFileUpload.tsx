@@ -14,11 +14,11 @@ import { toast } from "sonner";
 import AudioCaptureDialog from "@/components/Files/AudioCaptureDialog";
 import CameraCaptureDialog from "@/components/Files/CameraCaptureDialog";
 
-import { DEFAULT_ALLOWED_EXTENSIONS } from "@/common/constants";
-
 import mutate from "@/Utils/request/mutate";
 import uploadFile from "@/Utils/request/uploadFile";
 import {
+  DEFAULT_ALLOWED_EXTENSIONS,
+  FILE_EXTENSIONS,
   FileCategory,
   FileRead,
   FileReadMinimal,
@@ -70,18 +70,6 @@ export type FileUploadReturn = {
   uploading: boolean;
   previewing?: boolean;
 };
-
-// Array of image extensions
-const ExtImage: string[] = [
-  "jpeg",
-  "jpg",
-  "png",
-  "gif",
-  "svg",
-  "bmp",
-  "webp",
-  "jfif",
-];
 
 export default function useFileUpload(
   options: FileUploadOptions,
@@ -143,8 +131,8 @@ export default function useFileUpload(
     setFiles((prev) => [...prev, ...selectedFiles]);
     if (options.compress) {
       selectedFiles.forEach((file) => {
-        const ext: string = file.name.split(".")[1];
-        if (ExtImage.includes(ext)) {
+        const ext = file.name.split(".").pop()?.toLowerCase();
+        if (ext && (FILE_EXTENSIONS.IMAGE as readonly string[]).includes(ext)) {
           const options = {
             initialQuality: 0.6,
             alwaysKeepResolution: true,

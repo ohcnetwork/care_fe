@@ -21,16 +21,16 @@ import { Textarea } from "@/components/ui/textarea";
 import FilePreviewDialog from "@/components/Common/FilePreviewDialog";
 import { StateInterface } from "@/components/Common/FilePreviewDialog";
 
-import {
-  FILE_EXTENSIONS,
-  PREVIEWABLE_FILE_EXTENSIONS,
-} from "@/common/constants";
-
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { formatDateTime } from "@/Utils/utils";
-import { FileReadMinimal, FileUpdate } from "@/types/files/file";
+import {
+  FILE_EXTENSIONS,
+  FileReadMinimal,
+  FileUpdate,
+  PREVIEWABLE_FILE_EXTENSIONS,
+} from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 
 export interface FileManagerOptions {

@@ -43,8 +43,6 @@ import FileUploadDialog from "@/components/Files/FileUploadDialog";
 
 import useFileUpload from "@/hooks/useFileUpload";
 
-import { BACKEND_ALLOWED_EXTENSIONS } from "@/common/constants";
-
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -68,7 +66,10 @@ import {
 } from "@/types/emr/observationDefinition/observationDefinition";
 import { SpecimenRead, SpecimenStatus } from "@/types/emr/specimen/specimen";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
-import { FileReadMinimal } from "@/types/files/file";
+import {
+  BACKEND_ALLOWED_EXTENSIONS,
+  FileReadMinimal,
+} from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 
 interface DiagnosticReportFormProps {

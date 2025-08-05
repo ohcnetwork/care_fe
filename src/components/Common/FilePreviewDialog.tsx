@@ -23,9 +23,11 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import CircularProgress from "@/components/Common/CircularProgress";
 
-import { FILE_EXTENSIONS, getVideoMimeType } from "@/common/constants";
-
-import { FileReadMinimal } from "@/types/files/file";
+import {
+  FILE_EXTENSIONS,
+  FileReadMinimal,
+  getVideoMimeType,
+} from "@/types/files/file";
 
 const PDFViewer = lazy(() => import("@/components/Common/PDFViewer"));
 export interface StateInterface {

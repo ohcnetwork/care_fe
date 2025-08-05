@@ -16,9 +16,12 @@ import { Label } from "@/components/ui/label";
 
 import useFileUpload from "@/hooks/useFileUpload";
 
-import { BACKEND_ALLOWED_EXTENSIONS } from "@/common/constants";
-
-import { FileCategory, FileType, FileUploadQuestion } from "@/types/files/file";
+import {
+  BACKEND_ALLOWED_EXTENSIONS,
+  FileCategory,
+  FileType,
+  FileUploadQuestion,
+} from "@/types/files/file";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,

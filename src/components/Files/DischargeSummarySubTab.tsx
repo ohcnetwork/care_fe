@@ -39,16 +39,15 @@ import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
 import useFilters from "@/hooks/useFilters";
 
-import {
-  BACKEND_ALLOWED_EXTENSIONS,
-  FILE_EXTENSIONS,
-} from "@/common/constants";
-
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
+import {
+  BACKEND_ALLOWED_EXTENSIONS,
+  FILE_EXTENSIONS,
+} from "@/types/files/file";
 import { FileReadMinimal, FileType } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 

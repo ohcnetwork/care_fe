@@ -39,17 +39,18 @@ import useFileUpload from "@/hooks/useFileUpload";
 import useFilters from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
-import {
-  BACKEND_ALLOWED_EXTENSIONS,
-  FILE_EXTENSIONS,
-} from "@/common/constants";
 
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
-import { FileReadMinimal, FileType } from "@/types/files/file";
+import {
+  BACKEND_ALLOWED_EXTENSIONS,
+  FILE_EXTENSIONS,
+  FileReadMinimal,
+  FileType,
+} from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 
 interface FilesTabProps {
