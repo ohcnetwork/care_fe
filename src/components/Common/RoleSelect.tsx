@@ -47,8 +47,6 @@ export function RoleSelect({
         const selectedRole = roles?.results.find((r) => r.id === selectedId);
         if (selectedRole) {
           onChange(selectedRole);
-        } else {
-          onChange(undefined as any);
         }
       }}
       onSearch={setSearchTerm}
