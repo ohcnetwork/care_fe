@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRightSquare, BarChart3, SlidersHorizontal } from "lucide-react";
 import { Check } from "lucide-react";
 import { navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -56,6 +57,8 @@ export default function ToReceiveSupplyRequestTable({
     limit: 14,
     disableCache: true,
   });
+  const [openStatusPopover, setOpenStatusPopover] = useState(false);
+  const [openPriorityPopover, setOpenPriorityPopover] = useState(false);
 
   const effectiveStatus = qParams.status || SupplyRequestStatus.active;
 
@@ -106,7 +109,7 @@ export default function ToReceiveSupplyRequestTable({
           placeholder={t("search_by_item")}
           className="placeholder:font-semibold"
         />
-        <Popover>
+        <Popover open={openStatusPopover} onOpenChange={setOpenStatusPopover}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
@@ -136,14 +139,15 @@ export default function ToReceiveSupplyRequestTable({
                   <CommandItem
                     key={status}
                     value={status}
-                    onSelect={() =>
+                    onSelect={() => {
                       updateQuery({
                         status:
                           effectiveStatus === status
                             ? SupplyRequestStatus.active
                             : status,
-                      })
-                    }
+                      });
+                      setOpenStatusPopover(false);
+                    }}
                   >
                     <Check
                       className={cn(
@@ -161,7 +165,10 @@ export default function ToReceiveSupplyRequestTable({
           </PopoverContent>
         </Popover>
 
-        <Popover>
+        <Popover
+          open={openPriorityPopover}
+          onOpenChange={setOpenPriorityPopover}
+        >
           <PopoverTrigger asChild>
             <Button
               variant="outline"
@@ -191,12 +198,13 @@ export default function ToReceiveSupplyRequestTable({
                   <CommandItem
                     key={priority}
                     value={priority}
-                    onSelect={() =>
+                    onSelect={() => {
                       updateQuery({
                         priority:
                           qParams.priority === priority ? undefined : priority,
-                      })
-                    }
+                      });
+                      setOpenPriorityPopover(false);
+                    }}
                   >
                     <Check
                       className={cn(
