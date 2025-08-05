@@ -20,9 +20,6 @@ module.exports = {
         sans: ["Figtree", "sans-serif"],
       },
       colors: {
-        green: "colors.emerald",
-        yellow: "colors.amber",
-        purple: "colors.violet",
         primary: {
           100: "#def7ec",
           200: "#bcf0da",
@@ -36,10 +33,6 @@ module.exports = {
           DEFAULT: "#0d9f6e",
         },
         secondary: secondary,
-        danger: "colors.red",
-        warning: "colors.amber",
-        alert: "colors.violet",
-        gray: "colors.gray",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
