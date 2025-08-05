@@ -227,61 +227,64 @@ export default function ValueSetSearchContent({
           autoFocus
         />
       </div>
-      <CommandList className="h-75 overflow-hidden">
-        <CommandEmpty>
-          {searchQuery.isFetching ? (
-            <div className="flex justify-center items-center py-6 text-gray-500">
-              <Loader2 className="h-5 w-5 animate-spin mr-2" />
-              {t("searching")}
-            </div>
-          ) : search.length < 3 ? (
-            <p className="p-4 text-sm text-gray-500">
-              {t("min_char_length_error", { min_length: 3 })}
-            </p>
-          ) : (
-            <p className="p-4 text-sm text-gray-500">{t("no_results_found")}</p>
-          )}
-        </CommandEmpty>
-        <div className="flex">
-          <div
-            className={cn(
-              activeTab === 0 ? "block" : "hidden",
-              "md:block flex-1 overflow-auto h-[300px]",
+      {searchQuery.isFetching ? (
+        <div className="flex justify-center items-center py-6 text-gray-500">
+          <Loader2 className="h-5 w-5 animate-spin mr-2" />
+          {t("searching")}
+        </div>
+      ) : (
+        <CommandList className="h-75 overflow-hidden">
+          <CommandEmpty>
+            {search.length < 3 ? (
+              <p className="p-4 text-sm text-gray-500">
+                {t("min_char_length_error", { min_length: 3 })}
+              </p>
+            ) : (
+              <p className="p-4 text-sm text-gray-500">
+                {t("no_results_found")}
+              </p>
             )}
-          >
-            <CommandGroup>
-              {resultsWithRecents.map((option) => (
-                <Item
-                  key={option.code}
-                  option={option}
-                  showCode={showCode}
-                  onSelect={() => {
-                    onSelect({
-                      code: option.code,
-                      display: option.display || "",
-                      system: option.system || "",
-                    });
-                    addRecentMutation.mutate(option);
-                  }}
-                  onFavourite={() => {
-                    const isFavorited = favouritesQuery.data?.find(
-                      (favourite) => favourite.code === option.code,
-                    );
+          </CommandEmpty>
+          <div className="flex">
+            <div
+              className={cn(
+                activeTab === 0 ? "block" : "hidden",
+                "md:block flex-1 overflow-auto h-[300px]",
+              )}
+            >
+              <CommandGroup>
+                {resultsWithRecents.map((option) => (
+                  <Item
+                    key={option.code}
+                    option={option}
+                    showCode={showCode}
+                    onSelect={() => {
+                      onSelect({
+                        code: option.code,
+                        display: option.display || "",
+                        system: option.system || "",
+                      });
+                      addRecentMutation.mutate(option);
+                    }}
+                    onFavourite={() => {
+                      const isFavorited = favouritesQuery.data?.find(
+                        (favourite) => favourite.code === option.code,
+                      );
                     if (isFavorited) {
-                      setItemToRemove(option);
+                        setItemToRemove(option);
                     } else {
-                      addFavouriteMutation.mutate(option);
-                    }
+                        addFavouriteMutation.mutate(option);
+                      }
                   }}
-                  isFavourite={
-                    !!favouritesQuery.data?.find(
-                      (favourite) => favourite.code === option.code,
-                    )
-                  }
-                />
-              ))}
-            </CommandGroup>
-          </div>
+                    isFavourite={
+                      !!favouritesQuery.data?.find(
+                        (favourite) => favourite.code === option.code,
+                      )
+                    }
+                  />
+                ))}
+              </CommandGroup>
+            </div>
 
           <div
             className={cn(
