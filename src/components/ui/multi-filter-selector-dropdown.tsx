@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import {
+  format,
   formatDate,
   isBefore,
   isSameDay,
+  isValid,
   subDays,
   subMonths,
   subWeeks,
@@ -20,7 +22,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,6 +48,7 @@ import {
 } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
+import { Calendar } from "./calendar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
 // Shared utilities and hooks
@@ -103,7 +105,7 @@ function FilterOptionsList({
   }, [focusItemRef]);
 
   return (
-    <div>
+    <div className="flex flex-col gap-1">
       {options.map((option, index) => (
         <div
           key={option.value}
@@ -220,16 +222,18 @@ interface FilterConfig {
   resource?: TagResource;
   icon?: React.ReactNode;
   renderSelected?: (
-    selected: string[] | TagConfig[] | Date[],
+    selected: string[] | TagConfig[] | FilterDateRange,
   ) => React.ReactNode;
-  getOperations?: (selected: string[] | TagConfig[] | Date[]) => string[];
+  getOperations?: (
+    selected: string[] | TagConfig[] | FilterDateRange,
+  ) => string[];
 }
 
 interface MultiFilterSelectorDropdownProps {
   selectedFilters: Record<string, FilterState>;
   onFilterChange: (
     filterKey: string,
-    values: string[] | TagConfig[] | Date[],
+    values: string[] | TagConfig[] | FilterDateRange,
   ) => void;
   onOperationChange: (filterKey: string, operation: string) => void;
   onClearAll: () => void;
@@ -247,7 +251,12 @@ export interface OperationConfig {
 export interface FilterState {
   filter: FilterConfig;
   operation: OperationConfig;
-  selected: string[] | TagConfig[] | Date[];
+  selected: string[] | TagConfig[] | FilterDateRange;
+}
+
+interface FilterDateRange {
+  from: Date;
+  to: Date;
 }
 
 export function useFilterState(filters: FilterConfig[]) {
@@ -269,14 +278,16 @@ export function useFilterState(filters: FilterConfig[]) {
 
   const handleFilterChange = (
     filterKey: string,
-    values: string[] | TagConfig[] | Date[],
+    values: string[] | TagConfig[] | FilterDateRange,
   ) => {
     const filter = selectedFilters[filterKey]?.filter;
     const operations = filter?.getOperations?.(values) ?? [];
+    const currentSelectedOperation =
+      selectedFilters[filterKey]?.operation.selectedOperation;
     const selectedOperation =
-      selectedFilters[filterKey]?.operation.selectedOperation ??
-      operations?.[0] ??
-      null;
+      currentSelectedOperation && operations.includes(currentSelectedOperation)
+        ? currentSelectedOperation
+        : operations?.[0];
     if (filter) {
       setSelectedFilters((prev) => ({
         ...prev,
@@ -339,29 +350,103 @@ function useNavigationShortcuts(
 ) {
   const [focusItemIndex, setFocusItemIndex] = useState<number | null>(null);
 
-  useKeyboardShortcut(["ArrowUp"], () => {
-    if (focusItemIndex === null) {
-      setFocusItemIndex(optionsLength - 1);
-    } else {
-      const newIndex = (focusItemIndex - 1 + optionsLength) % optionsLength;
-      setFocusItemIndex(newIndex);
-    }
-  });
+  useKeyboardShortcut(
+    ["ArrowUp"],
+    () => {
+      if (focusItemIndex === null) {
+        setFocusItemIndex(optionsLength - 1);
+      } else {
+        const newIndex = (focusItemIndex - 1 + optionsLength) % optionsLength;
+        setFocusItemIndex(newIndex);
+      }
+    },
+    {
+      overrideSystem: true,
+    },
+  );
 
-  useKeyboardShortcut(["ArrowDown"], () => {
-    if (focusItemIndex === null) {
-      setFocusItemIndex(0);
-    } else {
-      const newIndex = (focusItemIndex + 1) % optionsLength;
-      setFocusItemIndex(newIndex);
-    }
-  });
+  useKeyboardShortcut(
+    ["ArrowDown"],
+    () => {
+      if (focusItemIndex === null) {
+        setFocusItemIndex(0);
+      } else {
+        const newIndex = (focusItemIndex + 1) % optionsLength;
+        setFocusItemIndex(newIndex);
+      }
+    },
+    {
+      overrideSystem: true,
+    },
+  );
 
-  useKeyboardShortcut(["ArrowLeft"], () => {
-    handleBack?.();
-  });
+  useKeyboardShortcut(
+    ["ArrowLeft"],
+    () => {
+      handleBack?.();
+    },
+    {
+      overrideSystem: true,
+    },
+  );
 
   return { focusItemIndex, setFocusItemIndex };
+}
+
+function RenderNavigationHelper({
+  isActiveFilter,
+}: {
+  isActiveFilter?: boolean;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <Separator orientation="horizontal" className="bg-gray-200 h-px" />
+      <div className="flex justify-between">
+        <div className="flex gap-1 my-2 mx-2">
+          {isActiveFilter && (
+            <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
+              <CareIcon icon="l-arrow-left" className="h-4 w-4" />
+            </div>
+          )}
+          <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
+            <CareIcon icon="l-arrow-down" className="h-4 w-4" />
+          </div>
+          <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
+            <CareIcon icon="l-arrow-up" className="h-4 w-4" />
+          </div>
+          {!isActiveFilter && (
+            <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
+              <CareIcon icon="l-arrow-right" className="h-4 w-4" />
+            </div>
+          )}
+          <span className="text-xs text-gray-500 self-center">
+            {t("navigate")}
+          </span>
+        </div>
+        {isActiveFilter ? (
+          <div className="flex gap-1 my-2 mx-2">
+            <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
+              <CareIcon icon="l-space-key" className="h-4 w-4" />
+            </div>
+            <span className="text-xs text-gray-500 self-center">
+              {t("select")}
+            </span>
+          </div>
+        ) : (
+          <div className="flex gap-1 my-2 mx-2">
+            <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
+              <CareIcon icon="l-enter" className="h-4 w-4" />
+            </div>
+            <span className="text-xs text-gray-500 self-center">
+              {t("open")}
+            </span>
+          </div>
+        )}
+      </div>
+    </>
+  );
 }
 
 export function MultiFilterSelectorDropdown({
@@ -377,10 +462,14 @@ export function MultiFilterSelectorDropdown({
   const [open, setOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
-  const { t } = useTranslation();
 
   const totalSelectedCount = Object.values(selectedFilters).reduce(
-    (sum, filterState) => sum + filterState.selected.length,
+    (sum, filterState) => {
+      if (Array.isArray(filterState.selected)) {
+        return sum + filterState.selected.length;
+      }
+      return sum + 1;
+    },
     0,
   );
 
@@ -411,14 +500,20 @@ export function MultiFilterSelectorDropdown({
     }
   }, [open]);
 
-  useKeyboardShortcut(["ArrowLeft"], () => {
-    if (!activeFilter) {
-      setOpen(false);
-    }
-  });
+  useKeyboardShortcut(
+    ["ArrowLeft"],
+    () => {
+      if (!activeFilter) {
+        setOpen(false);
+      }
+    },
+    {
+      overrideSystem: true,
+    },
+  );
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 px-1">
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <Button
@@ -449,54 +544,18 @@ export function MultiFilterSelectorDropdown({
               setActiveFilter={setActiveFilter}
             />
           )}
-          <Separator orientation="horizontal" className="bg-gray-200 h-px" />
-          <div className="flex justify-between">
-            <div className="flex gap-1 my-2 mx-2">
-              {activeFilter && (
-                <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                  <CareIcon icon="l-arrow-left" className="h-4 w-4" />
-                </div>
-              )}
-              <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                <CareIcon icon="l-arrow-down" className="h-4 w-4" />
-              </div>
-              <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                <CareIcon icon="l-arrow-up" className="h-4 w-4" />
-              </div>
-              {!activeFilter && (
-                <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                  <CareIcon icon="l-arrow-right" className="h-4 w-4" />
-                </div>
-              )}
-              <span className="text-xs text-gray-500 self-center">
-                {t("navigate")}
-              </span>
-            </div>
-            {activeFilter ? (
-              <div className="flex gap-1 my-2 mx-2">
-                <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                  <CareIcon icon="l-space-key" className="h-4 w-4" />
-                </div>
-                <span className="text-xs text-gray-500 self-center">
-                  {t("select")}
-                </span>
-              </div>
-            ) : (
-              <div className="flex gap-1 my-2 mx-2">
-                <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                  <CareIcon icon="l-enter" className="h-4 w-4" />
-                </div>
-                <span className="text-xs text-gray-500 self-center">
-                  {t("open")}
-                </span>
-              </div>
-            )}
-          </div>
         </DropdownMenuContent>
       </DropdownMenu>
       {Object.entries(selectedFilters).map(([key, _]) => {
         const filterState = selectedFilters[key];
-        if (filterState.selected.length === 0 || !filterState) {
+        if (
+          (Array.isArray(filterState.selected) &&
+            filterState.selected.length === 0) ||
+          (!Array.isArray(filterState.selected) &&
+            !("from" in filterState.selected) &&
+            !("to" in filterState.selected)) ||
+          !filterState
+        ) {
           return <></>;
         }
         return (
@@ -531,16 +590,17 @@ function RenderDateFilter({
   handleBack,
 }: {
   filter: FilterConfig;
-  selected: Date[];
+  selected: FilterDateRange;
   onFilterChange: (
     filterKey: string,
-    values: Date[] | TagConfig[] | string[],
+    values: FilterDateRange | TagConfig[] | string[],
   ) => void;
   handleBack?: () => void;
 }) {
   const { t } = useTranslation();
-  const [dateFrom, setDateFrom] = useState<Date | undefined>(selected[0]);
-  const [dateTo, setDateTo] = useState<Date | undefined>(selected[1]);
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(selected.from);
+  const [dateTo, setDateTo] = useState<Date | undefined>(selected.to);
+  const [isCustomDateRange, setIsCustomDateRange] = useState(false);
 
   const dateRangeOptions: DateRangeOption[] = [
     {
@@ -591,70 +651,193 @@ function RenderDateFilter({
     const { from, to } = option.getDateRange();
     setDateFrom(from);
     setDateTo(to);
-    onFilterChange(filter.key, [from, to]);
+    onFilterChange(filter.key, { from, to });
   };
 
-  const handleDateFromChange = (date: Date | undefined) => {
-    setDateFrom(date);
-    if (date && dateTo) {
-      onFilterChange(filter.key, [date, dateTo]);
-    } else if (date) {
-      onFilterChange(filter.key, [date]);
-    }
+  const handleDateChange = (date: { from?: Date; to?: Date }) => {
+    setDateFrom(date?.from);
+    setDateTo(date?.to);
   };
 
-  const handleDateToChange = (date: Date | undefined) => {
-    setDateTo(date);
-    if (dateFrom && date) {
-      onFilterChange(filter.key, [dateFrom, date]);
-    } else if (date) {
-      onFilterChange(filter.key, [date]);
-    }
+  const isSameRange = (option: DateRangeOption) => {
+    const { from, to } = option.getDateRange();
+    return (
+      dateFrom && isSameDay(dateFrom, from) && dateTo && isSameDay(dateTo, to)
+    );
   };
+
+  const isCustomDateRangeSelected =
+    selected.from &&
+    selected.to &&
+    !dateRangeOptions.some((option) => isSameRange(option));
+
+  const [focusItemRef, setFocusItemRef] = useState<HTMLButtonElement | null>(
+    null,
+  );
+  const { focusItemIndex, setFocusItemIndex } = useNavigationShortcuts(
+    dateRangeOptions.length + 1,
+    handleBack,
+  );
+
+  useEffect(() => {
+    if (focusItemRef) {
+      focusItemRef.focus();
+    }
+  }, [focusItemRef]);
+
+  useEffect(() => {
+    setDateFrom(selected.from);
+    setDateTo(selected.to);
+  }, [selected]);
 
   return (
-    <div className="p-0">
-      {handleBack && <FilterHeader label={filter.label} onBack={handleBack} />}
-      <div className="p-2">
-        <div className="grid grid-cols-2 gap-2 p-0 pb-2">
-          <div>
-            <label className="text-xs text-gray-600 mb-1 block capitalize">
-              {t("from")}
-            </label>
-            <CombinedDatePicker
-              value={dateFrom}
-              onChange={handleDateFromChange}
-              placeholder={t("start_date")}
-              buttonClassName="truncate"
-              dateFormat="dd MMM yyyy"
+    <div className="pt-0">
+      {handleBack && !isCustomDateRange && (
+        <FilterHeader label={filter.label} onBack={handleBack} />
+      )}
+      {isCustomDateRange && (
+        <FilterHeader
+          label={"custom_date_range"}
+          onBack={() => setIsCustomDateRange(false)}
+        />
+      )}
+      <div className="px-2 pt-2 max-h-[calc(100vh-30rem)] overflow-y-auto">
+        {isCustomDateRange ? (
+          <div className="flex flex-col gap-2 p-0 pb-2">
+            <Calendar
+              mode="range"
+              selected={{ from: dateFrom, to: dateTo }}
+              onSelect={(date) => {
+                if (date) {
+                  handleDateChange(date);
+                }
+              }}
+              className="w-full"
+              styles={{
+                day: {
+                  width: "40px",
+                },
+                weekdays: {
+                  width: "100%",
+                  justifyContent: "space-between",
+                },
+                nav: {
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  padding: "0.5rem",
+                },
+              }}
             />
+            <div className="my-2">
+              <Separator
+                orientation="horizontal"
+                className="bg-gray-200 h-px"
+              />
+            </div>
+            <div className="flex flex-col gap-2 p-0 pb-2">
+              <div>
+                <label className="text-xs text-gray-600 mb-1 block capitalize">
+                  {t("from")}
+                </label>
+                <Input
+                  type="date"
+                  value={dateFrom ? format(dateFrom, "yyyy-MM-dd") : ""}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      setDateFrom(new Date(e.target.value));
+                    } else {
+                      setDateFrom(undefined);
+                    }
+                  }}
+                  placeholder={t("start_date")}
+                  className="flex flex-col justify-between"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 mb-1 block capitalize">
+                  {t("to")}
+                </label>
+                <Input
+                  type="date"
+                  value={dateTo ? format(dateTo, "yyyy-MM-dd") : ""}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      setDateTo(new Date(e.target.value));
+                    } else {
+                      setDateTo(undefined);
+                    }
+                  }}
+                  placeholder={t("end_date")}
+                  className="flex flex-col justify-between"
+                />
+              </div>
+            </div>
           </div>
-          <div>
-            <label className="text-xs text-gray-600 mb-1 block capitalize">
-              {t("to")}
-            </label>
-            <CombinedDatePicker
-              value={dateTo}
-              onChange={handleDateToChange}
-              placeholder={t("end_date")}
-              dateFormat="dd MMM yyyy"
-            />
-          </div>
-        </div>
-        <div className="my-2">
-          <Separator orientation="horizontal" className="bg-gray-200 h-px" />
-        </div>
-        {dateRangeOptions.map((option, index) => (
-          <Button
-            key={index}
-            onClick={() => handleDateRangeSelect(option)}
-            variant="ghost"
-            className="w-full justify-start px-3 font-medium text-sm text-gray-950"
-          >
-            {option.label}
-          </Button>
-        ))}
+        ) : (
+          <>
+            <div className="flex flex-col gap-1">
+              {dateRangeOptions.map((option, index) => (
+                <Button
+                  key={index}
+                  ref={index === focusItemIndex ? setFocusItemRef : null}
+                  onFocus={() => setFocusItemIndex(index)}
+                  onClick={() => handleDateRangeSelect(option)}
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start px-3 font-medium text-sm text-gray-950",
+                    isSameRange(option) &&
+                      "bg-gray-100 border-green-500 border",
+                  )}
+                >
+                  {option.label}
+                </Button>
+              ))}
+              <Button
+                variant="ghost"
+                ref={
+                  dateRangeOptions.length === focusItemIndex
+                    ? setFocusItemRef
+                    : null
+                }
+                className={cn(
+                  "w-full justify-between px-3 font-medium text-sm text-gray-950",
+                  isCustomDateRangeSelected &&
+                    "bg-gray-100 border-green-500 border",
+                )}
+                onClick={() => setIsCustomDateRange(true)}
+                onFocus={() => setFocusItemIndex(dateRangeOptions.length)}
+              >
+                {t("custom_date_range")}
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+            <RenderNavigationHelper isActiveFilter={true} />
+          </>
+        )}
       </div>
+      {isCustomDateRange && (
+        <div className="px-2 pb-2">
+          <Button
+            variant="primary"
+            className="w-full justify-center"
+            onClick={() => {
+              if (dateFrom && dateTo) {
+                onFilterChange(filter.key, { from: dateFrom, to: dateTo });
+                setIsCustomDateRange(false);
+              } else if (dateFrom) {
+                onFilterChange(filter.key, { from: dateFrom, to: dateFrom });
+                setIsCustomDateRange(false);
+              } else if (dateTo) {
+                onFilterChange(filter.key, { from: dateTo, to: dateTo });
+                setIsCustomDateRange(false);
+              }
+            }}
+          >
+            {t("confirm")}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
@@ -676,11 +859,17 @@ function RenderFilterList({
     () => setActiveFilter(null),
   );
 
-  useKeyboardShortcut(["ArrowRight"], () => {
-    if (focusItemIndex !== null) {
-      handleFilterSelect(Object.keys(selectedFilters)[focusItemIndex]);
-    }
-  });
+  useKeyboardShortcut(
+    ["ArrowRight"],
+    () => {
+      if (focusItemIndex !== null) {
+        handleFilterSelect(Object.keys(selectedFilters)[focusItemIndex]);
+      }
+    },
+    {
+      overrideSystem: true,
+    },
+  );
 
   useEffect(() => {
     if (focusItemRef) {
@@ -689,34 +878,36 @@ function RenderFilterList({
   }, [focusItemRef]);
 
   return (
-    <div className="p-2">
-      {Object.values(selectedFilters).map(({ filter }, index) => (
-        <DropdownMenuItem
-          key={filter.key}
-          ref={index === focusItemIndex ? setFocusItemRef : null}
-          onSelect={(e) => {
-            e.preventDefault();
-            handleFilterSelect(filter.key);
-          }}
-          className={cn(
-            "flex items-center justify-between px-3 py-2 cursor-pointer",
-          )}
-          onFocus={() => setFocusItemIndex(index)}
-        >
-          <div className="flex items-center gap-2">
-            <span className="border border-dotted border-gray-600 rounded w-3 h-3"></span>
-            <span className="text-base">{t(filter.label)}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            {selectedFilters[filter.key]?.selected.length > 0 && (
-              <span className="text-xs text-gray-500">
-                {selectedFilters[filter.key]?.selected.length}
-              </span>
+    <div className="px-2 pt-2">
+      {Object.values(selectedFilters).map(({ filter }, index) => {
+        const selected = selectedFilters[filter.key]?.selected as string[];
+        return (
+          <DropdownMenuItem
+            key={filter.key}
+            ref={index === focusItemIndex ? setFocusItemRef : null}
+            onSelect={(e) => {
+              e.preventDefault();
+              handleFilterSelect(filter.key);
+            }}
+            className={cn(
+              "flex items-center justify-between px-3 py-2 cursor-pointer",
             )}
-            <ChevronRight className="h-4 w-4" />
-          </div>
-        </DropdownMenuItem>
-      ))}
+            onFocus={() => setFocusItemIndex(index)}
+          >
+            <div className="flex items-center gap-2">
+              <span className="border border-dotted border-gray-600 rounded w-3 h-3 mb-0.5"></span>
+              <span className="text-sm">{t(filter.label)}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              {selected.length > 0 && (
+                <span className="text-xs text-gray-500">{selected.length}</span>
+              )}
+              <ChevronRight className="h-4 w-4" />
+            </div>
+          </DropdownMenuItem>
+        );
+      })}
+      <RenderNavigationHelper isActiveFilter={false} />
     </div>
   );
 }
@@ -731,7 +922,7 @@ function RenderTagFilter({
   selectedTags: TagConfig[];
   onFilterChange: (
     filterKey: string,
-    values: string[] | TagConfig[] | Date[],
+    values: string[] | TagConfig[] | FilterDateRange,
   ) => void;
   handleBack?: () => void;
 }) {
@@ -761,7 +952,7 @@ function RenderFilter({
   selectedFilters: Record<string, FilterState>;
   onFilterChange: (
     filterKey: string,
-    values: string[] | TagConfig[] | Date[],
+    values: string[] | TagConfig[] | FilterDateRange,
   ) => void;
   handleBack?: () => void;
 }) {
@@ -779,22 +970,31 @@ function RenderFilter({
   switch (filter.type) {
     case "date":
       return (
-        <RenderDateFilter {...commonProps} selected={selected as Date[]} />
+        <RenderDateFilter
+          {...commonProps}
+          selected={selected as FilterDateRange}
+        />
       );
     case "tag":
       return (
-        <RenderTagFilter
-          {...commonProps}
-          selectedTags={selected as TagConfig[]}
-        />
+        <>
+          <RenderTagFilter
+            {...commonProps}
+            selectedTags={selected as TagConfig[]}
+          />
+          <RenderNavigationHelper isActiveFilter={true} />
+        </>
       );
     default:
       return (
-        <FilterOptionsDropdown
-          {...commonProps}
-          selectedValues={selected.filter((value) => typeof value === "string")}
-          showColorIndicators={true}
-        />
+        <>
+          <FilterOptionsDropdown
+            {...commonProps}
+            selectedValues={selected as string[]}
+            showColorIndicators={true}
+          />
+          <RenderNavigationHelper isActiveFilter={true} />
+        </>
       );
   }
 }
@@ -812,7 +1012,7 @@ function FilterOptionsDropdown({
   handleBack?: () => void;
   onFilterChange?: (
     filterKey: string,
-    values: string[] | TagConfig[] | Date[],
+    values: string[] | TagConfig[] | FilterDateRange,
   ) => void;
   showColorIndicators?: boolean;
 }) {
@@ -844,14 +1044,14 @@ function FilterOptionsDropdown({
   return (
     <div className="p-0">
       {handleBack && <FilterHeader label={filter.label} onBack={handleBack} />}
-      <div className="p-3">
+      <div className="p-3 max-h-[calc(100vh-28rem)] overflow-y-auto">
         <Input
           placeholder="Search options..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="h-8 text-sm mb-3"
         />
-        <div className="max-h-[300px] overflow-y-auto">
+        <div className="">
           {filteredOptions.length === 0 ? (
             <div className="text-sm text-gray-500 text-center py-4">
               {t("no_results_found")}
@@ -930,21 +1130,27 @@ function TagFilterDropdown({
 
   const [hasOpenSubmenu, setHasOpenSubmenu] = useState(false);
 
-  useKeyboardShortcut(["ArrowLeft"], () => {
-    if (!hasOpenSubmenu) {
-      handleBack?.();
-    }
-  });
+  useKeyboardShortcut(
+    ["ArrowLeft"],
+    () => {
+      if (!hasOpenSubmenu) {
+        handleBack?.();
+      }
+    },
+    {
+      overrideSystem: true,
+    },
+  );
 
   return (
-    <div className="p-3">
+    <div className="p-3 max-h-[calc(100vh-28rem)] overflow-y-auto">
       <Input
         placeholder="Search tags..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className="h-8 text-sm mb-3"
       />
-      <div className="max-h-[300px] overflow-y-auto">
+      <div>
         {/* Selected Tags */}
         {selectedTags.length > 0 && (
           <>
@@ -1153,9 +1359,11 @@ export function createFilterConfig(
   options: FilterOption[],
   resource?: TagResource,
   renderSelected?: (
-    selected: string[] | TagConfig[] | Date[],
+    selected: string[] | TagConfig[] | FilterDateRange,
   ) => React.ReactNode,
-  getOperations?: (selected: string[] | TagConfig[] | Date[]) => string[],
+  getOperations?: (
+    selected: string[] | TagConfig[] | FilterDateRange,
+  ) => string[],
 ): FilterConfig {
   return {
     key,
@@ -1183,11 +1391,14 @@ function SubMenuFilter({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <div className="flex items-center gap-2 px-3 py-2 border-r border-gray-200 underline cursor-pointer text-xs grow">
+        <div className="flex items-center gap-2 px-3 py-2 border-r border-gray-200 underline cursor-pointer text-xs">
           {t(selectedOption ?? "")}
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[320px] p-0" align="start">
+      <DropdownMenuContent
+        className="w-[var(--radix-dropdown-menu-trigger-width)] p-0"
+        align="start"
+      >
         {availableOptions.map((option) => (
           <DropdownMenuItem
             key={option}
@@ -1233,7 +1444,7 @@ function SelectedFilterBar({
   setOpenState: (open: boolean) => void;
   onFilterChange: (
     filterKey: string,
-    values: string[] | TagConfig[] | Date[],
+    values: string[] | TagConfig[] | FilterDateRange,
   ) => void;
   onOperationChange: (filterKey: string, operation: string) => void;
 }) {
@@ -1246,14 +1457,14 @@ function SelectedFilterBar({
       open={openState || false}
       onOpenChange={(isOpen) => setOpenState(isOpen)}
     >
-      <div className="flex items-center justify-between bg-white rounded-md border border-gray-200 w-full">
+      <div className="flex items-center bg-white rounded-md border border-gray-200 w-fit">
         <DropdownMenuTrigger asChild>
           <div
-            className="flex items-center gap-2 px-3 py-2 border-r border-gray-200 text-sm grow"
+            className="flex items-center gap-2 px-3 py-2 border-r border-gray-200 text-sm max-w-20"
             onClick={onClick}
           >
             {filter?.icon}
-            {t(filter.label)}
+            <span className="truncate">{t(filter.label)}</span>
           </div>
         </DropdownMenuTrigger>
         <SubMenuFilter
@@ -1263,7 +1474,7 @@ function SelectedFilterBar({
           }
           availableOptions={availableOperations ?? []}
         />
-        <div className="flex items-center gap-2 px-3 py-2 border-r border-gray-200 grow">
+        <div className="flex items-center gap-2 px-3 py-2 border-r border-gray-200">
           {filter.renderSelected?.(selected)}
         </div>
         <Button
@@ -1358,26 +1569,27 @@ const RenderSelectedTagBadge = ({ selected }: { selected: TagConfig[] }) => {
   );
 };
 
-const RenderSelectedDateBadge = ({ selected }: { selected: Date[] }) => {
-  const { t } = useTranslation();
+const RenderSelectedDateBadge = ({
+  selected,
+}: {
+  selected: FilterDateRange;
+}) => {
+  if (!isValid(selected.from) || !isValid(selected.to)) return <></>;
+  const isSameDates =
+    selected.from && selected.to && isSameDay(selected.from, selected.to);
   return (
     <div className="text-xs">
-      {selected.length === 1 ? (
-        <span>{formatDate(selected[0], "d MMM yyyy")}</span>
+      {selected.from &&
+      selected.to &&
+      (selected.from === selected.to || isSameDates) ? (
+        <span>{formatDate(selected.from, "d MMM yyyy")}</span>
       ) : (
         <span>
-          {selected.map((date, index) => (
-            <>
-              {index > 0 && (
-                <>
-                  {" "}
-                  <span>{t("and")}</span>{" "}
-                </>
-              )}
-              <span key={date.toISOString() + index}>
-                {formatDate(date, "d MMM yyyy")}
-              </span>
-            </>
+          {[selected.from, selected.to].map((date, index) => (
+            <span key={date.toISOString() + index}>
+              {index > 0 && "-"}
+              <span>{formatDate(date, "d MMM yy")}</span>
+            </span>
           ))}
         </span>
       )}
@@ -1395,10 +1607,11 @@ export const encounterStatusFilter = createFilterConfig(
     color: ENCOUNTER_STATUS_COLORS[key as keyof typeof ENCOUNTER_STATUS_COLORS],
   })),
   undefined,
-  (selected: string[] | TagConfig[] | Date[]) => {
-    if (typeof selected[0] === "string") {
+  (selected: string[] | TagConfig[] | FilterDateRange) => {
+    const selectedStatus = selected as string[];
+    if (typeof selectedStatus[0] === "string") {
       const option = ENCOUNTER_STATUS[
-        selected[0] as keyof typeof ENCOUNTER_STATUS
+        selectedStatus[0] as keyof typeof ENCOUNTER_STATUS
       ] as string;
       const firstSelectedIndex = Object.values(ENCOUNTER_STATUS).findIndex(
         (o) => o === option,
@@ -1411,7 +1624,7 @@ export const encounterStatusFilter = createFilterConfig(
       return (
         <RenderSelectedBadge
           selectedValue={option}
-          selectedLength={selected.length}
+          selectedLength={selectedStatus.length}
           color={color}
           borderColor={borderColor}
           textColor={textColor}
@@ -1432,10 +1645,11 @@ export const encounterClassFilter = createFilterConfig(
     label: `encounter_class__${value}`,
   })),
   undefined,
-  (selected: string[] | TagConfig[] | Date[]) => {
-    if (typeof selected[0] === "string") {
+  (selected: string[] | TagConfig[] | FilterDateRange) => {
+    const selectedClass = selected as string[];
+    if (typeof selectedClass[0] === "string") {
       const option = ENCOUNTER_CLASS[
-        selected[0] as keyof typeof ENCOUNTER_CLASS
+        selectedClass[0] as keyof typeof ENCOUNTER_CLASS
       ] as string;
       const firstSelectedIndex = Object.values(ENCOUNTER_CLASS).findIndex(
         (o) => o === option,
@@ -1448,7 +1662,7 @@ export const encounterClassFilter = createFilterConfig(
       return (
         <RenderSelectedBadge
           selectedValue={`encounter_class__${option}`}
-          selectedLength={selected.length}
+          selectedLength={selectedClass.length}
           color={color}
           borderColor={borderColor}
           textColor={textColor}
@@ -1466,62 +1680,48 @@ export const tagFilter = createFilterConfig(
   "tag",
   [],
   TagResource.ENCOUNTER,
-  (selected: string[] | TagConfig[] | Date[]) => {
+  (selected: string[] | TagConfig[] | FilterDateRange) => {
     return <RenderSelectedTagBadge selected={selected as TagConfig[]} />;
   },
-  (selected: string[] | TagConfig[] | Date[]) => {
-    if (selected.length === 1) return ["includes", "does_not_include"];
+  (selected: string[] | TagConfig[] | FilterDateRange) => {
+    const selectedTags = selected as TagConfig[];
+    if (selectedTags.length === 1) return ["includes", "does_not_include"];
     return ["has_all_of", "has_any_of", "exclude_if_any", "exclude_if_all"];
   },
 );
 
-// TODO: Clean up operations
+const getDateOperations = (selected: FilterDateRange) => {
+  if (
+    isBefore(selected.from, new Date()) &&
+    isSameDay(selected.from, selected.to)
+  )
+    return ["since", "on_or_before"];
+  else if (isSameDay(selected.from, selected.to)) return ["is_on"];
+  else return ["b/w"];
+};
+
 export const startedDateFilter = createFilterConfig(
   "started_date",
-  "started date",
+  "started_date",
   "date",
   [],
   undefined,
-  (selected: string[] | TagConfig[] | Date[]) => {
-    return <RenderSelectedDateBadge selected={selected as Date[]} />;
+  (selected: string[] | TagConfig[] | FilterDateRange) => {
+    return <RenderSelectedDateBadge selected={selected as FilterDateRange} />;
   },
-  (selected: string[] | TagConfig[] | Date[]) => {
-    const selectedDates = selected as Date[];
-    if (selectedDates.length > 1)
-      if (
-        isBefore(selectedDates[0], new Date()) &&
-        isSameDay(selectedDates[1], new Date())
-      )
-        return ["since", "on_or_before", "is_on", "in_the_last", "in_the_next"];
-      else if (isSameDay(selectedDates[0], selectedDates[1])) return ["is_on"];
-      else return ["between"];
-    if (selectedDates[0] && isSameDay(selectedDates[0], new Date()))
-      return ["is_on", "on_or_before"];
-    return ["since", "on_or_before", "is_on"];
-  },
+  (selected: string[] | TagConfig[] | FilterDateRange) =>
+    getDateOperations(selected as FilterDateRange),
 );
 
 export const completedDateFilter = createFilterConfig(
   "completed_date",
-  "completed date",
+  "completed_date",
   "date",
   [],
   undefined,
-  (selected: string[] | TagConfig[] | Date[]) => {
-    return <RenderSelectedDateBadge selected={selected as Date[]} />;
+  (selected: string[] | TagConfig[] | FilterDateRange) => {
+    return <RenderSelectedDateBadge selected={selected as FilterDateRange} />;
   },
-  (selected: string[] | TagConfig[] | Date[]) => {
-    const selectedDates = selected as Date[];
-    if (selectedDates.length > 1)
-      if (
-        isBefore(selectedDates[0], new Date()) &&
-        isSameDay(selectedDates[1], new Date())
-      )
-        return ["since", "on_or_before", "is_on", "in_the_last", "in_the_next"];
-      else if (isSameDay(selectedDates[0], selectedDates[1])) return ["is_on"];
-      else return ["between"];
-    if (selectedDates[0] && isSameDay(selectedDates[0], new Date()))
-      return ["is_on", "on_or_before"];
-    return ["since", "on_or_before", "is_on"];
-  },
+  (selected: string[] | TagConfig[] | FilterDateRange) =>
+    getDateOperations(selected as FilterDateRange),
 );
