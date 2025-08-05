@@ -21,6 +21,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
@@ -34,6 +35,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import query from "@/Utils/request/query";
 import {
@@ -47,9 +53,6 @@ import {
   getTagHierarchyDisplay,
 } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
-
-import { Calendar } from "./calendar";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
 // Shared utilities and hooks
 const getColorForOption = (index: number) => {

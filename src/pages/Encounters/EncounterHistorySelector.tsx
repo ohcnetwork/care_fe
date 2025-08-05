@@ -21,7 +21,7 @@ import {
   startedDateFilter,
   tagFilter,
   useFilterState,
-} from "@/components/ui/multi-filter-selector-dropdown";
+} from "@/components/ui/multi-filter/multi-filter";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
