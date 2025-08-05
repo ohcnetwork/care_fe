@@ -33,7 +33,7 @@ export default function AudioPlayerDialog({
     queryKey: [fileApi.get, type, file?.id],
     queryFn: query(fileApi.get, {
       queryParams: { file_type: type, associating_id: associatingId },
-      pathParams: { id: file?.id || "" },
+      pathParams: { fileId: file?.id || "" },
     }),
     enabled: !!file?.id,
   });

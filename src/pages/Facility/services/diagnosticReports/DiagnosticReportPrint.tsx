@@ -90,7 +90,7 @@ export default function DiagnosticReportPrint({
           file_type: "diagnostic_report",
           associating_id: report.id,
         },
-        pathParams: { id: file.id },
+        pathParams: { fileId: file.id },
       })({} as any);
 
       return data?.read_signed_url as string;

@@ -106,7 +106,7 @@ export default function useFileManager(
             file_type: fileType,
             associating_id,
           },
-          pathParams: { id: file.id || "" },
+          pathParams: { fileId: file.id || "" },
         })({} as any),
     });
   };
@@ -151,7 +151,7 @@ export default function useFileManager(
     mutationFn: (body: { id: string; archive_reason: string }) =>
       query(fileApi.archive, {
         body: { archive_reason: body.archive_reason },
-        pathParams: { id: body.id },
+        pathParams: { fileId: body.id },
       })({} as any),
     onSuccess: () => {
       toast.success(t("file_archived_successfully"));
@@ -222,7 +222,7 @@ export default function useFileManager(
   >({
     mutationFn: (data) =>
       mutate(fileApi.update, {
-        pathParams: { id: data.id },
+        pathParams: { fileId: data.id },
       })(data),
     onSuccess: (_, { id }) => {
       toast.success(t("file_name_changed_successfully"));

@@ -20,12 +20,12 @@ export default {
     TRes: Type<PaginatedResponse<FileReadMinimal>>(),
   },
   get: {
-    path: "/api/v1/files/{id}/",
+    path: "/api/v1/files/{fileId}/",
     method: HttpMethod.GET,
     TRes: Type<FileRead>(),
   },
   update: {
-    path: "/api/v1/files/{id}/",
+    path: "/api/v1/files/{fileId}/",
     method: HttpMethod.PUT,
     TBody: Type<FileUpdate>(),
     TRes: Type<FileRead>(),
@@ -37,7 +37,7 @@ export default {
     TBody: Type<void>(),
   },
   archive: {
-    path: "/api/v1/files/{id}/archive/",
+    path: "/api/v1/files/{fileId}/archive/",
     method: HttpMethod.POST,
     TBody: Type<{ archive_reason: string }>(),
     TRes: Type<FileReadMinimal>(),
