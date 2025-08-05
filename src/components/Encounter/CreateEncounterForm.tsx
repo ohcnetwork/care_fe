@@ -5,7 +5,7 @@ import { Stethoscope } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -156,7 +156,13 @@ export default function CreateEncounterForm({
         <SheetHeader>
           <SheetTitle>{t("initiate_encounter")}</SheetTitle>
           <SheetDescription>
-            {t("begin_clinical_encounter", { patientName })}
+            <Trans
+              i18nKey="begin_clinical_encounter"
+              values={{ patientName }}
+              components={{
+                strong: <strong className="font-semibold text-gray-950" />,
+              }}
+            />
           </SheetDescription>
         </SheetHeader>
         <Form {...form}>
@@ -164,111 +170,111 @@ export default function CreateEncounterForm({
             onSubmit={form.handleSubmit(onSubmit)}
             className="mt-4 space-y-2"
           >
-            <FormField
-              control={form.control}
-              name="start_date"
-              render={({ field }) => {
-                const date = field.value ? new Date(field.value) : new Date();
-                return (
-                  <FormItem>
-                    <FormLabel>{t("date_and_time")}</FormLabel>
-                    <div className="flex sm:gap-2 flex-wrap">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "flex-1 justify-start text-left font-normal h-8",
-                              !field.value && "text-gray-500",
-                            )}
-                          >
-                            <CareIcon
-                              icon="l-calender"
-                              className="mr-2 size-4"
+            <div className="space-y-5">
+              <FormField
+                control={form.control}
+                name="start_date"
+                render={({ field }) => {
+                  const date = field.value ? new Date(field.value) : new Date();
+                  return (
+                    <FormItem>
+                      <FormLabel>{t("date_and_time")}</FormLabel>
+                      <div className="flex sm:gap-2 flex-wrap">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "flex-1 justify-start text-left font-normal h-8",
+                                !field.value && "text-gray-500",
+                              )}
+                            >
+                              <CareIcon
+                                icon="l-calender"
+                                className="mr-2 size-4"
+                              />
+                              {date.toLocaleDateString()}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={date}
+                              onSelect={(newDate) => {
+                                if (!newDate) return;
+                                const updatedDate = new Date(newDate);
+                                updatedDate.setHours(date.getHours());
+                                updatedDate.setMinutes(date.getMinutes());
+                                field.onChange(updatedDate.toISOString());
+                              }}
+                              autoFocus
                             />
-                            {date.toLocaleDateString()}
+                          </PopoverContent>
+                        </Popover>
+                        <Input
+                          type="time"
+                          className="sm:w-[150px] border-t-0 sm:border-t text-sm py-px border-gray-400 shadow-sm h-8"
+                          value={date.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          })}
+                          onChange={(e) => {
+                            const [hours, minutes] = e.target.value
+                              .split(":")
+                              .map(Number);
+                            if (isNaN(hours) || isNaN(minutes)) return;
+                            const updatedDate = new Date(date);
+                            updatedDate.setHours(hours);
+                            updatedDate.setMinutes(minutes);
+                            field.onChange(updatedDate.toISOString());
+                          }}
+                        />
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+              <FormField
+                control={form.control}
+                name="encounter_class"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("type_of_encounter")}</FormLabel>
+                    <div className="grid grid-cols-2 gap-3">
+                      {ENCOUNTER_CLASS.map((value) => {
+                        const Icon = ENCOUNTER_CLASS_ICONS[value];
+                        return (
+                          <Button
+                            key={value}
+                            type="button"
+                            data-cy={`encounter-type-${value}`}
+                            className={cn(
+                              "h-auto min-h-24 w-full justify-start text-lg",
+                              field.value === value &&
+                                "ring-2 ring-primary text-primary",
+                            )}
+                            variant="outline"
+                            onClick={() => field.onChange(value)}
+                          >
+                            <div className="flex flex-col items-center text-center">
+                              <Icon className="size-6" />
+                              <div className="text-sm font-bold">
+                                {t(`encounter_class__${value}`)}
+                              </div>
+                              <div className="text-wrap text-center text-xs text-gray-500">
+                                {t(`encounter_class_description__${value}`)}
+                              </div>
+                            </div>
                           </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={date}
-                            onSelect={(newDate) => {
-                              if (!newDate) return;
-                              const updatedDate = new Date(newDate);
-                              updatedDate.setHours(date.getHours());
-                              updatedDate.setMinutes(date.getMinutes());
-                              field.onChange(updatedDate.toISOString());
-                            }}
-                            autoFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <Input
-                        type="time"
-                        className="sm:w-[150px] border-t-0 sm:border-t text-gray-500 border-gray-200 h-8"
-                        value={date.toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: false,
-                        })}
-                        onChange={(e) => {
-                          const [hours, minutes] = e.target.value
-                            .split(":")
-                            .map(Number);
-                          if (isNaN(hours) || isNaN(minutes)) return;
-                          const updatedDate = new Date(date);
-                          updatedDate.setHours(hours);
-                          updatedDate.setMinutes(minutes);
-                          field.onChange(updatedDate.toISOString());
-                        }}
-                      />
+                        );
+                      })}
                     </div>
                     <FormMessage />
                   </FormItem>
-                );
-              }}
-            />
-            <FormField
-              control={form.control}
-              name="encounter_class"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>{t("type_of_encounter")}</FormLabel>
-                  <div className="grid grid-cols-2 gap-3">
-                    {ENCOUNTER_CLASS.map((value) => {
-                      const Icon = ENCOUNTER_CLASS_ICONS[value];
-                      return (
-                        <Button
-                          key={value}
-                          type="button"
-                          data-cy={`encounter-type-${value}`}
-                          className={cn(
-                            "h-24 w-full justify-start text-lg",
-                            field.value === value &&
-                              "ring-2 ring-primary text-primary",
-                          )}
-                          variant="outline"
-                          onClick={() => field.onChange(value)}
-                        >
-                          <div className="flex flex-col items-center text-center">
-                            <Icon className="size-6" />
-                            <div className="text-sm font-bold">
-                              {t(`encounter_class__${value}`)}
-                            </div>
-                            <div className="text-wrap text-center text-xs text-gray-500">
-                              {t(`encounter_class_description__${value}`)}
-                            </div>
-                          </div>
-                        </Button>
-                      );
-                    })}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="space-y-4">
+                )}
+              />
               <FormField
                 control={form.control}
                 name="status"
@@ -336,7 +342,7 @@ export default function CreateEncounterForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("tags")}</FormLabel>
-                    <FormControl>
+                    <FormControl className="mt-0">
                       <TagSelectorPopover
                         selected={selectedTags}
                         onChange={(tags) => {

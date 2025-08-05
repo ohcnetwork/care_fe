@@ -109,11 +109,11 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
       <div className="space-y-4 mt-4">
         <div className="border border-gray-200 rounded-lg">
           <div className="flex flex-col">
-            <div className="flex flex-wrap items-center justify-between gap-2 p-4">
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            <div className="flex flex-wrap items-center justify-between gap-2 p-4 sm:pb-4 pb-0">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                 <SearchInput
                   data-cy="resource-search"
-                  className="w-full sm:w-[12rem]"
+                  className="w-full sm:w-48"
                   options={[
                     {
                       key: "title",
@@ -128,12 +128,12 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     updateQuery({ [key]: value || undefined })
                   }
                 />
-                <div className="w-full flex justify-center sm:justify-start sm:w-auto">
+                <div>
                   <Tabs value={incoming ? "incoming" : "outgoing"}>
-                    <TabsList className="inline-flex bg-transparent p-0 h-8">
+                    <TabsList className="inline-flex bg-transparent p-0 h-8 w-full">
                       <TabsTrigger
                         value="outgoing"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
                         onClick={() => updateQuery({ incoming: false })}
                         data-cy="tab-outgoing"
                       >
@@ -141,7 +141,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       </TabsTrigger>
                       <TabsTrigger
                         value="incoming"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
                         onClick={() => updateQuery({ incoming: true })}
                         data-cy="tab-incoming"
                       >
@@ -150,8 +150,28 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     </TabsList>
                   </Tabs>
                 </div>
+                <div className="sm:hidden block">
+                  <Tabs value={isActive ? "active" : "completed"}>
+                    <TabsList className="bg-transparent p-0 h-8 w-full">
+                      <TabsTrigger
+                        value="active"
+                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
+                        onClick={() => updateQuery({ status: "pending" })}
+                      >
+                        {t("active")}
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="completed"
+                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
+                        onClick={() => updateQuery({ status: "completed" })}
+                      >
+                        {t("completed")}
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
               </div>
-              <div className="flex justify-center sm:justify-end w-full sm:w-auto">
+              <div className="hidden sm:block">
                 <Tabs value={isActive ? "active" : "completed"}>
                   <TabsList className="bg-transparent p-0 h-8">
                     <TabsTrigger
@@ -173,7 +193,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
               </div>
             </div>
 
-            <Separator />
+            <Separator className="hidden sm:block" />
 
             <div className="p-4 h-auto overflow-hidden">
               <div className="block sm:hidden w-full">
