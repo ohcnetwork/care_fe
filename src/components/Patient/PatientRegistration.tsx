@@ -172,9 +172,9 @@ export default function PatientRegistration(
               path: ["geo_organization"],
             });
           }
-          if (data.deceased_datetime) {
+          if (data._is_deceased) {
             const deathDate = dayjs(data.deceased_datetime);
-            if (!deathDate.isValid()) {
+            if (!deathDate?.isValid()) {
               ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: t("invalid_date_format", {
