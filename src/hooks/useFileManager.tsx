@@ -327,7 +327,10 @@ export default function useFileManager(
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setArchiveDialogueOpen(null)}
+                onClick={() => {
+                  setArchiveReason("");
+                  setArchiveDialogueOpen(null);
+                }}
               >
                 {t("cancel")}
               </Button>

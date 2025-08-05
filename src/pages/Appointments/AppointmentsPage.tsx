@@ -73,7 +73,7 @@ import {
   CardListSkeleton,
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
-import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
+import PatientEncounterOrIdentifierFilter from "@/components/Patient/PatientEncounterOrIdentifierFilter";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -669,9 +669,9 @@ export default function AppointmentsPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 items-center">
-          <PatientIdentifierFilter
+          <PatientEncounterOrIdentifierFilter
             onSelect={(patientId) => updateQuery({ patient: patientId })}
-            placeholder={t("filter_by_patient")}
+            placeholder={t("search_patients")}
             className="w-full sm:w-auto"
             patientId={qParams.patient}
           />
