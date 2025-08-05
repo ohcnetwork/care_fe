@@ -1,5 +1,6 @@
 import { StarFilledIcon, StarIcon } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -228,12 +229,15 @@ export default function ValueSetSearchContent({
       </div>
       <CommandList className="h-75 overflow-hidden">
         <CommandEmpty>
-          {search.length < 3 ? (
+          {searchQuery.isFetching ? (
+            <div className="flex justify-center items-center py-6 text-gray-500">
+              <Loader2 className="h-5 w-5 animate-spin mr-2" />
+              {t("searching")}
+            </div>
+          ) : search.length < 3 ? (
             <p className="p-4 text-sm text-gray-500">
               {t("min_char_length_error", { min_length: 3 })}
             </p>
-          ) : searchQuery.isFetching ? (
-            <p className="p-4 text-sm text-gray-500">{t("searching")}</p>
           ) : (
             <p className="p-4 text-sm text-gray-500">{t("no_results_found")}</p>
           )}
