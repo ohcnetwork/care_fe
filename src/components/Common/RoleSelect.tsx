@@ -45,9 +45,7 @@ export function RoleSelect({
       value={value?.id || ""}
       onChange={(selectedId) => {
         const selectedRole = roles?.results.find((r) => r.id === selectedId);
-        if (selectedRole) {
-          onChange(selectedRole);
-        }
+        selectedRole && onChange(selectedRole);
       }}
       onSearch={setSearchTerm}
       options={options}
