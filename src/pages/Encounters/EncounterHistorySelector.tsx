@@ -229,11 +229,11 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
   }, [inView, hasNextPage, fetchNextPage]);
 
   const filters = [
-    encounterStatusFilter,
-    encounterClassFilter,
-    tagFilter,
-    startedDateFilter,
-    completedDateFilter,
+    encounterStatusFilter("status"),
+    encounterClassFilter("encounter_class"),
+    tagFilter("tags", TagResource.ENCOUNTER),
+    startedDateFilter("started_date"),
+    completedDateFilter("completed_date"),
   ];
   const {
     selectedFilters,

@@ -93,7 +93,7 @@ export default function MultiFilter({
   );
 
   return (
-    <div className="flex flex-col gap-2 px-1">
+    <div className={cn("flex flex-col gap-2 px-1", className)}>
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <Button

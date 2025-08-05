@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { FilterConfig, FilterState, FilterValues } from "./utils";
 
-export default function useFilterState(filters: FilterConfig[]) {
+export default function useFilterState(
+  filters: FilterConfig[],
+  onFilterUpdate?: (query: Record<string, unknown>) => void,
+) {
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, FilterState>
   >(
@@ -19,29 +22,39 @@ export default function useFilterState(filters: FilterConfig[]) {
     ),
   );
 
-  const handleFilterChange = (filterKey: string, values: FilterValues) => {
-    const filter = selectedFilters[filterKey]?.filter;
-    const operations = filter?.getOperations?.(values) ?? [];
-    const currentSelectedOperation =
-      selectedFilters[filterKey]?.operation.selectedOperation;
-    const selectedOperation =
-      currentSelectedOperation && operations.includes(currentSelectedOperation)
-        ? currentSelectedOperation
-        : operations?.[0];
-    if (filter) {
-      setSelectedFilters((prev) => ({
-        ...prev,
-        [filterKey]: {
-          ...(selectedFilters[filterKey] ?? { filter }),
-          selected: values,
-          operation: {
-            selectedOperation,
-            availableOperations: operations,
+  const handleFilterChange = useCallback(
+    (filterKey: string, values: FilterValues) => {
+      const filter = selectedFilters[filterKey]?.filter;
+      const operations = filter?.getOperations?.(values) ?? [];
+      const currentSelectedOperation =
+        selectedFilters[filterKey]?.operation.selectedOperation;
+      const selectedOperation =
+        currentSelectedOperation &&
+        operations.includes(currentSelectedOperation)
+          ? currentSelectedOperation
+          : operations?.[0];
+      if (filter) {
+        setSelectedFilters((prev) => ({
+          ...prev,
+          [filterKey]: {
+            ...(selectedFilters[filterKey] ?? { filter }),
+            selected: values,
+            operation: {
+              selectedOperation,
+              availableOperations: operations,
+            },
           },
-        },
-      }));
-    }
-  };
+        }));
+        onFilterUpdate?.({
+          [filterKey]:
+            filter.mode === "single" && Array.isArray(values)
+              ? values[0]
+              : values,
+        });
+      }
+    },
+    [selectedFilters, onFilterUpdate],
+  );
 
   const handleOperationChange = (filterKey: string, operation: string) => {
     setSelectedFilters((prev) => ({

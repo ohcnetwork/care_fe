@@ -10,6 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
+  encounterClassFilter,
+  encounterStatusFilter,
+  tagFilter,
+} from "@/components/ui/multi-filter/filter-list";
+import MultiFilter from "@/components/ui/multi-filter/multi-filter";
+import useFilterState from "@/components/ui/multi-filter/utils/useFilterState";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -129,6 +136,25 @@ export function EncounterList({
     },
     [status, encounterClass, priority, updateQuery],
   );
+
+  const filters = [
+    encounterStatusFilter("status", "single"),
+    encounterClassFilter("encounter_class", "single"),
+    tagFilter("tags", TagResource.ENCOUNTER),
+  ];
+
+  const onFilterUpdate = (query: Record<string, unknown>) => {
+    console.log(query);
+    updateQuery(query);
+  };
+
+  const {
+    selectedFilters,
+    handleFilterChange,
+    handleOperationChange,
+    handleClearAll,
+    handleClearFilter,
+  } = useFilterState(filters, onFilterUpdate);
 
   const { data: queryEncounters, isLoading } = useQuery({
     queryKey: ["encounters", facilityId, qParams],
@@ -251,6 +277,15 @@ export function EncounterList({
                     </div>
                   </PopoverContent>
                 </Popover>
+
+                <MultiFilter
+                  selectedFilters={selectedFilters}
+                  onFilterChange={handleFilterChange}
+                  onOperationChange={handleOperationChange}
+                  onClearAll={handleClearAll}
+                  onClearFilter={handleClearFilter}
+                  className="flex flex-row"
+                />
 
                 <div>
                   <Select

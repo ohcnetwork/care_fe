@@ -60,6 +60,8 @@ export interface FilterOption {
 
 export type FilterValues = string[] | TagConfig[] | FilterDateRange;
 
+export type FilterMode = "single" | "multi";
+
 export interface FilterConfig {
   key: string;
   label: string;
@@ -70,6 +72,7 @@ export interface FilterConfig {
   icon?: React.ReactNode;
   renderSelected?: (selected: FilterValues) => React.ReactNode;
   getOperations?: (selected: FilterValues) => string[];
+  mode?: FilterMode;
 }
 
 export interface OperationConfig {
@@ -101,6 +104,7 @@ export function createFilterConfig(
   resource?: TagResource,
   renderSelected?: (selected: FilterValues) => React.ReactNode,
   getOperations?: (selected: FilterValues) => string[],
+  mode: FilterMode = "multi",
 ): FilterConfig {
   return {
     key,
@@ -110,5 +114,6 @@ export function createFilterConfig(
     resource,
     renderSelected,
     getOperations,
+    mode,
   };
 }

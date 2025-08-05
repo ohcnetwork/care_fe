@@ -6,12 +6,14 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import FilterHeader from "./filter-header";
 import useFilterSearch from "./utils/useFilterSearch";
 import useNavigationShortcuts from "./utils/useNavigationShortcuts";
 import {
   FilterConfig,
+  FilterMode,
   FilterOption,
   FilterValues,
   getColorForOption,
@@ -50,6 +52,13 @@ export default function GenericFilter({
     }
   };
 
+  const handleCheckboxToggle = (value: string, checked: boolean) => {
+    if (!onFilterChange) return;
+    if (checked) {
+      onFilterChange(filter.key, [value]);
+    }
+  };
+
   const { focusItemIndex, setFocusItemIndex } = useNavigationShortcuts(
     filteredOptions.length,
     handleBack,
@@ -74,10 +83,15 @@ export default function GenericFilter({
             <FilterOptionsList
               options={filteredOptions}
               selectedValues={selectedValues}
-              onOptionToggle={handleOptionToggle}
+              onOptionToggle={
+                filter.mode === "single"
+                  ? handleCheckboxToggle
+                  : handleOptionToggle
+              }
               showColorIndicators={showColorIndicators}
               focusItemIndex={focusItemIndex}
               setFocusItemIndex={setFocusItemIndex}
+              mode={filter.mode}
             />
           )}
         </div>
@@ -93,6 +107,7 @@ function FilterOptionsList({
   showColorIndicators,
   focusItemIndex,
   setFocusItemIndex,
+  mode,
 }: {
   options: FilterOption[];
   selectedValues: string[];
@@ -100,6 +115,7 @@ function FilterOptionsList({
   showColorIndicators?: boolean;
   focusItemIndex: number | null;
   setFocusItemIndex: (index: number) => void;
+  mode?: FilterMode;
 }) {
   const { t } = useTranslation();
   const [focusItemRef, setFocusItemRef] = useState<HTMLDivElement | null>(null);
@@ -129,13 +145,22 @@ function FilterOptionsList({
             }
           }}
         >
-          <Checkbox
-            checked={selectedValues.includes(option.value)}
-            onCheckedChange={(checked) =>
-              onOptionToggle(option.value, checked as boolean)
-            }
-            className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-          />
+          {mode === "single" ? (
+            <RadioGroup
+              value={selectedValues[0]}
+              onValueChange={(value) => onOptionToggle(value, true)}
+            >
+              <RadioGroupItem value={option.value} />
+            </RadioGroup>
+          ) : (
+            <Checkbox
+              checked={selectedValues.includes(option.value)}
+              onCheckedChange={(checked) =>
+                onOptionToggle(option.value, checked as boolean)
+              }
+              className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+            />
+          )}
           {showColorIndicators && (
             <div
               className={cn(
