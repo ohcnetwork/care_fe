@@ -33,7 +33,10 @@ function ServiceCard({
     `d-${name}` as DuoToneIconName;
 
   return (
-    <Card className="transition-all duration-200 hover:border-primary/50 hover:shadow-sm rounded-md">
+    <Card
+      onClick={() => navigate(`/facility/${facilityId}/services/${service.id}`)}
+      className="cursor-pointer transition-all duration-200 hover:border-primary/50 hover:shadow-sm rounded-md"
+    >
       <CardContent className="flex items-center gap-3 py-3 px-4">
         <div className="relative size-10 rounded-sm flex p-4 items-center justify-center">
           <ColoredIndicator
