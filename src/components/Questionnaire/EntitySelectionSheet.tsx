@@ -158,18 +158,18 @@ export function EntitySelectionSheet({
           side="bottom"
           onInteractOutside={(event) => {
             const target = event.target as Node;
-            const currentTarget = event.currentTarget as Node;
-
             const selectContent = document.querySelector(
               '[data-slot="select-content"]',
             );
-
+            const sheetContent = document.getElementById("sheet-content");
             // Prevent the Sheet from closing if the click is inside the select dropdown or inside the Sheet
-            if (
-              selectContent?.contains(target) ||
-              currentTarget.contains(target)
-            ) {
+            if (selectContent?.contains(target)) {
               event.preventDefault();
+            }
+
+            if (sheetContent?.contains(target)) {
+              event.preventDefault();
+              return;
             }
           }}
         >
