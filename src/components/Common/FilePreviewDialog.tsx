@@ -175,6 +175,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
     setPage(1);
     setNumPages(1);
     setIndex(-1);
+    setRotation(0);
     onClose?.();
   };
 
