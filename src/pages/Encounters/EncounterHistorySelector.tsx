@@ -14,14 +14,14 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FilterSelect } from "@/components/ui/filter-select";
 import {
-  MultiFilterSelectorDropdown,
   completedDateFilter,
   encounterClassFilter,
   encounterStatusFilter,
   startedDateFilter,
   tagFilter,
-  useFilterState,
-} from "@/components/ui/multi-filter/multi-filter";
+} from "@/components/ui/multi-filter/filter-list";
+import MultiFilter from "@/components/ui/multi-filter/multi-filter";
+import useFilterState from "@/components/ui/multi-filter/utils/useFilterState";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -283,7 +283,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
 
           {/* Filters */}
 
-          <MultiFilterSelectorDropdown
+          <MultiFilter
             selectedFilters={selectedFilters}
             onFilterChange={handleFilterChange}
             onOperationChange={handleOperationChange}
