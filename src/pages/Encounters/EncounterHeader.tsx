@@ -173,6 +173,10 @@ export function EncounterHeader() {
                   open={actionsOpen}
                   onOpenChange={setActionsOpen}
                   encounter={encounter}
+                  readOnly={readOnly}
+                  canEdit={false}
+                  selectedEncounterId={selectedEncounterId}
+                  currentEncounterId={currentEncounterId}
                 />
               </div>
             )}

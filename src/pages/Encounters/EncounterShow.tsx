@@ -12,6 +12,7 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
+import { useEncounterShortcuts } from "@/hooks/useEncounterShortcuts";
 import { useSidebarAutoCollapse } from "@/hooks/useSidebarAutoCollapse";
 
 import { getPermissions } from "@/common/Permissions";
@@ -80,7 +81,7 @@ export const EncounterShow = (props: Props) => {
     ...Object.keys(pluginTabs),
   ];
 
-  const { canViewEncounter } = getPermissions(
+  const { canViewEncounter, canSubmitEncounterQuestionnaire } = getPermissions(
     hasPermission,
     currentEncounter?.permissions ?? [],
   );
@@ -91,6 +92,21 @@ export const EncounterShow = (props: Props) => {
   );
 
   const canAccess = canViewClinicalData || canViewEncounter;
+  const readOnly = selectedEncounterId !== currentEncounterId;
+  const canEdit =
+    !!facilityId &&
+    selectedEncounterId === currentEncounterId &&
+    canSubmitEncounterQuestionnaire;
+
+  // Initialize keyboard shortcuts for all encounter pages
+  const encounterForShortcuts = selectedEncounter || currentEncounter;
+  useEncounterShortcuts(encounterForShortcuts, {
+    readOnly,
+    canEdit,
+    questionnairesEnabled: !readOnly && canEdit,
+    selectedEncounterId,
+    currentEncounterId,
+  });
 
   useEffect(() => {
     if (!isCurrentEncounterLoading && !isPatientLoading && !canAccess) {
