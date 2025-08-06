@@ -1,5 +1,6 @@
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -160,7 +161,7 @@ export function QuestionnaireSearch({
           data-cy="add-questionnaire-button"
           variant="outline"
           role="combobox"
-          className="w-full justify-between"
+          className="w-full border border-primary-600"
           disabled={disabled || isLoading}
         >
           {isLoading ? (
@@ -169,9 +170,11 @@ export function QuestionnaireSearch({
               {t("loading")}
             </>
           ) : (
-            <span>{placeholder || t("add_questionnaire")}</span>
+            <div className="flex items-center justify-start gap-2 text-primary-600">
+              <Plus className="size-4" />
+              <span>{placeholder || t("add_questionnaire")}</span>
+            </div>
           )}
-          <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0" align="start">
