@@ -19,15 +19,12 @@
                                   "description": "Clinical History",
                                   "when": "always" },
                                   
-  { "key": "c",                   "action": "manage-consents",
-                                  "description": "Manage Consents",
-                                  "when": "canEdit" },
 
   { "key": "escape",              "action": "close-dialog",
                                   "description": "Close Dialog",
                                   "when": "always" },
 
-  { "key": "g v",                 "action": "encounter-overview",
+  { "key": "g g",                 "action": "encounter-overview",
                                   "description": "Go to Overview",
                                   "when": "always" },
                                   
