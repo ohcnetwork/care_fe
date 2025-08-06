@@ -5,7 +5,7 @@ import { Stethoscope } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -45,17 +45,21 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import routes from "@/Utils/request/api";
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
+
 import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
   ENCOUNTER_CLASS,
-  ENCOUNTER_CLASSES_ICONS,
+  ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_PRIORITY,
-  Encounter,
   EncounterClass,
-  EncounterRequest,
-} from "@/types/emr/encounter";
+  EncounterCreate,
+  EncounterRead,
+} from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 
 interface Props {
   patientId: string;
@@ -86,6 +90,7 @@ export default function CreateEncounterForm({
       message: t("at_least_one_department_is_required"),
     }),
     start_date: z.string(),
+    tags: z.array(z.string()),
   });
 
   const form = useForm({
@@ -96,12 +101,19 @@ export default function CreateEncounterForm({
       priority: "routine",
       organizations: [],
       start_date: new Date().toISOString(),
+      tags: [],
     },
   });
 
+  const tagIds = form.watch("tags");
+  const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
+  const selectedTags = tagQueries
+    .map((query) => query.data)
+    .filter(Boolean) as TagConfig[];
+
   const { mutate: createEncounter, isPending } = useMutation({
-    mutationFn: mutate(routes.encounter.create),
-    onSuccess: (data: Encounter) => {
+    mutationFn: mutate(encounterApi.create),
+    onSuccess: (data: EncounterRead) => {
       toast.success(t("encounter_created"));
       setIsOpen(false);
       form.reset();
@@ -114,13 +126,14 @@ export default function CreateEncounterForm({
   });
 
   function onSubmit(data: z.infer<typeof encounterFormSchema>) {
-    const encounterRequest: EncounterRequest = {
+    const encounterRequest: EncounterCreate = {
       ...data,
       patient: patientId,
       facility: facilityId,
       period: {
         start: data.start_date,
       },
+      tags: data.tags,
     };
 
     createEncounter(encounterRequest);
@@ -143,7 +156,13 @@ export default function CreateEncounterForm({
         <SheetHeader>
           <SheetTitle>{t("initiate_encounter")}</SheetTitle>
           <SheetDescription>
-            {t("begin_clinical_encounter", { patientName })}
+            <Trans
+              i18nKey="begin_clinical_encounter"
+              values={{ patientName }}
+              components={{
+                strong: <strong className="font-semibold text-gray-950" />,
+              }}
+            />
           </SheetDescription>
         </SheetHeader>
         <Form {...form}>
@@ -151,111 +170,111 @@ export default function CreateEncounterForm({
             onSubmit={form.handleSubmit(onSubmit)}
             className="mt-4 space-y-2"
           >
-            <FormField
-              control={form.control}
-              name="start_date"
-              render={({ field }) => {
-                const date = field.value ? new Date(field.value) : new Date();
-                return (
-                  <FormItem>
-                    <FormLabel>{t("date_and_time")}</FormLabel>
-                    <div className="flex sm:gap-2 flex-wrap">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "flex-1 justify-start text-left font-normal h-8",
-                              !field.value && "text-gray-500",
-                            )}
-                          >
-                            <CareIcon
-                              icon="l-calender"
-                              className="mr-2 size-4"
+            <div className="space-y-5">
+              <FormField
+                control={form.control}
+                name="start_date"
+                render={({ field }) => {
+                  const date = field.value ? new Date(field.value) : new Date();
+                  return (
+                    <FormItem>
+                      <FormLabel>{t("date_and_time")}</FormLabel>
+                      <div className="flex sm:gap-2 flex-wrap">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "flex-1 justify-start text-left font-normal h-8",
+                                !field.value && "text-gray-500",
+                              )}
+                            >
+                              <CareIcon
+                                icon="l-calender"
+                                className="mr-2 size-4"
+                              />
+                              {date.toLocaleDateString()}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={date}
+                              onSelect={(newDate) => {
+                                if (!newDate) return;
+                                const updatedDate = new Date(newDate);
+                                updatedDate.setHours(date.getHours());
+                                updatedDate.setMinutes(date.getMinutes());
+                                field.onChange(updatedDate.toISOString());
+                              }}
+                              autoFocus
                             />
-                            {date.toLocaleDateString()}
+                          </PopoverContent>
+                        </Popover>
+                        <Input
+                          type="time"
+                          className="sm:w-[150px] border-t-0 sm:border-t text-sm py-px border-gray-400 shadow-sm h-8"
+                          value={date.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          })}
+                          onChange={(e) => {
+                            const [hours, minutes] = e.target.value
+                              .split(":")
+                              .map(Number);
+                            if (isNaN(hours) || isNaN(minutes)) return;
+                            const updatedDate = new Date(date);
+                            updatedDate.setHours(hours);
+                            updatedDate.setMinutes(minutes);
+                            field.onChange(updatedDate.toISOString());
+                          }}
+                        />
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+              <FormField
+                control={form.control}
+                name="encounter_class"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("type_of_encounter")}</FormLabel>
+                    <div className="grid grid-cols-2 gap-3">
+                      {ENCOUNTER_CLASS.map((value) => {
+                        const Icon = ENCOUNTER_CLASS_ICONS[value];
+                        return (
+                          <Button
+                            key={value}
+                            type="button"
+                            data-cy={`encounter-type-${value}`}
+                            className={cn(
+                              "h-auto min-h-24 w-full justify-start text-lg",
+                              field.value === value &&
+                                "ring-2 ring-primary text-primary",
+                            )}
+                            variant="outline"
+                            onClick={() => field.onChange(value)}
+                          >
+                            <div className="flex flex-col items-center text-center">
+                              <Icon className="size-6" />
+                              <div className="text-sm font-bold">
+                                {t(`encounter_class__${value}`)}
+                              </div>
+                              <div className="text-wrap text-center text-xs text-gray-500">
+                                {t(`encounter_class_description__${value}`)}
+                              </div>
+                            </div>
                           </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={date}
-                            onSelect={(newDate) => {
-                              if (!newDate) return;
-                              const updatedDate = new Date(newDate);
-                              updatedDate.setHours(date.getHours());
-                              updatedDate.setMinutes(date.getMinutes());
-                              field.onChange(updatedDate.toISOString());
-                            }}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <Input
-                        type="time"
-                        className="sm:w-[150px] border-t-0 sm:border-t text-gray-500 border-gray-200 h-8"
-                        value={date.toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: false,
-                        })}
-                        onChange={(e) => {
-                          const [hours, minutes] = e.target.value
-                            .split(":")
-                            .map(Number);
-                          if (isNaN(hours) || isNaN(minutes)) return;
-                          const updatedDate = new Date(date);
-                          updatedDate.setHours(hours);
-                          updatedDate.setMinutes(minutes);
-                          field.onChange(updatedDate.toISOString());
-                        }}
-                      />
+                        );
+                      })}
                     </div>
                     <FormMessage />
                   </FormItem>
-                );
-              }}
-            />
-            <FormField
-              control={form.control}
-              name="encounter_class"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>{t("type_of_encounter")}</FormLabel>
-                  <div className="grid grid-cols-2 gap-3">
-                    {ENCOUNTER_CLASS.map((value) => {
-                      const Icon = ENCOUNTER_CLASSES_ICONS[value];
-                      return (
-                        <Button
-                          key={value}
-                          type="button"
-                          data-cy={`encounter-type-${value}`}
-                          className={cn(
-                            "h-24 w-full justify-start text-lg",
-                            field.value === value &&
-                              "ring-2 ring-primary text-primary",
-                          )}
-                          variant="outline"
-                          onClick={() => field.onChange(value)}
-                        >
-                          <div className="flex flex-col items-center text-center">
-                            <Icon className="size-6" />
-                            <div className="text-sm font-bold">
-                              {t(`encounter_class__${value}`)}
-                            </div>
-                            <div className="text-wrap text-center text-xs text-gray-500">
-                              {t(`encounter_class_description__${value}`)}
-                            </div>
-                          </div>
-                        </Button>
-                      );
-                    })}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="space-y-4">
+                )}
+              />
               <FormField
                 control={form.control}
                 name="status"
@@ -317,27 +336,46 @@ export default function CreateEncounterForm({
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="tags"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("tags")}</FormLabel>
+                    <FormControl className="mt-0">
+                      <TagSelectorPopover
+                        selected={selectedTags}
+                        onChange={(tags) => {
+                          field.onChange(tags.map((tag) => tag.id));
+                        }}
+                        resource={TagResource.ENCOUNTER}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="organizations"
+                render={({ field }) => (
+                  <FormItem>
+                    <FacilityOrganizationSelector
+                      facilityId={facilityId}
+                      value={field.value}
+                      onChange={(value) => {
+                        if (value === null) {
+                          form.setValue("organizations", []);
+                        } else {
+                          form.setValue("organizations", value);
+                        }
+                      }}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-            <FormField
-              control={form.control}
-              name="organizations"
-              render={({ field }) => (
-                <FormItem>
-                  <FacilityOrganizationSelector
-                    facilityId={facilityId}
-                    value={field.value}
-                    onChange={(value) => {
-                      if (value === null) {
-                        form.setValue("organizations", []);
-                      } else {
-                        form.setValue("organizations", value);
-                      }
-                    }}
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <div className="flex justify-end mt-6 space-x-2">
               <Button
                 type="button"

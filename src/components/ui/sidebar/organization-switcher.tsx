@@ -1,6 +1,6 @@
 import { CaretSortIcon, DashboardIcon } from "@radix-ui/react-icons";
 import { Globe } from "lucide-react";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -69,25 +69,25 @@ export function OrganizationSwitcher({
         side={isMobile ? "bottom" : "right"}
         sideOffset={4}
       >
-        <DropdownMenuItem onClick={() => navigate("/")}>
-          <DashboardIcon className="size-4" />
-          {t("view_dashboard")}
+        <DropdownMenuItem asChild>
+          <Link className="flex items-center gap-2 cursor-pointer" href="/">
+            <DashboardIcon className="size-4" />
+            {t("view_dashboard")}
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuLabel>{t("organizations")}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {organizations.map((org) => (
           <DropdownMenuItem
             key={org.id}
-            onClick={() => {
-              navigate(`/organization/${org.id}`);
-            }}
+            asChild
             className={cn(
               "gap-2 p-2",
               org?.name === selectedOrganization?.name &&
                 "bg-primary-500 text-white focus:bg-primary-600 focus:text-white",
             )}
           >
-            {org.name}
+            <Link href={`/organization/${org.id}`}>{org.name}</Link>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

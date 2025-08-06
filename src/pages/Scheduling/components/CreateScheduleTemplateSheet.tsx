@@ -100,13 +100,13 @@ export default function CreateScheduleTemplateSheet({
               z.object({
                 slot_type: z.literal("appointment"),
                 name: z.string().min(1, t("field_required")),
-                reason: z.string(),
-                start_time: z
-                  .string()
-                  .min(1, t("field_required")) as unknown as z.ZodType<Time>,
-                end_time: z
-                  .string()
-                  .min(1, t("field_required")) as unknown as z.ZodType<Time>,
+                reason: z.string().trim(),
+                start_time: z.string().min(1, t("field_required")) as z.ZodType<
+                  Time | undefined
+                >,
+                end_time: z.string().min(1, t("field_required")) as z.ZodType<
+                  Time | undefined
+                >,
                 slot_size_in_minutes: z
                   .number()
                   .min(1, t("number_min_error", { min: 0 })),
@@ -122,7 +122,7 @@ export default function CreateScheduleTemplateSheet({
               z.object({
                 slot_type: z.enum(["open", "closed"]),
                 name: z.string().min(1, t("field_required")),
-                reason: z.string(),
+                reason: z.string().trim(),
                 start_time: z
                   .string()
                   .min(1, t("field_required")) as unknown as z.ZodType<Time>,
@@ -181,7 +181,7 @@ export default function CreateScheduleTemplateSheet({
 
   const { mutate: createTemplate, isPending } = useMutation({
     mutationFn: mutate(scheduleApis.templates.create, {
-      pathParams: { facility_id: facilityId },
+      pathParams: { facilityId },
     }),
     onSuccess: () => {
       toast.success("Schedule template created successfully");
@@ -254,11 +254,11 @@ export default function CreateScheduleTemplateSheet({
   const updateSlotDuration = (index: number) => {
     const isAutoFill = form.watch(`availabilities.${index}.is_auto_fill`);
     if (isAutoFill) {
-      const duration = calculateSlotDuration(
-        form.watch(`availabilities.${index}.start_time`),
-        form.watch(`availabilities.${index}.end_time`),
-        form.watch(`availabilities.${index}.num_of_slots`),
-      );
+      const start = form.watch(`availabilities.${index}.start_time`);
+      const end = form.watch(`availabilities.${index}.end_time`);
+      const numOfSlots = form.watch(`availabilities.${index}.num_of_slots`);
+      if (!start || !end) return;
+      const duration = calculateSlotDuration(start, end, numOfSlots);
       form.setValue(`availabilities.${index}.slot_size_in_minutes`, duration);
     }
   };
@@ -277,7 +277,7 @@ export default function CreateScheduleTemplateSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-fit ">
+      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-fit">
         <SheetHeader>
           <SheetTitle>{t("create_schedule_template")}</SheetTitle>
           <SheetDescription className="sr-only">
@@ -317,6 +317,9 @@ export default function CreateScheduleTemplateSheet({
                       <DatePicker
                         date={field.value}
                         onChange={(date) => field.onChange(date)}
+                        disabled={(date) =>
+                          dayjs(date).isBefore(dayjs(), "day")
+                        }
                       />
                       <FormMessage />
                     </FormItem>
@@ -332,6 +335,9 @@ export default function CreateScheduleTemplateSheet({
                       <DatePicker
                         date={field.value}
                         onChange={(date) => field.onChange(date)}
+                        disabled={(date) =>
+                          dayjs(date).isBefore(dayjs(), "day")
+                        }
                       />
                       <FormMessage />
                     </FormItem>
@@ -690,8 +696,8 @@ export default function CreateScheduleTemplateSheet({
                       name: "",
                       slot_type: "appointment",
                       reason: "",
-                      start_time: "00:00",
-                      end_time: "00:00",
+                      start_time: undefined,
+                      end_time: undefined,
                       tokens_per_slot: null as unknown as number,
                       slot_size_in_minutes: null as unknown as number,
                       is_auto_fill: false,

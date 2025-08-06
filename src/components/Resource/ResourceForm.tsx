@@ -9,6 +9,7 @@ import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import RadioInput from "@/components/ui/RadioInput";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,6 @@ import { Textarea } from "@/components/ui/textarea";
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 import UserSelector from "@/components/Common/UserSelector";
-import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -49,8 +49,12 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
 import validators from "@/Utils/validators";
+import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
-import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
+import {
+  RESOURCE_REQUEST_STATUSES,
+  ResourceRequest,
+} from "@/types/resourceRequest/resourceRequest";
 import { UserBase } from "@/types/user/user";
 
 interface ResourceProps {
@@ -67,7 +71,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const authUser = useAuthUser();
 
   const resourceFormSchema = z.object({
-    status: z.string().min(1, { message: t("field_required") }),
+    status: z.enum(RESOURCE_REQUEST_STATUSES),
     category: z.string().min(1, { message: t("field_required") }),
     assigned_facility: z.object({
       id: z.string(),
@@ -75,7 +79,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     }),
     emergency: z.enum(["true", "false"]),
     title: z.string().min(1, { message: t("field_required") }),
-    reason: z.string().min(1, { message: t("field_required") }),
+    reason: z
+      .string()
+      .trim()
+      .min(1, { message: t("field_required") }),
     referring_facility_contact_name: z
       .string()
       .min(1, { message: t("field_required") }),
@@ -88,7 +95,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
   const { data: patientData } = useQuery({
     queryKey: ["patient", related_patient],
-    queryFn: query(routes.patient.getPatient, {
+    queryFn: query(patientApi.getPatient, {
       pathParams: { id: String(related_patient) },
     }),
     enabled: !!related_patient,

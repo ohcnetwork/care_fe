@@ -1,6 +1,6 @@
 import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
 
-import { Code } from "./code";
+import { Code } from "@/types/base/code/code";
 
 export type QuestionType =
   | "group"

@@ -89,7 +89,7 @@ export default function Calendar(props: Props) {
 
         {calendarDays.map((date, index) => {
           if (!date) {
-            return <div key={`empty-${index}`} className="min-h-[80px]" />;
+            return <div key={`empty-${index}`} className="min-h-16" />;
           }
 
           const isToday = date.toDateString() === new Date().toDateString();

@@ -1,5 +1,5 @@
 import { CaretSortIcon } from "@radix-ui/react-icons";
-import { BadgeCheck, LogOut } from "lucide-react";
+import { BadgeCheck, LogOut, RefreshCw } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -18,17 +18,17 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { useAppUpdates } from "@/hooks/useAppUpdates";
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 import { useCareApps } from "@/hooks/useCareApps";
 import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { formatName } from "@/Utils/utils";
-
-import { NavigationLink } from "./facility-nav";
 
 export function FacilityNavUser({
   selectedFacilityId,
@@ -40,6 +40,7 @@ export function FacilityNavUser({
   const { isMobile, open } = useSidebar();
   const { signOut } = useAuthContext();
   const careApps = useCareApps();
+  const { newVersion, updateApp } = useAppUpdates(false, undefined, true);
   const pluginNavItems = careApps
     .filter((c) => !!c.userNavItems)
     .flatMap((c) => c.userNavItems) as NavigationLink[];
@@ -57,7 +58,7 @@ export function FacilityNavUser({
               <Avatar
                 className="size-8 rounded-lg"
                 name={`${user.first_name} ${user.last_name}`}
-                imageUrl={user.read_profile_picture_url}
+                imageUrl={user.profile_picture_url}
               />
               {(open || isMobile) && (
                 <>
@@ -83,7 +84,7 @@ export function FacilityNavUser({
                 <Avatar
                   className="size-8 rounded-lg"
                   name={`${user.first_name} ${user.last_name}`}
-                  imageUrl={user.read_profile_picture_url}
+                  imageUrl={user.profile_picture_url}
                 />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
@@ -93,6 +94,18 @@ export function FacilityNavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
+            {newVersion && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  data-cy="user-menu-update"
+                  onClick={updateApp}
+                >
+                  <RefreshCw />
+                  {t("update_available")}
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem

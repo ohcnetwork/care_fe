@@ -1,8 +1,20 @@
 import { FacilityModel } from "@/components/Facility/models";
 import { UserBareMinimum } from "@/components/Users/models";
 
-import { Patient } from "@/types/emr/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import { UserBase } from "@/types/user/user";
+
+export const RESOURCE_REQUEST_STATUSES = [
+  "pending",
+  "approved",
+  "rejected",
+  "cancelled",
+  "transportation_to_be_arranged",
+  "transfer_in_progress",
+  "completed",
+] as const;
+
+export type ResourceRequestStatus = (typeof RESOURCE_REQUEST_STATUSES)[number];
 
 export interface ResourceRequest {
   approving_facility: FacilityModel | null;
@@ -16,19 +28,29 @@ export interface ResourceRequest {
   referring_facility_contact_name: string;
   referring_facility_contact_number: string;
   requested_quantity: number;
-  status: string;
+  status: ResourceRequestStatus;
   title: string;
   assigned_to: UserBase | null;
   created_by: UserBase;
   updated_by: UserBase;
   created_date: string;
   modified_date: string;
-  related_patient: Patient | null;
+  related_patient: PatientRead | null;
 }
+
+export const RESOURCE_REQUEST_STATUS_COLORS = {
+  pending: "yellow",
+  approved: "green",
+  rejected: "destructive",
+  cancelled: "secondary",
+  transportation_to_be_arranged: "secondary",
+  transfer_in_progress: "secondary",
+  completed: "secondary",
+} as const;
 
 export interface CreateResourceRequest {
   title: string;
-  status: string;
+  status: ResourceRequestStatus;
   reason: string;
   referring_facility_contact_name: string;
   referring_facility_contact_number: string;
@@ -47,7 +69,7 @@ export interface UpdateResourceRequest {
   title: string;
   reason: string;
   assigned_to: string | null;
-  status: string;
+  status: ResourceRequestStatus;
   referring_facility_contact_name: string;
   referring_facility_contact_number: string;
   approving_facility: string | null;

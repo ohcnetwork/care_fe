@@ -38,14 +38,14 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import mutate from "@/Utils/request/mutate";
 import { formatName } from "@/Utils/utils";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import { Code } from "@/types/base/code/code";
 import careTeamApi from "@/types/careTeam/careTeamApi";
-import { Encounter } from "@/types/emr/encounter";
-import { Code } from "@/types/questionnaire/code";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { UserBase } from "@/types/user/user";
 
 type CareTeamSheetProps = {
   trigger: React.ReactNode;
-  encounter: Encounter;
+  encounter: EncounterRead;
   canWrite: boolean;
 };
 
