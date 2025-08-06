@@ -1,8 +1,10 @@
-export const AllergyIcon = ({
-  className = "size-4",
-}: {
+import React from "react";
+
+interface IconProps {
   className?: string;
-}) => (
+}
+
+export const AllergyIcon: React.FC<IconProps> = ({ className = "size-4" }) => (
   <svg
     width="33"
     height="32"
@@ -27,7 +29,7 @@ export const AllergyIcon = ({
   </svg>
 );
 
-export const ChillIcon = ({ className = "size-4" }: { className?: string }) => (
+export const ChillIcon: React.FC<IconProps> = ({ className = "size-4" }) => (
   <svg
     width="33"
     height="32"
@@ -62,10 +64,8 @@ export const ChillIcon = ({ className = "size-4" }: { className?: string }) => (
   </svg>
 );
 
-export const StethoscopeIcon = ({
+export const StethoscopeIcon: React.FC<IconProps> = ({
   className = "size-4",
-}: {
-  className?: string;
 }) => (
   <svg
     width="33"
@@ -89,10 +89,8 @@ export const StethoscopeIcon = ({
   </svg>
 );
 
-export const HealthWorkerIcon = ({
+export const HealthWorkerIcon: React.FC<IconProps> = ({
   className = "size-4",
-}: {
-  className?: string;
 }) => (
   <svg
     width="33"
