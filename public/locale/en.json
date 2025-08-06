@@ -3690,7 +3690,7 @@
   "requirements": "Requirements",
   "reschedule": "Reschedule",
   "reschedule_appointment": "Reschedule Appointment",
-  "reschedule_appointment_warning": "<strong>Enter the reason for rescheduling.</strong> You are about to create a new appointment by clicking Continue. This action cannot be undone. The current appointment will be marked as Rescheduled, and the patient will be notified.",
+  "reschedule_appointment_warning": "You are about to create a new appointment by clicking Continue. This action cannot be undone. The current appointment will be marked as Rescheduled with above note, and the patient will be notified.",
   "reschedule_appointment_with": "Reschedule Appointment with",
   "rescheduled": "Rescheduled",
   "rescheduling": "Rescheduling...",
