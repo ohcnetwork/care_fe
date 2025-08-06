@@ -125,28 +125,6 @@ export function EncounterList({
     [status, encounterClass, priority, updateQuery],
   );
 
-  const filters = [
-    encounterStatusFilter("status"),
-    encounterClassFilter("encounter_class"),
-    encounterPriorityFilter("priority"),
-    tagFilter("tags", TagResource.ENCOUNTER),
-  ];
-
-  const onFilterUpdate = (query: Record<string, unknown>) => {
-    if (query.tags) {
-      query.tags = (query.tags as TagConfig[]).map((tag) => tag.id);
-    }
-    updateQuery(query);
-  };
-
-  const {
-    selectedFilters,
-    handleFilterChange,
-    handleOperationChange,
-    handleClearAll,
-    handleClearFilter,
-  } = useFilterState(filters, onFilterUpdate);
-
   const { data: queryEncounters, isLoading } = useQuery({
     queryKey: ["encounters", facilityId, qParams],
     queryFn: query.debounced(encounterApi.list, {
@@ -206,6 +184,31 @@ export function EncounterList({
   const selectedTags = tagQueries
     .map((query) => query.data)
     .filter(Boolean) as TagConfig[];
+
+  const filters = [
+    encounterStatusFilter("status"),
+    encounterClassFilter("encounter_class"),
+    encounterPriorityFilter("priority"),
+    tagFilter("tags", TagResource.ENCOUNTER),
+  ];
+
+  const onFilterUpdate = (query: Record<string, unknown>) => {
+    if (query.tags) {
+      query.tags = (query.tags as TagConfig[]).map((tag) => tag.id);
+    }
+    updateQuery(query);
+  };
+
+  const {
+    selectedFilters,
+    handleFilterChange,
+    handleOperationChange,
+    handleClearAll,
+    handleClearFilter,
+  } = useFilterState(filters, onFilterUpdate, {
+    ...qParams,
+    tags: selectedTags,
+  });
 
   return (
     <Page
