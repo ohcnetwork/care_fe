@@ -45,32 +45,32 @@ function SpecimenDefinitionCard({
   return (
     <Card>
       <CardContent className="p-6">
-        <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="mb-4 flex items-start gap-4">
           <div>
-            <div className="mb-2 flex items-center gap-2">
+            <div className="mb-2 flex items-center justify-between gap-2">
               <Badge
                 variant={SPECIMEN_DEFINITION_STATUS_COLORS[definition.status]}
               >
                 {t(definition.status)}
               </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  navigate(
+                    `/facility/${facilityId}/settings/specimen_definitions/${definition.id}`,
+                  )
+                }
+              >
+                <CareIcon icon="l-edit" className="size-4" />
+                {t("see_details")}
+              </Button>
             </div>
             <h3 className="font-medium text-gray-900">{definition.title}</h3>
             <p className="mt-1 text-sm text-gray-500 whitespace-pre-wrap">
               {definition.description}
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/settings/specimen_definitions/${definition.id}`,
-              )
-            }
-          >
-            <CareIcon icon="l-edit" className="size-4" />
-            {t("see_details")}
-          </Button>
         </div>
       </CardContent>
     </Card>
