@@ -51,13 +51,13 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceStatus } from "@/types/billing/invoice/invoice";
 import {
+  MEDICATION_DISPENSE_STATUS_COLORS,
   MedicationDispenseCategory,
   MedicationDispenseRead,
   MedicationDispenseStatus,
   MedicationDispenseUpdate,
   MedicationDispenseUpsert,
 } from "@/types/emr/medicationDispense/medicationDispense";
-import { MEDICATION_DISPENSE_STATUS_COLORS } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 
 interface MedicationTableProps {

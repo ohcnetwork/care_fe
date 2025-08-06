@@ -1,7 +1,6 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Info, QrCode, Scan /* User */ } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";

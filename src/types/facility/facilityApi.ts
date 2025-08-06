@@ -1,5 +1,4 @@
-import { FacilityModel } from "@/components/Facility/models";
-import { FacilityRequest } from "@/components/Facility/models";
+import { FacilityModel, FacilityRequest } from "@/components/Facility/models";
 
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";

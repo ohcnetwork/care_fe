@@ -36,8 +36,11 @@ import { formatPatientAge } from "@/Utils/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
-import { getPartialId } from "@/types/emr/patient/patient";
-import { PartialPatientModel, PatientRead } from "@/types/emr/patient/patient";
+import {
+  getPartialId,
+  PartialPatientModel,
+  PatientRead,
+} from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 
 interface Props {

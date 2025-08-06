@@ -7,7 +7,6 @@
 // service worker, and the Workbox build step will be skipped.
 import { clientsClaim } from "workbox-core";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { precacheAndRoute } from "workbox-precaching";
 
 declare const self: ServiceWorkerGlobalScope;
 

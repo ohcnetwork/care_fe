@@ -10,10 +10,10 @@ import {
   Command,
   CommandEmpty,
   CommandGroup,
+  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { CommandInput } from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,

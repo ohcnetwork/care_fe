@@ -31,11 +31,9 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import {
   ACTIVITY_DEFINITION_STATUS_COLORS,
-  type ActivityDefinitionReadSpec,
-} from "@/types/emr/activityDefinition/activityDefinition";
-import {
   Category,
   Status,
+  type ActivityDefinitionReadSpec,
 } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 

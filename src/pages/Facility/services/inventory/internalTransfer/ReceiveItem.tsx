@@ -54,8 +54,6 @@ import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryAp
 import {
   SUPPLY_REQUEST_PRIORITY_COLORS,
   SUPPLY_REQUEST_STATUS_COLORS,
-} from "@/types/inventory/supplyRequest/supplyRequest";
-import {
   SupplyRequestCreate,
   SupplyRequestStatus,
 } from "@/types/inventory/supplyRequest/supplyRequest";

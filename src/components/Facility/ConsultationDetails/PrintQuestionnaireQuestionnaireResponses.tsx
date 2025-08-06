@@ -12,8 +12,7 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Separator } from "@/components/ui/separator";
 
 import query from "@/Utils/request/query";
-import { formatDateTime } from "@/Utils/utils";
-import { formatName, formatPatientAge } from "@/Utils/utils";
+import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { PatientRead } from "@/types/emr/patient/patient";

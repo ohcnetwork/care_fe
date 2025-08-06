@@ -1,5 +1,4 @@
-import { CaretDownIcon } from "@radix-ui/react-icons";
-import { CheckIcon } from "@radix-ui/react-icons";
+import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { XIcon } from "lucide-react";
 import { useState } from "react";

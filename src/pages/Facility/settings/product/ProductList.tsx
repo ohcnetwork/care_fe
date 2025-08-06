@@ -22,18 +22,20 @@ import {
 } from "@/components/ui/table";
 
 import Page from "@/components/Common/Page";
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import {
+  CardGridSkeleton,
+  TableSkeleton,
+} from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import {
+  PRODUCT_STATUS_COLORS,
   ProductBase,
   ProductRead,
   ProductStatusOptions,
 } from "@/types/inventory/product/product";
-import { PRODUCT_STATUS_COLORS } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
 
 function ProductCard({

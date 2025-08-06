@@ -1,6 +1,5 @@
 import { Menu } from "lucide-react";
-import { useRoutes } from "raviger";
-import { Link } from "raviger";
+import { Link, useRoutes } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
