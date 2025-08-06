@@ -64,10 +64,9 @@ function LocationNode({
     >
       <div className="flex flex-col gap-2 ml-2">
         <div className="flex items-center text-sm">
-          <CareIcon
-            icon="l-corner-down-right"
-            className="size-4 mr-2 mb-1 text-gray-400"
-          />
+          <div className="relative border-l border-b border-gray-400 rounded-bl-sm size-2 -mt-1.5 mr-2">
+            <div className="absolute -bottom-0.75 -right-0.75 size-1.5 bg-gray-400 rounded-full" />
+          </div>
           <span
             className={isLast ? "font-semibold" : "text-gray-700 font-medium"}
           >
