@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import React from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -44,14 +45,9 @@ export default function EncounterDetailsTab({
             </span>
             <div>
               <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]}>
-                <CareIcon
-                  icon={
-                    ENCOUNTER_STATUS_ICONS[
-                      encounter.status as keyof typeof ENCOUNTER_STATUS_ICONS
-                    ] ?? "l-spinner"
-                  }
-                  className="size-4"
-                />
+                {React.createElement(ENCOUNTER_STATUS_ICONS[encounter.status], {
+                  className: "size-4",
+                })}
                 {t(`encounter_status__${encounter.status}`)}
               </Badge>
             </div>

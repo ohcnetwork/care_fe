@@ -1,7 +1,7 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import { DropletIcon, HandIcon, Plus } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { DropletIcon, HandIcon } from "lucide-react";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -15,9 +15,6 @@ import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 import { VitalsList } from "@/components/Patient/vitals/list";
-import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
-
-import { useIsMobile } from "@/hooks/use-mobile";
 
 import query from "@/Utils/request/query";
 import { formatTruncatedList } from "@/Utils/utils";
@@ -29,21 +26,6 @@ import {
   completedEncounterStatus,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
-
-const actionLinks = [
-  {
-    href: "questionnaire/allergy_intolerance",
-    label: "Add Allergy",
-  },
-  {
-    href: "questionnaire/diagnosis",
-    label: "Add Diagnosis",
-  },
-  {
-    href: "questionnaire/symptom",
-    label: "Add Symptoms",
-  },
-];
 
 export const EncounterOverviewTab = () => {
   const { t } = useTranslation();
@@ -88,7 +70,6 @@ export const EncounterOverviewTab = () => {
 
   const vitalGroups =
     plotsConfig?.find((plot) => plot.id === "primary-parameters")?.groups || [];
-  const isMobile = useIsMobile();
 
   return (
     <div className="flex flex-col gap-4">
@@ -149,41 +130,6 @@ export const EncounterOverviewTab = () => {
               </Button>
             </div>
           </div>
-          {canEdit && (
-            <div className="flex flex-col md:flex-row justify-between gap-2">
-              <div className="grid grid-cols-2 w-full sm:grid-cols-4 md:grid-cols-5  gap-2 mx-auto md:mx-0">
-                {actionLinks.map((link) => {
-                  return (
-                    <Button
-                      size={isMobile ? "md" : "sm"}
-                      variant="outline"
-                      asChild
-                      key={link.href}
-                      className="[&_svg]:size-3"
-                    >
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
-                      >
-                        <Plus />
-                        {link.label}
-                      </Link>
-                    </Button>
-                  );
-                })}
-                <div className="col-span-2 sm:col-span-4 md:col-span-1">
-                  <QuestionnaireSearch
-                    size={isMobile ? "md" : "sm"}
-                    onSelect={(selected) =>
-                      navigate(`questionnaire/${selected.slug}`)
-                    }
-                    subjectType="encounter"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
           {encounter ? (
             <EncounterDetailsTab encounter={encounter} canEdit={canEdit} />
           ) : (
