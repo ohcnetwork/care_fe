@@ -691,8 +691,8 @@ const Account = ({
         limit: 1,
       },
     }),
-    enabled: false,
   });
+
   return (
     <div>
       <div className="flex justify-between p-2 px-3">
@@ -708,7 +708,7 @@ const Account = ({
           <span className="text-sm text-black font-semibold">
             {response?.results[0]?.name}
           </span>
-          <Badge variant="green">{response?.results[0]?.status}</Badge>
+          <Badge variant="green">{response?.results[0]?.billing_status}</Badge>
         </div>
       </div>
     </div>
