@@ -1,9 +1,8 @@
-import { UserBareMinimum } from "@/components/Users/models";
-
 import { Code } from "@/types/base/code/code";
 import { DosageQuantity } from "@/types/emr/medicationRequest/medicationRequest";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { Quantity } from "@/types/questionnaire/quantity";
+import { UserReadMinimal } from "@/types/user/user";
 
 export const MEDICATION_ADMINISTRATION_STATUS = [
   "completed",
@@ -50,8 +49,8 @@ export interface MedicationAdministration {
 
   note?: string;
 
-  created_by?: UserBareMinimum;
-  updated_by?: UserBareMinimum;
+  created_by?: UserReadMinimal;
+  updated_by?: UserReadMinimal;
 }
 
 export interface MedicationAdministrationRequest {
@@ -96,6 +95,6 @@ export interface MedicationAdministrationRead {
     dose?: DosageQuantity;
     rate?: Quantity;
   };
-  created_by: UserBareMinimum;
-  updated_by: UserBareMinimum;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
 }

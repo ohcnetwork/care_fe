@@ -1,11 +1,11 @@
-import { UserBareMinimum } from "@/components/Users/models";
+import { UserReadMinimal } from "@/types/user/user";
 
 export interface BaseModel {
   readonly id: string;
   readonly modified_date: string;
   readonly created_date: string;
-  readonly created_by: UserBareMinimum;
-  readonly updated_by: UserBareMinimum;
+  readonly created_by: UserReadMinimal;
+  readonly updated_by: UserReadMinimal;
 }
 
 /**

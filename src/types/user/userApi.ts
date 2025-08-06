@@ -51,13 +51,13 @@ export default {
   uploadProfilePicture: {
     path: "/api/v1/users/{username}/profile_picture/",
     method: HttpMethod.POST,
-    TRes: Type<AuthUserModel>(),
+    TRes: Type<void>(),
     TBody: Type<FormData>(),
   },
   deleteProfilePicture: {
     path: "/api/v1/users/{username}/profile_picture/",
     method: HttpMethod.DELETE,
-    TRes: Type<AuthUserModel>(),
+    TRes: Type<void>(),
     TBody: Type<void>(),
   },
 } as const;

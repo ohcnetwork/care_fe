@@ -1,9 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 
-import { UserBareMinimum } from "@/components/Users/models";
-
 import { Code } from "@/types/base/code/code";
 import { Period } from "@/types/questionnaire/base";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum MedicationStatementInformationSourceType {
   PATIENT = "patient",
@@ -66,7 +65,7 @@ export type MedicationStatementRequest = {
   effective_period?: Period;
   information_source: MedicationStatementInformationSourceType;
   note?: string;
-  created_by?: UserBareMinimum;
+  created_by?: UserReadMinimal;
 };
 
 export type MedicationStatementRead = {
@@ -81,6 +80,6 @@ export type MedicationStatementRead = {
   note?: string;
   created_date: string;
   modified_date: string;
-  created_by: UserBareMinimum;
-  updated_by: UserBareMinimum;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
 };

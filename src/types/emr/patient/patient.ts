@@ -1,8 +1,7 @@
-import { UserBareMinimum } from "@/components/Users/models";
-
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { Organization } from "@/types/organization/organization";
 import { PatientIdentifier } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum BloodGroupChoices {
   A_negative = "A_negative",
@@ -44,8 +43,8 @@ export interface PatientRead extends Omit<PatientBase, "geo_organization"> {
   year_of_birth: number;
   created_date: string;
   modified_date: string;
-  created_by: UserBareMinimum | null;
-  updated_by: UserBareMinimum | null;
+  created_by: UserReadMinimal | null;
+  updated_by: UserReadMinimal | null;
   permissions: string[];
   instance_tags: TagConfig[];
   facility_tags: TagConfig[];
