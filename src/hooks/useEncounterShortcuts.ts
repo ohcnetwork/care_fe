@@ -3,19 +3,13 @@ import { useCallback, useMemo } from "react";
 
 import {
   type ShortcutConditions as BaseShortcutConditions,
+  type KeyboardShortcut,
   useKeyboardShortcuts,
 } from "@/hooks/useKeyboardShortcuts";
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
 import shortcutsConfig from "@/config/keyboardShortcuts.json";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-
-interface KeyboardShortcut {
-  key: string;
-  action: string;
-  description: string;
-  when: string;
-}
 
 interface ShortcutsConfig {
   global: KeyboardShortcut[];
