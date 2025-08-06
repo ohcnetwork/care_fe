@@ -1,70 +1,81 @@
-[
-  { "key": "a",                   "action": "add-allergy",
-                                  "description": "Add Allergy",
-                                  "when": "canEdit" },
-                                  
-  { "key": "s",                   "action": "add-symptoms", 
-                                  "description": "Add Symptoms",
-                                  "when": "canEdit" },
-                                  
-  { "key": "d",                   "action": "add-diagnosis",
-                                  "description": "Add Diagnosis", 
-                                  "when": "canEdit" },
-                                  
-  { "key": "e",                   "action": "update-encounter",
-                                  "description": "Update Encounter",
-                                  "when": "canEdit" },
-                                  
-  { "key": "h",                   "action": "clinical-history",
-                                  "description": "Clinical History",
-                                  "when": "always" },
-                                  
+{
+  "global": [
+    { "key": "escape",              "action": "close-dialog",
+                                    "description": "Close Dialog",
+                                    "when": "always" },
+    
+    { "key": "ctrl+k",              "action": "command-palette",
+                                    "description": "Open Command Palette",
+                                    "when": "always" },
+                                    
+    { "key": "?",                   "action": "show-shortcuts",
+                                    "description": "Show Keyboard Shortcuts",
+                                    "when": "always" }
+  ],
+  
+  "encounter": [
+    { "key": "a",                   "action": "add-allergy",
+                                    "description": "Add Allergy",
+                                    "when": "canEdit" },
+                                    
+    { "key": "s",                   "action": "add-symptoms", 
+                                    "description": "Add Symptoms",
+                                    "when": "canEdit" },
+                                    
+    { "key": "d",                   "action": "add-diagnosis",
+                                    "description": "Add Diagnosis", 
+                                    "when": "canEdit" },
+                                    
+    { "key": "e",                   "action": "update-encounter",
+                                    "description": "Update Encounter",
+                                    "when": "canEdit" },
+                                    
+    { "key": "h",                   "action": "clinical-history",
+                                    "description": "Clinical History",
+                                    "when": "always" },
 
-  { "key": "escape",              "action": "close-dialog",
-                                  "description": "Close Dialog",
-                                  "when": "always" },
+    { "key": "g g",                 "action": "encounter-overview",
+                                    "description": "Go to Overview",
+                                    "when": "always" },
+                                    
+    { "key": "g p",                 "action": "plots",
+                                    "description": "Go to Plots",
+                                    "when": "always" },
+                                    
+    { "key": "g o",                 "action": "observations", 
+                                    "description": "Go to Observations",
+                                    "when": "always" },
+                                    
+    { "key": "g m",                 "action": "medicines",
+                                    "description": "Go to Medicines",
+                                    "when": "always" },
+                                    
+    { "key": "g f",                 "action": "files",
+                                    "description": "Go to Files",
+                                    "when": "always" },
+                                    
+    { "key": "g n",                 "action": "notes",
+                                    "description": "Go to Notes", 
+                                    "when": "always" },
+                                    
+    { "key": "g d",                 "action": "devices",
+                                    "description": "Go to Devices",
+                                    "when": "always" },
+                                    
+    { "key": "g c",                 "action": "consents",
+                                    "description": "Go to Consents",
+                                    "when": "always" },
+                                    
+    { "key": "g s",                 "action": "service-requests",
+                                    "description": "Go to Service Requests",
+                                    "when": "always" },
+                                    
+    { "key": "g r",                 "action": "diagnostic-reports",
+                                    "description": "Go to Diagnostic Reports", 
+                                    "when": "always" },
 
-  { "key": "g g",                 "action": "encounter-overview",
-                                  "description": "Go to Overview",
-                                  "when": "always" },
-                                  
-  { "key": "g p",                 "action": "plots",
-                                  "description": "Go to Plots",
-                                  "when": "always" },
-                                  
-  { "key": "g o",                 "action": "observations", 
-                                  "description": "Go to Observations",
-                                  "when": "always" },
-                                  
-  { "key": "g m",                 "action": "medicines",
-                                  "description": "Go to Medicines",
-                                  "when": "always" },
-                                  
-  { "key": "g f",                 "action": "files",
-                                  "description": "Go to Files",
-                                  "when": "always" },
-                                  
-  { "key": "g n",                 "action": "notes",
-                                  "description": "Go to Notes", 
-                                  "when": "always" },
-                                  
-  { "key": "g d",                 "action": "devices",
-                                  "description": "Go to Devices",
-                                  "when": "always" },
-                                  
-  { "key": "g c",                 "action": "consents",
-                                  "description": "Go to Consents",
-                                  "when": "always" },
-                                  
-  { "key": "g s",                 "action": "service-requests",
-                                  "description": "Go to Service Requests",
-                                  "when": "always" },
-                                  
-  { "key": "g r",                 "action": "diagnostic-reports",
-                                  "description": "Go to Diagnostic Reports", 
-                                  "when": "always" },
-
-  { "key": "q 0",                 "action": "add-questionnaire",
-                                  "description": "Add Questionnaire",
-                                  "when": "canEdit && questionnairesEnabled" }
-]
+    { "key": "q q",                 "action": "add-questionnaire",
+                                    "description": "Add Questionnaire",
+                                    "when": "canEdit && questionnairesEnabled" }
+  ]
+}

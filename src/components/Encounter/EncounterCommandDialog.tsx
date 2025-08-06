@@ -1,12 +1,10 @@
 import {
   ArrowBigRight,
-  Check,
   Edit,
   FileText,
   HistoryIcon,
   NotebookPen,
   Plus,
-  Users,
 } from "lucide-react";
 import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -118,18 +116,6 @@ export function EncounterCommandDialog({
             label: t("manage_consents"),
             shortcut: getShortcutDisplay("manage-consents"),
             icon: <NotebookPen />,
-          },
-          {
-            id: "mark-complete",
-            label: t("mark_as_complete"),
-            icon: <Check />,
-            disabled: true,
-          },
-          {
-            id: "manage-care-team",
-            label: t("manage_care_team"),
-            icon: <Users />,
-            disabled: true,
           },
         ],
       },
