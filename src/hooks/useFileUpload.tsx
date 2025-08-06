@@ -23,7 +23,7 @@ import { DEFAULT_ALLOWED_EXTENSIONS } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import uploadFile from "@/Utils/request/uploadFile";
+import { uploadMultipleFiles } from "@/Utils/request/uploadFile";
 
 export type FileUploadOptions = {
   multiple?: boolean;
@@ -218,52 +218,6 @@ export default function useFileUpload(
       },
     });
 
-  const uploadfile = async (
-    data: CreateFileResponse,
-    file: File,
-    associating_id: string,
-  ) => {
-    const url = data.signed_url;
-    const internal_name = data.internal_name;
-    const newFile = new File([file], `${internal_name}`);
-
-    return new Promise<void>((resolve, reject) => {
-      uploadFile(
-        url,
-        newFile,
-        "PUT",
-        { "Content-Type": file.type },
-        async (xhr: XMLHttpRequest) => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            setProgress(null);
-            await markUploadComplete({
-              data,
-              associating_id: associating_id,
-            });
-            if (markUploadCompleteError) {
-              toast.error(t("file_error__mark_complete_failed"));
-              reject();
-              return;
-            }
-            resolve();
-          } else {
-            toast.error(
-              t("file_error__dynamic", { statusText: xhr.statusText }),
-            );
-            setProgress(null);
-            reject();
-          }
-        },
-        setProgress as any,
-        () => {
-          toast.error(t("file_error__network"));
-          setProgress(null);
-          reject();
-        },
-      );
-    });
-  };
-
   const { mutateAsync: createUpload } = useMutation({
     mutationFn: (body: {
       original_name: string;
@@ -295,7 +249,6 @@ export default function useFileUpload(
     if (!validateFileUpload()) return;
 
     setProgress(0);
-    const errors: File[] = [];
     if (combineToPDF) {
       if (!uploadFileNames.length || !uploadFileNames[0]) {
         setError(t("file_error__single_file_name"));
@@ -313,11 +266,11 @@ export default function useFileUpload(
         }
       }
     }
-
+    let filesToUpload = files;
     if (combineToPDF && files.length > 1) {
       const pdfFile = await generatePDF(files);
       if (pdfFile) {
-        files.splice(0, files.length, pdfFile);
+        filesToUpload = [pdfFile];
       } else {
         clearFiles();
         setError(t("file_error__generate_pdf"));
@@ -327,32 +280,48 @@ export default function useFileUpload(
 
     setUploading(true);
 
-    for (const [index, file] of files.entries()) {
-      try {
-        const data = await createUpload({
-          original_name: file.name ?? "",
-          file_type: fileType,
-          name:
-            allowNameFallback && uploadFileNames[index] === "" && file
-              ? file.name
-              : uploadFileNames[index],
-          associating_id,
-          file_category: category,
-          mime_type: file.type ?? "",
-        });
+    // helper functions for better readability
+    const createUploadFn = async (file: File, index: number) =>
+      await createUpload({
+        original_name: file.name ?? "",
+        file_type: fileType,
+        name:
+          allowNameFallback && uploadFileNames[index] === "" && file
+            ? file.name
+            : uploadFileNames[index],
+        associating_id,
+        file_category: category,
+        mime_type: file.type ?? "",
+      });
 
-        if (data) {
-          await uploadfile(data, file, associating_id);
-        }
-      } catch {
-        errors.push(file);
+    const markUploadCompleteHandler = async ({
+      data,
+      associating_id,
+    }: {
+      data: any;
+      associating_id: string;
+    }) => {
+      await markUploadComplete({ data, associating_id });
+      if (markUploadCompleteError) {
+        toast.error(t("file_error__mark_complete_failed"));
       }
-    }
+    };
+
+    const { errors } = await uploadMultipleFiles(
+      filesToUpload,
+      createUploadFn,
+      markUploadCompleteHandler,
+      {
+        associating_id,
+        setProgress,
+        setError,
+      },
+    );
 
     setUploading(false);
     setFiles(errors);
     setUploadFileNames(errors?.map((f) => f.name) ?? []);
-    setError(t("file_error__network"));
+    if (errors.length > 0) setError(t("file_error__network"));
     setCameraModalOpen(false);
   };
 

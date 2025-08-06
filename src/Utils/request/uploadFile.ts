@@ -2,10 +2,18 @@ import { t } from "i18next";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 
-import { handleUploadPercentage } from "@/Utils/request/utils";
-
 import { handleHttpError } from "./errorHandler";
 import { HTTPError } from "./types";
+
+function handleUploadPercentage(
+  event: ProgressEvent,
+  setUploadPercent: Dispatch<SetStateAction<number>>,
+) {
+  if (event.lengthComputable) {
+    const percentComplete = Math.round((event.loaded / event.total) * 100);
+    setUploadPercent(percentComplete);
+  }
+}
 
 const uploadFile = async (
   url: string,
@@ -62,4 +70,80 @@ const uploadFile = async (
     xhr.send(file);
   });
 };
+
+export const uploadMultipleFiles = async (
+  files: File[],
+  createUploadFn: (file: File, index: number) => Promise<any>,
+  markUploadCompleteFn: (args: {
+    data: any;
+    associating_id: string;
+  }) => Promise<any>,
+  options: {
+    associating_id: string;
+    setProgress: (progress: number) => void;
+    setError: (msg: string) => void;
+  },
+): Promise<{ errors: File[] }> => {
+  const { associating_id, setProgress, setError } = options;
+
+  const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
+  let completedFilesBytes = 0;
+  const errors: File[] = [];
+
+  const updateProgress = (currentFileBytes: number) => {
+    const totalUploadedBytes = completedFilesBytes + currentFileBytes;
+    setProgress(totalBytes > 0 ? (totalUploadedBytes / totalBytes) * 100 : 0);
+  };
+
+  const getSuccessHandler =
+    (file: File, data: any, resolve: () => void, reject: () => void) =>
+    async (xhr: XMLHttpRequest) => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        completedFilesBytes += file.size;
+        updateProgress(0);
+        await markUploadCompleteFn({ data, associating_id });
+        resolve();
+      } else {
+        toast.error(t("file_error__dynamic", { statusText: xhr.statusText }));
+        setError(t("file_error__dynamic", { statusText: xhr.statusText }));
+        reject();
+      }
+    };
+  const getErrorHandler = (reject: () => void) => () => {
+    toast.error(t("file_error__network"));
+    setError(t("file_error__network"));
+    reject();
+  };
+
+  for (const [index, file] of files.entries()) {
+    try {
+      const data = await createUploadFn(file, index);
+      if (data) {
+        await new Promise<void>((resolve, reject) => {
+          uploadFile(
+            data.signed_url,
+            new File([file], `${data.internal_name}`),
+            "PUT",
+            { "Content-Type": file.type },
+            getSuccessHandler(file, data, resolve, reject),
+            (percent: number | ((prev: number) => number)) => {
+              if (typeof percent === "number") {
+                const currentFileBytes = Math.round(
+                  (percent / 100) * file.size,
+                );
+                updateProgress(currentFileBytes);
+              }
+            },
+            getErrorHandler(reject),
+          );
+        });
+      }
+    } catch {
+      errors.push(file);
+      setError(t("file_error__network"));
+    }
+  }
+  return { errors };
+};
+
 export default uploadFile;
