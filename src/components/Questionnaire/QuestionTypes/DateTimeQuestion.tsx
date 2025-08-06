@@ -44,7 +44,7 @@ export function DateTimeQuestion({
 
   const currentValue = questionnaireResponse.values[index]?.value
     ? new Date(questionnaireResponse.values[index].value as string)
-    : undefined;
+    : new Date();
 
   const handleSelect = (date: Date | undefined) => {
     if (!date) return;
@@ -119,7 +119,7 @@ export function DateTimeQuestion({
             mode="single"
             selected={currentValue}
             onSelect={handleSelect}
-            initialFocus
+            autoFocus
           />
         </PopoverContent>
       </Popover>
