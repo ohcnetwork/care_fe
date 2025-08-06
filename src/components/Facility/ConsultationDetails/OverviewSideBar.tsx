@@ -2,7 +2,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { NotebookPen, Plus, SquarePen } from "lucide-react";
 import { navigate } from "raviger";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -45,13 +44,12 @@ interface Props {
 
 export default function SideOverview({ encounter, canEdit }: Props) {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState("details");
 
   return (
     <div className="w-72 flex flex-col gap-4">
       <div className="hidden md:block">
         <div className="w-full">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <Tabs defaultValue="details">
             <TabsList className="w-full bg-gray-100 justify-between border border-gray-200 -p-1">
               <TabsTrigger value="details" className="w-full">
                 {t("details")}
