@@ -372,7 +372,7 @@ export function NoteManager({
     fetchNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<PaginatedResponse<Message>>({
-    queryKey: ["messages", selectedThread],
+    queryKey: ["messages", selectedThread, patientId],
     queryFn: async ({ pageParam = 0 }) => {
       const response = await query(patientApi.getMessages, {
         pathParams: {
@@ -421,7 +421,9 @@ export function NoteManager({
       pathParams: { patientId, threadId: selectedThread! },
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["messages", selectedThread] });
+      queryClient.invalidateQueries({
+        queryKey: ["messages", selectedThread, patientId],
+      });
       setNewMessage("");
       setCommentAdded(true);
     },
