@@ -31,7 +31,6 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 
-import EncounterPropertyTab from "./EncounterDetailsTab";
 import { EncounterDiagnosticReportsTab } from "./tabs/EncounterDiagnosticReportsTab";
 import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
 import { EncounterServiceRequestTab } from "./tabs/EncounterServiceRequestTab";
@@ -166,7 +165,6 @@ export const EncounterShow = (props: Props) => {
     <Page title={t("encounter")} className="block" hideTitleOnPage>
       <EncounterHeader />
       <div className="flex flex-col lg:flex-row mt-4 sm:h-[calc(100vh-10rem)]">
-        <EncounterPropertyTab encounter={currentEncounter} />
         <EncounterHistorySelector />
         <NavTabs
           showMoreAfterIndex={showMoreAfterIndex}

@@ -21,6 +21,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 import query from "@/Utils/request/query";
 import { formatTruncatedList } from "@/Utils/utils";
+import EncounterDetailsTab from "@/pages/Encounters/EncounterDetailsTab";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import EncounterOverviewDevices from "@/pages/Facility/settings/devices/components/EncounterOverviewDevices";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
@@ -181,6 +182,13 @@ export const EncounterOverviewTab = () => {
                   />
                 </div>
               </div>
+            </div>
+          )}
+          {encounter ? (
+            <EncounterDetailsTab encounter={encounter} canEdit={canEdit} />
+          ) : (
+            <div className="flex-1 space-y-4 max-w-[18rem]">
+              <CardListSkeleton count={3} />
             </div>
           )}
           {/* Associated Devices Section */}

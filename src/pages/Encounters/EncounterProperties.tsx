@@ -233,7 +233,7 @@ export const StatusBadge = ({ encounter }: { encounter: EncounterRead }) => {
   );
 };
 
-const LocationPropertyBadge = ({
+export const LocationPropertyBadge = ({
   encounter,
   canEdit,
 }: {

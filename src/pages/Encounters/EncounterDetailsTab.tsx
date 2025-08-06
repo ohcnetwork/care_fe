@@ -21,14 +21,16 @@ import {
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
 
-interface EncounterPropertyTabProps {
+interface EncounterDetailsTabProps {
   encounter: EncounterRead;
+  canEdit: boolean;
   onUpdateDetails?: () => void;
 }
 
-export default function EncounterPropertyTab({
+export default function EncounterDetailsTab({
+  canEdit,
   encounter,
-}: EncounterPropertyTabProps) {
+}: EncounterDetailsTabProps) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("details");
 
@@ -132,8 +134,6 @@ export default function EncounterPropertyTab({
             </div>
           </div>
         </div>
-
-        {/* */}
       </div>
       <div>
         <span className="text-sm font-medium text-gray-700">
@@ -262,11 +262,11 @@ export default function EncounterPropertyTab({
         </TabsContent>
 
         <TabsContent value="actions">
-          <Actions />
+          <Actions encounter={encounter} canWrite={canEdit} />
         </TabsContent>
 
         <TabsContent value="reports">
-          <Actions />
+          <Actions encounter={encounter} canWrite={canEdit} />
         </TabsContent>
       </Tabs>
     </div>
