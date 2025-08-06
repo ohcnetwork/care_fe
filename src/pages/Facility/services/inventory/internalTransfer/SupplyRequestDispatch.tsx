@@ -106,10 +106,7 @@ export default function SupplyRequestDispatch({
 
   useEffect(() => {
     if (highlightedDeliveryId) {
-      highlightedRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
+      highlightedRef.current?.scrollIntoView();
       const timer = setTimeout(() => {
         setHighlightedDeliveryId(undefined);
         const newQParams = { ...qParams };
