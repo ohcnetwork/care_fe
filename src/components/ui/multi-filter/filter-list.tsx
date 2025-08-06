@@ -1,5 +1,6 @@
 import {
   ENCOUNTER_CLASS,
+  ENCOUNTER_PRIORITY,
   ENCOUNTER_STATUS,
   ENCOUNTER_STATUS_COLORS,
 } from "@/types/emr/encounter/encounter";
@@ -20,7 +21,7 @@ import {
 
 export const encounterStatusFilter = (
   key: string = "encounter_status",
-  mode: FilterMode = "multi",
+  mode: FilterMode = "single",
 ) =>
   createFilterConfig(
     key,
@@ -61,14 +62,14 @@ export const encounterStatusFilter = (
   );
 export const encounterClassFilter = (
   key: string = "encounter_class",
-  mode: FilterMode = "multi",
+  mode: FilterMode = "single",
 ) =>
   createFilterConfig(
     key,
     "class",
     "command",
-    Object.entries(ENCOUNTER_CLASS).map(([key, value]) => ({
-      value: key,
+    Array.from(ENCOUNTER_CLASS).map((value) => ({
+      value: value,
       label: `encounter_class__${value}`,
     })),
     undefined,
@@ -99,6 +100,48 @@ export const encounterClassFilter = (
     () => ["is", "is_not"],
     mode,
   );
+
+export const encounterPriorityFilter = (
+  key: string = "encounter_priority",
+  mode: FilterMode = "single",
+) =>
+  createFilterConfig(
+    key,
+    "priority",
+    "command",
+    Array.from(ENCOUNTER_PRIORITY).map((value) => ({
+      value: value.toLowerCase(),
+      label: `encounter_priority__${value}`,
+    })),
+    undefined,
+    (selected: FilterValues) => {
+      const selectedPriority = selected as string[];
+      if (typeof selectedPriority[0] === "string") {
+        const option = selectedPriority[0];
+        const firstSelectedIndex = Object.values(ENCOUNTER_PRIORITY).findIndex(
+          (o) => o === option,
+        );
+        const color = COLOR_PALETTE[firstSelectedIndex % COLOR_PALETTE.length];
+        const borderColor =
+          BADGE_BORDER_COLORS[firstSelectedIndex % BADGE_BORDER_COLORS.length];
+        const textColor =
+          BADGE_TEXT_COLORS[firstSelectedIndex % BADGE_TEXT_COLORS.length];
+        return (
+          <GenericSelectedBadge
+            selectedValue={`encounter_priority__${option}`}
+            selectedLength={selectedPriority.length}
+            color={color}
+            borderColor={borderColor}
+            textColor={textColor}
+          />
+        );
+      }
+      return <></>;
+    },
+    () => ["is", "is_not"],
+    mode,
+  );
+
 export const startedDateFilter = (key: string = "started_date") =>
   createFilterConfig(
     key,

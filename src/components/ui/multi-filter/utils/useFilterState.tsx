@@ -86,6 +86,9 @@ export default function useFilterState(
       ...prev,
       [filterKey]: { ...prev[filterKey], selected: [] },
     }));
+    onFilterUpdate?.({
+      [filterKey]: null,
+    });
   };
 
   return {

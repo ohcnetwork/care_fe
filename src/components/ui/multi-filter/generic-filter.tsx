@@ -56,6 +56,8 @@ export default function GenericFilter({
     if (!onFilterChange) return;
     if (checked) {
       onFilterChange(filter.key, [value]);
+    } else {
+      onFilterChange(filter.key, []);
     }
   };
 
@@ -131,12 +133,18 @@ function FilterOptionsList({
       {options.map((option, index) => (
         <div
           key={option.value}
-          className="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-50 transition-colors"
+          className="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-50 transition-colors cursor-pointer"
           ref={index === focusItemIndex ? setFocusItemRef : null}
           onFocus={() => setFocusItemIndex(index)}
           tabIndex={index}
+          onClick={() => {
+            onOptionToggle(
+              option.value,
+              !selectedValues.includes(option.value),
+            );
+          }}
           onKeyDown={(e) => {
-            if (e.key === " ") {
+            if (e.key === " " || e.key === "Enter") {
               e.preventDefault();
               onOptionToggle(
                 option.value,
@@ -147,18 +155,17 @@ function FilterOptionsList({
         >
           {mode === "single" ? (
             <RadioGroup
+              id={`${option.value}-${index}`}
               value={selectedValues[0]}
-              onValueChange={(value) => onOptionToggle(value, true)}
+              className="pointer-events-none"
+              onClick={(e) => e.stopPropagation()}
             >
               <RadioGroupItem value={option.value} />
             </RadioGroup>
           ) : (
             <Checkbox
               checked={selectedValues.includes(option.value)}
-              onCheckedChange={(checked) =>
-                onOptionToggle(option.value, checked as boolean)
-              }
-              className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+              className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500 pointer-events-none"
             />
           )}
           {showColorIndicators && (
