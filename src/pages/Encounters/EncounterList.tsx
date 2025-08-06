@@ -278,7 +278,8 @@ export function EncounterList({
                   onOperationChange={handleOperationChange}
                   onClearAll={handleClearAll}
                   onClearFilter={handleClearFilter}
-                  className="flex flex-row"
+                  className="flex flex-row items-center"
+                  triggerButtonClassName="h-9"
                 />
               </div>
             </div>

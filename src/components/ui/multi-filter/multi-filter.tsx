@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronRight, ListFilter } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useKeyboardShortcut from "use-keyboard-shortcut";
@@ -27,6 +27,8 @@ interface MultiFilterProps {
   onClearFilter: (filterKey: string) => void;
   placeholder?: string;
   className?: string;
+
+  triggerButtonClassName?: string;
   disabled?: boolean;
 }
 export default function MultiFilter({
@@ -37,6 +39,7 @@ export default function MultiFilter({
   onClearFilter,
   placeholder = "Filter",
   className,
+  triggerButtonClassName,
   disabled = false,
 }: MultiFilterProps) {
   const [open, setOpen] = useState(false);
@@ -99,14 +102,14 @@ export default function MultiFilter({
           <Button
             variant="outline"
             className={cn(
-              "justify-between min-w-[200px]",
+              "justify-between",
               hasAnyFilters && "border-blue-300 bg-blue-50",
-              className,
+              triggerButtonClassName,
             )}
             disabled={disabled}
           >
+            <ListFilter className="h-3 w-3" />
             <span className="truncate">{placeholder}</span>
-            <ChevronDown className="h-4 w-4 ml-2" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[320px] p-0" align="start">
@@ -136,7 +139,7 @@ export default function MultiFilter({
             !("to" in filterState.selected)) ||
           !filterState
         ) {
-          return <></>;
+          return null;
         }
         return (
           <SelectedFilterBar

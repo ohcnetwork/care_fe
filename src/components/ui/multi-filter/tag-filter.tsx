@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Folder } from "lucide-react";
+import { ChevronRight, Component } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useKeyboardShortcut from "use-keyboard-shortcut";
@@ -128,14 +128,27 @@ function TagFilterDropdown({
               >
                 <Checkbox checked={true} className="h-4 w-4" />
                 <div className="flex items-center gap-2 flex-1">
-                  <div
-                    className={cn(
-                      "h-3 w-3 rounded-full flex-shrink-0",
-                      getColorForTag(tag.id, index),
+                  {tag.parent && (
+                    <Component
+                      className="h-3 w-3 text-black/80"
+                      strokeWidth={1.25}
+                    />
+                  )}
+                  <span className="text-sm flex flex-row items-center gap-1">
+                    {tag.parent && (
+                      <span className="flex gap-1 items-center">
+                        <span className="text-gray-700">
+                          {tag.parent.display}
+                        </span>
+                        <ChevronRight className="h-3 w-3" />
+                      </span>
                     )}
-                  />
-                  <span className="text-sm">
-                    {tag.parent ? `${tag.parent.display} > ` : ""}
+                    <div
+                      className={cn(
+                        "h-3 w-3 rounded-full flex-shrink-0",
+                        getColorForTag(tag.id, index),
+                      )}
+                    />
                     {tag.display}
                   </span>
                 </div>
@@ -262,10 +275,12 @@ function GroupSubmenu({
       }}
     >
       <DropdownMenuSubTrigger className="flex items-center gap-2 px-2 py-1">
-        <div className="flex items-center gap-2 flex-1">
-          <Folder className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm">{group.display}</span>
-          <Badge variant="outline" className="text-xs">
+        <div className="flex items-center gap-2 flex-1 justify-between">
+          <div className="flex items-center gap-1">
+            <Component className="h-4 w-4 text-black/80" strokeWidth={1.25} />
+            <span className="text-sm">{group.display}</span>
+          </div>
+          <Badge variant="secondary" className="text-xs p-0.5">
             {t("group")}
           </Badge>
         </div>
@@ -373,7 +388,7 @@ export const SelectedTagBadge = ({ selected }: { selected: TagConfig[] }) => {
         </TooltipTrigger>
         <TooltipContent>
           {selected.map((tag) => (
-            <div key={tag.id}>{getTagHierarchyDisplay(tag)}</div>
+            <div key={tag.id}>{getTagHierarchyDisplay(tag, " > ")}</div>
           ))}
         </TooltipContent>
       </Tooltip>

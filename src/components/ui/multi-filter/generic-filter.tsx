@@ -156,7 +156,8 @@ function FilterOptionsList({
           {mode === "single" ? (
             <RadioGroup
               id={`${option.value}-${index}`}
-              value={selectedValues[0]}
+              value={selectedValues.length > 0 ? selectedValues[0] : ""}
+              onValueChange={() => {}}
               className="pointer-events-none"
               onClick={(e) => e.stopPropagation()}
             >
@@ -172,7 +173,7 @@ function FilterOptionsList({
             <div
               className={cn(
                 "h-3 w-3 rounded-full flex-shrink-0",
-                getColorForOption(index),
+                option.color || getColorForOption(index),
               )}
             />
           )}
@@ -188,23 +189,16 @@ function FilterOptionsList({
 export const GenericSelectedBadge = ({
   selectedValue,
   selectedLength,
-  color,
-  borderColor,
-  textColor,
+  className,
 }: {
   selectedValue: string;
   selectedLength: number;
-  color: string;
-  borderColor: string;
-  textColor: string;
+  className?: string;
 }) => {
   const { t } = useTranslation();
   return (
     <div className="flex items-center gap-1">
-      <Badge
-        variant="outline"
-        className={cn("text-xs", color, borderColor, textColor)}
-      >
+      <Badge variant="outline" className={cn("text-xs", className)}>
         {t(selectedValue)}
       </Badge>
       {selectedLength > 1 && (

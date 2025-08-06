@@ -2,7 +2,9 @@ import {
   ENCOUNTER_CLASS,
   ENCOUNTER_PRIORITY,
   ENCOUNTER_STATUS,
-  ENCOUNTER_STATUS_COLORS,
+  EncounterClass,
+  EncounterPriority,
+  EncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 
@@ -10,9 +12,9 @@ import { SelectedDateBadge, getDateOperations } from "./date-filter";
 import { GenericSelectedBadge } from "./generic-filter";
 import { SelectedTagBadge } from "./tag-filter";
 import {
-  BADGE_BORDER_COLORS,
-  BADGE_TEXT_COLORS,
-  COLOR_PALETTE,
+  ENCOUNTER_CLASS_FILTER_COLORS,
+  ENCOUNTER_PRIORITY_FILTER_COLORS,
+  ENCOUNTER_STATUS_FILTER_COLORS,
   FilterDateRange,
   FilterMode,
   FilterValues,
@@ -30,28 +32,19 @@ export const encounterStatusFilter = (
     Array.from(ENCOUNTER_STATUS).map((value) => ({
       value: value,
       label: value,
-      color: ENCOUNTER_STATUS_COLORS[value],
+      color: ENCOUNTER_STATUS_FILTER_COLORS[value],
     })),
     undefined,
     (selected: FilterValues) => {
       const selectedStatus = selected as string[];
       if (typeof selectedStatus[0] === "string") {
         const option = selectedStatus[0];
-        const firstSelectedIndex = Object.values(ENCOUNTER_STATUS).findIndex(
-          (o) => o === option,
-        );
-        const color = COLOR_PALETTE[firstSelectedIndex % COLOR_PALETTE.length];
-        const borderColor =
-          BADGE_BORDER_COLORS[firstSelectedIndex % BADGE_BORDER_COLORS.length];
-        const textColor =
-          BADGE_TEXT_COLORS[firstSelectedIndex % BADGE_TEXT_COLORS.length];
+        const color = ENCOUNTER_STATUS_FILTER_COLORS[option as EncounterStatus];
         return (
           <GenericSelectedBadge
             selectedValue={option}
             selectedLength={selectedStatus.length}
-            color={color}
-            borderColor={borderColor}
-            textColor={textColor}
+            className={color}
           />
         );
       }
@@ -71,27 +64,19 @@ export const encounterClassFilter = (
     Array.from(ENCOUNTER_CLASS).map((value) => ({
       value: value,
       label: `encounter_class__${value}`,
+      color: ENCOUNTER_CLASS_FILTER_COLORS[value as EncounterClass],
     })),
     undefined,
     (selected: FilterValues) => {
       const selectedClass = selected as string[];
       if (typeof selectedClass[0] === "string") {
         const option = selectedClass[0];
-        const firstSelectedIndex = Object.values(ENCOUNTER_CLASS).findIndex(
-          (o) => o === option,
-        );
-        const color = COLOR_PALETTE[firstSelectedIndex % COLOR_PALETTE.length];
-        const borderColor =
-          BADGE_BORDER_COLORS[firstSelectedIndex % BADGE_BORDER_COLORS.length];
-        const textColor =
-          BADGE_TEXT_COLORS[firstSelectedIndex % BADGE_TEXT_COLORS.length];
+        const color = ENCOUNTER_CLASS_FILTER_COLORS[option as EncounterClass];
         return (
           <GenericSelectedBadge
             selectedValue={`encounter_class__${option}`}
             selectedLength={selectedClass.length}
-            color={color}
-            borderColor={borderColor}
-            textColor={textColor}
+            className={color}
           />
         );
       }
@@ -112,27 +97,20 @@ export const encounterPriorityFilter = (
     Array.from(ENCOUNTER_PRIORITY).map((value) => ({
       value: value.toLowerCase(),
       label: `encounter_priority__${value}`,
+      color: ENCOUNTER_PRIORITY_FILTER_COLORS[value as EncounterPriority],
     })),
     undefined,
     (selected: FilterValues) => {
       const selectedPriority = selected as string[];
       if (typeof selectedPriority[0] === "string") {
         const option = selectedPriority[0];
-        const firstSelectedIndex = Object.values(ENCOUNTER_PRIORITY).findIndex(
-          (o) => o === option,
-        );
-        const color = COLOR_PALETTE[firstSelectedIndex % COLOR_PALETTE.length];
-        const borderColor =
-          BADGE_BORDER_COLORS[firstSelectedIndex % BADGE_BORDER_COLORS.length];
-        const textColor =
-          BADGE_TEXT_COLORS[firstSelectedIndex % BADGE_TEXT_COLORS.length];
+        const color =
+          ENCOUNTER_PRIORITY_FILTER_COLORS[option as EncounterPriority];
         return (
           <GenericSelectedBadge
             selectedValue={`encounter_priority__${option}`}
             selectedLength={selectedPriority.length}
-            color={color}
-            borderColor={borderColor}
-            textColor={textColor}
+            className={color}
           />
         );
       }
@@ -169,6 +147,7 @@ export const completedDateFilter = (key: string = "completed_date") =>
 export const tagFilter = (
   key: string = "tags",
   resource: TagResource = TagResource.ENCOUNTER,
+  mode: FilterMode = "multi",
 ) =>
   createFilterConfig(
     key,
@@ -184,4 +163,5 @@ export const tagFilter = (
       if (selectedTags.length === 1) return ["includes", "does_not_include"];
       return ["has_all_of", "has_any_of", "exclude_if_any", "exclude_if_all"];
     },
+    mode,
   );

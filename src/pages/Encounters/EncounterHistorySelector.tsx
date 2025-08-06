@@ -1,6 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { CircleDashed } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -12,10 +11,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FilterSelect } from "@/components/ui/filter-select";
 import {
-  completedDateFilter,
-  encounterClassFilter,
   encounterStatusFilter,
   startedDateFilter,
   tagFilter,
@@ -32,16 +28,13 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import { DateRangeFilter } from "@/components/Common/DateRangeFilter";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { dateTimeQueryString } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
-  ENCOUNTER_STATUS,
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
   completedEncounterStatus,
@@ -52,7 +45,6 @@ import {
   TagResource,
   getTagHierarchyDisplay,
 } from "@/types/emr/tagConfig/tagConfig";
-import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 
 interface EncounterCardProps {
   encounter: EncounterRead;
@@ -147,27 +139,6 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     facilityId,
   } = useEncounter();
 
-  const tagConfigsQuery = useTagConfigs({ ids: selectedTagIds, facilityId });
-  const selectedTags = tagConfigsQuery
-    .map((q) => q.data)
-    .filter(Boolean) as TagConfig[];
-
-  const handleStatusChange = (value: string | undefined) => {
-    setStatus(value);
-  };
-
-  const handleTagsChange = (tags: TagConfig[]) => {
-    setSelectedTagIds(tags.map((tag) => tag.id));
-  };
-
-  const handleDateFromChange = (date: Date | undefined) => {
-    setDateFrom(date);
-  };
-
-  const handleDateToChange = (date: Date | undefined) => {
-    setDateTo(date);
-  };
-
   const handleSelect = (encounterId: string | null) => {
     setSelectedEncounter(encounterId);
     onSelect?.();
@@ -228,12 +199,38 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
+  const onFilterUpdate = (query: Record<string, unknown>) => {
+    const [key, value] = Object.entries(query)[0];
+    const filterValue = value as
+      | string
+      | TagConfig[]
+      | { from: Date; to: Date };
+    switch (key) {
+      case "status":
+        setStatus(filterValue as string);
+        break;
+      case "tags":
+        setSelectedTagIds(
+          (filterValue as TagConfig[])?.map((tag) => tag.id) ?? [],
+        );
+        break;
+      case "created_date":
+        if (
+          typeof filterValue === "object" &&
+          "from" in filterValue &&
+          "to" in filterValue
+        ) {
+          setDateFrom(filterValue.from as Date);
+          setDateTo(filterValue.to as Date);
+        }
+        break;
+    }
+  };
+
   const filters = [
     encounterStatusFilter("status"),
-    encounterClassFilter("encounter_class"),
     tagFilter("tags", TagResource.ENCOUNTER),
-    startedDateFilter("started_date"),
-    completedDateFilter("completed_date"),
+    startedDateFilter("created_date"),
   ];
   const {
     selectedFilters,
@@ -241,7 +238,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     handleOperationChange,
     handleClearAll,
     handleClearFilter,
-  } = useFilterState(filters);
+  } = useFilterState(filters, onFilterUpdate);
 
   return (
     <div className="space-y-4 pt-2">
@@ -289,47 +286,9 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             onOperationChange={handleOperationChange}
             onClearAll={handleClearAll}
             onClearFilter={handleClearFilter}
-            placeholder="Filter encounters"
+            placeholder="Filter"
+            triggerButtonClassName="self-start"
           />
-
-          {showFilters && (
-            <div className="flex flex-col gap-2 mb-4">
-              <FilterSelect
-                value={status || ""}
-                onValueChange={handleStatusChange}
-                options={[...ENCOUNTER_STATUS]}
-                label={t("status")}
-                onClear={() => setStatus(undefined)}
-                icon={<CircleDashed className="size-4 text-gray-600" />}
-                className="bg-white font-medium rounded-md hover:bg-gray-100 h-9"
-              />
-
-              <TagSelectorPopover
-                selected={selectedTags}
-                onChange={handleTagsChange}
-                resource={TagResource.ENCOUNTER}
-                asFilter
-                className="mt-0 bg-white font-medium rounded-md"
-              />
-
-              <DateRangeFilter
-                dateFrom={dateFrom}
-                dateTo={dateTo}
-                onDateFromChange={handleDateFromChange}
-                onDateToChange={handleDateToChange}
-                onDateRangeChange={(from, to) => {
-                  setDateFrom(from);
-                  setDateTo(to);
-                }}
-                onClear={() => {
-                  setDateFrom(undefined);
-                  setDateTo(undefined);
-                }}
-                popoverPlaceholder={t("select_created_date_range")}
-                className="bg-white font-medium rounded-md"
-              />
-            </div>
-          )}
         </div>
 
         <div>
