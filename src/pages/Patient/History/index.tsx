@@ -53,18 +53,10 @@ export function ClinicalHistoryPage({
           ? t("patient_clinical_history_page_title", { name: patient?.name })
           : t("loading")
       }
-      hideTitleOnPage
+      className="text-lg font-semibold"
     >
       <div className="flex justify-between items-center bg-gray-100 -mx-3 -mt-8 md:-mt-8 md:-mx-9 px-3 md:px-6 pb-3 pt-2 md:rounded-t-lg">
-        <div>
-          {patient ? (
-            <h5 className="text-lg font-semibold">
-              {t("patient_clinical_history_page_title", { name: patient.name })}
-            </h5>
-          ) : (
-            <Skeleton className="w-20 h-4" />
-          )}
-        </div>
+        <div>{!patient && <Skeleton className="w-20 h-4" />}</div>
         <div>
           <Button variant="outline" onClick={handleClose} size="icon">
             <X className="size-4" />

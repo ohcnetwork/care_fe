@@ -221,7 +221,10 @@ export default function ServiceRequestList({
   };
 
   return (
-    <Page title={t("service_requests")} hideTitleOnPage>
+    <Page
+      title={t("service_requests")}
+      className="text-2xl font-semibold text-gray-900"
+    >
       <SpecimenIDScanDialog
         open={isBarcodeOpen}
         onOpenChange={setBarcodeOpen}
@@ -233,9 +236,6 @@ export default function ServiceRequestList({
           <div className="mb-4">
             <p className="text-sm text-gray-600">{location?.name}</p>
             <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
-              <h1 className="text-2xl font-semibold text-gray-900">
-                {t("service_requests")}
-              </h1>
               <Button
                 variant="primary"
                 size="sm"

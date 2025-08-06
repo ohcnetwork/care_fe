@@ -160,7 +160,10 @@ export default function TagConfigView({
   }
 
   return (
-    <Page title={tagConfig.display} hideTitleOnPage>
+    <Page
+      title={tagConfig.display}
+      className="text-2xl font-bold text-gray-900"
+    >
       <div className="container mx-auto space-y-6">
         <Button
           variant="outline"
@@ -178,9 +181,6 @@ export default function TagConfigView({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {tagConfig.display}
-              </h1>
               <p className="text-gray-600">{tagConfig.slug}</p>
             </div>
           </div>

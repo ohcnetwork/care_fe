@@ -103,14 +103,11 @@ export default function AdminOrganizationList({
 
   return (
     <>
-      <Page title={t(organizationType)} hideTitleOnPage className="p-0">
+      <Page title={t(organizationType)} className="p-0">
         <div className="container mx-auto">
-          <div className="flex flex-col sm:flex-row items-start justify-between mb-2 sm:mb-4">
-            <h3>{t(organizationType)}</h3>
-          </div>
           <ResizablePanelGroup
             direction="horizontal"
-            className="min-h-[calc(100vh-14rem)] rounded-lg"
+            className="min-h-[calc(100vh-14rem)] rounded-lg mb-2 sm:mb-4"
           >
             <ResizablePanel
               defaultSize={20}

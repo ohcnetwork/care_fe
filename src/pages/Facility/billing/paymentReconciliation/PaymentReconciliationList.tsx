@@ -24,14 +24,14 @@ export function PaymentReconciliationList({
   const effectiveAccountId = accountId || urlAccountId;
 
   return (
-    <Page title={t("payment_reconciliations")} hideTitleOnPage>
+    <Page
+      title={t("payment_reconciliations")}
+      className="text-2xl font-bold text-gray-700 mb-2"
+    >
       <div className="container mx-auto">
         <div className="mb-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-700 mb-2">
-                {t("payment_reconciliations")}
-              </h1>
               <p className="text-gray-600 text-sm">
                 {accountId
                   ? t("view_and_manage_account_payments")

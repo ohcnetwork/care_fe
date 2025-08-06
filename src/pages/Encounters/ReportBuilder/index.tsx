@@ -51,10 +51,9 @@ export default function ReportBuilderList({
     });
 
   return (
-    <Page title={t("available_templates")} hideTitleOnPage className="p-0">
+    <Page title={t("available_templates")} className="p-0">
       <div className="container mx-auto">
         <div className="flex flex-col sm:flex-row items-start justify-between mb-4 gap-2">
-          <h3>{t("available_templates")}</h3>
           {canManageTemplate && (
             <Button
               variant="outline"

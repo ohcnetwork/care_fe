@@ -80,14 +80,13 @@ export function IncomingDeliveries({ facilityId, locationId }: Props) {
   const deliveries = response?.results || [];
 
   return (
-    <Page title={t("inward_entry")} hideTitleOnPage>
+    <Page
+      title={t("inward_entry")}
+      className="text-xl font-semibold text-gray-900"
+    >
       <div className="container mx-auto">
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {t("inward_entry")}
-            </h1>
-
             <div className="flex flex-row gap-2">
               <Button variant="outline" size="sm" asChild>
                 <Link

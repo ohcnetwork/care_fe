@@ -115,12 +115,12 @@ export function ChargeItemDefinitionsList({
   const chargeItemDefinitions = response?.results || [];
 
   return (
-    <Page title={t("charge_item_definitions")} hideTitleOnPage>
+    <Page
+      title={t("charge_item_definitions")}
+      className="text-2xl font-bold text-gray-700"
+    >
       <div className="container mx-auto">
         <div className="mb-4">
-          <h1 className="text-2xl font-bold text-gray-700">
-            {t("charge_item_definitions")}
-          </h1>
           <div className="mb-6 flex sm:flex-row sm:items-center sm:justify-between flex-col gap-4">
             <div>
               <p className="text-gray-600 text-sm">

@@ -72,16 +72,11 @@ export default function SupplyDeliveryList({
   const deliveries = response?.results || [];
 
   return (
-    <Page title={t("supply_deliveries")} hideTitleOnPage>
+    <Page
+      title={t("supply_deliveries")}
+      className="text-xl font-semibold text-gray-900 mb-6"
+    >
       <div className="container mx-auto">
-        <div className="mb-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {t("supply_deliveries")}
-            </h1>
-          </div>
-        </div>
-
         <div className="mb-4 flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex-1">

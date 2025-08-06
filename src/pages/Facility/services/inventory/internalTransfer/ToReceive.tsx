@@ -39,13 +39,13 @@ export default function ToReceive({ facilityId, locationId }: Props) {
   };
 
   return (
-    <Page title={t("to_receive")} hideTitleOnPage>
+    <Page
+      title={t("to_receive")}
+      className="text-xl font-semibold text-gray-900"
+    >
       <div className="space-y-4">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">
-              {t("to_receive")}
-            </h2>
             <p className="mt-1 text-sm text-gray-600">
               {t("to_receive_description")}
             </p>

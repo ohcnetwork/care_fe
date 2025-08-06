@@ -191,13 +191,13 @@ export function PurchaseOrders({ facilityId, locationId }: Props) {
   );
 
   return (
-    <Page title={t("purchase_orders")} hideTitleOnPage>
+    <Page
+      title={t("purchase_orders")}
+      className="text-xl font-semibold text-gray-900"
+    >
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">
-              {t("purchase_orders")}
-            </h1>
             <p className="mt-1 text-sm text-gray-600">
               <Trans
                 i18nKey="raise_dispatch_request"

@@ -128,10 +128,9 @@ export default function RolesIndex() {
   };
 
   return (
-    <Page title={t("roles")} hideTitleOnPage>
+    <Page title={t("roles")} className="text-2xl font-bold text-gray-700">
       <div className="container mx-auto">
         <div className="mb-4">
-          <h1 className="text-2xl font-bold text-gray-700">{t("roles")}</h1>
           <div className="mb-6 flex items-center justify-between">
             <div>
               <p className="text-gray-600 text-sm">

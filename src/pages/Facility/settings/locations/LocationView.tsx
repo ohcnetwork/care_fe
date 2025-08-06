@@ -198,7 +198,10 @@ export default function LocationView({
         </BreadcrumbList>
       </Breadcrumb>
 
-      <Page hideTitleOnPage title={location?.name || t("location")}>
+      <Page
+        className="text-xl font-semibold"
+        title={location?.name || t("location")}
+      >
         <div className="space-y-6">
           <div className="flex flex-col justify-between items-start gap-4">
             <div className="flex items-center gap-2 flex-wrap">
@@ -210,7 +213,6 @@ export default function LocationView({
                 </>
               ) : (
                 <>
-                  <h2 className="text-xl font-semibold">{location?.name}</h2>
                   <Badge variant="outline" className="whitespace-nowrap">
                     {t(`location_form__${location?.form}`)}
                   </Badge>

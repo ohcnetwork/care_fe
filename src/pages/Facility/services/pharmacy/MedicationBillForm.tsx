@@ -1241,12 +1241,13 @@ export default function MedicationBillForm({ patientId }: Props) {
   };
 
   return (
-    <Page title={t("bill_medications")} hideTitleOnPage={true} isInsidePage>
+    <Page
+      title={t("bill_medications")}
+      className="text-2xl font-bold whitespace-nowrap"
+      isInsidePage
+    >
       <div>
         <div className="mb-6 flex items-center justify-between flex-wrap gap-2">
-          <h1 className="text-2xl font-bold whitespace-nowrap">
-            {t("bill_medications")}
-          </h1>
           <div className="flex gap-2 justify-end">
             <Button
               variant="outline"

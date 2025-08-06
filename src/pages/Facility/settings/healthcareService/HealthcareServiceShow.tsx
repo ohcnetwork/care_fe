@@ -46,13 +46,11 @@ export default function HealthcareServiceShow({
 
   if (isLoading) {
     return (
-      <Page title={t("healthcare_service_details")} hideTitleOnPage>
+      <Page
+        title={t("healthcare_service_details")}
+        className="text-xl font-semibold text-gray-900 mb-6"
+      >
         <div className="container mx-auto max-w-3xl">
-          <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {t("healthcare_service_details")}
-            </h1>
-          </div>
           <TableSkeleton count={1} />
         </div>
       </Page>
@@ -61,13 +59,11 @@ export default function HealthcareServiceShow({
 
   if (!healthcareService) {
     return (
-      <Page title={t("healthcare_service_details")} hideTitleOnPage>
+      <Page
+        title={t("healthcare_service_details")}
+        className="text-xl font-semibold text-gray-900 mb-6"
+      >
         <div className="container mx-auto max-w-3xl">
-          <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {t("healthcare_service_details")}
-            </h1>
-          </div>
           <Card>
             <CardContent className="flex h-[200px] items-center justify-center">
               <div className="text-center">
@@ -87,12 +83,12 @@ export default function HealthcareServiceShow({
   }
 
   return (
-    <Page title={t("healthcare_service_details")} hideTitleOnPage>
+    <Page
+      title={t("healthcare_service_details")}
+      className="text-xl font-semibold text-gray-900"
+    >
       <div className="container mx-auto max-w-3xl">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-gray-900">
-            {t("healthcare_service_details")}
-          </h1>
           <div className="flex gap-2">
             <Button
               variant="outline"

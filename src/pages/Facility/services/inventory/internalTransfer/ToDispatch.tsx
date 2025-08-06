@@ -46,7 +46,10 @@ export default function ToDispatch({ facilityId, locationId }: Props) {
   };
 
   return (
-    <Page title={t("to_dispatch")} hideTitleOnPage>
+    <Page
+      title={t("to_dispatch")}
+      className="text-xl font-semibold text-gray-900"
+    >
       <div className="space-y-4">
         <div className="flex flex-col">
           <p className="text-sm text-gray-700">
@@ -54,9 +57,6 @@ export default function ToDispatch({ facilityId, locationId }: Props) {
           </p>
 
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">
-              {t("to_dispatch")}
-            </h2>
             <p className="mt-1 text-sm text-gray-600">
               <Trans
                 i18nKey="raise_dispatch_request"

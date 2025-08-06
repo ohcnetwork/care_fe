@@ -139,11 +139,8 @@ export default function FacilityOrganizationList({
 
   return (
     <>
-      <Page title={t("departments_or_teams")} hideTitleOnPage className="p-0">
+      <Page title={t("departments_or_teams")} className="p-0">
         <div className="container mx-auto">
-          <div className="flex flex-col sm:flex-row items-start justify-between mb-2 sm:mb-4">
-            <h3>{t("departments_or_teams")}</h3>
-          </div>
           <div className="flex">
             <FacilityOrganizationNavbar
               facilityId={facilityId}
@@ -201,12 +198,11 @@ export default function FacilityOrganizationList({
               <Page
                 hideTitleOnPage
                 title={org?.name || ""}
-                className="mx-auto max-w-4xl"
+                className="mx-auto max-w-4xl text-xl font-semibold"
               >
                 {organizationId && org && (
                   <>
                     <div className="flex items-center">
-                      <h2 className="text-xl font-semibold">{org.name}</h2>
                       {org.org_type && (
                         <Badge variant="indigo" className="ml-2 w-auto">
                           {t(`facility_organization_type__${org.org_type}`)}

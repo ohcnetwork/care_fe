@@ -89,12 +89,9 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
   };
 
   return (
-    <Page title={t("tag_config")} hideTitleOnPage>
+    <Page title={t("tag_config")} className="text-2xl font-bold text-gray-700">
       <div className="container mx-auto">
         <div className="mb-4">
-          <h1 className="text-2xl font-bold text-gray-700">
-            {t("tag_config")}
-          </h1>
           <div className="mb-6 flex items-center justify-between">
             <div>
               <p className="text-gray-600 text-sm">

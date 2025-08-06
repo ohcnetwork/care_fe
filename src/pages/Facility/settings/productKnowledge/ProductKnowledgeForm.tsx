@@ -117,13 +117,11 @@ export default function ProductKnowledgeForm({
 
   if (isEditMode && isFetching) {
     return (
-      <Page title={t("edit_product_knowledge")} hideTitleOnPage>
+      <Page
+        title={t("edit_product_knowledge")}
+        className="text-xl font-semibold text-gray-900"
+      >
         <div className="container mx-auto max-w-3xl">
-          <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {t("edit_product_knowledge")}
-            </h1>
-          </div>
           <FormSkeleton rows={10} />
         </div>
       </Page>
@@ -292,17 +290,9 @@ function ProductKnowledgeFormContent({
       title={
         isEditMode ? t("edit_product_knowledge") : t("create_product_knowledge")
       }
-      hideTitleOnPage
+      className="text-xl font-semibold text-gray-900"
     >
       <div className="container mx-auto max-w-3xl">
-        <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">
-            {isEditMode
-              ? t("edit_product_knowledge")
-              : t("create_product_knowledge")}
-          </h1>
-        </div>
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {/* Basic Information Section */}

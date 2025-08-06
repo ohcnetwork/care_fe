@@ -118,10 +118,9 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
   const products = response?.results || [];
 
   return (
-    <Page title={t("products")} hideTitleOnPage>
+    <Page title={t("products")} className="text-2xl font-bold text-gray-700">
       <div className="container mx-auto">
         <div className="mb-4">
-          <h1 className="text-2xl font-bold text-gray-700">{t("products")}</h1>
           <div className="mb-6 flex sm:flex-row sm:items-center sm:justify-between flex-col gap-4">
             <div>
               <p className="text-gray-600 text-sm">{t("manage_products")}</p>

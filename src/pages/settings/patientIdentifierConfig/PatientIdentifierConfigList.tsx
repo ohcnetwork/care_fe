@@ -130,12 +130,12 @@ export default function PatientIdentifierConfigList({
   };
 
   return (
-    <Page title={t("patient_identifier_config")} hideTitleOnPage>
+    <Page
+      title={t("patient_identifier_config")}
+      className="text-2xl font-bold text-gray-700"
+    >
       <div className="container mx-auto">
         <div className="mb-4">
-          <h1 className="text-2xl font-bold text-gray-700">
-            {t("patient_identifier_config")}
-          </h1>
           <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-gray-600 text-sm">

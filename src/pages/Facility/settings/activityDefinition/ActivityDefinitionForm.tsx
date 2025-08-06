@@ -177,13 +177,11 @@ export default function ActivityDefinitionForm({
 
   if (isEditMode && isFetching) {
     return (
-      <Page title={t("edit_activity_definition")} hideTitleOnPage>
+      <Page
+        title={t("edit_activity_definition")}
+        className="text-xl font-semibold text-gray-900 mb-6"
+      >
         <div className="container mx-auto max-w-3xl">
-          <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {t("edit_activity_definition")}
-            </h1>
-          </div>
           <div className="flex items-center justify-center rounded-lg border border-gray-200 bg-white p-8">
             <div className="text-center">
               <div className="mb-2 text-sm text-gray-500">{t("loading")}</div>
@@ -463,17 +461,9 @@ function ActivityDefinitionFormContent({
           ? t("edit_activity_definition")
           : t("create_activity_definition")
       }
-      hideTitleOnPage
+      className="text-xl font-semibold text-gray-900 mb-6"
     >
       <div className="container mx-auto max-w-3xl">
-        <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">
-            {isEditMode
-              ? t("edit_activity_definition")
-              : t("create_activity_definition")}
-          </h1>
-        </div>
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {/* Basic Information Section */}

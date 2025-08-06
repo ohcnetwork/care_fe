@@ -157,12 +157,10 @@ export function ReceiveStock({
   return (
     <Page
       title={t("receive_stock")}
-      className="flex flex-col gap-4"
-      hideTitleOnPage
+      className="flex flex-col gap-4 text-2xl font-bold"
     >
       <div className="flex flex-row gap-2 justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold">{t("receive_stock")}</h1>
           <p className="text-sm text-gray-500">
             {t("receive_stock_description")}
           </p>

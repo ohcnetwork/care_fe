@@ -102,13 +102,13 @@ export default function HealthcareServiceList({
   const healthcareServices = response?.results || [];
 
   return (
-    <Page title={t("healthcare_services")} hideTitleOnPage>
+    <Page
+      title={t("healthcare_services")}
+      className="text-2xl font-bold text-gray-700"
+    >
       <div className="container mx-auto">
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-700">
-              {t("healthcare_services")}
-            </h1>
             <p className="mt-1 text-sm text-gray-600">
               {t("manage_healthcare_services")}
             </p>

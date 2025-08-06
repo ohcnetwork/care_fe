@@ -98,10 +98,9 @@ export default function FacilityServicesPage({
   const healthcareServices = response?.results || [];
 
   return (
-    <Page title={t("services")} hideTitleOnPage>
+    <Page title={t("services")} className="text-2xl font-bold text-gray-900">
       <div className="container mx-auto">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">{t("services")}</h1>
           <p className="mt-1 text-sm text-gray-600">
             {t("discover_healthcare_services")}
           </p>

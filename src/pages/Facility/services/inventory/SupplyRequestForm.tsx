@@ -316,11 +316,8 @@ export default function SupplyRequestForm({
 
   if (isEditMode && isFetching) {
     return (
-      <Page title={title} hideTitleOnPage>
+      <Page title={title} className="text-xl font-semibold text-gray-900 mb-6">
         <div className="container mx-auto max-w-3xl">
-          <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
-          </div>
           <FormSkeleton rows={10} />
         </div>
       </Page>
@@ -328,7 +325,7 @@ export default function SupplyRequestForm({
   }
 
   return (
-    <Page title={title} hideTitleOnPage>
+    <Page title={title} className="text-xl font-semibold text-gray-900">
       <div className="container mx-auto max-w-5xl">
         <div className="mb-6 relative">
           <Button
@@ -340,7 +337,6 @@ export default function SupplyRequestForm({
             <X className="size-5" />
             <span className="sr-only">{t("close")}</span>
           </Button>
-          <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
           <p className="mt-1 text-sm text-gray-600">{pageDescription}</p>
         </div>
         <Form {...form}>

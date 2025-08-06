@@ -307,13 +307,11 @@ export default function ReceiveItem({
 
   if (isLoading || !delivery) {
     return (
-      <Page title={t("to_receive")} hideTitleOnPage>
+      <Page
+        title={t("to_receive")}
+        className="text-xl font-semibold text-gray-900 mb-6"
+      >
         <div className="container mx-auto max-w-6xl">
-          <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {t("to_receive")}
-            </h1>
-          </div>
           <div className="flex justify-center items-center h-64">
             <div className="text-lg">{t("loading")}</div>
           </div>
@@ -371,13 +369,13 @@ export default function ReceiveItem({
   );
 
   return (
-    <Page title={t("to_receive")} hideTitleOnPage>
+    <Page
+      title={t("to_receive")}
+      className="text-xl font-semibold text-gray-900"
+    >
       <div className="max-w-6xl container mx-auto">
         <div className="flex justify-between">
           <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {t("to_receive")}
-            </h1>
             <div className="text-sm text-gray-600">
               {delivery.status === "in_progress" ? (
                 <>

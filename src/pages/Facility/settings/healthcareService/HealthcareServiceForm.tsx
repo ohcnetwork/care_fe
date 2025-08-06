@@ -86,13 +86,11 @@ export default function HealthcareServiceForm({
 
   if (isEditMode && isFetching) {
     return (
-      <Page title={t("edit_healthcare_service")} hideTitleOnPage>
+      <Page
+        title={t("edit_healthcare_service")}
+        className="text-xl font-semibold text-gray-900 mb-6"
+      >
         <div className="container mx-auto max-w-3xl">
-          <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {t("edit_healthcare_service")}
-            </h1>
-          </div>
           <div className="flex items-center justify-center rounded-lg border border-gray-200 bg-white p-8">
             <div className="text-center">
               <div className="mb-2 text-sm text-gray-500">
@@ -216,17 +214,9 @@ function HealthcareServiceFormContent({
           ? t("edit_healthcare_service")
           : t("create_healthcare_service")
       }
-      hideTitleOnPage
+      className="text-xl font-semibold text-gray-900 mb-6"
     >
       <div className="container mx-auto max-w-3xl">
-        <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">
-            {isEditMode
-              ? t("edit_healthcare_service")
-              : t("create_healthcare_service")}
-          </h1>
-        </div>
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {/* Basic Information Section */}

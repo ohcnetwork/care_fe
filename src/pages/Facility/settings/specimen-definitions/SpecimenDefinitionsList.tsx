@@ -114,12 +114,12 @@ export function SpecimenDefinitionsList({
   const specimenDefinitions = response?.results || [];
 
   return (
-    <Page title={t("specimen_definitions")} hideTitleOnPage>
+    <Page
+      title={t("specimen_definitions")}
+      className="text-2xl font-bold text-gray-700"
+    >
       <div className="container mx-auto">
         <div className="mb-4">
-          <h1 className="text-2xl font-bold text-gray-700">
-            {t("specimen_definitions")}
-          </h1>
           <div className="mb-6 flex sm:items-center sm:justify-between sm:flex-row flex-col gap-4">
             <div>
               <p className="text-gray-600 text-sm">
