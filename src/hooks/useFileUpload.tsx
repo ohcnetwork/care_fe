@@ -21,9 +21,9 @@ import {
 
 import { DEFAULT_ALLOWED_EXTENSIONS } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { uploadMultipleFiles } from "@/Utils/request/uploadFile";
+import filesApi from "@/types/files/filesApi";
 
 export type FileUploadOptions = {
   multiple?: boolean;
@@ -203,7 +203,7 @@ export default function useFileUpload(
         data: CreateFileResponse;
         associating_id: string;
       }) =>
-        mutate(routes.markUploadCompleted, {
+        mutate(filesApi.markUploadCompleted, {
           pathParams: {
             id: body.data.id,
           },
@@ -227,7 +227,7 @@ export default function useFileUpload(
       file_category: FileCategory;
       mime_type: string;
     }) =>
-      mutate(routes.createUpload, {
+      mutate(filesApi.createUpload, {
         body: {
           original_name: body.original_name,
           file_type: body.file_type,
@@ -280,37 +280,26 @@ export default function useFileUpload(
 
     setUploading(true);
 
-    // helper functions for better readability
-    const createUploadFn = async (file: File, index: number) =>
-      await createUpload({
-        original_name: file.name ?? "",
-        file_type: fileType,
-        name:
-          allowNameFallback && uploadFileNames[index] === "" && file
-            ? file.name
-            : uploadFileNames[index],
-        associating_id,
-        file_category: category,
-        mime_type: file.type ?? "",
-      });
-
-    const markUploadCompleteHandler = async ({
-      data,
-      associating_id,
-    }: {
-      data: any;
-      associating_id: string;
-    }) => {
-      await markUploadComplete({ data, associating_id });
-      if (markUploadCompleteError) {
-        toast.error(t("file_error__mark_complete_failed"));
-      }
-    };
-
     const { errors } = await uploadMultipleFiles(
       filesToUpload,
-      createUploadFn,
-      markUploadCompleteHandler,
+      async (file, index) =>
+        await createUpload({
+          original_name: file.name ?? "",
+          file_type: fileType,
+          name:
+            allowNameFallback && uploadFileNames[index] === "" && file
+              ? file.name
+              : uploadFileNames[index],
+          associating_id,
+          file_category: category,
+          mime_type: file.type ?? "",
+        }),
+      async ({ data, associating_id }) => {
+        await markUploadComplete({ data, associating_id });
+        if (markUploadCompleteError) {
+          toast.error(t("file_error__mark_complete_failed"));
+        }
+      },
       {
         associating_id,
         setProgress,
