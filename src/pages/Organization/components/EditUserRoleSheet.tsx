@@ -176,11 +176,7 @@ export default function EditUserRoleSheet({
               <Label className="text-sm font-medium">
                 {t("select_new_role")}
               </Label>
-              <RoleSelect
-                value={selectedRole}
-                onChange={setSelectedRole}
-                className="h-12"
-              />
+              <RoleSelect value={selectedRole} onChange={setSelectedRole} />
             </div>
 
             <div className="flex flex-col gap-2">

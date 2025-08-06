@@ -179,11 +179,7 @@ export default function LinkFacilityUserSheet({
                   {t("select_role")}
                 </label>
                 <div data-cy="select-role-dropdown">
-                  <RoleSelect
-                    value={selectedRole}
-                    onChange={setSelectedRole}
-                    className="h-12"
-                  />
+                  <RoleSelect value={selectedRole} onChange={setSelectedRole} />
                 </div>
               </div>
 

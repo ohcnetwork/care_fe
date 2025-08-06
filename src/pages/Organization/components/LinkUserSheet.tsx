@@ -178,11 +178,7 @@ export default function LinkUserSheet({
                   {t("select_role")}
                 </Label>
                 <div data-cy="select-role-dropdown">
-                  <RoleSelect
-                    value={selectedRole}
-                    onChange={setSelectedRole}
-                    className="h-12"
-                  />
+                  <RoleSelect value={selectedRole} onChange={setSelectedRole} />
                 </div>
               </div>
               <Button

@@ -174,11 +174,7 @@ export default function EditUserRoleSheet({
               {t("select_new_role")}
             </Label>
             <div data-cy="select-updated-role">
-              <RoleSelect
-                value={selectedRole}
-                onChange={setSelectedRole}
-                className="h-12"
-              />
+              <RoleSelect value={selectedRole} onChange={setSelectedRole} />
             </div>
           </div>
 
