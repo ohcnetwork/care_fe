@@ -15,27 +15,29 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 
 type EncounterContextType = {
-  currentEncounterId: string;
   facilityId?: string;
   patientId: string;
+  primaryEncounterId: string;
   selectedEncounterId: string;
 
   patient: PatientRead | undefined;
-  currentEncounter: EncounterRead | undefined;
+  primaryEncounter: EncounterRead | undefined;
   selectedEncounter: EncounterRead | undefined;
   isPatientLoading: boolean;
-  isCurrentEncounterLoading: boolean;
+  isPrimaryEncounterLoading: boolean;
   isSelectedEncounterLoading: boolean;
   setSelectedEncounter: (encounterId: string | null) => void;
-  currentEncounterPermissions: Permissions;
+  primaryEncounterPermissions: Permissions;
   selectedEncounterPermissions: Permissions;
   patientPermissions: Permissions;
 
-  canAccessCurrentEncounter: boolean;
+  canAccessPrimaryEncounter: boolean;
   canAccessSelectedEncounter: boolean;
+  canAccessClinicalData: boolean;
 
-  canEditCurrentEncounter: boolean;
-  canEditSelectedEncounter: boolean;
+  canWritePrimaryEncounter: boolean;
+  canWriteSelectedEncounter: boolean;
+  canWriteClinicalData: boolean;
 };
 
 const encounterContext = createContext<EncounterContextType | undefined>(
@@ -44,7 +46,7 @@ const encounterContext = createContext<EncounterContextType | undefined>(
 
 export function EncounterProvider({
   children,
-  encounterId,
+  encounterId: primaryEncounterId,
   facilityId,
   patientId,
 }: {
@@ -53,9 +55,10 @@ export function EncounterProvider({
   facilityId?: string;
   patientId: string;
 }) {
-  const currentEncounterId = encounterId;
-  const [{ selectedEncounter: selectedEncounterId = encounterId }, setQParams] =
-    useQueryParams();
+  const [
+    { selectedEncounter: selectedEncounterId = primaryEncounterId },
+    setQParams,
+  ] = useQueryParams();
 
   const { data: patient, isLoading: isPatientLoading } = useQuery({
     queryKey: ["patient", patientId],
@@ -64,11 +67,11 @@ export function EncounterProvider({
     }),
   });
 
-  const { data: currentEncounter, isLoading: isCurrentEncounterLoading } =
+  const { data: primaryEncounter, isLoading: isPrimaryEncounterLoading } =
     useQuery({
-      queryKey: ["encounter", currentEncounterId],
+      queryKey: ["encounter", primaryEncounterId],
       queryFn: query(encounterApi.get, {
-        pathParams: { id: currentEncounterId },
+        pathParams: { id: primaryEncounterId },
         queryParams: facilityId
           ? { facility: facilityId }
           : { patient: patientId },
@@ -95,9 +98,9 @@ export function EncounterProvider({
 
   const { hasPermission } = usePermissions();
 
-  const currentEncounterPermissions = getPermissions(
+  const primaryEncounterPermissions = getPermissions(
     hasPermission,
-    currentEncounter?.permissions ?? [],
+    primaryEncounter?.permissions ?? [],
   );
 
   const selectedEncounterPermissions = getPermissions(
@@ -116,44 +119,57 @@ export function EncounterProvider({
     selectedEncounterPermissions.canViewClinicalData;
 
   // User can edit the selected encounter if it was accessed via facility scope, is the same as the primary encounter in view, and is active
-  const canEditSelectedEncounter =
+  const canWriteSelectedEncounter =
     canAccessSelectedEncounter &&
     !!facilityId &&
-    selectedEncounterId === currentEncounterId &&
-    !inactiveEncounterStatus.includes(selectedEncounter?.status ?? "");
+    selectedEncounterId === primaryEncounterId &&
+    !!selectedEncounter &&
+    !inactiveEncounterStatus.includes(selectedEncounter.status);
 
   // User can access the current encounter if they have canViewEncounter or canViewClinicalData permission
-  const canAccessCurrentEncounter =
-    currentEncounterPermissions.canViewEncounter ||
-    currentEncounterPermissions.canViewClinicalData;
+  const canAccessPrimaryEncounter =
+    primaryEncounterPermissions.canViewEncounter ||
+    primaryEncounterPermissions.canViewClinicalData;
 
   // User can edit the current encounter if it was accessed via facility scope and is active
-  const canEditCurrentEncounter =
-    canAccessCurrentEncounter &&
+  const canWritePrimaryEncounter =
+    canAccessPrimaryEncounter &&
     !!facilityId &&
-    !inactiveEncounterStatus.includes(currentEncounter?.status ?? "");
+    !!primaryEncounter &&
+    !inactiveEncounterStatus.includes(primaryEncounter.status);
+
+  // User can access clinical data if they have canViewClinicalData permission or canViewEncounter permission
+  const canAccessClinicalData =
+    patientPermissions.canViewClinicalData ||
+    selectedEncounterPermissions.canViewEncounter;
+
+  // User can write clinical data if they have canViewClinicalData permission and can write the selected encounter
+  const canWriteClinicalData =
+    canAccessClinicalData && canWriteSelectedEncounter;
 
   return (
     <encounterContext.Provider
       value={{
-        currentEncounterId,
         facilityId,
         patientId,
+        primaryEncounterId,
         selectedEncounterId,
         patient,
-        currentEncounter,
+        primaryEncounter,
         selectedEncounter,
         isPatientLoading,
-        isCurrentEncounterLoading,
+        isPrimaryEncounterLoading,
         isSelectedEncounterLoading,
         setSelectedEncounter,
-        currentEncounterPermissions,
+        primaryEncounterPermissions,
         selectedEncounterPermissions,
         patientPermissions,
         canAccessSelectedEncounter,
-        canEditSelectedEncounter,
-        canAccessCurrentEncounter,
-        canEditCurrentEncounter,
+        canWriteSelectedEncounter,
+        canAccessPrimaryEncounter,
+        canWritePrimaryEncounter,
+        canAccessClinicalData,
+        canWriteClinicalData,
       }}
     >
       {children}

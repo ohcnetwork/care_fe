@@ -6,17 +6,15 @@ export const EncounterFilesTab = () => {
   const {
     selectedEncounter: encounter,
     patient,
-    currentEncounterId,
+    canWriteSelectedEncounter,
   } = useEncounter();
-
-  const readOnly = encounter?.id !== currentEncounterId;
 
   return (
     <FilesTab
       type="encounter"
       encounter={encounter}
       patient={patient}
-      readOnly={readOnly}
+      readOnly={!canWriteSelectedEncounter}
     />
   );
 };

@@ -55,7 +55,6 @@ import {
   CreateConsentRequest,
 } from "@/types/consent/consent";
 import consentApi from "@/types/consent/consentApi";
-import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 
 interface FileEntry {
   file: File;
@@ -122,12 +121,9 @@ export default function ConsentFormSheet({
   const isEdit = !!existingConsent;
   const {
     selectedEncounterId: encounterId,
-    selectedEncounter: encounter,
+    canWriteSelectedEncounter,
     patientId,
   } = useEncounter();
-
-  const readOnly =
-    encounter && inactiveEncounterStatus.includes(encounter.status);
 
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -287,9 +283,11 @@ export default function ConsentFormSheet({
       createConsent(consentData);
     }
   };
-  if (readOnly) {
+
+  if (!canWriteSelectedEncounter) {
     return null;
   }
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>

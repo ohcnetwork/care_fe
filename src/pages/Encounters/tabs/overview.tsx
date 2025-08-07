@@ -22,7 +22,7 @@ export const EncounterOverviewTab = () => {
     patientId,
     selectedEncounterId: encounterId,
     canAccessSelectedEncounter: canAccess,
-    canEditSelectedEncounter: canEdit,
+    canWriteSelectedEncounter: canWrite,
   } = useEncounter();
 
   const { data: plotsConfig } = useQuery<ObservationPlotConfig>({
@@ -39,9 +39,7 @@ export const EncounterOverviewTab = () => {
         <div className="flex flex-col gap-6">
           <QuickActions />
           <ClinicalHistoryOverview />
-          <div className="xl:hidden">
-            <SummaryPanel />
-          </div>
+          <SummaryPanel />
 
           <div className="flex flex-col gap-8 overflow-x-auto">
             {/* Show preview of devices associated with the encounter */}
@@ -50,18 +48,18 @@ export const EncounterOverviewTab = () => {
             <AllergyList
               patientId={patientId}
               encounterId={encounterId}
-              readOnly={!canEdit}
+              readOnly={!canWrite}
               encounterStatus={encounter?.status}
             />
             <SymptomsList
               patientId={patientId}
               encounterId={encounterId}
-              readOnly={!canEdit}
+              readOnly={!canWrite}
             />
             <DiagnosisList
               patientId={patientId}
               encounterId={encounterId}
-              readOnly={!canEdit}
+              readOnly={!canWrite}
             />
             <VitalsList
               patientId={patientId}
@@ -77,7 +75,7 @@ export const EncounterOverviewTab = () => {
         </div>
       </ScrollArea>
 
-      <ScrollArea className="w-72 h-[calc(100vh-12rem)] hidden xl:block">
+      <ScrollArea className="w-72 h-[calc(100vh-12rem)]">
         <SummaryPanel />
       </ScrollArea>
     </div>

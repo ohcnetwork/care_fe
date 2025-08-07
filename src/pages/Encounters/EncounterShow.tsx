@@ -47,11 +47,11 @@ interface Props {
 export const EncounterShow = (props: Props) => {
   const {
     facilityId,
-    currentEncounter,
+    primaryEncounter,
     selectedEncounter,
-    currentEncounterId,
+    primaryEncounterId,
     selectedEncounterId,
-    isCurrentEncounterLoading,
+    isPrimaryEncounterLoading,
     patient,
     isPatientLoading,
   } = useEncounter();
@@ -72,7 +72,7 @@ export const EncounterShow = (props: Props) => {
 
   const { canViewEncounter } = getPermissions(
     hasPermission,
-    currentEncounter?.permissions ?? [],
+    primaryEncounter?.permissions ?? [],
   );
 
   const { canViewClinicalData } = getPermissions(
@@ -83,16 +83,16 @@ export const EncounterShow = (props: Props) => {
   const canAccess = canViewClinicalData || canViewEncounter;
 
   useEffect(() => {
-    if (!isCurrentEncounterLoading && !isPatientLoading && !canAccess) {
+    if (!isPrimaryEncounterLoading && !isPatientLoading && !canAccess) {
       toast.error(t("permission_denied_encounter"));
       goBack("/");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCurrentEncounterLoading, isPatientLoading]);
+  }, [isPrimaryEncounterLoading, isPatientLoading]);
 
   if (
-    isCurrentEncounterLoading ||
-    !currentEncounter ||
+    isPrimaryEncounterLoading ||
+    !primaryEncounter ||
     (!facilityId && !patient)
   ) {
     return <Loading />;
@@ -180,7 +180,7 @@ export const EncounterShow = (props: Props) => {
           onTabChange={(tab) =>
             navigate(tab, {
               query:
-                currentEncounterId !== selectedEncounterId
+                primaryEncounterId !== selectedEncounterId
                   ? { selectedEncounter: selectedEncounterId }
                   : undefined,
             })

@@ -33,7 +33,6 @@ import query from "@/Utils/request/query";
 import AssociateDeviceSheet from "@/pages/Encounters/AssociateDeviceSheet";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import deviceApi from "@/types/device/deviceApi";
-import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 
 export const EncounterDevicesTab = () => {
   const { t } = useTranslation();
@@ -43,13 +42,8 @@ export const EncounterDevicesTab = () => {
     selectedEncounterId: encounterId,
     patientId,
     facilityId,
-    currentEncounterId,
-    selectedEncounter: encounter,
+    canWriteSelectedEncounter,
   } = useEncounter();
-
-  const readOnly =
-    encounterId !== currentEncounterId ||
-    (encounter && inactiveEncounterStatus.includes(encounter.status));
 
   const limit = RESULTS_PER_PAGE_LIMIT;
 
@@ -125,7 +119,7 @@ export const EncounterDevicesTab = () => {
                             <span>{device.care_type || "-"}</span>
                           </TableCell>
                           <TableCell>
-                            {!readOnly && (
+                            {canWriteSelectedEncounter && (
                               <div className="flex items-center">
                                 <TooltipProvider>
                                   <Tooltip>
@@ -174,7 +168,7 @@ export const EncounterDevicesTab = () => {
               />
             )}
 
-            {facilityId && !readOnly && (
+            {facilityId && canWriteSelectedEncounter && (
               <AssociateDeviceSheet
                 facilityId={facilityId}
                 encounterId={encounterId}

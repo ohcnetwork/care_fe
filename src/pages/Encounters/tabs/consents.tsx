@@ -22,7 +22,6 @@ import { formatDateTime } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { ConsentModel } from "@/types/consent/consent";
 import consentApi from "@/types/consent/consentApi";
-import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 
 const CONSENTS_PER_PAGE = 12;
 
@@ -173,13 +172,8 @@ export const EncounterConsentsTab = () => {
   const {
     selectedEncounterId: encounterId,
     patientId,
-    currentEncounterId,
-    selectedEncounter: encounter,
+    canWriteSelectedEncounter,
   } = useEncounter();
-
-  const readOnly =
-    encounterId !== currentEncounterId ||
-    (encounter && inactiveEncounterStatus.includes(encounter.status));
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: CONSENTS_PER_PAGE,
@@ -227,7 +221,7 @@ export const EncounterConsentsTab = () => {
           />
         </div>
 
-        {!readOnly && <ConsentFormSheet />}
+        {canWriteSelectedEncounter && <ConsentFormSheet />}
       </div>
 
       {filteredConsents && filteredConsents.length > 0 ? (

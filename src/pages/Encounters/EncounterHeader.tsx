@@ -24,17 +24,13 @@ import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 export function EncounterHeader() {
   const { t } = useTranslation();
-  const {
-    currentEncounter: encounter,
-    selectedEncounterId,
-    currentEncounterId,
-  } = useEncounter();
+  const { primaryEncounter: encounter, canWriteSelectedEncounter } =
+    useEncounter();
+  const readOnly = !canWriteSelectedEncounter;
 
   if (!encounter) {
     return <CardListSkeleton count={1} />;
   }
-
-  const readOnly = selectedEncounterId !== currentEncounterId;
 
   const { patient, facility } = encounter;
 

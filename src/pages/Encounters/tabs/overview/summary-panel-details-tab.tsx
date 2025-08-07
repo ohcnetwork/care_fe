@@ -38,7 +38,7 @@ import { Questionnaires } from "./summary-panel-details-tab/questionnaires";
 
 export const SummaryPanelDetailTab = () => {
   const { t } = useTranslation();
-  const { selectedEncounter: encounter, canEditSelectedEncounter: canEdit } =
+  const { selectedEncounter: encounter, canWriteSelectedEncounter: canEdit } =
     useEncounter();
   const queryClient = useQueryClient();
 

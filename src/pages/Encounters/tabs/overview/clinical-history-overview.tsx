@@ -21,8 +21,8 @@ export const ClinicalHistoryOverview = (props: React.ComponentProps<"div">) => {
     facilityId,
     patientId,
     patient,
-    currentEncounterId,
-    currentEncounter,
+    primaryEncounter,
+    primaryEncounterId,
   } = useEncounter();
 
   const { data: allergies } = useQuery({
@@ -35,8 +35,8 @@ export const ClinicalHistoryOverview = (props: React.ComponentProps<"div">) => {
     }),
     // Voluntarily doing as this is available only if permitted.
     enabled:
-      currentEncounter &&
-      !completedEncounterStatus.includes(currentEncounter.status),
+      primaryEncounter &&
+      !completedEncounterStatus.includes(primaryEncounter.status),
   });
 
   return (
@@ -85,7 +85,7 @@ export const ClinicalHistoryOverview = (props: React.ComponentProps<"div">) => {
           className="md:w-auto w-full"
         >
           <Link
-            href={`/facility/${facilityId}/patient/${patientId}/history/symptoms?sourceUrl=${encodeURIComponent(`/facility/${facilityId}/patient/${patientId}/encounter/${currentEncounterId}/updates`)}`}
+            href={`/facility/${facilityId}/patient/${patientId}/history/symptoms?sourceUrl=${encodeURIComponent(`/facility/${facilityId}/patient/${patientId}/encounter/${primaryEncounterId}/updates`)}`}
           >
             <img
               src="/images/icons/clinical_history.svg"

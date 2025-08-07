@@ -130,8 +130,8 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
   const [dateTo, setDateTo] = useState<Date>();
 
   const {
-    currentEncounter,
-    currentEncounterId,
+    primaryEncounter,
+    primaryEncounterId,
     selectedEncounterId,
     setSelectedEncounter,
     patientId,
@@ -184,7 +184,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
         queryParams: {
           limit: 14,
           offset: String(pageParam),
-          ...(completedEncounterStatus.includes(currentEncounter?.status ?? "")
+          ...(completedEncounterStatus.includes(primaryEncounter?.status ?? "")
             ? { patient_filter: patientId, facility: facilityId }
             : { patient: patientId }),
           ...(status && { status }),
@@ -204,13 +204,13 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
       const currentOffset = allPages.length * 14;
       return currentOffset < lastPage.count ? currentOffset : null;
     },
-    enabled: !!currentEncounter,
+    enabled: !!primaryEncounter,
   });
 
   const past = encounters?.pages.flatMap((page) => page.results) ?? [];
 
   const pastEncounters = past.filter(
-    (encounter) => encounter.id !== currentEncounterId,
+    (encounter) => encounter.id !== primaryEncounterId,
   );
 
   useEffect(() => {
@@ -221,7 +221,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
 
   return (
     <div className="space-y-4 pt-2">
-      {!currentEncounter ? (
+      {!primaryEncounter ? (
         <CardListSkeleton count={1} />
       ) : (
         <div>
@@ -230,8 +230,8 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
           </h2>
           <div className="space-y-2">
             <EncounterCard
-              encounter={currentEncounter}
-              isSelected={currentEncounterId === selectedEncounterId}
+              encounter={primaryEncounter}
+              isSelected={primaryEncounterId === selectedEncounterId}
               onSelect={() => handleSelect(null)}
             />
           </div>

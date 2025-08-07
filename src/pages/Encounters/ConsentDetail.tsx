@@ -29,7 +29,6 @@ import useFileUpload from "@/hooks/useFileUpload";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import consentApi from "@/types/consent/consentApi";
-import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 
 import { useEncounter } from "./utils/EncounterProvider";
 
@@ -42,13 +41,10 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
 
   const {
     selectedEncounterId: encounterId,
-    selectedEncounter: encounter,
+    canWriteSelectedEncounter: canWrite,
     patientId,
     facilityId,
   } = useEncounter();
-
-  const readOnly =
-    encounter && inactiveEncounterStatus.includes(encounter.status);
 
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const queryClient = useQueryClient();
@@ -157,7 +153,7 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
                   <h3 className="text-lg font-semibold">
                     {t("supporting_documents")}
                   </h3>
-                  {!readOnly && (
+                  {canWrite && (
                     <Button
                       variant="outline"
                       className="flex flex-row items-center"
