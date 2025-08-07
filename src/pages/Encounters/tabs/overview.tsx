@@ -39,7 +39,9 @@ export const EncounterOverviewTab = () => {
         <div className="flex flex-col gap-6">
           <QuickActions />
           <ClinicalHistoryOverview />
-          <SummaryPanel />
+          <div className="xl:hidden">
+            <SummaryPanel />
+          </div>
 
           <div className="flex flex-col gap-8 overflow-x-auto">
             {/* Show preview of devices associated with the encounter */}
@@ -75,7 +77,7 @@ export const EncounterOverviewTab = () => {
         </div>
       </ScrollArea>
 
-      <ScrollArea className="w-72 h-[calc(100vh-12rem)]">
+      <ScrollArea className="w-72 h-[calc(100vh-12rem)] hidden xl:block">
         <SummaryPanel />
       </ScrollArea>
     </div>
