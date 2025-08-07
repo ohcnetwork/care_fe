@@ -96,7 +96,7 @@ export default function RolesIndex() {
       queryParams: {
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        search: qParams.search,
+        name: qParams.search,
         ordering: "name",
       },
     }),
