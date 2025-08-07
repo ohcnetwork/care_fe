@@ -22,7 +22,11 @@ export class PatientDetails {
   }
 
   selectUserRole(role: string) {
-    cy.clickAndSelectOption('[data-cy="patient-user-role-select"]', role);
+    cy.typeAndSelectOption(
+      'button[role="combobox"] span:contains("Select Role")',
+      role,
+      false,
+    );
     return this;
   }
 
