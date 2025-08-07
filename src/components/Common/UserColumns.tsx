@@ -1,7 +1,7 @@
-import { UserBase } from "@/types/user/user";
+import { UserRead } from "@/types/user/user";
 
 export type userChildProps = {
-  userData: UserBase;
+  userData: UserRead;
   username: string;
   permissions?: string[];
 };
