@@ -26,7 +26,7 @@
                                     "description": "Add Diagnosis", 
                                     "when": "canEdit" },
                                     
-    { "key": "e",                   "action": "update-encounter",
+    { "key": "e e",                   "action": "update-encounter",
                                     "description": "Update Encounter",
                                     "when": "canEdit" },
                                     
@@ -74,7 +74,7 @@
                                     "description": "Go to Diagnostic Reports", 
                                     "when": "always" },
 
-    { "key": "q q",                 "action": "add-questionnaire",
+    { "key": "f",                 "action": "add-questionnaire",
                                     "description": "Add Questionnaire",
                                     "when": "canEdit && questionnairesEnabled" }
   ]

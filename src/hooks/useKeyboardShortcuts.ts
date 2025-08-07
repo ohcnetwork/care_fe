@@ -81,8 +81,7 @@ export function useKeyboardShortcuts(
   // Parse and categorize shortcuts
   const categorizedShortcuts = useMemo(() => {
     const direct: Record<string, KeyboardShortcut> = {};
-    const gPrefix: Record<string, KeyboardShortcut> = {};
-    const qPrefix: Record<string, KeyboardShortcut> = {};
+    const prefixGroups: Record<string, Record<string, KeyboardShortcut>> = {};
     const modified: Record<string, KeyboardShortcut> = {};
 
     shortcuts.forEach((shortcut) => {
@@ -93,14 +92,18 @@ export function useKeyboardShortcuts(
 
       const key = shortcut.key.toLowerCase();
 
-      if (key.startsWith("g ")) {
-        // G-prefix shortcuts (like "g g", "g p")
-        const gKey = key.substring(2);
-        gPrefix[gKey] = shortcut;
-      } else if (key.startsWith("q ")) {
-        // Q-prefix shortcuts (like "q 0")
-        const qKey = key.substring(2);
-        qPrefix[qKey] = shortcut;
+      if (key.includes(" ")) {
+        // Prefix shortcuts (like "g g", "q q", "e e")
+        const parts = key.split(" ");
+        if (parts.length === 2 && parts[0] === parts[1]) {
+          const prefix = parts[0];
+          const suffix = parts[1];
+
+          if (!prefixGroups[prefix]) {
+            prefixGroups[prefix] = {};
+          }
+          prefixGroups[prefix][suffix] = shortcut;
+        }
       } else if (key.includes("+")) {
         // Modified key shortcuts (like "ctrl+k", "shift+p")
         modified[key] = shortcut;
@@ -110,7 +113,7 @@ export function useKeyboardShortcuts(
       }
     });
 
-    return { direct, gPrefix, qPrefix, modified };
+    return { direct, prefixGroups, modified };
   }, [shortcuts, evaluateWhenCondition]);
 
   // Helper function to check if event matches key combination
@@ -147,32 +150,20 @@ export function useKeyboardShortcuts(
     [],
   );
 
-  const gPrefixActiveRef = useRef(false);
-  const qPrefixActiveRef = useRef(false);
-
-  const [gPrefixActive, setGPrefixActive] = useState(false);
-  const [qPrefixActive, setQPrefixActive] = useState(false);
+  // Dynamic prefix state management
+  const prefixActiveRef = useRef<string | null>(null);
+  const [activePrefix, setActivePrefix] = useState<string | null>(null);
 
   // Reset prefix states after timeout
   useEffect(() => {
-    if (gPrefixActive) {
+    if (activePrefix) {
       const timer = setTimeout(() => {
-        gPrefixActiveRef.current = false;
-        setGPrefixActive(false);
+        prefixActiveRef.current = null;
+        setActivePrefix(null);
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [gPrefixActive]);
-
-  useEffect(() => {
-    if (qPrefixActive) {
-      const timer = setTimeout(() => {
-        qPrefixActiveRef.current = false;
-        setQPrefixActive(false);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [qPrefixActive]);
+  }, [activePrefix]);
 
   // Handle keyboard events
   const handleKeyDown = useCallback(
@@ -207,67 +198,55 @@ export function useKeyboardShortcuts(
       }
 
       // Handle prefix sequences using refs for reliable state
-      if (gPrefixActiveRef.current) {
-        const shortcut = categorizedShortcuts.gPrefix[key];
-        if (shortcut) {
-          const handler = handlers[shortcut.action];
-          if (handler) {
-            event.preventDefault();
-            event.stopPropagation();
-            handler();
-          }
-        }
-        gPrefixActiveRef.current = false;
-        setGPrefixActive(false);
-        return;
-      }
+      if (prefixActiveRef.current) {
+        const currentPrefix = prefixActiveRef.current;
+        const prefixShortcuts =
+          categorizedShortcuts.prefixGroups[currentPrefix];
 
-      if (qPrefixActiveRef.current) {
-        const shortcut = categorizedShortcuts.qPrefix[key];
-        if (shortcut) {
-          const handler = handlers[shortcut.action];
-          if (handler) {
-            event.preventDefault();
-            event.stopPropagation();
-            handler();
-          }
-        } else {
-          // Handle Q + 1-9 for dynamic questionnaires
-          const keyNumber = parseInt(key);
-          if (!isNaN(keyNumber) && keyNumber >= 1 && keyNumber <= 9) {
-            // Get all questionnaire handlers
-            const allQuestionnaireActions = Object.keys(handlers).filter(
-              (action) => action.startsWith("questionnaire-"),
-            );
+        if (prefixShortcuts) {
+          const shortcut = prefixShortcuts[key];
+          if (shortcut) {
+            const handler = handlers[shortcut.action];
+            if (handler) {
+              event.preventDefault();
+              event.stopPropagation();
+              handler();
+            }
+          } else {
+            // Handle dynamic shortcuts for the current prefix
+            // For example, if prefix is 'q', handle q + 1-9 for questionnaires
+            if (currentPrefix === "q") {
+              const keyNumber = parseInt(key);
+              if (!isNaN(keyNumber) && keyNumber >= 1 && keyNumber <= 9) {
+                // Get all questionnaire handlers
+                const allQuestionnaireActions = Object.keys(handlers).filter(
+                  (action) => action.startsWith("questionnaire-"),
+                );
 
-            const targetIndex = keyNumber - 1;
-            if (targetIndex < allQuestionnaireActions.length) {
-              const targetAction = allQuestionnaireActions[targetIndex];
-              const handler = handlers[targetAction];
-              if (handler) {
-                event.preventDefault();
-                event.stopPropagation();
-                handler();
+                const targetIndex = keyNumber - 1;
+                if (targetIndex < allQuestionnaireActions.length) {
+                  const targetAction = allQuestionnaireActions[targetIndex];
+                  const handler = handlers[targetAction];
+                  if (handler) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    handler();
+                  }
+                }
               }
             }
           }
         }
-        qPrefixActiveRef.current = false;
-        setQPrefixActive(false);
+        prefixActiveRef.current = null;
+        setActivePrefix(null);
         return;
       }
 
-      // Handle direct keys and prefix initiators
-      if (key === "g") {
-        gPrefixActiveRef.current = true;
-        setGPrefixActive(true);
-        event.preventDefault();
-        return;
-      }
-
-      if (key === "q") {
-        qPrefixActiveRef.current = true;
-        setQPrefixActive(true);
+      // Handle prefix initiators
+      const availablePrefixes = Object.keys(categorizedShortcuts.prefixGroups);
+      if (availablePrefixes.includes(key)) {
+        prefixActiveRef.current = key;
+        setActivePrefix(key);
         event.preventDefault();
         return;
       }
@@ -297,7 +276,6 @@ export function useKeyboardShortcuts(
     shortcuts: shortcuts.filter((shortcut) =>
       evaluateWhenCondition(shortcut.when),
     ),
-    gPrefixActive,
-    qPrefixActive,
+    activePrefix,
   };
 }
