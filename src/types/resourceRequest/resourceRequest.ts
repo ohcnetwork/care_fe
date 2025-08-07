@@ -4,6 +4,18 @@ import { UserBareMinimum } from "@/components/Users/models";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { UserBase } from "@/types/user/user";
 
+export const RESOURCE_REQUEST_STATUSES = [
+  "pending",
+  "approved",
+  "rejected",
+  "cancelled",
+  "transportation_to_be_arranged",
+  "transfer_in_progress",
+  "completed",
+] as const;
+
+export type ResourceRequestStatus = (typeof RESOURCE_REQUEST_STATUSES)[number];
+
 export interface ResourceRequest {
   approving_facility: FacilityModel | null;
   assigned_facility: FacilityModel | undefined;
@@ -16,7 +28,7 @@ export interface ResourceRequest {
   referring_facility_contact_name: string;
   referring_facility_contact_number: string;
   requested_quantity: number;
-  status: string;
+  status: ResourceRequestStatus;
   title: string;
   assigned_to: UserBase | null;
   created_by: UserBase;
@@ -38,7 +50,7 @@ export const RESOURCE_REQUEST_STATUS_COLORS = {
 
 export interface CreateResourceRequest {
   title: string;
-  status: string;
+  status: ResourceRequestStatus;
   reason: string;
   referring_facility_contact_name: string;
   referring_facility_contact_number: string;
@@ -57,7 +69,7 @@ export interface UpdateResourceRequest {
   title: string;
   reason: string;
   assigned_to: string | null;
-  status: string;
+  status: ResourceRequestStatus;
   referring_facility_contact_name: string;
   referring_facility_contact_number: string;
   approving_facility: string | null;
