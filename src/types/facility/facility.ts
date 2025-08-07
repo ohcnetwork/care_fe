@@ -35,7 +35,6 @@ export interface FacilityPublicRead extends FacilityBase {
 }
 
 export interface FacilityRead extends FacilityBase, FacilityPermissions {
-  id: string;
   read_cover_image_url?: string;
   cover_image_url?: string;
   created_date?: string;
