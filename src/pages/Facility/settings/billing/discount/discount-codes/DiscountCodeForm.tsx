@@ -29,6 +29,8 @@ export function DiscountCodeForm({
 }: DiscountCodeFormProps) {
   const { t } = useTranslation();
 
+  const isEditMode = Boolean(defaultValues?.code || defaultValues?.display);
+
   const formSchema = useMemo(
     () =>
       z.object({
@@ -92,7 +94,13 @@ export function DiscountCodeForm({
         />
 
         <div className="pt-2">
-          <Button type="submit" className="w-full">
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={
+              isEditMode ? !form.formState.isDirty : !form.formState.isValid
+            }
+          >
             {t("save")}
           </Button>
         </div>

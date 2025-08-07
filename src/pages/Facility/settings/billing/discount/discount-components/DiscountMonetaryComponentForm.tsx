@@ -42,8 +42,13 @@ export function DiscountMonetaryComponentForm({
 }: DiscountMonetaryComponentFormProps) {
   const { t } = useTranslation();
 
+  const isEditMode = Boolean(
+    defaultValues?.title || defaultValues?.factor || defaultValues?.amount,
+  );
+
+  const initialValueType = defaultValues?.factor != null ? "factor" : "amount";
   const [valueType, setValueType] = useState<"factor" | "amount">(
-    defaultValues?.factor != null ? "factor" : "amount",
+    initialValueType,
   );
 
   const formSchema = useMemo(
@@ -108,7 +113,7 @@ export function DiscountMonetaryComponentForm({
       monetary_component_type: MonetaryComponentType.discount,
       code: defaultValues?.code,
       factor: defaultValues?.factor,
-      amount: defaultValues?.amount,
+      amount: defaultValues?.amount?.toString() || undefined,
       title: defaultValues?.title || "",
     },
   });
@@ -121,6 +126,8 @@ export function DiscountMonetaryComponentForm({
       form.setValue("factor", undefined);
     }
   };
+
+  const hasValueTypeChanged = valueType !== initialValueType;
 
   return (
     <Form {...form}>
@@ -263,7 +270,15 @@ export function DiscountMonetaryComponentForm({
         </div>
 
         <div className="pt-2">
-          <Button type="submit" className="w-full">
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={
+              isEditMode
+                ? !(form.formState.isDirty || hasValueTypeChanged)
+                : !form.formState.isValid
+            }
+          >
             {t("save")}
           </Button>
         </div>
