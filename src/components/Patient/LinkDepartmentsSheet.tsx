@@ -20,13 +20,13 @@ import FacilityOrganizationSelector from "@/pages/Facility/settings/organization
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import deviceApi from "@/types/device/deviceApi";
 import encounterApi from "@/types/emr/encounter/encounterApi";
-import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import locationApi from "@/types/location/locationApi";
 
 interface Props {
   entityType: "encounter" | "location" | "device";
   entityId: string;
-  currentOrganizations: FacilityOrganization[];
+  currentOrganizations: FacilityOrganizationRead[];
   facilityId: string;
   trigger?: React.ReactNode;
   onUpdate?: () => void;

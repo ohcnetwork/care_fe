@@ -28,8 +28,8 @@ export function BillingSettings() {
     isError,
     reset,
   } = useMutation({
-    mutationFn: mutate(facilityApi.patchInvoiceNumberExpression, {
-      pathParams: { id: facilityId },
+    mutationFn: mutate(facilityApi.setInvoiceExpression, {
+      pathParams: { facilityId },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["facility", facilityId] });
