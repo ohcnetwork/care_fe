@@ -73,7 +73,7 @@ import {
   CardListSkeleton,
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
-import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
+import PatientEncounterOrIdentifierFilter from "@/components/Patient/PatientEncounterOrIdentifierFilter";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -312,7 +312,7 @@ export default function AppointmentsPage() {
 
   const [activeTab, setActiveTab] = useView("appointments", "board");
   const { open: isSidebarOpen } = useSidebar();
-  const { facility, facilityId } = useCurrentFacility();
+  const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
   const selectedTagIds = qParams.tags?.split(",") ?? [];
   const tagConfigsQuery = useTagConfigs({ ids: selectedTagIds, facilityId });
   const selectedTags = tagConfigsQuery
@@ -410,12 +410,12 @@ export default function AppointmentsPage() {
   const slot = slots?.find((s) => s.id === qParams.slot);
 
   useEffect(() => {
-    if (!canViewAppointments && !facility) {
+    if (!isFacilityLoading && !canViewAppointments && !facility) {
       toast.error(t("no_permission_to_view_page"));
       goBack("/");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canViewAppointments, facility]);
+  }, [canViewAppointments, facility, isFacilityLoading]);
 
   if (schedulableUsersQuery.isLoading || !facility) {
     return <Loading />;
@@ -669,9 +669,9 @@ export default function AppointmentsPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 items-center">
-          <PatientIdentifierFilter
+          <PatientEncounterOrIdentifierFilter
             onSelect={(patientId) => updateQuery({ patient: patientId })}
-            placeholder={t("filter_by_patient")}
+            placeholder={t("search_patients")}
             className="w-full sm:w-auto"
             patientId={qParams.patient}
           />
