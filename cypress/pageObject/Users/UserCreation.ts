@@ -136,11 +136,7 @@ export class UserCreation {
   }
 
   selectUserRole(role: string) {
-    cy.typeAndSelectOption(
-      'button[role="combobox"] span:contains("Select Role")',
-      role,
-      false,
-    );
+    cy.typeAndSelectOption('button:contains("Select Role")', role, false);
     return this;
   }
 
