@@ -13,10 +13,9 @@ import {
 
 import { FilterState } from "@/hooks/useFilters";
 
-import { FACILITY_TYPES, OptionsType } from "@/common/constants";
-
 import query from "@/Utils/request/query";
 import { OrganizationLevel } from "@/pages/Organization/components/OrganizationLevel";
+import { FACILITY_TYPES, FacilityType } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -37,7 +36,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const [orgTypes, setOrgTypes] = useState<string[]>([]);
   const [selectedFacilityType, setSelectedFacilityType] = useState<
-    OptionsType | undefined
+    FacilityType | undefined
   >(undefined);
 
   const { data: orgDetail, isLoading: isOrgDetailLoading } = useQuery({
