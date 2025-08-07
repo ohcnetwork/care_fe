@@ -1,16 +1,10 @@
 import careConfig from "@careConfig";
 import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
   addDays,
   format,
   formatDate,
-  isPast,
   isToday,
   isTomorrow,
   isYesterday,
@@ -79,7 +73,7 @@ import {
   CardListSkeleton,
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
-import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
+import PatientEncounterOrIdentifierFilter from "@/components/Patient/PatientEncounterOrIdentifierFilter";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -88,7 +82,6 @@ import useFilters, { FilterState } from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
-import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
 import {
@@ -111,11 +104,10 @@ import {
   Appointment,
   AppointmentRead,
   AppointmentStatus,
-  AppointmentStatuses,
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 import { MultiPractitionerSelector } from "./components/MultiPractitionerSelect";
 
@@ -320,7 +312,7 @@ export default function AppointmentsPage() {
 
   const [activeTab, setActiveTab] = useView("appointments", "board");
   const { open: isSidebarOpen } = useSidebar();
-  const { facility, facilityId } = useCurrentFacility();
+  const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
   const selectedTagIds = qParams.tags?.split(",") ?? [];
   const tagConfigsQuery = useTagConfigs({ ids: selectedTagIds, facilityId });
   const selectedTags = tagConfigsQuery
@@ -418,12 +410,12 @@ export default function AppointmentsPage() {
   const slot = slots?.find((s) => s.id === qParams.slot);
 
   useEffect(() => {
-    if (!canViewAppointments && !facility) {
+    if (!isFacilityLoading && !canViewAppointments && !facility) {
       toast.error(t("no_permission_to_view_page"));
       goBack("/");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canViewAppointments, facility]);
+  }, [canViewAppointments, facility, isFacilityLoading]);
 
   if (schedulableUsersQuery.isLoading || !facility) {
     return <Loading />;
@@ -459,7 +451,7 @@ export default function AppointmentsPage() {
             <MultiPractitionerSelector
               facilityId={facilityId}
               selected={practitioners ?? null}
-              onSelect={(users: UserBase[] | null) => {
+              onSelect={(users: UserReadMinimal[] | null) => {
                 if (users) {
                   updateQuery({
                     practitioners: users.map((user) => user.id).join(","),
@@ -677,9 +669,9 @@ export default function AppointmentsPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 items-center">
-          <PatientIdentifierFilter
+          <PatientEncounterOrIdentifierFilter
             onSelect={(patientId) => updateQuery({ patient: patientId })}
-            placeholder={t("filter_by_patient")}
+            placeholder={t("search_patients")}
             className="w-full sm:w-auto"
             patientId={qParams.patient}
           />
@@ -1176,7 +1168,7 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
         {formatName(appointment.user)}
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        <AppointmentStatusDropdown appointment={appointment} />
+        {t(appointment.status)}
       </TableCell>
       {/* TODO: replace this with token number once that's ready... */}
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white rounded-r-lg">
@@ -1185,86 +1177,6 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
     </>
   );
 }
-
-const AppointmentStatusDropdown = ({
-  appointment,
-}: {
-  appointment: Appointment;
-}) => {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const { facilityId } = useCurrentFacility();
-
-  const currentStatus = appointment.status;
-  const hasStarted = isPast(appointment.token_slot.start_datetime);
-
-  const { mutate: updateAppointment } = useMutation({
-    mutationFn: mutate(scheduleApis.appointments.update, {
-      pathParams: { facilityId, id: appointment.id },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["appointments", facilityId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["appointment", appointment.id],
-      });
-    },
-  });
-
-  // Get available status options based on current status
-  const getAvailableStatuses = () => {
-    if (
-      ["fulfilled", "cancelled", "entered_in_error"].includes(currentStatus)
-    ) {
-      return [currentStatus];
-    }
-
-    if (currentStatus === "booked") {
-      return ["booked", "checked_in", "in_consultation", "noshow", "cancelled"];
-    }
-
-    if (currentStatus === "checked_in") {
-      return ["checked_in", "in_consultation", "noshow", "cancelled"];
-    }
-
-    if (currentStatus === "in_consultation") {
-      return ["in_consultation", "fulfilled", "cancelled"];
-    }
-
-    return AppointmentStatuses;
-  };
-
-  return (
-    <div className="w-32" onClick={(e) => e.stopPropagation()}>
-      <Select
-        value={currentStatus}
-        onValueChange={(status: Appointment["status"]) =>
-          updateAppointment({ status, note: appointment.note })
-        }
-      >
-        <SelectTrigger>
-          <CareIcon icon="l-schedule" className="size-4" />
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {getAvailableStatuses().map((status) => (
-            <SelectItem
-              key={status}
-              value={status}
-              disabled={
-                !hasStarted &&
-                ["checked_in", "in_consultation", "fulfilled"].includes(status)
-              }
-            >
-              {t(status)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-};
 
 interface SlotFilterProps {
   slots: TokenSlot[];

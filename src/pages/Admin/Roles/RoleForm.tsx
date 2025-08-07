@@ -21,11 +21,11 @@ import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
 import { Permission } from "@/types/emr/permission/permission";
-import { Role } from "@/types/emr/role/role";
+import { RoleRead } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
 
 interface RoleFormProps {
-  role: Role | null;
+  role: RoleRead | null;
   permissions: Permission[];
   onSuccess: () => void;
 }
