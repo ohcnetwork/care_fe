@@ -5,6 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SummaryPanelActionsTab } from "@/pages/Encounters/tabs/overview/summary-panel-actions.tab";
 import { SummaryPanelReportsTab } from "@/pages/Encounters/tabs/overview/summary-panel-reports-tab";
 
+import { SummaryPanelDetailTab } from "./summary-panel-details-tab";
+
 export const SummaryPanel = () => {
   const { t } = useTranslation();
 
@@ -27,7 +29,7 @@ export const SummaryPanel = () => {
         </TabsList>
 
         <TabsContent value="details">
-          {/* <RenderDetailsTab encounter={encounter} canEdit={canEdit} /> */}
+          <SummaryPanelDetailTab />
         </TabsContent>
 
         <TabsContent value="actions">
