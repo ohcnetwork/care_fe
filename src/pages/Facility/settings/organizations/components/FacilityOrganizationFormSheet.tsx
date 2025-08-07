@@ -228,11 +228,9 @@ export default function FacilityOrganizationFormSheet({
                         )
                         .map((type) => (
                           <SelectItem key={type} value={type}>
-                            {t(
-                              type === FacilityOrganizationType.DEPT
-                                ? t("department")
-                                : t("team"),
-                            )}
+                            {type === FacilityOrganizationType.DEPT
+                              ? t("department")
+                              : t("team")}
                           </SelectItem>
                         ))}
                     </SelectContent>
