@@ -69,15 +69,13 @@ export default function EditUserRoleSheet({
   });
 
   const { mutate: updateRole } = useMutation({
-    mutationFn: (body: { user: string; role: string }) =>
-      mutate(facilityOrganizationApi.updateUserRole, {
-        pathParams: {
-          facilityId,
-          organizationId: organizationId,
-          userRoleId: userRole.id,
-        },
-        body,
-      })(body),
+    mutationFn: mutate(facilityOrganizationApi.updateUserRole, {
+      pathParams: {
+        facilityId,
+        organizationId: organizationId,
+        userRoleId: userRole.id,
+      },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["facilityOrganizationUsers", facilityId, organizationId],
@@ -94,14 +92,13 @@ export default function EditUserRoleSheet({
   });
 
   const { mutate: removeRole } = useMutation({
-    mutationFn: () =>
-      mutate(facilityOrganizationApi.removeUserRole, {
-        pathParams: {
-          facilityId,
-          organizationId: organizationId,
-          userRoleId: userRole.id,
-        },
-      })({}),
+    mutationFn: mutate(facilityOrganizationApi.removeUserRole, {
+      pathParams: {
+        facilityId,
+        organizationId: organizationId,
+        userRoleId: userRole.id,
+      },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["facilityOrganizationUsers", facilityId, organizationId],
@@ -124,7 +121,6 @@ export default function EditUserRoleSheet({
     }
 
     updateRole({
-      user: userRole.user.id,
       role: selectedRole,
     });
   };
@@ -152,9 +148,6 @@ export default function EditUserRoleSheet({
               <div className="flex flex-col flex-1">
                 <span className="font-medium text-lg">
                   {formatName(userRole.user)}
-                </span>
-                <span className="text-sm text-gray-500">
-                  {userRole.user.email}
                 </span>
               </div>
             </div>
