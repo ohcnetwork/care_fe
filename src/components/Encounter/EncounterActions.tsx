@@ -27,12 +27,14 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
+import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import {
   OfflineKeyMap,
   PathParamsObject,
   QueryParamsObject,
 } from "@/OfflineSupport/offlineKeys";
 import {
+  handleOfflineRecordSuccess,
   isOfflineId,
   normalizeUserBase,
   saveOfflineWrite,
@@ -52,6 +54,7 @@ import encounterApi from "@/types/emr/encounter/encounterApi";
 
 interface EncounterActionsProps {
   encounter: EncounterRead;
+  offlineEntryId?: string;
   variant?: "default" | "outline" | "ghost";
   size?: "default" | "sm" | "lg" | "icon";
   disableButtons?: boolean;
@@ -61,6 +64,7 @@ interface EncounterActionsProps {
 
 export default function EncounterActions({
   encounter,
+  offlineEntryId,
   variant = "outline",
   size = "default",
   disableButtons = false,
@@ -75,6 +79,7 @@ export default function EncounterActions({
     hasPermission,
     encounter.permissions,
   );
+  const db = new AppCacheDB();
 
   const organizationId = usePathParams("/organization/:organizationId/*");
   const canWrite =
@@ -84,7 +89,11 @@ export default function EncounterActions({
     mutationFn: mutate(encounterApi.update, {
       pathParams: { id: encounter.id },
     }),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      if (offlineEntryId) {
+        handleOfflineRecordSuccess(offlineEntryId, data);
+      }
+
       toast.success(t("encounter_marked_as_complete"));
       queryClient.invalidateQueries({ queryKey: ["encounter", encounter.id] });
     },
@@ -138,6 +147,11 @@ export default function EncounterActions({
         updated_by: normalizeUserBase(authUser),
         is_updated_offline: true,
       };
+
+      // Update the offline write entry with normalized data for display/editing
+      await db.OfflineWrites.update(saveResult.entry.id, {
+        normalizedData: updatedEncounter,
+      });
 
       updateActiveEncounterList({
         queryClient,

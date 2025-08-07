@@ -1,6 +1,6 @@
 import { UseQueryOptions, useQueries, useQuery } from "@tanstack/react-query";
 import { Building, ChevronDown, ChevronRight, Loader2, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -40,6 +40,10 @@ interface FacilityOrganizationSelectorProps {
   onChange: (value: string[] | null) => void;
   facilityId: string;
   currentOrganizations?: FacilityOrganization[];
+
+  setCurrentSelectedOrganizations?: (
+    organizations: FacilityOrganization[] | null,
+  ) => void;
   singleSelection?: boolean;
 }
 type OrgKey = ["organizations", string, string];
@@ -58,6 +62,7 @@ export default function FacilityOrganizationSelector(
     onChange,
     facilityId,
     currentOrganizations,
+    setCurrentSelectedOrganizations,
     singleSelection = false,
   } = props;
 
@@ -91,6 +96,12 @@ export default function FacilityOrganizationSelector(
     meta: { persist: true },
     networkMode: "online",
   });
+
+  useEffect(() => {
+    if (setCurrentSelectedOrganizations) {
+      setCurrentSelectedOrganizations(selectedOrganizations);
+    }
+  }, [setCurrentSelectedOrganizations, selectedOrganizations]);
 
   const organizationQueries = useQueries({
     queries: navigationLevels.map((level) => ({
@@ -131,6 +142,7 @@ export default function FacilityOrganizationSelector(
     if (!selectedOrganizations.includes(org)) {
       const newSelection = [...selectedOrganizations, org];
       setSelectedOrganizations(newSelection);
+
       onChange(newSelection.map((org) => org.id));
       setAlreadySelected(true);
     }

@@ -54,6 +54,7 @@ import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
+  handleOfflineRecordSuccess,
   isOfflineId,
   normaliZedResourcerequestRecord,
   saveOfflineWrite,
@@ -84,9 +85,13 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const [facilitySearch, setFacilitySearch] = useState("");
   const { goBack } = useAppHistory();
   const { t } = useTranslation();
-  const [{ related_patient }] = useQueryParams();
+  const [{ related_patient, offlineEntryId }] = useQueryParams();
   const [assignedToUser, setAssignedToUser] = useState<UserBase>();
   const [assignFacility, setAssignFacility] = useState<FacilityModel>();
+  const [offlineEntry, setOfflineEntry] = useState<OfflineWritesEntry | null>(
+    null,
+  );
+  const [isLoadingOfflineEntry, setIsLoadingOfflineEntry] = useState(false);
   const authUser = useAuthUser();
   const queryClient = useQueryClient();
   const db = new AppCacheDB();
@@ -173,20 +178,48 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     }
   };
 
+  // Load offline entry when offlineEntryId is present
+  useEffect(() => {
+    if (offlineEntryId && !id) {
+      setIsLoadingOfflineEntry(true);
+      const loadOfflineEntry = async () => {
+        try {
+          const entry = await db.OfflineWrites.get(offlineEntryId);
+          if (entry && entry.normalizedData) {
+            setOfflineEntry(entry);
+          }
+        } catch (error) {
+          console.error("Error loading offline entry:", error);
+        } finally {
+          setIsLoadingOfflineEntry(false);
+        }
+      };
+      loadOfflineEntry();
+    }
+  }, [offlineEntryId]);
+
   useEffect(() => {
     const loadResourcerequest = async () => {
-      if (resourceData) {
-        mappedResourceFields(resourceData);
+      // Use offline data if available, otherwise use server data
+      const dataToUse = offlineEntryId
+        ? offlineEntry?.normalizedData
+        : resourceData;
+
+      if (dataToUse) {
+        mappedResourceFields(dataToUse as ResourceRequest);
         return;
       }
     };
 
     loadResourcerequest();
-  }, [resourceData, form]);
+  }, [resourceData, offlineEntry, form]);
 
   const { mutate: createResource, isPending } = useMutation({
     mutationFn: mutate(routes.createResource),
-    onSuccess: (data: ResourceRequest) => {
+    onSuccess: async (data: ResourceRequest) => {
+      if (offlineEntryId) {
+        await handleOfflineRecordSuccess(offlineEntryId, data);
+      }
       toast.success(t("resource_created_successfully"));
       navigate(`/facility/${facilityId}/resource/${data.id}`);
     },
@@ -196,11 +229,15 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     mutationFn: mutate(routes.updateResource, {
       pathParams: { id: String(id) },
     }),
-    onSuccess: (data: ResourceRequest) => {
+    onSuccess: async (data: ResourceRequest) => {
+      if (offlineEntryId) {
+        await handleOfflineRecordSuccess(offlineEntryId, data);
+      }
       toast.success(t("resource_updated_successfully"));
       navigate(`/facility/${facilityId}/resource/${data.id}`);
     },
   });
+
   const toFacilityModel = (facility: FacilityData): FacilityModel => ({
     id: facility.id,
     name: facility.name,
@@ -291,6 +328,12 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           queryClient,
           authUser,
         );
+
+        // Update the offline write entry with normalized data for display/editing
+        await db.OfflineWrites.update(updatedEntry.id, {
+          normalizedData: normalizedResource,
+        });
+
         updatePaginatedResourceCache(
           queryClient,
           ["resourceRequests", resourceData?.related_patient?.id],
@@ -334,6 +377,11 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           authUser,
         );
 
+        // Update the offline write entry with normalized data for display/editing
+        await db.OfflineWrites.update(saveResult.entry.id, {
+          normalizedData: normalizedResource,
+        });
+
         updatePaginatedResourceCache(
           queryClient,
           ["resourceRequests", resourceData?.related_patient?.id],
@@ -370,9 +418,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         type: OfflineKeyMap.create_resource_request,
         resourceType: "resourceRequest",
         payload: resourcePayload,
-        parentMutationIds: isOfflineId(related_patient)
-          ? [related_patient]
-          : [],
+        parentMutationId: isOfflineId(related_patient)
+          ? related_patient
+          : undefined,
       };
 
       const saveResult = await saveOfflineWrite(offlineEntry);
@@ -389,6 +437,11 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         queryClient,
         authUser,
       );
+
+      // Update the offline write entry with normalized data for display/editing
+      await db.OfflineWrites.update(saveResult.entry.id, {
+        normalizedData: normalizedResource,
+      });
 
       const prevResourceRequestList = queryClient.getQueryData<
         PaginatedResponse<ResourceRequest>
@@ -500,7 +553,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     }
   };
 
-  if (isPending || isUpdatePending) {
+  if (isPending || isUpdatePending || isLoadingOfflineEntry) {
     return <Loading />;
   }
 

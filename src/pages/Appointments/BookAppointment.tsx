@@ -138,7 +138,7 @@ export default function BookAppointment({ patientId }: Props) {
         type: OfflineKeyMap.create_appointment,
         resourceType: "Appointment",
         payload: createAppointmentData,
-        parentMutationIds: isOfflineId(patientId) ? [patientId] : [],
+        parentMutationId: isOfflineId(patientId) ? patientId : undefined,
       };
 
       const saveResult = await saveOfflineWrite(offlineEntry);

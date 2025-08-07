@@ -23,7 +23,11 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
-export function EncounterHeader() {
+export function EncounterHeader({
+  offlineEntryId,
+}: {
+  offlineEntryId?: string;
+}) {
   const { t } = useTranslation();
   const {
     currentEncounter: encounter,
@@ -149,7 +153,11 @@ export function EncounterHeader() {
                 align="end"
                 className="w-(--radix-dropdown-menu-trigger-width) sm:w-auto"
               >
-                <EncounterActions encounter={encounter} layout="dropdown" />
+                <EncounterActions
+                  offlineEntryId={offlineEntryId}
+                  encounter={encounter}
+                  layout="dropdown"
+                />
                 <PLUGIN_Component
                   __name="PatientInfoCardActions"
                   encounter={encounter}

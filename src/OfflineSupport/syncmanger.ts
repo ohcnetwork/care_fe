@@ -12,7 +12,6 @@ import { AppCacheDB } from "./AppcacheDB";
 import { detectAndMarkConflict } from "./conflictHandler";
 import { topologicalSort } from "./dependencyResolver";
 import { dependencySchema } from "./dependencySchema";
-import { IdMap } from "./idMap";
 import { replaceOfflineIdsInWrite } from "./idReplacer";
 import { OfflineKey } from "./offlineKeys";
 import {
@@ -41,7 +40,7 @@ export const mutationMap = {
 
 interface SyncManagerOptions {
   userId: string;
-  facilityId?: string; // Add optional facilityId
+  facilityId?: string;
   maxRetries?: number;
   retryDelayMs?: number;
   enableConflictDetection?: boolean;
@@ -60,13 +59,10 @@ interface SyncResult {
 }
 
 export class SyncManager {
-  private idMap: IdMap;
   private isRunning = false;
   private abortController: AbortController | null = null;
 
-  constructor(private options: SyncManagerOptions) {
-    this.idMap = new IdMap();
-  }
+  constructor(private options: SyncManagerOptions) {}
 
   // Main sync loop that start the entire sync process
 
@@ -102,26 +98,7 @@ export class SyncManager {
         return result;
       }
 
-      // Step 2: Pre-populate IdMap with all successful sync records
-      // Get ALL writes (including successful ones) to build the mapping
-      const db = new AppCacheDB();
-      let query = db.OfflineWrites.where("userId").equals(this.options.userId);
-
-      // If facilityId is provided, filter by facilityId for the mapping
-      if (this.options.facilityId) {
-        query = query.and((w) => w.facilityId === this.options.facilityId);
-      }
-
-      const allWrites = await query.toArray();
-
-      const successfulWrites = allWrites.filter(
-        (write) => write.syncStatus === "success",
-      );
-      this.idMap.prePopulateFromSuccessfulSyncs(successfulWrites);
-
-      // Debug: Show available mappings
-      const allMappings = this.idMap.getAllMappings();
-      console.log(`Available ID mappings for this sync session:`, allMappings);
+      // Step 2: No need to pre-populate IdMap - each write will find its own parent mappings
 
       // Step 3: Sort by dependencies (topological sort)
       const sortedWrites = topologicalSort(pendingWrites);
@@ -188,7 +165,7 @@ export class SyncManager {
     return result;
   }
 
-  /// Process a single write through the sync pipeline
+  // Process a single write through the sync pipeline
 
   private async processWrite(write: any): Promise<{
     status: "success" | "failed" | "conflict" | "blocked";
@@ -196,10 +173,10 @@ export class SyncManager {
   }> {
     try {
       // Step 1: Check if parent writes are blocked
-      if (write.parentMutationIds?.length > 0) {
-        const blockedParents = await this.checkBlockedParents(
-          write.parentMutationIds,
-        );
+      if (write.parentMutationId) {
+        const blockedParents = await this.checkBlockedParents([
+          write.parentMutationId,
+        ]);
         if (blockedParents.length > 0) {
           return { status: "blocked" };
         }
@@ -214,10 +191,9 @@ export class SyncManager {
       }
 
       // Step 3: Replace offline IDs with server IDs
-      const processedWrite = replaceOfflineIdsInWrite(
+      const processedWrite = await replaceOfflineIdsInWrite(
         write,
         dependencySchema,
-        this.idMap,
       );
 
       // Step 4: Execute the mutation
@@ -229,12 +205,7 @@ export class SyncManager {
         lastAttemptAt: Date.now(),
       });
 
-      // Step 6: Add ID mapping if this was a creation
-      if (response?.id && write.id.startsWith("offline-")) {
-        this.idMap.addMapping(write.id, response.id);
-      }
-
-      // Step 7: Unblock dependent writes that were blocked by this write
+      // Step 6: Unblock dependent writes that were blocked by this write
       await unblockDependentWrites(write.id);
 
       return { status: "success" };
@@ -319,7 +290,7 @@ export class SyncManager {
 
     const allWrites = await db.OfflineWrites.toArray();
     const dependentWrites = allWrites.filter((write) => {
-      return write.parentMutationIds?.includes(failedParentId) || false;
+      return write.parentMutationId === failedParentId;
     });
 
     for (const dependent of dependentWrites) {
@@ -361,10 +332,8 @@ export class SyncManager {
     try {
       const db = new AppCacheDB();
       const now = Date.now();
-      const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000; // 30 days
-      const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000; // 7 days
+      const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
 
-      // Clean up old successful writes (older than 30 days)
       let query = db.OfflineWrites.where("userId").equals(this.options.userId);
 
       // If facilityId is provided, filter by facilityId for cleanup
@@ -382,35 +351,6 @@ export class SyncManager {
       for (const write of oldSuccessfulWrites) {
         await db.OfflineWrites.delete(write.id);
       }
-
-      // Clean up permanently failed writes (older than 7 days)
-      let failedQuery = db.OfflineWrites.where("userId").equals(
-        this.options.userId,
-      );
-
-      // If facilityId is provided, filter by facilityId for cleanup
-      if (this.options.facilityId) {
-        failedQuery = failedQuery.and(
-          (w) => w.facilityId === this.options.facilityId,
-        );
-      }
-
-      const oldFailedWrites = await failedQuery
-        .and(
-          (w) =>
-            w.syncStatus === "failed" &&
-            w.isPermanentFailure === true &&
-            w.clientTimestamp < sevenDaysAgo,
-        )
-        .toArray();
-
-      for (const write of oldFailedWrites) {
-        await db.OfflineWrites.delete(write.id);
-      }
-
-      console.log(
-        `Cleanup: Removed ${oldSuccessfulWrites.length} old successful writes and ${oldFailedWrites.length} old failed writes`,
-      );
     } catch (error) {
       console.error("Cleanup failed:", error);
     }
@@ -427,7 +367,7 @@ export class SyncManager {
   }
 }
 
-// Convenience function to run a one-time sync
+//  function to run a one-time sync
 
 export async function syncOfflineRecords(
   userId: string,
@@ -483,4 +423,5 @@ export async function syncOfflineRecords(
  *
  * // Stop sync
  * syncManager.stop();
+ *
  */

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -25,12 +26,25 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
+import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
+import { AddUserSheet } from "@/components/Patient/PatientDetailsTab/PatientUsers";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
+import { checkParentSyncStatus } from "@/OfflineSupport/offlineWriteHelpers";
 import { getPendingAndRetryableWrites } from "@/OfflineSupport/writeQueue";
 import { useSync } from "@/context/SyncContext";
+
+import {
+  handleAssignUserToPatientEdit,
+  handleCreateEncounterEdit,
+  handleCreateandUpdatePatientEdit,
+  handleCreateandUpdateResourceRequestEdit,
+  handleEncounterAction,
+  handleRemoveUserFromPatientEdit,
+  handleUnsupportedTypeEdit,
+} from "./actionHandlers";
 
 // Helper function to get writes by status
 async function getWritesByStatus(
@@ -347,9 +361,10 @@ const getResourceTypeDisplay = (entry: OfflineWritesEntry) => {
 };
 
 // Pending writes table component
-const PendingWritesTable: React.FC<{ facilityId?: string }> = ({
-  facilityId,
-}) => {
+const PendingWritesTable: React.FC<{
+  facilityId?: string;
+  onEdit: (entry: OfflineWritesEntry) => void;
+}> = ({ facilityId, onEdit }) => {
   const [pendingWrites, setPendingWrites] = React.useState<
     OfflineWritesEntry[]
   >([]);
@@ -367,7 +382,7 @@ const PendingWritesTable: React.FC<{ facilityId?: string }> = ({
         );
         setPendingWrites(writes);
       } catch (error) {
-        console.error("Failed to fetch pending writes:", error);
+        console.error("Error fetching pending writes:", error);
       } finally {
         setIsLoading(false);
       }
@@ -375,16 +390,6 @@ const PendingWritesTable: React.FC<{ facilityId?: string }> = ({
 
     fetchPendingWrites();
   }, [user.external_id, facilityId]);
-
-  const handleView = (entry: OfflineWritesEntry) => {
-    console.log("View entry:", entry);
-    // TODO: Implement view functionality
-  };
-
-  const handleEdit = (entry: OfflineWritesEntry) => {
-    console.log("Edit entry:", entry);
-    // TODO: Implement edit functionality
-  };
 
   const handleRetry = (entry: OfflineWritesEntry) => {
     console.log("Retry entry:", entry);
@@ -450,15 +455,7 @@ const PendingWritesTable: React.FC<{ facilityId?: string }> = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleView(entry)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <CareIcon icon="l-eye" className="size-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(entry)}
+                    onClick={() => onEdit(entry)}
                     className="h-8 w-8 p-0"
                   >
                     <CareIcon icon="l-edit" className="size-4" />
@@ -490,9 +487,10 @@ const PendingWritesTable: React.FC<{ facilityId?: string }> = ({
 };
 
 // Failed writes table component
-const FailedWritesTable: React.FC<{ facilityId?: string }> = ({
-  facilityId,
-}) => {
+const FailedWritesTable: React.FC<{
+  facilityId?: string;
+  onEdit: (entry: OfflineWritesEntry) => void;
+}> = ({ facilityId, onEdit }) => {
   const [failedWrites, setFailedWrites] = React.useState<OfflineWritesEntry[]>(
     [],
   );
@@ -595,6 +593,14 @@ const FailedWritesTable: React.FC<{ facilityId?: string }> = ({
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={() => onEdit(entry)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <CareIcon icon="l-edit" className="size-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => handleView(entry)}
                     className="h-8 w-8 p-0"
                   >
@@ -627,7 +633,10 @@ const FailedWritesTable: React.FC<{ facilityId?: string }> = ({
 };
 
 // Tabbed sync details component
-const SyncStatusTabs: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
+const SyncStatusTabs: React.FC<{
+  facilityId?: string;
+  onEdit: (entry: OfflineWritesEntry) => void;
+}> = ({ facilityId, onEdit }) => {
   const [activeTab, setActiveTab] = React.useState("pending");
   const { syncData } = useSyncData(facilityId);
 
@@ -687,10 +696,10 @@ const SyncStatusTabs: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
       {/* Tab content */}
       <div className="mt-6">
         {activeTab === "pending" && (
-          <PendingWritesTable facilityId={facilityId} />
+          <PendingWritesTable facilityId={facilityId} onEdit={onEdit} />
         )}
         {activeTab === "failed" && (
-          <FailedWritesTable facilityId={facilityId} />
+          <FailedWritesTable facilityId={facilityId} onEdit={onEdit} />
         )}
         {activeTab === "conflicted" && (
           <div className="text-center py-8 text-gray-500">
@@ -717,12 +726,130 @@ const SyncStatusTabs: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
 
 // Main page component
 const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
+  const { t } = useTranslation();
+  const authUser = useAuthUser();
+  const [selectedEncounterEntry, setSelectedEncounterEntry] =
+    React.useState<OfflineWritesEntry | null>(null);
+  const [isEncounterFormOpen, setIsEncounterFormOpen] = React.useState(false);
+  const [selectedUserAssignmentEntry, setSelectedUserAssignmentEntry] =
+    React.useState<OfflineWritesEntry | null>(null);
+  const [isUserAssignmentFormOpen, setIsUserAssignmentFormOpen] =
+    React.useState(false);
+
+  const handleEdit = async (entry: OfflineWritesEntry) => {
+    // Check parent sync status first for all entries that have a parent
+    if (entry.parentMutationId) {
+      try {
+        const parentCheck = await checkParentSyncStatus(entry.parentMutationId);
+        if (!parentCheck.isSynced) {
+          toast.error(
+            "Parent entries must be successfully synced before editing this entry.",
+          );
+          return;
+        }
+      } catch (error) {
+        console.error("Error checking parent status:", error);
+        toast.error("Error checking parent status. Please try again.");
+        return;
+      }
+    }
+
+    switch (entry.type) {
+      case "create_patient":
+        await handleCreateandUpdatePatientEdit(entry, facilityId);
+        break;
+
+      case "create_encounter":
+        await handleCreateEncounterEdit(
+          entry,
+          setSelectedEncounterEntry,
+          setIsEncounterFormOpen,
+        );
+        break;
+
+      case "update_patient":
+        await handleCreateandUpdatePatientEdit(entry, facilityId);
+        break;
+
+      case "mark_encounter_as_complete":
+        await handleEncounterAction(entry);
+        break;
+
+      case "create_resource_request":
+        await handleCreateandUpdateResourceRequestEdit(entry, facilityId);
+        break;
+      case "update_resource_request":
+        await handleCreateandUpdateResourceRequestEdit(entry, facilityId);
+        break;
+      case "assign_user_to_patient":
+        await handleAssignUserToPatientEdit(
+          entry,
+          setSelectedUserAssignmentEntry,
+          setIsUserAssignmentFormOpen,
+        );
+        break;
+      case "remove_user_from_patient":
+        await handleRemoveUserFromPatientEdit(entry);
+        break;
+      case "create_appointment":
+      case "reschedule_appointment":
+      case "update_appointment_status":
+      case "cancel_appointment":
+      case "non_structured_questionnaire":
+      case "update_encounter_questionnair":
+      case "structured_questionnair":
+        // TODO: Implement edit functionality for these types
+        handleUnsupportedTypeEdit(entry);
+        break;
+
+      default:
+        handleUnsupportedTypeEdit(entry);
+        break;
+    }
+  };
+
   return (
-    <Page title="Sync Status" hideTitleOnPage>
-      <div className="space-y-6">
+    <Page title={t("sync_status")}>
+      <div className="container mx-auto p-6 max-w-7xl">
         <SyncStatusHeader facilityId={facilityId} />
         <SyncStatusOverview facilityId={facilityId} />
-        <SyncStatusTabs facilityId={facilityId} />
+        <SyncStatusTabs facilityId={facilityId} onEdit={handleEdit} />
+
+        {/* Global CreateEncounterForm for editing offline encounters */}
+        {selectedEncounterEntry && isEncounterFormOpen && (
+          <CreateEncounterForm
+            patientId={(selectedEncounterEntry.payload as any)?.patient || ""}
+            facilityId={facilityId || ""}
+            patientName="Patient"
+            offlineEntryId={selectedEncounterEntry.id}
+            trigger={null}
+            onSuccess={() => {
+              setIsEncounterFormOpen(false);
+              setSelectedEncounterEntry(null);
+            }}
+            onClose={() => {
+              setIsEncounterFormOpen(false);
+              setSelectedEncounterEntry(null);
+            }}
+          />
+        )}
+
+        {/* Global AddUserSheet for editing offline user assignments */}
+        {selectedUserAssignmentEntry && isUserAssignmentFormOpen && (
+          <AddUserSheet
+            patientId={
+              (selectedUserAssignmentEntry.mutationPathParams as any)
+                ?.patientId || ""
+            }
+            users={undefined}
+            authUser={authUser}
+            offlineEntryId={selectedUserAssignmentEntry.id}
+            onClose={() => {
+              setIsUserAssignmentFormOpen(false);
+              setSelectedUserAssignmentEntry(null);
+            }}
+          />
+        )}
       </div>
     </Page>
   );

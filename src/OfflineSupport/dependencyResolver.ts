@@ -14,10 +14,8 @@ export function buildDependencyGraph(
   }
 
   for (const write of writes) {
-    for (const parentId of write.parentMutationIds || []) {
-      if (graph.has(parentId)) {
-        graph.get(parentId)!.push(write.id);
-      }
+    if (write.parentMutationId && graph.has(write.parentMutationId)) {
+      graph.get(write.parentMutationId)!.push(write.id);
     }
   }
 
@@ -37,7 +35,7 @@ export function topologicalSort(
   }
 
   for (const write of writes) {
-    for (const _ of write.parentMutationIds || []) {
+    if (write.parentMutationId) {
       inDegree.set(write.id, (inDegree.get(write.id) || 0) + 1);
     }
   }

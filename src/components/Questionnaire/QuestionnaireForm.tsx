@@ -617,7 +617,7 @@ export function QuestionnaireForm({
         payload: {
           requests: [req],
         },
-        parentMutationIds: isOfflineId(parentID) ? [parentID] : [],
+        parentMutationId: isOfflineId(parentID) ? parentID : undefined,
       };
 
       const saveResult = await saveOfflineWrite(newOfflineEntry);
@@ -722,7 +722,7 @@ export function QuestionnaireForm({
         type: OfflineKeyMap.structured_questionnair,
         resourceType: "Questionnaire",
         payload: cleanedRequests,
-        parentMutationIds: isOfflineId(parentID) ? [parentID] : [],
+        parentMutationId: isOfflineId(parentID) ? parentID : undefined,
       };
 
       const saveResult = await saveOfflineWrite(newOfflineEntry);
@@ -807,17 +807,15 @@ export function QuestionnaireForm({
         type: OfflineKeyMap.structured_questionnair,
         resourceType: "Questionnaire",
         payload: cleanedRequests,
-        parentMutationIds: isOfflineId(parentID) ? [parentID] : [],
+        parentMutationId: isOfflineId(parentID) ? parentID : undefined,
       };
 
       const saveResult = await saveOfflineWrite(newOfflineEntry);
       if (!saveResult.success) {
         toast.error(
-          toast.error(
-            t("failed_to_queue_for_offline_submission", {
-              reference: reference_id.replace("_", " "),
-            }),
-          ),
+          t("failed_to_queue_for_offline_submission", {
+            reference: reference_id.replace("_", " "),
+          }),
         );
         return;
       }
@@ -902,7 +900,7 @@ export function QuestionnaireForm({
         type: OfflineKeyMap.update_encounter_questionnair,
         resourceType: "Questionnaire",
         payload: cleanedRequests,
-        parentMutationIds: isOfflineId(parentID) ? [parentID] : [],
+        parentMutationId: isOfflineId(parentID) ? parentID : undefined,
       };
 
       const saveResult = await saveOfflineWrite(newOfflineEntry);
@@ -1023,7 +1021,7 @@ export function QuestionnaireForm({
         type: OfflineKeyMap.non_structured_questionnaire,
         resourceType: "Questionnaire",
         payload: { requests: nonStructuredQuestionnaires },
-        parentMutationIds: isOfflineId(parentID) ? [parentID] : [],
+        parentMutationId: isOfflineId(parentID) ? parentID : undefined,
       };
 
       const saveResult = await saveOfflineWrite(offlineEntry);

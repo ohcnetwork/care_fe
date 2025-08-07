@@ -10,7 +10,10 @@ import { dateQueryString, getMonthStartAndEnd } from "@/Utils/utils";
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import { AllergyIntolerance } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
+import {
+  EncounterCreate,
+  EncounterRead,
+} from "@/types/emr/encounter/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 import {
@@ -21,6 +24,7 @@ import {
 import { Symptom } from "@/types/emr/symptom/symptom";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum, FacilityData } from "@/types/facility/facility";
+import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import { Organization } from "@/types/organization/organization";
 import { PatientIdentifier } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
@@ -42,6 +46,7 @@ import { UserBase } from "@/types/user/user";
 import { OfflineWritesEntry } from "./AppcacheDB";
 import { AppCacheDB } from "./AppcacheDB";
 import { OfflineKey } from "./offlineKeys";
+import { markWriteStatus, unblockDependentWrites } from "./writeQueue";
 
 interface QuestionnaireListResponse {
   results: QuestionnaireDetail[];
@@ -62,7 +67,7 @@ export type saveOfflineWriteData = {
   type: OfflineKey;
   resourceType?: string;
   payload: unknown;
-  parentMutationIds?: string[];
+  parentMutationId?: string;
   serverTimestamp?: string;
   useQueryRouteKey?: string;
   useQueryPathParams?: Record<string, any>;
@@ -79,13 +84,13 @@ export const saveOfflineWrite = async ({
   mutationPathParams,
   mutationQueryParams,
   payload,
-  parentMutationIds,
+  parentMutationId,
   serverTimestamp,
   useQueryRouteKey,
   useQueryPathParams,
   useQueryParams,
 }: saveOfflineWriteData): Promise<SaveOfflineWriteResult> => {
-  const writeEntry = {
+  const writeEntry: OfflineWritesEntry = {
     id,
     userId,
     facilityId,
@@ -95,7 +100,7 @@ export const saveOfflineWrite = async ({
     mutationPathParams,
     mutationQueryParams,
     payload,
-    parentMutationIds,
+    parentMutationId,
 
     clientTimestamp: Date.now(),
     serverTimestamp,
@@ -249,11 +254,12 @@ export const normalizeOfflineEncounterRecord = (
   authUser: AuthUserModel,
   selectedTags: TagConfig[],
   permissions?: string[],
+  currentOrganizations?: FacilityOrganization[],
   created_by?: UserBase,
   created_date?: string,
   modified_date?: string,
 ): EncounterRead => {
-  const payload = entry.payload as EncounterRead;
+  const payload = entry.payload as EncounterCreate;
 
   const facilityData = queryClient.getQueryData<FacilityData>([
     "facility",
@@ -269,8 +275,7 @@ export const normalizeOfflineEncounterRecord = (
     status: payload.status ?? "Unknown (offline)",
     encounter_class: payload.encounter_class ?? "Unknown (offline)",
     period: {
-      start:
-        payload.period?.start ?? new Date(entry.clientTimestamp).toISOString(),
+      start: payload.period?.start,
     },
     hospitalization: payload?.hospitalization,
     priority: payload.priority ?? "Unknown (offline)",
@@ -289,7 +294,7 @@ export const normalizeOfflineEncounterRecord = (
     status_history: {
       history: [],
     },
-    organizations: [],
+    organizations: currentOrganizations || [],
     current_location: null,
     location_history: [],
     permissions: permissions ?? [],
@@ -1208,3 +1213,73 @@ export const cacheQuestionnairResponse = (
     (prev = []) => [...prev, ...normalizedQuestionnairResponse],
   );
 };
+
+// Helper function to handle offline record success when using server mutations
+export const handleOfflineRecordSuccess = async (
+  offlineEntryId: string,
+  serverResponse: any,
+): Promise<void> => {
+  const db = new AppCacheDB();
+
+  try {
+    const entry = await db.OfflineWrites.get(offlineEntryId);
+    if (!entry) {
+      console.warn(
+        `Offline entry ${offlineEntryId} not found for success handling`,
+      );
+      return;
+    }
+
+    await markWriteStatus(entry.id, "success", {
+      response: serverResponse,
+      lastAttemptAt: Date.now(),
+    });
+
+    await unblockDependentWrites(entry.id);
+  } catch (error) {
+    console.error(
+      `Error handling offline record success for ${offlineEntryId}:`,
+      error,
+    );
+    throw error;
+  }
+};
+
+export async function checkParentSyncStatus(parentId?: string): Promise<{
+  isSynced: boolean;
+  parentId?: string;
+}> {
+  if (!parentId) {
+    return {
+      isSynced: true,
+      parentId,
+    };
+  }
+
+  try {
+    const db = new AppCacheDB();
+    const parentWrite = await db.OfflineWrites.get(parentId);
+
+    if (!parentWrite) {
+      return {
+        isSynced: false,
+        parentId,
+      };
+    }
+
+    if (parentWrite.syncStatus === "success") {
+      return { isSynced: true, parentId };
+    }
+
+    return {
+      isSynced: false,
+      parentId,
+    };
+  } catch (error) {
+    console.error("Error checking parent sync status:", error);
+    return {
+      isSynced: false,
+      parentId,
+    };
+  }
+}

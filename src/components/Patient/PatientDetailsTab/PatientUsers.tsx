@@ -4,7 +4,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
@@ -50,9 +50,10 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
-import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
+  handleOfflineRecordSuccess,
   isOfflineId,
   saveOfflineWrite,
   saveOfflineWriteData,
@@ -63,6 +64,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import roleApi from "@/types/emr/role/roleApi";
 import { UserBase } from "@/types/user/user";
@@ -72,18 +74,32 @@ import { PatientProps } from ".";
 interface AddUserSheetProps {
   patientId: string;
   users: PaginatedResponse<UserBase> | undefined;
-
   authUser: AuthUserModel;
+  patientData?: PatientRead;
+  offlineEntryId?: string;
+
+  onClose?: () => void;
 }
 
-function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
+export function AddUserSheet({
+  patientId,
+  users,
+  authUser,
+  patientData,
+  offlineEntryId,
+  onClose,
+}: AddUserSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { facilityId } = useCurrentFacility();
+  const db = new AppCacheDB();
 
   const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserBase>();
   const [selectedRole, setSelectedRole] = useState<string>("");
+  const [offlineEntry, setOfflineEntry] = useState<OfflineWritesEntry | null>(
+    null,
+  );
 
   const { data: roles } = useQuery({
     queryKey: ["roles"],
@@ -93,13 +109,57 @@ function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
     enabled: open,
   });
 
+  // Load offline entry when offlineEntryId is present
+  useEffect(() => {
+    if (offlineEntryId) {
+      const loadOfflineEntry = async () => {
+        try {
+          const entry = await db.OfflineWrites.get(offlineEntryId);
+          if (entry && entry.normalizedData) {
+            setOfflineEntry(entry);
+          }
+        } catch (error) {
+          console.error("Error loading offline entry:", error);
+        }
+      };
+      loadOfflineEntry();
+    }
+  }, [offlineEntryId]);
+
+  // Populate form with offline data when available
+  useEffect(() => {
+    if (offlineEntry?.normalizedData) {
+      const normalizedData = offlineEntry.normalizedData as {
+        user: UserBase;
+        role: string;
+      };
+
+      if (normalizedData.user) {
+        setSelectedUser(normalizedData.user);
+      }
+      if (normalizedData.role) {
+        setSelectedRole(normalizedData.role);
+      }
+    }
+  }, [offlineEntry, offlineEntryId]);
+
+  // Open sheet when offlineEntryId is provided
+  useEffect(() => {
+    if (offlineEntryId) {
+      setOpen(true);
+    }
+  }, [offlineEntryId]);
+
   const { mutate: assignUser } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
       mutate(patientApi.addUser, {
         pathParams: { patientId },
         body,
       })(body),
-    onSuccess: () => {
+    onSuccess: async (data) => {
+      if (offlineEntryId) {
+        await handleOfflineRecordSuccess(offlineEntryId, data);
+      }
       queryClient.invalidateQueries({
         queryKey: ["patientUsers", patientId],
       });
@@ -142,7 +202,7 @@ function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
         type: OfflineKeyMap.assign_user_to_patient,
         resourceType: "patient",
         payload: assignUserData,
-        parentMutationIds: isOfflineId(patientId) ? [patientId] : [],
+        parentMutationId: isOfflineId(patientId) ? patientId : undefined,
       };
 
       const saveResult = await saveOfflineWrite(offlineWrite);
@@ -150,6 +210,16 @@ function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
         toast.error(saveResult.error);
         return;
       }
+
+      //update normalized data
+      const normalizedData = {
+        user: selectedUser,
+        role: selectedRole,
+        patientName: patientData?.name || "Unknown Patient",
+      };
+      await db.OfflineWrites.update(saveResult.entry.id, {
+        normalizedData: normalizedData,
+      });
 
       const updatedUserList: PaginatedResponse<UserBase> = users?.results
         ? {
@@ -201,17 +271,35 @@ function AddUserSheet({ patientId, users, authUser }: AddUserSheetProps) {
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="outline_primary" data-cy="assign-user-button">
-          <CareIcon icon="l-plus" className="mr-2 size-4" />
-          {t("assign_user")}
-        </Button>
-      </SheetTrigger>
+    <Sheet
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen && onClose) {
+          onClose();
+        }
+      }}
+    >
+      {!offlineEntryId && (
+        <SheetTrigger asChild>
+          <Button variant="outline_primary" data-cy="assign-user-button">
+            <CareIcon icon="l-plus" className="mr-2 size-4" />
+            {t("assign_user")}
+          </Button>
+        </SheetTrigger>
+      )}
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>{t("assign_user_to_patient")}</SheetTitle>
-          <SheetDescription>{t("search_user_description")}</SheetDescription>
+          <SheetTitle>
+            {offlineEntryId
+              ? t("edit_offline_user_assignment")
+              : t("assign_user_to_patient")}
+          </SheetTitle>
+          <SheetDescription>
+            {offlineEntryId
+              ? t("edit_offline_user_assignment_description")
+              : t("search_user_description")}
+          </SheetDescription>
         </SheetHeader>
         <div className="space-y-6 py-4">
           <div className="space-y-4" data-cy="patient-user-selector-container">
@@ -338,7 +426,10 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
     networkMode: "online",
   });
 
-  const queueRemoveUserOffline = async (removeUserId: string) => {
+  const queueRemoveUserOffline = async (
+    removeUserId: string,
+    userToRemove: UserBase,
+  ) => {
     try {
       const generatedId = `offline-${crypto.randomUUID()}`;
       const offlineWrite = {
@@ -352,7 +443,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
         type: OfflineKeyMap.remove_user_from_patient,
         resourceType: "patient",
         payload: { user: removeUserId },
-        parentMutationIds: isOfflineId(patientId) ? [patientId] : [],
+        parentMutationId: isOfflineId(patientId) ? patientId : undefined,
       };
 
       const saveResult = await saveOfflineWrite(offlineWrite);
@@ -360,6 +451,16 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
         toast.error(saveResult.error);
         return;
       }
+
+      //update normalized data
+      const normalizedData = {
+        user: userToRemove,
+        patientName: patientData.name,
+      };
+      await db.OfflineWrites.update(saveResult.entry.id, {
+        normalizedData: normalizedData,
+      });
+
       await db.OfflineWrites.where({
         type: "assignUser",
         resourceType: "patient",
@@ -415,14 +516,18 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
     },
   });
 
-  const handleRemoveUser = async (userId: string) => {
+  const handleRemoveUser = async (userId: string, userToRemove?: UserBase) => {
     if (!userId) {
       toast.error("User ID is missing");
       return;
     }
 
     if (!onlineManager.isOnline()) {
-      await queueRemoveUserOffline(userId);
+      if (!userToRemove) {
+        toast.error("User data is missing");
+        return;
+      }
+      await queueRemoveUserOffline(userId, userToRemove);
       return;
     }
 
@@ -499,7 +604,9 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
                       <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                       <AlertDialogAction
                         data-cy="patient-user-remove-confirm-button"
-                        onClick={() => handleRemoveUser(user.id)}
+                        onClick={() => {
+                          handleRemoveUser(user.id, user);
+                        }}
                         className={cn(
                           buttonVariants({ variant: "destructive" }),
                         )}
@@ -541,6 +648,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
             {canWritePatient && (
               <AddUserSheet
                 authUser={authUser}
+                patientData={patientData}
                 users={users}
                 patientId={patientId}
               />

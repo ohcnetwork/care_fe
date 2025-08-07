@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { Stethoscope } from "lucide-react";
 import { navigate } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -54,8 +54,10 @@ import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import { OfflineKeyMap } from "@/OfflineSupport/offlineKeys";
 import {
+  handleOfflineRecordSuccess,
   isOfflineId,
   normalizeOfflineEncounterRecord,
   saveOfflineWrite,
@@ -76,6 +78,7 @@ import {
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
 interface Props {
   patientId: string;
@@ -83,8 +86,10 @@ interface Props {
   patientName: string;
   hasReachedEncounterLimitOffline?: boolean;
   encounterClass?: EncounterClass;
+  offlineEntryId?: string;
   trigger?: React.ReactNode;
   onSuccess?: () => void;
+  onClose?: () => void;
 }
 
 export default function CreateEncounterForm({
@@ -93,14 +98,19 @@ export default function CreateEncounterForm({
   patientName,
   hasReachedEncounterLimitOffline,
   encounterClass,
+  offlineEntryId,
   trigger,
   onSuccess,
+  onClose,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const authUser = useAuthUser();
   const { t } = useTranslation();
+  const db = new AppCacheDB();
   const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
+  const [currentSelectedOrganizations, setCurrentSelectedOrganizations] =
+    useState<FacilityOrganization[] | null>(null);
 
   const encounterFormSchema = z.object({
     status: z.enum(["planned", "in_progress", "on_hold"] as const),
@@ -125,7 +135,20 @@ export default function CreateEncounterForm({
 
   const { mutate: createEncounter, isPending } = useMutation({
     mutationFn: mutate(encounterApi.create),
-    onSuccess: (data: EncounterRead) => {
+    onSuccess: async (data: EncounterRead) => {
+      // If this was editing an offline encounter, mark the old entry as successful
+      if (offlineEntryId) {
+        try {
+          await handleOfflineRecordSuccess(offlineEntryId, data);
+          toast.success(t("encounter_created"));
+          setIsOpen(false);
+          onSuccess?.();
+          return;
+        } catch (error) {
+          console.error("Error marking offline entry as successful:", error);
+        }
+      }
+
       toast.success(t("encounter_created"));
       setIsOpen(false);
       form.reset();
@@ -151,7 +174,7 @@ export default function CreateEncounterForm({
         type: OfflineKeyMap.create_encounter,
         resourceType: "Encounter",
         payload: encounterRequestData,
-        parentMutationIds: isOfflineId(patientId) ? [patientId] : [],
+        parentMutationId: isOfflineId(patientId) ? patientId : undefined,
       };
 
       const saveResult = await saveOfflineWrite(offlineWrite);
@@ -181,7 +204,12 @@ export default function CreateEncounterForm({
         authUser,
         selectedTags,
         permissions,
+        currentSelectedOrganizations || [],
       );
+      // Update the offline write entry with normalized data for display/editing
+      await db.OfflineWrites.update(saveResult.entry.id, {
+        normalizedData: normalizeEncounter,
+      });
 
       // update the encounter list at encounterhistory on patient profile page
       queryClient.setQueryData(
@@ -229,6 +257,57 @@ export default function CreateEncounterForm({
     }
   };
 
+  //  open sheet when offlineEntryId is provided
+  useEffect(() => {
+    if (offlineEntryId) {
+      setIsOpen(true);
+    }
+  }, [offlineEntryId]);
+
+  useEffect(() => {
+    if (offlineEntryId) {
+      // Fetch offline entry and populate form
+      const fetchAndPopulateForm = async () => {
+        try {
+          const db = new AppCacheDB();
+          const entry = await db.OfflineWrites.get(offlineEntryId);
+
+          if (entry && entry.normalizedData) {
+            const normalizedData = entry.normalizedData as EncounterRead;
+
+            // Populate form with normalized data
+            const formData = {
+              status:
+                normalizedData.status === "planned" ||
+                normalizedData.status === "in_progress" ||
+                normalizedData.status === "on_hold"
+                  ? normalizedData.status
+                  : "planned",
+              encounter_class: normalizedData.encounter_class,
+              priority: normalizedData.priority,
+              organizations:
+                normalizedData.organizations?.map((org) => org.id) || [],
+              start_date:
+                normalizedData.period?.start || new Date().toISOString(),
+            };
+
+            form.reset(formData);
+
+            // Set tags if available
+            if (normalizedData.tags && normalizedData.tags.length > 0) {
+              setSelectedTags(normalizedData.tags);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching offline entry:", error);
+          toast.error("Error loading offline encounter data");
+        }
+      };
+
+      fetchAndPopulateForm();
+    }
+  }, [offlineEntryId, form]);
+
   async function onSubmit(data: z.infer<typeof encounterFormSchema>) {
     const encounterRequest: EncounterCreate = {
       ...data,
@@ -246,23 +325,40 @@ export default function CreateEncounterForm({
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        {trigger || (
-          <Button
-            variant="secondary"
-            className="h-14 w-full justify-start text-lg"
-          >
-            <Stethoscope className="mr-4 size-6" />
-            {t("create_encounter")}
-          </Button>
-        )}
-      </SheetTrigger>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open && onClose) {
+          onClose();
+        }
+      }}
+    >
+      {/* Only show trigger when not editing an offline encounter */}
+      {!offlineEntryId && (
+        <SheetTrigger asChild>
+          {trigger || (
+            <Button
+              variant="secondary"
+              className="h-14 w-full justify-start text-lg"
+            >
+              <Stethoscope className="mr-4 size-6" />
+              {t("create_encounter")}
+            </Button>
+          )}
+        </SheetTrigger>
+      )}
       <SheetContent className="overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{t("initiate_encounter")}</SheetTitle>
+          <SheetTitle>
+            {offlineEntryId
+              ? t("edit_offline_encounter")
+              : t("initiate_encounter")}
+          </SheetTitle>
           <SheetDescription>
-            {t("begin_clinical_encounter", { patientName })}
+            {offlineEntryId
+              ? t("edit_offline_encounter_description", { patientName })
+              : t("begin_clinical_encounter", { patientName })}
           </SheetDescription>
         </SheetHeader>
         <Form {...form}>
@@ -381,10 +477,7 @@ export default function CreateEncounterForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("status")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger
                           data-cy="encounter-status"
@@ -412,10 +505,7 @@ export default function CreateEncounterForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Priority</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger
                           data-cy="encounter-priority"
@@ -448,22 +538,27 @@ export default function CreateEncounterForm({
             <FormField
               control={form.control}
               name="organizations"
-              render={({ field }) => (
-                <FormItem>
-                  <FacilityOrganizationSelector
-                    facilityId={facilityId}
-                    value={field.value}
-                    onChange={(value) => {
-                      if (value === null) {
-                        form.setValue("organizations", []);
-                      } else {
-                        form.setValue("organizations", value);
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FacilityOrganizationSelector
+                      facilityId={facilityId}
+                      value={field.value}
+                      setCurrentSelectedOrganizations={
+                        setCurrentSelectedOrganizations
                       }
-                    }}
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
+                      onChange={(value) => {
+                        if (value === null) {
+                          form.setValue("organizations", []);
+                        } else {
+                          form.setValue("organizations", value);
+                        }
+                      }}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
             {!onlineManager.isOnline() &&
               hasReachedEncounterLimitOffline === true && (

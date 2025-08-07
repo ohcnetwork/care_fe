@@ -50,7 +50,7 @@
     "sort-locales": "node ./scripts/sort-locales.js"
   },
   "dependencies": {
-    "@excalidraw/excalidraw": "^0.18.0-a18b139",
+    "@excalidraw/excalidraw": "^0.18.0",
     "@fontsource/figtree": "^5.1.1",
     "@fontsource/libre-barcode-128-text": "^5.2.5",
     "@hookform/resolvers": "^5.0.1",
@@ -185,7 +185,7 @@
     "typescript": "^5.6.3",
     "unimported": "^1.31.0",
     "uuid": "^11.0.2",
-    "vite": "^6.0.0",
+    "vite": "^6.3.5",
     "vite-plugin-checker": "^0.9.0",
     "vite-plugin-pwa": "^1.0.0",
     "vite-plugin-static-copy": "^2.0.0",

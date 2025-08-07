@@ -55,11 +55,12 @@ import { BLOOD_GROUP_CHOICES, GENDER_TYPES } from "@/common/constants";
 import { GENDERS } from "@/common/constants";
 import countryList from "@/common/static/countries.json";
 
-import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import OfflinePatientWarningDialog from "@/OfflineSupport/OfflinePatientCreateWarning";
 import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
   getYearOfBirth,
+  handleOfflineRecordSuccess,
   normalizeOfflinePatientRecord,
   pickPatientCreateFields,
   saveOfflineWrite,
@@ -106,7 +107,7 @@ export default function PatientRegistration(
 
   const { enableMinimalPatientRegistration } = careConfig;
 
-  const [{ phone_number }] = useQueryParams();
+  const [{ phone_number, offlineEntryId }] = useQueryParams();
   const { patientId, facilityId } = props;
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
@@ -127,6 +128,10 @@ export default function PatientRegistration(
 
   const [suppressOfflineDuplicateWarning, setSuppressOfflineDuplicateWarning] =
     useState(!!patientId);
+  const [offlineEntry, setOfflineEntry] = useState<OfflineWritesEntry | null>(
+    null,
+  );
+  const [isLoadingOfflineEntry, setIsLoadingOfflineEntry] = useState(false);
   const queryClient = useQueryClient();
 
   const formSchema = useMemo(
@@ -277,7 +282,19 @@ export default function PatientRegistration(
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
     mutationKey: ["create_patient"],
     mutationFn: mutate(patientApi.addPatient),
-    onSuccess: (resp: PatientRead) => {
+    onSuccess: async (resp: PatientRead) => {
+      if (offlineEntryId) {
+        try {
+          await handleOfflineRecordSuccess(offlineEntryId, resp);
+          toast.success(t("patient_registration_success"));
+          navigate(`/facility/${facilityId}/settings/sync-status`);
+          return;
+        } catch (error) {
+          console.error(`Error handling offline record success:`, error);
+          // Don't block the success flow, just log the error
+        }
+      }
+
       toast.success(t("patient_registration_success"));
       // Lets navigate the user to the verify page as the patient is not accessible to the user yet
       navigate(`/facility/${facilityId}/patients/verify`, {
@@ -301,7 +318,18 @@ export default function PatientRegistration(
     mutationFn: mutate(patientApi.updatePatient, {
       pathParams: { id: patientId || "" },
     }),
-    onSuccess: () => {
+    onSuccess: async (resp: PatientRead) => {
+      if (offlineEntryId) {
+        try {
+          await handleOfflineRecordSuccess(offlineEntryId, resp);
+          toast.success(t("patient_update_success"));
+          navigate(`/facility/${facilityId}/settings/sync-status`);
+          return;
+        } catch (error) {
+          console.error(`Error handling offline record success:`, error);
+        }
+      }
+
       toast.success(t("patient_update_success"));
       goBack();
     },
@@ -350,7 +378,10 @@ export default function PatientRegistration(
           identifiers,
           permissions,
         );
-
+        // Update the offline write entry with normalized data for display/editing
+        await db.OfflineWrites.update(patientId, {
+          normalizedData: normalizePatient,
+        });
         queryClient.setQueryData(["patient", patientId], normalizePatient);
       } else {
         const offlineWrite: saveOfflineWriteData = {
@@ -386,6 +417,11 @@ export default function PatientRegistration(
         );
 
         queryClient.setQueryData(["patient", patientId], normalizePatient);
+
+        // Update the offline write entry with normalized data for display/editing
+        await db.OfflineWrites.update(saveResult.entry.id, {
+          normalizedData: normalizePatient,
+        });
       }
       toast.success(t("patient_update_success"));
       setNavTarget("back");
@@ -433,6 +469,11 @@ export default function PatientRegistration(
 
       queryClient.setQueryData(["patient", generatedId], normalizePatient);
 
+      // Update the offline write entry with normalized data for display/editing
+      await db.OfflineWrites.update(saveResult.entry.id, {
+        normalizedData: normalizePatient,
+      });
+
       const yob = getYearOfBirth(
         createPatientData.date_of_birth,
         createPatientData.age,
@@ -456,6 +497,7 @@ export default function PatientRegistration(
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log("values submit");
     const editableIdentifiers = values.identifiers.filter((identifier) => {
       const config = facility?.patient_instance_identifier_configs.find(
         (c) => c.id === identifier.config,
@@ -567,52 +609,80 @@ export default function PatientRegistration(
   });
 
   useEffect(() => {
-    if (patientQuery.data && facility) {
-      setSelectedOrganization(
-        patientQuery.data.geo_organization as unknown as Organization,
-      );
+    if (offlineEntryId && !patientId) {
+      setIsLoadingOfflineEntry(true);
+      const loadOfflineEntry = async () => {
+        try {
+          const entry = await db.OfflineWrites.get(offlineEntryId);
+          if (entry && entry.normalizedData) {
+            setOfflineEntry(entry);
+          }
+        } catch (error) {
+          console.error("Error loading offline entry:", error);
+        } finally {
+          setIsLoadingOfflineEntry(false);
+        }
+      };
+      loadOfflineEntry();
+    }
+  }, [offlineEntryId]);
 
-      form.reset({
-        _selected_levels: [
-          patientQuery.data.geo_organization as unknown as Organization,
-        ],
-        _is_deceased: !!patientQuery.data.deceased_datetime,
-        name: patientQuery.data.name || "",
-        phone_number: patientQuery.data.phone_number || "",
-        emergency_phone_number: patientQuery.data.emergency_phone_number || "",
-        same_phone_number:
-          patientQuery.data.phone_number ===
-          patientQuery.data.emergency_phone_number,
-        same_address:
-          patientQuery.data.address === patientQuery.data.permanent_address,
-        gender: patientQuery.data.gender as (typeof GENDERS)[number],
-        blood_group: patientQuery.data.blood_group,
-        age_or_dob: patientQuery.data.date_of_birth ? "dob" : "age",
-        date_of_birth: patientQuery.data.date_of_birth || undefined,
-        age:
-          !patientQuery.data.date_of_birth && patientQuery.data.year_of_birth
-            ? new Date().getFullYear() - patientQuery.data.year_of_birth
-            : undefined,
-        address: patientQuery.data.address || "",
-        permanent_address: patientQuery.data.permanent_address || "",
-        pincode: Number(patientQuery.data.pincode) || undefined,
-        nationality: patientQuery.data.nationality || defaultCountry,
-        geo_organization: (
-          patientQuery.data.geo_organization as unknown as Organization
-        )?.id,
-        deceased_datetime: null,
-        identifiers: facility.patient_instance_identifier_configs.map(
-          (identifierConfig) => {
-            const identifier = patientQuery.data.instance_identifiers?.find(
-              (i) => i.config.id === identifierConfig.id,
-            );
-            return {
-              config: identifierConfig.id,
-              value: identifier?.value,
-            };
-          },
-        ),
-      } as unknown as z.infer<typeof formSchema>);
+  useEffect(() => {
+    if ((patientQuery.data && facility) || (offlineEntry && facility)) {
+      const patientData = (
+        offlineEntryId ? offlineEntry?.normalizedData : patientQuery.data
+      ) as PatientRead | undefined;
+
+      if (patientData) {
+        setSelectedOrganization(
+          patientData.geo_organization as unknown as Organization,
+        );
+
+        form.reset({
+          _selected_levels: [
+            patientData.geo_organization as unknown as Organization,
+          ],
+          _is_deceased: !!patientData.deceased_datetime,
+          name: patientData.name || "",
+          phone_number: patientData.phone_number || "",
+          emergency_phone_number: patientData.emergency_phone_number || "",
+          same_phone_number:
+            patientData.phone_number === patientData.emergency_phone_number,
+          same_address: patientData.address === patientData.permanent_address,
+          gender: patientData.gender as (typeof GENDERS)[number],
+          blood_group: patientData.blood_group,
+          age_or_dob: patientData.date_of_birth ? "dob" : "age",
+          date_of_birth: patientData.date_of_birth || undefined,
+          age:
+            !patientData.date_of_birth && patientData.year_of_birth
+              ? new Date().getFullYear() - patientData.year_of_birth
+              : undefined,
+          address: patientData.address || "",
+          permanent_address: patientData.permanent_address || "",
+          pincode: Number(patientData.pincode) || undefined,
+          nationality: patientData.nationality || defaultCountry,
+          geo_organization: (
+            patientData.geo_organization as unknown as Organization
+          )?.id,
+          deceased_datetime: null,
+          identifiers: facility.patient_instance_identifier_configs.map(
+            (identifierConfig) => {
+              const identifier = patientData.instance_identifiers?.find(
+                (i) => i.config.id === identifierConfig.id,
+              );
+              return {
+                config: identifierConfig.id,
+                value: identifier?.value,
+              };
+            },
+          ),
+        } as unknown as z.infer<typeof formSchema>);
+
+        // Set selected tags if available
+        if (patientData.instance_tags) {
+          setSelectedTags(patientData.instance_tags);
+        }
+      }
     } else if (facility) {
       form.setValue(
         "identifiers",
@@ -624,7 +694,14 @@ export default function PatientRegistration(
         ),
       );
     }
-  }, [patientQuery.data, facility]);
+  }, [
+    patientQuery.data,
+    facility,
+    offlineEntry,
+    offlineEntryId,
+    defaultCountry,
+    form,
+  ]);
 
   const showDuplicate =
     onlineManager.isOnline() &&
@@ -662,7 +739,10 @@ export default function PatientRegistration(
     t("unsaved_changes"),
   );
 
-  if (patientId && patientQuery.isLoading) {
+  if (
+    (patientId && patientQuery.isLoading) ||
+    (offlineEntryId && isLoadingOfflineEntry)
+  ) {
     return <Loading />;
   }
 

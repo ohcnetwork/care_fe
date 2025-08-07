@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -79,6 +79,8 @@ export const EncounterShow = (props: Props) => {
   const pluginTabs = useCareAppEncounterTabs();
   const { goBack } = useAppHistory();
   const queryClient = useQueryClient();
+
+  const [{ offlineEntryId }] = useQueryParams();
   queryClient.setQueryDefaults(["patientPermissions"], {
     meta: { persist: true },
     networkMode: "online",
@@ -152,7 +154,7 @@ export const EncounterShow = (props: Props) => {
 
   return (
     <Page title={t("encounter")} className="block" hideTitleOnPage>
-      <EncounterHeader />
+      <EncounterHeader offlineEntryId={offlineEntryId} />
       <div className="flex flex-col lg:flex-row gap-6 lg:gap-2 mt-4 h-[calc(100vh-10rem)]">
         {!inactiveEncounterStatus.includes(currentEncounter.status) && (
           <EncounterHistorySelector />

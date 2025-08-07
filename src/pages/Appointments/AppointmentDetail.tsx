@@ -217,11 +217,11 @@ export default function AppointmentDetail(props: Props) {
       type: OfflineKeyMap.update_appointment_status,
       resourceType: "Appointment",
       payload: updateAppointmentData,
-      parentMutationIds: isOfflineId(appointment.id)
-        ? [appointment.id] //   offline-created appointment
+      parentMutationId: isOfflineId(appointment.id)
+        ? appointment.id //   offline-created appointment
         : existingRescheduleEntry
-          ? [rescheduleId] //  reschedule write exists and if we are updating status
-          : [],
+          ? rescheduleId //  reschedule write exists and if we are updating status
+          : undefined,
     };
 
     const writeEntry: saveOfflineWriteData = !isOfflineId(appointment.id)

@@ -18,8 +18,9 @@ export interface OfflineWritesEntry {
   mutationPathParams?: Record<string, any>;
   mutationQueryParams?: Record<string, any>;
   payload: unknown;
+  normalizedData?: unknown; // Add normalized data for display/editing
   response?: unknown;
-  parentMutationIds?: string[];
+  parentMutationId?: string;
   clientTimestamp: number;
   serverTimestamp?: string;
   lastAttemptAt?: number;

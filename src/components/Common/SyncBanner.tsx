@@ -19,7 +19,7 @@ export function SyncBanner({
   useEffect(() => {
     if (isVisible && syncedCount === totalCount && totalCount > 0) {
       setIsCompleted(true);
-      // Auto-hide after 4 seconds when completed
+
       const timer = setTimeout(() => {
         onComplete?.();
         setIsCompleted(false);
@@ -28,13 +28,12 @@ export function SyncBanner({
     }
   }, [isVisible, syncedCount, totalCount, onComplete]);
 
-  // Don't render if not visible or no total count
   if (!isVisible || totalCount === 0) return null;
 
   if (!isVisible || totalCount === 0) return null;
 
   const progress = totalCount > 0 ? (syncedCount / totalCount) * 100 : 0;
-  const circumference = 2 * Math.PI * 16; // radius = 16
+  const circumference = 2 * Math.PI * 16;
   const strokeDasharray = circumference;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
@@ -47,7 +46,6 @@ export function SyncBanner({
       <div className="flex items-center space-x-3">
         <div className="relative">
           <svg className="w-8 h-8 transform -rotate-90" viewBox="0 0 36 36">
-            {/* Background circle */}
             <circle
               cx="18"
               cy="18"
@@ -56,7 +54,7 @@ export function SyncBanner({
               strokeWidth="2"
               fill="none"
             />
-            {/* Progress circle */}
+
             <circle
               cx="18"
               cy="18"
