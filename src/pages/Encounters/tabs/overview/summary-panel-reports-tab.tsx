@@ -31,7 +31,7 @@ export const SummaryPanelReportsTab = () => {
           <Button
             key={report.label}
             variant="outline"
-            className="justify-start @sm:flex-1"
+            className="justify-start @sm:justify-center @sm:flex-1"
             asChild
           >
             <Link href={report.href}>

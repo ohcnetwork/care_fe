@@ -36,7 +36,7 @@ export const SummaryPanelActionsTab = () => {
           <Button
             key={action.label}
             variant="outline"
-            className="justify-start @sm:flex-1"
+            className="justify-start @sm:justify-center @sm:flex-1"
             asChild
           >
             <Link href={action.href}>
@@ -47,7 +47,11 @@ export const SummaryPanelActionsTab = () => {
         ))}
 
         <div className="@sm:flex-1 flex flex-col gap-2 border-t border-gray-300 border-dashed @sm:border-none pt-3 @sm:pt-0">
-          <Button variant="outline_primary" className="justify-start" asChild>
+          <Button
+            variant="outline_primary"
+            className="justify-start @sm:justify-center"
+            asChild
+          >
             <Link href="">
               <CheckIcon />
               {t("mark_as_completed")}

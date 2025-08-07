@@ -41,57 +41,36 @@ export const EncounterOverviewTab = () => {
           <ClinicalHistoryOverview />
           <SummaryPanel />
 
-          {/* Main Content Area */}
-          <div className="flex flex-col xl:flex-row gap-4">
-            {/* Left Column - Symptoms, Diagnoses, and Questionnaire Responses */}
-            <div className="flex-1 space-y-4">
-              {/* Associated Devices Section */}
-              {encounter && <EncounterOverviewDevices encounter={encounter} />}
-
-              {/* Allergies Section */}
-              <div>
-                <AllergyList
-                  patientId={patientId}
-                  encounterId={encounterId}
-                  readOnly={!canEdit}
-                  encounterStatus={encounter?.status}
-                />
-              </div>
-              {/* Symptoms Section */}
-              <div>
-                <SymptomsList
-                  patientId={patientId}
-                  encounterId={encounterId}
-                  readOnly={!canEdit}
-                />
-              </div>
-              {/* Diagnoses Section */}
-              <div>
-                <DiagnosisList
-                  patientId={patientId}
-                  encounterId={encounterId}
-                  readOnly={!canEdit}
-                />
-              </div>
-
-              {/* Vitals Section */}
-              <div>
-                <VitalsList
-                  patientId={patientId}
-                  encounterId={encounterId}
-                  codeGroups={vitalGroups}
-                />
-              </div>
-
-              {/* Questionnaire Responses Section */}
-              <div>
-                <QuestionnaireResponsesList
-                  encounter={encounter}
-                  patientId={patientId}
-                  canAccess={canAccess}
-                />
-              </div>
-            </div>
+          <div className="flex flex-col gap-8">
+            {/* Show preview of devices associated with the encounter */}
+            {encounter && <EncounterOverviewDevices encounter={encounter} />}
+            {/* Clinical informations */}
+            <AllergyList
+              patientId={patientId}
+              encounterId={encounterId}
+              readOnly={!canEdit}
+              encounterStatus={encounter?.status}
+            />
+            <SymptomsList
+              patientId={patientId}
+              encounterId={encounterId}
+              readOnly={!canEdit}
+            />
+            <DiagnosisList
+              patientId={patientId}
+              encounterId={encounterId}
+              readOnly={!canEdit}
+            />
+            <VitalsList
+              patientId={patientId}
+              encounterId={encounterId}
+              codeGroups={vitalGroups}
+            />
+            <QuestionnaireResponsesList
+              encounter={encounter}
+              patientId={patientId}
+              canAccess={canAccess}
+            />
           </div>
         </div>
       </ScrollArea>
