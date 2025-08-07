@@ -38,6 +38,7 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 interface QuestionnaireSearchProps {
   placeholder?: string;
+  trigger?: React.ReactNode;
   onSelect?: (questionnaire: QuestionnaireDetail) => void;
   subjectType?: string;
   disabled?: boolean;
@@ -46,6 +47,7 @@ interface QuestionnaireSearchProps {
 
 export function QuestionnaireSearch({
   placeholder,
+  trigger,
   size = "default",
   onSelect = (selected) => navigate(`questionnaire/${selected.slug}`),
   subjectType,
@@ -156,26 +158,31 @@ export function QuestionnaireSearch({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button
-          size={size}
-          data-cy="add-questionnaire-button"
-          variant="outline"
-          role="combobox"
-          className="w-full border border-primary-600"
-          disabled={disabled || isLoading}
-        >
-          {isLoading ? (
-            <>
-              <CareIcon icon="l-spinner" className="mr-2 size-4 animate-spin" />
-              {t("loading")}
-            </>
-          ) : (
-            <div className="flex items-center justify-start gap-2 text-primary-600">
-              <Plus className="size-4" />
-              <span>{placeholder || t("add_questionnaire")}</span>
-            </div>
-          )}
-        </Button>
+        {trigger || (
+          <Button
+            size={size}
+            data-cy="add-questionnaire-button"
+            variant="outline"
+            role="combobox"
+            className="w-full border border-primary-600"
+            disabled={disabled || isLoading}
+          >
+            {isLoading ? (
+              <>
+                <CareIcon
+                  icon="l-spinner"
+                  className="mr-2 size-4 animate-spin"
+                />
+                {t("loading")}
+              </>
+            ) : (
+              <div className="flex items-center justify-start gap-2 text-primary-600">
+                <Plus className="size-4" />
+                <span>{placeholder || t("add_questionnaire")}</span>
+              </div>
+            )}
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0" align="start">
         {content}

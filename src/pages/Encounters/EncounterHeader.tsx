@@ -20,6 +20,7 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import { formatPatientAge } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
+import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 export function EncounterHeader() {
   const { t } = useTranslation();
@@ -59,65 +60,6 @@ export function EncounterHeader() {
               </span>
             </Link>
           </div>
-          {/* <div className="flex flex-col md:flex-row gap-1 md:gap-8 items-start">
-            <div className="md:hidden flex md:flex-col gap-0.5 items-center md:items-start">
-              <span className="text-xs text-gray-600 w-32 md:w-auto">
-                {t("start_date")}:{" "}
-              </span>
-              <span className="text-sm font-semibold">
-                {encounter.period.start
-                  ? formatDateTime(encounter.period.start)
-                  : "--"}
-              </span>
-            </div>
-            <div className="md:hidden flex md:flex-col gap-0.5 items-center md:items-start">
-              <span className="text-xs text-gray-600 w-32 md:w-auto">
-                {t("end_date")}:{" "}
-              </span>
-              <span className="text-sm font-semibold">
-                {encounter.period.end
-                  ? formatDateTime(encounter.period.end)
-                  : t("ongoing")}
-              </span>
-            </div>
-            {patient.instance_identifiers?.map((identifier) => (
-              <div
-                key={identifier.config.id}
-                className="flex md:flex-col gap-0.5 items-center md:items-start"
-              >
-                <span className="text-xs text-gray-600 w-32 md:w-auto">
-                  {identifier.config.config.display}:{" "}
-                </span>
-                <span className="text-sm font-semibold">
-                  {identifier.value}
-                </span>
-              </div>
-            ))}
-            <div className="flex md:flex-col gap-0.5 items-center md:items-start">
-              <span className="text-xs text-gray-600 w-32 md:w-auto">
-                {t("patient_tags")}:{" "}
-              </span>
-              {tags.length ? (
-                <div className="flex flex-wrap gap-1">
-                  {tags.map((tag) => (
-                    <Badge
-                      key={tag.id}
-                      variant="secondary"
-                      size="sm"
-                      className="text-xs"
-                    >
-                      {getTagHierarchyDisplay(tag)}
-                    </Badge>
-                  ))}
-                </div>
-              ) : (
-                <span className="text-sm font-semibold">--</span>
-              )}
-            </div>
-          </div> */}
-          {/* <div className="md:hidden">
-            <EncounterProperties encounter={encounter} canEdit={false} />
-          </div> */}
           <div className="flex flex-row gap-10 ml-3">
             <div>
               <span className="text-sm font-medium text-gray-700">
@@ -148,7 +90,7 @@ export function EncounterHeader() {
                       className="capitalize"
                       title={tag.description}
                     >
-                      {tag.display}
+                      {getTagHierarchyDisplay(tag)}
                     </Badge>
                   ))}
                 </>

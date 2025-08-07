@@ -194,8 +194,6 @@ export function EncounterQuestion({
     return <div>{t("loading_encounter")}</div>;
   }
 
-  console.log("encounter:", encounter.encounter_class);
-
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
