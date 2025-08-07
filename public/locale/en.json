@@ -578,6 +578,7 @@
   "allergen": "Allergen",
   "allergies": "Allergies",
   "allergies_empty_message": "No allergies recorded",
+  "allergy": "Allergy",
   "allergy_history": "Allergy History",
   "allow_camera_access": "Please allow camera permissions in your browser",
   "allow_transfer": "Allow Transfer",
@@ -1184,6 +1185,7 @@
   "copying_is_not_allowed": "Copying is not allowed",
   "could_not_load_page": "We are facing some difficulties showing the Page you were looking for. Our Engineers have been notified and we'll make sure that this is resolved on the fly!",
   "counselling": "Counselling",
+  "count_more": "{{ count }} More",
   "countries_travelled": "Countries travelled",
   "cover_image_deleted": "Cover Image Deleted",
   "cover_image_updated": "Cover Image Updated",
@@ -2525,8 +2527,8 @@
   "mark_as_already_given": "Mark as Already Given",
   "mark_as_balanced": "Mark as balanced",
   "mark_as_cancelled": "Mark as cancelled",
-  "mark_as_complete": "Mark as Complete",
-  "mark_as_completed": "Mark as Completed",
+  "mark_as_complete": "Mark as complete",
+  "mark_as_completed": "Mark as completed",
   "mark_as_damaged": "Mark as Damaged",
   "mark_as_entered_in_error": "Mark as entered in error",
   "mark_as_error": "Mark as error",
@@ -4920,7 +4922,5 @@
   "you_have_unsaved_changes_what_would_you_like_to_do": "You have unsaved changes. What would you like to do?",
   "you_need_at_least_a_location_to_create_an_assest": "You need at least a location to create an assest.",
   "zoom_in": "Zoom In",
-  "zoom_out": "Zoom Out",
-  "allergy": "Allergy",
-  "count_more": "{{ count }} More"
+  "zoom_out": "Zoom Out"
 }

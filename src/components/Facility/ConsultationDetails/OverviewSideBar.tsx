@@ -25,6 +25,8 @@ import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { StatusBadge } from "@/pages/Encounters/EncounterProperties";
+import { SummaryPanelActionsTab } from "@/pages/Encounters/tabs/overview/summary-panel-actions.tab";
+import { SummaryPanelReportsTab } from "@/pages/Encounters/tabs/overview/summary-panel-reports-tab";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   AccountBillingStatus,
@@ -67,11 +69,11 @@ export default function SideOverview({ encounter, canEdit }: Props) {
       </TabsContent>
 
       <TabsContent value="actions">
-        <Actions encounter={encounter} canWrite={canEdit} />
+        <SummaryPanelActionsTab />
       </TabsContent>
 
       <TabsContent value="reports">
-        <Reports />
+        <SummaryPanelReportsTab />
       </TabsContent>
     </Tabs>
   );
@@ -298,40 +300,6 @@ export const Actions = ({
           </>
         )}
       </div>
-    </div>
-  );
-};
-
-export const Reports = () => {
-  const { selectedEncounterId } = useEncounter();
-  const { t } = useTranslation();
-
-  return (
-    <div className="flex flex-col gap-2">
-      <span className="text-black font-semibold">{t("reports")}</span>
-      <Button
-        variant="outline"
-        className="justify-start"
-        onClick={() => navigate(`../${selectedEncounterId}/treatment_summary`)}
-      >
-        <NotebookPen />
-        {t("treatment_summary")}
-      </Button>
-      <Button
-        variant="outline"
-        className="justify-start"
-        onClick={() =>
-          navigate("files", {
-            query: {
-              file: "discharge_summary",
-              selectedEncounter: selectedEncounterId,
-            },
-          })
-        }
-      >
-        <NotebookPen />
-        {t("discharge_summary")}
-      </Button>
     </div>
   );
 };
