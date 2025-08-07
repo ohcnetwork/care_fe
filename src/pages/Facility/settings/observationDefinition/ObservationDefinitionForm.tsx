@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle, X } from "lucide-react";
 import { navigate } from "raviger";
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -198,6 +198,8 @@ function ObservationDefinitionFormContent({
           },
   });
 
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+
   React.useEffect(() => {
     if (isEditMode) return;
 
@@ -209,6 +211,18 @@ function ObservationDefinitionFormContent({
       }
     });
     return () => subscription.unsubscribe();
+  }, [form, isEditMode]);
+
+  React.useEffect(() => {
+    if (isEditMode) {
+      // Reset interaction state when loading edit data
+      setHasUserInteracted(false);
+
+      const subscription = form.watch(() => {
+        setHasUserInteracted(true);
+      });
+      return () => subscription.unsubscribe();
+    }
   }, [form, isEditMode]);
 
   const { mutate: createObservationDefinition, isPending: isCreating } =
@@ -251,6 +265,14 @@ function ObservationDefinitionFormContent({
       createObservationDefinition(payload);
     }
   }
+
+  const isFormDisabled = isEditMode
+    ? !hasUserInteracted // Edit mode: disabled until user actually changes something
+    : !form.watch("title")?.trim() ||
+      !form.watch("description")?.trim() ||
+      !form.watch("category") ||
+      !form.watch("permitted_data_type") ||
+      !form.watch("code")?.code; // Create mode: check required fields
 
   return (
     <Page
@@ -533,7 +555,7 @@ function ObservationDefinitionFormContent({
                     <h2 className="text-base font-medium text-gray-900">
                       {t("components")}{" "}
                       <span className="text-sm font-normal text-gray-500">
-                        (Optional)
+                        ({t("optional")})
                       </span>
                     </h2>
                     <p className="mt-0.5 text-sm text-gray-500">
@@ -739,7 +761,7 @@ function ObservationDefinitionFormContent({
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" disabled={isPending || isFormDisabled}>
                 {isPending
                   ? isEditMode
                     ? t("saving")

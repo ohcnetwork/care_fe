@@ -531,7 +531,14 @@ export function ProductFormContent({
             <Button type="button" variant="outline" onClick={onCancel}>
               {t("cancel")}
             </Button>
-            <Button type="submit" disabled={isPending}>
+            <Button
+              type="submit"
+              disabled={
+                isPending || isEditMode
+                  ? !form.formState.isDirty
+                  : !form.formState.isValid
+              }
+            >
               {isPending ? t("saving") : isEditMode ? t("update") : t("create")}
             </Button>
           </div>

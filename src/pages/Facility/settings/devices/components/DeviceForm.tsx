@@ -613,7 +613,10 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
           </Button>
           <Button
             type="submit"
-            disabled={isPending || !form.formState.isDirty}
+            disabled={
+              isPending ||
+              (device ? !form.formState.isDirty : !form.formState.isValid)
+            }
             data-cy="save-device-button"
           >
             {isPending ? t("saving") : t("save")}

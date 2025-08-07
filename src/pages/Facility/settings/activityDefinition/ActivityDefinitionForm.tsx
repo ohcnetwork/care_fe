@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash2Icon } from "lucide-react";
 import { navigate } from "raviger";
 import * as React from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -376,6 +377,8 @@ function ActivityDefinitionFormContent({
           },
   });
 
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+
   // Watch title changes and update slug only when creating new activity definition
   React.useEffect(() => {
     if (isEditMode) return; // Skip if editing existing data
@@ -388,6 +391,18 @@ function ActivityDefinitionFormContent({
       }
     });
     return () => subscription.unsubscribe();
+  }, [form, isEditMode]);
+
+  React.useEffect(() => {
+    if (isEditMode) {
+      // Reset interaction state when loading edit data
+      setHasUserInteracted(false);
+
+      const subscription = form.watch(() => {
+        setHasUserInteracted(true);
+      });
+      return () => subscription.unsubscribe();
+    }
   }, [form, isEditMode]);
 
   const { mutate: createActivityDefinition, isPending: isCreating } =
@@ -455,6 +470,14 @@ function ActivityDefinitionFormContent({
       );
     }
   }
+
+  const isFormDisabled = isEditMode
+    ? !hasUserInteracted // Edit mode: disabled until user actually changes something
+    : !form.watch("title")?.trim() ||
+      !form.watch("description")?.trim() ||
+      !form.watch("usage")?.trim() ||
+      !form.watch("category") ||
+      !form.watch("code")?.code; // Create mode: check required fields
 
   return (
     <Page
@@ -1101,7 +1124,7 @@ function ActivityDefinitionFormContent({
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" disabled={isPending || isFormDisabled}>
                 {isPending
                   ? isEditMode
                     ? t("saving")

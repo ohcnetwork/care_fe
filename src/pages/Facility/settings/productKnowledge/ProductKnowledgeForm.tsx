@@ -164,7 +164,7 @@ function ProductKnowledgeFormContent({
   };
 
   // Handle form initialization with proper mapping of types
-  const getDefaultValues = () => {
+  const getDefaultValues = React.useCallback(() => {
     if (isEditMode && existingData) {
       return {
         name: existingData.name,
@@ -181,7 +181,6 @@ function ProductKnowledgeFormContent({
             : null,
       };
     }
-
     return {
       product_type: ProductKnowledgeType.medication,
       names: [],
@@ -190,12 +189,21 @@ function ProductKnowledgeFormContent({
       definitional: null,
       status: ProductKnowledgeStatus.active,
     };
-  };
+  }, [isEditMode, existingData]);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: getDefaultValues(),
   });
+
+  const [hasInitialized, setHasInitialized] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isEditMode && existingData && !hasInitialized) {
+      form.reset(getDefaultValues());
+      setHasInitialized(true);
+    }
+  }, [isEditMode, existingData, form, getDefaultValues, hasInitialized]);
 
   React.useEffect(() => {
     if (isEditMode) return;
@@ -887,7 +895,15 @@ function ProductKnowledgeFormContent({
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button
+                type="submit"
+                disabled={
+                  isPending ||
+                  (isEditMode
+                    ? !form.formState.isDirty
+                    : !form.watch("name")?.trim())
+                }
+              >
                 {isPending ? t("saving") : t("save")}
               </Button>
             </div>

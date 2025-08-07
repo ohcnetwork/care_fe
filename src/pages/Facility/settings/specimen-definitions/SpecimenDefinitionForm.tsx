@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { t } from "i18next";
 import { PlusCircle, XCircle } from "lucide-react";
 import { navigate } from "raviger";
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
@@ -94,7 +94,8 @@ const formSchema = z.object({
   derived_from_uri: z
     .string()
     .url({ message: "Please enter a valid URL" })
-    .optional(),
+    .optional()
+    .or(z.literal("")),
   type_collected: CodeSchema,
   patient_preparation: z.array(CodeSchema).min(0),
   collection: CodeSchema.optional(),
@@ -125,7 +126,7 @@ export function SpecimenDefinitionForm({
       slug: initialData?.slug,
       status: initialData?.status ?? SpecimenDefinitionStatus.active,
       description: initialData?.description,
-      derived_from_uri: initialData?.derived_from_uri ?? undefined,
+      derived_from_uri: initialData?.derived_from_uri || undefined,
       type_collected: initialData?.type_collected,
       patient_preparation: initialData?.patient_preparation ?? [],
       collection: initialData?.collection ?? undefined,
@@ -146,6 +147,8 @@ export function SpecimenDefinitionForm({
     },
   });
 
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+
   React.useEffect(() => {
     if (initialData) return;
 
@@ -157,6 +160,18 @@ export function SpecimenDefinitionForm({
       }
     });
     return () => subscription.unsubscribe();
+  }, [form, initialData]);
+
+  React.useEffect(() => {
+    if (initialData) {
+      // Reset interaction state when loading edit data
+      setHasUserInteracted(false);
+
+      const subscription = form.watch(() => {
+        setHasUserInteracted(true);
+      });
+      return () => subscription.unsubscribe();
+    }
   }, [form, initialData]);
 
   const handleTypeCollectedSelect = (code: Code) => {
@@ -220,6 +235,7 @@ export function SpecimenDefinitionForm({
   const handleSubmit = (data: SpecimenDefinitionCreate) => {
     onSubmit({
       ...data,
+      derived_from_uri: data.derived_from_uri || undefined,
       patient_preparation:
         data.patient_preparation?.filter((item) => item && item.code) || [],
       type_tested: data.type_tested
@@ -230,6 +246,12 @@ export function SpecimenDefinitionForm({
         : undefined,
     });
   };
+
+  const isFormDisabled = initialData
+    ? !hasUserInteracted // Edit mode: disabled until user actually changes something
+    : !form.watch("title")?.trim() ||
+      !form.watch("description")?.trim() ||
+      !form.watch("type_collected"); // Create mode
 
   return (
     <Form {...form}>
@@ -335,7 +357,11 @@ export function SpecimenDefinitionForm({
                     <FormItem className="flex flex-col">
                       <FormLabel>{t("derived_from_uri")}</FormLabel>
                       <FormControl>
-                        <Input placeholder={t("uri")} {...field} />
+                        <Input
+                          placeholder={t("uri")}
+                          {...field}
+                          value={field.value || ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -756,7 +782,7 @@ export function SpecimenDefinitionForm({
           >
             {t("cancel")}
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading || isFormDisabled}>
             {t("save")}
           </Button>
         </div>
