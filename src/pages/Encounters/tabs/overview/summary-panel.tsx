@@ -14,7 +14,7 @@ export const SummaryPanel = () => {
         defaultValue="details"
         className="@sm:bg-gray-100 @sm:border border-gray-200 @sm:p-1 @sm:rounded-lg"
       >
-        <TabsList className="w-72 bg-gray-100 @sm:bg-gray-200 justify-between inset-shadow-sm py-px px-0.5">
+        <TabsList className="w-72 bg-gray-100 @sm:bg-gray-200 justify-between inset-shadow-sm pt-px pb-0.5 px-0.5">
           <TabsTrigger value="details" className="w-full">
             <span className="text-black">{t("details")}</span>
           </TabsTrigger>

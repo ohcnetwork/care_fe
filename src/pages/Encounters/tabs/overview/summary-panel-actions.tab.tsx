@@ -27,7 +27,7 @@ export const SummaryPanelActionsTab = () => {
   ] as const satisfies { label: string; href: string }[];
 
   return (
-    <div className="flex flex-col gap-2 bg-gray-100 @sm:bg-white p-2 @sm:p-3 rounded-lg border border-gray-200 @sm:shadow">
+    <div className="flex flex-col gap-2 bg-gray-100 @sm:bg-white p-2 @sm:p-3 rounded-lg border border-gray-200 @sm:shadow @sm:overflow-x-auto">
       <div className="flex pl-1 @xs:hidden">
         <h6 className="text-gray-950 font-semibold">{t("actions")}</h6>
       </div>
