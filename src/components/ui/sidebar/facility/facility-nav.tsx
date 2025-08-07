@@ -6,21 +6,20 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 import { NavMain } from "@/components/ui/sidebar/nav-main";
 
-import { UserFacilityModel } from "@/components/Users/models";
-
 import { useCareApps } from "@/hooks/useCareApps";
 
 import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { FacilityBareMinimum } from "@/types/facility/facility";
 
 interface FacilityNavProps {
-  selectedFacility: UserFacilityModel | null;
+  selectedFacility: FacilityBareMinimum | null;
 }
 
 function generateFacilityLinks(
-  selectedFacility: UserFacilityModel | null,
+  selectedFacility: FacilityBareMinimum | null,
   t: TFunction,
   permissions: {
     canViewAppointments: boolean;

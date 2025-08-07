@@ -15,12 +15,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { UserFacilityModel } from "@/components/Users/models";
 
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { formatName } from "@/Utils/utils";
+import { FacilityBareMinimum } from "@/types/facility/facility";
 import { Organization, getOrgLabel } from "@/types/organization/organization";
 
 enum DashboardTabs {
@@ -31,9 +31,9 @@ enum DashboardTabs {
 
 type TabContentProps = {
   tabId: string;
-  tabItems: UserFacilityModel[] | Organization[];
+  tabItems: FacilityBareMinimum[] | Organization[];
   description: string;
-  renderChild: (item: UserFacilityModel | Organization) => React.ReactNode;
+  renderChild: (item: FacilityBareMinimum | Organization) => React.ReactNode;
 };
 
 export default function UserDashboard() {
@@ -69,7 +69,7 @@ export default function UserDashboard() {
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <Avatar
             name={formatName(user)}
-            imageUrl={user.profile_picture_url}
+            imageUrl={user.read_profile_picture_url}
             className="h-14 w-14 md:h-16 md:w-16"
           />
           <div className="space-y-1 text-center sm:text-left">
@@ -330,7 +330,7 @@ const TabContent = ({
         className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
         data-cy={`${tabId}-list`}
       >
-        {tabItems.map((item: UserFacilityModel | Organization) => {
+        {tabItems.map((item: FacilityBareMinimum | Organization) => {
           return renderChild(item);
         })}
       </div>

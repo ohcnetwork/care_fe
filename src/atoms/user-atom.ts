@@ -1,8 +1,8 @@
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
-import { AuthUserModel } from "@/components/Users/models";
+import { CurrentUserRead } from "@/types/user/user";
 
-export const userAtom = atomWithStorage<AuthUserModel | undefined>(
+export const userAtom = atomWithStorage<CurrentUserRead | undefined>(
   "care-auth-user",
   undefined,
   createJSONStorage(() => sessionStorage),

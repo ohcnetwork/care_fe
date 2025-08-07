@@ -1,8 +1,7 @@
-import { AuthUserModel } from "@/components/Users/models";
-
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import {
+  CurrentUserRead,
   UserCreate,
   UserRead,
   UserReadMinimal,
@@ -46,7 +45,7 @@ export default {
   currentUser: {
     path: "/api/v1/users/getcurrentuser/",
     method: HttpMethod.GET,
-    TRes: Type<AuthUserModel>(),
+    TRes: Type<CurrentUserRead>(),
   },
   uploadProfilePicture: {
     path: "/api/v1/users/{username}/profile_picture/",
