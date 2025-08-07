@@ -233,7 +233,7 @@ export default function EncounterDetailsTab({
   return (
     <div className="w-full bg-gray-100 p-2 border border-gray-200 rounded-md mb-2">
       <Tabs defaultValue="details">
-        <TabsList className="w-full h-10 bg-gray-200 justify-between">
+        <TabsList className="bg-gray-200 justify-between">
           <TabsTrigger value="details" className="w-full p-4">
             {t("details")}
           </TabsTrigger>

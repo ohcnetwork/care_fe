@@ -20,20 +20,20 @@ import { entriesOf } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { EncounterHeader } from "@/pages/Encounters/EncounterHeader";
 import EncounterHistorySelector from "@/pages/Encounters/EncounterHistorySelector";
-import { EncounterConsentsTab } from "@/pages/Encounters/tabs/EncounterConsentsTab";
-import { EncounterDevicesTab } from "@/pages/Encounters/tabs/EncounterDevicesTab";
-import { EncounterFilesTab } from "@/pages/Encounters/tabs/EncounterFilesTab";
-import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicinesTab";
-import { EncounterObservationsTab } from "@/pages/Encounters/tabs/EncounterObservationsTab";
-import { EncounterOverviewTab } from "@/pages/Encounters/tabs/EncounterOverviewTab";
-import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
+import { EncounterConsentsTab } from "@/pages/Encounters/tabs/consents";
+import { EncounterDevicesTab } from "@/pages/Encounters/tabs/devices";
+import { EncounterFilesTab } from "@/pages/Encounters/tabs/files";
+import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/medicines";
+import { EncounterObservationsTab } from "@/pages/Encounters/tabs/observations";
+import { EncounterOverviewTab } from "@/pages/Encounters/tabs/overview";
+import { EncounterPlotsTab } from "@/pages/Encounters/tabs/plots";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 
-import { EncounterDiagnosticReportsTab } from "./tabs/EncounterDiagnosticReportsTab";
-import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
-import { EncounterServiceRequestTab } from "./tabs/EncounterServiceRequestTab";
+import { EncounterDiagnosticReportsTab } from "./tabs/diagnostic-reports";
+import { EncounterNotesTab } from "./tabs/notes";
+import { EncounterServiceRequestTab } from "./tabs/service-requests";
 
 export interface PluginEncounterTabProps {
   encounter: EncounterRead;
@@ -162,14 +162,18 @@ export const EncounterShow = (props: Props) => {
   }
 
   return (
-    <Page title={t("encounter")} className="block" hideTitleOnPage>
+    <Page
+      title={t("encounter")}
+      className="block md:px-1 -mt-4"
+      hideTitleOnPage
+    >
       <EncounterHeader />
-      <div className="flex flex-col lg:flex-row mt-4 sm:h-[calc(100vh-10rem)]">
+      <div className="flex flex-col lg:flex-row mt-4">
         <EncounterHistorySelector />
         <NavTabs
           showMoreAfterIndex={showMoreAfterIndex}
           className="w-full overflow-x-auto"
-          tabContentClassName="flex-none sm:h-[calc(100vh-24rem)] overflow-y-auto"
+          tabContentClassName="flex-none h-[calc(100vh-12rem)] overflow-y-auto"
           tabs={tabs}
           currentTab={props.tab}
           tabTriggerClassName="max-w-36"

@@ -1,0 +1,71 @@
+import { PlusIcon } from "lucide-react";
+import { Link } from "raviger";
+import React from "react";
+import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
+
+export const QuickActions = (props: React.ComponentProps<"div">) => {
+  const { t } = useTranslation();
+
+  return (
+    <div {...props} className={cn("flex gap-3", props.className)}>
+      <QuickAction
+        icon={<PlusIcon className="size-8" />}
+        title={t("allergy")}
+        shortcut="A"
+        href="/encounters/allergy"
+      />
+      <QuickAction
+        icon={<PlusIcon className="size-8" />}
+        title={t("allergy")}
+        shortcut="A"
+        href="/encounters/allergy"
+      />
+      <QuickAction
+        icon={<PlusIcon className="size-8" />}
+        title={t("allergy")}
+        shortcut="A"
+        href="/encounters/allergy"
+      />
+      <QuickAction
+        icon={<PlusIcon className="size-8" />}
+        title={t("allergy")}
+        shortcut="A"
+        href="/encounters/allergy"
+      />
+    </div>
+  );
+};
+
+const QuickAction = ({
+  icon,
+  title,
+  shortcut,
+  href,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  shortcut: string;
+  href: string;
+}) => {
+  return (
+    <Link
+      href={href}
+      className="flex-1 flex flex-col gap-1.25 p-1 pb-2 rounded-lg shadow bg-white"
+    >
+      <div className="relative flex py-3 rounded-t-lg rounded-b-xl bg-gray-100">
+        <div className="flex items-center justify-center absolute top-1 right-1 size-5 bg-gradient-to-b from-white to gray-500/20 rounded-md border border-gray-200">
+          <span className="font-medium text-xs text-gray-700">{shortcut}</span>
+        </div>
+        <div className="rounded-xl bg-white p-2 size-12 shadow mx-auto">
+          {icon}
+        </div>
+      </div>
+      <div className="flex items-center gap-1 justify-center">
+        <PlusIcon className="size-4" />
+        <span className="text-sm font-semibold">{title}</span>
+      </div>
+    </Link>
+  );
+};

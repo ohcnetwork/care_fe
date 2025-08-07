@@ -6,7 +6,10 @@ import { Permissions, getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
+import {
+  EncounterRead,
+  inactiveEncounterStatus,
+} from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
@@ -27,6 +30,12 @@ type EncounterContextType = {
   currentEncounterPermissions: Permissions;
   selectedEncounterPermissions: Permissions;
   patientPermissions: Permissions;
+
+  canAccessCurrentEncounter: boolean;
+  canAccessSelectedEncounter: boolean;
+
+  canEditCurrentEncounter: boolean;
+  canEditSelectedEncounter: boolean;
 };
 
 const encounterContext = createContext<EncounterContextType | undefined>(
@@ -101,6 +110,29 @@ export function EncounterProvider({
     patient?.permissions ?? [],
   );
 
+  // User can access the selected encounter if they have canViewEncounter or canViewClinicalData permission
+  const canAccessSelectedEncounter =
+    selectedEncounterPermissions.canViewEncounter ||
+    selectedEncounterPermissions.canViewClinicalData;
+
+  // User can edit the selected encounter if it was accessed via facility scope, is the same as the primary encounter in view, and is active
+  const canEditSelectedEncounter =
+    canAccessSelectedEncounter &&
+    !!facilityId &&
+    selectedEncounterId === currentEncounterId &&
+    !inactiveEncounterStatus.includes(selectedEncounter?.status ?? "");
+
+  // User can access the current encounter if they have canViewEncounter or canViewClinicalData permission
+  const canAccessCurrentEncounter =
+    currentEncounterPermissions.canViewEncounter ||
+    currentEncounterPermissions.canViewClinicalData;
+
+  // User can edit the current encounter if it was accessed via facility scope and is active
+  const canEditCurrentEncounter =
+    canAccessCurrentEncounter &&
+    !!facilityId &&
+    !inactiveEncounterStatus.includes(currentEncounter?.status ?? "");
+
   return (
     <encounterContext.Provider
       value={{
@@ -118,6 +150,10 @@ export function EncounterProvider({
         currentEncounterPermissions,
         selectedEncounterPermissions,
         patientPermissions,
+        canAccessSelectedEncounter,
+        canEditSelectedEncounter,
+        canAccessCurrentEncounter,
+        canEditCurrentEncounter,
       }}
     >
       {children}

@@ -377,8 +377,8 @@ export default function EncounterHistorySelector() {
           </SheetContent>
         </Sheet>
       </div>
-      <div className="hidden lg:block">
-        <ScrollArea className="h-[calc(100vh-10rem)] pr-3">
+      <div className="hidden lg:block pr-3">
+        <ScrollArea className="h-[calc(100vh-9rem)] pr-3">
           <EncounterHistoryList />
         </ScrollArea>
       </div>

@@ -4920,5 +4920,7 @@
   "you_have_unsaved_changes_what_would_you_like_to_do": "You have unsaved changes. What would you like to do?",
   "you_need_at_least_a_location_to_create_an_assest": "You need at least a location to create an assest.",
   "zoom_in": "Zoom In",
-  "zoom_out": "Zoom Out"
+  "zoom_out": "Zoom Out",
+  "allergy": "Allergy",
+  "count_more": "{{ count }} More"
 }

@@ -42,57 +42,38 @@ interface Props {
   canEdit: boolean;
 }
 
+/**
+ * @deprecated
+ */
 export default function SideOverview({ encounter, canEdit }: Props) {
   const { t } = useTranslation();
 
   return (
-    <div className="w-72 flex flex-col gap-4">
-      <div className="hidden md:block">
-        <div className="w-full">
-          <Tabs defaultValue="details">
-            <TabsList className="w-full bg-gray-100 justify-between border border-gray-200 -p-1">
-              <TabsTrigger value="details" className="w-full">
-                {t("details")}
-              </TabsTrigger>
-              <TabsTrigger value="actions" className="w-full">
-                {t("actions")}
-              </TabsTrigger>
-              <TabsTrigger value="reports" className="w-full">
-                {t("reports")}
-              </TabsTrigger>
-            </TabsList>
+    <Tabs defaultValue="details">
+      <TabsList className="w-full bg-gray-100 justify-between inset-shadow-sm py-px pl-0.5">
+        <TabsTrigger value="details" className="w-full">
+          {t("details")}
+        </TabsTrigger>
+        <TabsTrigger value="actions" className="w-full">
+          {t("actions")}
+        </TabsTrigger>
+        <TabsTrigger value="reports" className="w-full">
+          {t("reports")}
+        </TabsTrigger>
+      </TabsList>
 
-            <TabsContent value="details">
-              <RenderDetailsTab encounter={encounter} canEdit={canEdit} />
-            </TabsContent>
+      <TabsContent value="details">
+        <RenderDetailsTab encounter={encounter} canEdit={canEdit} />
+      </TabsContent>
 
-            <TabsContent value="actions">
-              <Actions encounter={encounter} canWrite={canEdit} />
-            </TabsContent>
+      <TabsContent value="actions">
+        <Actions encounter={encounter} canWrite={canEdit} />
+      </TabsContent>
 
-            <TabsContent value="reports">
-              <Reports />
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
-      {/* <div className="flex flex-col gap-8 md:mt-6">
-        <Separator className="bg-slate-200" />
-        <Actions />
-        {!readOnly && canEdit && <Questionnaires encounter={encounter} />}
-        <Locations canEdit={canEdit} encounter={encounter} />
-        <DepartmentsAndTeams canEdit={canEdit} encounter={encounter} />
-        <div className="flex md:flex-col gap-0.5 items-center md:items-start">
-          <span className="text-xs text-gray-600 w-32 md:w-auto">
-            {t("hospital_identifier")}:{" "}
-          </span>
-          <span className="text-sm font-semibold">
-            {encounter.external_identifier || "--"}
-          </span>
-        </div>
-        <AuditLogs encounter={encounter} />
-      </div> */}
-    </div>
+      <TabsContent value="reports">
+        <Reports />
+      </TabsContent>
+    </Tabs>
   );
 }
 
@@ -321,7 +302,7 @@ export const Actions = ({
   );
 };
 
-const Reports = () => {
+export const Reports = () => {
   const { selectedEncounterId } = useEncounter();
   const { t } = useTranslation();
 
