@@ -112,31 +112,34 @@ export default function ProductView({ facilityId, productId }: Props) {
           {t("back")}
         </Button>
 
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <h1 className="text-2xl font-bold">Product ID: {product.id}</h1>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold">Product ID: {product.id}</h1>
               <Badge variant={PRODUCT_STATUS_COLORS[product.status]}>
                 {t(product.status)}
               </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  navigate(
+                    `/facility/${facilityId}/settings/product/${product.id}/edit`,
+                  )
+                }
+                className="flex items-center gap-1"
+              >
+                <CareIcon icon="l-pen" className="size-3" />
+                {t("edit")}
+              </Button>
             </div>
-            {product.batch?.lot_number && (
-              <p className="mt-1 text-sm text-gray-600">
-                {t("lot_number")}: {product.batch.lot_number}
-              </p>
-            )}
           </div>
-          <Button
-            variant="outline"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/settings/product/${product.id}/edit`,
-              )
-            }
-          >
-            <CareIcon icon="l-pen" className="mr-2 size-4" />
-            {t("edit")}
-          </Button>
+
+          {product.batch?.lot_number && (
+            <p className="text-sm text-gray-600">
+              {t("lot_number")}: {product.batch.lot_number}
+            </p>
+          )}
         </div>
 
         <Card>
