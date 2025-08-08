@@ -106,6 +106,11 @@ export function UpdateChargeItemDefinition({
           initialData={chargeItemDefinition}
           isUpdate={true}
           onSuccess={handleSuccess}
+          onCancel={() =>
+            navigate(
+              `/facility/${facilityId}/settings/charge_item_definitions/${chargeItemDefinitionId}`,
+            )
+          }
         />
       </div>
     </Page>

@@ -70,6 +70,11 @@ export function UpdateSpecimenDefinition({
           })
         }
         isLoading={isUpdating}
+        onCancel={() =>
+          navigate(
+            `/facility/${facilityId}/settings/specimen_definitions/${specimenDefinitionId}`,
+          )
+        }
       />
     </div>
   );
