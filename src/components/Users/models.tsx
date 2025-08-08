@@ -1,6 +1,7 @@
-import { Gender, UserType } from "@/components/Users/UserFormValidations";
+import { Gender } from "@/components/Users/UserFormValidations";
 
 import { Organization } from "@/types/organization/organization";
+import { UserType } from "@/types/user/user";
 
 export type UpdatePasswordForm = {
   old_password: string;
@@ -16,7 +17,7 @@ export type UserBareMinimum = {
   email: string;
   user_type: UserType;
   last_login: string | undefined;
-  read_profile_picture_url?: string;
+  profile_picture_url?: string;
   external_id: string;
   prefix: string | null;
   suffix: string | null;

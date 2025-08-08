@@ -15,10 +15,10 @@ import Loading from "@/components/Common/Loading";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PatientRead } from "@/types/emr/patient/patient";
+import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { Appointment } from "@/types/scheduling/schedule";
 
@@ -130,7 +130,7 @@ export default function PatientSelect({
 
   const { data: patientData, isLoading } = useQuery({
     queryKey: ["otp-patient"],
-    queryFn: query(routes.otp.getPatient, {
+    queryFn: query(publicPatientApi.listPatient, {
       headers: {
         Authorization: `Bearer ${tokenData.token}`,
         "Content-Type": "application/json",
@@ -191,7 +191,7 @@ export default function PatientSelect({
 
     createAppointment({
       patient: selectedPatientData.id,
-      reason_for_visit: reason,
+      note: reason,
     });
   };
 

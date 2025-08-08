@@ -55,6 +55,11 @@
                         "code": "2708-6",
                         "system": "http://loinc.org",
                         "display": "SpO2"
+                    },
+                    {
+                        "code": "59408-5",
+                        "system": "http://loinc.org",
+                        "display": "SpO2 (pulse oximetry)"
                     }
                 ]
             },

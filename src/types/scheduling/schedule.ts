@@ -6,7 +6,7 @@ import { Time } from "@/Utils/types";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export type ScheduleSlotType = "appointment" | "open" | "closed";
 
@@ -22,8 +22,8 @@ export interface ScheduleTemplate {
   valid_from: string;
   valid_to: string;
   availabilities: ScheduleAvailability[];
-  created_by: UserBase;
-  updated_by: UserBase;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
 }
 
 type ScheduleAvailabilityBase = {
@@ -168,46 +168,57 @@ export interface Appointment {
   patient: PatientRead;
   booked_on: string;
   status: AppointmentNonCancelledStatus;
-  reason_for_visit: string;
-  user: UserBase;
-  booked_by: UserBase | null; // This is null if the appointment was booked by the patient itself.
+  note: string;
+  user: UserReadMinimal;
+  booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
   facility: FacilityBareMinimum;
 }
 
 export interface AppointmentRead extends Appointment {
   tags: TagConfig[];
-  updated_by: UserBase | null;
-  created_by: UserBase;
+  updated_by: UserReadMinimal | null;
+  created_by: UserReadMinimal;
   modified_date: string;
 }
 
 export interface AppointmentCreateRequest {
   patient: string;
-  reason_for_visit: string;
+  note: string;
   tags: string[];
 }
 
 export interface AppointmentCreatePublicRequest {
   patient: string;
-  reason_for_visit: string;
+  note: string;
 }
 
 export interface AppointmentUpdateRequest {
   status: Appointment["status"];
+  note: string;
 }
 
 export interface CreateAppointmentQuestion {
-  reason_for_visit: string;
+  note: string;
   slot_id: string;
   tags: string[];
 }
 
 export interface AppointmentCancelRequest {
   reason: "cancelled" | "entered_in_error";
-  reason_for_visit?: string;
+  note?: string;
 }
 
 export interface AppointmentRescheduleRequest {
   new_slot: string;
-  reason: string;
+  previous_booking_note: string;
+  new_booking_note: string;
+  tags: string[];
 }
+
+export const getUserFromLocalStorage = (): UserReadMinimal => {
+  return JSON.parse(localStorage.getItem("user") ?? "{}");
+};
+
+export const storeUserInLocalStorage = (user: UserReadMinimal) => {
+  localStorage.setItem("user", JSON.stringify(user));
+};

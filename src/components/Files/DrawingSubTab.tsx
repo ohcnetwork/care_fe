@@ -20,6 +20,7 @@ import useFilters from "@/hooks/useFilters";
 import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import {
   EncounterRead,
@@ -266,7 +267,7 @@ export const DrawingPage = ({
                       </p>
                       <p className="flex items-center gap-1">
                         <CareIcon icon="l-user" className="text-gray-400" />
-                        {drawing.created_by.username}
+                        {formatName(drawing.created_by)}
                       </p>
                     </div>
                   </CardContent>

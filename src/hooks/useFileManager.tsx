@@ -30,6 +30,7 @@ import {
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { formatDateTime } from "@/Utils/utils";
 
 export interface FileManagerOptions {
@@ -326,7 +327,10 @@ export default function useFileManager(
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setArchiveDialogueOpen(null)}
+                onClick={() => {
+                  setArchiveReason("");
+                  setArchiveDialogueOpen(null);
+                }}
               >
                 {t("cancel")}
               </Button>
@@ -363,7 +367,7 @@ export default function useFileManager(
               },
               {
                 label: "Uploaded By",
-                content: archiveDialogueOpen?.uploaded_by?.username,
+                content: formatName(archiveDialogueOpen?.uploaded_by),
                 icon: "l-user",
               },
               {
@@ -378,7 +382,7 @@ export default function useFileManager(
               },
               {
                 label: "Archived By",
-                content: archiveDialogueOpen?.archived_by?.username,
+                content: formatName(archiveDialogueOpen?.archived_by),
                 icon: "l-user",
               },
               {

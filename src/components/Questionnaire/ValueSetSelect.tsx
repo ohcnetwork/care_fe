@@ -201,10 +201,7 @@ export default function ValueSetSelect({
             </div>
           </Button>
         </SheetTrigger>
-        <SheetContent
-          side="bottom"
-          className="h-[50vh] px-0 pt-2 pb-0 rounded-t-3xl"
-        >
+        <SheetContent side="bottom" className="px-0 pt-2 pb-0 rounded-t-3xl">
           <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto bg-gray-300 mt-2" />
           <div className="mt-6 h-full">
             <ValueSetSearchContent
@@ -240,7 +237,7 @@ export default function ValueSetSelect({
       >
         {!hideTrigger && (
           <PopoverTrigger asChild disabled={disabled}>
-            <div className="w-full px-0!">
+            <div className="w-full">
               <Button
                 type="button"
                 variant="outline"
@@ -250,7 +247,7 @@ export default function ValueSetSelect({
                   !value?.display && "text-gray-400",
                 )}
               >
-                <span>
+                <span className="truncate">
                   {value?.display || placeholder}
                   {value?.display && showCode && (
                     <span className="text-xs ml-1">({value?.code})</span>
