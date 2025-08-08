@@ -69,7 +69,7 @@ import { AppointmentTokenCard } from "@/pages/Appointments/components/Appointmen
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
-import { FacilityData } from "@/types/facility/facility";
+import { FacilityRead } from "@/types/facility/facility";
 import {
   APPOINTMENT_STATUS_COLORS,
   Appointment,
@@ -226,7 +226,7 @@ const AppointmentDetails = ({
   facility,
 }: {
   appointment: AppointmentRead;
-  facility: FacilityData;
+  facility: FacilityRead;
 }) => {
   const { user } = appointment;
   const { t } = useTranslation();
@@ -427,7 +427,6 @@ const AppointmentDetails = ({
           <div className="grid gap-2">
             <div className="text-sm">
               <p className="font-medium">{formatName(user)}</p>
-              <p className="text-gray-600">{user.email}</p>
             </div>
             <Separator />
             <div className="text-sm">

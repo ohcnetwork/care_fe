@@ -1,6 +1,5 @@
-import { FacilityModel } from "@/components/Facility/models";
-
-import { UserBase } from "@/types/user/user";
+import { FacilityRead } from "@/types/facility/facility";
+import { UserReadMinimal } from "@/types/user/user";
 
 export type AlignmentOptions =
   | "left"
@@ -294,9 +293,9 @@ export type ReportTemplateCreate = Omit<ReportTemplateBase, "id"> & {
 export type ReportTemplateUpdate = Pick<ReportTemplateBase, "config">;
 
 export interface ReportTemplateModel extends ReportTemplateBase {
-  facility: FacilityModel;
-  created_by: UserBase;
-  updated_by: UserBase;
+  facility: FacilityRead;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
   derived_from_url?: string;
 }
 

@@ -2210,6 +2210,7 @@
   "invalid_latitude": "Invalid latitude",
   "invalid_link_msg": "It appears that the password reset link you have used is either invalid or expired. Please request a new password reset link.",
   "invalid_longitude": "Invalid longitude",
+  "invalid_organization_type": "Invalid organization type",
   "invalid_otp": "Invalid OTP, Please check the OTP and try again",
   "invalid_password": "Password doesn't meet the requirements",
   "invalid_password_reset_link": "Invalid password reset link",
