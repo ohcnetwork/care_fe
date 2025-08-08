@@ -51,7 +51,10 @@ import { mergeAutocompleteOptions } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
-import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
+import {
+  RESOURCE_REQUEST_STATUSES,
+  ResourceRequest,
+} from "@/types/resourceRequest/resourceRequest";
 import { UserBase } from "@/types/user/user";
 
 interface ResourceProps {
@@ -68,7 +71,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const authUser = useAuthUser();
 
   const resourceFormSchema = z.object({
-    status: z.string().min(1, { message: t("field_required") }),
+    status: z.enum(RESOURCE_REQUEST_STATUSES),
     category: z.string().min(1, { message: t("field_required") }),
     assigned_facility: z.object({
       id: z.string(),
