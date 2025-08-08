@@ -64,9 +64,7 @@ export const DepartmentsAndTeams = ({
             ))}
           </div>
         ) : (
-          <p className="text-sm text-gray-500">
-            {t("no_departments_assigned")}
-          </p>
+          <span>--</span>
         )}
       </div>
     </div>
