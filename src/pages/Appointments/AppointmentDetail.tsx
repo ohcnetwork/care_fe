@@ -49,7 +49,6 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { ClickableAddress } from "@/components/Common/ClickableAddress";
 import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/Page";
 import PageTitle from "@/components/Common/PageTitle";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
@@ -164,63 +163,61 @@ export default function AppointmentDetail(props: Props) {
   const { patient } = appointment;
 
   return (
-    <Page title="">
-      <div className="container mx-auto p-6 max-w-7xl">
-        <PageTitle title={t("appointment_details")} className="md:ml-6" />
-        <div
-          className={cn(
-            "flex flex-col md:flex-col lg:flex-row",
-            isUpdating && "opacity-50 pointer-events-none animate-pulse",
-          )}
-        >
-          <AppointmentDetails appointment={appointment} facility={facility} />
-          <div className="mt-3">
-            <div id="section-to-print" className="print:w-[400px] print:pt-4">
-              <div id="appointment-token-card" className="bg-gray-50 md:p-4">
-                <AppointmentTokenCard
+    <div className="container mx-auto p-6 max-w-7xl">
+      <PageTitle title={t("appointment_details")} className="md:ml-6" />
+      <div
+        className={cn(
+          "flex flex-col md:flex-col lg:flex-row",
+          isUpdating && "opacity-50 pointer-events-none animate-pulse",
+        )}
+      >
+        <AppointmentDetails appointment={appointment} facility={facility} />
+        <div className="mt-3">
+          <div id="section-to-print" className="print:w-[400px] print:pt-4">
+            <div id="appointment-token-card" className="bg-gray-50 md:p-4">
+              <AppointmentTokenCard
+                appointment={appointment}
+                facility={facility}
+              />
+            </div>
+          </div>
+          <div className="flex gap-2 justify-end px-6 mt-4 md:mt-0">
+            <Button variant="outline" onClick={() => print()}>
+              <PrinterIcon className="size-4 mr-2" />
+              <span>{t("print")}</span>
+            </Button>
+            <Button
+              variant="default"
+              onClick={async () => {
+                await saveElementAsImage(
+                  "appointment-token-card",
+                  `${patient.name}'s Appointment.png`,
+                );
+                toast.success("Appointment card has been saved!");
+              }}
+            >
+              <DownloadIcon className="size-4 mr-2" />
+              <span>{t("save")}</span>
+            </Button>
+          </div>
+          {canUpdateAppointment && (
+            <>
+              <Separator className="my-4" />
+              <div className="md:mx-6 mt-10">
+                <AppointmentActions
+                  facilityId={facilityId}
                   appointment={appointment}
-                  facility={facility}
+                  updateAppointment={updateAppointment}
+                  onViewPatient={redirectToPatientPage}
+                  canCreateAppointment={canCreateAppointment}
+                  isUpdating={isUpdating}
                 />
               </div>
-            </div>
-            <div className="flex gap-2 justify-end px-6 mt-4 md:mt-0">
-              <Button variant="outline" onClick={() => print()}>
-                <PrinterIcon className="size-4 mr-2" />
-                <span>{t("print")}</span>
-              </Button>
-              <Button
-                variant="default"
-                onClick={async () => {
-                  await saveElementAsImage(
-                    "appointment-token-card",
-                    `${patient.name}'s Appointment.png`,
-                  );
-                  toast.success("Appointment card has been saved!");
-                }}
-              >
-                <DownloadIcon className="size-4 mr-2" />
-                <span>{t("save")}</span>
-              </Button>
-            </div>
-            {canUpdateAppointment && (
-              <>
-                <Separator className="my-4" />
-                <div className="md:mx-6 mt-10">
-                  <AppointmentActions
-                    facilityId={facilityId}
-                    appointment={appointment}
-                    updateAppointment={updateAppointment}
-                    onViewPatient={redirectToPatientPage}
-                    canCreateAppointment={canCreateAppointment}
-                    isUpdating={isUpdating}
-                  />
-                </div>
-              </>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
-    </Page>
+    </div>
   );
 }
 
