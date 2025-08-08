@@ -50,6 +50,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ClickableAddress } from "@/components/Common/ClickableAddress";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import PageTitle from "@/components/Common/PageTitle";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -163,8 +164,9 @@ export default function AppointmentDetail(props: Props) {
   const { patient } = appointment;
 
   return (
-    <Page title={t("appointment_details")}>
+    <Page title="">
       <div className="container mx-auto p-6 max-w-7xl">
+        <PageTitle title={t("appointment_details")} className="md:ml-6" />
         <div
           className={cn(
             "flex flex-col md:flex-col lg:flex-row",
