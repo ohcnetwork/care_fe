@@ -46,12 +46,12 @@ import patientIdentifierConfigApi from "@/types/patient/patientIdentifierConfig/
 const formSchema = z.object({
   config: z.object({
     use: z.nativeEnum(PatientIdentifierUse),
-    description: z.string().min(1, "Description is required"),
-    system: z.string().min(1, "System is required"),
+    description: z.string().trim().min(1, "Description is required"),
+    system: z.string().trim().min(1, "System is required"),
     required: z.boolean(),
     unique: z.boolean(),
     regex: z.string(),
-    display: z.string().min(1, "Display is required"),
+    display: z.string().trim().min(1, "Display is required"),
     default_value: z.string().optional(),
     retrieve_config: z.object({
       retrieve_with_dob: z.boolean().optional(),

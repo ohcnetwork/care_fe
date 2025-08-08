@@ -40,8 +40,8 @@ import {
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
 const tagConfigSchema = z.object({
-  slug: z.string().min(1, "Slug is required"),
-  display: z.string().min(1, "Display name is required"),
+  slug: z.string().trim().min(1, "Slug is required"),
+  display: z.string().trim().min(1, "Display name is required"),
   category: z.nativeEnum(TagCategory, {
     required_error: "Category is required",
   }),
