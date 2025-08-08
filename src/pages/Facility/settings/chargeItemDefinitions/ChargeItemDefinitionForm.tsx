@@ -233,8 +233,8 @@ export function ChargeItemDefinitionForm({
   // Fetch facility data for available components
   const { data: facilityData, isLoading } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(facilityApi.getFacility, {
-      pathParams: { id: facilityId },
+    queryFn: query(facilityApi.get, {
+      pathParams: { facilityId },
     }),
   });
 

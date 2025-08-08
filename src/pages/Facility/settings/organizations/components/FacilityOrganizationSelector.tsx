@@ -28,14 +28,14 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface FacilityOrganizationSelectorProps {
   value?: string[] | null;
   onChange: (value: string[] | null) => void;
   facilityId: string;
-  currentOrganizations?: FacilityOrganization[];
+  currentOrganizations?: FacilityOrganizationRead[];
   singleSelection?: boolean;
 }
 
@@ -51,12 +51,12 @@ export default function FacilityOrganizationSelector(
   } = props;
 
   const [selectedOrganizations, setSelectedOrganizations] = useState<
-    FacilityOrganization[]
+    FacilityOrganizationRead[]
   >([]);
   const [currentSelection, setCurrentSelection] =
-    useState<FacilityOrganization | null>(null);
+    useState<FacilityOrganizationRead | null>(null);
   const [navigationLevels, setNavigationLevels] = useState<
-    FacilityOrganization[]
+    FacilityOrganizationRead[]
   >([]);
   const [facilityOrgSearch, setFacilityOrgSearch] = useState("");
   const [showAllOrgs, setShowAllOrgs] = useState(false);
@@ -93,7 +93,7 @@ export default function FacilityOrganizationSelector(
     })),
   });
 
-  const handleSelect = (org: FacilityOrganization) => {
+  const handleSelect = (org: FacilityOrganizationRead) => {
     const isAlreadySelected = !!currentOrganizations?.find(
       (o) => o.id === org.id,
     );
@@ -112,7 +112,7 @@ export default function FacilityOrganizationSelector(
     setFacilityOrgSearch("");
   };
 
-  const handleConfirmSelection = (org: FacilityOrganization) => {
+  const handleConfirmSelection = (org: FacilityOrganizationRead) => {
     if (!selectedOrganizations.includes(org)) {
       const newSelection = [...selectedOrganizations, org];
       setSelectedOrganizations(newSelection);

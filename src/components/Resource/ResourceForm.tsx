@@ -52,12 +52,12 @@ import query from "@/Utils/request/query";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import patientApi from "@/types/emr/patient/patientApi";
-import facilityApi from "@/types/facility/facilityApi";
+import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import {
   RESOURCE_REQUEST_STATUSES,
   ResourceRequest,
 } from "@/types/resourceRequest/resourceRequest";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface ResourceProps {
   facilityId: number;
@@ -69,7 +69,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const { goBack } = useAppHistory();
   const { t } = useTranslation();
   const [{ related_patient }] = useQueryParams();
-  const [assignedToUser, setAssignedToUser] = useState<UserBase>();
+  const [assignedToUser, setAssignedToUser] = useState<UserReadMinimal>();
   const authUser = useAuthUser();
 
   const resourceFormSchema = z.object({
@@ -194,7 +194,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   };
   const { data: facilities } = useQuery({
     queryKey: ["facilities", facilitySearch],
-    queryFn: query.debounced(facilityApi.getAllFacilities, {
+    queryFn: query.debounced(publicFacilityApi.getAll, {
       queryParams: {
         search_text: facilitySearch ? facilitySearch : undefined,
         limit: 50,
@@ -207,7 +207,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     value: facility.id,
   }));
 
-  const handleUserChange = (user: UserBase) => {
+  const handleUserChange = (user: UserReadMinimal) => {
     form.setValue("assigned_to", user.id, { shouldDirty: true });
     setAssignedToUser(user);
   };
