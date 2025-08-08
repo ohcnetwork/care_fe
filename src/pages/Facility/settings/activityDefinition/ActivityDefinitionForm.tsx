@@ -519,7 +519,7 @@ function ActivityDefinitionFormContent({
                             onChange={(e) => {
                               const sanitizedValue = e.target.value
                                 .toLowerCase()
-                                .replace(/[^a-z0-9-]/g, "");
+                                .replace(/[^a-z0-9_-]/g, "");
                               field.onChange(sanitizedValue);
                             }}
                           />
@@ -801,10 +801,16 @@ function ActivityDefinitionFormContent({
                         placeholder={t("select_specimen_requirements")}
                         onSearch={setSpecimenSearch}
                         canCreate={true}
-                        createForm={(onSuccess) => (
+                        createForm={(onSuccess, onCancel) => (
                           <CreateSpecimenDefinition
                             facilityId={facilityId}
-                            onSuccess={onSuccess}
+                            onSuccess={() => {
+                              queryClient.invalidateQueries({
+                                queryKey: ["specimenDefinitions"],
+                              });
+                              onSuccess();
+                            }}
+                            onCancel={onCancel}
                           />
                         )}
                       />
@@ -863,11 +869,17 @@ function ActivityDefinitionFormContent({
                         placeholder={t("select_observation_requirements")}
                         onSearch={setObservationSearch}
                         canCreate={true}
-                        createForm={(onSuccess) => (
+                        createForm={(onSuccess, onCancel) => (
                           <div className="py-2">
                             <ObservationDefinitionForm
                               facilityId={facilityId}
-                              onSuccess={onSuccess}
+                              onSuccess={() => {
+                                queryClient.invalidateQueries({
+                                  queryKey: ["observationDefinitions"],
+                                });
+                                onSuccess();
+                              }}
+                              onCancel={onCancel}
                             />
                           </div>
                         )}
@@ -912,11 +924,17 @@ function ActivityDefinitionFormContent({
                         placeholder={t("select_charge_item_definitions")}
                         onSearch={setChargeItemSearch}
                         canCreate={true}
-                        createForm={(onSuccess) => (
+                        createForm={(onSuccess, onCancel) => (
                           <div className="py-2">
                             <ChargeItemDefinitionForm
                               facilityId={facilityId}
-                              onSuccess={onSuccess}
+                              onSuccess={() => {
+                                queryClient.invalidateQueries({
+                                  queryKey: ["chargeItemDefinitions"],
+                                });
+                                onSuccess();
+                              }}
+                              onCancel={onCancel}
                             />
                           </div>
                         )}

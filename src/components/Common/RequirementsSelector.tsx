@@ -42,7 +42,7 @@ interface RequirementsSelectorProps {
   onSearch?: (query: string) => void;
   customSelector?: React.ReactNode;
   canCreate?: boolean;
-  createForm?: (onSuccess: () => void) => React.ReactNode;
+  createForm?: (onSuccess: () => void, onCancel: () => void) => React.ReactNode;
   allowDuplicate?: boolean;
 }
 
@@ -123,6 +123,15 @@ export default function RequirementsSelector({
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = React.useState(false);
   const [isCreateSheetOpen, setIsCreateSheetOpen] = React.useState(false);
+
+  const onSuccess = () => {
+    setIsCreateSheetOpen(false);
+    setIsOpen(false);
+  };
+
+  const onCancel = () => {
+    setIsCreateSheetOpen(false);
+  };
 
   const addOption = (option: RequirementItem) => {
     if (!allowDuplicate && !customSelector) {
@@ -229,7 +238,7 @@ export default function RequirementsSelector({
                     className="flex h-full w-full flex-col overflow-y-auto md:max-w-[600px] lg:max-w-[800px]"
                   >
                     <div className="flex-1 overflow-y-auto py-6">
-                      {createForm?.(() => setIsCreateSheetOpen(false))}
+                      {createForm?.(onSuccess, onCancel)}
                     </div>
                   </SheetContent>
                 </Sheet>

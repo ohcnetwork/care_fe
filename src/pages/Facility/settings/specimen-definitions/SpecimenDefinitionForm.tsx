@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { t } from "i18next";
 import { PlusCircle, XCircle } from "lucide-react";
-import { navigate } from "raviger";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -107,16 +106,18 @@ interface SpecimenDefinitionFormProps {
   initialData?: SpecimenDefinitionCreate;
   onSubmit: (data: SpecimenDefinitionCreate) => void;
   isLoading?: boolean;
+  onCancel: () => void;
 }
 
 export function SpecimenDefinitionForm({
   initialData,
   onSubmit,
   isLoading,
+  onCancel,
 }: SpecimenDefinitionFormProps) {
   const { t } = useTranslation();
 
-  const { facilityId } = useCurrentFacility();
+  const { facilityId: _facilityId } = useCurrentFacility();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -281,7 +282,7 @@ export function SpecimenDefinitionForm({
                           onChange={(e) => {
                             const sanitizedValue = e.target.value
                               .toLowerCase()
-                              .replace(/[^a-z0-9-]/g, "");
+                              .replace(/[^a-z0-9_-]/g, "");
                             field.onChange(sanitizedValue);
                           }}
                         />
@@ -747,13 +748,7 @@ export function SpecimenDefinitionForm({
         </Card>
 
         <div className="flex justify-between">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() =>
-              navigate(`/facility/${facilityId}/settings/specimen_definitions`)
-            }
-          >
+          <Button type="button" variant="outline" onClick={onCancel}>
             {t("cancel")}
           </Button>
           <Button type="submit" disabled={isLoading}>

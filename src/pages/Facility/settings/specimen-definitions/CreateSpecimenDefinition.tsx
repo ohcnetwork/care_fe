@@ -12,11 +12,14 @@ import { SpecimenDefinitionForm } from "./SpecimenDefinitionForm";
 interface CreateSpecimenDefinitionProps {
   facilityId: string;
   onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 export function CreateSpecimenDefinition({
   facilityId,
   onSuccess = () =>
+    navigate(`/facility/${facilityId}/settings/specimen_definitions`),
+  onCancel = () =>
     navigate(`/facility/${facilityId}/settings/specimen_definitions`),
 }: CreateSpecimenDefinitionProps) {
   const { t } = useTranslation();
@@ -47,7 +50,11 @@ export function CreateSpecimenDefinition({
       <h1 className="text-2xl font-semibold">
         {t("create_specimen_definition")}
       </h1>
-      <SpecimenDefinitionForm onSubmit={handleSubmit} isLoading={isPending} />
+      <SpecimenDefinitionForm
+        onSubmit={handleSubmit}
+        isLoading={isPending}
+        onCancel={onCancel}
+      />
     </div>
   );
 }

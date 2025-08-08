@@ -109,10 +109,12 @@ export default function ObservationDefinitionForm({
   facilityId,
   observationDefinitionId,
   onSuccess,
+  onCancel,
 }: {
   facilityId: string;
   observationDefinitionId?: string;
   onSuccess?: () => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -152,6 +154,7 @@ export default function ObservationDefinitionForm({
       observationDefinitionId={observationDefinitionId}
       existingData={existingData}
       onSuccess={onSuccess}
+      onCancel={onCancel}
     />
   );
 }
@@ -162,11 +165,14 @@ function ObservationDefinitionFormContent({
   existingData,
   onSuccess = () =>
     navigate(`/facility/${facilityId}/settings/observation_definitions`),
+  onCancel = () =>
+    navigate(`/facility/${facilityId}/settings/observation_definitions`),
 }: {
   facilityId: string;
   observationDefinitionId?: string;
   existingData?: ObservationDefinitionReadSpec;
   onSuccess?: () => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -311,7 +317,7 @@ function ObservationDefinitionFormContent({
                             onChange={(e) => {
                               const sanitizedValue = e.target.value
                                 .toLowerCase()
-                                .replace(/[^a-z0-9-]/g, "");
+                                .replace(/[^a-z0-9_-]/g, "");
                               field.onChange(sanitizedValue);
                             }}
                           />
@@ -533,7 +539,7 @@ function ObservationDefinitionFormContent({
                     <h2 className="text-base font-medium text-gray-900">
                       {t("components")}{" "}
                       <span className="text-sm font-normal text-gray-500">
-                        (Optional)
+                        ({t("optional")})
                       </span>
                     </h2>
                     <p className="mt-0.5 text-sm text-gray-500">
@@ -728,15 +734,7 @@ function ObservationDefinitionFormContent({
             </div>
 
             <div className="flex justify-end space-x-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/observation_definitions`,
-                  )
-                }
-              >
+              <Button type="button" variant="outline" onClick={onCancel}>
                 {t("cancel")}
               </Button>
               <Button type="submit" disabled={isPending}>
