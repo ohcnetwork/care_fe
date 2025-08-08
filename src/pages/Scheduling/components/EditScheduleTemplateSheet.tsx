@@ -565,8 +565,8 @@ const NewAvailabilityCard = ({
       end_time: z.string().min(1, t("field_required")) as z.ZodType<
         Time | undefined
       >,
-      slot_size_in_minutes: z.number().nullable(),
-      tokens_per_slot: z.number().nullable(),
+      slot_size_in_minutes: z.number().min(1, t("field_required")),
+      tokens_per_slot: z.number().min(1, t("field_required")),
       reason: z.string().trim(),
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek>)
@@ -595,8 +595,8 @@ const NewAvailabilityCard = ({
       slot_type: "appointment",
       start_time: undefined,
       end_time: undefined,
-      slot_size_in_minutes: null,
-      tokens_per_slot: null,
+      slot_size_in_minutes: undefined,
+      tokens_per_slot: undefined,
       reason: "",
       weekdays: [],
       is_auto_fill: false,
