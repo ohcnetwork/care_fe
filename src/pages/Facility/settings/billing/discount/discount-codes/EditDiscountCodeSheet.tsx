@@ -32,7 +32,7 @@ export function EditDiscountCodeSheet({
   const [open, setOpen] = useState(false);
 
   const { mutate: updateCode, isPending } = useMutation({
-    mutationFn: mutate(facilityApi.updateMonetaryComponents, {
+    mutationFn: mutate(facilityApi.setMonetaryComponents, {
       pathParams: { facilityId },
     }),
     onSuccess: () => {
