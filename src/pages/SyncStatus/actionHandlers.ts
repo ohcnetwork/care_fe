@@ -2,12 +2,14 @@ import { navigate } from "raviger";
 import { toast } from "sonner";
 
 import { OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
+import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { SyncManager } from "@/OfflineSupport/syncmanger";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
+import { Appointment } from "@/types/scheduling/schedule";
 import { UserBase } from "@/types/user/user";
 
 /* Edit handlers for each type of offline write entry */
 
-// Handler for creating and updating patient entries
 export const handleCreateandUpdatePatientEdit = async (
   entry: OfflineWritesEntry,
   facilityId?: string,
@@ -27,7 +29,6 @@ export const handleCreateandUpdatePatientEdit = async (
   }
 };
 
-// Handler for creating encounter entries
 export const handleCreateEncounterEdit = async (
   entry: OfflineWritesEntry,
   setSelectedEncounterEntry: (entry: OfflineWritesEntry | null) => void,
@@ -98,31 +99,162 @@ export const handleRemoveUserFromPatientEdit = async (
   );
 };
 
+// Handler for appointment entries
+export const handleAppointmentEdit = async (entry: OfflineWritesEntry) => {
+  switch (entry.type) {
+    case "create_appointment": {
+      // Extract patient from normalized data
+      const normalizedData = entry.normalizedData as Appointment;
+      const patientId = normalizedData?.patient?.id;
+
+      if (!patientId) {
+        toast.error("Patient information not found in offline entry");
+        return;
+      }
+
+      navigate(
+        `/facility/${entry.facilityId}/patient/${patientId}/book-appointment`,
+        {
+          query: {
+            offlineEntryId: entry.id,
+          },
+        },
+      );
+      break;
+    }
+
+    case "reschedule_appointment":
+    case "update_appointment_status":
+    case "cancel_appointment": {
+      // Extract appointment and patient info from normalized data
+      const normalizedData = entry.normalizedData as Appointment;
+
+      // Extract the actual appointment ID from the offline entry ID
+      let appointmentId: string;
+      if (entry.id.startsWith("offline-")) {
+        // For offline entries, extract the original appointment ID
+        // Format: offline-{appointmentId}-{action}
+        // Remove "offline-" prefix and get everything before the last "-"
+        const withoutPrefix = entry.id.substring(8); // Remove "offline-"
+        const lastDashIndex = withoutPrefix.lastIndexOf("-");
+        if (lastDashIndex !== -1) {
+          appointmentId = withoutPrefix.substring(0, lastDashIndex); // Everything before the last dash
+        } else {
+          appointmentId = withoutPrefix; // Fallback if no action suffix
+        }
+      } else {
+        // For direct appointment IDs
+        appointmentId = entry.id;
+      }
+
+      const patientId = normalizedData?.patient?.id;
+
+      if (!patientId) {
+        toast.error("Patient information not found in offline entry");
+        return;
+      }
+
+      navigate(
+        `/facility/${entry.facilityId}/patient/${patientId}/appointments/${appointmentId}`,
+        {
+          query: {
+            offlineEntryId: entry.id,
+          },
+        },
+      );
+      break;
+    }
+
+    default:
+      handleUnsupportedTypeEdit(entry);
+      break;
+  }
+};
+
 // Handler for unsupported entry types
 export const handleUnsupportedTypeEdit = (entry: OfflineWritesEntry) => {
   toast.info(`Edit functionality for ${entry.type} is not implemented yet`);
 };
 
 // ============================================================================
-// DELETE HANDLERS
-// ============================================================================
-
-// TODO: Add delete handlers here
-// export const handleDeletePatient = async (entry: OfflineWritesEntry) => { ... }
-// export const handleDeleteEncounter = async (entry: OfflineWritesEntry) => { ... }
-
-// ============================================================================
 // RETRY HANDLERS
 // ============================================================================
 
-// TODO: Add retry handlers here
-// export const handleRetryPatient = async (entry: OfflineWritesEntry) => { ... }
-// export const handleRetryEncounter = async (entry: OfflineWritesEntry) => { ... }
+// Global retry handler for all record types
+export const handleRetryRecord = async (entry: OfflineWritesEntry) => {
+  try {
+    // Create a SyncManager instance to process the write
+    const syncManager = new SyncManager({
+      userId: entry.userId,
+      facilityId: entry.facilityId,
+      enableConflictDetection: true,
+    });
+    const result = await syncManager.processSingleWrite(entry);
+
+    if (result.status === "success") {
+      toast.success(`Successfully retried ${entry.type}`);
+    } else {
+      toast.error(`Retry failed: ${result.error || "Unknown error"}`);
+    }
+  } catch (error) {
+    console.error("Error retrying record:", error);
+    toast.error("Failed to retry record");
+  }
+};
 
 // ============================================================================
-// VIEW HANDLERS
+// DELETE HANDLERS
 // ============================================================================
 
-// TODO: Add view handlers here
-// export const handleViewPatient = async (entry: OfflineWritesEntry) => { ... }
-// export const handleViewEncounter = async (entry: OfflineWritesEntry) => { ... }
+// Global delete handler for all record types
+export const handleDeleteRecord = async (entry: OfflineWritesEntry) => {
+  try {
+    const db = new AppCacheDB();
+
+    // Find all child records that are not successful
+    const childRecords = await findChildRecords(entry.id);
+
+    // Delete the main record
+    await db.OfflineWrites.delete(entry.id);
+
+    // Delete all child records
+    for (const child of childRecords) {
+      await db.OfflineWrites.delete(child.id);
+    }
+
+    toast.success(`Successfully deleted record`);
+
+    return true;
+  } catch (error) {
+    console.error("Error deleting record:", error);
+    toast.error("Failed to delete record");
+    return false;
+  }
+};
+
+// Helper function to find all child records recursively
+async function findChildRecords(
+  parentId: string,
+): Promise<OfflineWritesEntry[]> {
+  const db = new AppCacheDB();
+  const allWrites = await db.OfflineWrites.toArray();
+  const childRecords: OfflineWritesEntry[] = [];
+
+  // Find direct children
+  const directChildren = allWrites.filter(
+    (write) => write.parentMutationId === parentId,
+  );
+
+  for (const child of directChildren) {
+    // Only include children that are not successful
+    if (child.syncStatus !== "success") {
+      childRecords.push(child);
+
+      // Recursively find children of this child
+      const grandChildren = await findChildRecords(child.id);
+      childRecords.push(...grandChildren);
+    }
+  }
+
+  return childRecords;
+}

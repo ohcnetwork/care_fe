@@ -17,7 +17,7 @@ import { OfflineKey } from "./offlineKeys";
 import {
   getPendingAndRetryableWrites,
   markWriteStatus,
-  unblockDependentWrites,
+  processDependentWrites,
 } from "./writeQueue";
 
 export const mutationMap = {
@@ -165,6 +165,14 @@ export class SyncManager {
     return result;
   }
 
+  // Public method to process a single write
+  public async processSingleWrite(write: any): Promise<{
+    status: "success" | "failed" | "conflict" | "blocked";
+    error?: string;
+  }> {
+    return this.processWrite(write);
+  }
+
   // Process a single write through the sync pipeline
 
   private async processWrite(write: any): Promise<{
@@ -174,10 +182,19 @@ export class SyncManager {
     try {
       // Step 1: Check if parent writes are blocked
       if (write.parentMutationId) {
-        const blockedParents = await this.checkBlockedParents([
+        const isParentBlocked = await this.checkBlockedParents(
           write.parentMutationId,
-        ]);
-        if (blockedParents.length > 0) {
+        );
+        if (isParentBlocked) {
+          // Mark the child as blocked in the database
+          await markWriteStatus(write.id, "blocked", {
+            lastError: `Blocked by failed/blocked parent: ${write.parentMutationId}`,
+            lastErrorDetails: {
+              blockedBy: write.parentMutationId,
+              reason: "parent_failed_or_blocked",
+            },
+            lastAttemptAt: Date.now(),
+          });
           return { status: "blocked" };
         }
       }
@@ -206,7 +223,7 @@ export class SyncManager {
       });
 
       // Step 6: Unblock dependent writes that were blocked by this write
-      await unblockDependentWrites(write.id);
+      await processDependentWrites(write.id);
 
       return { status: "success" };
     } catch (error) {
@@ -262,23 +279,13 @@ export class SyncManager {
     return response;
   }
 
-  // Check if any parent writes are failed (permanently or temporarily)
-
-  private async checkBlockedParents(parentIds: string[]): Promise<string[]> {
+  // Check if parent write is failed (permanently or temporarily)
+  private async checkBlockedParents(parentId: string): Promise<boolean> {
     const db = new AppCacheDB();
-    const blockedParents: string[] = [];
+    const parent = await db.OfflineWrites.get(parentId);
 
-    for (const parentId of parentIds) {
-      const parent = await db.OfflineWrites.get(parentId);
-
-      // Block child if parent is failed (permanently OR temporarily failure)
-
-      if (parent?.syncStatus === "failed") {
-        blockedParents.push(parentId);
-      }
-    }
-
-    return blockedParents;
+    // Return true if parent is failed (permanently OR temporarily failure)
+    return parent?.syncStatus === "failed";
   }
 
   // Mark all dependent writes as blocked when a parent fails (permanently or temporarily)
@@ -389,39 +396,3 @@ export async function syncOfflineRecords(
 
   return syncManager.sync();
 }
-
-/**
- * Create a persistent sync manager instance for ongoing sync operations
- */
-// export function createSyncManager(userId: string, options?: Partial<SyncManagerOptions>): SyncManager {
-//   return new SyncManager({
-//     userId,
-//     maxRetries: 3,
-//     retryDelayMs: 1000,
-//     enableConflictDetection: true,
-//     ...options,
-//   });
-// }
-
-/**
- * Example usage:
- *
- * // One-time sync
- * const result = await syncOfflineRecords(userId);
- * console.log(`Synced ${result.syncedCount} records`);
- *
- * // Persistent sync manager
- * const syncManager = createSyncManager(userId);
- *
- * // Start sync
- * const result = await syncManager.sync();
- *
- * // Check if running
- * if (syncManager.isSyncRunning()) {
- *   console.log("Sync in progress...");
- * }
- *
- * // Stop sync
- * syncManager.stop();
- *
- */

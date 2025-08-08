@@ -4,6 +4,16 @@ import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,12 +47,15 @@ import { getPendingAndRetryableWrites } from "@/OfflineSupport/writeQueue";
 import { useSync } from "@/context/SyncContext";
 
 import {
+  handleAppointmentEdit,
   handleAssignUserToPatientEdit,
   handleCreateEncounterEdit,
   handleCreateandUpdatePatientEdit,
   handleCreateandUpdateResourceRequestEdit,
+  handleDeleteRecord,
   handleEncounterAction,
   handleRemoveUserFromPatientEdit,
+  handleRetryRecord,
   handleUnsupportedTypeEdit,
 } from "./actionHandlers";
 
@@ -63,7 +76,7 @@ async function getWritesByStatus(
 }
 
 // Custom hook to fetch actual sync data
-function useSyncData(facilityId?: string) {
+function useSyncData(facilityId?: string, refreshTrigger?: number) {
   const [syncData, setSyncData] = React.useState({
     lastSync: "Never",
     statistics: {
@@ -143,7 +156,7 @@ function useSyncData(facilityId?: string) {
     }
 
     fetchSyncData();
-  }, [isSyncing, user.external_id, facilityId]); // Re-fetch when sync status, user, or facility changes
+  }, [isSyncing, user.external_id, facilityId, refreshTrigger]);
 
   return { syncData };
 }
@@ -217,10 +230,11 @@ const StatusCard: React.FC<StatusCardProps> = ({
 };
 
 // Header component
-const SyncStatusHeader: React.FC<{ facilityId?: string }> = ({
-  facilityId,
-}) => {
-  const { syncData } = useSyncData(facilityId);
+const SyncStatusHeader: React.FC<{
+  facilityId?: string;
+  refreshTrigger?: number;
+}> = ({ facilityId, refreshTrigger }) => {
+  const { syncData } = useSyncData(facilityId, refreshTrigger);
   const { startSync, isSyncing } = useSync();
   const user = useAuthUser();
   const { open: isSidebarOpen } = useSidebar();
@@ -276,11 +290,12 @@ const SyncStatusHeader: React.FC<{ facilityId?: string }> = ({
 };
 
 // Overview section component
-const SyncStatusOverview: React.FC<{ facilityId?: string }> = ({
-  facilityId,
-}) => {
+const SyncStatusOverview: React.FC<{
+  facilityId?: string;
+  refreshTrigger?: number;
+}> = ({ facilityId, refreshTrigger }) => {
   const { open: isSidebarOpen } = useSidebar();
-  const { syncData } = useSyncData(facilityId);
+  const { syncData } = useSyncData(facilityId, refreshTrigger);
 
   return (
     <div
@@ -343,18 +358,21 @@ const formatTimeAgo = (timestamp: number) => {
 const getResourceTypeDisplay = (entry: OfflineWritesEntry) => {
   // Map the type to a more readable display name
   const typeMap: Record<string, string> = {
-    createPatient: "Patient",
-    updatePatient: "Patient Update",
-    createEncounter: "Encounter",
-    mark_encounter_as_complete: "Encounter Complete",
-    create_resource_request: "Resource Request",
-    update_resource_request: "Resource Update",
+    create_patient: "Create Patient",
+    update_patient: "Patient Update",
+    create_encounter: "Create Encounter",
+    mark_encounter_as_complete: "Encounter as Complete",
+    create_resource_request: "Create Resource Request",
+    update_resource_request: "Update Resource Request",
     assign_user_to_patient: "User Assignment",
     remove_user_from_patient: "User Removal",
-    createAppointment: "Appointment",
-    updateAppointment: "Appointment Update",
-    cancelAppointment: "Appointment Cancel",
-    rescheduleAppointment: "Appointment Reschedule",
+    create_appointment: "Create Appointment",
+    update_appointment_status: "Appointment Update",
+    cancel_appointment: "Appointment Cancel",
+    reschedule_appointment: "Appointment Reschedule",
+    non_structured_questionnaire: "Non-structured Questionnaire",
+    update_encounter_questionnair: "Update Encounter Questionnaire",
+    structured_questionnair: "Structured Questionnaire",
   };
 
   return typeMap[entry.type] || entry.resourceType || entry.type;
@@ -364,7 +382,10 @@ const getResourceTypeDisplay = (entry: OfflineWritesEntry) => {
 const PendingWritesTable: React.FC<{
   facilityId?: string;
   onEdit: (entry: OfflineWritesEntry) => void;
-}> = ({ facilityId, onEdit }) => {
+  onRetry: (entry: OfflineWritesEntry) => void;
+  onDelete: (entry: OfflineWritesEntry) => void;
+  refreshTrigger: number;
+}> = ({ facilityId, onEdit, onRetry, onDelete, refreshTrigger }) => {
   const [pendingWrites, setPendingWrites] = React.useState<
     OfflineWritesEntry[]
   >([]);
@@ -389,16 +410,18 @@ const PendingWritesTable: React.FC<{
     }
 
     fetchPendingWrites();
-  }, [user.external_id, facilityId]);
+  }, [user.external_id, facilityId, refreshTrigger]);
+
+  const handleEdit = (entry: OfflineWritesEntry) => {
+    onEdit(entry);
+  };
 
   const handleRetry = (entry: OfflineWritesEntry) => {
-    console.log("Retry entry:", entry);
-    // TODO: Implement retry functionality
+    onRetry(entry);
   };
 
   const handleDelete = (entry: OfflineWritesEntry) => {
-    console.log("Delete entry:", entry);
-    // TODO: Implement delete functionality
+    onDelete(entry);
   };
 
   if (isLoading) {
@@ -455,7 +478,7 @@ const PendingWritesTable: React.FC<{
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onEdit(entry)}
+                    onClick={() => handleEdit(entry)}
                     className="h-8 w-8 p-0"
                   >
                     <CareIcon icon="l-edit" className="size-4" />
@@ -490,7 +513,10 @@ const PendingWritesTable: React.FC<{
 const FailedWritesTable: React.FC<{
   facilityId?: string;
   onEdit: (entry: OfflineWritesEntry) => void;
-}> = ({ facilityId, onEdit }) => {
+  onRetry: (entry: OfflineWritesEntry) => void;
+  onDelete: (entry: OfflineWritesEntry) => void;
+  refreshTrigger: number;
+}> = ({ facilityId, onEdit, onRetry, onDelete, refreshTrigger }) => {
   const [failedWrites, setFailedWrites] = React.useState<OfflineWritesEntry[]>(
     [],
   );
@@ -515,21 +541,18 @@ const FailedWritesTable: React.FC<{
     }
 
     fetchFailedWrites();
-  }, [user.external_id, facilityId]);
+  }, [user.external_id, facilityId, refreshTrigger]);
 
-  const handleView = (entry: OfflineWritesEntry) => {
-    console.log("View failed entry:", entry);
-    // TODO: Implement view functionality
+  const handleEdit = (entry: OfflineWritesEntry) => {
+    onEdit(entry);
   };
 
   const handleRetry = (entry: OfflineWritesEntry) => {
-    console.log("Retry failed entry:", entry);
-    // TODO: Implement retry functionality
+    onRetry(entry);
   };
 
   const handleDelete = (entry: OfflineWritesEntry) => {
-    console.log("Delete failed entry:", entry);
-    // TODO: Implement delete functionality
+    onDelete(entry);
   };
 
   if (isLoading) {
@@ -593,18 +616,10 @@ const FailedWritesTable: React.FC<{
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onEdit(entry)}
+                    onClick={() => handleEdit(entry)}
                     className="h-8 w-8 p-0"
                   >
                     <CareIcon icon="l-edit" className="size-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleView(entry)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <CareIcon icon="l-eye" className="size-4" />
                   </Button>
                   <Button
                     variant="outline"
@@ -632,13 +647,267 @@ const FailedWritesTable: React.FC<{
   );
 };
 
+// Conflicted writes table component
+const ConflictedWritesTable: React.FC<{
+  facilityId?: string;
+  onEdit: (entry: OfflineWritesEntry) => void;
+  onRetry: (entry: OfflineWritesEntry) => void;
+  onDelete: (entry: OfflineWritesEntry) => void;
+  refreshTrigger: number;
+}> = ({ facilityId, onEdit, onRetry, onDelete, refreshTrigger }) => {
+  const [conflictedWrites, setConflictedWrites] = React.useState<
+    OfflineWritesEntry[]
+  >([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const user = useAuthUser();
+
+  React.useEffect(() => {
+    async function fetchConflictedWrites() {
+      try {
+        setIsLoading(true);
+        const writes = await getWritesByStatus(
+          user.external_id,
+          facilityId,
+          "conflict",
+        );
+        setConflictedWrites(writes);
+      } catch (error) {
+        console.error("Error fetching conflicted writes:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchConflictedWrites();
+  }, [user.external_id, facilityId, refreshTrigger]);
+
+  const handleView = (entry: OfflineWritesEntry) => {
+    console.log("View conflicted entry:", entry);
+    // TODO: Implement view functionality
+  };
+
+  const handleEdit = (entry: OfflineWritesEntry) => {
+    toast.info(
+      "The form that open  will contains your local data, not the current server data. You can modify and save to overwrite the server data.",
+    );
+    onEdit(entry);
+  };
+
+  const handleRetry = (entry: OfflineWritesEntry) => {
+    onRetry(entry);
+  };
+
+  const handleDelete = (entry: OfflineWritesEntry) => {
+    onDelete(entry);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (conflictedWrites.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-gray-500">No conflicted writes found</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-gray-50">
+            <TableHead>Resource</TableHead>
+            <TableHead>Last Attempt</TableHead>
+            <TableHead>Conflict Details</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody className="bg-white">
+          {conflictedWrites.map((entry) => (
+            <TableRow key={entry.id} className="divide-x divide-gray-200">
+              <TableCell className="font-medium">
+                <div className="font-semibold text-gray-900">
+                  {getResourceTypeDisplay(entry)}
+                </div>
+                <div className="text-xs text-gray-500">ID: {entry.id}</div>
+              </TableCell>
+              <TableCell>
+                <div className="text-sm text-gray-900">
+                  {entry.lastAttemptAt
+                    ? formatTimeAgo(entry.lastAttemptAt)
+                    : formatTimeAgo(entry.clientTimestamp)}
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="text-sm text-orange-600 max-w-xs truncate">
+                  {entry.lastError || "Data conflict detected"}
+                </div>
+              </TableCell>
+              <TableCell className="text-left">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleView(entry)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <CareIcon icon="l-eye" className="size-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEdit(entry)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <CareIcon icon="l-edit" className="size-4" />
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleRetry(entry)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <CareIcon icon="l-refresh" className="size-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(entry)}
+                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                  >
+                    <CareIcon icon="l-trash" className="size-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+};
+
+// Blocked writes table component
+const BlockedWritesTable: React.FC<{
+  facilityId?: string;
+  onDelete: (entry: OfflineWritesEntry) => void;
+  refreshTrigger: number;
+}> = ({ facilityId, onDelete, refreshTrigger }) => {
+  const [blockedWrites, setBlockedWrites] = React.useState<
+    OfflineWritesEntry[]
+  >([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const user = useAuthUser();
+
+  React.useEffect(() => {
+    async function fetchBlockedWrites() {
+      try {
+        setIsLoading(true);
+        const writes = await getWritesByStatus(
+          user.external_id,
+          facilityId,
+          "blocked",
+        );
+        setBlockedWrites(writes);
+      } catch (error) {
+        console.error("Error fetching blocked writes:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchBlockedWrites();
+  }, [user.external_id, facilityId, refreshTrigger]);
+
+  const handleDelete = (entry: OfflineWritesEntry) => {
+    onDelete(entry);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (blockedWrites.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-gray-500">No blocked writes found</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-gray-50">
+            <TableHead>Resource</TableHead>
+            <TableHead>Last Attempt</TableHead>
+            <TableHead>Blocked By</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody className="bg-white">
+          {blockedWrites.map((entry) => (
+            <TableRow key={entry.id} className="divide-x divide-gray-200">
+              <TableCell className="font-medium">
+                <div className="font-semibold text-gray-900">
+                  {getResourceTypeDisplay(entry)}
+                </div>
+                <div className="text-xs text-gray-500">ID: {entry.id}</div>
+              </TableCell>
+              <TableCell>
+                <div className="text-sm text-gray-900">
+                  {entry.lastAttemptAt
+                    ? formatTimeAgo(entry.lastAttemptAt)
+                    : formatTimeAgo(entry.clientTimestamp)}
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="text-sm text-red-600 max-w-xs truncate">
+                  {entry.parentMutationId || "Unknown parent"}
+                </div>
+              </TableCell>
+              <TableCell className="text-left">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(entry)}
+                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                  >
+                    <CareIcon icon="l-trash" className="size-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+};
+
 // Tabbed sync details component
 const SyncStatusTabs: React.FC<{
   facilityId?: string;
   onEdit: (entry: OfflineWritesEntry) => void;
-}> = ({ facilityId, onEdit }) => {
+  onRetry: (entry: OfflineWritesEntry) => void;
+  onDelete: (entry: OfflineWritesEntry) => void;
+  refreshTrigger: number;
+}> = ({ facilityId, onEdit, onRetry, onDelete, refreshTrigger }) => {
   const [activeTab, setActiveTab] = React.useState("pending");
-  const { syncData } = useSyncData(facilityId);
+  const { syncData } = useSyncData(facilityId, refreshTrigger);
 
   const tabs = [
     { value: "pending", label: "Pending", count: syncData.statistics.pending },
@@ -696,28 +965,38 @@ const SyncStatusTabs: React.FC<{
       {/* Tab content */}
       <div className="mt-6">
         {activeTab === "pending" && (
-          <PendingWritesTable facilityId={facilityId} onEdit={onEdit} />
+          <PendingWritesTable
+            facilityId={facilityId}
+            onEdit={onEdit}
+            onRetry={onRetry}
+            onDelete={onDelete}
+            refreshTrigger={refreshTrigger}
+          />
         )}
         {activeTab === "failed" && (
-          <FailedWritesTable facilityId={facilityId} onEdit={onEdit} />
+          <FailedWritesTable
+            facilityId={facilityId}
+            onEdit={onEdit}
+            onRetry={onRetry}
+            onDelete={onDelete}
+            refreshTrigger={refreshTrigger}
+          />
         )}
         {activeTab === "conflicted" && (
-          <div className="text-center py-8 text-gray-500">
-            <CareIcon
-              icon="l-exclamation-circle"
-              className="w-8 h-8 mx-auto mb-2 text-gray-400"
-            />
-            <p>Conflicted writes table will be implemented here.</p>
-          </div>
+          <ConflictedWritesTable
+            facilityId={facilityId}
+            onEdit={onEdit}
+            onRetry={onRetry}
+            onDelete={onDelete}
+            refreshTrigger={refreshTrigger}
+          />
         )}
         {activeTab === "blocked" && (
-          <div className="text-center py-8 text-gray-500">
-            <CareIcon
-              icon="l-ban"
-              className="w-8 h-8 mx-auto mb-2 text-gray-400"
-            />
-            <p>Blocked writes table will be implemented here.</p>
-          </div>
+          <BlockedWritesTable
+            facilityId={facilityId}
+            onDelete={onDelete}
+            refreshTrigger={refreshTrigger}
+          />
         )}
       </div>
     </div>
@@ -735,6 +1014,16 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
     React.useState<OfflineWritesEntry | null>(null);
   const [isUserAssignmentFormOpen, setIsUserAssignmentFormOpen] =
     React.useState(false);
+  const [deleteConfirmEntry, setDeleteConfirmEntry] =
+    React.useState<OfflineWritesEntry | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
+  // Add refresh trigger state
+  const [refreshTrigger, setRefreshTrigger] = React.useState(0);
+
+  // Function to trigger refresh of all tables
+  const triggerRefresh = () => {
+    setRefreshTrigger((prev) => prev + 1);
+  };
 
   const handleEdit = async (entry: OfflineWritesEntry) => {
     // Check parent sync status first for all entries that have a parent
@@ -795,6 +1084,8 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
       case "reschedule_appointment":
       case "update_appointment_status":
       case "cancel_appointment":
+        await handleAppointmentEdit(entry);
+        break;
       case "non_structured_questionnaire":
       case "update_encounter_questionnair":
       case "structured_questionnair":
@@ -808,12 +1099,51 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
     }
   };
 
+  const handleDeleteConfirm = async (entry: OfflineWritesEntry) => {
+    setDeleteConfirmEntry(entry);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirmAction = async () => {
+    if (deleteConfirmEntry) {
+      const success = await handleDeleteRecord(deleteConfirmEntry);
+      if (success) {
+        setIsDeleteDialogOpen(false);
+        setDeleteConfirmEntry(null);
+        // Trigger refresh after successful deletion
+        triggerRefresh();
+      }
+    }
+  };
+
+  const handleRetry = async (entry: OfflineWritesEntry) => {
+    try {
+      await handleRetryRecord(entry);
+      // Trigger refresh after retry attempt (regardless of success/failure)
+      triggerRefresh();
+    } catch (error) {
+      console.error("Error in retry:", error);
+    }
+  };
+
   return (
     <Page title={t("sync_status")}>
       <div className="container mx-auto p-6 max-w-7xl">
-        <SyncStatusHeader facilityId={facilityId} />
-        <SyncStatusOverview facilityId={facilityId} />
-        <SyncStatusTabs facilityId={facilityId} onEdit={handleEdit} />
+        <SyncStatusHeader
+          facilityId={facilityId}
+          refreshTrigger={refreshTrigger}
+        />
+        <SyncStatusOverview
+          facilityId={facilityId}
+          refreshTrigger={refreshTrigger}
+        />
+        <SyncStatusTabs
+          facilityId={facilityId}
+          onEdit={handleEdit}
+          onRetry={handleRetry}
+          onDelete={handleDeleteConfirm}
+          refreshTrigger={refreshTrigger}
+        />
 
         {/* Global CreateEncounterForm for editing offline encounters */}
         {selectedEncounterEntry && isEncounterFormOpen && (
@@ -826,6 +1156,8 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
             onSuccess={() => {
               setIsEncounterFormOpen(false);
               setSelectedEncounterEntry(null);
+              // Trigger refresh after successful encounter creation/update
+              triggerRefresh();
             }}
             onClose={() => {
               setIsEncounterFormOpen(false);
@@ -847,9 +1179,38 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
             onClose={() => {
               setIsUserAssignmentFormOpen(false);
               setSelectedUserAssignmentEntry(null);
+              // Trigger refresh after user assignment form is closed
+              triggerRefresh();
             }}
           />
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Record</AlertDialogTitle>
+              <AlertDialogDescription>
+                When the record is deleted, all its child records (whose status
+                is not success) will be deleted as well.
+                <br />
+                <br />
+                <strong>Type:</strong> {deleteConfirmEntry?.type}
+                <br />
+                <strong>ID:</strong> {deleteConfirmEntry?.id}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteConfirmAction}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Page>
   );

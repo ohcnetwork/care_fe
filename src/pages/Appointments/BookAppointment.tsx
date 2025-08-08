@@ -5,6 +5,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { navigate } from "raviger";
+import { useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -22,8 +23,10 @@ import { AuthUserModel } from "@/components/Users/models";
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
+  handleOfflineRecordSuccess,
   isOfflineId,
   normalizedAppointmentRecord,
   saveOfflineWrite,
@@ -42,6 +45,7 @@ import {
   Appointment,
   AppointmentCreateRequest,
   AppointmentNonCancelledStatus,
+  AppointmentRead,
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -59,6 +63,8 @@ export default function BookAppointment({ patientId }: Props) {
 
   const authUser = useAuthUser();
   const queryClient = useQueryClient();
+  const db = new AppCacheDB();
+  const [{ offlineEntryId }] = useQueryParams();
 
   const [selectedPracticioner, setSelectedPracticioner] =
     useState<UserBase | null>(null);
@@ -74,6 +80,9 @@ export default function BookAppointment({ patientId }: Props) {
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
   const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
   const [reason, setReason] = useState("");
+  const [offlineEntry, setOfflineEntry] = useState<OfflineWritesEntry | null>(
+    null,
+  );
 
   const resourcesQuery = useQuery({
     queryKey: ["practitioners", facilityId],
@@ -84,6 +93,23 @@ export default function BookAppointment({ patientId }: Props) {
     networkMode: "online",
   });
   const resource = resourcesQuery.data?.users.find((r) => r.id === resourceId);
+
+  // Load offline entry when offlineEntryId is present
+  useEffect(() => {
+    if (offlineEntryId) {
+      const loadOfflineEntry = async () => {
+        try {
+          const entry = await db.OfflineWrites.get(offlineEntryId);
+          if (entry && entry.normalizedData) {
+            setOfflineEntry(entry);
+          }
+        } catch (error) {
+          console.error("Error loading offline entry:", error);
+        }
+      };
+      loadOfflineEntry();
+    }
+  }, [offlineEntryId]);
 
   useEffect(() => {
     const users = resourcesQuery.data?.users;
@@ -101,10 +127,44 @@ export default function BookAppointment({ patientId }: Props) {
     }
   }, [resourcesQuery.data?.users]);
 
+  // Populate form with offline data when available
+  useEffect(() => {
+    if (offlineEntry?.normalizedData) {
+      const normalizedData = offlineEntry.normalizedData as AppointmentRead;
+
+      // Populate tags
+      if (normalizedData.tags && normalizedData.tags.length > 0) {
+        setSelectedTags(normalizedData.tags);
+      }
+
+      // Populate note
+      if (normalizedData.note) {
+        setReason(normalizedData.note);
+      }
+
+      // Populate practitioner
+      if (normalizedData.user) {
+        setSelectedPracticioner(normalizedData.user);
+        setResourceId(normalizedData.user.id);
+      }
+
+      // Populate slot
+      if (normalizedData.token_slot) {
+        setOfflineSelectedSlot(normalizedData.token_slot);
+        setSelectedSlotId(normalizedData.token_slot.id);
+      }
+    }
+  }, [offlineEntry, offlineEntryId]);
+
   const { mutateAsync: createAppointment } = useMutation({
     mutationFn: mutate(scheduleApis.slots.createAppointment, {
       pathParams: { facilityId, slotId: selectedSlotId ?? "" },
     }),
+    onSuccess: async (resp: Appointment) => {
+      if (offlineEntryId) {
+        await handleOfflineRecordSuccess(offlineEntryId, resp);
+      }
+    },
   });
 
   const queueAppointmentRecordOffline = async (
@@ -178,6 +238,11 @@ export default function BookAppointment({ patientId }: Props) {
         selectedTags,
       );
 
+      // update the offline entry with normalize data
+      await db.OfflineWrites.update(saveResult.entry.id, {
+        normalizedData: normalizeAppointment,
+      });
+
       queryClient.setQueryData(
         ["appointment", generatedId],
         normalizeAppointment,
@@ -225,6 +290,7 @@ export default function BookAppointment({ patientId }: Props) {
       toast.error(t("unexpected_error_while_booking_appointment"));
     }
   };
+
   const handleSubmit = async () => {
     if (!resourceId) {
       toast.error(t("practicioner_is_not_selected"));

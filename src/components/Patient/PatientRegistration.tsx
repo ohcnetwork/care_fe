@@ -559,6 +559,7 @@ export default function PatientRegistration(
         return;
       } else {
         createPatient(createPatientData);
+        console.log("create patient data : ", createPatientData);
         return;
       }
     }

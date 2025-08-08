@@ -19,7 +19,7 @@ import {
 } from "@tanstack/react-query";
 import { differenceInYears, format, isSameDay } from "date-fns";
 import { BanIcon, Loader2, PrinterIcon } from "lucide-react";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -65,6 +65,7 @@ import { getPermissions } from "@/common/Permissions";
 import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
+  handleOfflineRecordSuccess,
   isOfflineId,
   normalizeUserBase,
   saveOfflineWrite,
@@ -115,6 +116,7 @@ export default function AppointmentDetail(props: Props) {
   const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
+  const [{ offlineEntryId }] = useQueryParams();
 
   const db = new AppCacheDB();
   const authUser = useAuthUser();
@@ -178,7 +180,10 @@ export default function AppointmentDetail(props: Props) {
     mutationFn: mutate(scheduleApis.appointments.update, {
       pathParams: { facilityId, id: props.appointmentId },
     }),
-    onSuccess: (_, request) => {
+    onSuccess: async (data, request) => {
+      if (offlineEntryId) {
+        await handleOfflineRecordSuccess(offlineEntryId, data);
+      }
       queryClient.invalidateQueries({
         queryKey: ["appointment", props.appointmentId],
       });
@@ -217,6 +222,11 @@ export default function AppointmentDetail(props: Props) {
       type: OfflineKeyMap.update_appointment_status,
       resourceType: "Appointment",
       payload: updateAppointmentData,
+      normalizedData: {
+        ...appointment,
+        status,
+        is_updated_offline: true,
+      },
       parentMutationId: isOfflineId(appointment.id)
         ? appointment.id //   offline-created appointment
         : existingRescheduleEntry
@@ -227,7 +237,7 @@ export default function AppointmentDetail(props: Props) {
     const writeEntry: saveOfflineWriteData = !isOfflineId(appointment.id)
       ? {
           ...baseEntry,
-          serverTimestamp: appointment.modified_date, // only add  when we upating and an exisitng appointment as needed for conflict detection
+          serverTimestamp: appointment.modified_date,
           useQueryRouteKey: "retrieveAppointment",
           useQueryPathParams: {
             facility_id: appointment.facility.id,
@@ -361,6 +371,7 @@ export default function AppointmentDetail(props: Props) {
                     handleUpdateAppointment={handleUpdateAppointment}
                     onViewPatient={redirectToPatientPage}
                     canCreateAppointment={canCreateAppointment}
+                    offlineEntryId={offlineEntryId}
                     isUpdating={isUpdating}
                     db={db}
                     authUser={authUser}
@@ -598,6 +609,7 @@ interface AppointmentActionsProps {
   handleUpdateAppointment: (data: AppointmentUpdateRequest) => void;
   onViewPatient: () => void;
   canCreateAppointment: boolean;
+  offlineEntryId?: string;
 
   authUser: AuthUserModel;
   db: AppCacheDB;
@@ -611,6 +623,7 @@ const AppointmentActions = ({
   handleUpdateAppointment,
   onViewPatient,
   canCreateAppointment,
+  offlineEntryId,
   authUser,
   db,
   isUpdating,
@@ -630,16 +643,77 @@ const AppointmentActions = ({
   const [OfflineSelectedSlot, setOfflineSelectedSlot] = useState<
     TokenSlot | undefined
   >();
+  const [offlineEntry, setOfflineEntry] = useState<OfflineWritesEntry | null>(
+    null,
+  );
+
   const currentStatus = appointment.status;
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
 
   const [note, setNote] = useState(appointment.note);
 
+  // Load offline entry when offlineEntryId is present
+  useEffect(() => {
+    if (offlineEntryId) {
+      const loadOfflineEntry = async () => {
+        try {
+          const entry = await db.OfflineWrites.get(offlineEntryId);
+          if (entry && entry.normalizedData) {
+            setOfflineEntry(entry);
+          }
+        } catch (error) {
+          console.error("Error loading offline entry:", error);
+        }
+      };
+      loadOfflineEntry();
+    }
+  }, [offlineEntryId, db]);
+
+  // Auto-open reschedule sheet if this is a reschedule offline entry
+  useEffect(() => {
+    if (offlineEntry?.type === "reschedule_appointment") {
+      setIsRescheduleOpen(true);
+    }
+  }, [offlineEntry]);
+
+  // Populate reschedule form with offline data when available
+  useEffect(() => {
+    if (
+      offlineEntry?.normalizedData &&
+      offlineEntry.type === "reschedule_appointment"
+    ) {
+      const normalizedData = offlineEntry.normalizedData as Appointment;
+      const payload = offlineEntry.payload as AppointmentRescheduleRequest;
+
+      // Populate notes
+      if (payload.previous_booking_note) {
+        setRescheduleReason(payload.previous_booking_note);
+      }
+      if (payload.new_booking_note) {
+        setNewVisitReason(payload.new_booking_note);
+      }
+
+      // Populate practitioner if available
+      if (normalizedData.user) {
+        setSelectedPractitioner(normalizedData.user);
+      }
+
+      // Populate slot if available
+      if (normalizedData.token_slot) {
+        setOfflineSelectedSlot(normalizedData.token_slot);
+        setSelectedSlotId(normalizedData.token_slot.id);
+      }
+    }
+  }, [offlineEntry]);
+
   const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
     mutationFn: mutate(scheduleApis.appointments.cancel, {
       pathParams: { facilityId, id: appointment.id },
     }),
-    onSuccess: () => {
+    onSuccess: async (data) => {
+      if (offlineEntryId) {
+        await handleOfflineRecordSuccess(offlineEntryId, data);
+      }
       toast.success(t("appointment_cancelled"));
       queryClient.invalidateQueries({
         queryKey: ["appointment", appointment.id],
@@ -669,6 +743,11 @@ const AppointmentActions = ({
       type: OfflineKeyMap.cancel_appointment,
       resourceType: "Appointment",
       payload: cancelAppointmentData,
+      normalizedData: {
+        ...appointment,
+        status,
+        is_updated_offline: true,
+      },
     };
 
     // const offlineEntry: saveOfflineWriteData = !isOfflineId(appointment.id)
@@ -782,7 +861,10 @@ const AppointmentActions = ({
       mutationFn: mutate(scheduleApis.appointments.reschedule, {
         pathParams: { facilityId, id: appointment.id },
       }),
-      onSuccess: (newAppointment: Appointment) => {
+      onSuccess: async (newAppointment: Appointment) => {
+        if (offlineEntryId) {
+          await handleOfflineRecordSuccess(offlineEntryId, newAppointment);
+        }
         toast.success(t("appointment_rescheduled"));
         queryClient.invalidateQueries({
           queryKey: ["appointment", appointment.id],

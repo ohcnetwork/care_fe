@@ -46,7 +46,7 @@ import { UserBase } from "@/types/user/user";
 import { OfflineWritesEntry } from "./AppcacheDB";
 import { AppCacheDB } from "./AppcacheDB";
 import { OfflineKey } from "./offlineKeys";
-import { markWriteStatus, unblockDependentWrites } from "./writeQueue";
+import { markWriteStatus, processDependentWrites } from "./writeQueue";
 
 interface QuestionnaireListResponse {
   results: QuestionnaireDetail[];
@@ -67,6 +67,7 @@ export type saveOfflineWriteData = {
   type: OfflineKey;
   resourceType?: string;
   payload: unknown;
+  normalizedData?: unknown;
   parentMutationId?: string;
   serverTimestamp?: string;
   useQueryRouteKey?: string;
@@ -84,6 +85,7 @@ export const saveOfflineWrite = async ({
   mutationPathParams,
   mutationQueryParams,
   payload,
+  normalizedData,
   parentMutationId,
   serverTimestamp,
   useQueryRouteKey,
@@ -100,6 +102,7 @@ export const saveOfflineWrite = async ({
     mutationPathParams,
     mutationQueryParams,
     payload,
+    normalizedData,
     parentMutationId,
 
     clientTimestamp: Date.now(),
@@ -1235,7 +1238,7 @@ export const handleOfflineRecordSuccess = async (
       lastAttemptAt: Date.now(),
     });
 
-    await unblockDependentWrites(entry.id);
+    await processDependentWrites(entry.id);
   } catch (error) {
     console.error(
       `Error handling offline record success for ${offlineEntryId}:`,

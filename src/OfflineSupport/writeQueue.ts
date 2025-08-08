@@ -42,7 +42,7 @@ export async function markWriteStatus(
  * Call this when a parent write succeeds
  * Also replaces offline IDs with server IDs in dependent writes
  */
-export async function unblockDependentWrites(
+export async function processDependentWrites(
   succeededParentId: string,
 ): Promise<void> {
   const allWrites = await db.OfflineWrites.toArray();
