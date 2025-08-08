@@ -847,7 +847,12 @@ const NewAvailabilityCard = ({
                                 {...field}
                                 className="shadow-none"
                                 onChange={(e) => {
-                                  field.onChange(e.target.valueAsNumber);
+                                  const value = e.target.value;
+                                  field.onChange(
+                                    value === ""
+                                      ? undefined
+                                      : e.target.valueAsNumber,
+                                  );
                                   updateSlotDuration();
                                 }}
                               />
