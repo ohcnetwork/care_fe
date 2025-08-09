@@ -82,10 +82,16 @@ export default function UserForm({
         ? z.string().optional()
         : z
             .string()
-            .min(4, t("field_required"))
-            .max(16, t("username_not_valid"))
-            .regex(/^[a-z0-9_-]*$/, t("username_not_valid"))
-            .regex(/^[a-z0-9].*[a-z0-9]$/, t("username_not_valid"))
+            .min(1, t("field_required"))
+            .refine(
+              (val) => val.trim().length >= 4 && val.trim().length <= 16,
+              t("username_not_valid"),
+            )
+            .refine((val) => /^[a-z0-9_-]*$/.test(val), t("username_not_valid"))
+            .refine(
+              (val) => /^[a-z0-9].*[a-z0-9]$/.test(val),
+              t("username_not_valid"),
+            )
             .refine(
               (val) => !val.match(/(?:[_-]{2,})/),
               t("username_not_valid"),
@@ -109,6 +115,30 @@ export default function UserForm({
       doctor_medical_council_registration: z.string().optional(), */
       geo_organization: z.string().optional(),
     })
+    .refine(
+      (data) => {
+        if (data.username !== undefined && data.username !== null) {
+          return data.username.trim() === data.username;
+        }
+        return true;
+      },
+      {
+        message: t("username_trim_error"),
+        path: ["username"],
+      },
+    )
+    .refine(
+      (data) => {
+        if (data.password) {
+          return data.password.trim() === data.password;
+        }
+        return true;
+      },
+      {
+        message: t("password_trim_error"),
+        path: ["password"],
+      },
+    )
     .refine(
       (data) => {
         if (!isEditMode && data.password_setup_method === "immediate") {
