@@ -75,13 +75,18 @@ function TagConfigCard({
       <CardContent className="p-6">
         <div className="mb-4 flex items-start justify-between gap-4">
           <div className="flex-1">
-            <div className="mb-2 flex items-center gap-2">
-              <Badge variant={TAG_STATUS_COLORS[config.status]}>
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <Badge
+                variant={TAG_STATUS_COLORS[config.status]}
+                className="whitespace-nowrap"
+              >
                 {t(config.status)}
               </Badge>
-              <Badge variant="secondary">{t(config.category)}</Badge>
+              <Badge variant="secondary" className="whitespace-nowrap">
+                {t(config.category)}
+              </Badge>
               {config.has_children && (
-                <Badge variant="blue">
+                <Badge variant="blue" className="whitespace-nowrap">
                   <CareIcon icon="l-sitemap" className="size-3 mr-1" />
                   {t("has_children")}
                 </Badge>
