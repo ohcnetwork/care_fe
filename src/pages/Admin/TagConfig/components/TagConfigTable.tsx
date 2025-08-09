@@ -147,6 +147,7 @@ function TagConfigCard({
             )}
             <Button variant="outline" size="sm">
               <CareIcon icon="l-arrow-right" className="size-4" />
+              {t("view")}
             </Button>
           </div>
         </div>
