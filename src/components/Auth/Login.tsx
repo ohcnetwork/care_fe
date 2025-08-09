@@ -137,7 +137,7 @@ const Login = (props: LoginProps) => {
         const firstError = errors[0] as OtpError;
         setOtpError(firstError.msg);
       } else {
-        setOtpError(t("send_otp_error"));
+        setOtpError("send_otp_error");
       }
     },
   });
@@ -166,7 +166,7 @@ const Login = (props: LoginProps) => {
       }
     },
     onError: (error: any) => {
-      let errorMessage = t("invalid_otp");
+      let errorMessage = "invalid_otp";
       if (
         error.cause &&
         Array.isArray(error.cause.errors) &&
@@ -539,7 +539,7 @@ const Login = (props: LoginProps) => {
                           placeholder={t("enter_phone_number")}
                         />
                         {otpError && (
-                          <p className="text-sm text-red-500">{otpError}</p>
+                          <p className="text-sm text-red-500">{t(otpError)}</p>
                         )}
                       </div>
 
@@ -577,7 +577,7 @@ const Login = (props: LoginProps) => {
                           </div>
                           {otpValidationError && (
                             <p className="text-sm text-red-500 text-center">
-                              {otpValidationError}
+                              {t(otpValidationError)}
                             </p>
                           )}
                         </div>

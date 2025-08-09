@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { ChevronDown, ExternalLink } from "lucide-react";
 import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,124 +41,140 @@ export function EncounterHeader() {
   const tags = [...patient.instance_tags, ...patient.facility_tags];
 
   return (
-    <Card className="p-2 md:p-4 flex flex-col md:flex-row md:justify-between gap-6">
-      <div className="flex flex-col md:flex-row gap-4 md:gap-8 md:items-end">
-        <div className="flex gap-3 items-center">
-          <div className="size-12">
-            <Avatar name={patient.name} />
-          </div>
-          <Link
-            href={`/facility/${facility.id}/patient/${patient.id}`}
-            className="flex flex-col"
-          >
-            <div className="flex gap-2 items-center">
-              <h5 className="text-lg font-semibold">{patient.name}</h5>
-              <ExternalLink className="size-4" />
+    <>
+      <Card className="p-2 rounded-sm shadow-sm border-none md:p-4 flex flex-col md:flex-row md:justify-between gap-6">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-8 md:items-end">
+          <div className="flex gap-3 items-center">
+            <div className="size-12">
+              <Avatar name={patient.name} />
             </div>
-            <span className="text-gray-700">
-              {formatPatientAge(patient, true)},{" "}
-              {t(`GENDER__${patient.gender}`)}
-            </span>
-          </Link>
-        </div>
-        <div className="flex flex-col md:flex-row gap-1 md:gap-8 items-start">
-          <div className="md:hidden flex md:flex-col gap-0.5 items-center md:items-start">
-            <span className="text-xs text-gray-600 w-32 md:w-auto">
-              {t("start_date")}:{" "}
-            </span>
-            <span className="text-sm font-semibold">
-              {encounter.period.start
-                ? formatDateTime(encounter.period.start)
-                : "--"}
-            </span>
-          </div>
-          <div className="md:hidden flex md:flex-col gap-0.5 items-center md:items-start">
-            <span className="text-xs text-gray-600 w-32 md:w-auto">
-              {t("end_date")}:{" "}
-            </span>
-            <span className="text-sm font-semibold">
-              {encounter.period.end
-                ? formatDateTime(encounter.period.end)
-                : t("ongoing")}
-            </span>
-          </div>
-          {patient.instance_identifiers?.map((identifier) => (
-            <div
-              key={identifier.config.id}
-              className="flex md:flex-col gap-0.5 items-center md:items-start"
+            <Link
+              href={`/facility/${facility.id}/patient/${patient.id}`}
+              className="flex flex-col"
             >
-              <span className="text-xs text-gray-600 w-32 md:w-auto">
-                {identifier.config.config.display}:{" "}
-              </span>
-              <span className="text-sm font-semibold">{identifier.value}</span>
-            </div>
-          ))}
-          <div className="flex md:flex-col gap-0.5 items-center md:items-start">
-            <span className="text-xs text-gray-600 w-32 md:w-auto">
-              {t("patient_tags")}:{" "}
-            </span>
-            {tags.length ? (
-              <div className="flex flex-wrap gap-1">
-                {tags.map((tag) => (
-                  <Badge
-                    key={tag.id}
-                    variant="secondary"
-                    size="sm"
-                    className="text-xs"
-                  >
-                    {getTagHierarchyDisplay(tag)}
-                  </Badge>
-                ))}
+              <div className="flex gap-2 items-center">
+                <h5 className="text-lg font-semibold">{patient.name}</h5>
+                <ExternalLink className="size-4" />
               </div>
-            ) : (
-              <span className="text-sm font-semibold">--</span>
+              <span className="text-gray-700">
+                {formatPatientAge(patient, true)},{" "}
+                {t(`GENDER__${patient.gender}`)}
+              </span>
+            </Link>
+          </div>
+          <div className="flex flex-col md:flex-row gap-1 md:gap-8 items-start">
+            <div className="md:hidden flex md:flex-col gap-0.5 items-center md:items-start">
+              <span className="text-xs text-gray-600 w-32 md:w-auto">
+                {t("start_date")}:{" "}
+              </span>
+              <span className="text-sm font-semibold">
+                {encounter.period.start
+                  ? formatDateTime(encounter.period.start)
+                  : "--"}
+              </span>
+            </div>
+            <div className="md:hidden flex md:flex-col gap-0.5 items-center md:items-start">
+              <span className="text-xs text-gray-600 w-32 md:w-auto">
+                {t("end_date")}:{" "}
+              </span>
+              <span className="text-sm font-semibold">
+                {encounter.period.end
+                  ? formatDateTime(encounter.period.end)
+                  : t("ongoing")}
+              </span>
+            </div>
+            {patient.instance_identifiers?.map((identifier) => (
+              <div
+                key={identifier.config.id}
+                className="flex md:flex-col gap-0.5 items-center md:items-start"
+              >
+                <span className="text-xs text-gray-600 w-32 md:w-auto">
+                  {identifier.config.config.display}:{" "}
+                </span>
+                <span className="text-sm font-semibold">
+                  {identifier.value}
+                </span>
+              </div>
+            ))}
+            <div className="flex md:flex-col gap-0.5 items-center md:items-start">
+              <span className="text-xs text-gray-600 w-32 md:w-auto">
+                {t("patient_tags")}:{" "}
+              </span>
+              {tags.length ? (
+                <div className="flex flex-wrap gap-1">
+                  {tags.map((tag) => (
+                    <Badge
+                      key={tag.id}
+                      variant="secondary"
+                      size="sm"
+                      className="text-xs"
+                    >
+                      {getTagHierarchyDisplay(tag)}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-sm font-semibold">--</span>
+              )}
+            </div>
+          </div>
+          <div className="md:hidden">
+            <EncounterProperties encounter={encounter} canEdit={false} />
+          </div>
+        </div>
+
+        {!readOnly && (
+          <div className="flex flex-col items-end justify-center gap-4">
+            <PLUGIN_Component
+              __name="PatientInfoCardQuickActions"
+              encounter={encounter}
+              className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
+            />
+
+            {!inactiveEncounterStatus.includes(encounter.status) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="primary_gradient">
+                    {t("update")}
+                    <ChevronDown className="ml-2 size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-(--radix-dropdown-menu-trigger-width) sm:w-auto"
+                >
+                  <EncounterActions encounter={encounter} layout="dropdown" />
+                  <PLUGIN_Component
+                    __name="PatientInfoCardActions"
+                    encounter={encounter}
+                  />
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
-        </div>
-        <div className="md:hidden">
-          <EncounterProperties encounter={encounter} canEdit={false} />
-        </div>
-        {patient.deceased_datetime && (
-          <Badge variant="destructive" className="w-fit sm:self-center">
-            <h3 className="text-sm font-normal">
-              {t("time_of_death")}
-              {": "}
-              {dayjs(patient.deceased_datetime).format("DD MMM YYYY, hh:mm A")}
-            </h3>
-          </Badge>
         )}
-      </div>
+      </Card>
 
-      {!readOnly && (
-        <div className="flex flex-col items-end justify-center gap-4">
-          <PLUGIN_Component
-            __name="PatientInfoCardQuickActions"
-            encounter={encounter}
-            className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
-          />
-
-          {!inactiveEncounterStatus.includes(encounter.status) && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="primary_gradient">
-                  {t("update")}
-                  <ChevronDown className="ml-2 size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-(--radix-dropdown-menu-trigger-width) sm:w-auto"
-              >
-                <EncounterActions encounter={encounter} layout="dropdown" />
-                <PLUGIN_Component
-                  __name="PatientInfoCardActions"
-                  encounter={encounter}
-                />
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+      {patient.deceased_datetime && (
+        <div className="mt-2">
+          <Card className="p-2 items-center rounded-sm shadow-sm border-red-400 bg-red-100 md:p-4 flex flex-wrap justify-center gap-4">
+            <Badge variant="danger" className="rounded-sm items-center px-1.5">
+              {t("deceased")}
+            </Badge>
+            <div className="text-sm font-semibold text-red-950">
+              <Trans
+                i18nKey="passed_away_on"
+                values={{
+                  date: dayjs(patient.deceased_datetime).format(
+                    "MMMM DD, YYYY",
+                  ),
+                  time: dayjs(patient.deceased_datetime).format("hh:mm A"),
+                }}
+              ></Trans>
+            </div>
+          </Card>
         </div>
       )}
-    </Card>
+    </>
   );
 }
