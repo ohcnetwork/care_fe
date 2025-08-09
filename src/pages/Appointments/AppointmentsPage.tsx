@@ -1039,6 +1039,9 @@ function AppointmentRow(props: {
       return props.status ?? "booked";
     }
 
+    if (selectedStatuses.length === 0) {
+      return statusGroup.statuses.join(",");
+    }
     return selectedStatuses.join(",");
   };
 
