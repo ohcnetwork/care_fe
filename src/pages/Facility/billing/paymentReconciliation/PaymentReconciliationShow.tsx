@@ -108,19 +108,12 @@ export function PaymentReconciliationShow({
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start gap-4">
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            className="p-2 h-auto"
-            onClick={() => goBack(`/facility/${facilityId}/billing/payments`)}
-          >
-            <CareIcon icon="l-arrow-left" className="size-5" />
-          </Button>
           <div>
             <h1 className="text-2xl font-bold flex items-center flex-wrap gap-2">
               {t("payment")}
             </h1>
             <span className="text-sm text-gray-500">#{payment.id}</span>
-            <div className="flex gap-2 mt-1 flex-wrap">
+            <div className="grid grid-cols-2 gap-2 mt-1 w-full sm:flex sm:flex-wrap">
               <Badge
                 variant={PAYMENT_RECONCILIATION_STATUS_COLORS[payment.status]}
               >
@@ -155,9 +148,9 @@ export function PaymentReconciliationShow({
               <CardTitle>{t("payment_details")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                 {/* Amount section */}
-                <div className="md:col-span-3">
+                <div className="col-span-3">
                   <div className="flex justify-between items-center py-3 border-b">
                     <div className="text-gray-500">{t("amount")}</div>
                     <MonetaryDisplay
