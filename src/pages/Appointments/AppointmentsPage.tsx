@@ -1021,12 +1021,22 @@ function AppointmentRow(props: {
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
+  const [selectedStatuses, setSelectedStatuses] = useState<AppointmentStatus[]>(
+    [],
+  );
+  const toggleStatus = (status: AppointmentStatus) => {
+    setSelectedStatuses((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status],
+    );
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: [
       "appointments",
       facilityId,
-      props.status,
+      selectedStatuses.length === 0 ? props.status : selectedStatuses.join(","),
       props.page,
       props.practitioners,
       props.slot,
@@ -1038,7 +1048,10 @@ function AppointmentRow(props: {
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facilityId },
       queryParams: {
-        status: props.status ?? "booked",
+        status:
+          selectedStatuses.length === 0
+            ? (props.status ?? "booked")
+            : selectedStatuses.join(","),
         slot: props.slot,
         user: props.practitioners ?? undefined,
         date_after: props.date_from,
@@ -1094,7 +1107,75 @@ function AppointmentRow(props: {
             </SelectContent>
           </Select>
         </div>
+        {/* Status sub-filters */}
+        {props.status && (
+          <div className="flex items-center gap-2 mt-2">
+            {selectedStatuses.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {selectedStatuses.map((status) => (
+                  <Badge
+                    key={status}
+                    variant="outline"
+                    onClick={() => toggleStatus(status)}
+                    className="bg-white cursor-pointer"
+                  >
+                    {t(status)}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-4 -mr-1 ml-1"
+                    >
+                      <CareIcon icon="l-times" className="size-3" />
+                    </Button>
+                  </Badge>
+                ))}
+              </div>
+            )}
 
+            {(() => {
+              const statusGroup = getStatusGroups(t).find(
+                (group) => group.label === props.status,
+              );
+              return statusGroup && statusGroup.statuses.length > 1;
+            })() && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8">
+                    <FilterIcon className="size-4 mr-2" />
+                    {t("filter")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-60 p-0" align="start">
+                  <Command>
+                    <CommandList>
+                      <CommandEmpty>{t("no_status_found")}</CommandEmpty>
+                      <CommandGroup>
+                        {getStatusGroups(t)
+                          .find((group) => group.label === props.status)
+                          ?.statuses.map((status) => (
+                            <CommandItem
+                              key={status}
+                              onSelect={() => toggleStatus(status)}
+                              className="cursor-pointer"
+                            >
+                              <div className="flex items-center gap-2 flex-1">
+                                <div className="size-4 rounded flex items-center justify-center border border-gray-300">
+                                  {selectedStatuses.includes(status) && (
+                                    <CheckIcon className="size-3" />
+                                  )}
+                                </div>
+                                <span>{t(status)}</span>
+                              </div>
+                            </CommandItem>
+                          ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            )}
+          </div>
+        )}
         <div className="mt-2">
           {isLoading ? (
             <TableSkeleton count={5} />
