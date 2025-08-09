@@ -1031,12 +1031,22 @@ function AppointmentRow(props: {
         : [...prev, status],
     );
   };
+  const getStatusForQuery = () => {
+    const statusGroup = getStatusGroups(t).find(
+      (group) => group.label === props.status,
+    );
+    if (!statusGroup) {
+      return props.status ?? "booked";
+    }
+
+    return selectedStatuses.join(",");
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: [
       "appointments",
       facilityId,
-      selectedStatuses.length === 0 ? props.status : selectedStatuses.join(","),
+      getStatusForQuery(),
       props.page,
       props.practitioners,
       props.slot,
@@ -1048,10 +1058,7 @@ function AppointmentRow(props: {
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facilityId },
       queryParams: {
-        status:
-          selectedStatuses.length === 0
-            ? (props.status ?? "booked")
-            : selectedStatuses.join(","),
+        status: getStatusForQuery(),
         slot: props.slot,
         user: props.practitioners ?? undefined,
         date_after: props.date_from,
