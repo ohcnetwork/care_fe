@@ -52,6 +52,8 @@ function PhoneInput({
       inputComponent={InputComponent}
       defaultCountry={careConfig.defaultCountry.code}
       smartCaret={true}
+      international={true}
+      countryCallingCodeEditable={false}
       /**
        * Handles the onChange event.
        *
