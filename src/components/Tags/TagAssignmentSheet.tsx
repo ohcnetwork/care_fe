@@ -511,7 +511,11 @@ export default function TagAssignmentSheet({
             >
               {t("cancel")}
             </Button>
-            <Button onClick={handleSave} disabled={isLoadingTags || !canWrite}>
+            <Button
+              variant="primary"
+              onClick={handleSave}
+              disabled={isLoadingTags || !canWrite}
+            >
               {isLoadingTags ? (
                 <>
                   <Loader2 className="mr-2 size-4 animate-spin" />

@@ -203,12 +203,18 @@ export const Demography = (props: PatientProps) => {
         />,
         {
           label: t("current_address"),
-          value: <ClickableAddress address={patientData.address || ""} />,
+          value: (
+            <div className="pr-4">
+              <ClickableAddress address={patientData.address || ""} />
+            </div>
+          ),
         },
         {
           label: t("permanent_address"),
           value: (
-            <ClickableAddress address={patientData.permanent_address || ""} />
+            <div className="pr-4">
+              <ClickableAddress address={patientData.permanent_address || ""} />
+            </div>
           ),
         },
         ...getGeoOrgDetails(patientData.geo_organization),
