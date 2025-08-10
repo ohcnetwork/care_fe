@@ -1,5 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -17,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
+import query from "@/Utils/request/query";
 import { AppointmentSlotPicker } from "@/pages/Appointments/components/AppointmentSlotPicker";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
@@ -35,6 +37,7 @@ import {
   CreateAppointmentQuestion,
   TokenSlot,
 } from "@/types/scheduling/schedule";
+import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserBase } from "@/types/user/user";
 
 interface AppointmentQuestionProps {
@@ -127,6 +130,24 @@ export function AppointmentQuestion({
 
   // Query to get slot details for display
   const [selectedSlot, setSelectedSlot] = useState<TokenSlot>();
+
+  // help to populate the data during ofline record edit
+  // Query to get slot details
+  const { data: slotData } = useQuery({
+    queryKey: ["slot", facilityId, value.slot_id],
+    queryFn: query(scheduleApis.slots.retrieve, {
+      pathParams: { facilityId, slotId: value.slot_id! },
+    }),
+    enabled: !!value.slot_id && !!facilityId,
+    meta: { persist: true },
+  });
+
+  // Simple effect to set selected tags from stored values and slot data
+  useEffect(() => {
+    if (slotData) {
+      setSelectedSlot(slotData as TokenSlot);
+    }
+  }, [slotData]);
 
   // Update slot details when a slot is selected
   const handleSlotSelect = (slotId: string | undefined) => {
@@ -260,7 +281,7 @@ export function AppointmentQuestion({
                 {resource && (
                   <AppointmentSlotPicker
                     facilityId={facilityId}
-                    resourceId={resource.id}
+                    resourceId={resource?.id}
                     onSlotSelect={handleSlotSelect}
                     selectedSlotId={value.slot_id}
                     onSlotDetailsChange={setSelectedSlot}

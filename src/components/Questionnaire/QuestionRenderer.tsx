@@ -30,6 +30,9 @@ interface QuestionRendererProps {
   encounterId?: string;
   facilityId?: string;
   patientId: string;
+  editMode?: boolean;
+  offlineEntryId?: string;
+  offlineEntry?: any; // Add offlineEntry prop
 }
 
 export function QuestionRenderer({
@@ -43,6 +46,9 @@ export function QuestionRenderer({
   encounterId,
   facilityId,
   patientId,
+  editMode = false,
+  offlineEntryId,
+  offlineEntry,
 }: QuestionRendererProps) {
   const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const isPreview = encounterId === "preview";
@@ -82,6 +88,9 @@ export function QuestionRenderer({
               disabled={disabled || isPreview}
               activeGroupId={activeGroupId}
               patientId={patientId}
+              editMode={editMode}
+              offlineEntryId={offlineEntryId}
+              offlineEntry={offlineEntry}
             />
           </div>
         </div>

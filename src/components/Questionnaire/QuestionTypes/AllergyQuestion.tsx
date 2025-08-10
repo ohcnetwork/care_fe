@@ -78,6 +78,8 @@ interface AllergyQuestionProps {
     note?: string,
   ) => void;
   disabled?: boolean;
+  editMode?: boolean;
+  offlineEntry?: any; // Add offlineEntry prop
 }
 
 const ALLERGY_INITIAL_VALUE: Partial<AllergyIntoleranceRequest> = {
@@ -553,6 +555,8 @@ export function AllergyQuestion({
   updateQuestionnaireResponseCB,
   disabled,
   patientId,
+  editMode = false,
+  offlineEntry,
 }: AllergyQuestionProps) {
   const { t } = useTranslation();
 
@@ -578,11 +582,37 @@ export function AllergyQuestion({
     }),
     meta: { persist: true },
     networkMode: "online",
-    enabled: !isPreview,
+    enabled: !isPreview && !editMode, // Skip server data fetching when in edit mode
   });
 
   useEffect(() => {
-    if (patientAllergies?.results) {
+    // Handle offline data population when in edit mode
+    if (editMode && offlineEntry) {
+      // Extract allergy data from offline entry
+      const payload = offlineEntry.payload as any;
+      if (payload?.requests && payload.requests.length > 0) {
+        const request = payload.requests[0];
+        if (request.body?.datapoints) {
+          // // Convert offline datapoints to allergy format
+          // const offlineAllergies = request.body.datapoints.map((dp: any) => ({
+          //   ...dp,
+          //   dirty: true, // Mark as dirty for offline editing
+          // }));
+
+          updateQuestionnaireResponseCB(
+            [
+              {
+                type: "allergy_intolerance",
+                value: request.body.datapoints,
+              },
+            ],
+            questionnaireResponse.question_id,
+          );
+        }
+      }
+    }
+    // Only fetch server data if not in edit mode
+    else if (patientAllergies?.results && !editMode) {
       updateQuestionnaireResponseCB(
         [
           {
@@ -593,7 +623,7 @@ export function AllergyQuestion({
         questionnaireResponse.question_id,
       );
     }
-  }, [patientAllergies]);
+  }, [patientAllergies, editMode, offlineEntry]);
 
   const handleAddAllergy = (code: Code) => {
     const newAllergy = {

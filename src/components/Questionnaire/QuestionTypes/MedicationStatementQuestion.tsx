@@ -90,6 +90,8 @@ interface MedicationStatementQuestionProps {
   ) => void;
   disabled?: boolean;
   errors: QuestionValidationError[];
+  editMode?: boolean;
+  offlineEntry?: any; // Add offlineEntry prop for offline data
 }
 
 const MEDICATION_STATEMENT_INITIAL_VALUE: MedicationStatementRequest = {
@@ -155,6 +157,8 @@ export function MedicationStatementQuestion({
   encounterId,
   question,
   errors,
+  editMode,
+  offlineEntry,
 }: MedicationStatementQuestionProps) {
   const { t } = useTranslation();
   const isPreview = patientId === "preview";
@@ -188,13 +192,33 @@ export function MedicationStatementQuestion({
   });
 
   useEffect(() => {
-    if (patientMedications?.results) {
+    // Handle offline data population when in edit mode
+    if (editMode && offlineEntry) {
+      // Extract medication data from offline entry
+      const payload = offlineEntry.payload as any;
+      if (payload?.requests && payload.requests.length > 0) {
+        const request = payload.requests[0];
+        if (request.body?.datapoints) {
+          updateQuestionnaireResponseCB(
+            [
+              {
+                type: "medication_statement",
+                value: request.body.datapoints,
+              },
+            ],
+            questionnaireResponse.question_id,
+          );
+        }
+      }
+    }
+    // Only fetch server data if not in edit mode
+    else if (patientMedications?.results && !editMode) {
       updateQuestionnaireResponseCB(
         [{ type: "medication_statement", value: patientMedications.results }],
         questionnaireResponse.question_id,
       );
     }
-  }, [patientMedications]);
+  }, [patientMedications, editMode, offlineEntry]);
 
   const handleAddMedication = (medication: Code) => {
     const newMedication = {

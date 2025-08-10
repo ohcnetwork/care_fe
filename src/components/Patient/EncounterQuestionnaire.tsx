@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,6 +34,7 @@ export default function EncounterQuestionnaire({
   subjectType,
 }: Props) {
   const { t } = useTranslation();
+  const [{ offlineEntryId, editMode }] = useQueryParams();
 
   const { goBack } = useAppHistory();
   const { data: encounter } = useQuery({
@@ -92,6 +93,8 @@ export default function EncounterQuestionnaire({
               subjectType={subjectType}
               encounterId={encounterId}
               questionnaireSlug={questionnaireSlug}
+              offlineEntryId={offlineEntryId}
+              editMode={editMode === "true"}
               onSubmit={() => {
                 if (encounterId && facilityId) {
                   navigate(

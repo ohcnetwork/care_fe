@@ -17,6 +17,7 @@ import {
   ScheduleTemplate,
   ScheduleTemplateCreateRequest,
   ScheduleTemplateUpdateRequest,
+  TokenSlot,
 } from "@/types/scheduling/schedule";
 import { UserBase } from "@/types/user/user";
 
@@ -117,6 +118,11 @@ export default {
       method: HttpMethod.POST,
       TBody: Type<AppointmentCreateRequest>(),
       TRes: Type<Appointment>(),
+    },
+    retrieve: {
+      path: "/api/v1/facility/{facilityId}/slots/{slotId}/",
+      method: HttpMethod.GET,
+      TRes: Type<TokenSlot>(),
     },
   },
 

@@ -74,7 +74,6 @@ export const dependencySchema: DependencySchema = {
     },
   ],
 
-  // Questionnaire mutations ( have deeply nested dependencies)
   structured_questionnair: [
     {
       location: "payload",
@@ -106,6 +105,118 @@ export const dependencySchema: DependencySchema = {
     },
   ],
 
-  // update encounter questionnair is not used for dependency resolution,it is a special case
-  update_encounter_questionnair: [],
+  update_encounter_questionnaire: [],
+
+  allergy_intolerance: [
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "datapoints", "*", "encounter"],
+      resourceType: "encounter",
+    },
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "datapoints", "*", "patient"],
+      resourceType: "patient",
+    },
+  ],
+  diagnosis: [
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "datapoints", "*", "encounter"],
+      resourceType: "encounter",
+    },
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "datapoints", "*", "patient"],
+      resourceType: "patient",
+    },
+  ],
+  medication_request: [
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "datapoints", "*", "encounter"],
+      resourceType: "encounter",
+    },
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "datapoints", "*", "patient"],
+      resourceType: "patient",
+    },
+  ],
+  medication_statement: [
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "datapoints", "*", "encounter"],
+      resourceType: "encounter",
+    },
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "datapoints", "*", "patient"],
+      resourceType: "patient",
+    },
+  ],
+  symptom: [
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "datapoints", "*", "encounter"],
+      resourceType: "encounter",
+    },
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "datapoints", "*", "patient"],
+      resourceType: "patient",
+    },
+  ],
+  encounter: [
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "patient"],
+      resourceType: "patient",
+    },
+  ],
+  appointment: [
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "patient"],
+      resourceType: "patient",
+    },
+  ],
+  files: [
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "encounter"],
+      resourceType: "encounter",
+    },
+  ],
+  time_of_death: [
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "patient"],
+      resourceType: "patient",
+    },
+  ],
+  charge_item: [
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "datapoints", "*", "encounter"],
+      resourceType: "encounter",
+    },
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "datapoints", "*", "patient"],
+      resourceType: "patient",
+    },
+  ],
+  service_request: [
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "datapoints", "*", "encounter"],
+      resourceType: "encounter",
+    },
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "datapoints", "*", "patient"],
+      resourceType: "patient",
+    },
+  ],
 };

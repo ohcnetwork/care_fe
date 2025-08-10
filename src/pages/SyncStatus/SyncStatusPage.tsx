@@ -42,20 +42,27 @@ import { AddUserSheet } from "@/components/Patient/PatientDetailsTab/PatientUser
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
+import { OfflineKeyMap } from "@/OfflineSupport/offlineKeys";
 import { checkParentSyncStatus } from "@/OfflineSupport/offlineWriteHelpers";
 import { getPendingAndRetryableWrites } from "@/OfflineSupport/writeQueue";
 import { useSync } from "@/context/SyncContext";
 
 import {
   handleAppointmentEdit,
+  handleAppointmentQuestionnaireEdit,
   handleAssignUserToPatientEdit,
   handleCreateEncounterEdit,
   handleCreateandUpdatePatientEdit,
   handleCreateandUpdateResourceRequestEdit,
   handleDeleteRecord,
   handleEncounterAction,
+  handleEncounterQuestionnaireEdit,
+  handleFilesQuestionnaireEdit,
+  handleNonStructuredQuestionnaireEdit,
   handleRemoveUserFromPatientEdit,
   handleRetryRecord,
+  handleStructuredQuestionnaireEdit,
+  handleTimeOfDeathEdit,
   handleUnsupportedTypeEdit,
 } from "./actionHandlers";
 
@@ -356,8 +363,8 @@ const formatTimeAgo = (timestamp: number) => {
 };
 
 const getResourceTypeDisplay = (entry: OfflineWritesEntry) => {
-  // Map the type to a more readable display name
-  const typeMap: Record<string, string> = {
+  // Map the type to a more readable display name using the type-safe OfflineKeyMap
+  const typeMap: Record<keyof typeof OfflineKeyMap, string> = {
     create_patient: "Create Patient",
     update_patient: "Patient Update",
     create_encounter: "Create Encounter",
@@ -371,11 +378,26 @@ const getResourceTypeDisplay = (entry: OfflineWritesEntry) => {
     cancel_appointment: "Appointment Cancel",
     reschedule_appointment: "Appointment Reschedule",
     non_structured_questionnaire: "Non-structured Questionnaire",
-    update_encounter_questionnair: "Update Encounter Questionnaire",
+    update_encounter_questionnaire: "Update Encounter Questionnaire",
     structured_questionnair: "Structured Questionnaire",
+    allergy_intolerance: "Allergy Intolerance",
+    diagnosis: "Diagnosis",
+    medication_request: "Medication Request",
+    medication_statement: "Medication Statement",
+    symptom: "Symptom",
+    encounter: "Encounter",
+    appointment: "Appointment",
+    files: "Files",
+    time_of_death: "Time of Death",
+    charge_item: "Charge Item",
+    service_request: "Service Request",
   };
 
-  return typeMap[entry.type] || entry.resourceType || entry.type;
+  return (
+    typeMap[entry.type as keyof typeof OfflineKeyMap] ||
+    entry.resourceType ||
+    entry.type
+  );
 };
 
 // Pending writes table component
@@ -1080,19 +1102,35 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
       case "remove_user_from_patient":
         await handleRemoveUserFromPatientEdit(entry);
         break;
-      case "create_appointment":
       case "reschedule_appointment":
       case "update_appointment_status":
       case "cancel_appointment":
         await handleAppointmentEdit(entry);
         break;
       case "non_structured_questionnaire":
-      case "update_encounter_questionnair":
-      case "structured_questionnair":
-        // TODO: Implement edit functionality for these types
-        handleUnsupportedTypeEdit(entry);
+        await handleNonStructuredQuestionnaireEdit(entry);
+        break;
+      case "time_of_death":
+        await handleTimeOfDeathEdit(entry);
+        break;
+      case "appointment":
+        await handleAppointmentQuestionnaireEdit(entry);
+        break;
+      case "files":
+        await handleFilesQuestionnaireEdit();
+        break;
+      case "encounter":
+        await handleEncounterQuestionnaireEdit(entry);
         break;
 
+      case "allergy_intolerance":
+      case "diagnosis":
+      case "symptom":
+      case "medication_request":
+      case "medication_statement":
+        await handleStructuredQuestionnaireEdit(entry);
+        break;
+      case "update_encounter_questionnaire":
       default:
         handleUnsupportedTypeEdit(entry);
         break;

@@ -10,6 +10,102 @@ import { UserBase } from "@/types/user/user";
 
 /* Edit handlers for each type of offline write entry */
 
+// Unified handler for structured questionnaire types (allergy, diagnosis, symptom, medication)
+export const handleStructuredQuestionnaireEdit = async (
+  entry: OfflineWritesEntry,
+) => {
+  // Check if this is a structured questionnaire type
+  const structuredTypes = [
+    "allergy_intolerance",
+    "diagnosis",
+    "symptom",
+    "medication_request",
+    "medication_statement",
+  ];
+
+  if (!structuredTypes.includes(entry.type as any)) {
+    toast.error("Invalid entry type for structured questionnaire editing");
+    return;
+  }
+
+  try {
+    // Extract the payload to get questionnaire and patient/encounter info
+    const payload = entry.payload as {
+      requests: Array<{
+        url: string;
+        method: string;
+        reference_id: string;
+        body: {
+          datapoints: Array<{
+            encounter?: string;
+            patient: string;
+            id: string;
+            [key: string]: any;
+          }>;
+          [key: string]: any;
+        };
+      }>;
+    };
+
+    if (!payload.requests || payload.requests.length === 0) {
+      toast.error("No questionnaire data found in offline entry");
+      return;
+    }
+
+    // Get the first request to extract navigation info
+    const firstRequest = payload.requests[0];
+    // Extract from datapoints array as per payload structure
+    const datapoint = firstRequest.body.datapoints?.[0];
+    if (!datapoint) {
+      toast.error("No datapoint found in offline entry");
+      return;
+    }
+
+    let patientId = datapoint.patient;
+    const encounterId = datapoint.encounter;
+    console.log("Extracted patient ID from URL:", patientId);
+    // If patient ID is missing, try to extract from URL (especially for allergy type)
+    if (!patientId) {
+      try {
+        // Extract patient ID from URL pattern: /api/v1/patient/{patientId}/...
+        const urlMatch = payload.requests[0].url?.match(
+          /\/api\/v1\/patient\/([^/]+)/,
+        );
+        if (urlMatch && urlMatch[1]) {
+          patientId = urlMatch[1];
+          console.log("Extracted patient ID from URL:", patientId);
+        }
+      } catch (urlError) {
+        console.warn("Failed to extract patient ID from URL:", urlError);
+      }
+    }
+
+    if (!patientId) {
+      toast.error("Patient information not found in offline entry");
+      return;
+    }
+
+    if (!encounterId) {
+      toast.error("Encounter information not found in offline entry");
+      return;
+    }
+
+    // Navigate to the specific questionnaire form with edit parameters
+    navigate(
+      `/facility/${entry.facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${entry.type}`,
+      {
+        query: {
+          offlineEntryId: entry.id,
+          editMode: "true",
+        },
+      },
+    );
+  } catch (error) {
+    console.error("Error handling structured questionnaire edit:", error);
+    toast.error("Failed to open questionnaire for editing");
+  }
+};
+
 export const handleCreateandUpdatePatientEdit = async (
   entry: OfflineWritesEntry,
   facilityId?: string,
@@ -171,16 +267,257 @@ export const handleAppointmentEdit = async (entry: OfflineWritesEntry) => {
   }
 };
 
-// Handler for unsupported entry types
+export const handleNonStructuredQuestionnaireEdit = async (
+  entry: OfflineWritesEntry,
+) => {
+  if (entry.type !== "non_structured_questionnaire") {
+    toast.error("Invalid entry type for questionnaire editing");
+    return;
+  }
+
+  try {
+    // Extract the payload to get questionnaire and patient/encounter info
+    const payload = entry.payload as {
+      requests: Array<{
+        url: string;
+        method: string;
+        reference_id: string;
+        body: {
+          encounter?: string;
+          patient: string;
+          resource_id: string;
+          results: Array<any>;
+        };
+      }>;
+    };
+
+    if (!payload.requests || payload.requests.length === 0) {
+      toast.error("No questionnaire data found in offline entry");
+      return;
+    }
+
+    // Get the first request to extract navigation info
+    const firstRequest = payload.requests[0];
+    const patientId = firstRequest.body.patient;
+    const encounterId = firstRequest.body.encounter;
+
+    // Navigate to questionnaire form with edit parameters
+    if (encounterId) {
+      navigate(
+        `/facility/${entry.facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire`,
+        {
+          query: {
+            offlineEntryId: entry.id,
+            editMode: "true",
+          },
+        },
+      );
+    } else {
+      navigate(
+        `/facility/${entry.facilityId}/patient/${patientId}/questionnaire`,
+        {
+          query: {
+            offlineEntryId: entry.id,
+            editMode: "true",
+          },
+        },
+      );
+    }
+  } catch (error) {
+    console.error("Error handling questionnaire edit:", error);
+    toast.error("Failed to open questionnaire for editing");
+  }
+};
+
+// Handler for appointment entries
+export const handleAppointmentQuestionnaireEdit = async (
+  entry: OfflineWritesEntry,
+) => {
+  if (entry.type !== "appointment") {
+    toast.error("Invalid entry type for appointment editing");
+    return;
+  }
+
+  try {
+    // Extract the payload to get patient and slot info
+    const payload = entry.payload as {
+      requests: Array<{
+        url: string;
+        method: string;
+        reference_id: string;
+        body: {
+          note: string;
+          patient: string;
+          tags: string[];
+        };
+      }>;
+    };
+
+    if (!payload.requests || payload.requests.length === 0) {
+      toast.error("No appointment data found in offline entry");
+      return;
+    }
+
+    // Get the first request to extract patient info
+    const firstRequest = payload.requests[0];
+    const patientId = firstRequest.body.patient;
+
+    if (!patientId) {
+      toast.error("Patient information not found in offline entry");
+      return;
+    }
+
+    // Navigate to patient questionnaire form with edit parameters
+    navigate(
+      `/facility/${entry.facilityId}/patient/${patientId}/questionnaire`,
+      {
+        query: {
+          offlineEntryId: entry.id,
+          editMode: "true",
+        },
+      },
+    );
+  } catch (error) {
+    console.error("Error handling appointment edit:", error);
+    toast.error("Failed to open appointment questionnaire for editing");
+  }
+};
+
+// Handler for files entries
+export const handleFilesQuestionnaireEdit = async () => {
+  toast.error("offline edit for files type is not supported");
+  return;
+};
+
+// Handler for encounter entries
+export const handleEncounterQuestionnaireEdit = async (
+  entry: OfflineWritesEntry,
+) => {
+  if (entry.type !== "encounter") {
+    toast.error("Invalid entry type for encounter editing");
+    return;
+  }
+
+  try {
+    // Extract the payload to get encounter and patient info
+    const payload = entry.payload as {
+      requests: Array<{
+        url: string;
+        method: string;
+        reference_id: string;
+        body: {
+          discharge_summary_advice?: string | null;
+          encounter_class: string;
+          external_identifier?: string | null;
+          facility: string;
+          hospitalization?: Record<string, any>;
+          patient: string;
+          period: {
+            start: string;
+            end?: string | null;
+          };
+          priority: string;
+          status: string;
+        };
+      }>;
+    };
+
+    if (!payload.requests || payload.requests.length === 0) {
+      toast.error("No encounter data found in offline entry");
+      return;
+    }
+
+    // Get the first request to extract encounter and patient info
+    const firstRequest = payload.requests[0];
+    const patientId = firstRequest.body.patient;
+
+    // Extract encounter ID from URL - format: /api/v1/encounter/{encounterId}/
+    const urlMatch = firstRequest.url.match(/\/api\/v1\/encounter\/([^/]+)\//);
+    const encounterId = urlMatch ? urlMatch[1] : null;
+
+    if (!patientId) {
+      toast.error("Patient information not found in offline entry");
+      return;
+    }
+
+    if (!encounterId) {
+      toast.error("Encounter information not found in offline entry");
+      return;
+    }
+
+    // Navigate to encounter questionnaire form with edit parameters
+    navigate(
+      `/facility/${entry.facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`,
+      {
+        query: {
+          offlineEntryId: entry.id,
+          editMode: "true",
+        },
+      },
+    );
+  } catch (error) {
+    console.error("Error handling encounter edit:", error);
+    toast.error("Failed to open encounter questionnaire for editing");
+  }
+};
+
+// Handler for time_of_death entries
+export const handleTimeOfDeathEdit = async (entry: OfflineWritesEntry) => {
+  if (entry.type !== "time_of_death") {
+    toast.error("Invalid entry type for time of death editing");
+    return;
+  }
+
+  try {
+    // Extract the payload to get patient info
+    const payload = entry.payload as {
+      requests: Array<{
+        url: string;
+        method: string;
+        reference_id: string;
+        body: {
+          deceased_datetime: string;
+        };
+      }>;
+    };
+
+    if (!payload.requests || payload.requests.length === 0) {
+      toast.error("No time of death data found in offline entry");
+      return;
+    }
+
+    // Get the first request to extract patient info
+    const firstRequest = payload.requests[0];
+
+    // Extract patient ID from URL - format: /api/v1/patient/{patientId}/
+    const urlMatch = firstRequest.url.match(/\/api\/v1\/patient\/([^/]+)\//);
+    const patientId = urlMatch ? urlMatch[1] : null;
+
+    if (!patientId) {
+      toast.error("Patient information not found in offline entry");
+      return;
+    }
+
+    // Navigate to patient questionnaire form with edit parameters
+    navigate(
+      `/facility/${entry.facilityId}/patient/${patientId}/questionnaire`,
+      {
+        query: {
+          offlineEntryId: entry.id,
+          editMode: "true",
+        },
+      },
+    );
+  } catch (error) {
+    console.error("Error handling time of death edit:", error);
+    toast.error("Failed to open time of death questionnaire for editing");
+  }
+};
+
 export const handleUnsupportedTypeEdit = (entry: OfflineWritesEntry) => {
   toast.info(`Edit functionality for ${entry.type} is not implemented yet`);
 };
 
-// ============================================================================
-// RETRY HANDLERS
-// ============================================================================
-
-// Global retry handler for all record types
 export const handleRetryRecord = async (entry: OfflineWritesEntry) => {
   try {
     // Create a SyncManager instance to process the write

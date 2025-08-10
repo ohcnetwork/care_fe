@@ -51,6 +51,9 @@ interface QuestionInputProps {
   facilityId?: string;
   patientId: string;
   isSubQuestion?: boolean;
+  editMode?: boolean;
+  offlineEntryId?: string;
+  offlineEntry?: any; // Add offlineEntry prop
 }
 
 export function QuestionInput({
@@ -64,6 +67,9 @@ export function QuestionInput({
   facilityId,
   patientId,
   isSubQuestion,
+  editMode = false,
+  offlineEntryId,
+  offlineEntry,
 }: QuestionInputProps) {
   const { t } = useTranslation();
   const questionnaireResponse = questionnaireResponses.find(
@@ -110,6 +116,9 @@ export function QuestionInput({
       index,
       patientId,
       errors,
+      editMode,
+      offlineEntryId,
+      offlineEntry,
     };
 
     switch (question.type) {
@@ -144,6 +153,8 @@ export function QuestionInput({
                 <MedicationRequestQuestion
                   {...commonProps}
                   encounterId={encounterId}
+                  editMode={editMode}
+                  offlineEntry={offlineEntry}
                 />
               );
             }
@@ -156,6 +167,8 @@ export function QuestionInput({
                 <MedicationStatementQuestion
                   {...commonProps}
                   encounterId={encounterId}
+                  editMode={editMode}
+                  offlineEntry={offlineEntry}
                 />
               );
             }
@@ -190,7 +203,13 @@ export function QuestionInput({
             return <span>{t("questionnaire_charge_item_no_encounter")}</span>;
           case "allergy_intolerance":
             if (encounterId) {
-              return <AllergyQuestion {...commonProps} />;
+              return (
+                <AllergyQuestion
+                  {...commonProps}
+                  editMode={editMode}
+                  offlineEntry={offlineEntry}
+                />
+              );
             }
             return (
               <span>{t("questionnaire_allergy_intolerance_no_encounter")}</span>
@@ -202,6 +221,8 @@ export function QuestionInput({
                   {...commonProps}
                   encounterId={encounterId}
                   patientId={patientId}
+                  editMode={editMode}
+                  offlineEntry={offlineEntry}
                 />
               );
             }
@@ -209,7 +230,12 @@ export function QuestionInput({
           case "diagnosis":
             if (encounterId) {
               return (
-                <DiagnosisQuestion {...commonProps} encounterId={encounterId} />
+                <DiagnosisQuestion
+                  {...commonProps}
+                  encounterId={encounterId}
+                  editMode={editMode}
+                  offlineEntry={offlineEntry}
+                />
               );
             }
             return <span>{t("questionnaire_diagnosis_no_encounter")}</span>;
@@ -227,6 +253,8 @@ export function QuestionInput({
                   {...commonProps}
                   facilityId={facilityId}
                   encounterId={encounterId}
+                  editMode={editMode}
+                  offlineEntry={offlineEntry}
                 />
               );
             }

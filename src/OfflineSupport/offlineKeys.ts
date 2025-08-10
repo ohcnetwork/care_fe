@@ -27,8 +27,19 @@ export const OfflineKeyMap = {
   update_appointment_status: "update_appointment_status",
   cancel_appointment: "cancel_appointment",
   non_structured_questionnaire: "non_structured_questionnaire",
-  update_encounter_questionnair: "update_encounter_questionnair",
+  update_encounter_questionnaire: "update_encounter_questionnaire",
   structured_questionnair: "structured_questionnair",
+  allergy_intolerance: "allergy_intolerance",
+  diagnosis: "diagnosis",
+  medication_request: "medication_request",
+  medication_statement: "medication_statement",
+  symptom: "symptom",
+  encounter: "encounter",
+  appointment: "appointment",
+  files: "files",
+  time_of_death: "time_of_death",
+  charge_item: "charge_item",
+  service_request: "service_request",
 } as const;
 
 // Type for values like "create_patient"

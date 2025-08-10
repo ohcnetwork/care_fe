@@ -2,11 +2,12 @@ import {
   QueryClient,
   onlineManager,
   useMutation,
+  useQueries,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import { useNavigationPrompt } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -23,10 +24,11 @@ import { AuthUserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import { OfflineKeyMap } from "@/OfflineSupport/offlineKeys";
 import {
   cacheQuestionnairResponse,
+  handleOfflineRecordSuccess,
   isOfflineId,
   normalizeAndUpdateAllergy_Intolerance,
   normalizeAndUpdateDiagnosis,
@@ -47,6 +49,7 @@ import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { FileUploadQuestion } from "@/types/files/files";
 import {
+  BatchSubmissionResult,
   DetailedValidationError,
   QuestionValidationError,
   ValidationErrorResponse,
@@ -104,6 +107,8 @@ export interface QuestionnaireFormProps {
   onSubmit?: () => void;
   onCancel?: () => void;
   facilityId?: string;
+  offlineEntryId?: string; // For editing offline entries
+  editMode?: boolean; // Whether we're in edit mode
 }
 
 interface ValidationErrorDisplayProps {
@@ -353,6 +358,8 @@ export function QuestionnaireForm({
   onSubmit,
   onCancel,
   facilityId,
+  offlineEntryId,
+  editMode = false,
 }: QuestionnaireFormProps) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
@@ -361,11 +368,17 @@ export function QuestionnaireForm({
   const [questionnaireForms, setQuestionnaireForms] = useState<
     QuestionnaireFormState[]
   >([]);
+  console.log(" questionnaireSlug : ", questionnaireSlug);
+  console.log(" questionnaireForms : ", questionnaireForms);
   const [serverErrors, setServerErrors] = useState<ServerValidationError[]>();
   const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string>();
 
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
+  const [offlineEntry, setOfflineEntry] = useState<OfflineWritesEntry | null>(
+    null,
+  );
+  const [isLoadingOfflineEntry, setIsLoadingOfflineEntry] = useState(false);
   const db = new AppCacheDB();
 
   const {
@@ -384,7 +397,10 @@ export function QuestionnaireForm({
 
   const { mutate: submitBatch, isPending } = useMutation({
     mutationFn: mutate(routes.batchRequest, { silent: true }),
-    onSuccess: () => {
+    onSuccess: async (response: { results: BatchSubmissionResult[] }) => {
+      if (editMode && offlineEntry) {
+        await handleOfflineRecordSuccess(offlineEntry.id, response);
+      }
       setServerErrors(undefined);
       toast.success(t("questionnaire_submitted_successfully"));
       onSubmit?.();
@@ -479,25 +495,196 @@ export function QuestionnaireForm({
   // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
   useNavigationPrompt(isDirty && !import.meta.env.DEV, t("unsaved_changes"));
 
+  // Load offline entry for editing
   useEffect(() => {
-    if (!isInitialized && questionnaireSlug) {
-      const questionnaire =
-        FIXED_QUESTIONNAIRES[questionnaireSlug] || questionnaireData;
+    if (editMode && offlineEntryId && !offlineEntry) {
+      setIsLoadingOfflineEntry(true);
 
-      if (questionnaire) {
-        setQuestionnaireForms([
-          {
-            questionnaire,
-            responses: initializeResponses(questionnaire.questions),
-            errors: [],
-          },
-        ]);
+      db.OfflineWrites.get(offlineEntryId)
+        .then((entry) => {
+          if (entry) {
+            setOfflineEntry(entry);
+          } else {
+            toast.error(t("offline_questionnaire_not_found"));
+          }
+        })
+        .catch((error) => {
+          console.error("Error loading offline entry:", error);
+          toast.error(t("failed_to_load_offline_questionnaire"));
+        })
+        .finally(() => {
+          setIsLoadingOfflineEntry(false);
+        });
+    }
+  }, [editMode, offlineEntryId, offlineEntry, patientId, encounterId]);
+
+  function extractSlugFromUrl(url: string) {
+    // Matches the part after "/questionnaire/" and before the next "/"
+    const match = url?.match(/\/questionnaire\/([^/]+)\//);
+    return match ? match[1] : null;
+  }
+
+  const payload = offlineEntry?.payload as BatchRequestBody;
+  const requests = payload?.requests ?? [];
+
+  // Step 1: Prepare all slugs - memoize to prevent unnecessary re-renders
+  const slugs = useMemo(
+    () => requests.map((req) => extractSlugFromUrl(req.url)),
+    [requests],
+  );
+
+  // Step 2: Fetch all questionnaires in parallel
+  const questionnaireQueries = useQueries({
+    queries: slugs.map((slug: string | null) => ({
+      queryKey: ["questionnaireDetail", slug],
+      queryFn: query(questionnaireApi.detail, {
+        pathParams: { id: slug ?? "" },
+      }),
+      meta: { persist: true },
+      networkMode: "online" as const,
+      enabled: !!slug && !FIXED_QUESTIONNAIRES[slug] && !!offlineEntryId,
+    })),
+  }) as any[];
+
+  useEffect(() => {
+    if (!isInitialized) {
+      // Handle edit mode initialization
+
+      const allFetched =
+        questionnaireQueries.length > 0 &&
+        questionnaireQueries.every(
+          (q: any, idx: number) =>
+            (slugs[idx] && FIXED_QUESTIONNAIRES[slugs[idx]]) ||
+            (q.isSuccess && q.data),
+        );
+      if (editMode && offlineEntry && allFetched) {
+        const payload = offlineEntry.payload as BatchRequestBody;
+
+        // Check if all questionnaires are available
+        let hasFailedQuestionnaire = false;
+
+        const formStates: QuestionnaireFormState[] = payload.requests
+          .map((request: any, idx: number) => {
+            // Step 1: Get or reconstruct questionnaire definition
+            const slug = slugs[idx];
+            const questionnaire =
+              slug && FIXED_QUESTIONNAIRES[slug]
+                ? FIXED_QUESTIONNAIRES[slug]
+                : questionnaireQueries[idx].data;
+
+            if (!questionnaire) {
+              hasFailedQuestionnaire = true;
+              return null;
+            }
+
+            // Step 2: Map stored answers to responses
+            const responses = initializeResponses(
+              questionnaire.questions,
+              request.body.results,
+            );
+
+            return {
+              questionnaire,
+              responses,
+              errors: [] as QuestionValidationError[],
+            };
+          })
+          .filter((state): state is QuestionnaireFormState => state !== null);
+
+        if (hasFailedQuestionnaire) {
+          toast.error(t("failed_to_load_the_offline_record_for_edit"));
+          return;
+        }
+
+        setQuestionnaireForms(formStates);
         setIsInitialized(true);
       }
-    }
-  }, [questionnaireData, isInitialized, questionnaireSlug]);
+      // Handle edit mode for specific structured questionnaire types (new approach)
+      else if (
+        editMode &&
+        offlineEntry &&
+        [
+          "time_of_death",
+          "allergy_intolerance",
+          "diagnosis",
+          "medication_request",
+          "medication_statement",
+          "symptom",
+          "encounter",
+          "appointment",
+          "files",
+          "charge_item",
+          "service_request",
+        ].includes(offlineEntry.type)
+      ) {
+        const payload = offlineEntry.payload as BatchRequestBody;
 
-  if (isQuestionnaireLoading) {
+        if (payload.requests && payload.requests.length > 0) {
+          const request = payload.requests[0];
+          const reference_id = request.reference_id;
+
+          // Get the structured questionnaire from FIXED_QUESTIONNAIRES
+          const questionnaire = FIXED_QUESTIONNAIRES[reference_id];
+
+          if (!questionnaire) {
+            toast.error(t("failed_to_load_the_offline_record_for_edit"));
+            return;
+          }
+
+          // Reconstruct structured data into questionnaire responses
+          const responses = initializeStructuredResponses(
+            questionnaire.questions,
+            request.body,
+            reference_id,
+            request, // Pass the full request for URL parsing
+          );
+
+          // Show warning toast for appointment type in edit mode
+          if (offlineEntry.type === "appointment") {
+            toast.warning(
+              t("practitioner_and_tags_not_available_for_offline_edit"),
+            );
+          }
+
+          setQuestionnaireForms([
+            {
+              questionnaire,
+              responses,
+              errors: [] as QuestionValidationError[],
+            },
+          ]);
+          setIsInitialized(true);
+        }
+      }
+      // Handle regular mode initialization
+      else if (!editMode && questionnaireSlug) {
+        const questionnaire =
+          FIXED_QUESTIONNAIRES[questionnaireSlug] || questionnaireData;
+
+        if (questionnaire) {
+          setQuestionnaireForms([
+            {
+              questionnaire,
+              responses: initializeResponses(questionnaire.questions),
+              errors: [],
+            },
+          ]);
+          setIsInitialized(true);
+        }
+      }
+    }
+  }, [
+    questionnaireData,
+    isInitialized,
+    questionnaireSlug,
+    editMode,
+    offlineEntry,
+    isLoadingOfflineEntry,
+    questionnaireQueries, // Added dependency
+    slugs, // Added dependency
+  ]);
+
+  if (isQuestionnaireLoading || isLoadingOfflineEntry) {
     return <Loading />;
   }
 
@@ -512,6 +699,7 @@ export function QuestionnaireForm({
 
   const initializeResponses = (
     questions: Question[],
+    existingResponses?: QuestionnaireResponse[],
   ): QuestionnaireResponse[] => {
     const responses: QuestionnaireResponse[] = [];
 
@@ -519,10 +707,158 @@ export function QuestionnaireForm({
       if (q.type === "group" && q.questions) {
         q.questions.forEach(processQuestion);
       } else {
+        const existing = existingResponses?.find(
+          (er) => er.question_id === q.id,
+        );
+
+        responses.push({
+          question_id: q.id,
+          link_id: q.link_id,
+          values: existing ? existing.values : [],
+          note: existing ? existing.note : undefined,
+          body_site: existing ? existing.body_site : undefined,
+          method: existing ? existing.method : undefined,
+          structured_type: q.structured_type ?? null,
+        });
+      }
+    };
+
+    questions.forEach(processQuestion);
+    return responses;
+  };
+
+  const initializeStructuredResponses = (
+    questions: Question[],
+    requestBody: any,
+    reference_id: string,
+    fullRequest?: any, // Optional full request for URL parsing
+  ): QuestionnaireResponse[] => {
+    const responses: QuestionnaireResponse[] = [];
+
+    const processQuestion = (q: Question) => {
+      if (q.type === "group" && q.questions) {
+        q.questions.forEach(processQuestion);
+      } else if (q.type === "structured" && q.structured_type) {
+        // Handle structured question types
+        let structuredData: any = null;
+
+        // Extract data based on reference_id and structure
+        if (requestBody.datapoints && Array.isArray(requestBody.datapoints)) {
+          // For datapoint-based structures (allergy, diagnosis, medication, etc.)
+          structuredData = requestBody.datapoints;
+        } else {
+          // For direct body structures (encounter, appointment, files, time_of_death)
+          switch (reference_id) {
+            case "encounter":
+              structuredData = [requestBody]; // Wrap in array for consistency
+              break;
+            case "appointment": {
+              // Extract slot_id from URL - format: /api/v1/facility/{facilityId}/slots/{slotId}/create_appointment/
+              const slotMatch = fullRequest?.url?.match(
+                /\/slots\/([^/]+)\/create_appointment\//,
+              );
+              const slot_id = slotMatch ? slotMatch[1] : null;
+
+              structuredData = [
+                {
+                  note: requestBody.note,
+                  tags: requestBody.tags,
+                  slot_id: slot_id,
+                },
+              ];
+
+              console.log(
+                "DEBUG: Appointment structured data:",
+                structuredData,
+              );
+
+              break;
+            }
+            case "files": {
+              // Convert base64 to File object with proper MIME type
+              let fileObject: File | null = null;
+              if (requestBody.file_data && requestBody.original_name) {
+                try {
+                  const extension = requestBody.original_name
+                    .split(".")
+                    .pop()
+                    ?.toLowerCase();
+                  const mimeTypes: Record<string, string> = {
+                    pdf: "application/pdf",
+                    jpg: "image/jpeg",
+                    jpeg: "image/jpeg",
+                    png: "image/png",
+                    gif: "image/gif",
+                    txt: "text/plain",
+                    doc: "application/msword",
+                    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    xls: "application/vnd.ms-excel",
+                    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                  };
+                  const mimeType =
+                    mimeTypes[extension || ""] || "application/octet-stream";
+
+                  // Modern one-liner base64 to File conversion
+                  fileObject = new File(
+                    [
+                      Uint8Array.from(atob(requestBody.file_data), (c) =>
+                        c.charCodeAt(0),
+                      ),
+                    ],
+                    requestBody.original_name,
+                    { type: mimeType },
+                  );
+                } catch (error) {
+                  console.error("Error converting file data:", error);
+                }
+              }
+
+              structuredData = [
+                {
+                  name: requestBody.name,
+                  original_name: requestBody.original_name,
+                  file_data: fileObject,
+                  file_category: requestBody.file_category,
+                  file_type: requestBody.file_type,
+                  associating_id: requestBody.associating_id,
+                },
+              ];
+              break;
+            }
+            case "time_of_death":
+              // For time of death, the component expects a string array, not an object
+              structuredData = [requestBody.deceased_datetime];
+              break;
+            default:
+              structuredData = [requestBody];
+          }
+        }
+
+        responses.push({
+          question_id: q.id,
+          link_id: q.link_id,
+          values: structuredData
+            ? [
+                {
+                  value: structuredData,
+                  type: q.structured_type as any, // Use the structured type from the question
+                },
+              ]
+            : [],
+          // note: undefined,
+          body_site: undefined,
+          method: undefined,
+          structured_type: q.structured_type,
+        });
+      } else {
+        // Handle non-structured questions
         responses.push({
           question_id: q.id,
           link_id: q.link_id,
           values: [],
+          note: undefined,
+          body_site: undefined,
+          method: undefined,
           structured_type: q.structured_type ?? null,
         });
       }
@@ -611,8 +947,12 @@ export function QuestionnaireForm({
         id: generatedId,
         userId: authUser.external_id,
         facilityId: facilityId,
-        mutationSyncRouteKey: OfflineKeyMap.structured_questionnair,
-        type: OfflineKeyMap.structured_questionnair,
+        mutationSyncRouteKey:
+          OfflineKeyMap[reference_id as keyof typeof OfflineKeyMap] ||
+          OfflineKeyMap.structured_questionnair,
+        type:
+          OfflineKeyMap[reference_id as keyof typeof OfflineKeyMap] ||
+          OfflineKeyMap.structured_questionnair,
         resourceType: "Questionnaire",
         payload: {
           requests: [req],
@@ -718,8 +1058,8 @@ export function QuestionnaireForm({
         id: recordId,
         userId: authUser.external_id,
         facilityId: facilityId,
-        mutationSyncRouteKey: OfflineKeyMap.structured_questionnair,
-        type: OfflineKeyMap.structured_questionnair,
+        mutationSyncRouteKey: OfflineKeyMap.diagnosis,
+        type: OfflineKeyMap.diagnosis,
         resourceType: "Questionnaire",
         payload: cleanedRequests,
         parentMutationId: isOfflineId(parentID) ? parentID : undefined,
@@ -803,8 +1143,12 @@ export function QuestionnaireForm({
         id: recordId,
         userId: authUser.external_id,
         facilityId: facilityId,
-        mutationSyncRouteKey: OfflineKeyMap.structured_questionnair,
-        type: OfflineKeyMap.structured_questionnair,
+        mutationSyncRouteKey:
+          OfflineKeyMap[reference_id as keyof typeof OfflineKeyMap] ||
+          OfflineKeyMap.structured_questionnair,
+        type:
+          OfflineKeyMap[reference_id as keyof typeof OfflineKeyMap] ||
+          OfflineKeyMap.structured_questionnair,
         resourceType: "Questionnaire",
         payload: cleanedRequests,
         parentMutationId: isOfflineId(parentID) ? parentID : undefined,
@@ -896,8 +1240,8 @@ export function QuestionnaireForm({
         id: recordId,
         userId: authUser.external_id,
         facilityId: facilityId,
-        mutationSyncRouteKey: OfflineKeyMap.update_encounter_questionnair,
-        type: OfflineKeyMap.update_encounter_questionnair,
+        mutationSyncRouteKey: OfflineKeyMap.encounter,
+        type: OfflineKeyMap.encounter,
         resourceType: "Questionnaire",
         payload: cleanedRequests,
         parentMutationId: isOfflineId(parentID) ? parentID : undefined,
@@ -1372,6 +1716,9 @@ export function QuestionnaireForm({
               activeGroupId={activeGroupId}
               errors={form.errors}
               patientId={patientId}
+              editMode={editMode}
+              offlineEntryId={offlineEntryId}
+              offlineEntry={offlineEntry}
               clearError={(questionId: string) => {
                 setQuestionnaireForms((prev) =>
                   prev.map((f) =>

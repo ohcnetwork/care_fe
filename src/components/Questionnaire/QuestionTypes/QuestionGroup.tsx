@@ -29,6 +29,9 @@ interface QuestionGroupProps {
   facilityId?: string;
   patientId: string;
   isSubQuestion?: boolean;
+  editMode?: boolean;
+  offlineEntryId?: string;
+  offlineEntry?: any; // Add offlineEntry prop
 }
 
 export function isQuestionEnabled(
@@ -111,6 +114,9 @@ export const QuestionGroup = memo(function QuestionGroup({
   facilityId,
   patientId,
   isSubQuestion = false,
+  editMode = false,
+  offlineEntryId,
+  offlineEntry,
 }: QuestionGroupProps) {
   const isEnabled = isQuestionEnabled(question, questionnaireResponses);
 
@@ -131,6 +137,9 @@ export const QuestionGroup = memo(function QuestionGroup({
         facilityId={facilityId}
         patientId={patientId}
         isSubQuestion={isSubQuestion}
+        editMode={editMode}
+        offlineEntryId={offlineEntryId}
+        offlineEntry={offlineEntry}
       />
     );
   }
@@ -180,6 +189,9 @@ export const QuestionGroup = memo(function QuestionGroup({
             activeGroupId={activeGroupId}
             patientId={patientId}
             isSubQuestion={true}
+            editMode={editMode}
+            offlineEntryId={offlineEntryId}
+            offlineEntry={offlineEntry}
           />
         ))}
       </div>

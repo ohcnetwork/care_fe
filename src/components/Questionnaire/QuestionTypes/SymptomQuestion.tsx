@@ -77,6 +77,8 @@ interface SymptomQuestionProps {
     note?: string,
   ) => void;
   disabled?: boolean;
+  editMode?: boolean;
+  offlineEntry?: any; // Add offlineEntry prop for offline data
 }
 
 const SYMPTOM_INITIAL_VALUE: Omit<SymptomRequest, "encounter"> = {
@@ -657,6 +659,8 @@ export function SymptomQuestion({
   updateQuestionnaireResponseCB,
   disabled,
   encounterId,
+  editMode = false,
+  offlineEntry,
 }: SymptomQuestionProps) {
   const { t } = useTranslation();
 
@@ -680,11 +684,31 @@ export function SymptomQuestion({
     }),
     meta: { persist: true },
     networkMode: "online",
-    enabled: !isPreview,
+    enabled: !isPreview && !editMode, // Skip server data fetching when in edit mode
   });
 
   useEffect(() => {
-    if (patientSymptoms?.results) {
+    // Handle offline data population when in edit mode
+    if (editMode && offlineEntry) {
+      // Extract symptom data from offline entry
+      const payload = offlineEntry.payload as any;
+      if (payload?.requests && payload.requests.length > 0) {
+        const request = payload.requests[0];
+        if (request.body?.datapoints) {
+          updateQuestionnaireResponseCB(
+            [
+              {
+                type: "symptom",
+                value: request.body.datapoints,
+              },
+            ],
+            questionnaireResponse.question_id,
+          );
+        }
+      }
+    }
+    // Only fetch server data if not in edit mode
+    else if (patientSymptoms?.results && !editMode) {
       updateQuestionnaireResponseCB(
         [
           {
@@ -695,7 +719,7 @@ export function SymptomQuestion({
         questionnaireResponse.question_id,
       );
     }
-  }, [patientSymptoms]);
+  }, [patientSymptoms, editMode]);
 
   const handleCodeSelect = (code: Code) => {
     if (checkForDuplicateSymptom(symptoms, code, t)) {

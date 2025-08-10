@@ -74,6 +74,8 @@ interface EncounterQuestionProps {
   organizations?: string[];
   patientId?: string;
   facilityId: string;
+  editMode?: boolean;
+  offlineEntry?: any; // Add offlineEntry prop for offline data
 }
 
 export function EncounterQuestion({
@@ -84,8 +86,11 @@ export function EncounterQuestion({
   encounterId,
   patientId = "",
   facilityId,
+  editMode = false,
+  offlineEntry,
 }: EncounterQuestionProps) {
   // Fetch encounter data
+
   const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(encounterApi.get, {
@@ -94,7 +99,7 @@ export function EncounterQuestion({
     }),
     meta: { persist: true },
     networkMode: "online",
-    enabled: !!encounterId,
+    enabled: !!encounterId && !editMode, // Skip server data fetching when in edit mode
   });
   const { t } = useTranslation();
 
@@ -116,6 +121,39 @@ export function EncounterQuestion({
     facility: "",
     patient: "",
   });
+
+  // Handle offline data population when in edit mode
+  useEffect(() => {
+    if (
+      editMode &&
+      offlineEntry &&
+      questionnaireResponse.values?.length === 0
+    ) {
+      // Extract encounter data from offline entry
+      const payload = offlineEntry.payload as any;
+      if (payload?.requests && payload.requests.length > 0) {
+        const request = payload.requests[0];
+        if (request.body) {
+          // The encounter data is directly in the body, not nested in datapoints
+          const offlineEncounter = request.body;
+          if (offlineEncounter) {
+            setEncounter(offlineEncounter);
+
+            // Update questionnaire response with offline data
+            updateQuestionnaireResponseCB(
+              [
+                {
+                  type: "encounter",
+                  value: [offlineEncounter],
+                },
+              ],
+              questionnaireResponse.question_id,
+            );
+          }
+        }
+      }
+    }
+  }, [editMode, offlineEntry]);
 
   useEffect(() => {
     if (
@@ -165,6 +203,7 @@ export function EncounterQuestion({
     }
   }, [encounterData]);
 
+  // Initialize encounter from questionnaire response
   useEffect(() => {
     const formStateValue = (questionnaireResponse.values[0]?.value as any)?.[0];
     if (formStateValue) {
@@ -172,6 +211,8 @@ export function EncounterQuestion({
         ...formStateValue,
       }));
     }
+    console.log("formStateValue", formStateValue);
+    console.log("questionnaireResponse", questionnaireResponse);
   }, [questionnaireResponse]);
 
   const handleUpdateEncounter = (

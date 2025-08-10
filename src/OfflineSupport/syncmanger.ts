@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { ApiRoute, HTTPError } from "@/Utils/request/types";
+import batchApi from "@/types/base/batch/batchApi";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -33,9 +34,20 @@ export const mutationMap = {
   reschedule_appointment: scheduleApis.appointments.reschedule,
   update_appointment_status: scheduleApis.appointments.update,
   cancel_appointment: scheduleApis.appointments.cancel,
-  non_structured_questionnaire: routes.batchRequest,
-  update_encounter_questionnair: routes.batchRequest,
-  structured_questionnair: routes.batchRequest,
+  non_structured_questionnaire: batchApi.batchRequest,
+  update_encounter_questionnaire: batchApi.batchRequest,
+  structured_questionnair: batchApi.batchRequest,
+  allergy_intolerance: batchApi.batchRequest,
+  diagnosis: batchApi.batchRequest,
+  medication_request: batchApi.batchRequest,
+  medication_statement: batchApi.batchRequest,
+  symptom: batchApi.batchRequest,
+  encounter: batchApi.batchRequest,
+  appointment: batchApi.batchRequest,
+  files: batchApi.batchRequest,
+  time_of_death: batchApi.batchRequest,
+  charge_item: batchApi.batchRequest,
+  service_request: batchApi.batchRequest,
 } satisfies Record<OfflineKey, ApiRoute<any, any>>;
 
 interface SyncManagerOptions {

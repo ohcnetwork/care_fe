@@ -78,6 +78,8 @@ interface DiagnosisQuestionProps {
     note?: string,
   ) => void;
   disabled?: boolean;
+  editMode?: boolean;
+  offlineEntry?: any; // Add offlineEntry prop
 }
 
 const DIAGNOSIS_INITIAL_VALUE: Omit<DiagnosisRequest, "encounter"> = {
@@ -317,6 +319,8 @@ export function DiagnosisQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
+  editMode = false,
+  offlineEntry,
 }: DiagnosisQuestionProps) {
   const { t } = useTranslation();
 
@@ -357,11 +361,37 @@ export function DiagnosisQuestion({
     }),
     meta: { persist: true },
     networkMode: "online",
-    enabled: !isPreview,
+    enabled: !isPreview && !editMode, // Skip server data fetching when in edit mode
   });
 
   useEffect(() => {
-    if (patientDiagnoses?.results) {
+    // Handle offline data population when in edit mode
+    if (editMode && offlineEntry) {
+      // Extract diagnosis data from offline entry
+      const payload = offlineEntry.payload as any;
+      if (payload?.requests && payload.requests.length > 0) {
+        const request = payload.requests[0];
+        if (request.body?.datapoints) {
+          // Convert offline datapoints to diagnosis format
+          // const offlineDiagnoses = request.body.datapoints.map((dp: any) => ({
+          //   ...dp,
+          //   dirty: true, // Mark as dirty for offline editing
+          // }));
+
+          updateQuestionnaireResponseCB(
+            [
+              {
+                type: "diagnosis",
+                value: request.body.datapoints,
+              },
+            ],
+            questionnaireResponse.question_id,
+          );
+        }
+      }
+    }
+    // Only fetch server data if not in edit mode
+    else if (patientDiagnoses?.results && !editMode) {
       updateQuestionnaireResponseCB(
         [
           {
@@ -372,7 +402,7 @@ export function DiagnosisQuestion({
         questionnaireResponse.question_id,
       );
     }
-  }, [patientDiagnoses]);
+  }, [patientDiagnoses, editMode, offlineEntry]);
 
   const handleCodeSelect = (code: Code) => {
     if (checkForDuplicateDiagnosis(sortedDiagnoses, code, t)) {
