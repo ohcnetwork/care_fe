@@ -289,6 +289,7 @@ export default function CreateEncounterForm({
                         <SelectTrigger
                           data-cy="encounter-status"
                           ref={field.ref}
+                          className="no-underline"
                         >
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
