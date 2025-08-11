@@ -14,7 +14,7 @@
  * the appropriate props.
  *
  */
-import { ReactNode, useState } from "react";
+import { ReactNode, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -104,6 +104,7 @@ export function EntitySelectionSheet({
 }: EntitySelectionSheetProps) {
   const { t } = useTranslation();
   const [selectedEntity, setSelectedEntity] = useState<Code | null>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
 
   const handleSelect = (code: Code) => {
     setSelectedEntity(code);
@@ -157,19 +158,15 @@ export function EntitySelectionSheet({
           className="px-0 pt-2 pb-0 rounded-t-3xl sm:max-w-md sm:mx-auto [&>button:first-child]:hidden"
           side="bottom"
           onInteractOutside={(event) => {
-            const target = event.target as Node;
-            const selectContent = document.querySelector(
-              '[data-slot="select-content"]',
-            );
-            const sheetContent = document.getElementById("sheet-content");
-            // Prevent the Sheet from closing if the click is inside the select dropdown or inside the Sheet
-            if (selectContent?.contains(target)) {
-              event.preventDefault();
-            }
+            const target = event.target as Element | null;
 
-            if (sheetContent?.contains(target)) {
+            if (!target) return;
+
+            if (
+              target.closest('[data-slot="select-content"]') ||
+              sheetRef.current?.contains(target)
+            ) {
               event.preventDefault();
-              return;
             }
           }}
         >
