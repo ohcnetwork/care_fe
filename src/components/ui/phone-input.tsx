@@ -63,7 +63,12 @@ function PhoneInput({
        *
        * @param {E164Number | undefined} value - The entered value
        */
-      onChange={(value) => onChange?.(value || ("" as RPNInput.Value))}
+      onChange={(value) => {
+        if (value === undefined) {
+          return;
+        }
+        onChange?.(value || ("" as RPNInput.Value));
+      }}
       {...props}
     />
   );
