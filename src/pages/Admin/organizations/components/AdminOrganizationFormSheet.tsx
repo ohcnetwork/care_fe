@@ -38,7 +38,7 @@ import {
   OrgType,
   Organization,
   OrganizationCreate,
-  OrganizationEdit,
+  OrganizationUpdate,
 } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -119,7 +119,7 @@ export default function AdminOrganizationFormSheet({
   });
 
   const { mutate: updateOrganization, isPending: isUpdating } = useMutation({
-    mutationFn: (body: OrganizationEdit) =>
+    mutationFn: (body: OrganizationUpdate) =>
       mutate(organizationApi.update, {
         pathParams: { id: org?.id },
         body,

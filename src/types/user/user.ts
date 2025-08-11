@@ -1,40 +1,46 @@
-import { UserType } from "@/components/Users/UserFormValidations";
-
 import { GENDER_TYPES } from "@/common/constants";
 
-export type UserBase = {
+import { Organization } from "@/types/organization/organization";
+
+export type UserType =
+  | "doctor"
+  | "nurse"
+  | "staff"
+  | "volunteer"
+  | "administrator";
+export interface UserBase {
   id: string;
   first_name: string;
-  username: string;
-  email: string;
   last_name: string;
+  username: string;
+  phone_number: string;
+  prefix?: string | null;
+  suffix?: string | null;
   user_type: UserType;
+  gender: (typeof GENDER_TYPES)[number]["id"];
+}
+
+export interface UserReadMinimal extends UserBase {
   last_login: string;
   profile_picture_url: string;
-  phone_number: string;
-  gender: (typeof GENDER_TYPES)[number]["id"];
-  suffix: string | null;
-  prefix: string | null;
   mfa_enabled: boolean;
   deleted: boolean;
-};
+}
 
-export type CreateUserModel = {
-  user_type: UserType;
-  username: string;
-  password: string;
-  first_name: string;
-  last_name: string;
+export interface UserRead extends UserReadMinimal {
+  geo_organization: Organization;
+  created_by: UserReadMinimal;
   email: string;
-  phone_number: string;
-  gender: (typeof GENDER_TYPES)[number]["id"];
-  qualification?: string;
-  doctor_experience_commenced_on?: string;
-  doctor_medical_council_registration?: string;
-  geo_organization: string;
-};
+  flags: string[];
+}
 
-export type UpdateUserModel = Omit<
-  CreateUserModel,
-  "username" | "password" | "email"
->;
+// Todo: Once backend adds a proper public user read spec, add it here and update the usages where applicable
+
+export interface UserUpdate extends Omit<UserBase, "id"> {
+  geo_organization?: string;
+}
+
+export interface UserCreate extends UserUpdate {
+  password?: string;
+  email: string;
+}
