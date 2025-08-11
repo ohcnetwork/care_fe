@@ -156,23 +156,22 @@ export function EntitySelectionSheet({
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
           ref={sheetRef}
+          id="sheet-content"
           className="px-0 pt-2 pb-0 rounded-t-3xl sm:max-w-md sm:mx-auto [&>button:first-child]:hidden"
           side="bottom"
-          onInteractOutside={(event) => {
+          onPointerDownOutside={(event) => {
             const target = event.target as Element | null;
             if (!target) return;
 
-            // Dropdown / select content check
+            // If inside Radix select dropdown (portal content)
             if (target.closest('[data-slot="select-content"]')) {
               event.preventDefault();
-              event.stopPropagation();
               return;
             }
 
-            // Click inside the sheet
+            // If inside sheet content
             if (sheetRef.current?.contains(target)) {
               event.preventDefault();
-              event.stopPropagation();
             }
           }}
         >
