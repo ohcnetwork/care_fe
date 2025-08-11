@@ -14,7 +14,7 @@
  * the appropriate props.
  *
  */
-import { ReactNode, useRef, useState } from "react";
+import { ReactNode, useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -132,6 +132,46 @@ export function EntitySelectionSheet({
     setSelectedEntity(null);
   };
 
+  const handleInteractOutside = useCallback((event: Event) => {
+    const target = event.target as Element | null;
+    if (!target) return;
+
+    // Check if the interaction is inside Radix select dropdown (portal content)
+    if (
+      target.closest('[data-slot="select-content"]') ||
+      target.closest("[data-radix-select-content]")
+    ) {
+      event.preventDefault();
+      return;
+    }
+
+    // Check if the interaction is inside any other common portal content
+    const portalSelectors = [
+      "[data-radix-dropdown-menu-content]",
+      "[data-radix-popover-content]",
+      "[data-radix-tooltip-content]",
+      "[data-radix-dialog-content]",
+      "[data-radix-combobox-content]",
+      "[data-portal]",
+      ".select-portal",
+      ".dropdown-portal",
+      ".popover-portal",
+    ];
+
+    if (portalSelectors.some((selector) => target.closest(selector))) {
+      event.preventDefault();
+      return;
+    }
+
+    // Check if the interaction is inside the sheet content itself
+    if (sheetRef.current?.contains(target)) {
+      event.preventDefault();
+      return;
+    }
+
+    // Allow the sheet to close for genuine outside interactions
+  }, []);
+
   return (
     <>
       {system === "system-medication" ? (
@@ -159,21 +199,7 @@ export function EntitySelectionSheet({
           id="sheet-content"
           className="px-0 pt-2 pb-0 rounded-t-3xl sm:max-w-md sm:mx-auto [&>button:first-child]:hidden"
           side="bottom"
-          onPointerDownOutside={(event) => {
-            const target = event.target as Element | null;
-            if (!target) return;
-
-            // If inside Radix select dropdown (portal content)
-            if (target.closest('[data-slot="select-content"]')) {
-              event.preventDefault();
-              return;
-            }
-
-            // If inside sheet content
-            if (sheetRef.current?.contains(target)) {
-              event.preventDefault();
-            }
-          }}
+          onInteractOutside={handleInteractOutside}
         >
           {selectedEntity ? (
             <div className="flex flex-col h-auto min-h-[50vh] max-h-[80vh] sm:max-h-[70vh] md:max-h-[60vh]">
