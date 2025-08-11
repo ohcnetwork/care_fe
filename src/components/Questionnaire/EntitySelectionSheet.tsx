@@ -155,18 +155,29 @@ export function EntitySelectionSheet({
       )}
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
+          ref={sheetRef}
           className="px-0 pt-2 pb-0 rounded-t-3xl sm:max-w-md sm:mx-auto [&>button:first-child]:hidden"
           side="bottom"
           onInteractOutside={(event) => {
-            const target = event.target as Element | null;
+            const target = event.target as Node;
 
-            if (!target) return;
+            // Select dropdown content
+            const selectContent = document.querySelector(
+              '[data-slot="select-content"]',
+            );
 
-            if (
-              target.closest('[data-slot="select-content"]') ||
-              sheetRef.current?.contains(target)
-            ) {
+            // If click/touch is inside the dropdown
+            if (selectContent && selectContent.contains(target)) {
               event.preventDefault();
+              event.stopPropagation();
+              return;
+            }
+
+            // If click/touch is inside the sheet
+            if (sheetRef.current?.contains(target)) {
+              event.preventDefault();
+              event.stopPropagation();
+              return;
             }
           }}
         >
