@@ -160,14 +160,19 @@ export function EntitySelectionSheet({
           side="bottom"
           onInteractOutside={(event) => {
             const target = event.target as Element | null;
-
             if (!target) return;
 
-            if (
-              target.closest('[data-slot="select-content"]') ||
-              sheetRef.current?.contains(target)
-            ) {
+            // Dropdown / select content check
+            if (target.closest('[data-slot="select-content"]')) {
               event.preventDefault();
+              event.stopPropagation();
+              return;
+            }
+
+            // Click inside the sheet
+            if (sheetRef.current?.contains(target)) {
+              event.preventDefault();
+              event.stopPropagation();
             }
           }}
         >
