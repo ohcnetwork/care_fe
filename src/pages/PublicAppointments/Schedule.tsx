@@ -28,9 +28,8 @@ import { dateQueryString, formatName } from "@/Utils/utils";
 import { TokenSlotButton } from "@/pages/Appointments/components/AppointmentSlotPicker";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
-import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
+import publicAppointmentApi from "@/types/scheduling/publicAppointmentApi";
 import { Appointment, TokenSlot } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface AppointmentsProps {
   facilityId: string;
@@ -61,7 +60,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
   const { data: appointmentData } = useQuery({
     queryKey: ["appointment", tokenData?.phoneNumber],
-    queryFn: query(PublicAppointmentApi.getAppointments, {
+    queryFn: query(publicAppointmentApi.getAppointments, {
       headers: { Authorization: `Bearer ${tokenData?.token}` },
     }),
     enabled: !!appointmentId && !!tokenData?.token,
@@ -91,12 +90,9 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
   const { data: userData, error: userError } = useQuery({
     queryKey: ["user", facilityId, staffId],
-    queryFn: query(
-      scheduleApis.appointments.getPublicScheduleableFacilityUser,
-      {
-        pathParams: { facility_id: facilityId, user_id: staffId },
-      },
-    ),
+    queryFn: query(publicFacilityApi.getFacilitySchedulableUser, {
+      pathParams: { facilityId, userId: staffId },
+    }),
     enabled: !!facilityId && !!staffId,
   });
 
@@ -106,7 +102,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
   const slotsQuery = useQuery({
     queryKey: ["slots", facilityId, staffId, selectedDate],
-    queryFn: query(PublicAppointmentApi.getSlotsForDay, {
+    queryFn: query(publicAppointmentApi.getSlotsForDay, {
       body: {
         facility: facilityId,
         user: staffId,
@@ -149,7 +145,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
   const { mutate: createAppointment, isPending: isCreatingAppointment } =
     useMutation({
-      mutationFn: mutate(PublicAppointmentApi.createAppointment, {
+      mutationFn: mutate(publicAppointmentApi.createAppointment, {
         pathParams: { id: selectedSlot?.id || "" },
         headers: {
           Authorization: `Bearer ${tokenData.token}`,
@@ -171,7 +167,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
   const { mutate: cancelAppointment, isPending: isCancellingAppointment } =
     useMutation({
-      mutationFn: mutate(PublicAppointmentApi.cancelAppointment, {
+      mutationFn: mutate(publicAppointmentApi.cancelAppointment, {
         headers: {
           Authorization: `Bearer ${tokenData.token}`,
         },

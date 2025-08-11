@@ -33,7 +33,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import mutate from "@/Utils/request/mutate";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
-import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
+import publicAppointmentApi from "@/types/scheduling/publicAppointmentApi";
 import {
   Appointment,
   AppointmentFinalStatuses,
@@ -61,7 +61,7 @@ function AppointmentDialog({
     );
   };
   const { mutate: cancelAppointment, isPending } = useMutation({
-    mutationFn: mutate(PublicAppointmentApi.cancelAppointment, {
+    mutationFn: mutate(publicAppointmentApi.cancelAppointment, {
       headers: {
         Authorization: `Bearer ${tokenData?.token}`,
       },

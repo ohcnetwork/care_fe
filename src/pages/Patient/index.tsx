@@ -16,7 +16,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
+import publicAppointmentApi from "@/types/scheduling/publicAppointmentApi";
 import {
   APPOINTMENT_STATUS_COLORS,
   Appointment,
@@ -42,7 +42,7 @@ function PatientIndex() {
 
   const { data: appointmentsData, isLoading } = useQuery({
     queryKey: ["appointment", tokenData?.phoneNumber],
-    queryFn: query(PublicAppointmentApi.getAppointments, {
+    queryFn: query(publicAppointmentApi.getAppointments, {
       headers: {
         Authorization: `Bearer ${tokenData?.token}`,
       },

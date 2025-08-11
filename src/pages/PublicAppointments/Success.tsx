@@ -11,7 +11,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
+import publicAppointmentApi from "@/types/scheduling/publicAppointmentApi";
 import { getUserFromLocalStorage } from "@/types/scheduling/schedule";
 
 export function AppointmentSuccess(props: { appointmentId: string }) {
@@ -25,7 +25,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["appointment", tokenData.phoneNumber],
-    queryFn: query(PublicAppointmentApi.getAppointments, {
+    queryFn: query(publicAppointmentApi.getAppointments, {
       headers: {
         Authorization: `Bearer ${tokenData.token}`,
       },

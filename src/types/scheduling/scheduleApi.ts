@@ -160,11 +160,6 @@ export default {
       method: HttpMethod.GET,
       TRes: Type<{ users: UserReadMinimal[] }>(),
     },
-    getPublicScheduleableFacilityUser: {
-      path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
-      method: HttpMethod.GET,
-      TRes: Type<UserReadMinimal>(),
-    },
     /**
      * Get appointments across facilities
      */

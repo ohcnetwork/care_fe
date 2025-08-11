@@ -19,7 +19,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
-import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
+import publicAppointmentApi from "@/types/scheduling/publicAppointmentApi";
 import { Appointment } from "@/types/scheduling/schedule";
 
 interface PatientCardProps {
@@ -140,7 +140,7 @@ export default function PatientSelect({
   });
 
   const { mutate: createAppointment } = useMutation({
-    mutationFn: mutate(PublicAppointmentApi.createAppointment, {
+    mutationFn: mutate(publicAppointmentApi.createAppointment, {
       pathParams: { id: slotId ?? "" },
       headers: {
         Authorization: `Bearer ${tokenData.token}`,

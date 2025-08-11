@@ -33,7 +33,7 @@ import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrgani
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { PatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
-import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
+import publicAppointmentApi from "@/types/scheduling/publicAppointmentApi";
 import { Appointment } from "@/types/scheduling/schedule";
 
 type PatientRegistrationProps = {
@@ -111,7 +111,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
 
   const { mutate: createAppointment, isPending: isCreatingAppointment } =
     useMutation({
-      mutationFn: mutate(PublicAppointmentApi.createAppointment, {
+      mutationFn: mutate(publicAppointmentApi.createAppointment, {
         pathParams: { id: slotId },
         headers: {
           Authorization: `Bearer ${tokenData.token}`,
