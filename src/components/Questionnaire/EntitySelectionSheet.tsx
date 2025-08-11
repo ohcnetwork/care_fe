@@ -160,22 +160,25 @@ export function EntitySelectionSheet({
           className="px-0 pt-2 pb-0 rounded-t-3xl sm:max-w-md sm:mx-auto [&>button:first-child]:hidden"
           side="bottom"
           onInteractOutside={(event) => {
-            const target = event.target as Element | null;
-            if (!target) return;
-
-            // Dropdown / select content check
+            const target = event.target as EventTarget | null;
+            if (!(target instanceof Element)) return;
+            // 1) If the tap/click is inside any portal content (select/combobox/popover), don't close the Sheet
             if (
-              target.closest('[role="combobox"]') ||
-              target.closest('[data-slot="select-trigger"]') ||
-              target.closest('[data-slot="popover-trigger"]')
+              target.closest(
+                '[data-slot="select-content"], [data-slot="combobox-content"], [data-slot="popover-content"]',
+              )
             ) {
               event.preventDefault();
               return;
             }
-            // Click inside the sheet
-            if (sheetRef.current?.contains(target)) {
+            // 2) If any of those portal contents are currently open, block the Sheet from closing
+            //    so overlay/back press closes the inner dropdown/popover first.
+            if (
+              document.querySelector(
+                '[data-slot="select-content"][data-state="open"], [data-slot="combobox-content"][data-state="open"], [data-slot="popover-content"][data-state="open"]',
+              )
+            ) {
               event.preventDefault();
-              return;
             }
           }}
         >
