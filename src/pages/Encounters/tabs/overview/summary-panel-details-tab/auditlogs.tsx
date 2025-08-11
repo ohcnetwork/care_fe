@@ -1,10 +1,13 @@
 import { useTranslation } from "react-i18next";
 
 import { formatDateTime, formatName } from "@/Utils/utils";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
-export const AuditLogs = ({ encounter }: { encounter: EncounterRead }) => {
+export const AuditLogs = () => {
   const { t } = useTranslation();
+  const { selectedEncounter: encounter } = useEncounter();
+
+  if (!encounter) return null;
 
   return (
     <div className="p-2">

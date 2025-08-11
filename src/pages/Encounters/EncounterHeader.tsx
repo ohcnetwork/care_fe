@@ -61,7 +61,13 @@ export function EncounterHeader() {
               <span className="text-sm font-medium text-gray-700">
                 {t("patient_id_abha")}:
               </span>
-              <div className="text-sm text-gray-950 font-semibold">"--"</div>
+              <div className="text-sm text-gray-950 font-semibold">
+                {patient.instance_identifiers.length > 0
+                  ? patient.instance_identifiers
+                      .map((identifier) => identifier.value)
+                      .join(", ")
+                  : "--"}
+              </div>
             </div>
             <div>
               <span className="text-sm font-medium text-gray-700">

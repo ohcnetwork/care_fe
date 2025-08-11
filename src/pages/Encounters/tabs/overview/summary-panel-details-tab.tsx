@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Signal, SquarePen } from "lucide-react";
 import { Link } from "raviger";
@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 import { Avatar } from "@/components/Common/Avatar";
-import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import query from "@/Utils/request/query";
 import { StatusBadge } from "@/pages/Encounters/EncounterProperties";
@@ -27,13 +26,13 @@ import {
   ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_PRIORITY_COLORS,
 } from "@/types/emr/encounter/encounter";
-import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 import { Account } from "./summary-panel-details-tab/account";
 import { AuditLogs } from "./summary-panel-details-tab/auditlogs";
 import { DepartmentsAndTeams } from "./summary-panel-details-tab/department-and-team";
 import { DischargeDetails } from "./summary-panel-details-tab/discharge-summary";
-import { EmptyState } from "./summary-panel-details-tab/empty-state";
+import { EncounterDetails } from "./summary-panel-details-tab/encounter-details";
+import { EncounterTags } from "./summary-panel-details-tab/encounter-tags";
 import { Questionnaires } from "./summary-panel-details-tab/forms";
 import { HospitalizationDetails } from "./summary-panel-details-tab/hospitalisation";
 import { Locations } from "./summary-panel-details-tab/locations";
@@ -48,7 +47,6 @@ export const SummaryPanelDetailTab = () => {
     facilityId,
     patient,
   } = useEncounter();
-  const queryClient = useQueryClient();
 
   const { data: account } = useQuery({
     queryKey: ["accounts", patientId],
@@ -66,6 +64,7 @@ export const SummaryPanelDetailTab = () => {
 
   if (!encounter) return null;
   const EncounterClassIcon = ENCOUNTER_CLASS_ICONS[encounter.encounter_class];
+  console.log("canEdit", canEdit);
 
   return (
     <div>
@@ -326,176 +325,16 @@ export const SummaryPanelDetailTab = () => {
         </Button>
       </div>
       <div className="@xs:hidden xl:flex flex-col gap-4">
-        <div className="flex flex-wrap gap-2 border bg-gray-100 border-gray-200 rounded-md p-1">
-          <div className="flex items-center justify-between w-full p-2 text-gray-950">
-            <span className="font-semibold ">{t("encounter_details")}</span>
-            <Button variant="ghost" size="xs" asChild>
-              <Link
-                href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter`}
-              >
-                <SquarePen
-                  className="size-4 text-gray-950 cursor-pointer"
-                  strokeWidth={1.5}
-                />
-              </Link>
-            </Button>
-          </div>
-          <div className="flex flex-wrap gap-2 justify-between bg-white w-full p-2 rounded-md shadow">
-            <div className="flex flex-col gap-1">
-              <span className="text-sm font-medium">{t("status")}: </span>
-              <div>
-                <StatusBadge encounter={encounter} />
-              </div>
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-sm font-medium">
-                {t("encounter_class")}:{" "}
-              </span>
-              <div>
-                <Badge
-                  variant={ENCOUNTER_CLASSES_COLORS[encounter.encounter_class]}
-                  size="sm"
-                >
-                  <EncounterClassIcon className="size-3" />
-                  <span className="whitespace-nowrap">
-                    {t(`encounter_class__${encounter.encounter_class}`)}
-                  </span>
-                </Badge>
-              </div>
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-sm font-medium">{t("priority")}: </span>
-              <div>
-                <Badge
-                  variant={ENCOUNTER_PRIORITY_COLORS[encounter.priority]}
-                  size="sm"
-                >
-                  <span className="whitespace-nowrap">
-                    {t(`encounter_priority__${encounter.priority}`)}
-                  </span>
-                </Badge>
-              </div>
-            </div>
-            <Separator className="my-2" />
-            <div className="hidden md:flex flex-col gap-1">
-              <div>
-                <span className="text-sm font-medium text-gray-700">
-                  {t("start_date")}:
-                </span>
-                <div className="text-sm text-gray-950 font-semibold">
-                  {encounter.period.start ? (
-                    <>
-                      {format(encounter.period.start, "dd MMM yyyy")}
-                      <div className="text-gray-600">
-                        {format(encounter.period.start, "hh:mma")}
-                      </div>
-                    </>
-                  ) : (
-                    <span>--</span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="hidden md:flex flex-col gap-1">
-              <div>
-                <span className="text-sm font-medium text-gray-700">
-                  {t("end_date")}:
-                </span>
-                <div className="text-sm text-gray-950 font-semibold">
-                  {encounter.period.end ? (
-                    <>
-                      {format(encounter.period.end, "dd MMM yyyy")},
-                      <div className="text-gray-600">
-                        {format(encounter.period.end, "hh:mma")}
-                      </div>
-                    </>
-                  ) : (
-                    <span>--({t("ongoing")})</span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-          <Button variant="outline" className="w-full" asChild>
-            <Link
-              href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter`}
-            >
-              <SquarePen className="size-3 text-gray-950" strokeWidth={1.5} />
-              <span className="text-gray-950">{t("update_details")}</span>
-            </Link>
-          </Button>
-        </div>
-        <div className="bg-gray-100 rounded-md border border-gray-200 p-1">
-          <div className="flex items-center justify-between w-full">
-            <span className="font-semibold text-gray-950 p-2">
-              {t("encounter_tags")}
-            </span>
-            {canEdit && (
-              <TagAssignmentSheet
-                entityType="encounter"
-                entityId={encounter.id}
-                currentTags={encounter.tags}
-                onUpdate={() => {
-                  queryClient.invalidateQueries({
-                    queryKey: ["encounter", encounter.id],
-                  });
-                }}
-                trigger={
-                  <Button variant="ghost" size="xs">
-                    <SquarePen
-                      className="size-3 text-gray-950"
-                      strokeWidth={1.5}
-                    />
-                  </Button>
-                }
-                canWrite={canEdit}
-              />
-            )}
-          </div>
-          <div className="flex flex-wrap bg-white w-full p-2 rounded-md gap-2 shadow">
-            {encounter.tags.length > 0 ? (
-              <>
-                {encounter.tags.map((tag) => (
-                  <Badge
-                    key={tag.id}
-                    variant="secondary"
-                    className="capitalize"
-                    title={tag.description}
-                  >
-                    {getTagHierarchyDisplay(tag)}
-                  </Badge>
-                ))}
-              </>
-            ) : (
-              <EmptyState message={t("no_tags")} />
-            )}
-          </div>
-        </div>
-        <div className="bg-gray-100 rounded-md p-2 border border-gray-200">
-          {canEdit && <Questionnaires encounter={encounter} />}
-        </div>
-        <div className="bg-gray-100 rounded-md w-full border border-gray-200">
-          <Locations canEdit={canEdit} encounter={encounter} />
-        </div>
-        <div className="bg-gray-100 rounded-md w-full border border-gray-200">
-          <ManageCareTeam />
-        </div>
-        <div className="bg-gray-100 rounded-md w-full border border-gray-200">
-          <DepartmentsAndTeams canEdit={canEdit} encounter={encounter} />
-        </div>
-        <div className="bg-gray-100 rounded-md w-full border border-gray-200">
-          <DischargeDetails encounter={encounter} />
-        </div>
-        <div className="bg-gray-100 rounded-md w-full border border-gray-200">
-          <HospitalizationDetails encounter={encounter} />
-        </div>
-        <div className="bg-gray-100 rounded-md w-full border border-gray-200">
-          <Account encounter={encounter} canEdit={canEdit} />
-        </div>
-        <div>
-          <AuditLogs encounter={encounter} />
-        </div>
+        <EncounterDetails />
+        <EncounterTags />
+        {canEdit && <Questionnaires />}
+        <Locations />
+        <ManageCareTeam />
+        <Account />
+        <DepartmentsAndTeams />
+        <HospitalizationDetails />
+        <DischargeDetails />
+        <AuditLogs />
       </div>
     </div>
   );

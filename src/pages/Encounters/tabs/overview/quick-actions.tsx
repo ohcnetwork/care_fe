@@ -5,8 +5,15 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+
 export const QuickActions = (props: React.ComponentProps<"div">) => {
   const { t } = useTranslation();
+  const {
+    selectedEncounterId: encounterId,
+    facilityId,
+    patientId,
+  } = useEncounter();
 
   return (
     <div {...props} className={cn("flex gap-3", props.className)}>
@@ -14,25 +21,25 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
         icon={<PlusIcon className="size-8" />}
         title={t("allergy")}
         shortcut="A"
-        href="/encounters/allergy"
+        href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/allergy_intolerance`}
       />
       <QuickAction
         icon={<PlusIcon className="size-8" />}
-        title={t("allergy")}
-        shortcut="A"
-        href="/encounters/allergy"
+        title={t("symptoms")}
+        shortcut="S"
+        href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/symptom`}
       />
       <QuickAction
         icon={<PlusIcon className="size-8" />}
-        title={t("allergy")}
-        shortcut="A"
-        href="/encounters/allergy"
+        title={t("diagnosis")}
+        shortcut="D"
+        href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/diagnosis`}
       />
       <QuickAction
         icon={<PlusIcon className="size-8" />}
-        title={t("allergy")}
-        shortcut="A"
-        href="/encounters/allergy"
+        title={t("forms")}
+        shortcut="F"
+        href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
       />
     </div>
   );
