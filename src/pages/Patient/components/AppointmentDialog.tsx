@@ -61,7 +61,7 @@ function AppointmentDialog({
     );
   };
   const { mutate: cancelAppointment, isPending } = useMutation({
-    mutationFn: mutate(publicAppointmentApi.cancelAppointment, {
+    mutationFn: mutate(publicAppointmentApi.cancel, {
       headers: {
         Authorization: `Bearer ${tokenData?.token}`,
       },

@@ -42,7 +42,7 @@ function PatientIndex() {
 
   const { data: appointmentsData, isLoading } = useQuery({
     queryKey: ["appointment", tokenData?.phoneNumber],
-    queryFn: query(publicAppointmentApi.getAppointments, {
+    queryFn: query(publicAppointmentApi.list, {
       headers: {
         Authorization: `Bearer ${tokenData?.token}`,
       },

@@ -2,6 +2,7 @@ import { HttpMethod, Type } from "@/Utils/request/api";
 import {
   AppointmentCreatePublicRequest,
   AppointmentRead,
+  PublicSlotsForDayRequest,
   TokenSlot,
 } from "@/types/scheduling/schedule";
 
@@ -10,20 +11,20 @@ export default {
     path: "/api/v1/otp/slots/get_slots_for_day/",
     method: HttpMethod.POST,
     TRes: Type<{ results: TokenSlot[] }>(),
-    TBody: Type<{ facility: string; user: string; day: string }>(),
+    TBody: Type<PublicSlotsForDayRequest>(),
   },
-  getAppointments: {
+  list: {
     path: "/api/v1/otp/slots/get_appointments/",
     method: HttpMethod.GET,
     TRes: Type<{ results: AppointmentRead[] }>(),
   },
-  createAppointment: {
-    path: "/api/v1/otp/slots/{id}/create_appointment/",
+  create: {
+    path: "/api/v1/otp/slots/{slotId}/create_appointment/",
     method: HttpMethod.POST,
     TRes: Type<AppointmentRead>(),
     TBody: Type<AppointmentCreatePublicRequest>(),
   },
-  cancelAppointment: {
+  cancel: {
     path: "/api/v1/otp/slots/cancel_appointment/",
     method: HttpMethod.POST,
     TRes: Type<AppointmentRead>(),

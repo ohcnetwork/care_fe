@@ -60,7 +60,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
   const { data: appointmentData } = useQuery({
     queryKey: ["appointment", tokenData?.phoneNumber],
-    queryFn: query(publicAppointmentApi.getAppointments, {
+    queryFn: query(publicAppointmentApi.list, {
       headers: { Authorization: `Bearer ${tokenData?.token}` },
     }),
     enabled: !!appointmentId && !!tokenData?.token,
@@ -145,8 +145,8 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
   const { mutate: createAppointment, isPending: isCreatingAppointment } =
     useMutation({
-      mutationFn: mutate(publicAppointmentApi.createAppointment, {
-        pathParams: { id: selectedSlot?.id || "" },
+      mutationFn: mutate(publicAppointmentApi.create, {
+        pathParams: { slotId: selectedSlot?.id || "" },
         headers: {
           Authorization: `Bearer ${tokenData.token}`,
         },
@@ -167,7 +167,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
   const { mutate: cancelAppointment, isPending: isCancellingAppointment } =
     useMutation({
-      mutationFn: mutate(publicAppointmentApi.cancelAppointment, {
+      mutationFn: mutate(publicAppointmentApi.cancel, {
         headers: {
           Authorization: `Bearer ${tokenData.token}`,
         },

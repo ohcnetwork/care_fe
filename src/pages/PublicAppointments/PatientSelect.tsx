@@ -140,8 +140,8 @@ export default function PatientSelect({
   });
 
   const { mutate: createAppointment } = useMutation({
-    mutationFn: mutate(publicAppointmentApi.createAppointment, {
-      pathParams: { id: slotId ?? "" },
+    mutationFn: mutate(publicAppointmentApi.create, {
+      pathParams: { slotId },
       headers: {
         Authorization: `Bearer ${tokenData.token}`,
       },

@@ -25,7 +25,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["appointment", tokenData.phoneNumber],
-    queryFn: query(publicAppointmentApi.getAppointments, {
+    queryFn: query(publicAppointmentApi.list, {
       headers: {
         Authorization: `Bearer ${tokenData.token}`,
       },

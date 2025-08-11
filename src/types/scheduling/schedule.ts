@@ -216,6 +216,12 @@ export interface AppointmentRescheduleRequest {
   tags: string[];
 }
 
+export interface PublicSlotsForDayRequest {
+  facility: string;
+  user: string;
+  day: string;
+}
+
 export const getUserFromLocalStorage = (): UserReadMinimal => {
   return JSON.parse(localStorage.getItem("user") ?? "{}");
 };
