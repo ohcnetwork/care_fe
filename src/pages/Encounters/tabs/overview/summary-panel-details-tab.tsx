@@ -64,7 +64,6 @@ export const SummaryPanelDetailTab = () => {
 
   if (!encounter) return null;
   const EncounterClassIcon = ENCOUNTER_CLASS_ICONS[encounter.encounter_class];
-  console.log("canEdit", canEdit);
 
   return (
     <div>
