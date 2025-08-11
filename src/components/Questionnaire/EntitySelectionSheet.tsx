@@ -14,7 +14,7 @@
  * the appropriate props.
  *
  */
-import { ReactNode, useCallback, useRef, useState } from "react";
+import { ReactNode, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -132,69 +132,6 @@ export function EntitySelectionSheet({
     setSelectedEntity(null);
   };
 
-  const handleInteractOutside = useCallback((event: Event) => {
-    const target = event.target as Element | null;
-    if (!target) return;
-
-    // Check if the interaction is inside Radix select dropdown (portal content)
-    // This handles both the old and new Radix UI implementations
-    if (
-      target.closest('[data-slot="select-content"]') ||
-      target.closest("[data-radix-select-content]") ||
-      target.closest('[role="listbox"]') ||
-      target.closest('[role="option"]')
-    ) {
-      event.preventDefault();
-      return;
-    }
-
-    // Check if the interaction is inside any other Radix portal content
-    const radixPortalSelectors = [
-      "[data-radix-dropdown-menu-content]",
-      "[data-radix-popover-content]",
-      "[data-radix-tooltip-content]",
-      "[data-radix-dialog-content]",
-      "[data-radix-combobox-content]",
-      "[data-radix-select-viewport]",
-      "[data-radix-popper-content-wrapper]",
-    ];
-
-    if (radixPortalSelectors.some((selector) => target.closest(selector))) {
-      event.preventDefault();
-      return;
-    }
-
-    // Check for popover content (like date pickers)
-    if (
-      target.closest('[data-slot="popover-content"]') ||
-      target.closest('[aria-haspopup="dialog"]') ||
-      target.closest(".react-datepicker") ||
-      target.closest(".DayPicker")
-    ) {
-      event.preventDefault();
-      return;
-    }
-
-    // Additional check: if clicking on a combobox trigger or select trigger,
-    // prevent closing to allow the dropdown to open
-    if (
-      target.closest('[role="combobox"]') ||
-      target.closest('[data-slot="select-trigger"]') ||
-      target.closest('[data-slot="popover-trigger"]')
-    ) {
-      event.preventDefault();
-      return;
-    }
-
-    // Check if the interaction is inside the sheet content itself
-    if (sheetRef.current?.contains(target)) {
-      event.preventDefault();
-      return;
-    }
-
-    // Allow the sheet to close for genuine outside interactions
-  }, []);
-
   return (
     <>
       {system === "system-medication" ? (
@@ -222,7 +159,25 @@ export function EntitySelectionSheet({
           id="sheet-content"
           className="px-0 pt-2 pb-0 rounded-t-3xl sm:max-w-md sm:mx-auto [&>button:first-child]:hidden"
           side="bottom"
-          onInteractOutside={handleInteractOutside}
+          onInteractOutside={(event) => {
+            const target = event.target as Element | null;
+            if (!target) return;
+
+            // Dropdown / select content check
+            if (
+              target.closest('[role="combobox"]') ||
+              target.closest('[data-slot="select-trigger"]') ||
+              target.closest('[data-slot="popover-trigger"]')
+            ) {
+              event.preventDefault();
+              return;
+            }
+            // Click inside the sheet
+            if (sheetRef.current?.contains(target)) {
+              event.preventDefault();
+              return;
+            }
+          }}
         >
           {selectedEntity ? (
             <div className="flex flex-col h-auto min-h-[50vh] max-h-[80vh] sm:max-h-[70vh] md:max-h-[60vh]">
