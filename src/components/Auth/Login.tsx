@@ -125,6 +125,7 @@ const Login = (props: LoginProps) => {
 
   // Send OTP Mutation
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     mutationFn: mutate(routes.otp.sendOtp),
     onSuccess: () => {
       setIsOtpSent(true);
@@ -145,6 +146,7 @@ const Login = (props: LoginProps) => {
   // Verify OTP Mutation
   const { mutate: verifyOtp, isPending: verifyOtpPending } = useMutation({
     mutationFn: async (data: OtpLoginData) => {
+      // eslint-disable-next-line @typescript-eslint/no-deprecated
       const response = await mutate(routes.otp.loginByOtp, { silent: true })(
         data,
       );
@@ -188,6 +190,7 @@ const Login = (props: LoginProps) => {
 
   // Forgot Password Mutation
   const { mutate: submitForgetPassword } = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     mutationFn: mutate(routes.forgotPassword),
     onSuccess: () => {
       toast.success(t("password_sent"));
@@ -212,28 +215,39 @@ const Login = (props: LoginProps) => {
 
   const validateData = () => {
     let hasError = false;
-    const err = Object.assign({}, errors);
+    const err: Record<string, string> = { ...errors };
+    const trimmedForm = { ...form };
+
     Object.keys(form).forEach((key) => {
-      if (
-        typeof form[key] === "string" &&
-        key !== "password" &&
-        key !== "confirm"
-      ) {
-        if (!form[key].match(/\w/)) {
+      const value = form[key as keyof typeof form];
+      if (typeof value === "string") {
+        const trimmedValue = value.trim();
+        trimmedForm[key as keyof typeof form] = trimmedValue as never;
+        if (!trimmedValue) {
           hasError = true;
           err[key] = "field_required";
         }
-      }
-      if (!form[key]) {
+      } else if (!value) {
         hasError = true;
         err[key] = "field_required";
       }
     });
+
+    if (form.username.trim() !== form.username) {
+      hasError = true;
+      err.username = t("username_trim_error");
+    }
+    if (form.password.trim() !== form.password) {
+      hasError = true;
+      err.password = t("password_trim_error");
+    }
+
     if (hasError) {
       setErrors(err);
       return false;
     }
-    return form;
+
+    return trimmedForm;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
