@@ -137,28 +137,51 @@ export function EntitySelectionSheet({
     if (!target) return;
 
     // Check if the interaction is inside Radix select dropdown (portal content)
+    // This handles both the old and new Radix UI implementations
     if (
       target.closest('[data-slot="select-content"]') ||
-      target.closest("[data-radix-select-content]")
+      target.closest("[data-radix-select-content]") ||
+      target.closest('[role="listbox"]') ||
+      target.closest('[role="option"]')
     ) {
       event.preventDefault();
       return;
     }
 
-    // Check if the interaction is inside any other common portal content
-    const portalSelectors = [
+    // Check if the interaction is inside any other Radix portal content
+    const radixPortalSelectors = [
       "[data-radix-dropdown-menu-content]",
       "[data-radix-popover-content]",
       "[data-radix-tooltip-content]",
       "[data-radix-dialog-content]",
       "[data-radix-combobox-content]",
-      "[data-portal]",
-      ".select-portal",
-      ".dropdown-portal",
-      ".popover-portal",
+      "[data-radix-select-viewport]",
+      "[data-radix-popper-content-wrapper]",
     ];
 
-    if (portalSelectors.some((selector) => target.closest(selector))) {
+    if (radixPortalSelectors.some((selector) => target.closest(selector))) {
+      event.preventDefault();
+      return;
+    }
+
+    // Check for popover content (like date pickers)
+    if (
+      target.closest('[data-slot="popover-content"]') ||
+      target.closest('[aria-haspopup="dialog"]') ||
+      target.closest(".react-datepicker") ||
+      target.closest(".DayPicker")
+    ) {
+      event.preventDefault();
+      return;
+    }
+
+    // Additional check: if clicking on a combobox trigger or select trigger,
+    // prevent closing to allow the dropdown to open
+    if (
+      target.closest('[role="combobox"]') ||
+      target.closest('[data-slot="select-trigger"]') ||
+      target.closest('[data-slot="popover-trigger"]')
+    ) {
       event.preventDefault();
       return;
     }
