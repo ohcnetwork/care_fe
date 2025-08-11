@@ -1042,7 +1042,9 @@ function AppointmentRow(props: {
     if (selectedStatuses.length === 0) {
       return statusGroup.statuses.join(",");
     }
-    return selectedStatuses.join(",");
+    return selectedStatuses.length > 0
+      ? selectedStatuses.join(",")
+      : statusGroup.statuses.join(",");
   };
 
   const { data, isLoading } = useQuery({
@@ -1126,14 +1128,14 @@ function AppointmentRow(props: {
                   <Badge
                     key={status}
                     variant="outline"
-                    onClick={() => toggleStatus(status)}
-                    className="bg-white cursor-pointer"
+                    className="bg-white flex items-center gap-1"
                   >
                     {t(status)}
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="size-4 -mr-1 ml-1"
+                      className="size-4 -mr-1 ml-1 cursor-pointer"
+                      onClick={() => toggleStatus(status)}
                     >
                       <CareIcon icon="l-times" className="size-3" />
                     </Button>
