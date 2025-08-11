@@ -101,7 +101,6 @@ import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import {
   APPOINTMENT_STATUS_COLORS,
-  Appointment,
   AppointmentRead,
   AppointmentStatus,
   TokenSlot,
@@ -1142,7 +1141,7 @@ function AppointmentRow(props: {
   );
 }
 
-function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
+function AppointmentRowItem({ appointment }: { appointment: AppointmentRead }) {
   const { patient } = appointment;
   const { t } = useTranslation();
 

@@ -72,7 +72,6 @@ import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityRead } from "@/types/facility/facility";
 import {
   APPOINTMENT_STATUS_COLORS,
-  Appointment,
   AppointmentFinalStatuses,
   AppointmentRead,
   AppointmentUpdateRequest,
@@ -97,7 +96,7 @@ export default function AppointmentDetail(props: Props) {
 
   const { data: appointment } = useQuery({
     queryKey: ["appointment", props.appointmentId],
-    queryFn: query(scheduleApis.appointments.retrieve, {
+    queryFn: query(scheduleApis.appointments.get, {
       pathParams: {
         facilityId,
         id: props.appointmentId,
@@ -139,7 +138,7 @@ export default function AppointmentDetail(props: Props) {
   }, [isFacilityLoading, facility, canViewAppointments, facilityId]);
 
   const { mutate: updateAppointment, isPending: isUpdating } = useMutation<
-    Appointment,
+    AppointmentRead,
     unknown,
     AppointmentUpdateRequest
   >({
@@ -193,7 +192,7 @@ export default function AppointmentDetail(props: Props) {
                     "appointment-token-card",
                     `${patient.name}'s Appointment.png`,
                   );
-                  toast.success("Appointment card has been saved!");
+                  toast.success(t("appointment_card_saved"));
                 }}
               >
                 <DownloadIcon className="size-4 mr-2" />
@@ -497,7 +496,7 @@ const AppointmentActions = ({
       mutationFn: mutate(scheduleApis.appointments.reschedule, {
         pathParams: { facilityId, id: appointment.id },
       }),
-      onSuccess: (newAppointment: Appointment) => {
+      onSuccess: (newAppointment: AppointmentRead) => {
         toast.success(t("appointment_rescheduled"));
         queryClient.invalidateQueries({
           queryKey: ["appointment", appointment.id],

@@ -27,7 +27,7 @@ import {
   useAvailabilityHeatmap,
 } from "@/pages/Appointments/utils";
 import {
-  Appointment,
+  AppointmentRead,
   GetSlotsForDayResponse,
   TokenSlot,
 } from "@/types/scheduling/schedule";
@@ -39,7 +39,7 @@ interface AppointmentSlotPickerProps {
   onSlotSelect: (slotId: string | undefined) => void;
   selectedSlotId?: string;
   onSlotDetailsChange?: (slot: TokenSlot) => void;
-  currentAppointment?: Appointment;
+  currentAppointment?: AppointmentRead;
 }
 
 export function AppointmentSlotPicker({

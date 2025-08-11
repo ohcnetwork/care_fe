@@ -83,12 +83,12 @@ export default function BookAppointment({ patientId }: Props) {
         note: reason,
         tags: selectedTags.map((tag) => tag.id),
       });
-      toast.success("Appointment created successfully");
+      toast.success(t("appointment_created_successfully"));
       navigate(
         `/facility/${facilityId}/patient/${patientId}/appointments/${data.id}`,
       );
     } catch {
-      toast.error("Failed to create appointment");
+      toast.error(t("failed_to_create_appointment"));
     }
   };
 

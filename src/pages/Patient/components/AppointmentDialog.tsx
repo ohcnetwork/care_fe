@@ -35,8 +35,8 @@ import { formatName, formatPatientAge } from "@/Utils/utils";
 import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import publicAppointmentApi from "@/types/scheduling/publicAppointmentApi";
 import {
-  Appointment,
   AppointmentFinalStatuses,
+  AppointmentRead,
 } from "@/types/scheduling/schedule";
 
 function AppointmentDialog({
@@ -45,7 +45,7 @@ function AppointmentDialog({
   onOpenChange,
   setAppointmentDialogOpen,
 }: {
-  appointment: Appointment | undefined;
+  appointment: AppointmentRead | undefined;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   setAppointmentDialogOpen: Dispatch<SetStateAction<boolean>>;
@@ -55,7 +55,7 @@ function AppointmentDialog({
   const patient = usePatientContext();
   const tokenData = patient?.tokenData;
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
-  const handleRescheduleAppointment = (appointment: Appointment) => {
+  const handleRescheduleAppointment = (appointment: AppointmentRead) => {
     navigate(
       `/facility/${appointment.facility.id}/appointments/${appointment.user.id}/reschedule/${appointment.id}`,
     );

@@ -8,11 +8,11 @@ import { formatName, formatPatientAge } from "@/Utils/utils";
 import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
 import { FacilityRead } from "@/types/facility/facility";
-import { Appointment } from "@/types/scheduling/schedule";
+import { AppointmentRead } from "@/types/scheduling/schedule";
 
 interface Props {
   id?: string;
-  appointment: Appointment;
+  appointment: AppointmentRead;
   facility: FacilityRead;
 }
 

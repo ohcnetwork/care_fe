@@ -20,7 +20,7 @@ import query from "@/Utils/request/query";
 import { PatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import publicAppointmentApi from "@/types/scheduling/publicAppointmentApi";
-import { Appointment } from "@/types/scheduling/schedule";
+import { AppointmentRead } from "@/types/scheduling/schedule";
 
 interface PatientCardProps {
   patient: PatientRead;
@@ -146,7 +146,7 @@ export default function PatientSelect({
         Authorization: `Bearer ${tokenData.token}`,
       },
     }),
-    onSuccess: (data: Appointment) => {
+    onSuccess: (data: AppointmentRead) => {
       toast.success(t("appointment_created_success"));
       queryClient.invalidateQueries({
         queryKey: [

@@ -1,3 +1,6 @@
+import { BloodGroupChoices, GenderChoices } from "@/types/emr/patient/patient";
+import { Organization } from "@/types/organization/organization";
+
 export interface TokenData {
   token: string;
   phoneNumber: string;
@@ -36,4 +39,18 @@ export interface MFALoginRequest {
 
 export interface MFAAuthenticationToken {
   temp_token: string;
+}
+
+export interface PatientOTPRead {
+  id: string;
+  name: string;
+  gender: GenderChoices;
+  phone_number: string;
+  emergency_phone_number: string;
+  address: string;
+  pincode: number;
+  date_of_birth: string;
+  year_of_birth: number;
+  geo_organization: Organization;
+  blood_group: BloodGroupChoices;
 }

@@ -34,7 +34,7 @@ import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { PatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import publicAppointmentApi from "@/types/scheduling/publicAppointmentApi";
-import { Appointment } from "@/types/scheduling/schedule";
+import { AppointmentRead } from "@/types/scheduling/schedule";
 
 type PatientRegistrationProps = {
   facilityId: string;
@@ -117,7 +117,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
           Authorization: `Bearer ${tokenData.token}`,
         },
       }),
-      onSuccess: (data: Appointment) => {
+      onSuccess: (data: AppointmentRead) => {
         toast.success(t("appointment_created_success"));
         queryClient.invalidateQueries({
           queryKey: [

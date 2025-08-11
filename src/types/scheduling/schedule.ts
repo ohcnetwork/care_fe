@@ -3,7 +3,7 @@ import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
 import { Badge } from "@/components/ui/badge";
 
 import { Time } from "@/Utils/types";
-import { PatientRead } from "@/types/emr/patient/patient";
+import { PatientOTPRead } from "@/types/auth/otp";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { UserReadMinimal } from "@/types/user/user";
@@ -162,23 +162,24 @@ export type AppointmentCancelledStatus =
 
 export type AppointmentStatus = (typeof AppointmentStatuses)[number];
 
-export interface Appointment {
+export interface AppointmentBase {
   id: string;
   token_slot: TokenSlot;
-  patient: PatientRead;
+  patient: PatientOTPRead;
   booked_on: string;
-  status: AppointmentNonCancelledStatus;
+  status: AppointmentStatus;
   note: string;
   user: UserReadMinimal;
   booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
   facility: FacilityBareMinimum;
 }
 
-export interface AppointmentRead extends Appointment {
+export interface AppointmentRead extends AppointmentBase {
   tags: TagConfig[];
-  updated_by: UserReadMinimal | null;
-  created_by: UserReadMinimal;
+  updated_by?: UserReadMinimal | null;
+  created_by?: UserReadMinimal | null;
   modified_date: string;
+  created_date: string;
 }
 
 export interface AppointmentCreateRequest {
@@ -193,7 +194,7 @@ export interface AppointmentCreatePublicRequest {
 }
 
 export interface AppointmentUpdateRequest {
-  status: Appointment["status"];
+  status: AppointmentStatus;
   note: string;
 }
 
@@ -204,7 +205,7 @@ export interface CreateAppointmentQuestion {
 }
 
 export interface AppointmentCancelRequest {
-  reason: "cancelled" | "entered_in_error";
+  reason: AppointmentCancelledStatus;
   note?: string;
 }
 

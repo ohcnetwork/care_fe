@@ -9,7 +9,7 @@ import {
 
 import { Time } from "@/Utils/types";
 import {
-  Appointment,
+  AppointmentRead,
   ScheduleAvailability,
   ScheduleException,
 } from "@/types/scheduling/schedule";
@@ -153,7 +153,7 @@ export const filterAvailabilitiesByDayOfWeek = (
  * TODO: Remove this once we have token number generation system.
  * This is a temporary function to generate a fake token number for an appointment.
  */
-export const getFakeTokenNumber = (appointment: Appointment) => {
+export const getFakeTokenNumber = (appointment: AppointmentRead) => {
   // Convert UUID to a number by summing char codes
   const hash = appointment.id
     .split("")

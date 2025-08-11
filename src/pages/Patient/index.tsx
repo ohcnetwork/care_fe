@@ -19,7 +19,7 @@ import { formatName } from "@/Utils/utils";
 import publicAppointmentApi from "@/types/scheduling/publicAppointmentApi";
 import {
   APPOINTMENT_STATUS_COLORS,
-  Appointment,
+  AppointmentRead,
 } from "@/types/scheduling/schedule";
 
 import AppointmentDialog from "./components/AppointmentDialog";
@@ -28,7 +28,7 @@ function PatientIndex() {
   const { t } = useTranslation();
 
   const [selectedAppointment, setSelectedAppointment] = useState<
-    Appointment | undefined
+    AppointmentRead | undefined
   >();
   const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
 
@@ -81,7 +81,7 @@ function PatientIndex() {
     dayjs().isBefore(dayjs(appointment.token_slot.start_datetime)),
   );
 
-  const getAppointmentCard = (appointment: Appointment) => {
+  const getAppointmentCard = (appointment: AppointmentRead) => {
     const appointmentTime = dayjs(appointment.token_slot.start_datetime);
     const appointmentDate = appointmentTime.format("DD MMMM YYYY");
     const appointmentTimeSlot = appointmentTime.format("hh:mm a");
@@ -153,7 +153,7 @@ function PatientIndex() {
   };
 
   const getAppointmentCardContent = (
-    appointments: Appointment[] | undefined,
+    appointments: AppointmentRead[] | undefined,
   ) => {
     return (
       <div className="grid gap-4 mb-2">

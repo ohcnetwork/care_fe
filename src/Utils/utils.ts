@@ -5,6 +5,7 @@ import { t } from "i18next";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
+import { PatientOTPRead } from "@/types/auth/otp";
 import { PatientRead } from "@/types/emr/patient/patient";
 
 const DATE_FORMAT = "DD/MM/YYYY";
@@ -161,7 +162,10 @@ const getRelativeDateSuffix = (abbreviated: boolean) => {
   };
 };
 
-export const formatPatientAge = (obj: PatientRead, abbreviated = false) => {
+export const formatPatientAge = (
+  obj: PatientRead | PatientOTPRead,
+  abbreviated = false,
+) => {
   const suffixes = getRelativeDateSuffix(abbreviated);
   const start = dayjs(
     obj.date_of_birth
@@ -170,7 +174,9 @@ export const formatPatientAge = (obj: PatientRead, abbreviated = false) => {
   );
 
   const end = dayjs(
-    obj.deceased_datetime ? new Date(obj.deceased_datetime) : new Date(),
+    "deceased_datetime" in obj && obj.deceased_datetime
+      ? new Date(obj.deceased_datetime)
+      : new Date(),
   );
 
   const years = end.diff(start, "years");

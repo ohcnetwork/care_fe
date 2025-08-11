@@ -29,7 +29,7 @@ import { TokenSlotButton } from "@/pages/Appointments/components/AppointmentSlot
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import publicAppointmentApi from "@/types/scheduling/publicAppointmentApi";
-import { Appointment, TokenSlot } from "@/types/scheduling/schedule";
+import { AppointmentRead, TokenSlot } from "@/types/scheduling/schedule";
 
 interface AppointmentsProps {
   facilityId: string;
@@ -151,7 +151,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
           Authorization: `Bearer ${tokenData.token}`,
         },
       }),
-      onSuccess: (data: Appointment) => {
+      onSuccess: (data: AppointmentRead) => {
         toast.success(t("appointment_created_success"));
         queryClient.invalidateQueries({
           queryKey: [
@@ -172,7 +172,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
           Authorization: `Bearer ${tokenData.token}`,
         },
       }),
-      onSuccess: (appointment: Appointment) => {
+      onSuccess: (appointment: AppointmentRead) => {
         toast.success(t("appointment_cancelled"));
         queryClient.invalidateQueries({
           queryKey: ["appointment", tokenData.phoneNumber],
@@ -184,7 +184,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
       },
     });
 
-  const handleRescheduleAppointment = (appointment: Appointment) => {
+  const handleRescheduleAppointment = (appointment: AppointmentRead) => {
     cancelAppointment({
       appointment: appointment.id,
       patient: appointment.patient.id,

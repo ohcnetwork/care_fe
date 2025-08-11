@@ -1,7 +1,6 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import {
-  Appointment,
   AppointmentCancelRequest,
   AppointmentCreateRequest,
   AppointmentRead,
@@ -116,7 +115,7 @@ export default {
       path: "/api/v1/facility/{facilityId}/slots/{slotId}/create_appointment/",
       method: HttpMethod.POST,
       TBody: Type<AppointmentCreateRequest>(),
-      TRes: Type<Appointment>(),
+      TRes: Type<AppointmentRead>(),
     },
   },
 
@@ -129,7 +128,7 @@ export default {
       method: HttpMethod.GET,
       TRes: Type<PaginatedResponse<AppointmentRead>>(),
     },
-    retrieve: {
+    get: {
       path: "/api/v1/facility/{facilityId}/appointments/{id}/",
       method: HttpMethod.GET,
       TRes: Type<AppointmentRead>(),
@@ -138,19 +137,19 @@ export default {
       path: "/api/v1/facility/{facilityId}/appointments/{id}/",
       method: HttpMethod.PUT,
       TBody: Type<AppointmentUpdateRequest>(),
-      TRes: Type<Appointment>(),
+      TRes: Type<AppointmentRead>(),
     },
     cancel: {
       path: "/api/v1/facility/{facilityId}/appointments/{id}/cancel/",
       method: HttpMethod.POST,
       TBody: Type<AppointmentCancelRequest>(),
-      TRes: Type<Appointment>(),
+      TRes: Type<AppointmentRead>(),
     },
     reschedule: {
       path: "/api/v1/facility/{facilityId}/appointments/{id}/reschedule/",
       method: HttpMethod.POST,
       TBody: Type<AppointmentRescheduleRequest>(),
-      TRes: Type<Appointment>(),
+      TRes: Type<AppointmentRead>(),
     },
     /**
      * Lists schedulable users for a facility
@@ -166,20 +165,20 @@ export default {
     getAppointments: {
       path: "/api/v1/patient/{patientId}/get_appointments/",
       method: HttpMethod.GET,
-      TRes: Type<PaginatedResponse<Appointment>>(),
+      TRes: Type<PaginatedResponse<AppointmentRead>>(),
     },
 
     // Tag-related endpoints
     setTags: {
       path: "/api/v1/facility/{facilityId}/appointments/{external_id}/set_tags/",
       method: HttpMethod.POST,
-      TRes: Type<unknown>(),
+      TRes: Type<AppointmentRead>(),
       TBody: Type<{ tags: string[] }>(),
     },
     removeTags: {
       path: "/api/v1/facility/{facilityId}/appointments/{external_id}/remove_tags/",
       method: HttpMethod.POST,
-      TRes: Type<unknown>(),
+      TRes: Type<AppointmentRead>(),
       TBody: Type<{ tags: string[] }>(),
     },
   },
