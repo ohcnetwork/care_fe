@@ -8,6 +8,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogFooter,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
@@ -55,7 +56,7 @@ export function PatientHeader({
             </span>
           </div>
         </DialogTrigger>
-        <DialogContent className="p-0 max-w-sm w-full rounded-t-2xl fixed bottom-0 left-1/2 -translate-x-1/2 m-0 shadow-2xl bg-white border-none animate-slide-up">
+        <DialogContent className="mb-8 rounded-lg p-4 w-[calc(100vw-2.5rem)] sm:w-[calc(100%-2rem)] max-w-3xl">
           {/* Drag handle */}
           <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 mb-2" />
           <div className="px-6 pb-6 pt-2 flex flex-col gap-4">
@@ -117,11 +118,13 @@ export function PatientHeader({
                 </div>
               </div>
             </div>
-            <DialogClose asChild>
-              <button className="mt-4 w-full py-2 rounded-full bg-primary-100 hover:bg-primary-200 text-primary-900 font-semibold shadow transition-colors text-base">
-                {t("close")}
-              </button>
-            </DialogClose>
+            <DialogFooter className="sm:justify-start mt-4">
+              <DialogClose asChild>
+                <button className="mt-4 w-full py-2 rounded-full bg-primary-100 hover:bg-primary-200 text-primary-900 font-semibold shadow transition-colors text-base">
+                  {t("close")}
+                </button>
+              </DialogClose>
+            </DialogFooter>
           </div>
         </DialogContent>
       </Dialog>
