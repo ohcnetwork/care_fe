@@ -215,31 +215,29 @@ const Login = (props: LoginProps) => {
 
   const validateData = () => {
     let hasError = false;
-    const err: Record<string, string> = { ...errors };
+    const err = Object.assign({}, errors);
     const trimmedForm = { ...form };
 
     Object.keys(form).forEach((key) => {
-      const value = form[key as keyof typeof form];
-      if (typeof value === "string") {
-        const trimmedValue = value.trim();
-        trimmedForm[key as keyof typeof form] = trimmedValue as never;
-        if (!trimmedValue) {
+      if (typeof form[key] === "string") {
+        trimmedForm[key] = form[key].trim();
+        if (trimmedForm[key].length === 0) {
           hasError = true;
           err[key] = "field_required";
         }
-      } else if (!value) {
+      } else if (!form[key]) {
         hasError = true;
         err[key] = "field_required";
       }
     });
 
-    if (form.username.trim() !== form.username) {
+    if (form.username !== trimmedForm.username) {
       hasError = true;
-      err.username = t("username_trim_error");
+      err.username = "Username cannot have leading or trailing spaces.";
     }
-    if (form.password.trim() !== form.password) {
+    if (form.password !== trimmedForm.password) {
       hasError = true;
-      err.password = t("password_trim_error");
+      err.password = "Password cannot have leading or trailing spaces.";
     }
 
     if (hasError) {
