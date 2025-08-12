@@ -161,11 +161,11 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
   return (
     <>
       <Card className="w-full">
-        <CardHeader>
+        <CardHeader className="px-4 sm:px-5">
           <CardTitle>{t("two_factor_authentication")}</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+        <CardContent className="px-4 sm:px-5">
+          <div className="space-y-3">
             {!userData.mfa_enabled ? (
               <>
                 <p className="text-sm text-gray-700">
