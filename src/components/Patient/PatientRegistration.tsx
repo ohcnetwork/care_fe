@@ -128,9 +128,7 @@ export default function PatientRegistration(
             ? z.string().trim().optional()
             : z.string().trim().nonempty(t("address_is_required")),
           same_address: z.boolean(),
-          permanent_address: enableMinimalPatientRegistration
-            ? z.string().trim().optional()
-            : z.string().trim().nonempty(t("field_required")),
+          permanent_address: z.string().trim().optional(),
           pincode: enableMinimalPatientRegistration
             ? validators().pincode.optional()
             : validators().pincode,
@@ -197,6 +195,18 @@ export default function PatientRegistration(
                   path: ["deceased_datetime"],
                 });
               }
+            }
+          }
+          if (!enableMinimalPatientRegistration && !data.same_address) {
+            if (
+              !data.permanent_address ||
+              data.permanent_address.trim() === ""
+            ) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: t("field_required"),
+                path: ["permanent_address"],
+              });
             }
           }
 
@@ -867,6 +877,7 @@ export default function PatientRegistration(
                                       form.getValues("address"),
                                       { shouldValidate: true },
                                     );
+                                    form.trigger("address");
                                   }
                                 }}
                                 data-cy="same-address-checkbox"
@@ -962,7 +973,7 @@ export default function PatientRegistration(
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 {form.watch("nationality") === defaultCountry && (
                   <FormField
                     control={form.control}
