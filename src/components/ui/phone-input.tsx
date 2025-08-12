@@ -52,7 +52,7 @@ function PhoneInput({
       countrySelectComponent={CountrySelect}
       inputComponent={InputComponent}
       defaultCountry={careConfig.defaultCountry.code}
-      value={(value as string) || undefined}
+      value={value || undefined}
       smartCaret={true}
       /**
        * Handles the onChange event.
