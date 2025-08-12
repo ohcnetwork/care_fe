@@ -2,20 +2,45 @@ import { AppCacheDB, OfflineWritesEntry } from "./AppcacheDB";
 import { DependencySchema } from "./dependencySchema";
 import { IdMap } from "./idMap";
 
-async function getServerIdForOfflineRecord(
-  offlineId: string,
-): Promise<string | undefined> {
-  const db = new AppCacheDB();
-  const entry = await db.OfflineWrites.get(offlineId);
+/**
+ * Recursively resolves all ancestor IDs in the dependency chain
+ * and adds them to the ID map. This ensures that when processing
+ * offline writes, all parent, grandparent, and ancestor IDs are
+ * properly mapped to their server IDs before replacement.
+ *
+ * @param parentMutationId - The immediate parent mutation ID to start resolving from
+ * @param idMap - The ID map to populate with resolved mappings
+ */
+async function resolveAncestorIds(
+  parentMutationId: string,
+  idMap: IdMap,
+): Promise<void> {
+  if (!parentMutationId.startsWith("offline-")) {
+    return;
+  }
 
-  if (entry?.syncStatus === "success" && entry.response) {
-    const response = entry.response as any;
+  // Get the parent record
+  const db = new AppCacheDB();
+  const parentEntry = await db.OfflineWrites.get(parentMutationId);
+
+  if (!parentEntry) {
+    console.warn(`Parent mutation ${parentMutationId} not found`);
+    return;
+  }
+
+  if (parentEntry.syncStatus === "success" && parentEntry.response) {
+    const response = parentEntry.response as any;
     if (response.id) {
-      return response.id;
+      console.log(
+        `Resolved ancestor ID: ${parentMutationId} -> ${response.id}`,
+      );
+      idMap.addMapping(parentMutationId, response.id);
     }
   }
 
-  return undefined;
+  if (parentEntry.parentMutationId) {
+    await resolveAncestorIds(parentEntry.parentMutationId, idMap);
+  }
 }
 
 function walkAndReplace(obj: any, path: string[], idMap: IdMap) {
@@ -42,6 +67,11 @@ function replaceOfflineIdsInUrl(url: string, idMap: IdMap): string {
   );
 }
 
+/**
+ * @param write - The offline write entry to process
+ * @param dependencySchema - The dependency schema defining relationships between resources
+ * @returns A new write entry with offline IDs replaced by server IDs
+ */
 export async function replaceOfflineIdsInWrite(
   write: OfflineWritesEntry,
   dependencySchema: DependencySchema,
@@ -63,12 +93,7 @@ export async function replaceOfflineIdsInWrite(
 
   const tempIdMap = new IdMap();
 
-  const parentServerId = await getServerIdForOfflineRecord(
-    write.parentMutationId,
-  );
-  if (parentServerId) {
-    tempIdMap.addMapping(write.parentMutationId, parentServerId);
-  }
+  await resolveAncestorIds(write.parentMutationId, tempIdMap);
 
   for (const dep of deps) {
     let container = newWrite[dep.location as keyof OfflineWritesEntry];

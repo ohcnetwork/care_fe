@@ -269,7 +269,7 @@ export class SyncManager {
     const db = new AppCacheDB();
     const parent = await db.OfflineWrites.get(parentId);
 
-    return parent?.syncStatus === "failed";
+    return parent?.syncStatus !== "success";
   }
 
   private async markDependentWritesAsBlocked(

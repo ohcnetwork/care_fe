@@ -254,8 +254,6 @@ const SyncStatusHeader: React.FC<{
         facilityId,
       );
 
-      console.log("pendingWrites", pendingWrites);
-
       if (pendingWrites.length === 0) {
         toast.info("No offline records to sync");
         return;
@@ -414,7 +412,7 @@ const PendingWritesTable: React.FC<{
   >([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const user = useAuthUser();
-
+  const { isSyncing } = useSync();
   React.useEffect(() => {
     async function fetchPendingWrites() {
       try {
@@ -433,7 +431,7 @@ const PendingWritesTable: React.FC<{
     }
 
     fetchPendingWrites();
-  }, [user.external_id, facilityId, refreshTrigger]);
+  }, [user.external_id, facilityId, refreshTrigger, isSyncing]);
 
   const handleEdit = (entry: OfflineWritesEntry) => {
     onEdit(entry);
@@ -545,7 +543,7 @@ const FailedWritesTable: React.FC<{
   );
   const [isLoading, setIsLoading] = React.useState(true);
   const user = useAuthUser();
-
+  const { isSyncing } = useSync();
   React.useEffect(() => {
     async function fetchFailedWrites() {
       try {
@@ -564,7 +562,7 @@ const FailedWritesTable: React.FC<{
     }
 
     fetchFailedWrites();
-  }, [user.external_id, facilityId, refreshTrigger]);
+  }, [user.external_id, facilityId, refreshTrigger, isSyncing]);
 
   const handleEdit = (entry: OfflineWritesEntry) => {
     onEdit(entry);
@@ -683,7 +681,7 @@ const ConflictedWritesTable: React.FC<{
   >([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const user = useAuthUser();
-
+  const { isSyncing } = useSync();
   React.useEffect(() => {
     async function fetchConflictedWrites() {
       try {
@@ -702,7 +700,7 @@ const ConflictedWritesTable: React.FC<{
     }
 
     fetchConflictedWrites();
-  }, [user.external_id, facilityId, refreshTrigger]);
+  }, [user.external_id, facilityId, refreshTrigger, isSyncing]);
 
   const handleView = (entry: OfflineWritesEntry) => {
     console.log("View conflicted entry:", entry);
@@ -828,7 +826,7 @@ const BlockedWritesTable: React.FC<{
   >([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const user = useAuthUser();
-
+  const { isSyncing } = useSync();
   React.useEffect(() => {
     async function fetchBlockedWrites() {
       try {
@@ -847,7 +845,7 @@ const BlockedWritesTable: React.FC<{
     }
 
     fetchBlockedWrites();
-  }, [user.external_id, facilityId, refreshTrigger]);
+  }, [user.external_id, facilityId, refreshTrigger, isSyncing]);
 
   const handleDelete = (entry: OfflineWritesEntry) => {
     onDelete(entry);
