@@ -7,7 +7,7 @@ import {
   PlusIcon,
   Search,
 } from "lucide-react";
-import { useNavigate } from "raviger";
+import { Link, useNavigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -222,7 +222,6 @@ const RenderTable = ({
 };
 
 export function QuestionnaireList() {
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
@@ -290,12 +289,14 @@ export function QuestionnaireList() {
             />
           </div>
 
-          <Button
-            className="w-full sm:w-auto"
-            onClick={() => navigate("/admin/questionnaire/create")}
-          >
-            <PlusIcon className="size-4" />
-            {t("create_questionnaire")}
+          <Button className="w-full sm:w-auto">
+            <Link
+              href="/admin/questionnaire/create"
+              className="flex items-center gap-2"
+            >
+              <PlusIcon className="size-4" />
+              {t("create_questionnaire")}
+            </Link>
           </Button>
         </div>
       </div>
