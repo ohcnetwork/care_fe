@@ -46,7 +46,7 @@ export interface CurrentUserRead extends UserBase, Permissions {
   verified?: boolean;
   facilities: FacilityBareMinimum[];
   organizations: Organization[];
-  read_profile_picture_url: string;
+  profile_picture_url: string;
   user_flags: string[];
   last_login: string;
 }
