@@ -410,22 +410,22 @@ export function QuestionnaireForm({
           reference_id: string;
           status_code: number;
           data:
-          | {
-            errors?: Array<{
-              question_id?: string;
-              msg?: string;
-              error?: string;
-              type?: string;
-              loc?: string[];
-            }>;
-          }
-          | Array<{
-            errors: Array<{
-              type: string;
-              loc: string[];
-              msg: string;
-            }>;
-          }>;
+            | {
+                errors?: Array<{
+                  question_id?: string;
+                  msg?: string;
+                  error?: string;
+                  type?: string;
+                  loc?: string[];
+                }>;
+              }
+            | Array<{
+                errors: Array<{
+                  type: string;
+                  loc: string[];
+                  msg: string;
+                }>;
+              }>;
         }>;
       };
 
@@ -518,7 +518,6 @@ export function QuestionnaireForm({
   }, [editMode, offlineEntryId, offlineEntry, patientId, encounterId]);
 
   function extractSlugFromUrl(url: string) {
-
     const match = url?.match(/\/questionnaire\/([^/]+)\//);
     return match ? match[1] : null;
   }
@@ -526,12 +525,10 @@ export function QuestionnaireForm({
   const payload = offlineEntry?.payload as BatchRequestBody;
   const requests = payload?.requests ?? [];
 
-
   const slugs = useMemo(
     () => requests.map((req) => extractSlugFromUrl(req.url)),
     [requests],
   );
-
 
   const questionnaireQueries = useQueries({
     queries: slugs.map((slug: string | null) => ({
@@ -638,7 +635,6 @@ export function QuestionnaireForm({
             request, // Pass the full request for URL parsing
           );
 
-
           if (offlineEntry.type === "appointment") {
             toast.warning(
               t("practitioner_and_tags_not_available_for_offline_edit"),
@@ -654,9 +650,7 @@ export function QuestionnaireForm({
           ]);
           setIsInitialized(true);
         }
-      }
-
-      else if (!editMode && questionnaireSlug) {
+      } else if (!editMode && questionnaireSlug) {
         const questionnaire =
           FIXED_QUESTIONNAIRES[questionnaireSlug] || questionnaireData;
 
@@ -738,9 +732,7 @@ export function QuestionnaireForm({
       if (q.type === "group" && q.questions) {
         q.questions.forEach(processQuestion);
       } else if (q.type === "structured" && q.structured_type) {
-
         let structuredData: any = null;
-
 
         if (requestBody.datapoints && Array.isArray(requestBody.datapoints)) {
           // For datapoint-based structures (allergy, diagnosis, medication, etc.)
@@ -765,8 +757,6 @@ export function QuestionnaireForm({
                   slot_id: slot_id,
                 },
               ];
-
-
 
               break;
             }
@@ -822,7 +812,6 @@ export function QuestionnaireForm({
               break;
             }
             case "time_of_death":
-
               structuredData = [requestBody.deceased_datetime];
               break;
             default:
@@ -835,11 +824,11 @@ export function QuestionnaireForm({
           link_id: q.link_id,
           values: structuredData
             ? [
-              {
-                value: structuredData,
-                type: q.structured_type as any,
-              },
-            ]
+                {
+                  value: structuredData,
+                  type: q.structured_type as any,
+                },
+              ]
             : [],
           note: undefined,
           body_site: undefined,
@@ -1440,7 +1429,7 @@ export function QuestionnaireForm({
           const response = form.responses.find((r) => r.question_id === q.id);
           const validator =
             STRUCTURED_TYPE_VALIDATORS[
-            q.structured_type as keyof typeof STRUCTURED_TYPE_VALIDATORS
+              q.structured_type as keyof typeof STRUCTURED_TYPE_VALIDATORS
             ];
 
           if (validator) {
@@ -1607,7 +1596,7 @@ export function QuestionnaireForm({
               className={cn(
                 "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
                 activeQuestionnaireId === form.questionnaire.id &&
-                "bg-gray-100 text-green-600",
+                  "bg-gray-100 text-green-600",
               )}
               onClick={() => scrollToQuestion(form.questionnaire.id)}
               disabled={isPending}
@@ -1623,7 +1612,7 @@ export function QuestionnaireForm({
                     className={cn(
                       "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
                       activeGroupId === group.id &&
-                      "bg-gray-100 text-green-600",
+                        "bg-gray-100 text-green-600",
                     )}
                     onClick={() =>
                       scrollToQuestion(form.questionnaire.id, group.id)
@@ -1692,14 +1681,14 @@ export function QuestionnaireForm({
                   existingForms.map((formItem) =>
                     formItem.questionnaire.id === form.questionnaire.id
                       ? {
-                        ...formItem,
-                        responses: formItem.responses.map((r) =>
-                          r.question_id === questionId
-                            ? { ...r, values, note: note }
-                            : r,
-                        ),
-                        errors: [],
-                      }
+                          ...formItem,
+                          responses: formItem.responses.map((r) =>
+                            r.question_id === questionId
+                              ? { ...r, values, note: note }
+                              : r,
+                          ),
+                          errors: [],
+                        }
                       : formItem,
                   ),
                 );
@@ -1719,11 +1708,11 @@ export function QuestionnaireForm({
                   prev.map((f) =>
                     f.questionnaire.id === form.questionnaire.id
                       ? {
-                        ...f,
-                        errors: f.errors.filter(
-                          (e) => e.question_id !== questionId,
-                        ),
-                      }
+                          ...f,
+                          errors: f.errors.filter(
+                            (e) => e.question_id !== questionId,
+                          ),
+                        }
                       : f,
                   ),
                 );

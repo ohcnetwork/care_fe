@@ -1,9 +1,7 @@
-
 export type ExtractPathParamKeys<Path extends string> =
   Path extends `${string}{${infer Param}}${infer Rest}`
-  ? Param | ExtractPathParamKeys<Rest>
-  : never;
-
+    ? Param | ExtractPathParamKeys<Rest>
+    : never;
 
 export type PathParamsObject<R extends { path: string }> = {
   [K in ExtractPathParamKeys<R["path"]>]: string;
@@ -41,6 +39,5 @@ export const OfflineKeyMap = {
   charge_item: "charge_item",
   service_request: "service_request",
 } as const;
-
 
 export type OfflineKey = (typeof OfflineKeyMap)[keyof typeof OfflineKeyMap];

@@ -53,7 +53,7 @@ interface QuestionInputProps {
   isSubQuestion?: boolean;
   editMode?: boolean;
   offlineEntryId?: string;
-  offlineEntry?: any; 
+  offlineEntry?: any;
 }
 
 export function QuestionInput({

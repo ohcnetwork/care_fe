@@ -178,7 +178,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     }
   };
 
-
   useEffect(() => {
     if (offlineEntryId && !id) {
       setIsLoadingOfflineEntry(true);
@@ -200,7 +199,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
   useEffect(() => {
     const loadResourcerequest = async () => {
-
       const dataToUse = offlineEntryId
         ? offlineEntry?.normalizedData
         : resourceData;
@@ -289,7 +287,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       if (entry) {
         const isCreate = entry.type === OfflineKeyMap.create_resource_request;
 
-
         const existingPayload = isCreate
           ? (entry.payload as CreateResourceRequest)
           : (entry.payload as UpdateResourceRequest);
@@ -376,7 +373,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           authUser,
         );
 
-
         await db.OfflineWrites.update(saveResult.entry.id, {
           normalizedData: normalizedResource,
         });
@@ -437,7 +433,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         authUser,
       );
 
-
       await db.OfflineWrites.update(saveResult.entry.id, {
         normalizedData: normalizedResource,
       });
@@ -449,16 +444,16 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       const updatedResourceRequestList: PaginatedResponse<ResourceRequest> =
         prevResourceRequestList?.results
           ? {
-            ...prevResourceRequestList,
-            results: [...prevResourceRequestList.results, normalizedResource],
-            count:
-              (prevResourceRequestList.count ??
-                prevResourceRequestList.results.length) + 1,
-          }
+              ...prevResourceRequestList,
+              results: [...prevResourceRequestList.results, normalizedResource],
+              count:
+                (prevResourceRequestList.count ??
+                  prevResourceRequestList.results.length) + 1,
+            }
           : {
-            count: 1,
-            results: [normalizedResource],
-          };
+              count: 1,
+              results: [normalizedResource],
+            };
 
       queryClient.setQueryData(
         ["resourceRequests", related_patient],
@@ -611,9 +606,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                           facilityOptions ?? [],
                           field.value
                             ? {
-                              label: field.value.name,
-                              value: field.value.id,
-                            }
+                                label: field.value.name,
+                                value: field.value.id,
+                              }
                             : undefined,
                         )}
                         value={field.value?.id ?? ""}

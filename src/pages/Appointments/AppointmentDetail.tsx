@@ -236,14 +236,14 @@ export default function AppointmentDetail(props: Props) {
 
     const writeEntry: saveOfflineWriteData = !isOfflineId(appointment.id)
       ? {
-        ...baseEntry,
-        serverTimestamp: appointment.modified_date,
-        useQueryRouteKey: "retrieveAppointment",
-        useQueryPathParams: {
-          facility_id: appointment.facility.id,
-          id: appointment.id,
-        },
-      }
+          ...baseEntry,
+          serverTimestamp: appointment.modified_date,
+          useQueryRouteKey: "retrieveAppointment",
+          useQueryPathParams: {
+            facility_id: appointment.facility.id,
+            id: appointment.id,
+          },
+        }
       : baseEntry;
 
     try {
@@ -747,8 +747,6 @@ const AppointmentActions = ({
       },
     };
 
-
-
     const prevTokenSlot = appointment.token_slot; //prev slot
     const prevDate = new Date(appointment.token_slot.start_datetime); // previous date
     const prevMonth = getMonthFromDate(appointment.token_slot.start_datetime); // previous month
@@ -909,7 +907,7 @@ const AppointmentActions = ({
       ) {
         const updateEntry: OfflineWritesEntry = {
           ...rescheduleEntryExist,
-          payload: rescheduleAppointmentData, 
+          payload: rescheduleAppointmentData,
         };
 
         await db.OfflineWrites.update(rescheduleEntryExist.id, updateEntry);
@@ -928,7 +926,8 @@ const AppointmentActions = ({
           type: OfflineKeyMap.reschedule_appointment,
           resourceType: "Appointment",
           payload: rescheduleAppointmentData,
-          serverTimestamp: appointment.modified_date,    useQueryRouteKey: "retrieveAppointment",
+          serverTimestamp: appointment.modified_date,
+          useQueryRouteKey: "retrieveAppointment",
           useQueryPathParams: {
             facility_id: appointment.facility.id,
             id: appointment.id,
@@ -991,7 +990,7 @@ const AppointmentActions = ({
         selectedDate: selectedDateOffline,
         selectedMonth: selectedMonthOffline,
         action: "rescheduled",
-        previousSlot: appointment.token_slot, 
+        previousSlot: appointment.token_slot,
         previousDate: new Date(appointment.token_slot.start_datetime),
         previousMonth: getMonthFromDate(appointment.token_slot.start_datetime),
       });

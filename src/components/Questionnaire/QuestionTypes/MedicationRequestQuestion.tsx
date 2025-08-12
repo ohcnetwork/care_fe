@@ -228,15 +228,11 @@ export function MedicationRequestQuestion({
   });
 
   useEffect(() => {
-
     if (editMode && offlineEntry) {
-
       const payload = offlineEntry.payload as any;
       if (payload?.requests && payload.requests.length > 0) {
         const request = payload.requests[0];
         if (request.body?.datapoints) {
-
-
           updateQuestionnaireResponseCB(
             [
               {
@@ -248,9 +244,7 @@ export function MedicationRequestQuestion({
           );
         }
       }
-    }
-
-    else if (patientMedications?.results && !editMode) {
+    } else if (patientMedications?.results && !editMode) {
       updateQuestionnaireResponseCB(
         [
           {
@@ -424,7 +418,7 @@ export function MedicationRequestQuestion({
               });
             }
           }}
-          onRemove={() => { }}
+          onRemove={() => {}}
           index={-1}
           questionId={questionnaireResponse.question_id}
           errors={errors}
@@ -650,7 +644,7 @@ export function MedicationRequestQuestion({
                           className={cn(
                             "mb-2 rounded-lg border-0 shadow-none",
                             expandedMedicationIndex === index &&
-                            "border border-primary-500",
+                              "border border-primary-500",
                           )}
                         >
                           <Collapsible
@@ -681,8 +675,8 @@ export function MedicationRequestQuestion({
                                         className={cn(
                                           "text-base text-gray-950 break-words",
                                           isInactive &&
-                                          medication.status !== "ended" &&
-                                          "line-through",
+                                            medication.status !== "ended" &&
+                                            "line-through",
                                         )}
                                         title={
                                           medication.medication?.display ||
@@ -746,8 +740,8 @@ export function MedicationRequestQuestion({
                                       {dosageInstruction?.as_needed_boolean
                                         ? ` · ${t("as_needed_prn")}`
                                         : dosageInstruction?.timing?.code
-                                          ?.code &&
-                                        ` · ${MEDICATION_REQUEST_TIMING_OPTIONS[dosageInstruction.timing.code.code]?.display || ""}`}
+                                            ?.code &&
+                                          ` · ${MEDICATION_REQUEST_TIMING_OPTIONS[dosageInstruction.timing.code.code]?.display || ""}`}
 
                                       {dosageInstruction?.timing?.repeat
                                         ?.bounds_duration?.value &&
@@ -1023,8 +1017,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             className={cn(
               "break-words line-clamp-2 hidden lg:block",
               disabled &&
-              medication.status !== "entered_in_error" &&
-              "line-through",
+                medication.status !== "entered_in_error" &&
+                "line-through",
             )}
           >
             {displayMedicationName(medication)}
@@ -1048,7 +1042,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               className={cn(
                 "h-9 text-sm cursor-pointer mb-3",
                 hasError(MEDICATION_REQUEST_FIELDS.DOSAGE.key) &&
-                "border-red-500",
+                  "border-red-500",
               )}
             />
           ) : (
@@ -1056,7 +1050,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               <div
                 className={cn(
                   hasError(MEDICATION_REQUEST_FIELDS.DOSAGE.key) &&
-                  "border border-red-500 rounded-md",
+                    "border border-red-500 rounded-md",
                 )}
               >
                 <ComboboxQuantityInput
@@ -1148,7 +1142,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             } else {
               const timingOption =
                 MEDICATION_REQUEST_TIMING_OPTIONS[
-                value as keyof typeof MEDICATION_REQUEST_TIMING_OPTIONS
+                  value as keyof typeof MEDICATION_REQUEST_TIMING_OPTIONS
                 ];
 
               handleUpdateDosageInstruction({
@@ -1164,7 +1158,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             className={cn(
               "h-9 text-sm",
               hasError(MEDICATION_REQUEST_FIELDS.FREQUENCY.key) &&
-              "border-red-500",
+                "border-red-500",
             )}
           >
             <SelectValue placeholder={t("select_frequency")} />
@@ -1196,9 +1190,9 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           className={cn(
             "flex gap-2",
             hasError(MEDICATION_REQUEST_FIELDS.DURATION.key) &&
-            "border border-red-500 rounded-md p-1",
+              "border border-red-500 rounded-md p-1",
             dosageInstruction?.as_needed_boolean &&
-            "opacity-50 bg-gray-100 rounded-md",
+              "opacity-50 bg-gray-100 rounded-md",
           )}
         >
           {dosageInstruction?.timing && (
@@ -1270,7 +1264,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               className={cn(
                 "h-9 text-sm w-full",
                 dosageInstruction?.as_needed_boolean &&
-                "cursor-not-allowed bg-gray-50",
+                  "cursor-not-allowed bg-gray-50",
               )}
             >
               <SelectValue />

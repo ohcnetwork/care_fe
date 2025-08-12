@@ -2,7 +2,6 @@ import { AppCacheDB, OfflineWritesEntry } from "./AppcacheDB";
 import { DependencySchema } from "./dependencySchema";
 import { IdMap } from "./idMap";
 
-
 async function getServerIdForOfflineRecord(
   offlineId: string,
 ): Promise<string | undefined> {
@@ -18,7 +17,6 @@ async function getServerIdForOfflineRecord(
 
   return undefined;
 }
-
 
 function walkAndReplace(obj: any, path: string[], idMap: IdMap) {
   if (!obj || path.length === 0) return;
@@ -51,7 +49,6 @@ export async function replaceOfflineIdsInWrite(
   const deps = dependencySchema[write.type];
   if (!deps) return write;
 
-
   if (
     !write.parentMutationId ||
     !write.parentMutationId.startsWith("offline-")
@@ -64,16 +61,13 @@ export async function replaceOfflineIdsInWrite(
 
   const newWrite: OfflineWritesEntry = JSON.parse(JSON.stringify(write));
 
-
   const tempIdMap = new IdMap();
-
 
   const parentServerId = await getServerIdForOfflineRecord(
     write.parentMutationId,
   );
   if (parentServerId) {
     tempIdMap.addMapping(write.parentMutationId, parentServerId);
-
   }
 
   for (const dep of deps) {

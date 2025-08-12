@@ -217,7 +217,6 @@ export default function AuthUserProvider({
   }, [signOut]);
   const isRestoring = useIsRestoring();
 
-
   // useEffect(() => {
   //   // Don't start sync if user is on session expired page
   //   const isOnSessionExpiredPage = location.pathname === "/session-expired";
@@ -229,18 +228,18 @@ export default function AuthUserProvider({
   //     localStorage.getItem(LocalStorageKeys.accessToken) === null ||
   //     isOnSessionExpiredPage
   //   ) {
-  //    
+  //
   //     return;
   //   }
 
-  //  
+  //
   //   const timeout = setTimeout(() => {
-  //    
+  //
   //     startSync(user.external_id);
   //   }, 3000);
 
   //   return () => {
-  //   
+  //
   //     clearTimeout(timeout);
   //   };
   // }, [

@@ -202,8 +202,8 @@ export function AppointmentQuestion({
           className={cn(
             "rounded-md",
             !resource &&
-            hasError(APPOINTMENT_FIELDS.SLOT.key) &&
-            "ring-1 ring-red-500",
+              hasError(APPOINTMENT_FIELDS.SLOT.key) &&
+              "ring-1 ring-red-500",
           )}
         >
           <PractitionerSelector
@@ -230,8 +230,8 @@ export function AppointmentQuestion({
           className={cn(
             "rounded-md",
             !value.slot_id &&
-            hasError(APPOINTMENT_FIELDS.SLOT.key) &&
-            "ring-1 ring-red-500",
+              hasError(APPOINTMENT_FIELDS.SLOT.key) &&
+              "ring-1 ring-red-500",
           )}
         >
           <Sheet open={open} onOpenChange={setOpen}>

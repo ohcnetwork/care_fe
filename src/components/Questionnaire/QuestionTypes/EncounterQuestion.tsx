@@ -75,7 +75,7 @@ interface EncounterQuestionProps {
   patientId?: string;
   facilityId: string;
   editMode?: boolean;
-  offlineEntry?: any; 
+  offlineEntry?: any;
 }
 
 export function EncounterQuestion({
@@ -89,8 +89,6 @@ export function EncounterQuestion({
   editMode = false,
   offlineEntry,
 }: EncounterQuestionProps) {
-
-
   const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(encounterApi.get, {
@@ -99,7 +97,7 @@ export function EncounterQuestion({
     }),
     meta: { persist: true },
     networkMode: "online",
-    enabled: !!encounterId && !editMode, 
+    enabled: !!encounterId && !editMode,
   });
   const { t } = useTranslation();
 
@@ -122,23 +120,19 @@ export function EncounterQuestion({
     patient: "",
   });
 
-
   useEffect(() => {
     if (
       editMode &&
       offlineEntry &&
       questionnaireResponse.values?.length === 0
     ) {
-
       const payload = offlineEntry.payload as any;
       if (payload?.requests && payload.requests.length > 0) {
         const request = payload.requests[0];
         if (request.body) {
-
           const offlineEncounter = request.body;
           if (offlineEncounter) {
             setEncounter(offlineEncounter);
-
 
             updateQuestionnaireResponseCB(
               [

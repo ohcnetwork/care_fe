@@ -37,7 +37,6 @@ export async function markWriteStatus(
   });
 }
 
-
 export async function processDependentWrites(
   succeededParentId: string,
 ): Promise<void> {
@@ -67,9 +66,6 @@ export async function processDependentWrites(
         lastErrorDetails: undefined,
         lastAttemptAt: undefined,
       });
-
     }
   }
 }
-
-

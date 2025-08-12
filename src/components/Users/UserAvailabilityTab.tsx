@@ -154,7 +154,7 @@ export default function UserAvailabilityTab({
                   className={cn(
                     "grid h-full cursor-pointer grid-rows-[1fr_auto_1fr] rounded-lg transition-all bg-gray-100 hover:bg-white data-[state=open]:bg-white",
                     templatesQuery.isLoading &&
-                    "opacity-50 pointer-events-none",
+                      "opacity-50 pointer-events-none",
                     !isSchedulableResource && "pointer-events-none",
                     "transition-all duration-200 ease-in-out",
                     "relative overflow-hidden",
@@ -180,13 +180,15 @@ export default function UserAvailabilityTab({
                       {date.getDate()}
                     </span>
                     <div className="flex justify-center gap-0.5">
-                      {templates?.slice(0, 5).map((template) => (
-                        <ColoredIndicator
-                          key={template.id}
-                          id={template.id}
-                          className="size-1.5 rounded-full"
-                        />
-                      ))}
+                      {templates
+                        ?.slice(0, 5)
+                        .map((template) => (
+                          <ColoredIndicator
+                            key={template.id}
+                            id={template.id}
+                            className="size-1.5 rounded-full"
+                          />
+                        ))}
                     </div>
                   </div>
                   <div />

@@ -286,7 +286,6 @@ export default function PatientRegistration(
       if (offlineEntryId) {
         try {
           await handleOfflineRecordSuccess(offlineEntryId, resp);
-
         } catch (error) {
           console.error(`Error handling offline record success:`, error);
           // Don't block the success flow, just log the error
@@ -352,19 +351,19 @@ export default function PatientRegistration(
         const isCreateType = entry.type === OfflineKeyMap.create_patient;
         const updatedEntry = isCreateType
           ? {
-            ...entry,
-            payload: pickPatientCreateFields({
-              ...(entry.payload as PatientCreate),
-              ...updatePatientData,
-            }),
-          }
+              ...entry,
+              payload: pickPatientCreateFields({
+                ...(entry.payload as PatientCreate),
+                ...updatePatientData,
+              }),
+            }
           : {
-            ...entry,
-            payload: {
-              ...(entry.payload as PatientUpdate),
-              ...updatePatientData,
-            },
-          };
+              ...entry,
+              payload: {
+                ...(entry.payload as PatientUpdate),
+                ...updatePatientData,
+              },
+            };
         await db.OfflineWrites.update(patientId, updatedEntry);
         const permissions = patientQuery.data?.permissions || [];
 
@@ -416,7 +415,6 @@ export default function PatientRegistration(
 
         queryClient.setQueryData(["patient", patientId], normalizePatient);
 
-
         await db.OfflineWrites.update(saveResult.entry.id, {
           normalizedData: normalizePatient,
         });
@@ -467,7 +465,6 @@ export default function PatientRegistration(
 
       queryClient.setQueryData(["patient", generatedId], normalizePatient);
 
-
       await db.OfflineWrites.update(saveResult.entry.id, {
         normalizedData: normalizePatient,
       });
@@ -502,7 +499,6 @@ export default function PatientRegistration(
       );
       return !config?.config.default_value && !!identifier.value;
     }) as PatientIdentifierCreate[];
-
 
     const fullIdentifiers: PatientIdentifier[] = editableIdentifiers
       .map((identifier) => {
@@ -677,7 +673,6 @@ export default function PatientRegistration(
           ),
         } as unknown as z.infer<typeof formSchema>);
 
-          
         if (patientData.instance_tags) {
           setSelectedTags(patientData.instance_tags);
         }
@@ -731,10 +726,10 @@ export default function PatientRegistration(
   // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
   useNavigationPrompt(
     !navTarget &&
-    form.formState.isDirty &&
-    !isCreatingPatient &&
-    !(isUpdatingPatient || isUpdateSuccess) &&
-    !showDuplicate,
+      form.formState.isDirty &&
+      !isCreatingPatient &&
+      !(isUpdatingPatient || isUpdateSuccess) &&
+      !showDuplicate,
     t("unsaved_changes"),
   );
 
@@ -1080,38 +1075,38 @@ export default function PatientRegistration(
 
                 {(form.watch("_is_deceased") ||
                   form.watch("deceased_datetime")) && (
-                    <div className="mt-4">
-                      <div className="flex items-center gap-2 mb-4 text-gray-500">
-                        <InfoIcon className="size-4" />
-                        <p className="text-sm text-gray-500">
-                          {t("deceased_disclaimer")}
-                        </p>
-                      </div>
-
-                      <FormField
-                        control={form.control}
-                        name="deceased_datetime"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t("date_and_time_of_death")}</FormLabel>
-                            <FormControl>
-                              <DateTimeInput
-                                id="death-datetime"
-                                data-cy="death-datetime-input"
-                                value={field.value ?? ""}
-                                onDateChange={(val) => {
-                                  field.onChange(val);
-                                  form.setValue("_is_deceased", !!val);
-                                }}
-                                max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                  <div className="mt-4">
+                    <div className="flex items-center gap-2 mb-4 text-gray-500">
+                      <InfoIcon className="size-4" />
+                      <p className="text-sm text-gray-500">
+                        {t("deceased_disclaimer")}
+                      </p>
                     </div>
-                  )}
+
+                    <FormField
+                      control={form.control}
+                      name="deceased_datetime"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("date_and_time_of_death")}</FormLabel>
+                          <FormControl>
+                            <DateTimeInput
+                              id="death-datetime"
+                              data-cy="death-datetime-input"
+                              value={field.value ?? ""}
+                              onDateChange={(val) => {
+                                field.onChange(val);
+                                form.setValue("_is_deceased", !!val);
+                              }}
+                              max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
               </div>
 
               <FormField

@@ -78,7 +78,7 @@ interface SymptomQuestionProps {
   ) => void;
   disabled?: boolean;
   editMode?: boolean;
-  offlineEntry?: any; 
+  offlineEntry?: any;
 }
 
 const SYMPTOM_INITIAL_VALUE: Omit<SymptomRequest, "encounter"> = {
@@ -684,13 +684,11 @@ export function SymptomQuestion({
     }),
     meta: { persist: true },
     networkMode: "online",
-    enabled: !isPreview && !editMode, 
+    enabled: !isPreview && !editMode,
   });
 
   useEffect(() => {
-   
     if (editMode && offlineEntry) {
-     
       const payload = offlineEntry.payload as any;
       if (payload?.requests && payload.requests.length > 0) {
         const request = payload.requests[0];
@@ -706,9 +704,7 @@ export function SymptomQuestion({
           );
         }
       }
-    }
-    
-    else if (patientSymptoms?.results && !editMode) {
+    } else if (patientSymptoms?.results && !editMode) {
       updateQuestionnaireResponseCB(
         [
           {

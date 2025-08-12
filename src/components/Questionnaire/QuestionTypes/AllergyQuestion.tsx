@@ -534,7 +534,7 @@ const AllergyItem = ({
 
       <StatusButtons
         clinicalStatus={allergy.clinical_status}
-        onUpdate={onUpdate || (() => { })}
+        onUpdate={onUpdate || (() => {})}
         disabled={disabled}
       />
 
@@ -588,13 +588,10 @@ export function AllergyQuestion({
   useEffect(() => {
     // Handle offline data population when in edit mode
     if (editMode && offlineEntry) {
-
       const payload = offlineEntry.payload as any;
       if (payload?.requests && payload.requests.length > 0) {
         const request = payload.requests[0];
         if (request.body?.datapoints) {
-
-
           updateQuestionnaireResponseCB(
             [
               {
@@ -606,9 +603,7 @@ export function AllergyQuestion({
           );
         }
       }
-    }
-
-    else if (patientAllergies?.results && !editMode) {
+    } else if (patientAllergies?.results && !editMode) {
       updateQuestionnaireResponseCB(
         [
           {
@@ -730,7 +725,7 @@ export function AllergyQuestion({
                     disabled={
                       disabled ||
                       patientAllergies?.results[index]?.verification_status ===
-                      "entered_in_error"
+                        "entered_in_error"
                     }
                     onUpdate={(updates) => handleUpdateAllergy(index, updates)}
                     onRemove={() => handleRemoveAllergy(index)}
@@ -756,12 +751,12 @@ export function AllergyQuestion({
                   className={cn(
                     "rounded-lg",
                     expandedAllergyIndex === index &&
-                    "border border-primary-500 bg-gray-50",
+                      "border border-primary-500 bg-gray-50",
                     expandedAllergyIndex !== index && "border-0 shadow-none",
                     (disabled ||
                       patientAllergies?.results[index]?.verification_status ===
-                      "entered_in_error") &&
-                    "opacity-40",
+                        "entered_in_error") &&
+                      "opacity-40",
                     allergy.clinical_status === "inactive" && "opacity-60",
                     allergy.clinical_status === "resolved" && "line-through",
                   )}
@@ -771,7 +766,7 @@ export function AllergyQuestion({
                       className={cn(
                         "p-2 rounded-lg shadow-none bg-gray-50 cursor-pointer active:bg-gray-100 transition-colors",
                         expandedAllergyIndex !== index &&
-                        "bg-gray-200 border border-gray-300",
+                          "bg-gray-200 border border-gray-300",
                       )}
                     >
                       <div className="flex flex-col space-y-1">
@@ -781,9 +776,9 @@ export function AllergyQuestion({
                               className={cn(
                                 "text-base text-gray-950 break-words",
                                 allergy.clinical_status === "resolved" &&
-                                "line-through",
+                                  "line-through",
                                 allergy.clinical_status === "inactive" &&
-                                "opacity-60",
+                                  "opacity-60",
                               )}
                               title={allergy.code.display}
                             >
@@ -892,13 +887,13 @@ export function AllergyQuestion({
                   setNewAllergyInSheet((prev) =>
                     prev
                       ? {
-                        ...prev,
-                        ...updates,
-                      }
+                          ...prev,
+                          ...updates,
+                        }
                       : null,
                   );
                 }}
-                onRemove={() => { }}
+                onRemove={() => {}}
               />
             )}
           </div>

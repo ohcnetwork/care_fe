@@ -15,7 +15,6 @@ export const queryMap = {
   getAppointment: scheduleApis.appointments.retrieve,
 } as const;
 
-
 async function fetchDataForRoute(
   routeKey: keyof typeof queryMap,
   pathParams: Record<string, any>,

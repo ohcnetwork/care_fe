@@ -91,7 +91,7 @@ interface MedicationStatementQuestionProps {
   disabled?: boolean;
   errors: QuestionValidationError[];
   editMode?: boolean;
-  offlineEntry?: any; 
+  offlineEntry?: any;
 }
 
 const MEDICATION_STATEMENT_INITIAL_VALUE: MedicationStatementRequest = {
@@ -192,9 +192,7 @@ export function MedicationStatementQuestion({
   });
 
   useEffect(() => {
- 
     if (editMode && offlineEntry) {
-      
       const payload = offlineEntry.payload as any;
       if (payload?.requests && payload.requests.length > 0) {
         const request = payload.requests[0];
@@ -210,9 +208,7 @@ export function MedicationStatementQuestion({
           );
         }
       }
-    }
-   
-    else if (patientMedications?.results && !editMode) {
+    } else if (patientMedications?.results && !editMode) {
       updateQuestionnaireResponseCB(
         [{ type: "medication_statement", value: patientMedications.results }],
         questionnaireResponse.question_id,

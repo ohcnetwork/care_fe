@@ -1,6 +1,5 @@
 import { OfflineWritesEntry } from "./AppcacheDB";
 
-
 export function buildDependencyGraph(
   writes: OfflineWritesEntry[],
 ): Map<string, string[]> {

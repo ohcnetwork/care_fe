@@ -100,9 +100,7 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
                   {(instruction?.additional_instruction ?? []).length > 0 && (
                     <div className="text-sm text-gray-600 space-y-1">
                       {instruction.additional_instruction?.map(
-                        (item, index) => (
-                          <div key={index}>{item.display}</div>
-                        ),
+                        (item, index) => <div key={index}>{item.display}</div>,
                       )}
                     </div>
                   )}

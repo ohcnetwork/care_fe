@@ -109,7 +109,6 @@ export function AddUserSheet({
     enabled: open,
   });
 
-
   useEffect(() => {
     if (offlineEntryId) {
       const loadOfflineEntry = async () => {
@@ -141,7 +140,6 @@ export function AddUserSheet({
       }
     }
   }, [offlineEntry, offlineEntryId]);
-
 
   useEffect(() => {
     if (offlineEntryId) {
@@ -209,7 +207,6 @@ export function AddUserSheet({
         toast.error(saveResult.error);
         return;
       }
-
 
       const normalizedData = {
         user: selectedUser,
@@ -451,7 +448,6 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
         return;
       }
 
-
       const normalizedData = {
         user: userToRemove,
         patientName: patientData.name,
@@ -472,7 +468,6 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
           );
         })
         .delete();
-
 
       const users = queryClient.getQueryData<PaginatedResponse<UserBase>>([
         "patientUsers",
