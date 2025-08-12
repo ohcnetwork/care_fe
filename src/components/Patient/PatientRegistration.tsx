@@ -973,7 +973,7 @@ export default function PatientRegistration(
                 />
               </div>
 
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 {form.watch("nationality") === defaultCountry && (
                   <FormField
                     control={form.control}
