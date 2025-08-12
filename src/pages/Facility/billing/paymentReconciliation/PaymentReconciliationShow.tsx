@@ -45,8 +45,8 @@ function humanize(str: string): string {
 
 function InfoItem({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="mb-3">
-      <div className="text-xs text-gray-500 mb-1">{label}</div>
+    <div className="mb-1">
+      <div className="text-xs text-gray-500">{label}</div>
       <div className="font-medium">{value || "-"}</div>
     </div>
   );
@@ -148,9 +148,9 @@ export function PaymentReconciliationShow({
               <CardTitle>{t("payment_details")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {/* Amount section */}
-                <div className="col-span-3">
+                <div className="col-span-2 md:col-span-3">
                   <div className="flex justify-between items-center py-3 border-b">
                     <div className="text-gray-500">{t("amount")}</div>
                     <MonetaryDisplay
