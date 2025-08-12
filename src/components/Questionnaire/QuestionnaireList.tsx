@@ -257,7 +257,7 @@ export function QuestionnaireList() {
               value={qParams.status || "active"}
               onValueChange={(value) => updateQuery({ status: value })}
             >
-              <div className="min-w-[480px]">
+              <div className="min-w-full sm:min-w-[50%] md:min-w-[40%] lg:min-w-[30rem]">
                 <TabsList className="flex w-full">
                   <TabsTrigger value="active" className="flex-1">
                     <FileCheckIcon className="size-4" />
@@ -300,6 +300,7 @@ export function QuestionnaireList() {
           </Button>
         </div>
       </div>
+
       <RenderTable
         questionnaireList={questionnaireList}
         isLoading={isLoading}
