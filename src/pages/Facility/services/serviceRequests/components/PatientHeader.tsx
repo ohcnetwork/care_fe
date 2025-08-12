@@ -4,6 +4,7 @@ import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -56,7 +57,7 @@ export function PatientHeader({
             </span>
           </div>
         </DialogTrigger>
-        <DialogContent className="mb-8 rounded-lg p-4 w-[calc(100vw-2.5rem)] sm:w-[calc(100%-2rem)] max-w-3xl">
+        <DialogContent className="mb-8 rounded-lg p-4">
           {/* Drag handle */}
           <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 mb-2" />
           <div className="px-6 pb-6 pt-2 flex flex-col gap-4">
@@ -120,9 +121,13 @@ export function PatientHeader({
             </div>
             <DialogFooter className="sm:justify-start mt-4">
               <DialogClose asChild>
-                <button className="mt-4 w-full py-2 rounded-full bg-primary-100 hover:bg-primary-200 text-primary-900 font-semibold shadow transition-colors text-base">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="w-full rounded-full"
+                >
                   {t("close")}
-                </button>
+                </Button>
               </DialogClose>
             </DialogFooter>
           </div>
