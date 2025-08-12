@@ -154,7 +154,8 @@ export function EntitySelectionSheet({
       )}
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
-          className="px-0 pt-2 pb-0 rounded-t-3xl sm:max-w-md sm:mx-auto [&>button:first-child]:hidden pointer-events-auto"
+          id="sheet-content"
+          className='px-0 pt-2 pb-0 rounded-t-3xl sm:max-w-md sm:mx-auto [&>button:first-child]:hidden [&[data-slot="sheet-content"][data-state="open"]]:pointer-events-auto'
           side="bottom"
           onInteractOutside={(event) => {
             // Try to get the real click/tap target from Radix's originalEvent
