@@ -115,7 +115,7 @@ export class SyncManager {
       // Step 3: Sort by dependencies (topological sort)
       const sortedWrites = topologicalSort(pendingWrites);
       const totalWrites = sortedWrites.length;
-
+      console.log("totalWrites", totalWrites);
       // Notify that sync is starting with pending writes
       this.options.onSyncStart?.(totalWrites);
 

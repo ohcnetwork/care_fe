@@ -254,6 +254,8 @@ const SyncStatusHeader: React.FC<{
         facilityId,
       );
 
+      console.log("pendingWrites", pendingWrites);
+
       if (pendingWrites.length === 0) {
         toast.info("No offline records to sync");
         return;
@@ -273,7 +275,6 @@ const SyncStatusHeader: React.FC<{
       className={`flex flex-col  justify-between ${isSidebarOpen ? "md:flex-col" : "md:flex-row"} lg:flex-row gap-4 mb-6`}
     >
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Sync Status</h1>
         <p className="text-gray-600 mt-1">
           Monitor and manage your offline data synchronization
         </p>
@@ -945,11 +946,8 @@ const SyncStatusTabs: React.FC<{
   return (
     <div className="">
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Sync Details
-        </h3>
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap mt-6 gap-4">
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
@@ -1166,7 +1164,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
 
   return (
     <Page title={t("sync_status")}>
-      <div className="container mx-auto p-6 max-w-7xl">
+      <div className="container mt-2 max-w-7xl">
         <SyncStatusHeader
           facilityId={facilityId}
           refreshTrigger={refreshTrigger}

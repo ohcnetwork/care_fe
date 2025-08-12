@@ -125,6 +125,10 @@ export const EncounterShow = (props: Props) => {
 
   const canAccess = canViewClinicalData || canViewEncounter;
 
+  console.log("encounter", currentEncounter);
+  console.log("patient", patient);
+  console.log("selected : ", selectedEncounter);
+
   useEffect(() => {
     if (!isCurrentEncounterLoading && !isPatientLoading && !canAccess) {
       toast.error(t("permission_denied_encounter"));
@@ -160,7 +164,7 @@ export const EncounterShow = (props: Props) => {
           <EncounterHistorySelector />
         )}
         <div className="w-full overflow-x-auto">
-          <div className="w-full border-b-2 border-secondary-200 ">
+          <div className="w-full border-b-2 border-se   condary-200 ">
             <div className="overflow-x-auto sm:flex sm:items-baseline">
               <div className="mt-4 sm:mt-0">
                 <nav

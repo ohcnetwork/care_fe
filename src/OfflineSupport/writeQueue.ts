@@ -20,8 +20,8 @@ export async function getPendingAndRetryableWrites(
       const isPending = w.syncStatus === "pending";
       const isFailedButRetryable =
         w.syncStatus === "failed" && (w.retries || 0) < MAX_RETRIES;
-      const isBlocked = w.syncStatus === "blocked";
-      return isPending || isFailedButRetryable || isBlocked;
+
+      return isPending || isFailedButRetryable;
     })
     .toArray();
 }
