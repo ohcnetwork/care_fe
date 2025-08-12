@@ -1,0 +1,16 @@
+name,description,type,status,operational_status,parent
+Main Building,Primary hospital building,building,active,open,
+ICU Ward,Intensive Care Unit,ward,active,open,Main Building
+ICU Room 101,ICU Room 101,room,active,open,ICU Ward
+ICU Bed A1,Bed A1 in ICU Room 101,bed,active,open,ICU Room 101
+ICU Bed A2,Bed A2 in ICU Room 101,bed,active,open,ICU Room 101
+Emergency Ward,Emergency Department,ward,active,open,Main Building
+Emergency Room 201,Emergency Room 201,room,active,open,Emergency Ward
+Emergency Bed E1,Bed E1 in Emergency Room 201,bed,active,open,Emergency Room 201
+Emergency Bed E2,Bed E2 in Emergency Room 201,bed,active,open,Emergency Room 201
+General Ward,General Patient Ward,ward,active,open,Main Building
+General Room 301,General Room 301,room,active,open,General Ward
+General Bed G1,Bed G1 in General Room 301,bed,active,open,General Room 301
+General Bed G2,Bed G2 in General Room 301,bed,inactive,housekeeping,General Room 301
+Pharmacy,Hospital Pharmacy,area,active,open,Main Building
+Laboratory,Clinical Laboratory,area,active,open,Main Building
