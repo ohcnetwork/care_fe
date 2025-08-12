@@ -18,8 +18,8 @@ import Page from "@/components/Common/Page";
 import query from "@/Utils/request/query";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
-  FacilityOrganization,
   FacilityOrganizationParent,
+  FacilityOrganizationRead,
 } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
@@ -52,7 +52,7 @@ export default function FacilityOrganizationList({
   });
 
   const handleOrganizationSelect = useCallback(
-    (organization: FacilityOrganization) => {
+    (organization: FacilityOrganizationRead) => {
       navigate(
         `/facility/${facilityId}/settings/departments/${organization.id}/${currentTab}`,
       );

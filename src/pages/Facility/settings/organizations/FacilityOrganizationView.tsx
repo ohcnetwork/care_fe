@@ -45,7 +45,7 @@ import { getPermissions } from "@/common/Permissions";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
-import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 import FacilityOrganizationFormSheet from "./components/FacilityOrganizationFormSheet";
@@ -60,7 +60,7 @@ function DeleteOrgDialog({
   org,
   facilityId,
 }: {
-  org: FacilityOrganization;
+  org: FacilityOrganizationRead;
   facilityId: string;
 }) {
   const { t } = useTranslation();
@@ -122,7 +122,7 @@ function OrganizationCard({
   parentId,
   canWrite,
 }: {
-  org: FacilityOrganization;
+  org: FacilityOrganizationRead;
   facilityId: string;
   parentId?: string;
   canWrite: boolean;
