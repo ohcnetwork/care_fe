@@ -16,52 +16,44 @@ export interface AvailabilityDateTime {
   end_time: Time;
 }
 
-export interface ScheduleTemplate {
-  id: string;
+export interface ScheduleBase {
   name: string;
   valid_from: string;
   valid_to: string;
-  availabilities: ScheduleAvailability[];
+  availabilities: ScheduleAvailabilityRead[];
+}
+
+export interface ScheduleRead extends ScheduleBase {
+  id: string;
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
 }
 
-type ScheduleAvailabilityBase = {
-  name: string;
-  reason: string;
-  availability: AvailabilityDateTime[];
-} & (
-  | {
-      slot_type: "appointment";
-      slot_size_in_minutes: number;
-      tokens_per_slot: number;
-    }
-  | {
-      slot_type: "open" | "closed";
-      slot_size_in_minutes: null;
-      tokens_per_slot: null;
-    }
-);
-
-export interface ScheduleTemplateCreateRequest {
+export interface ScheduleCreate extends Omit<ScheduleBase, "availabilities"> {
+  facility: string;
   user: string;
-  name: string;
-  valid_from: string; // datetime
-  valid_to: string; // datetime
   availabilities: ScheduleAvailabilityBase[];
 }
 
-export interface ScheduleTemplateUpdateRequest {
+export type ScheduleUpdate = Omit<ScheduleBase, "availabilities">;
+
+export interface ScheduleAvailabilityBase {
   name: string;
-  valid_from: string;
-  valid_to: string;
+  reason: string;
+  availability: AvailabilityDateTime[];
+  slot_type: ScheduleSlotType;
+  slot_size_in_minutes: number | null;
+  tokens_per_slot: number | null;
+  create_tokens: boolean;
 }
 
-export type ScheduleAvailability = ScheduleAvailabilityBase & {
+export interface ScheduleAvailabilityRead extends ScheduleAvailabilityBase {
   id: string;
-};
+}
 
-export type ScheduleAvailabilityCreateRequest = ScheduleAvailabilityBase;
+export interface ScheduleAvailabilityCreate extends ScheduleAvailabilityBase {
+  schedule: string;
+}
 
 export interface ScheduleException {
   id: string;

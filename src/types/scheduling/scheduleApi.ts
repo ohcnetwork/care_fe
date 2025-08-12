@@ -9,13 +9,13 @@ import {
   AvailabilityHeatmapRequest,
   AvailabilityHeatmapResponse,
   GetSlotsForDayResponse,
-  ScheduleAvailability,
-  ScheduleAvailabilityCreateRequest,
+  ScheduleAvailabilityCreate,
+  ScheduleAvailabilityRead,
+  ScheduleCreate,
   ScheduleException,
   ScheduleExceptionCreateRequest,
-  ScheduleTemplate,
-  ScheduleTemplateCreateRequest,
-  ScheduleTemplateUpdateRequest,
+  ScheduleRead,
+  ScheduleUpdate,
 } from "@/types/scheduling/schedule";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -27,27 +27,27 @@ export default {
     create: {
       path: "/api/v1/facility/{facilityId}/schedule/",
       method: HttpMethod.POST,
-      TRes: Type<ScheduleTemplate>(),
-      TBody: Type<ScheduleTemplateCreateRequest>(),
+      TRes: Type<ScheduleRead>(),
+      TBody: Type<ScheduleCreate>(),
     },
-    retrieve: {
-      path: "/api/v1/facility/{facilityId}/schedule/{id}/",
+    get: {
+      path: "/api/v1/facility/{facilityId}/schedule/{scheduleId}/",
       method: HttpMethod.GET,
-      TRes: Type<ScheduleTemplate>(),
+      TRes: Type<ScheduleRead>(),
     },
     list: {
       path: "/api/v1/facility/{facilityId}/schedule/",
       method: HttpMethod.GET,
-      TRes: Type<PaginatedResponse<ScheduleTemplate>>(),
+      TRes: Type<PaginatedResponse<ScheduleRead>>(),
     },
     update: {
-      path: "/api/v1/facility/{facilityId}/schedule/{id}/",
+      path: "/api/v1/facility/{facilityId}/schedule/{scheduleId}/",
       method: HttpMethod.PUT,
-      TBody: Type<ScheduleTemplateUpdateRequest>(),
-      TRes: Type<ScheduleTemplate>(),
+      TBody: Type<ScheduleUpdate>(),
+      TRes: Type<ScheduleRead>(),
     },
     delete: {
-      path: "/api/v1/facility/{facilityId}/schedule/{id}/",
+      path: "/api/v1/facility/{facilityId}/schedule/{scheduleId}/",
       method: HttpMethod.DELETE,
       TBody: Type<void>(),
       TRes: Type<void>(),
@@ -60,8 +60,8 @@ export default {
       create: {
         path: "/api/v1/facility/{facilityId}/schedule/{scheduleId}/availability/",
         method: HttpMethod.POST,
-        TBody: Type<ScheduleAvailabilityCreateRequest>(),
-        TRes: Type<ScheduleAvailability>(),
+        TBody: Type<ScheduleAvailabilityCreate>(),
+        TRes: Type<ScheduleAvailabilityRead>(),
       },
       delete: {
         path: "/api/v1/facility/{facilityId}/schedule/{scheduleId}/availability/{id}/",

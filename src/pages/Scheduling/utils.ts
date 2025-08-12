@@ -10,7 +10,7 @@ import {
 import { Time } from "@/Utils/types";
 import {
   AppointmentRead,
-  ScheduleAvailability,
+  ScheduleAvailabilityRead,
   ScheduleException,
 } from "@/types/scheduling/schedule";
 
@@ -51,7 +51,7 @@ type VirtualSlot = {
 };
 
 export function computeAppointmentSlots(
-  availability: ScheduleAvailability & { slot_type: "appointment" },
+  availability: ScheduleAvailabilityRead,
   exceptions: ScheduleException[],
   referenceDate: Date = new Date(),
 ) {
@@ -70,7 +70,7 @@ export function computeAppointmentSlots(
 
   let time = startTime;
   while (time < endTime) {
-    const slotEndTime = addMinutes(time, slotSizeInMinutes);
+    const slotEndTime = addMinutes(time, slotSizeInMinutes ?? 0);
 
     let conflicting = false;
     for (const exception of exceptions) {
@@ -109,23 +109,26 @@ export function computeAppointmentSlots(
 export function getSlotsPerSession(
   startTime: Time,
   endTime: Time,
-  slotSizeInMinutes: number,
+  slotSizeInMinutes: number | null,
 ) {
   const duration = getDurationInMinutes(startTime, endTime);
   if (!duration) return null;
+  if (!slotSizeInMinutes) return 0;
   const result = Math.floor(duration / slotSizeInMinutes);
   return result < 0 ? null : result;
 }
 
 export function getTokenDuration(
-  slotSizeInMinutes: number,
-  tokensPerSlot: number,
+  slotSizeInMinutes: number | null,
+  tokensPerSlot: number | null,
 ) {
+  if (!slotSizeInMinutes) return null;
+  if (!tokensPerSlot) return null;
   return slotSizeInMinutes / tokensPerSlot;
 }
 
 export const getDaysOfWeekFromAvailabilities = (
-  availabilities: ScheduleAvailability[],
+  availabilities: ScheduleAvailabilityRead[],
 ) => {
   return [
     ...new Set(
@@ -137,7 +140,7 @@ export const getDaysOfWeekFromAvailabilities = (
 };
 
 export const filterAvailabilitiesByDayOfWeek = (
-  availabilities: ScheduleAvailability[],
+  availabilities: ScheduleAvailabilityRead[],
   date?: Date,
 ) => {
   // Doing this weird things because backend uses python's 0-6.

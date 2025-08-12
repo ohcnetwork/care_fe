@@ -64,9 +64,9 @@ import {
 } from "@/pages/Scheduling/utils";
 import {
   AvailabilityDateTime,
-  ScheduleAvailability,
-  ScheduleAvailabilityCreateRequest,
-  ScheduleTemplate,
+  ScheduleAvailabilityCreate,
+  ScheduleAvailabilityRead,
+  ScheduleRead,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
@@ -78,7 +78,7 @@ export default function EditScheduleTemplateSheet({
   open,
   onOpenChange,
 }: {
-  template: ScheduleTemplate;
+  template: ScheduleRead;
   facilityId: string;
   userId: string;
   trigger?: React.ReactNode;
@@ -144,7 +144,7 @@ const ScheduleTemplateEditor = ({
   facilityId,
   userId,
 }: {
-  template: ScheduleTemplate;
+  template: ScheduleRead;
   facilityId: string;
   userId: string;
 }) => {
@@ -181,7 +181,7 @@ const ScheduleTemplateEditor = ({
 
   const { mutate: updateTemplate, isPending: isUpdating } = useMutation({
     mutationFn: mutate(scheduleApis.templates.update, {
-      pathParams: { facilityId, id: template.id },
+      pathParams: { facilityId, scheduleId: template.id },
     }),
     onSuccess: () => {
       toast.success("Schedule template updated successfully");
@@ -193,7 +193,7 @@ const ScheduleTemplateEditor = ({
 
   const { mutate: deleteTemplate, isPending: isDeleting } = useMutation({
     mutationFn: mutate(scheduleApis.templates.delete, {
-      pathParams: { facilityId, id: template.id },
+      pathParams: { facilityId, scheduleId: template.id },
     }),
     onSuccess: () => {
       toast.success(t("template_deleted"));
@@ -342,7 +342,7 @@ const AvailabilityEditor = ({
   facilityId,
   userId,
 }: {
-  availability: ScheduleAvailability;
+  availability: ScheduleAvailabilityRead;
   scheduleId: string;
   facilityId: string;
   userId: string;
@@ -501,7 +501,10 @@ const AvailabilityEditor = ({
                 </span>
               </div>
               <span className="mt-1 text-sm text-gray-500">
-                = {totalSlots ? totalSlots * availability.tokens_per_slot : 0}{" "}
+                ={" "}
+                {totalSlots
+                  ? totalSlots * (availability.tokens_per_slot ?? 0)
+                  : 0}{" "}
                 total patients
               </span>
             </div>
@@ -669,7 +672,7 @@ const NewAvailabilityCard = ({
             slot_size_in_minutes: null,
             tokens_per_slot: null,
           }),
-    } as ScheduleAvailabilityCreateRequest;
+    } as ScheduleAvailabilityCreate;
 
     createAvailability(availability);
   }

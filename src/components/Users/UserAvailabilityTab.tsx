@@ -52,7 +52,7 @@ import {
 import {
   AvailabilityDateTime,
   ScheduleException,
-  ScheduleTemplate,
+  ScheduleRead,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserReadMinimal } from "@/types/user/user";
@@ -288,7 +288,7 @@ function DayDetailsPopover({
   user,
 }: {
   date: Date;
-  templates: ScheduleTemplate[];
+  templates: ScheduleRead[];
   unavailableExceptions: ScheduleException[];
   setQParams: (params: AvailabilityTabQueryParams) => void;
   user: UserReadMinimal;
@@ -405,7 +405,7 @@ function ScheduleTemplateAvailabilityItem({
   unavailableExceptions,
   date,
 }: {
-  availability: ScheduleTemplate["availabilities"][0];
+  availability: ScheduleRead["availabilities"][0];
   unavailableExceptions: ScheduleException[];
   date: Date;
 }) {

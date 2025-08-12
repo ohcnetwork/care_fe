@@ -49,7 +49,6 @@ import {
   getSlotsPerSession,
   getTokenDuration,
 } from "@/pages/Scheduling/utils";
-import { ScheduleAvailabilityCreateRequest } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface Props {
@@ -160,18 +159,12 @@ export default function CreateScheduleTemplateSheet({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      valid_from: undefined,
-      valid_to: undefined,
       weekdays: [],
       availabilities: [
         {
           name: "",
           slot_type: "appointment",
           reason: "",
-          start_time: undefined,
-          end_time: undefined,
-          tokens_per_slot: null as unknown as undefined,
-          slot_size_in_minutes: null as unknown as undefined,
           is_auto_fill: false,
           num_of_slots: 1,
         },
@@ -199,21 +192,20 @@ export default function CreateScheduleTemplateSheet({
       valid_to: dateQueryString(values.valid_to),
       name: values.name,
       user: userId,
-      availabilities: values.availabilities.map(
-        (availability) =>
-          ({
-            name: availability.name,
-            slot_type: availability.slot_type,
-            slot_size_in_minutes: availability.slot_size_in_minutes,
-            tokens_per_slot: availability.tokens_per_slot,
-            reason: availability.reason,
-            availability: values.weekdays.map((day) => ({
-              day_of_week: day,
-              start_time: availability.start_time,
-              end_time: availability.end_time,
-            })),
-          }) as ScheduleAvailabilityCreateRequest,
-      ),
+      facility: facilityId,
+      availabilities: values.availabilities.map((availability) => ({
+        name: availability.name,
+        slot_type: availability.slot_type,
+        slot_size_in_minutes: availability.slot_size_in_minutes,
+        tokens_per_slot: availability.tokens_per_slot,
+        reason: availability.reason,
+        availability: values.weekdays.map((day) => ({
+          day_of_week: day,
+          start_time: availability.start_time as Time,
+          end_time: availability.end_time as Time,
+        })),
+        create_tokens: false,
+      })),
     });
   }
 

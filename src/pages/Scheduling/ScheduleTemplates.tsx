@@ -16,10 +16,10 @@ import {
   getDaysOfWeekFromAvailabilities,
   getSlotsPerSession,
 } from "@/pages/Scheduling/utils";
-import { ScheduleTemplate } from "@/types/scheduling/schedule";
+import { ScheduleRead } from "@/types/scheduling/schedule";
 
 interface Props {
-  items?: ScheduleTemplate[];
+  items?: ScheduleRead[];
   facilityId: string;
   userId: string;
 }
@@ -63,7 +63,7 @@ const ScheduleTemplateItem = ({
   facilityId,
   userId,
 }: {
-  template: ScheduleTemplate;
+  template: ScheduleRead;
   facilityId: string;
   userId: string;
 }) => {
