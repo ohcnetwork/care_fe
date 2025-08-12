@@ -74,9 +74,9 @@ export class SyncManager {
   private isRunning = false;
   private abortController: AbortController | null = null;
 
-  constructor(private options: SyncManagerOptions) {}
+  constructor(private options: SyncManagerOptions) { }
 
-  // Main sync loop that start the entire sync process
+
 
   async sync(): Promise<SyncResult> {
     if (this.isRunning) {
@@ -100,26 +100,23 @@ export class SyncManager {
     };
 
     try {
-      // Step 1: Get pending writes
+
       const pendingWrites = await getPendingAndRetryableWrites(
         this.options.userId,
-        this.options.facilityId, // Pass facilityId if provided
+        this.options.facilityId,
       );
 
       if (pendingWrites.length === 0) {
         return result;
       }
 
-      // Step 2: No need to pre-populate IdMap - each write will find its own parent mappings
 
-      // Step 3: Sort by dependencies (topological sort)
       const sortedWrites = topologicalSort(pendingWrites);
       const totalWrites = sortedWrites.length;
-      console.log("totalWrites", totalWrites);
-      // Notify that sync is starting with pending writes
+
       this.options.onSyncStart?.(totalWrites);
 
-      // Step 4: Process writes in dependency order
+
       for (let i = 0; i < sortedWrites.length; i++) {
         const write = sortedWrites[i];
 
@@ -127,7 +124,7 @@ export class SyncManager {
           break;
         }
 
-        // Add 1 second delay for testing banner visibility
+
         await new Promise((resolve) => setTimeout(resolve, 500));
 
         const writeResult = await this.processWrite(write);
@@ -150,17 +147,17 @@ export class SyncManager {
             break;
         }
 
-        // Report progress
+
         this.options.onProgress?.(
           result.syncedCount +
-            result.failedCount +
-            result.conflictCount +
-            result.blockedCount,
+          result.failedCount +
+          result.conflictCount +
+          result.blockedCount,
           totalWrites,
         );
       }
 
-      // Step 5: Cleanup and finalize
+
       await this.cleanup();
     } catch (error) {
       result.success = false;
@@ -177,7 +174,7 @@ export class SyncManager {
     return result;
   }
 
-  // Public method to process a single write
+
   public async processSingleWrite(write: any): Promise<{
     status: "success" | "failed" | "conflict" | "blocked";
     error?: string;
@@ -185,20 +182,20 @@ export class SyncManager {
     return this.processWrite(write);
   }
 
-  // Process a single write through the sync pipeline
+
 
   private async processWrite(write: any): Promise<{
     status: "success" | "failed" | "conflict" | "blocked";
     error?: string;
   }> {
     try {
-      // Step 1: Check if parent writes are blocked
+
       if (write.parentMutationId) {
         const isParentBlocked = await this.checkBlockedParents(
           write.parentMutationId,
         );
         if (isParentBlocked) {
-          // Mark the child as blocked in the database
+
           await markWriteStatus(write.id, "blocked", {
             lastError: `Blocked by failed/blocked parent: ${write.parentMutationId}`,
             lastErrorDetails: {
@@ -211,7 +208,7 @@ export class SyncManager {
         }
       }
 
-      // Step 2: Conflict detection (if enabled)
+
       if (this.options.enableConflictDetection && write.useQueryRouteKey) {
         const hasConflict = await detectAndMarkConflict(write);
         if (hasConflict) {
@@ -219,38 +216,38 @@ export class SyncManager {
         }
       }
 
-      // Step 3: Replace offline IDs with server IDs
+
       const processedWrite = await replaceOfflineIdsInWrite(
         write,
         dependencySchema,
       );
 
-      // Step 4: Execute the mutation
+
       const response = await this.executeMutation(processedWrite);
 
-      // Step 5: Update write status and store mapping
+
       await markWriteStatus(write.id, "success", {
         response,
         lastAttemptAt: Date.now(),
       });
 
-      // Step 6: Unblock dependent writes that were blocked by this write
+
       await processDependentWrites(write.id);
 
       return { status: "success" };
     } catch (error) {
-      console.log("error is here", error);
+
       toast.error(`Failed to sync write ${write.type}`);
 
       let errorMessage = "Unknown error";
       let serverResponse: any = null;
-      console.log("error", error);
+
       if (error instanceof HTTPError) {
         serverResponse = error.cause;
         errorMessage =
           serverResponse?.errors?.[0]?.msg || error.message || "Unknown error";
       }
-      // Determine if this is a permanent failure
+
       const isPermanentFailure = this.isPermanentFailure(error);
 
       await markWriteStatus(write.id, "failed", {
@@ -261,14 +258,14 @@ export class SyncManager {
         isPermanentFailure,
       });
 
-      // Mark all dependent writes as blocked for ANY failure
+
       await this.markDependentWritesAsBlocked(write.id);
 
       return { status: "failed", error: errorMessage };
     }
   }
 
-  // Execute the actual API mutation
+
 
   private async executeMutation(write: any): Promise<any> {
     const route = mutationMap[write.type as keyof typeof mutationMap];
@@ -277,7 +274,7 @@ export class SyncManager {
       throw new Error(`Unknown mutation type: ${write.type}`);
     }
 
-    // Validate payload before sending
+
     if (!write.payload) {
       throw new Error(`Missing payload for write type: ${write.type}`);
     }
@@ -291,16 +288,16 @@ export class SyncManager {
     return response;
   }
 
-  // Check if parent write is failed (permanently or temporarily)
+
   private async checkBlockedParents(parentId: string): Promise<boolean> {
     const db = new AppCacheDB();
     const parent = await db.OfflineWrites.get(parentId);
 
-    // Return true if parent is failed (permanently OR temporarily failure)
+
     return parent?.syncStatus === "failed";
   }
 
-  // Mark all dependent writes as blocked when a parent fails (permanently or temporarily)
+
 
   private async markDependentWritesAsBlocked(
     failedParentId: string,
@@ -324,18 +321,17 @@ export class SyncManager {
     }
   }
 
-  //  check if an error is permanent (should not retry)
 
   private isPermanentFailure(error: any): boolean {
     if (error instanceof HTTPError) {
       const statusCode = error.status;
 
-      // 4xx errors are usually permanent (except 429 - rate limit)
+
       if (statusCode >= 400 && statusCode < 500 && statusCode !== 429) {
         return true;
       }
 
-      // 5xx errors might be temporary, but some are permanent
+
       if (statusCode >= 500) {
         // Consider 501, 502, 503 as temporary, others as permanent
         return ![501, 502, 503].includes(statusCode);
@@ -345,7 +341,7 @@ export class SyncManager {
     return false;
   }
 
-  //  Cleanup after sync
+
 
   private async cleanup(): Promise<void> {
     try {
@@ -355,7 +351,7 @@ export class SyncManager {
 
       let query = db.OfflineWrites.where("userId").equals(this.options.userId);
 
-      // If facilityId is provided, filter by facilityId for cleanup
+
       if (this.options.facilityId) {
         query = query.and((w) => w.facilityId === this.options.facilityId);
       }
@@ -386,18 +382,18 @@ export class SyncManager {
   }
 }
 
-//  function to run a one-time sync
+
 
 export async function syncOfflineRecords(
   userId: string,
   onProgress?: (syncedCount: number, totalCount: number) => void,
   onSyncStart?: (totalCount: number) => void,
   onSyncComplete?: () => void,
-  facilityId?: string, // Add optional facilityId parameter
+  facilityId?: string,
 ): Promise<SyncResult> {
   const syncManager = new SyncManager({
     userId,
-    facilityId, // Pass facilityId to SyncManager
+    facilityId,
     maxRetries: 3,
     retryDelayMs: 1000,
     enableConflictDetection: true,

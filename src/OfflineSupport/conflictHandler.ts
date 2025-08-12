@@ -7,10 +7,7 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 import { OfflineWritesEntry } from "./AppcacheDB";
 import { markWriteStatus } from "./writeQueue";
 
-/**
- * queryMap: Used for conflict detection and fetching current server data.
- * Maps logical query keys to API functions/routes.
- */
+// queryMap: Used for conflict detection and fetching current server data.
 export const queryMap = {
   getPatient: patientApi.getPatient,
   getEncounter: encounterApi.get,
@@ -18,7 +15,7 @@ export const queryMap = {
   getAppointment: scheduleApis.appointments.retrieve,
 } as const;
 
-// function to fetch data for a given route key and path parameters
+
 async function fetchDataForRoute(
   routeKey: keyof typeof queryMap,
   pathParams: Record<string, any>,

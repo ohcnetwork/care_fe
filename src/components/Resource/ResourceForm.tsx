@@ -178,7 +178,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     }
   };
 
-  // Load offline entry when offlineEntryId is present
+
   useEffect(() => {
     if (offlineEntryId && !id) {
       setIsLoadingOfflineEntry(true);
@@ -200,7 +200,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
   useEffect(() => {
     const loadResourcerequest = async () => {
-      // Use offline data if available, otherwise use server data
+
       const dataToUse = offlineEntryId
         ? offlineEntry?.normalizedData
         : resourceData;
@@ -289,7 +289,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       if (entry) {
         const isCreate = entry.type === OfflineKeyMap.create_resource_request;
 
-        // Narrow the payload type based on the type field
+
         const existingPayload = isCreate
           ? (entry.payload as CreateResourceRequest)
           : (entry.payload as UpdateResourceRequest);
@@ -329,7 +329,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           authUser,
         );
 
-        // Update the offline write entry with normalized data for display/editing
         await db.OfflineWrites.update(updatedEntry.id, {
           normalizedData: normalizedResource,
         });
@@ -377,7 +376,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           authUser,
         );
 
-        // Update the offline write entry with normalized data for display/editing
+
         await db.OfflineWrites.update(saveResult.entry.id, {
           normalizedData: normalizedResource,
         });
@@ -438,7 +437,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         authUser,
       );
 
-      // Update the offline write entry with normalized data for display/editing
+
       await db.OfflineWrites.update(saveResult.entry.id, {
         normalizedData: normalizedResource,
       });
@@ -450,16 +449,16 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       const updatedResourceRequestList: PaginatedResponse<ResourceRequest> =
         prevResourceRequestList?.results
           ? {
-              ...prevResourceRequestList,
-              results: [...prevResourceRequestList.results, normalizedResource],
-              count:
-                (prevResourceRequestList.count ??
-                  prevResourceRequestList.results.length) + 1,
-            }
+            ...prevResourceRequestList,
+            results: [...prevResourceRequestList.results, normalizedResource],
+            count:
+              (prevResourceRequestList.count ??
+                prevResourceRequestList.results.length) + 1,
+          }
           : {
-              count: 1,
-              results: [normalizedResource],
-            };
+            count: 1,
+            results: [normalizedResource],
+          };
 
       queryClient.setQueryData(
         ["resourceRequests", related_patient],
@@ -612,9 +611,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                           facilityOptions ?? [],
                           field.value
                             ? {
-                                label: field.value.name,
-                                value: field.value.id,
-                              }
+                              label: field.value.name,
+                              value: field.value.id,
+                            }
                             : undefined,
                         )}
                         value={field.value?.id ?? ""}

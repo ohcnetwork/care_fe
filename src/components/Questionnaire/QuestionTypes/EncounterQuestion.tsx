@@ -75,7 +75,7 @@ interface EncounterQuestionProps {
   patientId?: string;
   facilityId: string;
   editMode?: boolean;
-  offlineEntry?: any; // Add offlineEntry prop for offline data
+  offlineEntry?: any; 
 }
 
 export function EncounterQuestion({
@@ -89,7 +89,7 @@ export function EncounterQuestion({
   editMode = false,
   offlineEntry,
 }: EncounterQuestionProps) {
-  // Fetch encounter data
+
 
   const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounter", encounterId],
@@ -99,7 +99,7 @@ export function EncounterQuestion({
     }),
     meta: { persist: true },
     networkMode: "online",
-    enabled: !!encounterId && !editMode, // Skip server data fetching when in edit mode
+    enabled: !!encounterId && !editMode, 
   });
   const { t } = useTranslation();
 
@@ -122,24 +122,24 @@ export function EncounterQuestion({
     patient: "",
   });
 
-  // Handle offline data population when in edit mode
+
   useEffect(() => {
     if (
       editMode &&
       offlineEntry &&
       questionnaireResponse.values?.length === 0
     ) {
-      // Extract encounter data from offline entry
+
       const payload = offlineEntry.payload as any;
       if (payload?.requests && payload.requests.length > 0) {
         const request = payload.requests[0];
         if (request.body) {
-          // The encounter data is directly in the body, not nested in datapoints
+
           const offlineEncounter = request.body;
           if (offlineEncounter) {
             setEncounter(offlineEncounter);
 
-            // Update questionnaire response with offline data
+
             updateQuestionnaireResponseCB(
               [
                 {

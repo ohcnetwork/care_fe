@@ -132,7 +132,7 @@ export function AppointmentQuestion({
   const [selectedSlot, setSelectedSlot] = useState<TokenSlot>();
 
   // help to populate the data during ofline record edit
-  // Query to get slot details
+
   const { data: slotData } = useQuery({
     queryKey: ["slot", facilityId, value.slot_id],
     queryFn: query(scheduleApis.slots.retrieve, {
@@ -142,7 +142,6 @@ export function AppointmentQuestion({
     meta: { persist: true },
   });
 
-  // Simple effect to set selected tags from stored values and slot data
   useEffect(() => {
     if (slotData) {
       setSelectedSlot(slotData as TokenSlot);
@@ -203,8 +202,8 @@ export function AppointmentQuestion({
           className={cn(
             "rounded-md",
             !resource &&
-              hasError(APPOINTMENT_FIELDS.SLOT.key) &&
-              "ring-1 ring-red-500",
+            hasError(APPOINTMENT_FIELDS.SLOT.key) &&
+            "ring-1 ring-red-500",
           )}
         >
           <PractitionerSelector
@@ -231,8 +230,8 @@ export function AppointmentQuestion({
           className={cn(
             "rounded-md",
             !value.slot_id &&
-              hasError(APPOINTMENT_FIELDS.SLOT.key) &&
-              "ring-1 ring-red-500",
+            hasError(APPOINTMENT_FIELDS.SLOT.key) &&
+            "ring-1 ring-red-500",
           )}
         >
           <Sheet open={open} onOpenChange={setOpen}>

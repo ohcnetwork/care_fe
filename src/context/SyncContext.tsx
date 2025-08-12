@@ -36,7 +36,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
             setTotalCount(totalCount);
           },
           () => {},
-          facilityId, // Pass facilityId to syncOfflineRecords
+          facilityId, 
         );
         console.log("Sync result:", result);
       } catch (error) {
@@ -46,7 +46,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
         setSyncInProgress(false);
       }
     },
-    [], // Remove isSyncing dependency to prevent recreation
+    [], 
   );
 
   const resetSync = useCallback(() => {

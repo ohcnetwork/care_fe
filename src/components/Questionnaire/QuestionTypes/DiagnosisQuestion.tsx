@@ -79,7 +79,7 @@ interface DiagnosisQuestionProps {
   ) => void;
   disabled?: boolean;
   editMode?: boolean;
-  offlineEntry?: any; // Add offlineEntry prop
+  offlineEntry?: any; 
 }
 
 const DIAGNOSIS_INITIAL_VALUE: Omit<DiagnosisRequest, "encounter"> = {
@@ -361,22 +361,18 @@ export function DiagnosisQuestion({
     }),
     meta: { persist: true },
     networkMode: "online",
-    enabled: !isPreview && !editMode, // Skip server data fetching when in edit mode
+    enabled: !isPreview && !editMode,
   });
 
   useEffect(() => {
     // Handle offline data population when in edit mode
     if (editMode && offlineEntry) {
-      // Extract diagnosis data from offline entry
+
       const payload = offlineEntry.payload as any;
       if (payload?.requests && payload.requests.length > 0) {
         const request = payload.requests[0];
         if (request.body?.datapoints) {
-          // Convert offline datapoints to diagnosis format
-          // const offlineDiagnoses = request.body.datapoints.map((dp: any) => ({
-          //   ...dp,
-          //   dirty: true, // Mark as dirty for offline editing
-          // }));
+
 
           updateQuestionnaireResponseCB(
             [
@@ -390,7 +386,7 @@ export function DiagnosisQuestion({
         }
       }
     }
-    // Only fetch server data if not in edit mode
+
     else if (patientDiagnoses?.results && !editMode) {
       updateQuestionnaireResponseCB(
         [

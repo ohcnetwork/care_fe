@@ -18,7 +18,7 @@ export interface OfflineWritesEntry {
   mutationPathParams?: Record<string, any>;
   mutationQueryParams?: Record<string, any>;
   payload: unknown;
-  normalizedData?: unknown; // Add normalized data for display/editing
+  normalizedData?: unknown;
   response?: unknown;
   parentMutationId?: string;
   clientTimestamp: number;
@@ -40,7 +40,7 @@ export class AppCacheDB extends Dexie {
   OfflineWrites!: Dexie.Table<OfflineWritesEntry, string>;
   constructor() {
     super("AppCacheDB");
-    this.version(4).stores({
+    this.version(5).stores({
       querycache: "cacheKey, timestamp",
       OfflineWrites:
         "id, userId, facilityId, type, resourceType, mutationSyncRouteKey, syncStatus, clientTimestamp, retries",

@@ -1,9 +1,6 @@
 import { OfflineWritesEntry } from "./AppcacheDB";
 
-/**
- * Build a dependency graph from the list of writes.
- * Each node is a write ID, and edges point from parent to child.
- */
+
 export function buildDependencyGraph(
   writes: OfflineWritesEntry[],
 ): Map<string, string[]> {

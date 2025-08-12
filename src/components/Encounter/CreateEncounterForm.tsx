@@ -136,7 +136,7 @@ export default function CreateEncounterForm({
   const { mutate: createEncounter, isPending } = useMutation({
     mutationFn: mutate(encounterApi.create),
     onSuccess: async (data: EncounterRead) => {
-      // If this was editing an offline encounter, mark the old entry as successful
+
       if (offlineEntryId) {
         try {
           await handleOfflineRecordSuccess(offlineEntryId, data);
@@ -206,12 +206,12 @@ export default function CreateEncounterForm({
         permissions,
         currentSelectedOrganizations || [],
       );
-      // Update the offline write entry with normalized data for display/editing
+
       await db.OfflineWrites.update(saveResult.entry.id, {
         normalizedData: normalizeEncounter,
       });
 
-      // update the encounter list at encounterhistory on patient profile page
+
       queryClient.setQueryData(
         ["encounter", normalizeEncounter.id],
         normalizeEncounter,
@@ -226,18 +226,18 @@ export default function CreateEncounterForm({
 
       const updatedList: PaginatedResponse<EncounterRead> = prevEncounterList
         ? {
-            ...prevEncounterList,
-            count: prevEncounterList.count + 1,
-            results: [normalizeEncounter, ...prevEncounterList.results],
-          }
+          ...prevEncounterList,
+          count: prevEncounterList.count + 1,
+          results: [normalizeEncounter, ...prevEncounterList.results],
+        }
         : {
-            count: 1,
-            results: [normalizeEncounter],
-          };
+          count: 1,
+          results: [normalizeEncounter],
+        };
 
       queryClient.setQueryData(encounterListKey, updatedList);
 
-      // update active encounter on verify page
+
       updateActiveEncounterList({
         queryClient: queryClient,
         action: "createEncounter",
@@ -257,7 +257,7 @@ export default function CreateEncounterForm({
     }
   };
 
-  //  open sheet when offlineEntryId is provided
+
   useEffect(() => {
     if (offlineEntryId) {
       setIsOpen(true);
@@ -266,7 +266,7 @@ export default function CreateEncounterForm({
 
   useEffect(() => {
     if (offlineEntryId) {
-      // Fetch offline entry and populate form
+
       const fetchAndPopulateForm = async () => {
         try {
           const db = new AppCacheDB();
@@ -275,12 +275,12 @@ export default function CreateEncounterForm({
           if (entry && entry.normalizedData) {
             const normalizedData = entry.normalizedData as EncounterRead;
 
-            // Populate form with normalized data
+
             const formData = {
               status:
                 normalizedData.status === "planned" ||
-                normalizedData.status === "in_progress" ||
-                normalizedData.status === "on_hold"
+                  normalizedData.status === "in_progress" ||
+                  normalizedData.status === "on_hold"
                   ? normalizedData.status
                   : "planned",
               encounter_class: normalizedData.encounter_class,
@@ -293,7 +293,7 @@ export default function CreateEncounterForm({
 
             form.reset(formData);
 
-            // Set tags if available
+
             if (normalizedData.tags && normalizedData.tags.length > 0) {
               setSelectedTags(normalizedData.tags);
             }
@@ -448,7 +448,7 @@ export default function CreateEncounterForm({
                           className={cn(
                             "h-24 w-full justify-start text-lg",
                             field.value === value &&
-                              "ring-2 ring-primary text-primary",
+                            "ring-2 ring-primary text-primary",
                           )}
                           variant="outline"
                           onClick={() => field.onChange(value)}

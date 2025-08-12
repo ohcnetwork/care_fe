@@ -78,7 +78,7 @@ interface SymptomQuestionProps {
   ) => void;
   disabled?: boolean;
   editMode?: boolean;
-  offlineEntry?: any; // Add offlineEntry prop for offline data
+  offlineEntry?: any; 
 }
 
 const SYMPTOM_INITIAL_VALUE: Omit<SymptomRequest, "encounter"> = {
@@ -684,13 +684,13 @@ export function SymptomQuestion({
     }),
     meta: { persist: true },
     networkMode: "online",
-    enabled: !isPreview && !editMode, // Skip server data fetching when in edit mode
+    enabled: !isPreview && !editMode, 
   });
 
   useEffect(() => {
-    // Handle offline data population when in edit mode
+   
     if (editMode && offlineEntry) {
-      // Extract symptom data from offline entry
+     
       const payload = offlineEntry.payload as any;
       if (payload?.requests && payload.requests.length > 0) {
         const request = payload.requests[0];
@@ -707,7 +707,7 @@ export function SymptomQuestion({
         }
       }
     }
-    // Only fetch server data if not in edit mode
+    
     else if (patientSymptoms?.results && !editMode) {
       updateQuestionnaireResponseCB(
         [

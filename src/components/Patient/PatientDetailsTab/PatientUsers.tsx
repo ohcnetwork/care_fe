@@ -109,7 +109,7 @@ export function AddUserSheet({
     enabled: open,
   });
 
-  // Load offline entry when offlineEntryId is present
+
   useEffect(() => {
     if (offlineEntryId) {
       const loadOfflineEntry = async () => {
@@ -126,7 +126,6 @@ export function AddUserSheet({
     }
   }, [offlineEntryId]);
 
-  // Populate form with offline data when available
   useEffect(() => {
     if (offlineEntry?.normalizedData) {
       const normalizedData = offlineEntry.normalizedData as {
@@ -143,7 +142,7 @@ export function AddUserSheet({
     }
   }, [offlineEntry, offlineEntryId]);
 
-  // Open sheet when offlineEntryId is provided
+
   useEffect(() => {
     if (offlineEntryId) {
       setOpen(true);
@@ -211,7 +210,7 @@ export function AddUserSheet({
         return;
       }
 
-      //update normalized data
+
       const normalizedData = {
         user: selectedUser,
         role: selectedRole,
@@ -452,7 +451,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
         return;
       }
 
-      //update normalized data
+
       const normalizedData = {
         user: userToRemove,
         patientName: patientData.name,
@@ -474,7 +473,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
         })
         .delete();
 
-      //update the query cache list of users
+
       const users = queryClient.getQueryData<PaginatedResponse<UserBase>>([
         "patientUsers",
         patientId,

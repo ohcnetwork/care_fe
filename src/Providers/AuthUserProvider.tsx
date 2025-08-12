@@ -1,6 +1,5 @@
 import careConfig from "@careConfig";
 import {
-  onlineManager,
   useIsRestoring,
   useMutation,
   useQuery,
@@ -217,7 +216,7 @@ export default function AuthUserProvider({
     };
   }, [signOut]);
   const isRestoring = useIsRestoring();
-  console.log(isLoading, !isRestoring, !isChecked);
+
 
   // useEffect(() => {
   //   // Don't start sync if user is on session expired page
@@ -230,24 +229,18 @@ export default function AuthUserProvider({
   //     localStorage.getItem(LocalStorageKeys.accessToken) === null ||
   //     isOnSessionExpiredPage
   //   ) {
-  //     console.log("Sync skipped:", {
-  //       isOnline: onlineManager.isOnline(),
-  //       hasUser: !!user?.external_id,
-  //       isSyncing,
-  //       isOnSessionExpiredPage,
-  //       currentPath: location.pathname,
-  //     });
+  //    
   //     return;
   //   }
 
-  //   console.log("Setting up automatic sync in 3 seconds...");
+  //  
   //   const timeout = setTimeout(() => {
-  //     console.log("Triggering automatic sync for user:", user.external_id);
+  //    
   //     startSync(user.external_id);
   //   }, 3000);
 
   //   return () => {
-  //     console.log("Clearing sync timeout");
+  //   
   //     clearTimeout(timeout);
   //   };
   // }, [
@@ -258,7 +251,6 @@ export default function AuthUserProvider({
   //   location.pathname,
   // ]);
 
-  console.log("user : ", user, onlineManager.isOnline());
   if (isLoading || isRestoring || !isChecked) {
     return <Loading />;
   }

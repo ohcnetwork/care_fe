@@ -200,9 +200,9 @@ export const normalizeOfflinePatientRecord = (
 
     created_date: created_date ? created_date : nowIso,
     modified_date: modified_date ? modified_date : nowIso,
-    instance_tags: selectedTags ?? [], // change needed
-    facility_tags: [], // change needed
-    instance_identifiers: identifierforNormalize ?? [], // change needed
+    instance_tags: selectedTags ?? [],
+    facility_tags: [],
+    instance_identifiers: identifierforNormalize ?? [],
 
     geo_organization: selectedGeoLocation ?? {
       id: payload.geo_organization ?? "unknown",
@@ -385,7 +385,7 @@ export const normalizedAppointmentRecord = (
     modified_date: nowIso,
     updated_by: bookedBy ? normalizeUserBase(bookedBy) : null,
     created_by: bookedBy ? normalizeUserBase(bookedBy) : null,
-    tags: selectedTags, // have to done changes here
+    tags: selectedTags,
   };
 };
 
@@ -433,7 +433,7 @@ export const updateSlotCacheAfterOfflineAppointment = ({
     };
   };
 
-  // Utility to update heatmap slot counts
+
   const updateHeatmap = (key: any[], dateKey: string, delta: number) => {
     const heatmap = queryClient.getQueryData<AvailabilityHeatmapResponse>(key);
     if (heatmap && heatmap[dateKey]) {
@@ -449,7 +449,7 @@ export const updateSlotCacheAfterOfflineAppointment = ({
     }
   };
 
-  // Utility to update slot allocation
+
   const updateSlots = (key: any[], slotId: string, delta: number) => {
     const slotList = queryClient.getQueryData<{ results: TokenSlot[] }>(key);
     if (slotList) {
@@ -458,9 +458,9 @@ export const updateSlotCacheAfterOfflineAppointment = ({
         results: slotList.results.map((slot) =>
           slot.id === slotId
             ? {
-                ...slot,
-                allocated: Math.max((slot.allocated ?? 0) + delta, 0),
-              }
+              ...slot,
+              allocated: Math.max((slot.allocated ?? 0) + delta, 0),
+            }
             : slot,
         ),
       };
@@ -468,7 +468,6 @@ export const updateSlotCacheAfterOfflineAppointment = ({
     }
   };
 
-  // Handle increment for "booked" and "rescheduled"
   if (
     (action === "booked" || action === "rescheduled") &&
     selectedDate &&
@@ -483,7 +482,7 @@ export const updateSlotCacheAfterOfflineAppointment = ({
     updateSlots(slotQueryKey, selectedSlot.id, +1);
   }
 
-  // Handle decrement for "rescheduled", "cancel", and "mark_as_entered_in_error"
+
   if (
     (action === "rescheduled" ||
       action === "cancel" ||
@@ -538,14 +537,14 @@ export const updateActiveEncounterList = ({
   ): PaginatedResponse<EncounterRead> => {
     const updatedList: PaginatedResponse<EncounterRead> = EncouterList?.results
       ? {
-          ...EncouterList,
-          results: [...EncouterList.results, newEncounter as EncounterRead],
-          count: (EncouterList.count ?? EncouterList.results.length) + 1,
-        }
+        ...EncouterList,
+        results: [...EncouterList.results, newEncounter as EncounterRead],
+        count: (EncouterList.count ?? EncouterList.results.length) + 1,
+      }
       : {
-          count: 1,
-          results: [newEncounter as EncounterRead],
-        };
+        count: 1,
+        results: [newEncounter as EncounterRead],
+      };
     return updatedList;
   };
 
@@ -565,18 +564,18 @@ export const updateActiveEncounterList = ({
     const UpdatedActiveEncounterList: PaginatedResponse<EncounterRead> =
       ActiveEncouterList?.results
         ? {
-            ...ActiveEncouterList,
-            results: ActiveEncouterList.results.filter(
-              (entry) => entry.id !== normalizeEncounter?.id,
-            ),
-            count:
-              (ActiveEncouterList.count ?? ActiveEncouterList.results.length) -
-              1,
-          }
+          ...ActiveEncouterList,
+          results: ActiveEncouterList.results.filter(
+            (entry) => entry.id !== normalizeEncounter?.id,
+          ),
+          count:
+            (ActiveEncouterList.count ?? ActiveEncouterList.results.length) -
+            1,
+        }
         : {
-            count: 0,
-            results: [],
-          };
+          count: 0,
+          results: [],
+        };
     queryClient.setQueryData(
       ["encounters", "live", patientID],
       UpdatedActiveEncounterList,
@@ -601,17 +600,17 @@ export const normalizedQuestionnairRequest = (
     modified_date: new Date().toISOString(),
     questionnaire: questionnaireMeta
       ? {
-          id: questionnaireMeta.id,
-          slug: questionnaireMeta.slug,
-          version: questionnaireMeta.version,
-          code: questionnaireMeta.code,
-          questions: questionnaireMeta.questions,
-          title: questionnaireMeta.title,
-          description: questionnaireMeta.description,
-          status: questionnaireMeta.status,
-          subject_type: questionnaireMeta.subject_type,
-          tags: questionnaireMeta.tags,
-        }
+        id: questionnaireMeta.id,
+        slug: questionnaireMeta.slug,
+        version: questionnaireMeta.version,
+        code: questionnaireMeta.code,
+        questions: questionnaireMeta.questions,
+        title: questionnaireMeta.title,
+        description: questionnaireMeta.description,
+        status: questionnaireMeta.status,
+        subject_type: questionnaireMeta.subject_type,
+        tags: questionnaireMeta.tags,
+      }
       : undefined,
     subject_id: encounterID ?? patientID,
     responses: questionnair.body.results ?? [],
@@ -648,14 +647,14 @@ function replaceEncounterScopedInPaginatedCache<
 ) {
   const prevData = queryClient.getQueryData(key);
 
-  // Check if this is an infinite query by key pattern (starts with "infinite-")
+
   const isInfiniteQuery = key[0]?.startsWith("infinite-");
 
   if (isInfiniteQuery) {
-    // Handle infinite query data
+
     queryClient.setQueryData(key, (prev: any) => {
       if (!prev?.pages) {
-        // If no existing cache, create a new infinite query structure
+
         return {
           pages: [
             {
@@ -667,10 +666,10 @@ function replaceEncounterScopedInPaginatedCache<
         };
       }
 
-      // Only update the first page with new entries, keep other pages unchanged
+
       const updatedPages = prev.pages.map((page: any, index: number) => {
         if (index === 0) {
-          // First page gets filtered and merged data
+
           const filteredResults = (page.results || []).filter(
             (entry: any) => entry.encounter !== encounterID,
           );
@@ -682,7 +681,7 @@ function replaceEncounterScopedInPaginatedCache<
             count: merged.length,
           };
         } else {
-          // Other pages remain unchanged
+
           return page;
         }
       });
@@ -693,7 +692,7 @@ function replaceEncounterScopedInPaginatedCache<
       };
     });
   } else {
-    // Handle regular paginated data
+
     const paginatedData = prevData as PaginatedResponse<T> | undefined;
     const filteredResults = (paginatedData?.results ?? []).filter(
       (entry) => entry.encounter !== encounterID,
@@ -738,12 +737,12 @@ export const normalizeAndUpdateDiagnosis = (
 
   const newCodes = new Set(normalizedDiagnosisResult.map((d) => d.code.code));
 
-  // Update infinite query cache
+
   queryClient.setQueryData(
     ["infinite-encounter_diagnosis", patientID, encounterID],
     (prev: any) => {
       if (!prev?.pages) {
-        // If no existing cache, create a new one
+
         return {
           pages: [
             {
@@ -775,7 +774,7 @@ export const normalizeAndUpdateDiagnosis = (
     },
   );
 
-  // Get existing diagnoses for this encounter to create merged data
+
   const existingDiagnoses =
     queryClient.getQueryData<PaginatedResponse<Diagnosis>>([
       "diagnoses",
@@ -789,7 +788,7 @@ export const normalizeAndUpdateDiagnosis = (
 
   const mergedDiagnoses = [...filteredResults, ...normalizedDiagnosisResult];
 
-  // Update regular paginated cache
+
   queryClient.setQueryData(
     ["diagnoses", patientID, encounterID],
     (prev: PaginatedResponse<Diagnosis> | undefined) => {
@@ -801,7 +800,7 @@ export const normalizeAndUpdateDiagnosis = (
     },
   );
 
-  // Update patient-scoped cache with merged diagnoses
+
   replaceEncounterScopedInPaginatedCache<Diagnosis>(
     queryClient,
     ["infinite-encounter_diagnosis", patientID, undefined],
@@ -853,14 +852,7 @@ export const normalizeAndUpdateMedication_Request = (
     normaizedMedication_RequestResult,
   );
 
-  /* No need for replce as we dont show medication request per patient
-  replaceEncounterScopedInPaginatedCache<MedicationRequestRead>(
-    queryClient,
-    ["medication_requests_active", patientID, encounterID],
-    encounterID,
-    normaizedMedication_RequestResult,
-  );
-  **/
+
 };
 
 export const normalizeAndUpdateSymptom = async (
@@ -892,12 +884,11 @@ export const normalizeAndUpdateSymptom = async (
     },
   );
 
-  // Update infinite query cache
   queryClient.setQueryData(
     ["infinite-symptoms", patientID, encounterID],
     (prev: any) => {
       if (!prev?.pages) {
-        // If no existing cache, create a new one
+
         return {
           pages: [
             {
@@ -909,17 +900,17 @@ export const normalizeAndUpdateSymptom = async (
         };
       }
 
-      // Only update the first page with new symptoms, keep other pages unchanged
+
       const updatedPages = prev.pages.map((page: any, index: number) => {
         if (index === 0) {
-          // First page gets all the normalized symptoms
+
           return {
             ...page,
             results: normalizedSymptomResult,
             count: normalizedSymptomResult.length,
           };
         } else {
-          // Other pages remain unchanged
+
           return page;
         }
       });
@@ -931,7 +922,7 @@ export const normalizeAndUpdateSymptom = async (
     },
   );
 
-  // Update regular paginated cache
+
   queryClient.setQueryData(
     ["symptoms", patientID, encounterID],
     (prev: PaginatedResponse<Symptom> | undefined) => {
@@ -984,12 +975,12 @@ export const normalizeAndUpdateMedication_Statement = (
       };
     });
 
-  // Update infinite query cache
+
   queryClient.setQueryData(
     ["infinite-medication_statements", patientID, encounterID],
     (prev: any) => {
       if (!prev?.pages) {
-        // If no existing cache, create a new one
+
         return {
           pages: [
             {
@@ -1001,17 +992,17 @@ export const normalizeAndUpdateMedication_Statement = (
         };
       }
 
-      // Only update the first page with new medication statements, keep other pages unchanged
+
       const updatedPages = prev.pages.map((page: any, index: number) => {
         if (index === 0) {
-          // First page gets all the normalized medication statements
+
           return {
             ...page,
             results: normalizeMedication_Statement,
             count: normalizeMedication_Statement.length,
           };
         } else {
-          // Other pages remain unchanged
+
           return page;
         }
       });
@@ -1023,7 +1014,6 @@ export const normalizeAndUpdateMedication_Statement = (
     },
   );
 
-  // Update regular paginated cache
   queryClient.setQueryData(
     ["medication_statements", patientID, encounterID],
     (prev: PaginatedResponse<MedicationStatementRead> | undefined) => {
@@ -1078,10 +1068,10 @@ export const normalizeAndUpdateAllergy_Intolerance = (
     },
   );
 
-  // Update infinite query cache
+
   queryClient.setQueryData(["infinite-allergies", patientID], (prev: any) => {
     if (!prev?.pages) {
-      // If no existing cache, create a new one
+
       return {
         pages: [
           {
@@ -1093,17 +1083,17 @@ export const normalizeAndUpdateAllergy_Intolerance = (
       };
     }
 
-    // Only update the first page with new allergies, keep other pages unchanged
+
     const updatedPages = prev.pages.map((page: any, index: number) => {
       if (index === 0) {
-        // First page gets all the normalized allergies
+
         return {
           ...page,
           results: normalizedAllergyResult,
           count: normalizedAllergyResult.length,
         };
       } else {
-        // Other pages remain unchanged
+
         return page;
       }
     });
@@ -1114,7 +1104,7 @@ export const normalizeAndUpdateAllergy_Intolerance = (
     };
   });
 
-  // Update regular paginated cache
+
   queryClient.setQueryData(
     ["allergies", patientID],
     (prev: PaginatedResponse<AllergyIntolerance> | undefined) => {
@@ -1163,13 +1153,13 @@ export const normalizeAndUpdateEncounter = (
     const allergyData = queryClient.getQueryData<
       PaginatedResponse<AllergyIntolerance>
     >(["allergies", patientID, encounterID, PrevEncounterData.status]);
-    // set allergy data with new key if status change
+
     queryClient.setQueryData(
       ["allergies", patientID, encounterID, q.body?.status],
       allergyData,
     );
 
-    // Remove old key
+
     queryClient.removeQueries({
       queryKey: ["allergies", patientID, encounterID, PrevEncounterData.status],
     });
@@ -1205,7 +1195,7 @@ export const cacheQuestionnairResponse = (
       ),
     );
 
-  // Cache the newly submitted offline questionnaire responses
+
   queryClient.setQueryDefaults(["offlineCreatedQuestionnaireResponses"], {
     meta: { persist: true },
     networkMode: "online",
@@ -1217,7 +1207,7 @@ export const cacheQuestionnairResponse = (
   );
 };
 
-// Helper function to handle offline record success when using server mutations
+
 export const handleOfflineRecordSuccess = async (
   offlineEntryId: string,
   serverResponse: any,

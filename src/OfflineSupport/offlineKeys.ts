@@ -1,10 +1,10 @@
-// Extracts placeholder names like {facilityId}, {slotId} from a route string
+
 export type ExtractPathParamKeys<Path extends string> =
   Path extends `${string}{${infer Param}}${infer Rest}`
-    ? Param | ExtractPathParamKeys<Rest>
-    : never;
+  ? Param | ExtractPathParamKeys<Rest>
+  : never;
 
-// Given a route object, returns an object type for its path params
+
 export type PathParamsObject<R extends { path: string }> = {
   [K in ExtractPathParamKeys<R["path"]>]: string;
 };
@@ -42,5 +42,5 @@ export const OfflineKeyMap = {
   service_request: "service_request",
 } as const;
 
-// Type for values like "create_patient"
+
 export type OfflineKey = (typeof OfflineKeyMap)[keyof typeof OfflineKeyMap];

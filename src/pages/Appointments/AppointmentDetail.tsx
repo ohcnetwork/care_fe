@@ -228,7 +228,7 @@ export default function AppointmentDetail(props: Props) {
         is_updated_offline: true,
       },
       parentMutationId: isOfflineId(appointment.id)
-        ? appointment.id //   offline-created appointment
+        ? appointment.id
         : existingRescheduleEntry
           ? rescheduleId //  reschedule write exists and if we are updating status
           : undefined,
@@ -236,21 +236,21 @@ export default function AppointmentDetail(props: Props) {
 
     const writeEntry: saveOfflineWriteData = !isOfflineId(appointment.id)
       ? {
-          ...baseEntry,
-          serverTimestamp: appointment.modified_date,
-          useQueryRouteKey: "retrieveAppointment",
-          useQueryPathParams: {
-            facility_id: appointment.facility.id,
-            id: appointment.id,
-          },
-        }
+        ...baseEntry,
+        serverTimestamp: appointment.modified_date,
+        useQueryRouteKey: "retrieveAppointment",
+        useQueryPathParams: {
+          facility_id: appointment.facility.id,
+          id: appointment.id,
+        },
+      }
       : baseEntry;
 
     try {
       if (existingStatusEntry) {
-        await db.OfflineWrites.update(statusupdateId, writeEntry); //  correct variable
+        await db.OfflineWrites.update(statusupdateId, writeEntry);
       } else {
-        const saveResult = await saveOfflineWrite(writeEntry); //  used writeEntry here
+        const saveResult = await saveOfflineWrite(writeEntry);
         if (!saveResult.success) {
           toast.error(saveResult.error);
           return;
@@ -652,7 +652,6 @@ const AppointmentActions = ({
 
   const [note, setNote] = useState(appointment.note);
 
-  // Load offline entry when offlineEntryId is present
   useEffect(() => {
     if (offlineEntryId) {
       const loadOfflineEntry = async () => {
@@ -669,14 +668,12 @@ const AppointmentActions = ({
     }
   }, [offlineEntryId, db]);
 
-  // Auto-open reschedule sheet if this is a reschedule offline entry
   useEffect(() => {
     if (offlineEntry?.type === "reschedule_appointment") {
       setIsRescheduleOpen(true);
     }
   }, [offlineEntry]);
 
-  // Populate reschedule form with offline data when available
   useEffect(() => {
     if (
       offlineEntry?.normalizedData &&
@@ -750,17 +747,7 @@ const AppointmentActions = ({
       },
     };
 
-    // const offlineEntry: saveOfflineWriteData = !isOfflineId(appointment.id)
-    //   ? {
-    //       ...baseEntry,
-    //       useQueryRouteKey: "cancelAppointmentQuery",
-    //       serverTimestamp: appointment.modified_date,
-    //       useQueryPathParams: {
-    //         facility_id: appointment.facility.id,
-    //         id: appointment.id,
-    //       },
-    //     }
-    //   : baseEntry;
+
 
     const prevTokenSlot = appointment.token_slot; //prev slot
     const prevDate = new Date(appointment.token_slot.start_datetime); // previous date
@@ -922,7 +909,7 @@ const AppointmentActions = ({
       ) {
         const updateEntry: OfflineWritesEntry = {
           ...rescheduleEntryExist,
-          payload: rescheduleAppointmentData, // replaces the old payload
+          payload: rescheduleAppointmentData, 
         };
 
         await db.OfflineWrites.update(rescheduleEntryExist.id, updateEntry);
@@ -941,9 +928,7 @@ const AppointmentActions = ({
           type: OfflineKeyMap.reschedule_appointment,
           resourceType: "Appointment",
           payload: rescheduleAppointmentData,
-          serverTimestamp: appointment.modified_date, // point to note : Although here we are changing  modified dat ehre for a appointment , It is correct for new appointment ,
-          // But we have to ensure serverstamp store the value of modidfied data from last server-cache  not the value after we update appointment and change modified data during normalizing in some cases
-          useQueryRouteKey: "retrieveAppointment",
+          serverTimestamp: appointment.modified_date,    useQueryRouteKey: "retrieveAppointment",
           useQueryPathParams: {
             facility_id: appointment.facility.id,
             id: appointment.id,
@@ -1006,9 +991,9 @@ const AppointmentActions = ({
         selectedDate: selectedDateOffline,
         selectedMonth: selectedMonthOffline,
         action: "rescheduled",
-        previousSlot: appointment.token_slot, //prev slot
-        previousDate: new Date(appointment.token_slot.start_datetime), // previous date
-        previousMonth: getMonthFromDate(appointment.token_slot.start_datetime), // previous month
+        previousSlot: appointment.token_slot, 
+        previousDate: new Date(appointment.token_slot.start_datetime),
+        previousMonth: getMonthFromDate(appointment.token_slot.start_datetime),
       });
 
       const updatedCacheAppointment: Appointment = {

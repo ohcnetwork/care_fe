@@ -31,7 +31,7 @@ interface QuestionGroupProps {
   isSubQuestion?: boolean;
   editMode?: boolean;
   offlineEntryId?: string;
-  offlineEntry?: any; // Add offlineEntry prop
+  offlineEntry?: any; 
 }
 
 export function isQuestionEnabled(

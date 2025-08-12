@@ -37,11 +37,7 @@ export async function markWriteStatus(
   });
 }
 
-/**
- * Unblock writes that were blocked by a failed parent
- * Call this when a parent write succeeds
- * Also replaces offline IDs with server IDs in dependent writes
- */
+
 export async function processDependentWrites(
   succeededParentId: string,
 ): Promise<void> {
@@ -71,15 +67,9 @@ export async function processDependentWrites(
         lastErrorDetails: undefined,
         lastAttemptAt: undefined,
       });
-      console.log(`Unblocked write ${dependent.id} (${dependent.type})`);
+
     }
   }
 }
 
-/**
- * Placeholder for cleaning up old successful/failed writes.
- * Implement this function later as needed.
- */
-// export async function cleanupSuccessfulWrites(userId: string, olderThanMs: number): Promise<void> {
-//   // TODO: Implement cleanup logic
-// }
+

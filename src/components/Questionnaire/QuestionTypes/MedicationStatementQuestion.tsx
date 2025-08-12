@@ -91,7 +91,7 @@ interface MedicationStatementQuestionProps {
   disabled?: boolean;
   errors: QuestionValidationError[];
   editMode?: boolean;
-  offlineEntry?: any; // Add offlineEntry prop for offline data
+  offlineEntry?: any; 
 }
 
 const MEDICATION_STATEMENT_INITIAL_VALUE: MedicationStatementRequest = {
@@ -192,9 +192,9 @@ export function MedicationStatementQuestion({
   });
 
   useEffect(() => {
-    // Handle offline data population when in edit mode
+ 
     if (editMode && offlineEntry) {
-      // Extract medication data from offline entry
+      
       const payload = offlineEntry.payload as any;
       if (payload?.requests && payload.requests.length > 0) {
         const request = payload.requests[0];
@@ -211,7 +211,7 @@ export function MedicationStatementQuestion({
         }
       }
     }
-    // Only fetch server data if not in edit mode
+   
     else if (patientMedications?.results && !editMode) {
       updateQuestionnaireResponseCB(
         [{ type: "medication_statement", value: patientMedications.results }],
