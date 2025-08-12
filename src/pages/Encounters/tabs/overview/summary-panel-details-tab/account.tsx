@@ -75,7 +75,7 @@ export const Account = () => {
               <Badge
                 variant={ACCOUNT_BILLING_STATUS_COLORS[account.billing_status]}
               >
-                {account.billing_status}
+                {t(account.billing_status)}
               </Badge>
             </div>
           )}

@@ -230,15 +230,6 @@ export const SummaryPanelDetailTab = () => {
               </div>
               <div>
                 <span className="text-sm font-medium text-gray-700">
-                  {t("hospital_identifier")}
-                </span>
-                <div className="text-sm text-gray-950 font-semibold">
-                  {encounter.external_identifier || "--"}
-                </div>
-              </div>
-
-              <div>
-                <span className="text-sm font-medium text-gray-700">
                   {t("account")}:
                 </span>
                 <div className="text-sm text-gray-950 font-semibold">
@@ -267,15 +258,20 @@ export const SummaryPanelDetailTab = () => {
               </div>
 
               <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium text-gray-700">
-                  {t("patient_id_abha")}:
-                </span>
                 <div className="text-sm text-gray-950 font-semibold flex flex-wrap gap-2">
-                  {patient?.instance_identifiers.map((identifier) => (
-                    <Badge key={identifier.config.id} variant="secondary">
-                      {identifier.value}
-                    </Badge>
-                  )) || <span>--</span>}
+                  {patient?.instance_identifiers?.map((identifier) => (
+                    <div
+                      key={identifier.config.id}
+                      className="flex md:flex-col gap-0.5 items-center md:items-start"
+                    >
+                      <span className="text-xs text-gray-600 w-32 md:w-auto">
+                        {identifier.config.config.display}:{" "}
+                      </span>
+                      <span className="text-sm font-semibold">
+                        {identifier.value}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
 

@@ -57,26 +57,19 @@ export function EncounterHeader() {
             </Link>
           </div>
           <div className="flex flex-row gap-10 ml-3">
-            <div>
-              <span className="text-sm font-medium text-gray-700">
-                {t("patient_id_abha")}:
-              </span>
-              <div className="text-sm text-gray-950 font-semibold">
-                {patient.instance_identifiers.length > 0
-                  ? patient.instance_identifiers
-                      .map((identifier) => identifier.value)
-                      .join(", ")
-                  : "--"}
+            {patient.instance_identifiers?.map((identifier) => (
+              <div
+                key={identifier.config.id}
+                className="flex md:flex-col gap-0.5 items-center md:items-start"
+              >
+                <span className="text-xs text-gray-600 w-32 md:w-auto">
+                  {identifier.config.config.display}:{" "}
+                </span>
+                <span className="text-sm font-semibold">
+                  {identifier.value}
+                </span>
               </div>
-            </div>
-            <div>
-              <span className="text-sm font-medium text-gray-700">
-                {t("hospital_identifier")}:
-              </span>
-              <div className="text-sm text-gray-950 font-semibold">
-                {encounter.external_identifier || "--"}
-              </div>
-            </div>
+            ))}
           </div>
           <div className="ml-3">
             <span className="text-sm font-medium text-gray-700">

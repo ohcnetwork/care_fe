@@ -12,15 +12,8 @@ import {
   StethoscopeIcon,
 } from "@/CAREUI/icons/CustomIcons";
 
-import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-
 export const QuickActions = (props: React.ComponentProps<"div">) => {
   const { t } = useTranslation();
-  const {
-    selectedEncounterId: encounterId,
-    facilityId,
-    patientId,
-  } = useEncounter();
 
   return (
     <div {...props} className={cn("flex gap-3", props.className)}>
@@ -28,25 +21,25 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
         icon={<AllergyIcon className="size-8 text-yellow-700" />}
         title={t("allergy")}
         shortcut="A"
-        href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/allergy_intolerance`}
+        href={`questionnaire/allergy_intolerance`}
       />
       <QuickAction
         icon={<ChillIcon className="size-8 text-pink-700" />}
         title={t("symptoms")}
         shortcut="S"
-        href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/symptom`}
+        href={`questionnaire/symptom`}
       />
       <QuickAction
         icon={<StethoscopeIcon className="size-8 text-blue-800" />}
         title={t("diagnosis")}
         shortcut="D"
-        href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/diagnosis`}
+        href={`questionnaire/diagnosis`}
       />
       <QuickAction
         icon={<HealthWorkerIcon className="size-8 text-teal-700" />}
         title={t("forms")}
         shortcut="F"
-        href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
+        href={`questionnaire/encounter`}
       />
     </div>
   );
