@@ -54,7 +54,7 @@ export const SummaryPanelEncounterDetails = () => {
     <div className="flex flex-col gap-2">
       <div className="hidden @xs:flex flex-col sm:flex-row p-3 bg-white -mt-1 rounded-lg gap-4 shadow">
         <div className="flex flex-col gap-4 sm:border-r border-gray-200 pr-4">
-          <div className="flex flex-row gap-14">
+          <div className="flex flex-row gap-8">
             <div className="flex flex-col gap-4">
               <div>
                 <span className="text-sm font-medium text-gray-700">
@@ -181,7 +181,7 @@ export const SummaryPanelEncounterDetails = () => {
             trigger={
               <Button
                 variant="outline"
-                className="hidden @sm:flex flex-row w-full text-gray-950"
+                className="hidden @md:flex flex-row w-full text-gray-950"
               >
                 <SquarePen className="size-3 text-gray-950" strokeWidth={1.5} />
                 <span className="font-semibold">{t("update_details")}</span>
@@ -192,9 +192,9 @@ export const SummaryPanelEncounterDetails = () => {
 
         <Separator className="sm:hidden" />
 
-        <div className="flex flex-row -mt-2 sm:mt-0 gap-5">
-          <div className="flex flex-col gap-2">
-            <div>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-row gap-6">
+            <div className="flex flex-col">
               <span className="text-sm font-medium text-gray-700">
                 {t("start_date")}:
               </span>
@@ -211,18 +211,7 @@ export const SummaryPanelEncounterDetails = () => {
                 )}
               </div>
             </div>
-            <div>
-              <span className="text-sm font-medium text-gray-700">
-                {t("account")}:
-              </span>
-              <div className="text-sm text-gray-950 font-semibold">
-                {account?.results[0]?.name || "--"}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <div>
+            <div className="flex flex-col">
               <span className="text-sm font-medium text-gray-700">
                 {t("end_date")}:
               </span>
@@ -239,26 +228,34 @@ export const SummaryPanelEncounterDetails = () => {
                 )}
               </div>
             </div>
-
-            <div className="flex flex-col gap-2">
-              <div className="text-sm text-gray-950 font-semibold flex flex-wrap gap-2">
-                {patient?.instance_identifiers?.map((identifier) => (
-                  <div
-                    key={identifier.config.id}
-                    className="flex md:flex-col gap-0.5 items-center md:items-start"
-                  >
-                    <span className="text-xs text-gray-600 w-32 md:w-auto">
-                      {identifier.config.config.display}:{" "}
-                    </span>
-                    <span className="text-sm font-semibold">
-                      {identifier.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-gray-700">
+              {t("account")}:
+            </span>
+            <div className="text-sm text-gray-950 font-semibold">
+              {account?.results[0]?.name || "--"}
             </div>
+          </div>
 
-            <div>
+          <div className="flex flex-row gap-2">
+            <div className="text-sm text-gray-950 font-semibold flex flex-wrap gap-6">
+              {patient?.instance_identifiers?.map((identifier) => (
+                <div
+                  key={identifier.config.id}
+                  className="flex flex-col items-start"
+                >
+                  <span className="text-gray-600 md:w-auto">
+                    {identifier.config.config.display}:{" "}
+                  </span>
+                  <span className="font-semibold">{identifier.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-row gap-2">
+            <div className="flex flex-col gap-2">
               <span className="text-sm font-medium text-gray-700">
                 {t("care_team")}:
               </span>

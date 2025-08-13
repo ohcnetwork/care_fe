@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetContent,
@@ -34,11 +35,17 @@ export const OverviewSidebarSheet = ({
   return (
     <Sheet>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent side="right" className="overflow-y-auto">
+      <SheetContent
+        side="right"
+        className="overflow-y-auto min-w-full sm:min-w-128 p-6"
+      >
         <SheetHeader>
-          <SheetTitle className="ml-3">
-            <span className="font-semibold">{t("encounter_details")}</span>
+          <SheetTitle>
+            <span className="text-xl font-semibold">
+              {t("encounter_details")}
+            </span>
           </SheetTitle>
+          <Separator className="my-2" />
         </SheetHeader>
         <Tabs defaultValue="details" className="p-2 rounded-lg">
           <TabsList className="w-full bg-gray-100 justify-between inset-shadow-sm pt-px pb-0.5 px-0.5">
