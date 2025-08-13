@@ -132,12 +132,10 @@ export default function BookAppointment({ patientId }: Props) {
     if (offlineEntry?.normalizedData) {
       const normalizedData = offlineEntry.normalizedData as AppointmentRead;
 
-     
       if (normalizedData.tags && normalizedData.tags.length > 0) {
         setSelectedTags(normalizedData.tags);
       }
 
-     
       if (normalizedData.note) {
         setReason(normalizedData.note);
       }
@@ -146,7 +144,6 @@ export default function BookAppointment({ patientId }: Props) {
         setSelectedPracticioner(normalizedData.user);
         setResourceId(normalizedData.user.id);
       }
-
 
       if (normalizedData.token_slot) {
         setOfflineSelectedSlot(normalizedData.token_slot);
@@ -237,7 +234,6 @@ export default function BookAppointment({ patientId }: Props) {
         selectedTags,
       );
 
-      
       await db.OfflineWrites.update(saveResult.entry.id, {
         normalizedData: normalizeAppointment,
       });

@@ -8,13 +8,10 @@ import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 import { Appointment } from "@/types/scheduling/schedule";
 import { UserBase } from "@/types/user/user";
 
-
-
 // Unified handler for structured questionnaire types (allergy, diagnosis, symptom, medication)
 export const handleStructuredQuestionnaireEdit = async (
   entry: OfflineWritesEntry,
 ) => {
-
   const structuredTypes = [
     "allergy_intolerance",
     "diagnosis",
@@ -29,7 +26,6 @@ export const handleStructuredQuestionnaireEdit = async (
   }
 
   try {
-   
     const payload = entry.payload as {
       requests: Array<{
         url: string;
@@ -53,7 +49,7 @@ export const handleStructuredQuestionnaireEdit = async (
     }
 
     const firstRequest = payload.requests[0];
-   
+
     const datapoint = firstRequest.body.datapoints?.[0];
     if (!datapoint) {
       toast.error("No datapoint found in offline entry");
@@ -62,11 +58,9 @@ export const handleStructuredQuestionnaireEdit = async (
 
     let patientId = datapoint.patient;
     const encounterId = datapoint.encounter;
-   
 
     if (!patientId) {
       try {
-       
         const urlMatch = payload.requests[0].url?.match(
           /\/api\/v1\/patient\/([^/]+)/,
         );
@@ -88,7 +82,6 @@ export const handleStructuredQuestionnaireEdit = async (
       toast.error("Encounter information not found in offline entry");
       return;
     }
-
 
     navigate(
       `/facility/${entry.facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${entry.type}`,
@@ -133,8 +126,6 @@ export const handleCreateEncounterEdit = async (
   setIsEncounterFormOpen(true);
 };
 
-
-
 export const handleEncounterAction = async (entry: OfflineWritesEntry) => {
   //Note: we use entry.id to navigate to the encounter updates page only because mark as complete is for already existing encounters
   navigate(`/facility/${entry.facilityId}/encounter/${entry.id}/updates`, {
@@ -149,7 +140,6 @@ export const handleCreateandUpdateResourceRequestEdit = async (
   facilityId?: string,
 ) => {
   if (entry.type === "create_resource_request") {
-  
     const payload = entry.payload as ResourceRequest;
     const relatedPatient = payload?.related_patient;
 
@@ -180,7 +170,6 @@ export const handleAssignUserToPatientEdit = async (
 export const handleRemoveUserFromPatientEdit = async (
   entry: OfflineWritesEntry,
 ) => {
-
   const normalizedData = entry.normalizedData as {
     user: UserBase;
     patientName: string;
@@ -194,11 +183,9 @@ export const handleRemoveUserFromPatientEdit = async (
   );
 };
 
-
 export const handleAppointmentEdit = async (entry: OfflineWritesEntry) => {
   switch (entry.type) {
     case "create_appointment": {
-      
       const normalizedData = entry.normalizedData as Appointment;
       const patientId = normalizedData?.patient?.id;
 
@@ -221,22 +208,19 @@ export const handleAppointmentEdit = async (entry: OfflineWritesEntry) => {
     case "reschedule_appointment":
     case "update_appointment_status":
     case "cancel_appointment": {
-     
       const normalizedData = entry.normalizedData as Appointment;
 
       // Extract the actual appointment ID from the offline entry ID
       let appointmentId: string;
       if (entry.id.startsWith("offline-")) {
-        
-        const withoutPrefix = entry.id.substring(8); 
+        const withoutPrefix = entry.id.substring(8);
         const lastDashIndex = withoutPrefix.lastIndexOf("-");
         if (lastDashIndex !== -1) {
-          appointmentId = withoutPrefix.substring(0, lastDashIndex); 
+          appointmentId = withoutPrefix.substring(0, lastDashIndex);
         } else {
-          appointmentId = withoutPrefix; 
+          appointmentId = withoutPrefix;
         }
       } else {
-        
         appointmentId = entry.id;
       }
 
@@ -273,7 +257,6 @@ export const handleNonStructuredQuestionnaireEdit = async (
   }
 
   try {
-
     const payload = entry.payload as {
       requests: Array<{
         url: string;
@@ -293,12 +276,10 @@ export const handleNonStructuredQuestionnaireEdit = async (
       return;
     }
 
- 
     const firstRequest = payload.requests[0];
     const patientId = firstRequest.body.patient;
     const encounterId = firstRequest.body.encounter;
 
-   
     if (encounterId) {
       navigate(
         `/facility/${entry.facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire`,
@@ -326,7 +307,6 @@ export const handleNonStructuredQuestionnaireEdit = async (
   }
 };
 
-
 export const handleAppointmentQuestionnaireEdit = async (
   entry: OfflineWritesEntry,
 ) => {
@@ -336,7 +316,6 @@ export const handleAppointmentQuestionnaireEdit = async (
   }
 
   try {
-
     const payload = entry.payload as {
       requests: Array<{
         url: string;
@@ -355,7 +334,6 @@ export const handleAppointmentQuestionnaireEdit = async (
       return;
     }
 
-  
     const firstRequest = payload.requests[0];
     const patientId = firstRequest.body.patient;
 
@@ -363,7 +341,6 @@ export const handleAppointmentQuestionnaireEdit = async (
       toast.error("Patient information not found in offline entry");
       return;
     }
-
 
     navigate(
       `/facility/${entry.facilityId}/patient/${patientId}/questionnaire`,
@@ -394,7 +371,6 @@ export const handleEncounterQuestionnaireEdit = async (
   }
 
   try {
- 
     const payload = entry.payload as {
       requests: Array<{
         url: string;
@@ -422,10 +398,8 @@ export const handleEncounterQuestionnaireEdit = async (
       return;
     }
 
-
     const firstRequest = payload.requests[0];
     const patientId = firstRequest.body.patient;
-
 
     const urlMatch = firstRequest.url.match(/\/api\/v1\/encounter\/([^/]+)\//);
     const encounterId = urlMatch ? urlMatch[1] : null;
@@ -440,7 +414,6 @@ export const handleEncounterQuestionnaireEdit = async (
       return;
     }
 
-    
     navigate(
       `/facility/${entry.facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`,
       {
@@ -456,7 +429,6 @@ export const handleEncounterQuestionnaireEdit = async (
   }
 };
 
-
 export const handleTimeOfDeathEdit = async (entry: OfflineWritesEntry) => {
   if (entry.type !== "time_of_death") {
     toast.error("Invalid entry type for time of death editing");
@@ -464,7 +436,6 @@ export const handleTimeOfDeathEdit = async (entry: OfflineWritesEntry) => {
   }
 
   try {
-   
     const payload = entry.payload as {
       requests: Array<{
         url: string;
@@ -481,10 +452,8 @@ export const handleTimeOfDeathEdit = async (entry: OfflineWritesEntry) => {
       return;
     }
 
-   
     const firstRequest = payload.requests[0];
 
-   
     const urlMatch = firstRequest.url.match(/\/api\/v1\/patient\/([^/]+)\//);
     const patientId = urlMatch ? urlMatch[1] : null;
 
@@ -493,7 +462,6 @@ export const handleTimeOfDeathEdit = async (entry: OfflineWritesEntry) => {
       return;
     }
 
-   
     navigate(
       `/facility/${entry.facilityId}/patient/${patientId}/questionnaire`,
       {
@@ -515,7 +483,6 @@ export const handleUnsupportedTypeEdit = (entry: OfflineWritesEntry) => {
 
 export const handleRetryRecord = async (entry: OfflineWritesEntry) => {
   try {
-   
     const syncManager = new SyncManager({
       userId: entry.userId,
       facilityId: entry.facilityId,
@@ -534,20 +501,16 @@ export const handleRetryRecord = async (entry: OfflineWritesEntry) => {
   }
 };
 
-
 // DELETE HANDLERS
 
 export const handleDeleteRecord = async (entry: OfflineWritesEntry) => {
   try {
     const db = new AppCacheDB();
 
-   
     const childRecords = await findChildRecords(entry.id);
 
-    
     await db.OfflineWrites.delete(entry.id);
 
-   
     for (const child of childRecords) {
       await db.OfflineWrites.delete(child.id);
     }
@@ -562,7 +525,6 @@ export const handleDeleteRecord = async (entry: OfflineWritesEntry) => {
   }
 };
 
-
 async function findChildRecords(
   parentId: string,
 ): Promise<OfflineWritesEntry[]> {
@@ -575,11 +537,9 @@ async function findChildRecords(
   );
 
   for (const child of directChildren) {
-   
     if (child.syncStatus !== "success") {
       childRecords.push(child);
 
-      
       const grandChildren = await findChildRecords(child.id);
       childRecords.push(...grandChildren);
     }

@@ -31,7 +31,6 @@ export default {
     TRes: Type<TagConfig>(),
   },
 
-
   update: {
     path: "/api/v1/tag_config/{external_id}/",
     method: HttpMethod.PUT,

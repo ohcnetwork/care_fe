@@ -66,7 +66,6 @@ import {
   handleUnsupportedTypeEdit,
 } from "./actionHandlers";
 
-
 async function getWritesByStatus(
   userId: string,
   facilityId: string | undefined,
@@ -81,7 +80,6 @@ async function getWritesByStatus(
 
   return query.and((w) => w.syncStatus === status).toArray();
 }
-
 
 function useSyncData(facilityId?: string, refreshTrigger?: number) {
   const [syncData, setSyncData] = React.useState({
@@ -104,17 +102,14 @@ function useSyncData(facilityId?: string, refreshTrigger?: number) {
         const db = new AppCacheDB();
         const userId = user.external_id;
 
-        
         let query = db.OfflineWrites.where("userId").equals(userId);
 
-        
         if (facilityId) {
           query = query.and((w) => w.facilityId === facilityId);
         }
 
         const allWrites = await query.toArray();
 
-        
         const statistics = {
           pending: allWrites.filter((w) => w.syncStatus === "pending").length,
           failed: allWrites.filter((w) => w.syncStatus === "failed").length,
@@ -126,7 +121,6 @@ function useSyncData(facilityId?: string, refreshTrigger?: number) {
           total: allWrites.length,
         };
 
-       
         const successfulWrites = allWrites.filter(
           (w) => w.syncStatus === "success",
         );
@@ -167,7 +161,6 @@ function useSyncData(facilityId?: string, refreshTrigger?: number) {
 
   return { syncData };
 }
-
 
 interface StatusCardProps {
   title: string;
@@ -236,7 +229,6 @@ const StatusCard: React.FC<StatusCardProps> = ({
   );
 };
 
-
 const SyncStatusHeader: React.FC<{
   facilityId?: string;
   refreshTrigger?: number;
@@ -248,7 +240,7 @@ const SyncStatusHeader: React.FC<{
 
   const handleSyncNow = async () => {
     try {
-        const pendingWrites = await getPendingAndRetryableWrites(
+      const pendingWrites = await getPendingAndRetryableWrites(
         user.external_id,
         facilityId,
       );
@@ -345,7 +337,6 @@ const SyncStatusOverview: React.FC<{
   );
 };
 
-
 const formatTimeAgo = (timestamp: number) => {
   const now = Date.now();
   const diffInMinutes = Math.floor((now - timestamp) / (1000 * 60));
@@ -361,7 +352,7 @@ const formatTimeAgo = (timestamp: number) => {
 };
 
 const getResourceTypeDisplay = (entry: OfflineWritesEntry) => {
- const typeMap: Record<keyof typeof OfflineKeyMap, string> = {
+  const typeMap: Record<keyof typeof OfflineKeyMap, string> = {
     create_patient: "Create Patient",
     update_patient: "Patient Update",
     create_encounter: "Create Encounter",
@@ -396,7 +387,6 @@ const getResourceTypeDisplay = (entry: OfflineWritesEntry) => {
     entry.type
   );
 };
-
 
 const PendingWritesTable: React.FC<{
   facilityId?: string;
@@ -527,7 +517,6 @@ const PendingWritesTable: React.FC<{
     </div>
   );
 };
-
 
 const FailedWritesTable: React.FC<{
   facilityId?: string;
@@ -665,7 +654,6 @@ const FailedWritesTable: React.FC<{
     </div>
   );
 };
-
 
 const ConflictedWritesTable: React.FC<{
   facilityId?: string;
@@ -812,7 +800,6 @@ const ConflictedWritesTable: React.FC<{
     </div>
   );
 };
-
 
 const BlockedWritesTable: React.FC<{
   facilityId?: string;
@@ -1018,7 +1005,6 @@ const SyncStatusTabs: React.FC<{
   );
 };
 
-
 const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
   const { t } = useTranslation();
   const authUser = useAuthUser();
@@ -1032,10 +1018,9 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
   const [deleteConfirmEntry, setDeleteConfirmEntry] =
     React.useState<OfflineWritesEntry | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
- 
+
   const [refreshTrigger, setRefreshTrigger] = React.useState(0);
 
-  
   const triggerRefresh = () => {
     setRefreshTrigger((prev) => prev + 1);
   };
@@ -1140,7 +1125,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
       if (success) {
         setIsDeleteDialogOpen(false);
         setDeleteConfirmEntry(null);
-     
+
         triggerRefresh();
       }
     }
@@ -1149,7 +1134,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
   const handleRetry = async (entry: OfflineWritesEntry) => {
     try {
       await handleRetryRecord(entry);
-           triggerRefresh();
+      triggerRefresh();
     } catch (error) {
       console.error("Error in retry:", error);
     }
@@ -1208,7 +1193,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
             onClose={() => {
               setIsUserAssignmentFormOpen(false);
               setSelectedUserAssignmentEntry(null);
-                       triggerRefresh();
+              triggerRefresh();
             }}
           />
         )}

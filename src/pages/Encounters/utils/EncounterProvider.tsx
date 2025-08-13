@@ -103,7 +103,6 @@ export function EncounterProvider({
     selectedEncounter?.permissions ?? [],
   );
 
-
   const patientPermissions = getPermissions(
     hasPermission,
     patient?.permissions ?? [],

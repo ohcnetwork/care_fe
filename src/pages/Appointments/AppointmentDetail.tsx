@@ -257,8 +257,6 @@ export default function AppointmentDetail(props: Props) {
         }
       }
 
-    
-
       const updatedAppointment = {
         ...appointment,
         status,
@@ -682,7 +680,6 @@ const AppointmentActions = ({
       const normalizedData = offlineEntry.normalizedData as Appointment;
       const payload = offlineEntry.payload as AppointmentRescheduleRequest;
 
-   
       if (payload.previous_booking_note) {
         setRescheduleReason(payload.previous_booking_note);
       }
@@ -690,12 +687,10 @@ const AppointmentActions = ({
         setNewVisitReason(payload.new_booking_note);
       }
 
-      
       if (normalizedData.user) {
         setSelectedPractitioner(normalizedData.user);
       }
 
-    
       if (normalizedData.token_slot) {
         setOfflineSelectedSlot(normalizedData.token_slot);
         setSelectedSlotId(normalizedData.token_slot.id);
