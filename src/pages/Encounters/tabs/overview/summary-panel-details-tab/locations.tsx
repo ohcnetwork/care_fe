@@ -1,9 +1,8 @@
-import { SquarePen } from "lucide-react";
+import { HistoryIcon, SquarePen } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
+import { Button } from "@/components/ui/button";
 
-import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
@@ -12,7 +11,10 @@ import { EmptyState } from "./empty-state";
 
 export const Locations = () => {
   const { t } = useTranslation();
-  const { selectedEncounter: encounter } = useEncounter();
+  const {
+    selectedEncounter: encounter,
+    actions: { assignLocation, viewLocationHistory },
+  } = useEncounter();
 
   if (!encounter) return null;
 
@@ -20,17 +22,14 @@ export const Locations = () => {
     <div className="bg-gray-100 rounded-md w-full border border-gray-200 pt-2 px-1 pb-1">
       <div className="flex justify-between items-center text-black pl-2 pb-1">
         <span className=" font-semibold">{t("location")}</span>
-        <LocationSheet
-          facilityId={encounter.facility.id}
-          history={encounter.location_history}
-          encounter={encounter}
-          trigger={
-            <div className="flex items-center gap-4 p-2">
-              <CareIcon icon="l-history" className="text-gray-700" />
-              <SquarePen className="size-4 cursor-pointer" strokeWidth={1.5} />
-            </div>
-          }
-        />
+        <div className="flex">
+          <Button variant="ghost" size="icon" onClick={viewLocationHistory}>
+            <HistoryIcon className="size-4 cursor-pointer" strokeWidth={1.5} />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={assignLocation}>
+            <SquarePen className="size-4 cursor-pointer" strokeWidth={1.5} />
+          </Button>
+        </div>
       </div>
       <div className="bg-white rounded-md p-2 shadow">
         {encounter.current_location ? (
