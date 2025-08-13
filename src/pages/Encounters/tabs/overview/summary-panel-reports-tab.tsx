@@ -26,12 +26,12 @@ export const SummaryPanelReportsTab = () => {
       <div className="flex pl-1 @xs:hidden">
         <h6 className="text-gray-950 font-semibold">{t("reports")}</h6>
       </div>
-      <div className="flex flex-col @sm:flex-row gap-3 @sm:gap-4">
+      <div className="flex flex-col sm:@sm:flex-row gap-3 sm:@sm:gap-4">
         {reports.map((report) => (
           <Button
             key={report.label}
             variant="outline"
-            className="justify-start @sm:justify-center @sm:flex-1"
+            className="justify-start sm:@sm:justify-center sm:@sm:flex-1"
             asChild
           >
             <Link href={report.href}>

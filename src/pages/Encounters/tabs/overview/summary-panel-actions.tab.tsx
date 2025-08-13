@@ -31,12 +31,12 @@ export const SummaryPanelActionsTab = () => {
       <div className="flex pl-1 @xs:hidden">
         <h6 className="text-gray-950 font-semibold">{t("actions")}</h6>
       </div>
-      <div className="flex flex-col @sm:flex-row gap-3 @sm:gap-4">
+      <div className="flex flex-col sm:@sm:flex-row gap-3 sm:@sm:gap-4">
         {actions.map((action) => (
           <Button
             key={action.label}
             variant="outline"
-            className="justify-start @sm:justify-center @sm:flex-1"
+            className="justify-start sm:@sm:justify-center sm:@sm:flex-1"
             asChild
           >
             <Link href={action.href}>
@@ -46,10 +46,10 @@ export const SummaryPanelActionsTab = () => {
           </Button>
         ))}
 
-        <div className="@sm:flex-1 flex flex-col gap-2 border-t border-gray-300 border-dashed @sm:border-none pt-3 @sm:pt-0">
+        <div className="sm:@sm:flex-1 flex flex-col gap-2 border-t border-gray-300 border-dashed sm:@sm:border-none pt-3 sm:@sm:pt-0">
           <Button
             variant="outline_primary"
-            className="justify-start @sm:justify-center"
+            className="justify-start sm:@sm:justify-center"
             asChild
           >
             <Link href="">
