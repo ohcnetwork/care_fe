@@ -30,8 +30,9 @@ export function topologicalSort(
     inDegree.set(write.id, 0);
   }
 
+  // Increment inDegree only if parent exists in the pending writes list
   for (const write of writes) {
-    if (write.parentMutationId) {
+    if (write.parentMutationId && idToWrite.has(write.parentMutationId)) {
       inDegree.set(write.id, (inDegree.get(write.id) || 0) + 1);
     }
   }

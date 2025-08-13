@@ -10,11 +10,12 @@ export async function getPendingAndRetryableWrites(
   facilityId?: string,
 ): Promise<OfflineWritesEntry[]> {
   let query = db.OfflineWrites.where("userId").equals(userId);
-
+  console.log("facilityId", facilityId);
+  console.log("userId", userId);
   if (facilityId) {
     query = query.and((w) => w.facilityId === facilityId);
   }
-
+  console.log("query", query);
   return query
     .and((w) => {
       const isPending = w.syncStatus === "pending";

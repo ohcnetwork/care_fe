@@ -102,6 +102,7 @@ export class SyncManager {
         this.options.userId,
         this.options.facilityId,
       );
+      console.log("pendingWrites", pendingWrites);
 
       if (pendingWrites.length === 0) {
         return result;
@@ -110,6 +111,7 @@ export class SyncManager {
       const sortedWrites = topologicalSort(pendingWrites);
       const totalWrites = sortedWrites.length;
 
+      console.log("sortedWrites", sortedWrites);
       this.options.onSyncStart?.(totalWrites);
 
       for (let i = 0; i < sortedWrites.length; i++) {
@@ -170,6 +172,7 @@ export class SyncManager {
     status: "success" | "failed" | "conflict" | "blocked";
     error?: string;
   }> {
+    console.log("write", write);
     return this.processWrite(write);
   }
 
@@ -206,6 +209,8 @@ export class SyncManager {
         write,
         dependencySchema,
       );
+
+      console.log("processedWrite", processedWrite);
 
       const response = await this.executeMutation(processedWrite);
 
@@ -256,13 +261,43 @@ export class SyncManager {
       throw new Error(`Missing payload for write type: ${write.type}`);
     }
 
+    console.log("🚀 Executing mutation:", {
+      type: write.type,
+      route: route,
+      pathParams: write.mutationPathParams,
+      queryParams: write.mutationQueryParams,
+      payload: write.payload,
+      facilityId: write.facilityId,
+      userId: write.userId,
+    });
+
+    // Log the exact API call details
+    console.log("🌐 API Call Details:", {
+      method: route.method,
+      path: route.path,
+      fullUrl: `${route.path}`,
+      headers: "Will be set by fetch",
+      body: write.payload,
+    });
+
     const runMutation = mutate(route, {
       pathParams: write.mutationPathParams,
       queryParams: write.mutationQueryParams,
     });
 
-    const response = await runMutation(write.payload);
-    return response;
+    try {
+      const response = await runMutation(write.payload);
+      console.log("✅ Mutation successful:", response);
+      return response;
+    } catch (error) {
+      console.error("❌ Mutation failed:", {
+        error: error instanceof Error ? error.message : String(error),
+        details: error instanceof Error ? error.cause : error,
+        payload: write.payload,
+        route: route,
+      });
+      throw error;
+    }
   }
 
   private async checkBlockedParents(parentId: string): Promise<boolean> {
