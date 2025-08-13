@@ -11,6 +11,7 @@ import { Permissions, getPermissions } from "@/common/Permissions";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
+import { DispenseMedicineButton } from "@/pages/Encounters/tabs/overview/summary-panel-details-tab/dispense-medicine";
 import {
   EncounterRead,
   inactiveEncounterStatus,
@@ -50,6 +51,7 @@ type EncounterContextType = {
     viewLocationHistory: () => void;
     manageCareTeam: () => void;
     manageDepartments: () => void;
+    dispenseMedicine: () => void;
   };
 };
 
@@ -59,6 +61,7 @@ enum EncounterAction {
   LocationHistory,
   ManageCareTeam,
   ManageDepartments,
+  DispenseMedicine,
 }
 
 const encounterContext = createContext<EncounterContextType | undefined>(
@@ -211,6 +214,9 @@ export function EncounterProvider({
           manageDepartments: () => {
             setActiveAction(EncounterAction.ManageDepartments);
           },
+          dispenseMedicine: () => {
+            setActiveAction(EncounterAction.DispenseMedicine);
+          },
         },
       }}
     >
@@ -268,6 +274,13 @@ export function EncounterProvider({
           trigger={<></>}
         />
       )}
+
+      <DispenseMedicineButton
+        open={activeAction === EncounterAction.DispenseMedicine}
+        setOpen={(open) => {
+          setActiveAction(open ? EncounterAction.DispenseMedicine : null);
+        }}
+      />
     </encounterContext.Provider>
   );
 }

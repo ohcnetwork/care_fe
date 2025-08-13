@@ -51,7 +51,7 @@ export const ManageCareTeam = () => {
                   key={member.member.id}
                   name={member.member.first_name}
                   imageUrl={member.member.profile_picture_url}
-                  className="size-9 rounded-full"
+                  className="size-9 rounded-full border border-white shadow-sm"
                 />{" "}
                 <div className="flex items-center justify-between w-full">
                   <div className="flex flex-col">
@@ -71,20 +71,22 @@ export const ManageCareTeam = () => {
               </div>
             ))}
             {encounter.care_team.length > 3 && !showAllMembers && (
-              <span
-                className="text-sm font-medium text-black underline cursor-pointer"
+              <div
                 onClick={() => setShowAllMembers(true)}
+                className="text-sm font-medium text-black underline cursor-pointer p-1"
               >
-                +{encounter.care_team.length - 3} {t("members")}
-              </span>
+                <span>
+                  +{encounter.care_team.length - 3} {t("members")}
+                </span>
+              </div>
             )}
             {encounter.care_team.length > 3 && showAllMembers && (
-              <span
-                className="text-sm font-medium text-black underline cursor-pointer"
+              <div
                 onClick={() => setShowAllMembers(false)}
+                className="text-sm font-medium text-black underline cursor-pointer p-1"
               >
-                {t("show_less")}
-              </span>
+                <span>{t("show_less")}</span>
+              </div>
             )}
           </div>
         ) : (

@@ -333,9 +333,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
           <div ref={ref} />
           {isFetchingNextPage && <CardListSkeleton count={5} />}
           {!hasNextPage && !isFetching && (
-            <div className="text-sm text-gray-500 text-center border-y border-gray-300 py-2">
-              {t("no_more_encounters_in_this_facility")}
-            </div>
+            <div className="border-b border-gray-300 pb-2" />
           )}
         </div>
       </div>

@@ -15,6 +15,7 @@ export const SummaryPanelActionsTab = () => {
       assignLocation,
       manageDepartments,
       manageCareTeam,
+      dispenseMedicine,
     },
   } = useEncounter();
 
@@ -34,6 +35,10 @@ export const SummaryPanelActionsTab = () => {
     {
       label: t("update_department"),
       onClick: manageDepartments,
+    },
+    {
+      label: t("dispense_medicine"),
+      onClick: dispenseMedicine,
     },
   ] as const satisfies { label: string; onClick: () => void }[];
 
