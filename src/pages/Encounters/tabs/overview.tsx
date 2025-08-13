@@ -37,7 +37,7 @@ export const EncounterOverviewTab = () => {
     <div className="flex gap-3">
       <ScrollArea className="flex-1 h-[calc(100vh-12rem)] pr-3">
         <div className="flex flex-col gap-6">
-          <QuickActions />
+          {canWrite && <QuickActions />}
           <ClinicalHistoryOverview />
           <div className="xl:hidden">
             <SummaryPanel />

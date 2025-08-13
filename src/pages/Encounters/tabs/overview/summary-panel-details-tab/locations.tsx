@@ -1,71 +1,42 @@
-import { NotebookPen, SquarePen } from "lucide-react";
+import { SquarePen } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Button } from "@/components/ui/button";
-
 import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
 
-import { EncounterRead } from "@/types/emr/encounter/encounter";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
-export const Locations = ({
-  encounter,
-  actionsTab = false,
-  canEdit,
-}: {
-  encounter: EncounterRead;
-  actionsTab?: boolean;
-  canEdit?: boolean;
-}) => {
+import { EmptyState } from "./empty-state";
+
+export const Locations = () => {
   const { t } = useTranslation();
+  const { selectedEncounter: encounter } = useEncounter();
 
-  if (actionsTab) {
-    return (
-      <div>
-        <LocationSheet
-          facilityId={encounter.facility.id}
-          history={encounter.location_history}
-          encounter={encounter}
-          trigger={
-            <>
-              {canEdit ? (
-                <Button variant="outline" className="w-full justify-start">
-                  <NotebookPen className="size-4" />
-                  {t("update_location")}
-                </Button>
-              ) : (
-                <></>
-              )}
-            </>
-          }
-        />
-      </div>
-    );
-  }
+  if (!encounter) return null;
 
   return (
-    <div>
-      <div className="flex justify-between items-center p-2">
-        <span className="text-black font-semibold">{t("location")}</span>
+    <div className="bg-gray-100 rounded-md w-full border border-gray-200 pt-2 px-1 pb-1">
+      <div className="flex justify-between items-center text-black pl-2 pb-1">
+        <span className=" font-semibold">{t("location")}</span>
         <LocationSheet
           facilityId={encounter.facility.id}
           history={encounter.location_history}
           encounter={encounter}
           trigger={
-            <div className="flex items-center gap-2 p-2">
+            <div className="flex items-center gap-4 p-2">
               <CareIcon icon="l-history" className="text-gray-700" />
-              <SquarePen className="size-4 cursor-pointer" />
+              <SquarePen className="size-4 cursor-pointer" strokeWidth={1.5} />
             </div>
           }
         />
       </div>
-      <div className="bg-white rounded-md p-2 mx-1">
+      <div className="bg-white rounded-md p-2 shadow">
         {encounter.current_location ? (
           <LocationTree location={encounter.current_location} />
         ) : (
-          <p className="text-gray-500 text-sm">{t("no_location_associated")}</p>
+          <EmptyState message={t("no_location_associated")} />
         )}
       </div>
     </div>

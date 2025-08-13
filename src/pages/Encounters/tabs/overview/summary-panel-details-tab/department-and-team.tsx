@@ -1,47 +1,25 @@
-import { NotebookPen, SquarePen } from "lucide-react";
+import { SquarePen } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
-import { EncounterRead } from "@/types/emr/encounter/encounter";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
-export const DepartmentsAndTeams = ({
-  canEdit,
-  encounter,
-  actionsTab = false,
-}: {
-  canEdit: boolean;
-  encounter: EncounterRead;
-  actionsTab?: boolean;
-}) => {
+import { EmptyState } from "./empty-state";
+
+export const DepartmentsAndTeams = () => {
   const { t } = useTranslation();
+  const { selectedEncounter: encounter, canWriteSelectedEncounter: canEdit } =
+    useEncounter();
 
-  if (actionsTab) {
-    return (
-      <div>
-        <LinkDepartmentsSheet
-          entityType="encounter"
-          entityId={encounter.id}
-          currentOrganizations={encounter.organizations}
-          facilityId={encounter.facility.id}
-          trigger={
-            <Button variant="outline" className="w-full justify-start">
-              <NotebookPen className="size-4" />
-              {t("update_department")}
-            </Button>
-          }
-        />
-      </div>
-    );
-  }
+  if (!encounter) return null;
 
   return (
-    <div>
-      <div className="flex justify-between items-center p-2">
-        <span className="text-black font-semibold mb-2">
+    <div className="bg-gray-100 rounded-md w-full border border-gray-200 pt-2">
+      <div className="flex justify-between items-center px-3 py-1 text-gray-950">
+        <span className=" font-semibold mb-2">
           {t("departments_and_teams")}
         </span>
         {canEdit && (
@@ -50,11 +28,13 @@ export const DepartmentsAndTeams = ({
             entityId={encounter.id}
             currentOrganizations={encounter.organizations}
             facilityId={encounter.facility.id}
-            trigger={<SquarePen className="size-4 cursor-pointer" />}
+            trigger={
+              <SquarePen className="size-4 cursor-pointer" strokeWidth={1.5} />
+            }
           />
         )}
       </div>
-      <div className="space-y-2 bg-white rounded-lg p-2 mx-1">
+      <div className="space-y-2 bg-white rounded-lg p-2 mx-1 mb-1 shadow">
         {encounter.organizations.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {encounter.organizations.map((org) => (
@@ -64,7 +44,7 @@ export const DepartmentsAndTeams = ({
             ))}
           </div>
         ) : (
-          <span>--</span>
+          <EmptyState message={t("no_departments_and_teams")} />
         )}
       </div>
     </div>

@@ -122,25 +122,27 @@ export function QuestionnaireSearch({
     return (
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
-          <Button
-            data-cy="add-questionnaire-button"
-            variant="outline"
-            role="combobox"
-            disabled={disabled || isLoading}
-          >
-            {isLoading ? (
-              <>
-                <CareIcon
-                  icon="l-spinner"
-                  className="mr-2 size-4 animate-spin"
-                />
-                {t("loading")}
-              </>
-            ) : (
-              <span>{placeholder || t("add_questionnaire")}</span>
-            )}
-            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-          </Button>
+          {trigger || (
+            <Button
+              data-cy="add-questionnaire-button"
+              variant="outline"
+              role="combobox"
+              disabled={disabled || isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <CareIcon
+                    icon="l-spinner"
+                    className="mr-2 size-4 animate-spin"
+                  />
+                  {t("loading")}
+                </>
+              ) : (
+                <span>{placeholder || t("add_questionnaire")}</span>
+              )}
+              <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+            </Button>
+          )}
         </SheetTrigger>
 
         <SheetContent

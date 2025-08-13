@@ -5,33 +5,32 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import { EncounterRead } from "@/types/emr/encounter/encounter";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
-export const HospitalizationDetails = ({
-  encounter,
-}: {
-  encounter: EncounterRead;
-}) => {
+export const HospitalizationDetails = () => {
   const { t } = useTranslation();
+  const {
+    selectedEncounter: encounter,
+    selectedEncounterId: encounterId,
+    patientId,
+    facilityId,
+  } = useEncounter();
+
+  if (!encounter) return null;
 
   return (
-    <div className="p-1">
-      <div className="p-2 flex justify-between items-center">
-        <span className="text-gray-950 font-semibold">
-          {t("hospitalisation")}
-        </span>
+    <div className="bg-gray-100 rounded-md w-full border border-gray-200 pt-2">
+      <div className="flex justify-between items-center px-3 pt-1 text-gray-950 pb-2 pr-2">
+        <span className="font-semibold">{t("hospitalisation")}</span>
         <Button variant="ghost" size="xs" asChild>
           <Link
-            href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter`}
+            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
           >
-            <SquarePen
-              className="size-4 cursor-pointer text-gray-950"
-              strokeWidth={1.5}
-            />
+            <SquarePen className="size-4 cursor-pointer" strokeWidth={1.5} />
           </Link>
         </Button>
       </div>
-      <div className="flex flex-col gap-2 bg-white rounded-md shadow">
+      <div className="flex flex-col gap-2 bg-white rounded-md shadow mx-1 mb-1">
         <div className="flex justify-between items-center p-2">
           <span className="text-gray-950 font-semibold">
             {t("hospitalisation")}
