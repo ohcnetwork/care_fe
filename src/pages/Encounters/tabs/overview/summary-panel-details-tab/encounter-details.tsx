@@ -77,7 +77,7 @@ export const EncounterDetails = () => {
           </div>
         </div>
         <Separator className="mt-2" />
-        <div className="hidden md:flex flex-col gap-1">
+        <div className="md:flex flex-col gap-1">
           <div>
             <span className="text-sm font-medium text-gray-700">
               {t("start_date")}:
@@ -97,7 +97,7 @@ export const EncounterDetails = () => {
           </div>
         </div>
 
-        <div className="hidden md:flex flex-col gap-1">
+        <div className=" md:flex flex-col gap-1">
           <div>
             <span className="text-sm font-medium text-gray-700">
               {t("end_date")}:

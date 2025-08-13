@@ -56,13 +56,13 @@ export function EncounterHeader() {
               </span>
             </Link>
           </div>
-          <div className="flex flex-row gap-10 ml-3">
+          <div className="flex flex-wrap md:gap-10 ml-3 gap-3">
             {patient.instance_identifiers?.map((identifier) => (
               <div
                 key={identifier.config.id}
-                className="flex md:flex-col gap-0.5 items-center md:items-start"
+                className="flex flex-col gap-1.5 items-start"
               >
-                <span className="text-xs text-gray-600 w-32 md:w-auto">
+                <span className="text-xs text-gray-600 md:w-auto">
                   {identifier.config.config.display}:{" "}
                 </span>
                 <span className="text-sm font-semibold">

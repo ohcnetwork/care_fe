@@ -25,7 +25,7 @@ export const Questionnaires = () => {
   return (
     <div className="bg-gray-100 rounded-md p-2 border border-gray-200">
       <div className="flex items-center justify-between w-full pl-1 pt-1">
-        <span className="font-semibold text-gray-950 ">{t("forms")}</span>
+        <span className="font-semibold text-gray-950">{t("forms")}</span>
         <QuestionnaireSearch
           trigger={
             <Button variant="ghost" size="xs" className="-mr-2">
