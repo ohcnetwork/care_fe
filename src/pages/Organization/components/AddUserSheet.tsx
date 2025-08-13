@@ -14,12 +14,12 @@ import {
 
 import UserForm from "@/components/Users/UserForm";
 
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface AddUserSheetProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  onUserCreated?: (user: UserBase) => void;
+  onUserCreated?: (user: UserReadMinimal) => void;
   organizationId?: string;
 }
 
