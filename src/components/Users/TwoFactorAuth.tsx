@@ -174,7 +174,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
                 <Button
                   onClick={handleSetup}
                   variant="outline"
-                  className="border-blue-600 text-blue-600 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed block mx-auto sm:mx-0"
+                  className="border-blue-600 text-blue-600 hover:bg-blue-50 disabled:cursor-not-allowed block mx-auto sm:mx-0"
                   disabled={isSettingUp}
                 >
                   {isSettingUp ? (
