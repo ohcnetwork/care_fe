@@ -70,7 +70,7 @@ export default function UserSoftwareUpdate() {
         </UpdatableApp>
       ) : (
         // Default state to check for updates
-        <div className="flex justify-center sm:justify-start overflow-hidden rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:px-6 sm:py-6">
+        <div className="flex justify-center sm:justify-start overflow-hidden rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:p-6">
           <Button variant="primary" onClick={checkUpdates}>
             <div className="flex items-center gap-4">
               <CareIcon icon="l-sync" className="text-xl" />
