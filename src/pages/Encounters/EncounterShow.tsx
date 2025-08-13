@@ -63,7 +63,7 @@ export const EncounterShow = (props: Props) => {
   const pluginTabs = useCareAppEncounterTabs();
   const { goBack } = useAppHistory();
   const showMoreAfterIndex = useBreakpoints({
-    default: 1,
+    default: 2,
     xs: 2,
     sm: 6,
     xl: 9,
@@ -168,12 +168,12 @@ export const EncounterShow = (props: Props) => {
       hideTitleOnPage
     >
       <EncounterHeader />
-      <div className="flex flex-col lg:flex-row mt-4">
+      <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
         <EncounterHistorySelector />
         <NavTabs
           showMoreAfterIndex={showMoreAfterIndex}
-          className="w-full overflow-x-auto"
-          tabContentClassName="flex-none h-[calc(100vh-12rem)] overflow-y-auto"
+          className="w-full"
+          tabContentClassName="flex-none overflow-x-auto overflow-y-hidden lg:overflow-y-auto lg:h-[calc(100vh-12rem)]"
           tabs={tabs}
           currentTab={props.tab}
           tabTriggerClassName="max-w-36"

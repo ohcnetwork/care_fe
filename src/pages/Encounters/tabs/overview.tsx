@@ -35,9 +35,13 @@ export const EncounterOverviewTab = () => {
 
   return (
     <div className="flex gap-3">
-      <ScrollArea className="flex-1 h-[calc(100vh-12rem)] pr-3">
+      <div className="flex-1 xl:h-[calc(100vh-12rem)] xl:pr-3 overflow-y-auto">
         <div className="flex flex-col gap-6">
-          {canWrite && <QuickActions />}
+          {canWrite && (
+            <div className="hidden xl:block">
+              <QuickActions />
+            </div>
+          )}
           <ClinicalHistoryOverview />
           <div className="xl:hidden">
             <SummaryPanel />
@@ -75,7 +79,7 @@ export const EncounterOverviewTab = () => {
             />
           </div>
         </div>
-      </ScrollArea>
+      </div>
 
       <ScrollArea className="w-72 h-[calc(100vh-12rem)] hidden xl:block">
         <SummaryPanel />
