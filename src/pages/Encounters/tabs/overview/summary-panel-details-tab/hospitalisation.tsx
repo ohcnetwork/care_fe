@@ -14,6 +14,7 @@ export const HospitalizationDetails = () => {
     selectedEncounterId: encounterId,
     patientId,
     facilityId,
+    canWriteSelectedEncounter,
   } = useEncounter();
 
   if (!encounter) return null;
@@ -22,13 +23,15 @@ export const HospitalizationDetails = () => {
     <div className="bg-gray-100 rounded-md w-full border border-gray-200 pt-2">
       <div className="flex justify-between items-center px-3 pt-1 text-gray-950 pb-2 pr-2">
         <span className="font-semibold">{t("hospitalisation")}</span>
-        <Button variant="ghost" size="xs" asChild>
-          <Link
-            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
-          >
-            <SquarePen className="size-4 cursor-pointer" strokeWidth={1.5} />
-          </Link>
-        </Button>
+        {canWriteSelectedEncounter && (
+          <Button variant="ghost" size="xs" asChild>
+            <Link
+              href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
+            >
+              <SquarePen className="size-4 cursor-pointer" strokeWidth={1.5} />
+            </Link>
+          </Button>
+        )}
       </div>
       <div className="flex flex-col gap-2 bg-white rounded-md shadow mx-1 mb-1">
         <div className="flex justify-between items-center p-2">

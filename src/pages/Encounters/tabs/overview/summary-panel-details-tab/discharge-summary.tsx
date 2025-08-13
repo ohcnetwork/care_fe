@@ -17,7 +17,8 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
 export const DischargeDetails = () => {
   const { t } = useTranslation();
-  const { selectedEncounter: encounter } = useEncounter();
+  const { selectedEncounter: encounter, canWriteSelectedEncounter } =
+    useEncounter();
 
   if (!encounter) return null;
 
@@ -27,16 +28,18 @@ export const DischargeDetails = () => {
         <span className="text-gray-950 font-semibold">
           {t("discharge_details")}
         </span>
-        <Button variant="ghost" size="xs" asChild>
-          <Link
-            href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter`}
-          >
-            <SquarePen
-              className="size-4 text-gray-950 cursor-pointer"
-              strokeWidth={1.5}
-            />
-          </Link>
-        </Button>
+        {canWriteSelectedEncounter && (
+          <Button variant="ghost" size="xs" asChild>
+            <Link
+              href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter`}
+            >
+              <SquarePen
+                className="size-4 text-gray-950 cursor-pointer"
+                strokeWidth={1.5}
+              />
+            </Link>
+          </Button>
+        )}
       </div>
       <div className="bg-white rounded-md p-2 shadow flex flex-col gap-3 mx-1 mb-1">
         <div className="flex justify-between items-center">

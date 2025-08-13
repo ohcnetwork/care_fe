@@ -15,7 +15,7 @@ export const ManageCareTeam = () => {
   const { t } = useTranslation();
   const {
     selectedEncounter: encounter,
-    selectedEncounterPermissions: { canWriteEncounter: canWrite },
+    canWriteSelectedEncounter: canWrite,
     actions: { manageCareTeam },
   } = useEncounter();
   const [showAllMembers, setShowAllMembers] = useState(false);
@@ -31,9 +31,11 @@ export const ManageCareTeam = () => {
           <span className=" font-semibold pl-1">
             {canWrite ? t("manage_care_team") : t("view_care_team")}
           </span>
-          <Button variant="ghost" size="icon" onClick={manageCareTeam}>
-            <SquarePen className="size-4 cursor-pointer" strokeWidth={1.5} />
-          </Button>
+          {canWrite && (
+            <Button variant="ghost" size="icon" onClick={manageCareTeam}>
+              <SquarePen className="size-4 cursor-pointer" strokeWidth={1.5} />
+            </Button>
+          )}
         </div>
       </div>
       <div className="bg-white p-2 rounded-md mx-1 mb-1 shadow">
