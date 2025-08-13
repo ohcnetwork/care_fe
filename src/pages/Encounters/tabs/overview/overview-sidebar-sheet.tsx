@@ -37,7 +37,7 @@ export const OverviewSidebarSheet = ({
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent
         side="right"
-        className="overflow-y-auto min-w-full sm:min-w-128 p-6"
+        className="overflow-y-auto min-w-full sm:min-w-128 p-5 sm:p-6"
       >
         <SheetHeader>
           <SheetTitle>
