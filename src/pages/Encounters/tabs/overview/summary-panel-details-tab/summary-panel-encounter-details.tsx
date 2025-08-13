@@ -224,7 +224,7 @@ export const SummaryPanelEncounterDetails = () => {
                     </span>
                   </>
                 ) : (
-                  <span>({t("ongoing")})</span>
+                  <span>--({t("ongoing")})</span>
                 )}
               </div>
             </div>
