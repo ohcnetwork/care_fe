@@ -4,11 +4,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { SummaryPanelActionsTab } from "@/pages/Encounters/tabs/overview/summary-panel-actions.tab";
 import { SummaryPanelReportsTab } from "@/pages/Encounters/tabs/overview/summary-panel-reports-tab";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
 import { SummaryPanelDetailTab } from "./summary-panel-details-tab";
 
 export const SummaryPanel = () => {
   const { t } = useTranslation();
+  const { canWriteSelectedEncounter } = useEncounter();
 
   return (
     <div className="@container">
@@ -20,9 +22,11 @@ export const SummaryPanel = () => {
           <TabsTrigger value="details" className="w-full">
             <span className="text-black">{t("details")}</span>
           </TabsTrigger>
-          <TabsTrigger value="actions" className="w-full">
-            <span className="text-black">{t("actions")}</span>
-          </TabsTrigger>
+          {canWriteSelectedEncounter && (
+            <TabsTrigger value="actions" className="w-full">
+              <span className="text-black">{t("actions")}</span>
+            </TabsTrigger>
+          )}
           <TabsTrigger value="reports" className="w-full">
             <span className="text-black">{t("reports")}</span>
           </TabsTrigger>

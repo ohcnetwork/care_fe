@@ -31,7 +31,6 @@ import {
 
 import { CareTeamSheet } from "@/components/CareTeam/CareTeamSheet";
 import { Avatar } from "@/components/Common/Avatar";
-import EncounterActions from "@/components/Encounter/EncounterActions";
 import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
 import { AccountSheetButton } from "@/components/Patient/AccountSheet";
@@ -527,10 +526,6 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                           align="end"
                           className="w-(--radix-dropdown-menu-trigger-width) sm:w-auto"
                         >
-                          <EncounterActions
-                            encounter={encounter}
-                            layout="dropdown"
-                          />
                           <PLUGIN_Component
                             __name="PatientInfoCardActions"
                             encounter={encounter}

@@ -4,8 +4,14 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+
 export const SummaryPanelActionsTab = () => {
   const { t } = useTranslation();
+
+  const {
+    actions: { markAsCompleted },
+  } = useEncounter();
 
   const actions = [
     {
@@ -50,12 +56,10 @@ export const SummaryPanelActionsTab = () => {
           <Button
             variant="outline_primary"
             className="justify-start sm:@sm:justify-center"
-            asChild
+            onClick={markAsCompleted}
           >
-            <Link href="">
-              <CheckIcon />
-              {t("mark_as_completed")}
-            </Link>
+            <CheckIcon />
+            {t("mark_as_completed")}
           </Button>
         </div>
       </div>

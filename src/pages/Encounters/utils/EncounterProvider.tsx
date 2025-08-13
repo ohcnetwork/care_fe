@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState } from "react";
 
 import { Permissions, getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
+import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
 import {
   EncounterRead,
   inactiveEncounterStatus,
@@ -38,6 +39,10 @@ type EncounterContextType = {
   canWritePrimaryEncounter: boolean;
   canWriteSelectedEncounter: boolean;
   canWriteClinicalData: boolean;
+
+  actions: {
+    markAsCompleted: () => void;
+  };
 };
 
 const encounterContext = createContext<EncounterContextType | undefined>(
@@ -147,6 +152,9 @@ export function EncounterProvider({
   const canWriteClinicalData =
     canAccessClinicalData && canWriteSelectedEncounter;
 
+  const [markAsCompletedDialogOpen, setMarkAsCompletedDialogOpen] =
+    useState(false);
+
   return (
     <encounterContext.Provider
       value={{
@@ -170,9 +178,17 @@ export function EncounterProvider({
         canWritePrimaryEncounter,
         canAccessClinicalData,
         canWriteClinicalData,
+        actions: {
+          markAsCompleted: () => setMarkAsCompletedDialogOpen(true),
+        },
       }}
     >
       {children}
+
+      <MarkEncounterAsCompletedDialog
+        open={markAsCompletedDialogOpen}
+        onOpenChange={setMarkAsCompletedDialogOpen}
+      />
     </encounterContext.Provider>
   );
 }
