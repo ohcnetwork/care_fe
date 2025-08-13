@@ -103,14 +103,14 @@ export default function PaymentsData({
 
   return (
     <>
-      <div className="flex flex-row justify-between items-center gap-2 my-4 max-sm:flex-col w-full">
-        <div className="flex flex-row justify-start items-center gap-3 max-sm:flex-col w-full">
+      <div className="flex flex-row justify-between items-center gap-2 my-4 w-full md:flex-wrap md:gap-y-4">
+        <div className="flex flex-row justify-start items-center gap-3 w-full flex-wrap md:gap-y-4 md:flex-wrap md:flex-row sm:flex-col">
           <Tabs
             defaultValue={qParams.status ?? "all"}
             onValueChange={(value) =>
               updateQuery({ status: value === "all" ? undefined : value })
             }
-            className="max-sm:hidden"
+            className="hidden sm:flex"
           >
             <TabsList>
               <TabsTrigger value="all">{t("all_status")}</TabsTrigger>
@@ -149,7 +149,7 @@ export default function PaymentsData({
                 reconciliation_type: value === "all" ? undefined : value,
               })
             }
-            className="max-sm:hidden"
+            className="hidden sm:flex"
           >
             <TabsList>
               <TabsTrigger value="all">{t("all_type")}</TabsTrigger>
