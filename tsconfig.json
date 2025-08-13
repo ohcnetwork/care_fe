@@ -31,6 +31,7 @@
     "care.config.ts",
     "scripts/**/*.ts",
     "cypress.config.ts",
-    "plugins/**/*.ts"
+    "plugins/**/*.ts",
+    "sudheendra-scripts/**/*.ts"
   ]
 }

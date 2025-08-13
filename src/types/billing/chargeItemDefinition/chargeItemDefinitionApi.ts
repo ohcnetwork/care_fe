@@ -5,6 +5,7 @@ import {
   ChargeItemDefinitionBase,
   ChargeItemDefinitionCreate,
   ChargeItemDefinitionRead,
+  ChargeItemDefinitionUpsert,
 } from "./chargeItemDefinition";
 
 export default {
@@ -29,5 +30,11 @@ export default {
     method: HttpMethod.PUT,
     TRes: Type<ChargeItemDefinitionRead>(),
     TBody: Type<ChargeItemDefinitionCreate>(),
+  },
+  upsertChargeItemDefinition: {
+    path: "/api/v1/facility/{facilityId}/charge_item_definition/upsert/",
+    method: HttpMethod.POST,
+    TRes: Type<ChargeItemDefinitionRead>(),
+    TBody: Type<{ datapoints: ChargeItemDefinitionUpsert[] }>(),
   },
 } as const;
