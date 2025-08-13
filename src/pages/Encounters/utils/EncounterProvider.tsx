@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
 import { createContext, useContext, useState } from "react";
 
+import { CareTeamSheet } from "@/components/CareTeam/CareTeamSheet";
 import { LocationSheet } from "@/components/Location/LocationSheet";
 
 import { Permissions, getPermissions } from "@/common/Permissions";
@@ -46,6 +47,7 @@ type EncounterContextType = {
     markAsCompleted: () => void;
     assignLocation: () => void;
     viewLocationHistory: () => void;
+    manageCareTeam: () => void;
   };
 };
 
@@ -53,6 +55,7 @@ enum EncounterAction {
   MarkAsCompleted,
   AssignLocation,
   LocationHistory,
+  ManageCareTeam,
 }
 
 const encounterContext = createContext<EncounterContextType | undefined>(
@@ -199,6 +202,9 @@ export function EncounterProvider({
           viewLocationHistory: () => {
             setActiveAction(EncounterAction.LocationHistory);
           },
+          manageCareTeam: () => {
+            setActiveAction(EncounterAction.ManageCareTeam);
+          },
         },
       }}
     >
@@ -228,6 +234,17 @@ export function EncounterProvider({
               ? "history"
               : "assign"
           }
+        />
+      )}
+
+      {selectedEncounter && (
+        <CareTeamSheet
+          open={activeAction === EncounterAction.ManageCareTeam}
+          setOpen={(open) => {
+            setActiveAction(open ? EncounterAction.ManageCareTeam : null);
+          }}
+          encounter={selectedEncounter}
+          canWrite={canWriteSelectedEncounter}
         />
       )}
     </encounterContext.Provider>
