@@ -178,7 +178,7 @@ export function QuestionnaireSearch({
                 {t("loading")}
               </>
             ) : (
-              <div className="flex items-center justify-start gap-2 text-primary-600">
+              <div className="flex justify-start items-center gap-2 text-primary-800 w-full">
                 <Plus className="size-4" />
                 <span>{placeholder || t("add_questionnaire")}</span>
               </div>
