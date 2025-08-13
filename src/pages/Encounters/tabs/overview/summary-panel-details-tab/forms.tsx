@@ -61,7 +61,7 @@ export const Questionnaires = () => {
 
         <div className="@sm:flex-1 flex flex-col gap-2 border-t border-gray-300 border-dashed @sm:border-none pt-3 @sm:pt-0">
           <QuestionnaireSearch
-            placeholder={t("choose_questionnaire")}
+            placeholder={t("choose_form")}
             subjectType="encounter"
           />
         </div>
