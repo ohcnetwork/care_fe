@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   formatPhoneNumberIntl,
@@ -148,7 +148,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     [searchOptions],
   );
 
-  const isIdentifierValid = (() => {
+  const isIdentifierValid = useMemo(() => {
     if (!identifierSearch.value) return false;
     if (!identifierSearch.regex) return true;
     try {
@@ -157,7 +157,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     } catch {
       return false;
     }
-  })();
+  }, [identifierSearch.value, identifierSearch.regex]);
 
   const isPhoneValid = !!phoneNumber && isValidPhoneNumber(phoneNumber);
 
