@@ -22,7 +22,7 @@ export class PatientEncounter {
   }
 
   clickUpdateEncounter() {
-    cy.get("button:contains('Update Encounter')").click();
+    cy.get("a:contains('Update Encounter')").filter(":visible").click();
     return this;
   }
 
