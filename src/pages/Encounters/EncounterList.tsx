@@ -296,8 +296,8 @@ export function EncounterList({
                   onOperationChange={handleOperationChange}
                   onClearAll={handleClearAll}
                   onClearFilter={handleClearFilter}
-                  className="flex flex-row items-center"
-                  triggerButtonClassName="h-9"
+                  className="flex sm:flex-row items-center"
+                  triggerButtonClassName="h-9 self-start"
                 />
                 <PatientIdentifierFilter
                   onSelect={(patientId) =>

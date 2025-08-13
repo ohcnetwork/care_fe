@@ -112,7 +112,10 @@ export default function MultiFilter({
             <span className="truncate">{placeholder}</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[320px] p-0" align="start">
+        <DropdownMenuContent
+          className="w-[320px] max-w-[calc(100vw-1rem)]  p-0"
+          align="start"
+        >
           {activeFilter ? (
             <Filter
               activeFilter={activeFilter}
