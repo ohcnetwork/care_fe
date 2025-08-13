@@ -37,7 +37,7 @@ export function EncounterHeader() {
   return (
     <>
       <Card className="p-2 rounded-sm shadow-sm border-none md:p-4 flex flex-col md:flex-row md:justify-between gap-6">
-        <div className="flex flex-col md:flex-row gap-4 md:gap-8 md:items-end">
+        <div className="flex flex-col md:flex-row gap-4 xl:gap-8 xl:items-end">
           <div className="flex gap-3 items-center">
             <div className="size-12">
               <Avatar name={patient.name} />
@@ -56,11 +56,11 @@ export function EncounterHeader() {
               </span>
             </Link>
           </div>
-          <div className="flex flex-wrap md:gap-10 ml-3 gap-3">
+          <div className="flex flex-wrap md:hidden xl:flex xl:gap-10 ml-3 gap-2">
             {patient.instance_identifiers?.map((identifier) => (
               <div
                 key={identifier.config.id}
-                className="flex flex-col gap-1.5 items-start"
+                className="flex flex-col gap-1 items-start"
               >
                 <span className="text-xs text-gray-600 md:w-auto">
                   {identifier.config.config.display}:{" "}
@@ -71,7 +71,7 @@ export function EncounterHeader() {
               </div>
             ))}
           </div>
-          <div className="ml-3">
+          <div className="ml-3 sm:ml-0">
             <span className="text-sm font-medium text-gray-700">
               {t("encounter_tags")}:
             </span>
