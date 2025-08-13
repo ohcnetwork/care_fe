@@ -1,62 +1,72 @@
-import { FacilityModel } from "@/components/Facility/models";
-import { FacilityRequest } from "@/components/Facility/models";
-
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
 import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryComponent";
+import { UserReadMinimal } from "@/types/user/user";
 
-import { BaseFacility, CreateFacility, FacilityData } from "./facility";
+import { FacilityCreate, FacilityListRead, FacilityRead } from "./facility";
 
 export default {
+  list: {
+    path: "/api/v1/facility/",
+    method: HttpMethod.GET,
+    TRes: Type<PaginatedResponse<FacilityListRead>>(),
+  },
   create: {
     path: "/api/v1/facility/",
     method: HttpMethod.POST,
-    TRes: Type<BaseFacility>(),
-    TBody: Type<CreateFacility>(),
+    TRes: Type<FacilityRead>(),
+    TBody: Type<FacilityCreate>(),
   },
-  getAllFacilities: {
-    path: "/api/v1/getallfacilities/",
-    method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<FacilityData>>(),
+  update: {
+    path: "/api/v1/facility/{facilityId}/",
+    method: HttpMethod.PUT,
+    TRes: Type<FacilityRead>(),
+    TBody: Type<FacilityCreate>(),
   },
-  getAnyFacility: {
-    path: "/api/v1/getallfacilities/{id}/",
-    method: "GET",
-    TRes: Type<FacilityModel>(),
-  },
-  deleteFacility: {
-    path: "/api/v1/facility/{id}/",
+  delete: {
+    path: "/api/v1/facility/{facilityId}/",
     method: HttpMethod.DELETE,
     TRes: Type<Record<string, never>>(),
     TBody: Type<void>(),
   },
-  getFacility: {
-    path: "/api/v1/facility/{id}/",
+  get: {
+    path: "/api/v1/facility/{facilityId}/",
     method: HttpMethod.GET,
-    TRes: Type<FacilityData>(),
+    TRes: Type<FacilityRead>(),
   },
-  patchInvoiceNumberExpression: {
-    path: "/api/v1/facility/{id}/set_invoice_expression/",
+  uploadCoverImage: {
+    path: "/api/v1/facility/{facilityId}/cover_image/",
     method: HttpMethod.POST,
-    TRes: Type<FacilityData>(),
+    TRes: Type<FacilityRead>(),
+    TBody: Type<FormData>(),
+  },
+  deleteCoverImage: {
+    path: "/api/v1/facility/{facilityId}/cover_image/",
+    method: HttpMethod.DELETE,
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<void>(),
+  },
+  setInvoiceExpression: {
+    path: "/api/v1/facility/{facilityId}/set_invoice_expression/",
+    method: HttpMethod.POST,
+    TRes: Type<FacilityRead>(),
     TBody: Type<{
       invoice_number_expression: string;
     }>(),
   },
-  updateFacility: {
-    path: "/api/v1/facility/{id}/",
-    method: HttpMethod.PUT,
-    TRes: Type<FacilityModel>(),
-    TBody: Type<FacilityRequest>(),
-  },
-  updateMonetaryComponents: {
+  setMonetaryComponents: {
     path: "/api/v1/facility/{facilityId}/set_monetary_codes/",
     method: HttpMethod.POST,
-    TRes: Type<FacilityData>(),
+    TRes: Type<FacilityRead>(),
     TBody: Type<{
       discount_codes: Code[];
       discount_monetary_components: MonetaryComponentRead[];
     }>(),
+  },
+  getUsers: {
+    path: "/api/v1/facility/{facilityId}/users/",
+    method: HttpMethod.GET,
+    TRes: Type<PaginatedResponse<UserReadMinimal>>(),
   },
 } as const;

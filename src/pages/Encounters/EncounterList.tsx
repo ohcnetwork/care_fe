@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -28,6 +29,7 @@ import Page from "@/components/Common/Page";
 import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -87,7 +89,13 @@ export function EncounterList({
 }: EncounterListProps) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    cacheBlacklist: ["name", "encounter_id", "external_identifier", "tags"],
+    cacheBlacklist: [
+      "name",
+      "encounter_id",
+      "external_identifier",
+      "tags",
+      "patient_filter",
+    ],
   });
   const { t } = useTranslation();
   const {
@@ -97,6 +105,7 @@ export function EncounterList({
     name,
     encounter_id,
     external_identifier,
+    patient_filter,
   } = qParams;
   const handleFieldChange = () => {
     updateQuery({
@@ -107,6 +116,7 @@ export function EncounterList({
       encounter_id: undefined,
       external_identifier: undefined,
       tags: qParams.tags,
+      patient_filter: undefined,
     });
   };
 
@@ -118,11 +128,19 @@ export function EncounterList({
           encounter_class: encounterClass,
           priority,
           tags: qParams.tags,
+          patient: patient_filter,
         },
         [key]: value || undefined,
       });
     },
-    [status, encounterClass, priority, updateQuery],
+    [
+      status,
+      encounterClass,
+      priority,
+      updateQuery,
+      qParams.tags,
+      patient_filter,
+    ],
   );
 
   const { data: queryEncounters, isLoading } = useQuery({
@@ -135,6 +153,7 @@ export function EncounterList({
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         tags: qParams.tags,
+        patient: patient_filter,
       },
     }),
     enabled: !propEncounters && !encounter_id,
@@ -225,7 +244,7 @@ export function EncounterList({
       }
     >
       <div className="space-y-4 mt-4 flex flex-col">
-        <div className="rounded-lg border border-gray-200 bg-card shadow-xs flex flex-col">
+        <div className="rounded-lg border border-gray-200 bg-card shadow-xs flex flex-col overflow-auto">
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
@@ -234,14 +253,13 @@ export function EncounterList({
                     <Button
                       data-cy="search-encounter"
                       variant="outline"
-                      size="sm"
                       className={cn(
-                        "h-8 min-w-[120px] justify-start",
+                        "min-w-32 justify-start text-gray-500 font-normal h-9 sm:w-auto w-full",
                         (name || encounter_id || external_identifier) &&
-                          "bg-primary/10 text-primary hover:bg-primary/20",
+                          "bg-primary/10 text-primary font-medium hover:bg-primary/20",
                       )}
                     >
-                      <CareIcon icon="l-search" className="mr-2 size-4" />
+                      <CareIcon icon="l-search" className="size-4" />
                       {name || encounter_id || external_identifier ? (
                         <span className="truncate">
                           {name || encounter_id || external_identifier}
@@ -280,6 +298,14 @@ export function EncounterList({
                   onClearFilter={handleClearFilter}
                   className="flex flex-row items-center"
                   triggerButtonClassName="h-9"
+                />
+                <PatientIdentifierFilter
+                  onSelect={(patientId) =>
+                    updateQuery({ patient_filter: patientId })
+                  }
+                  placeholder={t("filter_by_identifier")}
+                  className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+                  patientId={qParams.patient_filter}
                 />
               </div>
             </div>
