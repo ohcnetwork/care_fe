@@ -52,9 +52,11 @@ export const OverviewSidebarSheet = ({
             <TabsTrigger value="details" className="w-full">
               <span className="text-black">{t("details")}</span>
             </TabsTrigger>
-            <TabsTrigger value="actions" className="w-full">
-              <span className="text-black">{t("actions")}</span>
-            </TabsTrigger>
+            {canEdit && (
+              <TabsTrigger value="actions" className="w-full">
+                <span className="text-black">{t("actions")}</span>
+              </TabsTrigger>
+            )}
             <TabsTrigger value="reports" className="w-full">
               <span className="text-black">{t("reports")}</span>
             </TabsTrigger>

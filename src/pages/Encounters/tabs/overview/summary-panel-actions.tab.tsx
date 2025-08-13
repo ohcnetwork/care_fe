@@ -1,30 +1,41 @@
 import { CheckIcon, NotebookPen } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+
 export const SummaryPanelActionsTab = () => {
   const { t } = useTranslation();
+
+  const {
+    actions: { markAsCompleted, assignLocation },
+  } = useEncounter();
 
   const actions = [
     {
       label: t("manage_consents"),
-      href: "",
+      onClick: () => {
+        console.log("manage_consents");
+      },
     },
     {
       label: t("manage_care_team"),
-      href: "",
+      onClick: () => {
+        console.log("manage_care_team");
+      },
     },
     {
       label: t("update_location"),
-      href: "",
+      onClick: assignLocation,
     },
     {
       label: t("update_department"),
-      href: "",
+      onClick: () => {
+        console.log("update_department");
+      },
     },
-  ] as const satisfies { label: string; href: string }[];
+  ] as const satisfies { label: string; onClick: () => void }[];
 
   return (
     <div className="flex flex-col gap-2 bg-gray-100 @sm:bg-white p-2 @sm:p-3 rounded-lg border border-gray-200 @sm:shadow @sm:overflow-x-auto">
@@ -37,12 +48,10 @@ export const SummaryPanelActionsTab = () => {
             key={action.label}
             variant="outline"
             className="justify-start sm:@sm:justify-center sm:@sm:flex-1"
-            asChild
+            onClick={action.onClick}
           >
-            <Link href={action.href}>
-              <NotebookPen />
-              {action.label}
-            </Link>
+            <NotebookPen />
+            {action.label}
           </Button>
         ))}
 
@@ -50,12 +59,10 @@ export const SummaryPanelActionsTab = () => {
           <Button
             variant="outline_primary"
             className="justify-start sm:@sm:justify-center"
-            asChild
+            onClick={markAsCompleted}
           >
-            <Link href="">
-              <CheckIcon />
-              {t("mark_as_completed")}
-            </Link>
+            <CheckIcon />
+            {t("mark_as_completed")}
           </Button>
         </div>
       </div>

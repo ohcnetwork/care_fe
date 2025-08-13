@@ -1,11 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState } from "react";
+
+import { LocationSheet } from "@/components/Location/LocationSheet";
 
 import { Permissions, getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
+import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
 import {
   EncounterRead,
   inactiveEncounterStatus,
@@ -38,7 +41,19 @@ type EncounterContextType = {
   canWritePrimaryEncounter: boolean;
   canWriteSelectedEncounter: boolean;
   canWriteClinicalData: boolean;
+
+  actions: {
+    markAsCompleted: () => void;
+    assignLocation: () => void;
+    viewLocationHistory: () => void;
+  };
 };
+
+enum EncounterAction {
+  MarkAsCompleted,
+  AssignLocation,
+  LocationHistory,
+}
 
 const encounterContext = createContext<EncounterContextType | undefined>(
   undefined,
@@ -147,6 +162,10 @@ export function EncounterProvider({
   const canWriteClinicalData =
     canAccessClinicalData && canWriteSelectedEncounter;
 
+  const [activeAction, setActiveAction] = useState<EncounterAction | null>(
+    null,
+  );
+
   return (
     <encounterContext.Provider
       value={{
@@ -170,9 +189,47 @@ export function EncounterProvider({
         canWritePrimaryEncounter,
         canAccessClinicalData,
         canWriteClinicalData,
+        actions: {
+          markAsCompleted: () => {
+            setActiveAction(EncounterAction.MarkAsCompleted);
+          },
+          assignLocation: () => {
+            setActiveAction(EncounterAction.AssignLocation);
+          },
+          viewLocationHistory: () => {
+            setActiveAction(EncounterAction.LocationHistory);
+          },
+        },
       }}
     >
       {children}
+
+      <MarkEncounterAsCompletedDialog
+        open={activeAction === EncounterAction.MarkAsCompleted}
+        onOpenChange={(open) => {
+          setActiveAction(open ? EncounterAction.MarkAsCompleted : null);
+        }}
+      />
+
+      {selectedEncounter && (
+        <LocationSheet
+          open={
+            activeAction === EncounterAction.AssignLocation ||
+            activeAction === EncounterAction.LocationHistory
+          }
+          onOpenChange={(open) => {
+            setActiveAction(open ? EncounterAction.AssignLocation : null);
+          }}
+          facilityId={selectedEncounter.facility.id}
+          history={selectedEncounter.location_history}
+          encounter={selectedEncounter}
+          defaultTab={
+            activeAction === EncounterAction.LocationHistory
+              ? "history"
+              : "assign"
+          }
+        />
+      )}
     </encounterContext.Provider>
   );
 }

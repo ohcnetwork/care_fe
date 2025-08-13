@@ -1,27 +1,17 @@
 import dayjs from "dayjs";
-import { ChevronDown, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { Link } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-import EncounterActions from "@/components/Encounter/EncounterActions";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import { formatPatientAge } from "@/Utils/utils";
-import {
-  EncounterRead,
-  inactiveEncounterStatus,
-} from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 export function EncounterHeader({
@@ -110,27 +100,6 @@ export function EncounterHeader({
               encounter={encounter}
               className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
             />
-
-            {!inactiveEncounterStatus.includes(encounter.status) && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="primary_gradient" className="w-full">
-                    {t("encounter_actions")}
-                    <ChevronDown className="ml-2 size-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-(--radix-dropdown-menu-trigger-width) sm:w-auto"
-                >
-                  <EncounterActions encounter={encounter} layout="dropdown" />
-                  <PLUGIN_Component
-                    __name="PatientInfoCardActions"
-                    encounter={encounter}
-                  />
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
           </div>
         )}
       </Card>

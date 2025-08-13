@@ -22,7 +22,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -63,19 +62,23 @@ interface EditingState {
 }
 
 interface LocationSheetProps {
-  trigger: React.ReactNode;
   history: LocationHistory[];
   facilityId: string;
   encounter: EncounterRead;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  defaultTab?: "assign" | "history";
 }
 
 const ITEMS_PER_PAGE = 10;
 
 export function LocationSheet({
-  trigger,
   history,
   facilityId,
   encounter,
+  open,
+  onOpenChange,
+  defaultTab = "assign",
 }: LocationSheetProps) {
   const { t } = useTranslation();
   const [showDischargeDialog, setShowDischargeDialog] = useState(false);
@@ -100,7 +103,6 @@ export function LocationSheet({
   const [hasMoreLocations, setHasMoreLocations] = useState(true);
   const [locationStatus, setLocationStatus] = useState<string | null>(null);
   const [hasMoreBeds, setHasMoreBeds] = useState(true);
-  const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const initialState = {
@@ -843,15 +845,15 @@ export function LocationSheet({
   return (
     <>
       <Sheet
+        open={open}
         onOpenChange={(open) => {
-          setOpen(open);
+          onOpenChange(open);
           // Reset states when closing the sheet
           if (!open) {
             resetStates();
           }
         }}
       >
-        <SheetTrigger asChild>{trigger}</SheetTrigger>
         <SheetContent className="w-full sm:max-w-3xl pr-2 pl-3">
           <SheetHeader className="space-y-1 px-1">
             <SheetTitle className="text-sm font-semibold">
@@ -859,7 +861,7 @@ export function LocationSheet({
             </SheetTitle>
           </SheetHeader>
 
-          <Tabs defaultValue="assign" className="mt-2">
+          <Tabs defaultValue={defaultTab} className="mt-2">
             <TabsList className="w-full justify-start border-b border-gray-200 bg-transparent p-0 h-auto rounded-none">
               <TabsTrigger
                 value="assign"
