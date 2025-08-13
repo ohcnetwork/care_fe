@@ -1,4 +1,5 @@
 import { CheckIcon, NotebookPen } from "lucide-react";
+import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -15,9 +16,7 @@ export const SummaryPanelActionsTab = () => {
   const actions = [
     {
       label: t("manage_consents"),
-      onClick: () => {
-        console.log("manage_consents");
-      },
+      onClick: () => navigate("consents"),
     },
     {
       label: t("manage_care_team"),
