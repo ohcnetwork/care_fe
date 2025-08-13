@@ -67,9 +67,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 
   const handleCreatePatient = useCallback(() => {
     const queryParams = phoneNumber ? { phone_number: phoneNumber } : {};
-    navigate(`/facility/${facilityId}/patient/create`, {
-      query: queryParams,
-    });
+    navigate(`/facility/${facilityId}/patient/create`, { query: queryParams });
   }, [facilityId, phoneNumber]);
 
   useKeyboardShortcut(["shift", "p"], handleCreatePatient, {
@@ -161,6 +159,8 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     }
   })();
 
+  const isPhoneValid = !!phoneNumber && isValidPhoneNumber(phoneNumber);
+
   const { data: patientList, isFetching } = useQuery({
     queryKey: ["patient-search", facilityId, phoneNumber, identifierSearch],
     queryFn: query.debounced(patientApi.searchPatient, {
@@ -170,8 +170,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
           ? { config: identifierSearch.config, value: identifierSearch.value }
           : {},
     }),
-    enabled:
-      (!!isValidPhoneNumber(phoneNumber) && !!phoneNumber) || isIdentifierValid,
+    enabled: isPhoneValid || isIdentifierValid,
   });
 
   const handlePatientSelect = (index: number) => {
@@ -236,16 +235,20 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
               onSearch={handleSearch}
               className="w-full"
               autoFocus
+              invalidIdentifier={!isIdentifierValid && !!identifierSearch.value}
+              invalidPhone={!!phoneNumber && !isPhoneValid}
             />
 
             <div className="min-h-[200px]" id="patient-search-results">
-              {(!!phoneNumber || isIdentifierValid) && (
+              {(!!phoneNumber || !!identifierSearch.value) && (
                 <>
-                  {isFetching || !patientList ? (
+                  {isFetching ||
+                  (!patientList && (isIdentifierValid || isPhoneValid)) ? (
                     <div className="flex items-center justify-center h-[200px]">
                       <Loading />
                     </div>
-                  ) : !patientList.results.length ? (
+                  ) : (!isIdentifierValid && !!identifierSearch.value) ||
+                    (!!phoneNumber && !isPhoneValid) ? (
                     <div className="flex flex-col items-center justify-center py-10 text-center">
                       <h3 className="text-lg font-semibold">
                         {t("no_patient_record_found")}
@@ -253,7 +256,17 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                       <p className="text-sm text-gray-500 mb-6">
                         {t("no_patient_record_text")}
                       </p>
-                      <AddPatientButton outline />
+                      {canCreatePatient && <AddPatientButton outline />}
+                    </div>
+                  ) : !patientList?.results.length ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-center">
+                      <h3 className="text-lg font-semibold">
+                        {t("no_patient_record_found")}
+                      </h3>
+                      <p className="text-sm text-gray-500 mb-6">
+                        {t("no_patient_record_text")}
+                      </p>
+                      {canCreatePatient && <AddPatientButton outline />}
                     </div>
                   ) : (
                     <div className="rounded-lg border border-gray-200">

@@ -43,6 +43,8 @@ interface SearchInputProps
   enableOptionButtons?: boolean;
   onFieldChange?: (options: SearchOption) => void;
   autoFocus?: boolean;
+  invalidIdentifier?: boolean;
+  invalidPhone?: boolean;
 }
 
 const KeyboardShortcutHint = ({ open }: { open: boolean }) => {
@@ -74,6 +76,7 @@ const KeyboardShortcutHint = ({ open }: { open: boolean }) => {
     </div>
   );
 };
+
 const SearchInputFieldRenderer = ({
   selectedOption,
   searchValue,
@@ -83,6 +86,7 @@ const SearchInputFieldRenderer = ({
   autoFocus,
   isSingleOption,
   open,
+  invalidIdentifier,
   ...prop
 }: {
   selectedOption: SearchOption;
@@ -93,8 +97,11 @@ const SearchInputFieldRenderer = ({
   autoFocus?: boolean;
   isSingleOption: boolean;
   open: boolean;
+  invalidIdentifier?: boolean;
+  invalidPhone?: boolean;
 }) => {
   const isMobile = useIsMobile();
+
   switch (selectedOption.type) {
     case "phone":
       return (
@@ -122,10 +129,12 @@ const SearchInputFieldRenderer = ({
             value={searchValue}
             onChange={(event) => setSearchValue(event.target.value)}
             className={cn(
-              !isSingleOption &&
-                "grow border-none shadow-none focus-visible:ring-0",
+              !isSingleOption && "grow shadow-none focus-visible:ring-1",
               inputClassName,
+              invalidIdentifier &&
+                "border border-primary-700 focus:border-primary-700 focus:ring-primary-700",
             )}
+            autoFocus={autoFocus}
             {...prop}
           />
           {!isSingleOption && !isMobile && <KeyboardShortcutHint open={open} />}
@@ -133,6 +142,7 @@ const SearchInputFieldRenderer = ({
       );
   }
 };
+
 export default function SearchInput({
   options,
   onSearch,
@@ -142,6 +152,8 @@ export default function SearchInput({
   onFieldChange,
   enableOptionButtons = true,
   autoFocus = false,
+  invalidIdentifier,
+  invalidPhone,
   ...props
 }: SearchInputProps) {
   const initialOptionIndex = Math.max(
@@ -158,6 +170,7 @@ export default function SearchInput({
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [error, setError] = useState<string | undefined | boolean>();
   const isSingleOption = options.length == 1;
+
   const handleOptionChange = useCallback(
     (index: number) => {
       setSelectedOptionIndex(index);
@@ -170,7 +183,7 @@ export default function SearchInput({
       onSearch(option.key, option.value);
       onFieldChange?.(options[index]);
     },
-    [onSearch],
+    [onSearch, onFieldChange, options],
   );
 
   const unselectedOptions = options.filter(
@@ -221,13 +234,13 @@ export default function SearchInput({
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [focusedIndex, open, handleOptionChange, options]);
+  }, [focusedIndex, open, handleOptionChange, options, unselectedOptions]);
 
   useEffect(() => {
     if (selectedOption.value !== searchValue) {
       onSearch(selectedOption.key, searchValue);
     }
-  }, [searchValue]);
+  }, [searchValue, selectedOption, onSearch]);
 
   useEffect(() => {
     if (autoFocus) {
@@ -255,7 +268,7 @@ export default function SearchInput({
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
-                className="focus:ring-0  ml-1"
+                className="focus:ring-0 ml-1"
                 size="sm"
                 onClick={() => setOpen(true)}
               >
@@ -278,9 +291,7 @@ export default function SearchInput({
                           <Button
                             onClick={() => {
                               setOpen(false);
-                              if (inputRef.current) {
-                                inputRef.current.focus();
-                              }
+                              inputRef.current?.focus();
                             }}
                             variant="outline"
                             size="xs"
@@ -297,45 +308,40 @@ export default function SearchInput({
                           {t("choose_other_search_type")}
                         </p>
                         <div className="space-y-2">
-                          {unselectedOptions.map((option, index) => {
-                            if (selectedOption.key === option.key) return null;
-
-                            return (
-                              <CommandItem
-                                key={option.key}
-                                onSelect={() =>
-                                  handleOptionChange(
-                                    options.findIndex(
-                                      (option) =>
-                                        option.key ===
-                                        unselectedOptions[index].key,
-                                    ),
-                                  )
-                                }
-                                className={cn(
-                                  "flex items-center p-2 rounded-md cursor-pointer",
-                                  {
-                                    "bg-gray-100": focusedIndex === index,
-                                    "hover:bg-secondary-100": true,
-                                  },
-                                )}
-                                onMouseEnter={() => setFocusedIndex(index)}
-                                onMouseLeave={() => setFocusedIndex(-1)}
-                              >
-                                <span className="flex-1 text-sm">
-                                  {t(option.display)}
-                                </span>
-                                {focusedIndex === index && (
-                                  <kbd
-                                    className="ml-2 border border-gray-300 rounded px-1 bg-white text-xs text-gray-500"
-                                    title="Press Enter to select"
-                                  >
-                                    ⏎ Enter
-                                  </kbd>
-                                )}
-                              </CommandItem>
-                            );
-                          })}
+                          {unselectedOptions.map((option, index) => (
+                            <CommandItem
+                              key={option.key}
+                              onSelect={() =>
+                                handleOptionChange(
+                                  options.findIndex(
+                                    (o) =>
+                                      o.key === unselectedOptions[index].key,
+                                  ),
+                                )
+                              }
+                              className={cn(
+                                "flex items-center p-2 rounded-md cursor-pointer",
+                                {
+                                  "bg-gray-100": focusedIndex === index,
+                                  "hover:bg-secondary-100": true,
+                                },
+                              )}
+                              onMouseEnter={() => setFocusedIndex(index)}
+                              onMouseLeave={() => setFocusedIndex(-1)}
+                            >
+                              <span className="flex-1 text-sm">
+                                {t(option.display)}
+                              </span>
+                              {focusedIndex === index && (
+                                <kbd
+                                  className="ml-2 border border-gray-300 rounded px-1 bg-white text-xs text-gray-500"
+                                  title="Press Enter to select"
+                                >
+                                  ⏎ Enter
+                                </kbd>
+                              )}
+                            </CommandItem>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -355,12 +361,14 @@ export default function SearchInput({
             autoFocus={autoFocus}
             isSingleOption={isSingleOption}
             open={open}
+            invalidIdentifier={invalidIdentifier}
+            invalidPhone={invalidPhone}
             {...props}
           />
         </div>
       </div>
       {error && (
-        <div className="px-2 mb-1 text-xs font-medium tracking-wide transition-opacity duration-300 error-text text-danger-500">
+        <div className="px-2 mb-1 text-xs font-medium tracking-wide text-danger-500">
           {t("phone_number_validation_error")}
         </div>
       )}
