@@ -12,7 +12,7 @@ import {
   PlusCircledIcon,
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { differenceInYears, format, isSameDay } from "date-fns";
+import { addDays, differenceInYears, format, isBefore } from "date-fns";
 import { BanIcon, Loader2, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -69,7 +69,7 @@ import { AppointmentTokenCard } from "@/pages/Appointments/components/Appointmen
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
-import { FacilityData } from "@/types/facility/facility";
+import { FacilityRead } from "@/types/facility/facility";
 import {
   APPOINTMENT_STATUS_COLORS,
   Appointment,
@@ -227,7 +227,7 @@ const AppointmentDetails = ({
   facility,
 }: {
   appointment: AppointmentRead;
-  facility: FacilityData;
+  facility: FacilityRead;
 }) => {
   const { user } = appointment;
   const { t } = useTranslation();
@@ -428,7 +428,6 @@ const AppointmentDetails = ({
           <div className="grid gap-2">
             <div className="text-sm">
               <p className="font-medium">{formatName(user)}</p>
-              <p className="text-gray-600">{user.email}</p>
             </div>
             <Separator />
             <div className="text-sm">
@@ -472,7 +471,13 @@ const AppointmentActions = ({
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
   const currentStatus = appointment.status;
-  const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
+
+  // Allow check-in/start consultation as long as the appointment is before 24 hours ahead of slot's start time
+  const canCheckIn = isBefore(
+    appointment.token_slot.start_datetime,
+    addDays(new Date(), 1),
+  );
+
   const [note, setNote] = useState(appointment.note);
 
   const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
@@ -670,7 +675,7 @@ const AppointmentActions = ({
       {currentStatus === "booked" && (
         <>
           <Button
-            disabled={!isToday}
+            disabled={!canCheckIn}
             variant="outline_primary"
             onClick={() =>
               updateAppointment({
@@ -688,7 +693,7 @@ const AppointmentActions = ({
 
       {["booked", "checked_in"].includes(currentStatus) && (
         <Button
-          disabled={!isToday}
+          disabled={!canCheckIn}
           variant={
             currentStatus === "checked_in" ? "outline_primary" : "outline"
           }

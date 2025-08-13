@@ -1,7 +1,7 @@
 import { t } from "i18next";
 
-import { PaginatedResponse } from "@/Utils/request/types";
-import { UserBase } from "@/types/user/user";
+import { RoleRead } from "@/types/emr/role/role";
+import { UserReadMinimal } from "@/types/user/user";
 
 type org_type =
   | "team"
@@ -34,7 +34,7 @@ export interface OrganizationParent {
   parent?: OrganizationParent;
 }
 
-export interface OrganizationEdit {
+export interface OrganizationUpdate {
   name?: string;
   description?: string;
   org_type?: OrgType;
@@ -64,24 +64,9 @@ export interface OrganizationCreate {
 
 export interface OrganizationUserRole {
   id: string;
-  user: UserBase;
-  role: {
-    id: string;
-    name: string;
-  };
+  user: UserReadMinimal;
+  role: RoleRead;
 }
-
-export interface Role {
-  id: string;
-  name: string;
-  description?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export type OrganizationUserRoleResponse =
-  PaginatedResponse<OrganizationUserRole>;
-export type RoleResponse = PaginatedResponse<Role>;
 
 export const getOrgLabel = (org_type: org_type, metadata: Metadata | null) => {
   if (org_type === "govt") {
