@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
 import { createContext, useContext, useState } from "react";
 
+import { CareTeamSheet } from "@/components/CareTeam/CareTeamSheet";
 import { LocationSheet } from "@/components/Location/LocationSheet";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
@@ -242,7 +243,7 @@ export function EncounterProvider({
         />
       )}
 
-      {/* {selectedEncounter && (
+      {selectedEncounter && (
         <CareTeamSheet
           open={activeAction === EncounterAction.ManageCareTeam}
           setOpen={(open) => {
@@ -250,8 +251,9 @@ export function EncounterProvider({
           }}
           encounter={selectedEncounter}
           canWrite={canWriteSelectedEncounter}
+          trigger={<></>}
         />
-      )} */}
+      )}
 
       {selectedEncounter && (
         <LinkDepartmentsSheet

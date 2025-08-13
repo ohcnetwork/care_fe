@@ -10,7 +10,12 @@ export const SummaryPanelActionsTab = () => {
   const { t } = useTranslation();
 
   const {
-    actions: { markAsCompleted, assignLocation, manageDepartments },
+    actions: {
+      markAsCompleted,
+      assignLocation,
+      manageDepartments,
+      manageCareTeam,
+    },
   } = useEncounter();
 
   const actions = [
@@ -20,9 +25,7 @@ export const SummaryPanelActionsTab = () => {
     },
     {
       label: t("manage_care_team"),
-      onClick: () => {
-        console.log("manage_care_team");
-      },
+      onClick: manageCareTeam,
     },
     {
       label: t("update_location"),
