@@ -1,4 +1,3 @@
-import { t } from "i18next";
 import { z } from "zod/v4";
 
 export interface Code {
@@ -13,7 +12,7 @@ export const CodeSchema = z.object(
     code: z.string(),
     display: z.string(),
   },
-  { error: t("required") },
+  { error: "Required" },
 );
 
 export type ValueSetSystem =
