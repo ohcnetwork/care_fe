@@ -157,9 +157,6 @@ export default function EditUserRoleSheet({
                   <span className="font-medium text-lg">
                     {formatName(userRole.user)}
                   </span>
-                  <span className="text-sm text-gray-500">
-                    {userRole.user.email}
-                  </span>
                 </div>
               </div>
 

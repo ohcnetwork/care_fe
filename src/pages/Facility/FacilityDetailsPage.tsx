@@ -17,6 +17,7 @@ import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import publicFacilityApi from "@/types/facility/publicFacilityApi";
 
 import { FeatureBadge } from "./Utils";
 import { UserCard } from "./components/UserCard";
@@ -30,7 +31,7 @@ export function FacilityDetailsPage({ id }: Props) {
   const { goBack } = useAppHistory();
   const { data: facilityResponse, isLoading } = useQuery({
     queryKey: ["facility", id],
-    queryFn: query(routes.getAnyFacility, {
+    queryFn: query(publicFacilityApi.getAny, {
       pathParams: { id },
     }),
   });
@@ -113,16 +114,16 @@ export function FacilityDetailsPage({ id }: Props) {
                 {[facility.address].filter(Boolean).join(", ")}
                 {facility.latitude && facility.longitude && (
                   <FacilityMapsLink
-                    latitude={facility.latitude.toString()}
-                    longitude={facility.longitude.toString()}
+                    latitude={facility.latitude}
+                    longitude={facility.longitude}
                   />
                 )}
               </p>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {facility.features?.map((featureId) => (
-                <FeatureBadge key={featureId} featureId={featureId as number} />
+              {facility.features?.map((featureId: number) => (
+                <FeatureBadge key={featureId} featureId={featureId} />
               ))}
             </div>
 

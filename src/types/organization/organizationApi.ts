@@ -5,7 +5,7 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import {
   Organization,
   OrganizationCreate,
-  OrganizationEdit,
+  OrganizationUpdate,
   OrganizationUserRole,
 } from "./organization";
 
@@ -30,7 +30,7 @@ export default {
     path: "/api/v1/organization/{id}/",
     method: HttpMethod.PUT,
     TRes: Type<Organization>(),
-    TBody: Type<OrganizationEdit>(),
+    TBody: Type<OrganizationUpdate>(),
   },
   delete: {
     path: "/api/v1/organization/{id}/",
