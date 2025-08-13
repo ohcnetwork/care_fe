@@ -59,7 +59,7 @@ export function EncounterHeader({
                 key={identifier.config.id}
                 className="flex flex-col gap-1 items-start md:hidden xl:flex"
               >
-                <span className="text-xs text-gray-600 md:w-auto">
+                <span className="text-xs text-gray-700 md:w-auto">
                   {identifier.config.config.display}:{" "}
                 </span>
                 <span className="text-sm font-semibold">
@@ -68,7 +68,7 @@ export function EncounterHeader({
               </div>
             ))}
             <div className="flex flex-col gap-1 items-start">
-              <span className="text-xs font-medium text-gray-700">
+              <span className="text-xs text-gray-700">
                 {t("encounter_tags")}:
               </span>
               <div className="flex flex-wrap gap-2 text-sm">

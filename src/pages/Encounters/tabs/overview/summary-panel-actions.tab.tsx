@@ -9,7 +9,7 @@ export const SummaryPanelActionsTab = () => {
   const { t } = useTranslation();
 
   const {
-    actions: { markAsCompleted, assignLocation },
+    actions: { markAsCompleted, assignLocation, manageDepartments },
   } = useEncounter();
 
   const actions = [
@@ -31,9 +31,7 @@ export const SummaryPanelActionsTab = () => {
     },
     {
       label: t("update_department"),
-      onClick: () => {
-        console.log("update_department");
-      },
+      onClick: manageDepartments,
     },
   ] as const satisfies { label: string; onClick: () => void }[];
 

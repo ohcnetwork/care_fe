@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
 import { createContext, useContext, useState } from "react";
 
-import { CareTeamSheet } from "@/components/CareTeam/CareTeamSheet";
 import { LocationSheet } from "@/components/Location/LocationSheet";
+import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import { Permissions, getPermissions } from "@/common/Permissions";
 
@@ -48,6 +48,7 @@ type EncounterContextType = {
     assignLocation: () => void;
     viewLocationHistory: () => void;
     manageCareTeam: () => void;
+    manageDepartments: () => void;
   };
 };
 
@@ -56,6 +57,7 @@ enum EncounterAction {
   AssignLocation,
   LocationHistory,
   ManageCareTeam,
+  ManageDepartments,
 }
 
 const encounterContext = createContext<EncounterContextType | undefined>(
@@ -205,6 +207,9 @@ export function EncounterProvider({
           manageCareTeam: () => {
             setActiveAction(EncounterAction.ManageCareTeam);
           },
+          manageDepartments: () => {
+            setActiveAction(EncounterAction.ManageDepartments);
+          },
         },
       }}
     >
@@ -237,7 +242,7 @@ export function EncounterProvider({
         />
       )}
 
-      {selectedEncounter && (
+      {/* {selectedEncounter && (
         <CareTeamSheet
           open={activeAction === EncounterAction.ManageCareTeam}
           setOpen={(open) => {
@@ -245,6 +250,19 @@ export function EncounterProvider({
           }}
           encounter={selectedEncounter}
           canWrite={canWriteSelectedEncounter}
+        />
+      )} */}
+
+      {selectedEncounter && (
+        <LinkDepartmentsSheet
+          entityType="encounter"
+          entityId={selectedEncounter.id}
+          currentOrganizations={selectedEncounter.organizations}
+          facilityId={selectedEncounter.facility.id}
+          open={activeAction === EncounterAction.ManageDepartments}
+          setOpen={(open) => {
+            setActiveAction(open ? EncounterAction.ManageDepartments : null);
+          }}
         />
       )}
     </encounterContext.Provider>
