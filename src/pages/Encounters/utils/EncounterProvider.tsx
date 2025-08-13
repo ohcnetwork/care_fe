@@ -37,9 +37,9 @@ type EncounterContextType = {
   selectedEncounterPermissions: Permissions;
   patientPermissions: Permissions;
 
-  canAccessPrimaryEncounter: boolean;
-  canAccessSelectedEncounter: boolean;
-  canAccessClinicalData: boolean;
+  canReadPrimaryEncounter: boolean;
+  canReadSelectedEncounter: boolean;
+  canReadClinicalData: boolean;
 
   canWritePrimaryEncounter: boolean;
   canWriteSelectedEncounter: boolean;
@@ -138,38 +138,37 @@ export function EncounterProvider({
   );
 
   // User can access the selected encounter if they have canViewEncounter or canViewClinicalData permission
-  const canAccessSelectedEncounter =
+  const canReadSelectedEncounter =
     selectedEncounterPermissions.canViewEncounter ||
     selectedEncounterPermissions.canViewClinicalData;
 
   // User can edit the selected encounter if it was accessed via facility scope, is the same as the primary encounter in view, and is active
   const canWriteSelectedEncounter =
-    canAccessSelectedEncounter &&
+    canReadSelectedEncounter &&
     !!facilityId &&
     selectedEncounterId === primaryEncounterId &&
     !!selectedEncounter &&
     !inactiveEncounterStatus.includes(selectedEncounter.status);
 
   // User can access the current encounter if they have canViewEncounter or canViewClinicalData permission
-  const canAccessPrimaryEncounter =
+  const canReadPrimaryEncounter =
     primaryEncounterPermissions.canViewEncounter ||
     primaryEncounterPermissions.canViewClinicalData;
 
   // User can edit the current encounter if it was accessed via facility scope and is active
   const canWritePrimaryEncounter =
-    canAccessPrimaryEncounter &&
+    canReadPrimaryEncounter &&
     !!facilityId &&
     !!primaryEncounter &&
     !inactiveEncounterStatus.includes(primaryEncounter.status);
 
   // User can access clinical data if they have canViewClinicalData permission or canViewEncounter permission
-  const canAccessClinicalData =
+  const canReadClinicalData =
     patientPermissions.canViewClinicalData ||
     selectedEncounterPermissions.canViewEncounter;
 
   // User can write clinical data if they have canViewClinicalData permission and can write the selected encounter
-  const canWriteClinicalData =
-    canAccessClinicalData && canWriteSelectedEncounter;
+  const canWriteClinicalData = canReadClinicalData && canWriteSelectedEncounter;
 
   const [activeAction, setActiveAction] = useState<EncounterAction | null>(
     null,
@@ -192,11 +191,11 @@ export function EncounterProvider({
         primaryEncounterPermissions,
         selectedEncounterPermissions,
         patientPermissions,
-        canAccessSelectedEncounter,
+        canReadSelectedEncounter,
         canWriteSelectedEncounter,
-        canAccessPrimaryEncounter,
+        canReadPrimaryEncounter,
         canWritePrimaryEncounter,
-        canAccessClinicalData,
+        canReadClinicalData,
         canWriteClinicalData,
         actions: {
           markAsCompleted: () => {

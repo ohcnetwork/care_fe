@@ -26,7 +26,7 @@ export const EncounterPlotsTab = () => {
   const {
     patientId,
     selectedEncounterId: encounterId,
-    canAccessClinicalData: canAccess,
+    canReadClinicalData: canAccess,
   } = useEncounter();
 
   const plotColumns = useBreakpoints({ default: 1, lg: 2 });
