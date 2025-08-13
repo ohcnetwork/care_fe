@@ -78,18 +78,6 @@ export const EncounterOverviewTab = () => {
     canSubmitEncounterQuestionnaire &&
     !inactiveEncounterStatus.includes(encounter?.status ?? "");
 
-  console.log("canEdit", canEdit);
-  console.log("encounterId", encounterId);
-  console.log("currentEncounterId", currentEncounterId);
-  console.log("encounter", encounter);
-  console.log("encounter?.status", encounter?.status);
-  console.log("inactiveEncounterStatus", inactiveEncounterStatus);
-  console.log(
-    "canSubmitEncounterQuestionnaire",
-    canSubmitEncounterQuestionnaire,
-  );
-  console.log("canViewEncounter", canViewEncounter);
-
   const isMobile = useIsMobile();
 
   return (

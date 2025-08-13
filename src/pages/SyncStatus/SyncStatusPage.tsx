@@ -66,7 +66,7 @@ import {
   handleUnsupportedTypeEdit,
 } from "./actionHandlers";
 
-// Helper function to get writes by status
+
 async function getWritesByStatus(
   userId: string,
   facilityId: string | undefined,
@@ -82,7 +82,7 @@ async function getWritesByStatus(
   return query.and((w) => w.syncStatus === status).toArray();
 }
 
-// Custom hook to fetch actual sync data
+
 function useSyncData(facilityId?: string, refreshTrigger?: number) {
   const [syncData, setSyncData] = React.useState({
     lastSync: "Never",
@@ -104,17 +104,17 @@ function useSyncData(facilityId?: string, refreshTrigger?: number) {
         const db = new AppCacheDB();
         const userId = user.external_id;
 
-        // Get all writes for the current user and facility
+        
         let query = db.OfflineWrites.where("userId").equals(userId);
 
-        // Filter by facility ID if available
+        
         if (facilityId) {
           query = query.and((w) => w.facilityId === facilityId);
         }
 
         const allWrites = await query.toArray();
 
-        // Calculate statistics
+        
         const statistics = {
           pending: allWrites.filter((w) => w.syncStatus === "pending").length,
           failed: allWrites.filter((w) => w.syncStatus === "failed").length,
@@ -126,7 +126,7 @@ function useSyncData(facilityId?: string, refreshTrigger?: number) {
           total: allWrites.length,
         };
 
-        // Get last sync time
+       
         const successfulWrites = allWrites.filter(
           (w) => w.syncStatus === "success",
         );
@@ -168,7 +168,7 @@ function useSyncData(facilityId?: string, refreshTrigger?: number) {
   return { syncData };
 }
 
-// Status card component
+
 interface StatusCardProps {
   title: string;
   count: number;
@@ -236,7 +236,7 @@ const StatusCard: React.FC<StatusCardProps> = ({
   );
 };
 
-// Header component
+
 const SyncStatusHeader: React.FC<{
   facilityId?: string;
   refreshTrigger?: number;
@@ -248,8 +248,7 @@ const SyncStatusHeader: React.FC<{
 
   const handleSyncNow = async () => {
     try {
-      // Check if there are any pending writes before starting sync
-      const pendingWrites = await getPendingAndRetryableWrites(
+        const pendingWrites = await getPendingAndRetryableWrites(
         user.external_id,
         facilityId,
       );
@@ -346,7 +345,7 @@ const SyncStatusOverview: React.FC<{
   );
 };
 
-// Shared helper functions for table components
+
 const formatTimeAgo = (timestamp: number) => {
   const now = Date.now();
   const diffInMinutes = Math.floor((now - timestamp) / (1000 * 60));
@@ -362,8 +361,7 @@ const formatTimeAgo = (timestamp: number) => {
 };
 
 const getResourceTypeDisplay = (entry: OfflineWritesEntry) => {
-  // Map the type to a more readable display name using the type-safe OfflineKeyMap
-  const typeMap: Record<keyof typeof OfflineKeyMap, string> = {
+ const typeMap: Record<keyof typeof OfflineKeyMap, string> = {
     create_patient: "Create Patient",
     update_patient: "Patient Update",
     create_encounter: "Create Encounter",
@@ -399,7 +397,7 @@ const getResourceTypeDisplay = (entry: OfflineWritesEntry) => {
   );
 };
 
-// Pending writes table component
+
 const PendingWritesTable: React.FC<{
   facilityId?: string;
   onEdit: (entry: OfflineWritesEntry) => void;
@@ -530,7 +528,7 @@ const PendingWritesTable: React.FC<{
   );
 };
 
-// Failed writes table component
+
 const FailedWritesTable: React.FC<{
   facilityId?: string;
   onEdit: (entry: OfflineWritesEntry) => void;
@@ -668,7 +666,7 @@ const FailedWritesTable: React.FC<{
   );
 };
 
-// Conflicted writes table component
+
 const ConflictedWritesTable: React.FC<{
   facilityId?: string;
   onEdit: (entry: OfflineWritesEntry) => void;
@@ -815,7 +813,7 @@ const ConflictedWritesTable: React.FC<{
   );
 };
 
-// Blocked writes table component
+
 const BlockedWritesTable: React.FC<{
   facilityId?: string;
   onDelete: (entry: OfflineWritesEntry) => void;
@@ -919,7 +917,6 @@ const BlockedWritesTable: React.FC<{
   );
 };
 
-// Tabbed sync details component
 const SyncStatusTabs: React.FC<{
   facilityId?: string;
   onEdit: (entry: OfflineWritesEntry) => void;
@@ -1021,7 +1018,7 @@ const SyncStatusTabs: React.FC<{
   );
 };
 
-// Main page component
+
 const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
   const { t } = useTranslation();
   const authUser = useAuthUser();
@@ -1035,16 +1032,15 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
   const [deleteConfirmEntry, setDeleteConfirmEntry] =
     React.useState<OfflineWritesEntry | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
-  // Add refresh trigger state
+ 
   const [refreshTrigger, setRefreshTrigger] = React.useState(0);
 
-  // Function to trigger refresh of all tables
+  
   const triggerRefresh = () => {
     setRefreshTrigger((prev) => prev + 1);
   };
 
   const handleEdit = async (entry: OfflineWritesEntry) => {
-    // Check parent sync status first for all entries that have a parent
     if (entry.parentMutationId) {
       try {
         const parentCheck = await checkParentSyncStatus(entry.parentMutationId);
@@ -1144,7 +1140,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
       if (success) {
         setIsDeleteDialogOpen(false);
         setDeleteConfirmEntry(null);
-        // Trigger refresh after successful deletion
+     
         triggerRefresh();
       }
     }
@@ -1153,8 +1149,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
   const handleRetry = async (entry: OfflineWritesEntry) => {
     try {
       await handleRetryRecord(entry);
-      // Trigger refresh after retry attempt (regardless of success/failure)
-      triggerRefresh();
+           triggerRefresh();
     } catch (error) {
       console.error("Error in retry:", error);
     }
@@ -1213,8 +1208,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
             onClose={() => {
               setIsUserAssignmentFormOpen(false);
               setSelectedUserAssignmentEntry(null);
-              // Trigger refresh after user assignment form is closed
-              triggerRefresh();
+                       triggerRefresh();
             }}
           />
         )}

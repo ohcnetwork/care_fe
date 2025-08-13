@@ -31,11 +31,6 @@ export default {
     TRes: Type<TagConfig>(),
   },
 
-  retrieveById: {
-    path: "/api/v1/tag_config/by_id/{id}/",
-    method: HttpMethod.GET,
-    TRes: Type<TagConfig>(),
-  },
 
   update: {
     path: "/api/v1/tag_config/{external_id}/",

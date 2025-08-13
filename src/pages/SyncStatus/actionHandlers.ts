@@ -8,13 +8,13 @@ import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 import { Appointment } from "@/types/scheduling/schedule";
 import { UserBase } from "@/types/user/user";
 
-/* Edit handlers for each type of offline write entry */
+
 
 // Unified handler for structured questionnaire types (allergy, diagnosis, symptom, medication)
 export const handleStructuredQuestionnaireEdit = async (
   entry: OfflineWritesEntry,
 ) => {
-  // Check if this is a structured questionnaire type
+
   const structuredTypes = [
     "allergy_intolerance",
     "diagnosis",
@@ -29,7 +29,7 @@ export const handleStructuredQuestionnaireEdit = async (
   }
 
   try {
-    // Extract the payload to get questionnaire and patient/encounter info
+   
     const payload = entry.payload as {
       requests: Array<{
         url: string;
@@ -52,9 +52,8 @@ export const handleStructuredQuestionnaireEdit = async (
       return;
     }
 
-    // Get the first request to extract navigation info
     const firstRequest = payload.requests[0];
-    // Extract from datapoints array as per payload structure
+   
     const datapoint = firstRequest.body.datapoints?.[0];
     if (!datapoint) {
       toast.error("No datapoint found in offline entry");
@@ -63,11 +62,11 @@ export const handleStructuredQuestionnaireEdit = async (
 
     let patientId = datapoint.patient;
     const encounterId = datapoint.encounter;
-    console.log("Extracted patient ID from URL:", patientId);
-    // If patient ID is missing, try to extract from URL (especially for allergy type)
+   
+
     if (!patientId) {
       try {
-        // Extract patient ID from URL pattern: /api/v1/patient/{patientId}/...
+       
         const urlMatch = payload.requests[0].url?.match(
           /\/api\/v1\/patient\/([^/]+)/,
         );
@@ -90,7 +89,7 @@ export const handleStructuredQuestionnaireEdit = async (
       return;
     }
 
-    // Navigate to the specific questionnaire form with edit parameters
+
     navigate(
       `/facility/${entry.facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${entry.type}`,
       {
@@ -134,7 +133,7 @@ export const handleCreateEncounterEdit = async (
   setIsEncounterFormOpen(true);
 };
 
-// Handler for encounter  action ( mark as complete)
+
 
 export const handleEncounterAction = async (entry: OfflineWritesEntry) => {
   //Note: we use entry.id to navigate to the encounter updates page only because mark as complete is for already existing encounters
@@ -150,7 +149,7 @@ export const handleCreateandUpdateResourceRequestEdit = async (
   facilityId?: string,
 ) => {
   if (entry.type === "create_resource_request") {
-    // Extract related_patient from the payload
+  
     const payload = entry.payload as ResourceRequest;
     const relatedPatient = payload?.related_patient;
 
@@ -181,7 +180,7 @@ export const handleAssignUserToPatientEdit = async (
 export const handleRemoveUserFromPatientEdit = async (
   entry: OfflineWritesEntry,
 ) => {
-  // Extract user and patient info from normalized data
+
   const normalizedData = entry.normalizedData as {
     user: UserBase;
     patientName: string;
@@ -195,11 +194,11 @@ export const handleRemoveUserFromPatientEdit = async (
   );
 };
 
-// Handler for appointment entries
+
 export const handleAppointmentEdit = async (entry: OfflineWritesEntry) => {
   switch (entry.type) {
     case "create_appointment": {
-      // Extract patient from normalized data
+      
       const normalizedData = entry.normalizedData as Appointment;
       const patientId = normalizedData?.patient?.id;
 
@@ -222,24 +221,22 @@ export const handleAppointmentEdit = async (entry: OfflineWritesEntry) => {
     case "reschedule_appointment":
     case "update_appointment_status":
     case "cancel_appointment": {
-      // Extract appointment and patient info from normalized data
+     
       const normalizedData = entry.normalizedData as Appointment;
 
       // Extract the actual appointment ID from the offline entry ID
       let appointmentId: string;
       if (entry.id.startsWith("offline-")) {
-        // For offline entries, extract the original appointment ID
-        // Format: offline-{appointmentId}-{action}
-        // Remove "offline-" prefix and get everything before the last "-"
-        const withoutPrefix = entry.id.substring(8); // Remove "offline-"
+        
+        const withoutPrefix = entry.id.substring(8); 
         const lastDashIndex = withoutPrefix.lastIndexOf("-");
         if (lastDashIndex !== -1) {
-          appointmentId = withoutPrefix.substring(0, lastDashIndex); // Everything before the last dash
+          appointmentId = withoutPrefix.substring(0, lastDashIndex); 
         } else {
-          appointmentId = withoutPrefix; // Fallback if no action suffix
+          appointmentId = withoutPrefix; 
         }
       } else {
-        // For direct appointment IDs
+        
         appointmentId = entry.id;
       }
 
@@ -276,7 +273,7 @@ export const handleNonStructuredQuestionnaireEdit = async (
   }
 
   try {
-    // Extract the payload to get questionnaire and patient/encounter info
+
     const payload = entry.payload as {
       requests: Array<{
         url: string;
@@ -296,12 +293,12 @@ export const handleNonStructuredQuestionnaireEdit = async (
       return;
     }
 
-    // Get the first request to extract navigation info
+ 
     const firstRequest = payload.requests[0];
     const patientId = firstRequest.body.patient;
     const encounterId = firstRequest.body.encounter;
 
-    // Navigate to questionnaire form with edit parameters
+   
     if (encounterId) {
       navigate(
         `/facility/${entry.facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire`,
@@ -329,7 +326,7 @@ export const handleNonStructuredQuestionnaireEdit = async (
   }
 };
 
-// Handler for appointment entries
+
 export const handleAppointmentQuestionnaireEdit = async (
   entry: OfflineWritesEntry,
 ) => {
@@ -339,7 +336,7 @@ export const handleAppointmentQuestionnaireEdit = async (
   }
 
   try {
-    // Extract the payload to get patient and slot info
+
     const payload = entry.payload as {
       requests: Array<{
         url: string;
@@ -358,7 +355,7 @@ export const handleAppointmentQuestionnaireEdit = async (
       return;
     }
 
-    // Get the first request to extract patient info
+  
     const firstRequest = payload.requests[0];
     const patientId = firstRequest.body.patient;
 
@@ -367,7 +364,7 @@ export const handleAppointmentQuestionnaireEdit = async (
       return;
     }
 
-    // Navigate to patient questionnaire form with edit parameters
+
     navigate(
       `/facility/${entry.facilityId}/patient/${patientId}/questionnaire`,
       {
@@ -383,13 +380,11 @@ export const handleAppointmentQuestionnaireEdit = async (
   }
 };
 
-// Handler for files entries
 export const handleFilesQuestionnaireEdit = async () => {
   toast.error("offline edit for files type is not supported");
   return;
 };
 
-// Handler for encounter entries
 export const handleEncounterQuestionnaireEdit = async (
   entry: OfflineWritesEntry,
 ) => {
@@ -399,7 +394,7 @@ export const handleEncounterQuestionnaireEdit = async (
   }
 
   try {
-    // Extract the payload to get encounter and patient info
+ 
     const payload = entry.payload as {
       requests: Array<{
         url: string;
@@ -427,11 +422,11 @@ export const handleEncounterQuestionnaireEdit = async (
       return;
     }
 
-    // Get the first request to extract encounter and patient info
+
     const firstRequest = payload.requests[0];
     const patientId = firstRequest.body.patient;
 
-    // Extract encounter ID from URL - format: /api/v1/encounter/{encounterId}/
+
     const urlMatch = firstRequest.url.match(/\/api\/v1\/encounter\/([^/]+)\//);
     const encounterId = urlMatch ? urlMatch[1] : null;
 
@@ -445,7 +440,7 @@ export const handleEncounterQuestionnaireEdit = async (
       return;
     }
 
-    // Navigate to encounter questionnaire form with edit parameters
+    
     navigate(
       `/facility/${entry.facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`,
       {
@@ -461,7 +456,7 @@ export const handleEncounterQuestionnaireEdit = async (
   }
 };
 
-// Handler for time_of_death entries
+
 export const handleTimeOfDeathEdit = async (entry: OfflineWritesEntry) => {
   if (entry.type !== "time_of_death") {
     toast.error("Invalid entry type for time of death editing");
@@ -469,7 +464,7 @@ export const handleTimeOfDeathEdit = async (entry: OfflineWritesEntry) => {
   }
 
   try {
-    // Extract the payload to get patient info
+   
     const payload = entry.payload as {
       requests: Array<{
         url: string;
@@ -486,10 +481,10 @@ export const handleTimeOfDeathEdit = async (entry: OfflineWritesEntry) => {
       return;
     }
 
-    // Get the first request to extract patient info
+   
     const firstRequest = payload.requests[0];
 
-    // Extract patient ID from URL - format: /api/v1/patient/{patientId}/
+   
     const urlMatch = firstRequest.url.match(/\/api\/v1\/patient\/([^/]+)\//);
     const patientId = urlMatch ? urlMatch[1] : null;
 
@@ -498,7 +493,7 @@ export const handleTimeOfDeathEdit = async (entry: OfflineWritesEntry) => {
       return;
     }
 
-    // Navigate to patient questionnaire form with edit parameters
+   
     navigate(
       `/facility/${entry.facilityId}/patient/${patientId}/questionnaire`,
       {
@@ -520,7 +515,7 @@ export const handleUnsupportedTypeEdit = (entry: OfflineWritesEntry) => {
 
 export const handleRetryRecord = async (entry: OfflineWritesEntry) => {
   try {
-    // Create a SyncManager instance to process the write
+   
     const syncManager = new SyncManager({
       userId: entry.userId,
       facilityId: entry.facilityId,
@@ -539,22 +534,20 @@ export const handleRetryRecord = async (entry: OfflineWritesEntry) => {
   }
 };
 
-// ============================================================================
-// DELETE HANDLERS
-// ============================================================================
 
-// Global delete handler for all record types
+// DELETE HANDLERS
+
 export const handleDeleteRecord = async (entry: OfflineWritesEntry) => {
   try {
     const db = new AppCacheDB();
 
-    // Find all child records that are not successful
+   
     const childRecords = await findChildRecords(entry.id);
 
-    // Delete the main record
+    
     await db.OfflineWrites.delete(entry.id);
 
-    // Delete all child records
+   
     for (const child of childRecords) {
       await db.OfflineWrites.delete(child.id);
     }
@@ -569,7 +562,7 @@ export const handleDeleteRecord = async (entry: OfflineWritesEntry) => {
   }
 };
 
-// Helper function to find all child records recursively
+
 async function findChildRecords(
   parentId: string,
 ): Promise<OfflineWritesEntry[]> {
@@ -577,17 +570,16 @@ async function findChildRecords(
   const allWrites = await db.OfflineWrites.toArray();
   const childRecords: OfflineWritesEntry[] = [];
 
-  // Find direct children
   const directChildren = allWrites.filter(
     (write) => write.parentMutationId === parentId,
   );
 
   for (const child of directChildren) {
-    // Only include children that are not successful
+   
     if (child.syncStatus !== "success") {
       childRecords.push(child);
 
-      // Recursively find children of this child
+      
       const grandChildren = await findChildRecords(child.id);
       childRecords.push(...grandChildren);
     }

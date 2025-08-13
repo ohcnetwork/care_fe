@@ -103,8 +103,6 @@ export function EncounterProvider({
     selectedEncounter?.permissions ?? [],
   );
 
-  console.log("selected provider encounter : ", selectedEncounter);
-  console.log("current encounter : ", currentEncounter);
 
   const patientPermissions = getPermissions(
     hasPermission,

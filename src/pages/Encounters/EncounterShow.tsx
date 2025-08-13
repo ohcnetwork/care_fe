@@ -125,10 +125,6 @@ export const EncounterShow = (props: Props) => {
 
   const canAccess = canViewClinicalData || canViewEncounter;
 
-  console.log("encounter", currentEncounter);
-  console.log("patient", patient);
-  console.log("selected : ", selectedEncounter);
-
   useEffect(() => {
     if (!isCurrentEncounterLoading && !isPatientLoading && !canAccess) {
       toast.error(t("permission_denied_encounter"));
