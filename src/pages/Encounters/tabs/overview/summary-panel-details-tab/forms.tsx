@@ -12,7 +12,7 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
 import { EmptyState } from "./empty-state";
 
-export const Questionnaires = () => {
+export const Forms = () => {
   const { t } = useTranslation();
   const {
     selectedEncounterId: encounterId,
