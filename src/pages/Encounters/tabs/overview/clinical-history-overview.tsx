@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { DropletIcon, HandIcon } from "lucide-react";
+import { DropletIcon } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
+
+import { AllergyIcon } from "@/CAREUI/icons/CustomIcons";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -65,7 +67,9 @@ export const ClinicalHistoryOverview = (props: React.ComponentProps<"div">) => {
                 {t("allergies")}:
               </span>
               <Badge variant="yellow">
-                <HandIcon className="size-4" />
+                <div>
+                  <AllergyIcon className="size-4" />
+                </div>
                 <span>
                   {formatTruncatedList(
                     allergies?.results || [],

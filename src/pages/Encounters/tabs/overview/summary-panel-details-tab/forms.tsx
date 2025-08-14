@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
@@ -22,25 +23,27 @@ export const Forms = () => {
 
   const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
 
+  if (!questionnaireOptions) return <CardListSkeleton count={3} />;
+
   return (
-    <div className="bg-gray-100 rounded-md p-2 border border-gray-200">
-      <div className="flex items-center justify-between w-full pl-1 pt-1">
+    <div className="bg-gray-100 rounded-md p-2 border border-gray-200 space-y-1">
+      <div className="flex items-center justify-between w-full pl-2">
         <span className="font-semibold text-gray-950">{t("forms")}</span>
         <QuestionnaireSearch
           trigger={
-            <Button variant="ghost" size="xs" className="-mr-2">
-              <Plus className="size-3 text-gray-950" />
+            <Button variant="ghost" size="sm">
+              <Plus className="text-gray-950" />
             </Button>
           }
           subjectType="encounter"
         />
       </div>
-      <div className="flex flex-col gap-3 mt-2">
-        {questionnaireOptions.length === 0 ? (
+      <div className="flex flex-col gap-3">
+        {questionnaireOptions.results.length === 0 ? (
           <EmptyState message={t("no_forms")} />
         ) : (
           <>
-            {questionnaireOptions.map((option) => (
+            {questionnaireOptions.results.map((option) => (
               <Button
                 key={option.slug}
                 variant="outline"

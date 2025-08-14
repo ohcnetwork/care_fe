@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { LocationTree } from "@/components/Location/LocationTree";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
@@ -17,19 +18,19 @@ export const Locations = () => {
     actions: { assignLocation, viewLocationHistory },
   } = useEncounter();
 
-  if (!encounter) return null;
+  if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
-    <div className="bg-gray-100 rounded-md w-full border border-gray-200 pt-2 px-1 pb-1">
-      <div className="flex justify-between items-center text-black pl-2 pb-1">
+    <div className="bg-gray-100 rounded-md w-full border border-gray-200 p-1 pt-2 space-y-1">
+      <div className="flex justify-between items-center text-black pl-2">
         <span className=" font-semibold">{t("location")}</span>
         <div className="flex">
-          <Button variant="ghost" size="icon" onClick={viewLocationHistory}>
-            <HistoryIcon className="size-4 cursor-pointer" strokeWidth={1.5} />
+          <Button variant="ghost" size="sm" onClick={viewLocationHistory}>
+            <HistoryIcon className="cursor-pointer" strokeWidth={1.5} />
           </Button>
           {canWriteSelectedEncounter && (
-            <Button variant="ghost" size="icon" onClick={assignLocation}>
-              <SquarePen className="size-4 cursor-pointer" strokeWidth={1.5} />
+            <Button variant="ghost" size="sm" onClick={assignLocation}>
+              <SquarePen className="cursor-pointer" strokeWidth={1.5} />
             </Button>
           )}
         </div>

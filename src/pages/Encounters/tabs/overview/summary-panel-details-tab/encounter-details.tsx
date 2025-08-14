@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+
 import { StatusBadge } from "@/pages/Encounters/EncounterProperties";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
@@ -24,7 +26,7 @@ export const EncounterDetails = () => {
     facilityId,
     canWriteSelectedEncounter,
   } = useEncounter();
-  if (!encounter) return null;
+  if (!encounter) return <CardListSkeleton count={1} />;
 
   const EncounterClassIcon = ENCOUNTER_CLASS_ICONS[encounter.encounter_class];
 
@@ -33,14 +35,11 @@ export const EncounterDetails = () => {
       <div className="flex items-center justify-between w-full text-gray-950 pl-2">
         <span className="font-semibold ">{t("encounter_details")}</span>
         {canWriteSelectedEncounter && (
-          <Button variant="ghost" size="xs" asChild>
+          <Button variant="ghost" size="sm" asChild>
             <Link
               href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
             >
-              <SquarePen
-                className="size-4 text-gray-950 cursor-pointer"
-                strokeWidth={1.5}
-              />
+              <SquarePen className="text-gray-950" strokeWidth={1.5} />
             </Link>
           </Button>
         )}
@@ -126,7 +125,7 @@ export const EncounterDetails = () => {
             href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
           >
             <SquarePen className="size-3 text-gray-950" strokeWidth={1.5} />
-            <span className="text-gray-950">{t("update_details")}</span>
+            <span className="text-gray-950">{t("update_encounter")}</span>
           </Link>
         </Button>
       )}

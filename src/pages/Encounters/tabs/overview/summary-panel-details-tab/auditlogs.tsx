@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
 
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
@@ -7,7 +9,7 @@ export const AuditLogs = () => {
   const { t } = useTranslation();
   const { selectedEncounter: encounter } = useEncounter();
 
-  if (!encounter) return null;
+  if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
     <div className="p-2">

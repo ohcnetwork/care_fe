@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
@@ -20,25 +21,23 @@ export const ManageCareTeam = () => {
   } = useEncounter();
   const [showAllMembers, setShowAllMembers] = useState(false);
 
-  if (!encounter) {
-    return null;
-  }
+  if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
-    <div className="bg-gray-100 rounded-md w-full border border-gray-200">
+    <div className="bg-gray-100 rounded-md w-full border border-gray-200 p-1 pt-2 space-y-1">
       <div className="bg-gray-100 rounded-md">
-        <div className="flex justify-between items-center p-2 w-full text-gray-950 pt-3 pr-3">
-          <span className=" font-semibold pl-1">
+        <div className="flex justify-between items-center w-full text-gray-950 pl-2">
+          <span className=" font-semibold">
             {canWrite ? t("manage_care_team") : t("view_care_team")}
           </span>
           {canWrite && (
-            <Button variant="ghost" size="icon" onClick={manageCareTeam}>
-              <SquarePen className="size-4 cursor-pointer" strokeWidth={1.5} />
+            <Button variant="ghost" size="sm" onClick={manageCareTeam}>
+              <SquarePen className="cursor-pointer" strokeWidth={1.5} />
             </Button>
           )}
         </div>
       </div>
-      <div className="bg-white p-2 rounded-md mx-1 mb-1 shadow">
+      <div className="bg-white p-2 rounded-md shadow">
         {encounter.care_team.length > 0 ? (
           <div className="flex flex-col gap-1">
             {(showAllMembers
