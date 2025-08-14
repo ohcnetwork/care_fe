@@ -7,15 +7,15 @@ import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { DeviceDetail } from "@/types/device/device";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 import { AppRoutes } from "./Routers/AppRouter";
 import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
 import { pluginMap } from "./pluginMap";
-import { FacilityData } from "./types/facility/facility";
+import { FacilityRead } from "./types/facility/facility";
 
 export type DoctorConnectButtonComponentType = React.FC<{
-  user: UserBase;
+  user: UserReadMinimal;
 }>;
 
 export type ScribeComponentType = React.FC<{
@@ -44,7 +44,7 @@ export type PatientInfoCardMarkAsCompleteComponentType = React.FC<{
 }>;
 
 export type FacilityHomeActionsComponentType = React.FC<{
-  facility: FacilityData;
+  facility: FacilityRead;
   className?: string;
 }>;
 

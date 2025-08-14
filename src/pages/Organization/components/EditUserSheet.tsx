@@ -10,13 +10,13 @@ import {
 
 import UserForm from "@/components/Users/UserForm";
 
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface EditUserSheetProps {
   existingUsername: string;
   open: boolean;
   setOpen: (open: boolean) => void;
-  onUserUpdated?: (user: UserBase) => void;
+  onUserUpdated?: (user: UserReadMinimal) => void;
 }
 
 export default function EditUserSheet({
