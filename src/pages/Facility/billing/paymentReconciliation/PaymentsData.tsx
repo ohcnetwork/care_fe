@@ -103,8 +103,8 @@ export default function PaymentsData({
 
   return (
     <>
-      <div className="flex flex-row justify-between items-center gap-2 my-4 w-full md:flex-wrap md:gap-y-4">
-        <div className="flex flex-row justify-start items-center gap-3 w-full flex-wrap md:gap-y-4 md:flex-wrap md:flex-row sm:flex-col">
+      <div className="flex w-full flex-col items-center my-4 gap-2 md:flex-row md:flex-wrap md:gap-y-4 md:justify-start lg:flex-nowrap lg:justify-between">
+        <div className="flex w-full flex-col items-center gap-3 md:flex-row md:flex-wrap md:gap-y-4">
           <Tabs
             defaultValue={qParams.status ?? "all"}
             onValueChange={(value) =>
