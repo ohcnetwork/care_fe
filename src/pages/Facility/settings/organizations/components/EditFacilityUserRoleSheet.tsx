@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -19,13 +19,6 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -35,12 +28,12 @@ import {
 } from "@/components/ui/sheet";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { RoleSelect } from "@/components/Common/RoleSelect";
 import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import roleApi from "@/types/emr/role/roleApi";
+import { RoleBase } from "@/types/emr/role/role";
 import { FacilityOrganizationUserRole } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
@@ -59,14 +52,8 @@ export default function EditUserRoleSheet({
 }: Props) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<string>(userRole.role.id);
+  const [selectedRole, setSelectedRole] = useState<RoleBase>();
   const { t } = useTranslation();
-
-  const { data: roles } = useQuery({
-    queryKey: ["roles"],
-    queryFn: query(roleApi.listRoles),
-    enabled: open,
-  });
 
   const { mutate: updateRole } = useMutation({
     mutationFn: mutate(facilityOrganizationApi.updateUserRole, {
@@ -115,13 +102,13 @@ export default function EditUserRoleSheet({
   });
 
   const handleUpdateRole = () => {
-    if (selectedRole === userRole.role.id) {
+    if (!selectedRole || selectedRole.id === userRole.role.id) {
       toast.error(t("select_diff_role"));
       return;
     }
 
     updateRole({
-      role: selectedRole,
+      role: selectedRole.id,
     });
   };
 
@@ -179,32 +166,14 @@ export default function EditUserRoleSheet({
             <Label className="text-sm font-medium">
               {t("select_new_role")}
             </Label>
-            <Select value={selectedRole} onValueChange={setSelectedRole}>
-              <SelectTrigger className="h-12" data-cy="select-updated-role">
-                <SelectValue placeholder={t("select_role")} />
-              </SelectTrigger>
-              <SelectContent className="w-[var(--radix-select-trigger-width)]">
-                {roles?.results?.map((role) => (
-                  <SelectItem key={role.id} value={role.id}>
-                    <div className="flex flex-col text-left">
-                      <span>{role.name}</span>
-                      {role.description && (
-                        <span className="text-xs text-gray-500">
-                          {role.description}
-                        </span>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <RoleSelect value={selectedRole} onChange={setSelectedRole} />
           </div>
 
           <div className="flex flex-col gap-2">
             <Button
               className="w-full"
               onClick={handleUpdateRole}
-              disabled={selectedRole === userRole.role.id}
+              disabled={!selectedRole || selectedRole.id === userRole.role.id}
               data-cy="update-user-role"
             >
               {t("update_role")}

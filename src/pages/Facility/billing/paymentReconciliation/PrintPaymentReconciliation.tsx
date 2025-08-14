@@ -100,7 +100,7 @@ export function PrintPaymentReconciliation({
                     variant={
                       PAYMENT_RECONCILIATION_OUTCOME_COLORS[payment.outcome]
                     }
-                    className="align-middle ml-1"
+                    className="ml-2"
                   >
                     {outcomeMap[payment.outcome]?.label}
                   </Badge>
