@@ -27,7 +27,7 @@ export const ManageCareTeam = () => {
   return (
     <div className="bg-gray-100 rounded-md w-full border border-gray-200">
       <div className="bg-gray-100 rounded-md">
-        <div className="flex justify-between items-center p-2 w-full text-gray-950 pt-3 pr-3">
+        <div className="flex justify-between items-center p-2 w-full text-gray-950 pt-1 pr-1">
           <span className=" font-semibold pl-1">
             {canWrite ? t("manage_care_team") : t("view_care_team")}
           </span>

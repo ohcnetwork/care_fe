@@ -30,7 +30,7 @@ export const DischargeDetails = () => {
 
   return (
     <div className="bg-gray-100 rounded-md w-full border border-gray-200 pt-2">
-      <div className="flex justify-between items-center p-2 pl-3 pr-1">
+      <div className="flex justify-between items-center p-2 pl-3">
         <span className="text-gray-950 font-semibold">
           {t("discharge_details")}
         </span>

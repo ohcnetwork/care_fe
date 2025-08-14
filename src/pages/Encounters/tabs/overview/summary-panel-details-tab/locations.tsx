@@ -20,7 +20,7 @@ export const Locations = () => {
   if (!encounter) return null;
 
   return (
-    <div className="bg-gray-100 rounded-md w-full border border-gray-200 pt-2 px-1 pb-1">
+    <div className="bg-gray-100 rounded-md w-full border border-gray-200 pt-1 px-1 pb-1">
       <div className="flex justify-between items-center text-black pl-2 pb-1">
         <span className=" font-semibold">{t("location")}</span>
         <div className="flex">

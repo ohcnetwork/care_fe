@@ -20,7 +20,7 @@ export const DepartmentsAndTeams = () => {
 
   return (
     <div className="bg-gray-100 rounded-md w-full border border-gray-200">
-      <div className="flex justify-between items-center px-3 py-1 text-gray-950">
+      <div className="flex justify-between items-center pl-3 pr-2 py-1 text-gray-950">
         <span className=" font-semibold">{t("departments_and_teams")}</span>
         {canEdit && (
           <Button variant="ghost" size="icon" onClick={manageDepartments}>

@@ -126,7 +126,7 @@ export const EncounterDetails = () => {
             href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
           >
             <SquarePen className="size-3 text-gray-950" strokeWidth={1.5} />
-            <span className="text-gray-950">{t("update_details")}</span>
+            <span className="text-gray-950">{t("update_encounter")}</span>
           </Link>
         </Button>
       )}

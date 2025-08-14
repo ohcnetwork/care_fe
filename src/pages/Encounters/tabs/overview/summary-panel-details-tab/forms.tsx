@@ -1,14 +1,16 @@
+import { useQuery } from "@tanstack/react-query";
 import { NotebookPen, Plus } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 
-import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
-
+import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 import { EmptyState } from "./empty-state";
 
@@ -20,7 +22,19 @@ export const Forms = () => {
     facilityId,
   } = useEncounter();
 
-  const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
+  const { data: questionnaireOptions } = useQuery({
+    queryKey: ["questionnaires", "encounter_actions"] as const,
+    queryFn: query(questionnaireApi.list, {
+      queryParams: {
+        tag_slug: "encounter_actions",
+        status: "active",
+        subject_type: "encounter",
+      },
+      silent: (res) => res.status === 404,
+    }),
+  });
+
+  if (!questionnaireOptions) return <CardListSkeleton count={3} />;
 
   return (
     <div className="bg-gray-100 rounded-md p-2 border border-gray-200">
@@ -36,11 +50,11 @@ export const Forms = () => {
         />
       </div>
       <div className="flex flex-col gap-3 mt-2">
-        {questionnaireOptions.length === 0 ? (
+        {questionnaireOptions.results.length === 0 ? (
           <EmptyState message={t("no_forms")} />
         ) : (
           <>
-            {questionnaireOptions.map((option) => (
+            {questionnaireOptions.results.map((option) => (
               <Button
                 key={option.slug}
                 variant="outline"
