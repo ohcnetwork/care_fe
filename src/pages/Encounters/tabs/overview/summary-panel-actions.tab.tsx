@@ -1,4 +1,5 @@
 import { CheckIcon, NotebookPen } from "lucide-react";
+import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -9,21 +10,23 @@ export const SummaryPanelActionsTab = () => {
   const { t } = useTranslation();
 
   const {
-    actions: { markAsCompleted, assignLocation },
+    actions: {
+      markAsCompleted,
+      assignLocation,
+      manageDepartments,
+      manageCareTeam,
+      dispenseMedicine,
+    },
   } = useEncounter();
 
   const actions = [
     {
       label: t("manage_consents"),
-      onClick: () => {
-        console.log("manage_consents");
-      },
+      onClick: () => navigate("consents"),
     },
     {
       label: t("manage_care_team"),
-      onClick: () => {
-        console.log("manage_care_team");
-      },
+      onClick: manageCareTeam,
     },
     {
       label: t("update_location"),
@@ -31,9 +34,11 @@ export const SummaryPanelActionsTab = () => {
     },
     {
       label: t("update_department"),
-      onClick: () => {
-        console.log("update_department");
-      },
+      onClick: manageDepartments,
+    },
+    {
+      label: t("dispense_medicine"),
+      onClick: dispenseMedicine,
     },
   ] as const satisfies { label: string; onClick: () => void }[];
 

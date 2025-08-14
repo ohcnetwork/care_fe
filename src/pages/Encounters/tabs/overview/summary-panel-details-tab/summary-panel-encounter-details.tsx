@@ -269,7 +269,7 @@ export const SummaryPanelEncounterDetails = () => {
                           key={member.member.id}
                           name={member.member.first_name}
                           imageUrl={member.member.profile_picture_url}
-                          className="size-8 rounded-full"
+                          className="size-10 rounded-full border border-white shadow-sm"
                         />
                       ))
                   ) : (
@@ -277,9 +277,9 @@ export const SummaryPanelEncounterDetails = () => {
                   )}
                 </div>
                 {encounter.care_team.length > 3 && (
-                  <span className="text-sm font-medium text-gray-600">
-                    +{encounter.care_team.length - 3}
-                  </span>
+                  <div className="flex items-center justify-center text-sm font-medium text-gray-700 rounded-full bg-gray-100 size-10 border border-white shadow-sm -ml-4">
+                    <span>+{encounter.care_team.length - 3}</span>
+                  </div>
                 )}
               </div>
             </div>

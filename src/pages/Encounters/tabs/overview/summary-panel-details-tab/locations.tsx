@@ -13,6 +13,7 @@ export const Locations = () => {
   const { t } = useTranslation();
   const {
     selectedEncounter: encounter,
+    canWriteSelectedEncounter,
     actions: { assignLocation, viewLocationHistory },
   } = useEncounter();
 
@@ -26,9 +27,11 @@ export const Locations = () => {
           <Button variant="ghost" size="icon" onClick={viewLocationHistory}>
             <HistoryIcon className="size-4 cursor-pointer" strokeWidth={1.5} />
           </Button>
-          <Button variant="ghost" size="icon" onClick={assignLocation}>
-            <SquarePen className="size-4 cursor-pointer" strokeWidth={1.5} />
-          </Button>
+          {canWriteSelectedEncounter && (
+            <Button variant="ghost" size="icon" onClick={assignLocation}>
+              <SquarePen className="size-4 cursor-pointer" strokeWidth={1.5} />
+            </Button>
+          )}
         </div>
       </div>
       <div className="bg-white rounded-md p-2 shadow">

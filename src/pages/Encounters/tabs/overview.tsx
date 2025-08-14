@@ -21,7 +21,7 @@ export const EncounterOverviewTab = () => {
     selectedEncounter: encounter,
     patientId,
     selectedEncounterId: encounterId,
-    canAccessSelectedEncounter: canAccess,
+    canReadSelectedEncounter: canAccess,
     canWriteSelectedEncounter: canWrite,
   } = useEncounter();
 

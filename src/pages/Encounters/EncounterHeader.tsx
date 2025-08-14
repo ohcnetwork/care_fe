@@ -11,13 +11,18 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import { formatPatientAge } from "@/Utils/utils";
-import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
-export function EncounterHeader() {
+export function EncounterHeader({
+  encounter,
+  canWriteSelectedEncounter,
+}: {
+  encounter?: EncounterRead;
+  canWriteSelectedEncounter: boolean;
+}) {
   const { t } = useTranslation();
-  const { primaryEncounter: encounter, canWriteSelectedEncounter } =
-    useEncounter();
+
   const readOnly = !canWriteSelectedEncounter;
 
   if (!encounter) {
@@ -48,13 +53,13 @@ export function EncounterHeader() {
               </span>
             </Link>
           </div>
-          <div className="flex flex-wrap md:hidden xl:flex xl:gap-10 ml-3 gap-2">
+          <div className="flex flex-wrap xl:gap-8 gap-2">
             {patient.instance_identifiers?.map((identifier) => (
               <div
                 key={identifier.config.id}
-                className="flex flex-col gap-1 items-start"
+                className="flex flex-col gap-1 items-start md:hidden xl:flex"
               >
-                <span className="text-xs text-gray-600 md:w-auto">
+                <span className="text-xs text-gray-700 md:w-auto">
                   {identifier.config.config.display}:{" "}
                 </span>
                 <span className="text-sm font-semibold">
@@ -62,28 +67,28 @@ export function EncounterHeader() {
                 </span>
               </div>
             ))}
-          </div>
-          <div className="ml-3 sm:ml-0">
-            <span className="text-sm font-medium text-gray-700">
-              {t("encounter_tags")}:
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {encounter.tags.length > 0 ? (
-                <>
-                  {encounter.tags.map((tag) => (
-                    <Badge
-                      key={tag.id}
-                      variant="secondary"
-                      className="capitalize"
-                      title={tag.description}
-                    >
-                      {getTagHierarchyDisplay(tag)}
-                    </Badge>
-                  ))}
-                </>
-              ) : (
-                <p className="text-sm text-gray-500">{t("no_tags")}</p>
-              )}
+            <div className="flex flex-col gap-1 items-start">
+              <span className="text-xs text-gray-700">
+                {t("encounter_tags")}:
+              </span>
+              <div className="flex flex-wrap gap-2 text-sm">
+                {encounter.tags.length > 0 ? (
+                  <>
+                    {encounter.tags.map((tag) => (
+                      <Badge
+                        key={tag.id}
+                        variant="secondary"
+                        className="capitalize"
+                        title={tag.description}
+                      >
+                        {getTagHierarchyDisplay(tag)}
+                      </Badge>
+                    ))}
+                  </>
+                ) : (
+                  <p className="text-sm text-gray-500">{t("no_tags")}</p>
+                )}
+              </div>
             </div>
           </div>
         </div>

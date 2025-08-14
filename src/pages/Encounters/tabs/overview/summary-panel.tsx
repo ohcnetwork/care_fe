@@ -16,7 +16,7 @@ export const SummaryPanel = () => {
     <div className="@container">
       <Tabs
         defaultValue="details"
-        className="@xs:bg-gray-100 @xs:border border-gray-200 p-2 sm:p-0 @sm:p-1 @xs:rounded-lg"
+        className="@xs:bg-gray-100 @xs:border border-gray-200 p-1 xl:p-0 @xs:rounded-lg"
       >
         <TabsList className="w-full sm:w-72 bg-gray-100 @xs:bg-gray-200 justify-between inset-shadow-sm pt-px pb-0.5 px-0.5">
           <TabsTrigger value="details" className="w-full">

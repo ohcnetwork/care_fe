@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import query from "@/Utils/request/query";
 import { formatTruncatedList } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { ALLERGY_VERIFICATION_STATUS } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import { completedEncounterStatus } from "@/types/emr/encounter/encounter";
 
@@ -26,11 +25,11 @@ export const ClinicalHistoryOverview = (props: React.ComponentProps<"div">) => {
   } = useEncounter();
 
   const { data: allergies } = useQuery({
-    queryKey: ["allergies", patientId, ALLERGY_VERIFICATION_STATUS.confirmed],
+    queryKey: ["allergies", patientId, "confirmed"],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
       queryParams: {
-        verification_status: ALLERGY_VERIFICATION_STATUS.confirmed,
+        verification_status: "confirmed",
       },
     }),
     // Voluntarily doing as this is available only if permitted.

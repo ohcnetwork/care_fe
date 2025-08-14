@@ -2,13 +2,16 @@ import { useQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
 import { createContext, useContext, useState } from "react";
 
+import { CareTeamSheet } from "@/components/CareTeam/CareTeamSheet";
 import { LocationSheet } from "@/components/Location/LocationSheet";
+import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import { Permissions, getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
+import { DispenseMedicineButton } from "@/pages/Encounters/tabs/overview/summary-panel-details-tab/dispense-medicine";
 import {
   EncounterRead,
   inactiveEncounterStatus,
@@ -34,9 +37,9 @@ type EncounterContextType = {
   selectedEncounterPermissions: Permissions;
   patientPermissions: Permissions;
 
-  canAccessPrimaryEncounter: boolean;
-  canAccessSelectedEncounter: boolean;
-  canAccessClinicalData: boolean;
+  canReadPrimaryEncounter: boolean;
+  canReadSelectedEncounter: boolean;
+  canReadClinicalData: boolean;
 
   canWritePrimaryEncounter: boolean;
   canWriteSelectedEncounter: boolean;
@@ -46,6 +49,9 @@ type EncounterContextType = {
     markAsCompleted: () => void;
     assignLocation: () => void;
     viewLocationHistory: () => void;
+    manageCareTeam: () => void;
+    manageDepartments: () => void;
+    dispenseMedicine: () => void;
   };
 };
 
@@ -53,6 +59,9 @@ enum EncounterAction {
   MarkAsCompleted,
   AssignLocation,
   LocationHistory,
+  ManageCareTeam,
+  ManageDepartments,
+  DispenseMedicine,
 }
 
 const encounterContext = createContext<EncounterContextType | undefined>(
@@ -129,38 +138,37 @@ export function EncounterProvider({
   );
 
   // User can access the selected encounter if they have canViewEncounter or canViewClinicalData permission
-  const canAccessSelectedEncounter =
+  const canReadSelectedEncounter =
     selectedEncounterPermissions.canViewEncounter ||
     selectedEncounterPermissions.canViewClinicalData;
 
   // User can edit the selected encounter if it was accessed via facility scope, is the same as the primary encounter in view, and is active
   const canWriteSelectedEncounter =
-    canAccessSelectedEncounter &&
+    canReadSelectedEncounter &&
     !!facilityId &&
     selectedEncounterId === primaryEncounterId &&
     !!selectedEncounter &&
     !inactiveEncounterStatus.includes(selectedEncounter.status);
 
   // User can access the current encounter if they have canViewEncounter or canViewClinicalData permission
-  const canAccessPrimaryEncounter =
+  const canReadPrimaryEncounter =
     primaryEncounterPermissions.canViewEncounter ||
     primaryEncounterPermissions.canViewClinicalData;
 
   // User can edit the current encounter if it was accessed via facility scope and is active
   const canWritePrimaryEncounter =
-    canAccessPrimaryEncounter &&
+    canReadPrimaryEncounter &&
     !!facilityId &&
     !!primaryEncounter &&
     !inactiveEncounterStatus.includes(primaryEncounter.status);
 
   // User can access clinical data if they have canViewClinicalData permission or canViewEncounter permission
-  const canAccessClinicalData =
+  const canReadClinicalData =
     patientPermissions.canViewClinicalData ||
     selectedEncounterPermissions.canViewEncounter;
 
   // User can write clinical data if they have canViewClinicalData permission and can write the selected encounter
-  const canWriteClinicalData =
-    canAccessClinicalData && canWriteSelectedEncounter;
+  const canWriteClinicalData = canReadClinicalData && canWriteSelectedEncounter;
 
   const [activeAction, setActiveAction] = useState<EncounterAction | null>(
     null,
@@ -183,11 +191,11 @@ export function EncounterProvider({
         primaryEncounterPermissions,
         selectedEncounterPermissions,
         patientPermissions,
-        canAccessSelectedEncounter,
+        canReadSelectedEncounter,
         canWriteSelectedEncounter,
-        canAccessPrimaryEncounter,
+        canReadPrimaryEncounter,
         canWritePrimaryEncounter,
-        canAccessClinicalData,
+        canReadClinicalData,
         canWriteClinicalData,
         actions: {
           markAsCompleted: () => {
@@ -198,6 +206,15 @@ export function EncounterProvider({
           },
           viewLocationHistory: () => {
             setActiveAction(EncounterAction.LocationHistory);
+          },
+          manageCareTeam: () => {
+            setActiveAction(EncounterAction.ManageCareTeam);
+          },
+          manageDepartments: () => {
+            setActiveAction(EncounterAction.ManageDepartments);
+          },
+          dispenseMedicine: () => {
+            setActiveAction(EncounterAction.DispenseMedicine);
           },
         },
       }}
@@ -230,6 +247,39 @@ export function EncounterProvider({
           }
         />
       )}
+
+      {selectedEncounter && (
+        <CareTeamSheet
+          open={activeAction === EncounterAction.ManageCareTeam}
+          setOpen={(open) => {
+            setActiveAction(open ? EncounterAction.ManageCareTeam : null);
+          }}
+          encounter={selectedEncounter}
+          canWrite={canWriteSelectedEncounter}
+          trigger={<></>}
+        />
+      )}
+
+      {selectedEncounter && (
+        <LinkDepartmentsSheet
+          entityType="encounter"
+          entityId={selectedEncounter.id}
+          currentOrganizations={selectedEncounter.organizations}
+          facilityId={selectedEncounter.facility.id}
+          open={activeAction === EncounterAction.ManageDepartments}
+          setOpen={(open) => {
+            setActiveAction(open ? EncounterAction.ManageDepartments : null);
+          }}
+          trigger={<></>}
+        />
+      )}
+
+      <DispenseMedicineButton
+        open={activeAction === EncounterAction.DispenseMedicine}
+        setOpen={(open) => {
+          setActiveAction(open ? EncounterAction.DispenseMedicine : null);
+        }}
+      />
     </encounterContext.Provider>
   );
 }

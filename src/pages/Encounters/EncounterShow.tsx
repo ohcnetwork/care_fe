@@ -54,6 +54,7 @@ export const EncounterShow = (props: Props) => {
     isPrimaryEncounterLoading,
     patient,
     isPatientLoading,
+    canWriteSelectedEncounter,
   } = useEncounter();
 
   useSidebarAutoCollapse({ restore: false });
@@ -167,7 +168,10 @@ export const EncounterShow = (props: Props) => {
       className="block md:px-1 -mt-4"
       hideTitleOnPage
     >
-      <EncounterHeader />
+      <EncounterHeader
+        encounter={selectedEncounter}
+        canWriteSelectedEncounter={canWriteSelectedEncounter}
+      />
       <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
         <EncounterHistorySelector />
         <NavTabs

@@ -64,7 +64,7 @@ export default function MedicationRequestTable() {
     patientId,
     selectedEncounterId: encounterId,
     canWriteClinicalData: canWrite,
-    canAccessClinicalData: canAccess,
+    canReadClinicalData: canAccess,
     facilityId,
   } = useEncounter();
   const [searchQuery, setSearchQuery] = useState("");

@@ -22,6 +22,7 @@ export const EncounterDetails = () => {
     selectedEncounterId: encounterId,
     patientId,
     facilityId,
+    canWriteSelectedEncounter,
   } = useEncounter();
   if (!encounter) return null;
 
@@ -31,16 +32,18 @@ export const EncounterDetails = () => {
     <div className="flex flex-wrap gap-2 border bg-gray-100 border-gray-200 rounded-md pt-2 px-1 pb-1">
       <div className="flex items-center justify-between w-full text-gray-950 pl-2">
         <span className="font-semibold ">{t("encounter_details")}</span>
-        <Button variant="ghost" size="xs" asChild>
-          <Link
-            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
-          >
-            <SquarePen
-              className="size-4 text-gray-950 cursor-pointer"
-              strokeWidth={1.5}
-            />
-          </Link>
-        </Button>
+        {canWriteSelectedEncounter && (
+          <Button variant="ghost" size="xs" asChild>
+            <Link
+              href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
+            >
+              <SquarePen
+                className="size-4 text-gray-950 cursor-pointer"
+                strokeWidth={1.5}
+              />
+            </Link>
+          </Button>
+        )}
       </div>
       <div className="flex flex-wrap gap-2 justify-between bg-white w-full p-2 rounded-md shadow">
         <div className="flex flex-col gap-1">
@@ -117,14 +120,16 @@ export const EncounterDetails = () => {
           </div>
         </div>
       </div>
-      <Button variant="outline" className="w-full" asChild>
-        <Link
-          href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
-        >
-          <SquarePen className="size-3 text-gray-950" strokeWidth={1.5} />
-          <span className="text-gray-950">{t("update_details")}</span>
-        </Link>
-      </Button>
+      {canWriteSelectedEncounter && (
+        <Button variant="outline" className="w-full" asChild>
+          <Link
+            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
+          >
+            <SquarePen className="size-3 text-gray-950" strokeWidth={1.5} />
+            <span className="text-gray-950">{t("update_details")}</span>
+          </Link>
+        </Button>
+      )}
     </div>
   );
 };

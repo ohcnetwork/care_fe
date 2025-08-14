@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Building, Loader2, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -14,10 +14,10 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import { BatchRequestBody } from "@/types/base/batch/batch";
+import batchApi from "@/types/base/batch/batchApi";
 import deviceApi from "@/types/device/deviceApi";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
@@ -31,6 +31,8 @@ interface Props {
   trigger?: React.ReactNode;
   onUpdate?: () => void;
   orgType?: "organization" | "managing_organization";
+  open?: boolean;
+  setOpen?: (open: boolean) => void;
 }
 
 type MutationRoute =
@@ -185,15 +187,27 @@ export default function LinkDepartmentsSheet({
   facilityId,
   trigger,
   onUpdate,
+  ...props
 }: Props) {
   const { t } = useTranslation();
 
-  const [open, setOpen] = useState(false);
+  const [open, _setOpen] = useState(false);
   const [selectedOrgs, setSelectedOrgs] = useState<string[] | null>(null);
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    if (props.open != null) {
+      _setOpen(props.open);
+    }
+  }, [props.open]);
+
+  const setOpen = (open: boolean) => {
+    _setOpen(open);
+    props.setOpen?.(open);
+  };
+
   const { mutate: submitBatch, isPending: isAdding } = useMutation({
-    mutationFn: mutate(routes.batchRequest, { silent: true }),
+    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
       queryClient.invalidateQueries({ queryKey: invalidateQueries });

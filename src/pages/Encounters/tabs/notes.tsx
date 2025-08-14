@@ -7,14 +7,14 @@ export const EncounterNotesTab = () => {
   const {
     selectedEncounterId: encounterId,
     canWriteSelectedEncounter,
-    canAccessSelectedEncounter,
+    canReadSelectedEncounter,
     patientId,
   } = useEncounter();
 
   return (
     <div>
       <NoteManager
-        canAccess={canAccessSelectedEncounter}
+        canAccess={canReadSelectedEncounter}
         canWrite={canWriteSelectedEncounter}
         encounterId={encounterId}
         patientId={patientId}
