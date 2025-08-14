@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { NotebookPen, Plus } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -8,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 
-import query from "@/Utils/request/query";
+import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
+
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 import { EmptyState } from "./empty-state";
 
@@ -22,17 +21,7 @@ export const Forms = () => {
     facilityId,
   } = useEncounter();
 
-  const { data: questionnaireOptions } = useQuery({
-    queryKey: ["questionnaires", "encounter_actions"],
-    queryFn: query(questionnaireApi.list, {
-      queryParams: {
-        tag_slug: "encounter_actions",
-        status: "active",
-        subject_type: "encounter",
-      },
-      silent: (res) => res.status === 404,
-    }),
-  });
+  const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
 
   if (!questionnaireOptions) return <CardListSkeleton count={3} />;
 
