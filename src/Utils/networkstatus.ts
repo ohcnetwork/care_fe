@@ -55,6 +55,9 @@ export default function useNetworkStatus() {
       onlineManager.setOnline(false);
       toast.warning(t("you_are_offline"));
       await restorePersistedCache();
+      queryClient.invalidateQueries({
+        queryKey: ["refresh-token"],
+      });
     } finally {
       setIsChecked(true);
     }

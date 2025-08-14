@@ -138,13 +138,10 @@ export default function CreateEncounterForm({
 
   const tagIds = form.watch("tags");
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
-  console.log("tagIds", tagIds);
 
   const newSelectedTags = tagQueries
     .map((query) => query.data)
     .filter(Boolean) as TagConfig[];
-
-  console.log("newSelectedTags", newSelectedTags);
 
   const { mutate: createEncounter, isPending } = useMutation({
     mutationFn: mutate(encounterApi.create),
@@ -300,7 +297,6 @@ export default function CreateEncounterForm({
             };
 
             form.reset(formData);
-            console.log("formData", formData);
 
             // if (normalizedData.tags && normalizedData.tags.length > 0) {
             //   setSelectedTags(normalizedData.tags);

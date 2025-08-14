@@ -187,6 +187,11 @@ export const dependencySchema: DependencySchema = {
       path: ["requests", "*", "body", "encounter"],
       resourceType: "encounter",
     },
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "associating_id"],
+      resourceType: "encounter",
+    },
   ],
   time_of_death: [
     {

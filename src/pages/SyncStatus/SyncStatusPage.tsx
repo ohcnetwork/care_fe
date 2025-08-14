@@ -393,6 +393,7 @@ const PendingWritesTable: React.FC<{
   onEdit: (entry: OfflineWritesEntry) => void;
   onRetry: (entry: OfflineWritesEntry) => void;
   onDelete: (entry: OfflineWritesEntry) => void;
+
   refreshTrigger: number;
 }> = ({ facilityId, onEdit, onRetry, onDelete, refreshTrigger }) => {
   const [pendingWrites, setPendingWrites] = React.useState<
@@ -523,8 +524,16 @@ const FailedWritesTable: React.FC<{
   onEdit: (entry: OfflineWritesEntry) => void;
   onRetry: (entry: OfflineWritesEntry) => void;
   onDelete: (entry: OfflineWritesEntry) => void;
+
   refreshTrigger: number;
-}> = ({ facilityId, onEdit, onRetry, onDelete, refreshTrigger }) => {
+}> = ({
+  facilityId,
+  onEdit,
+  onRetry,
+  onDelete,
+
+  refreshTrigger,
+}) => {
   const [failedWrites, setFailedWrites] = React.useState<OfflineWritesEntry[]>(
     [],
   );
@@ -657,11 +666,21 @@ const FailedWritesTable: React.FC<{
 
 const ConflictedWritesTable: React.FC<{
   facilityId?: string;
-  onEdit: (entry: OfflineWritesEntry) => void;
   onRetry: (entry: OfflineWritesEntry) => void;
   onDelete: (entry: OfflineWritesEntry) => void;
+  setIsEditDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setEditConfirmEntry: React.Dispatch<
+    React.SetStateAction<OfflineWritesEntry | null>
+  >;
   refreshTrigger: number;
-}> = ({ facilityId, onEdit, onRetry, onDelete, refreshTrigger }) => {
+}> = ({
+  facilityId,
+  onRetry,
+  onDelete,
+  setIsEditDialogOpen,
+  setEditConfirmEntry,
+  refreshTrigger,
+}) => {
   const [conflictedWrites, setConflictedWrites] = React.useState<
     OfflineWritesEntry[]
   >([]);
@@ -688,16 +707,9 @@ const ConflictedWritesTable: React.FC<{
     fetchConflictedWrites();
   }, [user.external_id, facilityId, refreshTrigger, isSyncing]);
 
-  const handleView = (entry: OfflineWritesEntry) => {
-    console.log("View conflicted entry:", entry);
-    // TODO: Implement view functionality
-  };
-
   const handleEdit = (entry: OfflineWritesEntry) => {
-    toast.info(
-      "The form that open  will contains your local data, not the current server data. You can modify and save to overwrite the server data.",
-    );
-    onEdit(entry);
+    setEditConfirmEntry(entry);
+    setIsEditDialogOpen(true);
   };
 
   const handleRetry = (entry: OfflineWritesEntry) => {
@@ -758,14 +770,6 @@ const ConflictedWritesTable: React.FC<{
               </TableCell>
               <TableCell className="text-left">
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleView(entry)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <CareIcon icon="l-eye" className="size-4" />
-                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
@@ -909,8 +913,20 @@ const SyncStatusTabs: React.FC<{
   onEdit: (entry: OfflineWritesEntry) => void;
   onRetry: (entry: OfflineWritesEntry) => void;
   onDelete: (entry: OfflineWritesEntry) => void;
+  setIsEditDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setEditConfirmEntry: React.Dispatch<
+    React.SetStateAction<OfflineWritesEntry | null>
+  >;
   refreshTrigger: number;
-}> = ({ facilityId, onEdit, onRetry, onDelete, refreshTrigger }) => {
+}> = ({
+  facilityId,
+  onEdit,
+  onRetry,
+  onDelete,
+  setIsEditDialogOpen,
+  setEditConfirmEntry,
+  refreshTrigger,
+}) => {
   const [activeTab, setActiveTab] = React.useState("pending");
   const { syncData } = useSyncData(facilityId, refreshTrigger);
 
@@ -987,10 +1003,11 @@ const SyncStatusTabs: React.FC<{
         {activeTab === "conflicted" && (
           <ConflictedWritesTable
             facilityId={facilityId}
-            onEdit={onEdit}
             onRetry={onRetry}
             onDelete={onDelete}
             refreshTrigger={refreshTrigger}
+            setIsEditDialogOpen={setIsEditDialogOpen}
+            setEditConfirmEntry={setEditConfirmEntry}
           />
         )}
         {activeTab === "blocked" && (
@@ -1018,6 +1035,9 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
   const [deleteConfirmEntry, setDeleteConfirmEntry] =
     React.useState<OfflineWritesEntry | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
+  const [editConfirmEntry, setEditConfirmEntry] =
+    React.useState<OfflineWritesEntry | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
 
   const [refreshTrigger, setRefreshTrigger] = React.useState(0);
 
@@ -1025,10 +1045,15 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
     setRefreshTrigger((prev) => prev + 1);
   };
 
-  const handleEdit = async (entry: OfflineWritesEntry) => {
-    if (entry.parentMutationId) {
+  const handleEdit = async (entry?: OfflineWritesEntry) => {
+    const targetEntry = entry || editConfirmEntry;
+    if (!targetEntry) return;
+
+    if (targetEntry.parentMutationId) {
       try {
-        const parentCheck = await checkParentSyncStatus(entry.parentMutationId);
+        const parentCheck = await checkParentSyncStatus(
+          targetEntry.parentMutationId,
+        );
         if (!parentCheck.isSynced) {
           toast.error(
             "Parent entries must be successfully synced before editing this entry.",
@@ -1042,62 +1067,62 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
       }
     }
 
-    switch (entry.type) {
+    switch (targetEntry.type) {
       case "create_patient":
-        await handleCreateandUpdatePatientEdit(entry, facilityId);
+        await handleCreateandUpdatePatientEdit(targetEntry, facilityId);
         break;
 
       case "create_encounter":
         await handleCreateEncounterEdit(
-          entry,
+          targetEntry,
           setSelectedEncounterEntry,
           setIsEncounterFormOpen,
         );
         break;
 
       case "update_patient":
-        await handleCreateandUpdatePatientEdit(entry, facilityId);
+        await handleCreateandUpdatePatientEdit(targetEntry, facilityId);
         break;
 
       case "mark_encounter_as_complete":
-        await handleEncounterAction(entry);
+        await handleEncounterAction(targetEntry);
         break;
 
       case "create_resource_request":
-        await handleCreateandUpdateResourceRequestEdit(entry, facilityId);
+        await handleCreateandUpdateResourceRequestEdit(targetEntry, facilityId);
         break;
       case "update_resource_request":
-        await handleCreateandUpdateResourceRequestEdit(entry, facilityId);
+        await handleCreateandUpdateResourceRequestEdit(targetEntry, facilityId);
         break;
       case "assign_user_to_patient":
         await handleAssignUserToPatientEdit(
-          entry,
+          targetEntry,
           setSelectedUserAssignmentEntry,
           setIsUserAssignmentFormOpen,
         );
         break;
       case "remove_user_from_patient":
-        await handleRemoveUserFromPatientEdit(entry);
+        await handleRemoveUserFromPatientEdit(targetEntry);
         break;
       case "reschedule_appointment":
       case "update_appointment_status":
       case "cancel_appointment":
-        await handleAppointmentEdit(entry);
+        await handleAppointmentEdit(targetEntry);
         break;
       case "non_structured_questionnaire":
-        await handleNonStructuredQuestionnaireEdit(entry);
+        await handleNonStructuredQuestionnaireEdit(targetEntry);
         break;
       case "time_of_death":
-        await handleTimeOfDeathEdit(entry);
+        await handleTimeOfDeathEdit(targetEntry);
         break;
       case "appointment":
-        await handleAppointmentQuestionnaireEdit(entry);
+        await handleAppointmentQuestionnaireEdit(targetEntry);
         break;
       case "files":
         await handleFilesQuestionnaireEdit();
         break;
       case "encounter":
-        await handleEncounterQuestionnaireEdit(entry);
+        await handleEncounterQuestionnaireEdit(targetEntry);
         break;
 
       case "allergy_intolerance":
@@ -1105,11 +1130,11 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
       case "symptom":
       case "medication_request":
       case "medication_statement":
-        await handleStructuredQuestionnaireEdit(entry);
+        await handleStructuredQuestionnaireEdit(targetEntry);
         break;
       case "update_encounter_questionnaire":
       default:
-        handleUnsupportedTypeEdit(entry);
+        handleUnsupportedTypeEdit(targetEntry);
         break;
     }
   };
@@ -1133,6 +1158,13 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
 
   const handleRetry = async (entry: OfflineWritesEntry) => {
     try {
+      const parentCheck = await checkParentSyncStatus(entry.parentMutationId);
+      if (!parentCheck.isSynced) {
+        toast.error(
+          "Parent entries must be successfully synced before retrying this entry.",
+        );
+        return;
+      }
       await handleRetryRecord(entry);
       triggerRefresh();
     } catch (error) {
@@ -1156,6 +1188,8 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
           onEdit={handleEdit}
           onRetry={handleRetry}
           onDelete={handleDeleteConfirm}
+          setIsEditDialogOpen={setIsEditDialogOpen}
+          setEditConfirmEntry={setEditConfirmEntry}
           refreshTrigger={refreshTrigger}
         />
 
@@ -1220,6 +1254,57 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={handleDeleteConfirmAction}>
                 Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Edit Confirmation Dialog */}
+        <AlertDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Edit Offline Data</AlertDialogTitle>
+              <AlertDialogDescription>
+                <div className="space-y-3">
+                  <p>
+                    The form will contain the data you filled when offline, not
+                    the current server data.
+                  </p>
+                  <p>
+                    <strong>Important:</strong> You can modify and save to
+                    overwrite the server data with your local changes.
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    To view the current server data, navigate to the original
+                    record.
+                  </p>
+                  <div className="bg-blue-50 p-3 rounded-md">
+                    <p className="text-sm text-blue-800">
+                      <strong>Type:</strong> {editConfirmEntry?.type}
+                      <br />
+                      <strong>ID:</strong> {editConfirmEntry?.id}
+                    </p>
+                  </div>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                onClick={() => {
+                  setIsEditDialogOpen(false);
+                  setEditConfirmEntry(null);
+                }}
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  setIsEditDialogOpen(false);
+                  setEditConfirmEntry(null);
+                  handleEdit();
+                }}
+              >
+                Continue to Edit
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

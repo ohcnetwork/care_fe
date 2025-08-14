@@ -66,7 +66,6 @@ export const handleStructuredQuestionnaireEdit = async (
         );
         if (urlMatch && urlMatch[1]) {
           patientId = urlMatch[1];
-          console.log("Extracted patient ID from URL:", patientId);
         }
       } catch (urlError) {
         console.warn("Failed to extract patient ID from URL:", urlError);
@@ -109,8 +108,9 @@ export const handleCreateandUpdatePatientEdit = async (
       },
     });
   } else if (entry.type === "update_patient") {
-    navigate(`/facility/${facilityId}/patient/${entry.id}/edit`, {
+    navigate(`/facility/${facilityId}/patient/${entry.id}/update`, {
       query: {
+        section: "general-info",
         offlineEntryId: entry.id,
       },
     });

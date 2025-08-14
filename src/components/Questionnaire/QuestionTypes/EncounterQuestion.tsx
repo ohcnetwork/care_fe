@@ -196,8 +196,7 @@ export function EncounterQuestion({
         ...formStateValue,
       }));
     }
-    console.log("formStateValue", formStateValue);
-    console.log("questionnaireResponse", questionnaireResponse);
+
   }, [questionnaireResponse]);
 
   const handleUpdateEncounter = (

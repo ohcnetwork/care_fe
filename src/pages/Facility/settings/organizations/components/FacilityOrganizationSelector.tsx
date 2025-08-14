@@ -71,7 +71,13 @@ export default function FacilityOrganizationSelector(
   const [alreadySelected, setAlreadySelected] = useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
   const { data: rootOrganizations, isLoading: isLoadingRoot } = useQuery({
-    queryKey: ["facilityOrganization", facilityOrgSearch, showAllOrgs],
+    queryKey: [
+      "facilityOrganization",
+      "facilityId",
+      facilityId,
+      facilityOrgSearch,
+      showAllOrgs,
+    ],
     queryFn: query.debounced(
       showAllOrgs
         ? facilityOrganizationApi.list

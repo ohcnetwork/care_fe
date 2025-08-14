@@ -102,7 +102,6 @@ export class SyncManager {
         this.options.userId,
         this.options.facilityId,
       );
-      console.log("pendingWrites", pendingWrites);
 
       if (pendingWrites.length === 0) {
         return result;
@@ -111,7 +110,6 @@ export class SyncManager {
       const sortedWrites = topologicalSort(pendingWrites);
       const totalWrites = sortedWrites.length;
 
-      console.log("sortedWrites", sortedWrites);
       this.options.onSyncStart?.(totalWrites);
 
       for (let i = 0; i < sortedWrites.length; i++) {
@@ -172,7 +170,6 @@ export class SyncManager {
     status: "success" | "failed" | "conflict" | "blocked";
     error?: string;
   }> {
-    console.log("write", write);
     return this.processWrite(write);
   }
 
@@ -209,8 +206,6 @@ export class SyncManager {
         write,
         dependencySchema,
       );
-
-      console.log("processedWrite", processedWrite);
 
       const response = await this.executeMutation(processedWrite);
 
@@ -268,15 +263,8 @@ export class SyncManager {
 
     try {
       const response = await runMutation(write.payload);
-      console.log("✅ Mutation successful:", response);
       return response;
     } catch (error) {
-      console.error("❌ Mutation failed:", {
-        error: error instanceof Error ? error.message : String(error),
-        details: error instanceof Error ? error.cause : error,
-        payload: write.payload,
-        route: route,
-      });
       throw error;
     }
   }

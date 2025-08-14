@@ -10,12 +10,11 @@ export async function getPendingAndRetryableWrites(
   facilityId?: string,
 ): Promise<OfflineWritesEntry[]> {
   let query = db.OfflineWrites.where("userId").equals(userId);
-  console.log("facilityId", facilityId);
-  console.log("userId", userId);
+
   if (facilityId) {
     query = query.and((w) => w.facilityId === facilityId);
   }
-  console.log("query", query);
+
   return query
     .and((w) => {
       const isPending = w.syncStatus === "pending";
@@ -47,21 +46,21 @@ export async function processDependentWrites(
   });
 
   for (const dependent of dependentWrites) {
+    try {
+      const processedWrite = await replaceOfflineIdsInWrite(
+        dependent,
+        dependencySchema,
+      );
+
+      await db.OfflineWrites.update(dependent.id, processedWrite);
+    } catch (error) {
+      console.error(
+        `Failed to replace offline IDs in write ${dependent.id}:`,
+        error,
+      );
+    }
+
     if (dependent.syncStatus === "blocked") {
-      try {
-        const processedWrite = await replaceOfflineIdsInWrite(
-          dependent,
-          dependencySchema,
-        );
-
-        await db.OfflineWrites.update(dependent.id, processedWrite);
-      } catch (error) {
-        console.error(
-          `Failed to replace offline IDs in write ${dependent.id}:`,
-          error,
-        );
-      }
-
       await markWriteStatus(dependent.id, "pending", {
         lastError: undefined,
         lastErrorDetails: undefined,

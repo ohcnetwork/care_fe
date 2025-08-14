@@ -44,8 +44,6 @@ const actionLinks = [
   },
 ];
 
-console.log("actionLinks", actionLinks);
-
 export const EncounterOverviewTab = () => {
   const { t } = useTranslation();
 
@@ -76,7 +74,7 @@ export const EncounterOverviewTab = () => {
   });
 
   const canAccess = canViewEncounter || canViewClinicalData;
-  console.log("canAccess", canAccess);
+
   const canEdit =
     !!facilityId &&
     encounterId === currentEncounterId &&

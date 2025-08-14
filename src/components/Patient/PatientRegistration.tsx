@@ -501,7 +501,6 @@ export default function PatientRegistration(
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("values submit : ", values);
     const editableIdentifiers = values.identifiers.filter((identifier) => {
       const config = facility?.patient_instance_identifier_configs.find(
         (c) => c.id === identifier.config,
@@ -562,7 +561,6 @@ export default function PatientRegistration(
         return;
       } else {
         createPatient(createPatientData);
-        console.log("create patient data : ", createPatientData);
         return;
       }
     }
@@ -613,11 +611,12 @@ export default function PatientRegistration(
   });
 
   useEffect(() => {
-    if (offlineEntryId && !patientId) {
+    if (offlineEntryId) {
       setIsLoadingOfflineEntry(true);
       const loadOfflineEntry = async () => {
         try {
           const entry = await db.OfflineWrites.get(offlineEntryId);
+
           if (entry && entry.normalizedData) {
             setOfflineEntry(entry);
           }
