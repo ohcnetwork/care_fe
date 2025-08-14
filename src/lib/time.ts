@@ -1,3 +1,6 @@
+import { Time } from "@/Utils/types";
+import dayjs from "dayjs";
+
 export interface GroupedItems<T> {
   today: T[];
   yesterday: T[];
@@ -73,4 +76,37 @@ export function groupItemsByTime<T extends { created_date: string }>(
   });
 
   return grouped;
+}
+
+export function validateTimeRange(start: Time, end: Time) {
+  return dayjs(start, "HH:mm").isBefore(dayjs(end, "HH:mm"));
+}
+
+/**
+ * Validates time range and sets form errors for React Hook Form
+ * @param startTime - Start time string
+ * @param endTime - End time string
+ * @param form - React Hook Form instance
+ * @param fieldPath - Path to the field to set errors on
+ * @param errorMessage - Error message to display
+ * @returns boolean indicating if validation passed
+ */
+export function validateTimeRangeAndSetError(
+  startTime: Time,
+  endTime: Time,
+  form: any,
+  fieldPath: string,
+  errorMessage: string,
+): boolean {
+  if (!startTime || !endTime) return true;
+
+  const isValid = validateTimeRange(startTime, endTime);
+
+  if (!isValid) {
+    form.setError(fieldPath, { message: errorMessage });
+  } else {
+    form.clearErrors(fieldPath);
+  }
+
+  return isValid;
 }

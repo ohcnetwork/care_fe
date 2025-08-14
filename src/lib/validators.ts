@@ -10,8 +10,8 @@ export const tzAwareDateTime = z
 
 export const timeRequired = z
   .string()
-  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, { message: "Invalid time format" })
-  .min(1, "Required");
+  .min(1, "Required")
+  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, { message: "Invalid time format" });
 
 export const timeOptional = z.preprocess(
   v => (v === "" ? undefined : v),

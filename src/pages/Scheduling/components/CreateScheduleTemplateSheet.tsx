@@ -8,6 +8,7 @@ import { Trans } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { validateTimeRangeAndSetError } from "@/lib/time";
 import { timeRequired } from "@/lib/validators";
 
 import Callout from "@/CAREUI/display/Callout";
@@ -94,55 +95,42 @@ export default function CreateScheduleTemplateSheet({
         .min(1, t("schedule_weekdays_min_error")),
       availabilities: z
         .array(
-          z
-            .discriminatedUnion("slot_type", [
-              // Schema for appointment type
-              z.object({
-                slot_type: z.literal("appointment"),
-                name: z.string().min(1, t("field_required")),
-                reason: z.string().trim(),
-                start_time: timeRequired,
-                end_time: timeRequired,
-                slot_size_in_minutes: z
-                  .number()
-                  .nullable()
-                  .refine((val) => val !== null && val >= 1, {
-                    message: t("number_min_error", { min: 0 }),
-                  }),
-                tokens_per_slot: z
-                  .number()
-                  .nullable()
-                  .refine((val) => val !== null && val >= 1, {
-                    message: t("number_min_error", { min: 0 }),
-                  }),
-                is_auto_fill: z.boolean().optional(),
-                num_of_slots: z
-                  .number()
-                  .min(1, t("number_min_error", { min: 0 })),
-              }),
-              // Schema for open and closed types
-              z.object({
-                slot_type: z.enum(["open", "closed"]),
-                name: z.string().min(1, t("field_required")),
-                reason: z.string().trim(),
-                start_time: timeRequired,
-                end_time: timeRequired,
-                slot_size_in_minutes: z.literal(null),
-                tokens_per_slot: z.literal(null),
-              }),
-            ])
-            .refine(
-              (data) => {
-                // Validate each availability's time range
-                const startTime = dayjs(data.start_time, "HH:mm");
-                const endTime = dayjs(data.end_time, "HH:mm");
-                return startTime.isBefore(endTime);
-              },
-              {
-                message: t("start_time_must_be_before_end_time"),
-                path: ["start_time"], // This will show error at the start_time field
-              },
-            ),
+          z.discriminatedUnion("slot_type", [
+            // Schema for appointment type
+            z.object({
+              slot_type: z.literal("appointment"),
+              name: z.string().min(1, t("field_required")),
+              reason: z.string().trim(),
+              start_time: timeRequired,
+              end_time: timeRequired,
+              slot_size_in_minutes: z
+                .number()
+                .nullable()
+                .refine((val) => val !== null && val >= 1, {
+                  message: t("number_min_error", { min: 0 }),
+                }),
+              tokens_per_slot: z
+                .number()
+                .nullable()
+                .refine((val) => val !== null && val >= 1, {
+                  message: t("number_min_error", { min: 0 }),
+                }),
+              is_auto_fill: z.boolean().optional(),
+              num_of_slots: z
+                .number()
+                .min(1, t("number_min_error", { min: 0 })),
+            }),
+            // Schema for open and closed types
+            z.object({
+              slot_type: z.enum(["open", "closed"]),
+              name: z.string().min(1, t("field_required")),
+              reason: z.string().trim(),
+              start_time: timeRequired,
+              end_time: timeRequired,
+              slot_size_in_minutes: z.literal(null),
+              tokens_per_slot: z.literal(null),
+            }),
+          ]),
         )
         .min(1, t("schedule_sessions_min_error")),
     })
@@ -164,6 +152,8 @@ export default function CreateScheduleTemplateSheet({
           name: "",
           slot_type: "appointment",
           reason: "",
+          start_time: "",
+          end_time: "",
           is_auto_fill: false,
           num_of_slots: 1,
         },
@@ -252,6 +242,31 @@ export default function CreateScheduleTemplateSheet({
       const duration = calculateSlotDuration(start, end, numOfSlots);
       form.setValue(`availabilities.${index}.slot_size_in_minutes`, duration);
     }
+  };
+
+  const validateTimeRangeForIndex = (index: number) => {
+    const errorMessage = t("start_time_must_be_before_end_time");
+    const fieldPath = `availabilities.${index}.start_time`;
+    const startTime = form.getValues(`availabilities.${index}.start_time`);
+    const endTime = form.getValues(`availabilities.${index}.end_time`);
+
+    if (!startTime || !endTime) return;
+
+    validateTimeRangeAndSetError(
+      startTime,
+      endTime,
+      form,
+      fieldPath,
+      errorMessage,
+    );
+
+    // reset values for slot_size_in_minutes and tokens_per_slot
+    form.setValue(`availabilities.${index}.slot_size_in_minutes`, null);
+    form.setValue(`availabilities.${index}.tokens_per_slot`, null);
+  };
+
+  const hasStartTimeError = (index: number) => {
+    return !!form.formState.errors.availabilities?.[index]?.start_time;
   };
 
   return (
@@ -479,9 +494,7 @@ export default function CreateScheduleTemplateSheet({
                                   onChange={(e) => {
                                     field.onChange(e);
                                     updateSlotDuration(index);
-                                    form.trigger(
-                                      `availabilities.${index}.start_time`,
-                                    );
+                                    validateTimeRangeForIndex(index);
                                   }}
                                 />
                               </FormControl>
@@ -505,9 +518,7 @@ export default function CreateScheduleTemplateSheet({
                                   onChange={(e) => {
                                     field.onChange(e);
                                     updateSlotDuration(index);
-                                    form.trigger(
-                                      `availabilities.${index}.end_time`,
-                                    );
+                                    validateTimeRangeForIndex(index);
                                   }}
                                 />
                               </FormControl>
@@ -547,6 +558,8 @@ export default function CreateScheduleTemplateSheet({
                                     updateSlotDuration(index);
                                   }
                                 }}
+                                // disable when the form.availabilities.start_time has errors
+                                disabled={hasStartTimeError(index)}
                               />
                               {form.watch(
                                 `availabilities.${index}.is_auto_fill`,
@@ -575,6 +588,7 @@ export default function CreateScheduleTemplateSheet({
                                               );
                                               updateSlotDuration(index);
                                             }}
+                                            disabled={hasStartTimeError(index)}
                                           />
                                         </FormControl>
                                         <FormMessage />
@@ -608,9 +622,11 @@ export default function CreateScheduleTemplateSheet({
                                       onChange={(e) => {
                                         field.onChange(e.target.valueAsNumber);
                                       }}
-                                      disabled={form.watch(
-                                        `availabilities.${index}.is_auto_fill`,
-                                      )}
+                                      disabled={
+                                        form.watch(
+                                          `availabilities.${index}.is_auto_fill`,
+                                        ) || hasStartTimeError(index)
+                                      }
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -641,6 +657,7 @@ export default function CreateScheduleTemplateSheet({
                                       onChange={(e) =>
                                         field.onChange(e.target.valueAsNumber)
                                       }
+                                      disabled={hasStartTimeError(index)}
                                     />
                                   </FormControl>
                                   <FormMessage />
