@@ -91,7 +91,6 @@ export default function Autocomplete({
       setInputValue("");
     }
   }, [value, options]);
-
   // Determine what text to display on the button.
   const displayText = freeInput
     ? inputValue || placeholder
@@ -100,10 +99,12 @@ export default function Autocomplete({
       : placeholder;
 
   // Handle changes in the CommandInput.
+
   const handleInputChange = (newValue: string) => {
     if (freeInput) {
       setInputValue(newValue);
       // If the new text exactly matches an option (case-insensitive), select that option.
+
       const matchingOption = options.find(
         (option) => option.label.toLowerCase() === newValue.toLowerCase(),
       );
@@ -119,6 +120,15 @@ export default function Autocomplete({
     }
   };
 
+  const handleTriggerClick = () => {
+    if (disabled) return;
+    if (isMobile) {
+      setOpen(true);
+    } else {
+      setOpen((prev) => !prev);
+    }
+  };
+
   const handleClear = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -130,10 +140,11 @@ export default function Autocomplete({
     }
 
     onSearch?.("");
-
     setOpen(false);
   };
+
   const { t } = useTranslation();
+
   const commandContent = (
     <>
       <CommandInput
@@ -160,6 +171,7 @@ export default function Autocomplete({
                   "";
                 onChange(currentValue);
                 // If freeInput is enabled, update the input text with the selected option's label.
+
                 if (freeInput) {
                   const selected = options.find(
                     (o) => o.value === currentValue,
@@ -189,8 +201,11 @@ export default function Autocomplete({
     return (
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
-          <Button
+          <div
+            role="combobox"
+            tabIndex={0}
             aria-invalid={props["aria-invalid"]}
+            aria-expanded={open}
             title={
               value
                 ? freeInput
@@ -198,14 +213,14 @@ export default function Autocomplete({
                   : selectedOption?.label
                 : undefined
             }
-            variant="outline"
-            ref={ref}
-            role="combobox"
-            aria-expanded={open}
-            className={cn("w-full justify-between", className)}
-            disabled={disabled}
+            className={cn(
+              "w-full justify-between inline-flex items-center rounded-md border px-3 py-2 text-sm outline-none",
+              disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+              className,
+            )}
             data-cy={dataCy}
-            type="button"
+            onClick={handleTriggerClick}
+            ref={ref as React.Ref<HTMLDivElement>}
           >
             <span className="overflow-hidden">
               {value
@@ -228,7 +243,7 @@ export default function Autocomplete({
             ) : (
               <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
             )}
-          </Button>
+          </div>
         </SheetTrigger>
         <SheetContent
           side="bottom"
@@ -246,17 +261,20 @@ export default function Autocomplete({
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild className={popoverClassName}>
-        <Button
-          title={selectedOption ? selectedOption.label : undefined}
-          variant="outline"
+        <div
           role="combobox"
+          tabIndex={0}
+          title={selectedOption ? selectedOption.label : undefined}
           aria-invalid={props["aria-invalid"]}
           aria-expanded={open}
-          className={cn("w-full justify-between", className)}
-          disabled={disabled}
+          className={cn(
+            "w-full justify-between inline-flex items-center rounded-md border px-3 py-2 text-sm outline-none",
+            disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+            className,
+          )}
           data-cy={dataCy}
-          onClick={() => setOpen(!open)}
-          ref={ref}
+          onClick={handleTriggerClick}
+          ref={ref as React.Ref<HTMLDivElement>}
         >
           <span
             className={cn(
@@ -280,7 +298,7 @@ export default function Autocomplete({
           ) : (
             <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
           )}
-        </Button>
+        </div>
       </PopoverTrigger>
       <PopoverContent
         className="p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]"
