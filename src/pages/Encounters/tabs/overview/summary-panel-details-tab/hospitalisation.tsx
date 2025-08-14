@@ -47,9 +47,9 @@ export const HospitalizationDetails = () => {
           <span className="text-gray-950 font-semibold">
             {t("hospitalisation")}
           </span>
-          <Badge variant="blue">
-            {encounter.hospitalization?.re_admission ? t("re_admission") : null}
-          </Badge>
+          {encounter.hospitalization?.re_admission && (
+            <Badge variant="blue">{t("re_admission")}</Badge>
+          )}
         </div>
         <div className="flex flex-row gap-2 bg-gray-100 rounded-md border border-gray-200">
           <div className="flex flex-col p-2">
