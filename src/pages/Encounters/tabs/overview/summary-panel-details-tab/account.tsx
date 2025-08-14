@@ -43,11 +43,13 @@ export const Account = () => {
     enabled: !!facilityId,
   });
 
-  if (!encounter) return null;
+  if (!encounter) return <CardListSkeleton count={3} />;
 
   if (isLoading) {
     return <CardListSkeleton count={1} />;
   }
+
+  if (facilityId !== encounter.facility.id) return null;
 
   const account = response?.results[0];
 

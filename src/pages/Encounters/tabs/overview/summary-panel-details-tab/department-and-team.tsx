@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
 import { EmptyState } from "./empty-state";
@@ -16,7 +18,7 @@ export const DepartmentsAndTeams = () => {
     actions: { manageDepartments },
   } = useEncounter();
 
-  if (!encounter) return null;
+  if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
     <div className="bg-gray-100 rounded-md w-full border border-gray-200 pt-2 p-1 space-y-1">

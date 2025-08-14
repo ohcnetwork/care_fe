@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
@@ -17,7 +18,7 @@ export const EncounterTags = () => {
     useEncounter();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  if (!encounter) return null;
+  if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
     <div className="bg-gray-100 rounded-md border border-gray-200 p-1 pt-2 space-y-1">

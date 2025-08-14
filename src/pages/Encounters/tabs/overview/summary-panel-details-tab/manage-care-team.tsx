@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
@@ -20,9 +21,7 @@ export const ManageCareTeam = () => {
   } = useEncounter();
   const [showAllMembers, setShowAllMembers] = useState(false);
 
-  if (!encounter) {
-    return null;
-  }
+  if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
     <div className="bg-gray-100 rounded-md w-full border border-gray-200 p-1 pt-2 space-y-1">

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,11 +12,19 @@ import { SummaryPanelDetailTab } from "./summary-panel-details-tab";
 export const SummaryPanel = () => {
   const { t } = useTranslation();
   const { canWriteSelectedEncounter } = useEncounter();
+  const [activeTab, setActiveTab] = useState("details");
+
+  useEffect(() => {
+    if (!canWriteSelectedEncounter) {
+      setActiveTab("details");
+    }
+  }, [canWriteSelectedEncounter]);
 
   return (
     <div className="@container">
       <Tabs
-        defaultValue="details"
+        value={activeTab}
+        onValueChange={setActiveTab}
         className="@xs:bg-gray-100 @xs:border border-gray-200 p-1 xl:p-0 @xs:rounded-lg"
       >
         <TabsList className="w-full sm:w-72 bg-gray-100 @xs:bg-gray-200 justify-between inset-shadow-sm pt-px pb-0.5 px-0.5">

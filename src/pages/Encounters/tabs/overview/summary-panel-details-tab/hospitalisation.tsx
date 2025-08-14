@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
 export const HospitalizationDetails = () => {
@@ -17,7 +19,7 @@ export const HospitalizationDetails = () => {
     canWriteSelectedEncounter,
   } = useEncounter();
 
-  if (!encounter) return null;
+  if (!encounter) return <CardListSkeleton count={1} />;
 
   const hasHospitalization =
     encounter.hospitalization?.admit_source ||

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { LocationTree } from "@/components/Location/LocationTree";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
@@ -17,7 +18,7 @@ export const Locations = () => {
     actions: { assignLocation, viewLocationHistory },
   } = useEncounter();
 
-  if (!encounter) return null;
+  if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
     <div className="bg-gray-100 rounded-md w-full border border-gray-200 p-1 pt-2 space-y-1">

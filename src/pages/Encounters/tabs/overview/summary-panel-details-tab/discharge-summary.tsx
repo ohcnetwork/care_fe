@@ -13,6 +13,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
 import { EmptyState } from "./empty-state";
@@ -22,7 +24,7 @@ export const DischargeDetails = () => {
   const { selectedEncounter: encounter, canWriteSelectedEncounter } =
     useEncounter();
 
-  if (!encounter) return null;
+  if (!encounter) return <CardListSkeleton count={1} />;
 
   const dischargeStatus = encounter.status_history.history.find(
     (status) => status.status === "discharged",

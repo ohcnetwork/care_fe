@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+
 import { StatusBadge } from "@/pages/Encounters/EncounterProperties";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
@@ -24,7 +26,7 @@ export const EncounterDetails = () => {
     facilityId,
     canWriteSelectedEncounter,
   } = useEncounter();
-  if (!encounter) return null;
+  if (!encounter) return <CardListSkeleton count={1} />;
 
   const EncounterClassIcon = ENCOUNTER_CLASS_ICONS[encounter.encounter_class];
 
