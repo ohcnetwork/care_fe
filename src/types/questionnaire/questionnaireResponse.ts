@@ -1,6 +1,6 @@
 import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
 
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 import { QuestionnaireResponse as Response } from "./form";
 import { QuestionnaireDetail } from "./questionnaire";
@@ -23,5 +23,5 @@ export interface QuestionnaireResponse {
     StructuredQuestionType,
     StructuredResponseValue
   >;
-  created_by: UserBase;
+  created_by: UserReadMinimal;
 }
