@@ -31,3 +31,8 @@ export interface ChargeItemDefinitionCreate
   extends Omit<ChargeItemDefinitionBase, "id"> {
   version?: number;
 }
+
+export interface ChargeItemDefinitionUpsert
+  extends Omit<ChargeItemDefinitionBase, "id"> {
+  id?: string;
+}
