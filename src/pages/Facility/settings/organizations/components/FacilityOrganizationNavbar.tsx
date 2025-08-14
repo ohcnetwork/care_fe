@@ -8,13 +8,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import query from "@/Utils/request/query";
-import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface OrganizationTreeNodeProps {
-  organization: FacilityOrganization;
+  organization: FacilityOrganizationRead;
   selectedOrganizationId: string | null;
-  onSelect: (organization: FacilityOrganization) => void;
+  onSelect: (organization: FacilityOrganizationRead) => void;
   expandedOrganizations: Set<string>;
   onToggleExpand: (organizationId: string) => void;
   level?: number;
@@ -113,7 +113,7 @@ interface FacilityOrganizationNavbarProps {
   selectedOrganizationId: string | null;
   expandedOrganizations: Set<string>;
   onToggleExpand: (organizationId: string) => void;
-  onOrganizationSelect: (organization: FacilityOrganization) => void;
+  onOrganizationSelect: (organization: FacilityOrganizationRead) => void;
 }
 
 export default function FacilityOrganizationNavbar({
