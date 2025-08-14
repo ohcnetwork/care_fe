@@ -51,9 +51,7 @@ export interface ScheduleAvailabilityRead extends ScheduleAvailabilityBase {
   id: string;
 }
 
-export interface ScheduleAvailabilityCreate extends ScheduleAvailabilityBase {
-  schedule: string;
-}
+export type ScheduleAvailabilityCreate = ScheduleAvailabilityBase;
 
 export interface ScheduleException {
   id: string;

@@ -1,3 +1,7 @@
+import { z } from "zod";
+
+import { timeRequired } from "@/lib/validators";
+
 import { UserReadMinimal } from "@/types/user/user";
 
 export interface BaseModel {
@@ -48,4 +52,4 @@ export type WritableOnly<T> = T extends object
 type IfEquals<X, Y, A = X, B = never> =
   (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? A : B;
 
-export type Time = `${number}:${number}` | `${number}:${number}:${number}`;
+export type Time = z.infer<typeof timeRequired>;

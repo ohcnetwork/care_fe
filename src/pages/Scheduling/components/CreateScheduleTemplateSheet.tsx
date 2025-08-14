@@ -8,6 +8,8 @@ import { Trans } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { timeRequired } from "@/lib/validators";
+
 import Callout from "@/CAREUI/display/Callout";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import WeekdayCheckbox, {
@@ -42,7 +44,6 @@ import { Textarea } from "@/components/ui/textarea";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import mutate from "@/Utils/request/mutate";
-import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import {
   calculateSlotDuration,
@@ -100,18 +101,20 @@ export default function CreateScheduleTemplateSheet({
                 slot_type: z.literal("appointment"),
                 name: z.string().min(1, t("field_required")),
                 reason: z.string().trim(),
-                start_time: z.string().min(1, t("field_required")) as z.ZodType<
-                  Time | undefined
-                >,
-                end_time: z.string().min(1, t("field_required")) as z.ZodType<
-                  Time | undefined
-                >,
+                start_time: timeRequired,
+                end_time: timeRequired,
                 slot_size_in_minutes: z
                   .number()
-                  .min(1, t("number_min_error", { min: 0 })),
+                  .nullable()
+                  .refine((val) => val !== null && val >= 1, {
+                    message: t("number_min_error", { min: 0 }),
+                  }),
                 tokens_per_slot: z
                   .number()
-                  .min(1, t("number_min_error", { min: 0 })),
+                  .nullable()
+                  .refine((val) => val !== null && val >= 1, {
+                    message: t("number_min_error", { min: 0 }),
+                  }),
                 is_auto_fill: z.boolean().optional(),
                 num_of_slots: z
                   .number()
@@ -122,12 +125,8 @@ export default function CreateScheduleTemplateSheet({
                 slot_type: z.enum(["open", "closed"]),
                 name: z.string().min(1, t("field_required")),
                 reason: z.string().trim(),
-                start_time: z
-                  .string()
-                  .min(1, t("field_required")) as unknown as z.ZodType<Time>,
-                end_time: z
-                  .string()
-                  .min(1, t("field_required")) as unknown as z.ZodType<Time>,
+                start_time: timeRequired,
+                end_time: timeRequired,
                 slot_size_in_minutes: z.literal(null),
                 tokens_per_slot: z.literal(null),
               }),
@@ -201,8 +200,8 @@ export default function CreateScheduleTemplateSheet({
         reason: availability.reason,
         availability: values.weekdays.map((day) => ({
           day_of_week: day,
-          start_time: availability.start_time as Time,
-          end_time: availability.end_time as Time,
+          start_time: availability.start_time,
+          end_time: availability.end_time,
         })),
         create_tokens: false,
       })),
@@ -390,6 +389,7 @@ export default function CreateScheduleTemplateSheet({
                             form.getValues("availabilities");
                           availabilities.splice(index, 1);
                           form.setValue("availabilities", availabilities);
+                          form.trigger(`availabilities.${index}`);
                         }}
                       >
                         <CareIcon icon="l-trash" className="text-base" />
@@ -479,6 +479,9 @@ export default function CreateScheduleTemplateSheet({
                                   onChange={(e) => {
                                     field.onChange(e);
                                     updateSlotDuration(index);
+                                    form.trigger(
+                                      `availabilities.${index}.start_time`,
+                                    );
                                   }}
                                 />
                               </FormControl>
@@ -502,6 +505,9 @@ export default function CreateScheduleTemplateSheet({
                                   onChange={(e) => {
                                     field.onChange(e);
                                     updateSlotDuration(index);
+                                    form.trigger(
+                                      `availabilities.${index}.end_time`,
+                                    );
                                   }}
                                 />
                               </FormControl>
@@ -688,10 +694,10 @@ export default function CreateScheduleTemplateSheet({
                       name: "",
                       slot_type: "appointment",
                       reason: "",
-                      start_time: undefined,
-                      end_time: undefined,
-                      tokens_per_slot: null as unknown as number,
-                      slot_size_in_minutes: null as unknown as number,
+                      start_time: "",
+                      end_time: "",
+                      slot_size_in_minutes: null,
+                      tokens_per_slot: null,
                       is_auto_fill: false,
                       num_of_slots: 1,
                     },
