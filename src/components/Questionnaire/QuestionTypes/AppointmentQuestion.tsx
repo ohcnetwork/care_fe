@@ -22,6 +22,7 @@ import query from "@/Utils/request/query";
 import { AppointmentSlotPicker } from "@/pages/Appointments/components/AppointmentSlotPicker";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
@@ -38,7 +39,7 @@ import {
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface AppointmentQuestionProps {
   question: Question;
@@ -98,14 +99,13 @@ export function AppointmentQuestion({
   facilityId,
 }: AppointmentQuestionProps) {
   const { t } = useTranslation();
-  const [resource, setResource] = useState<UserBase>();
+  const [resource, setResource] = useState<UserReadMinimal>();
   const [open, setOpen] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
   const { hasError } = useFieldError(question.id, errors);
   const values =
     (questionnaireResponse.values?.[0]?.value as CreateAppointmentQuestion[]) ||
     [];
-  const value = values[0] ?? {};
+  const value = values[0] ?? { tags: [] };
 
   const handleUpdate = (updates: Partial<CreateAppointmentQuestion>) => {
     const updatedValue = { ...value, ...updates };
@@ -157,6 +157,11 @@ export function AppointmentQuestion({
     }
   };
 
+  const tagQueries = useTagConfigs({ ids: value.tags, facilityId });
+  const selectedTags = tagQueries
+    .map((query) => query.data)
+    .filter(Boolean) as TagConfig[];
+
   return (
     <div className="space-y-4">
       <div>
@@ -165,7 +170,6 @@ export function AppointmentQuestion({
           <TagSelectorPopover
             selected={selectedTags}
             onChange={(tags) => {
-              setSelectedTags(tags);
               handleUpdate({ tags: tags.map((tag) => tag.id) });
             }}
             resource={TagResource.APPOINTMENT}

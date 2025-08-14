@@ -261,25 +261,6 @@ export class SyncManager {
       throw new Error(`Missing payload for write type: ${write.type}`);
     }
 
-    console.log("🚀 Executing mutation:", {
-      type: write.type,
-      route: route,
-      pathParams: write.mutationPathParams,
-      queryParams: write.mutationQueryParams,
-      payload: write.payload,
-      facilityId: write.facilityId,
-      userId: write.userId,
-    });
-
-    // Log the exact API call details
-    console.log("🌐 API Call Details:", {
-      method: route.method,
-      path: route.path,
-      fullUrl: `${route.path}`,
-      headers: "Will be set by fetch",
-      body: write.payload,
-    });
-
     const runMutation = mutate(route, {
       pathParams: write.mutationPathParams,
       queryParams: write.mutationQueryParams,

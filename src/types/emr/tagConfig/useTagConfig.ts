@@ -17,6 +17,7 @@ function getQueryOptions(id: TagConfig["id"], facilityId?: string) {
       queryParams: facilityId ? { facility: facilityId } : undefined,
     }),
     staleTime: 1000 * 60 * 60 * 24, // 24 hours
+
     meta: {
       persist: true,
     },

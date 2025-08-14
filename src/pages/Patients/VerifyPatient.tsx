@@ -4,7 +4,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { AlertCircle, CalendarIcon } from "lucide-react";
+import { AlertCircle, CalendarIcon, ExternalLink } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -202,24 +202,53 @@ export default function VerifyPatient() {
                       />
                     </div>
                     <div>
-                      <h1
-                        data-cy="verify-patient-name"
-                        className="text-xl font-bold capitalize text-gray-950"
-                      >
-                        {patientData.name}
-                        {patientData.is_updated_offline === true && (
-                          <PendingSyncBadge />
-                        )}
-                      </h1>
-
-                      <h3 className="text-sm font-medium text-gray-600">
-                        {formatPatientAge(patientData, true)},{"  "}
-                        <span className="capitalize">
-                          {patientData.gender.replace("_", " ")}
-                        </span>
-                        {patientData.blood_group &&
-                          ", " + patientData.blood_group.replace("_", " ")}
-                      </h3>
+                      {encounters?.results && encounters.results.length > 0 ? (
+                        <Link
+                          href={`/facility/${facility.id}/patient/${patientData.id}`}
+                          className="flex flex-col group"
+                        >
+                          <div className="flex items-center gap-2">
+                            <h1
+                              data-cy="verify-patient-name"
+                              className="text-xl font-bold capitalize text-gray-950 group-hover:text-primary transition-colors"
+                            >
+                              {patientData.name}
+                              {patientData.is_updated_offline === true && (
+                                <PendingSyncBadge />
+                              )}
+                            </h1>
+                            <ExternalLink className="size-4 text-gray-400 group-hover:text-primary transition-colors" />
+                          </div>
+                          <h3 className="text-sm font-medium text-gray-600">
+                            {formatPatientAge(patientData, true)},{"  "}
+                            <span className="capitalize">
+                              {patientData.gender.replace("_", " ")}
+                            </span>
+                            {patientData.blood_group &&
+                              ", " + patientData.blood_group.replace("_", " ")}
+                          </h3>
+                        </Link>
+                      ) : (
+                        <>
+                          <h1
+                            data-cy="verify-patient-name"
+                            className="text-xl font-bold capitalize text-gray-950"
+                          >
+                            {patientData.name}
+                            {patientData.is_updated_offline === true && (
+                              <PendingSyncBadge />
+                            )}
+                          </h1>
+                          <h3 className="text-sm font-medium text-gray-600">
+                            {formatPatientAge(patientData, true)},{"  "}
+                            <span className="capitalize">
+                              {patientData.gender.replace("_", " ")}
+                            </span>
+                            {patientData.blood_group &&
+                              ", " + patientData.blood_group.replace("_", " ")}
+                          </h3>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

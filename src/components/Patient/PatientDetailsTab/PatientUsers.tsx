@@ -67,13 +67,13 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import roleApi from "@/types/emr/role/roleApi";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 import { PatientProps } from ".";
 
 interface AddUserSheetProps {
   patientId: string;
-  users: PaginatedResponse<UserBase> | undefined;
+  users: PaginatedResponse<UserReadMinimal> | undefined;
   authUser: AuthUserModel;
   patientData?: PatientRead;
   offlineEntryId?: string;
@@ -95,7 +95,7 @@ export function AddUserSheet({
   const db = new AppCacheDB();
 
   const [open, setOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UserBase>();
+  const [selectedUser, setSelectedUser] = useState<UserReadMinimal>();
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [offlineEntry, setOfflineEntry] = useState<OfflineWritesEntry | null>(
     null,
@@ -128,7 +128,7 @@ export function AddUserSheet({
   useEffect(() => {
     if (offlineEntry?.normalizedData) {
       const normalizedData = offlineEntry.normalizedData as {
-        user: UserBase;
+        user: UserReadMinimal;
         role: string;
       };
 
@@ -175,8 +175,8 @@ export function AddUserSheet({
 
   const queueNewAssignUseroffline = async (
     assignUserData: { user: string; role: string },
-    selectedUser: UserBase,
-    users: PaginatedResponse<UserBase> | undefined,
+    selectedUser: UserReadMinimal,
+    users: PaginatedResponse<UserReadMinimal> | undefined,
   ) => {
     try {
       const canAddUser = !users?.results?.some(
@@ -217,7 +217,7 @@ export function AddUserSheet({
         normalizedData: normalizedData,
       });
 
-      const updatedUserList: PaginatedResponse<UserBase> = users?.results
+      const updatedUserList: PaginatedResponse<UserReadMinimal> = users?.results
         ? {
             ...users,
             results: [
@@ -261,7 +261,7 @@ export function AddUserSheet({
     assignUser(assignUserData);
   };
 
-  const handleUserChange = (user: UserBase) => {
+  const handleUserChange = (user: UserReadMinimal) => {
     setSelectedUser(user);
     setSelectedRole("");
   };
@@ -322,9 +322,6 @@ export function AddUserSheet({
                         {formatName(selectedUser)}
                       </p>
                     </TooltipComponent>
-                    <span className="text-sm text-gray-500">
-                      {selectedUser.email}
-                    </span>
                   </div>
                 </div>
 
@@ -424,7 +421,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
 
   const queueRemoveUserOffline = async (
     removeUserId: string,
-    userToRemove: UserBase,
+    userToRemove: UserReadMinimal,
   ) => {
     try {
       const generatedId = `offline-${crypto.randomUUID()}`;
@@ -469,10 +466,9 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
         })
         .delete();
 
-      const users = queryClient.getQueryData<PaginatedResponse<UserBase>>([
-        "patientUsers",
-        patientId,
-      ]);
+      const users = queryClient.getQueryData<
+        PaginatedResponse<UserReadMinimal>
+      >(["patientUsers", patientId]);
       const updatedUserList = users
         ? {
             ...users,
@@ -510,7 +506,10 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
     },
   });
 
-  const handleRemoveUser = async (userId: string, userToRemove?: UserBase) => {
+  const handleRemoveUser = async (
+    userId: string,
+    userToRemove?: UserReadMinimal,
+  ) => {
     if (!userId) {
       toast.error("User ID is missing");
       return;

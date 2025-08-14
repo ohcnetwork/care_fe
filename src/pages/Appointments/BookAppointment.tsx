@@ -40,7 +40,7 @@ import { PractitionerSelector } from "@/pages/Appointments/components/Practition
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
-import { FacilityData } from "@/types/facility/facility";
+import { FacilityRead } from "@/types/facility/facility";
 import {
   Appointment,
   AppointmentCreateRequest,
@@ -49,7 +49,7 @@ import {
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
 
@@ -67,7 +67,7 @@ export default function BookAppointment({ patientId }: Props) {
   const [{ offlineEntryId }] = useQueryParams();
 
   const [selectedPracticioner, setSelectedPracticioner] =
-    useState<UserBase | null>(null);
+    useState<UserReadMinimal | null>(null);
   const [OfflineSelectedSlot, setOfflineSelectedSlot] = useState<
     TokenSlot | undefined
   >();
@@ -166,7 +166,7 @@ export default function BookAppointment({ patientId }: Props) {
   const queueAppointmentRecordOffline = async (
     createAppointmentData: AppointmentCreateRequest,
     selectedSlot: TokenSlot | undefined,
-    selectedPracticioner: UserBase | null,
+    selectedPracticioner: UserReadMinimal | null,
     authUser: AuthUserModel,
     status: AppointmentNonCancelledStatus,
   ) => {
@@ -204,7 +204,7 @@ export default function BookAppointment({ patientId }: Props) {
         return;
       }
 
-      const facilityData = queryClient.getQueryData<FacilityData>([
+      const facilityData = queryClient.getQueryData<FacilityRead>([
         "facility",
         facilityId,
       ]);

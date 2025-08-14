@@ -1,29 +1,15 @@
 import careConfig from "@careConfig";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
-import { Hospital, Trash2 } from "lucide-react";
-import { navigate } from "raviger";
+import { Hospital } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
-
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Markdown } from "@/components/ui/markdown";
 import { TooltipComponent } from "@/components/ui/tooltip";
@@ -33,23 +19,19 @@ import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import FacilityDeleteDialog from "@/components/Facility/FacilityDeleteDialog";
 
-import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
-import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import uploadFile from "@/Utils/request/uploadFile";
-import { getAuthorizationHeader } from "@/Utils/request/utils";
-import { sleep } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { FeatureBadge } from "@/pages/Facility/Utils";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
+import { FACILITY_FEATURE_TYPES } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 import { renderGeoOrganizations } from "@/types/organization/organization";
 
@@ -75,12 +57,11 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
-  const { history, goBack } = useAppHistory();
 
   const { data: facilityData, isLoading } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(routes.facility.show, {
-      pathParams: { id: facilityId },
+    queryFn: query(facilityApi.get, {
+      pathParams: { facilityId },
     }),
   });
 
@@ -88,41 +69,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
     hasPermission,
     facilityData?.root_org_permissions ?? [],
   );
-
-  const { mutate: deleteFacility, isPending: isDeleting } = useMutation({
-    mutationFn: mutate(facilityApi.deleteFacility, {
-      pathParams: { id: facilityId },
-    }),
-    onSuccess: () => {
-      toast.success(
-        t("facility_deleted_successfully", { name: facilityData?.name }),
-      );
-      queryClient.invalidateQueries({
-        queryKey: ["facilities"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["currentUser"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["facility", facilityId],
-      });
-
-      if (history.length > 1) {
-        const prevPath = history[1];
-        if (prevPath.startsWith("/facility/")) {
-          navigate("/");
-        } else {
-          goBack("/");
-        }
-      } else {
-        navigate("/");
-      }
-    },
-  });
-
   const { mutateAsync: deleteAvatar } = useMutation({
-    mutationFn: mutate(routes.deleteFacilityCoverImage, {
-      pathParams: { id: facilityId },
+    mutationFn: mutate(facilityApi.deleteCoverImage, {
+      pathParams: { facilityId },
     }),
     onSuccess: () => {
       toast.success(t("cover_image_deleted"));
@@ -133,38 +82,32 @@ export const FacilityHome = ({ facilityId }: Props) => {
     },
   });
 
+  const { mutateAsync: uploadCoverImage } = useMutation({
+    mutationFn: mutate(facilityApi.uploadCoverImage, {
+      pathParams: { facilityId },
+    }),
+    onSuccess: () => {
+      setEditCoverImage(false);
+      queryClient.invalidateQueries({
+        queryKey: ["facility", facilityId],
+      });
+      toast.success(t("cover_image_updated"));
+    },
+  });
+
   const handleCoverImageUpload = async (
     file: File,
     onSuccess: () => void,
     onError: () => void,
   ) => {
-    const formData = new FormData();
-    formData.append("cover_image", file);
-    const url = `${careConfig.apiUrl}/api/v1/facility/${facilityId}/cover_image/`;
-
-    await uploadFile(
-      url,
-      formData,
-      "POST",
-      { Authorization: getAuthorizationHeader() },
-      async (xhr: XMLHttpRequest) => {
-        if (xhr.status === 200) {
-          setEditCoverImage(false);
-          await sleep(1000);
-          queryClient.invalidateQueries({
-            queryKey: ["facility", facilityId],
-          });
-          toast.success(t("cover_image_updated"));
-          onSuccess();
-        } else {
-          onError();
-        }
-      },
-      null,
-      () => {
-        onError();
-      },
-    );
+    try {
+      const formData = new FormData();
+      formData.append("cover_image", file);
+      await uploadCoverImage(formData);
+      onSuccess();
+    } catch {
+      onError();
+    }
   };
   const handleCoverImageDelete = async (
     onSuccess: () => void,
@@ -177,8 +120,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
       onError();
     }
   };
-
-  const isValidCoordinate = (val: number) => val && Number(val) !== 0;
 
   if (isLoading) {
     return <Loading />;
@@ -335,21 +276,19 @@ export const FacilityHome = ({ facilityId }: Props) => {
                           />
                         </span>
                       </div>
-
-                      <div className="flex flex-col mt-2">
-                        <span className="font-semibold">
-                          {t("location_details")}
-                        </span>
-                        <span className="text-sm">
-                          {isValidCoordinate(facilityData.latitude) &&
-                            isValidCoordinate(facilityData.longitude) && (
-                              <FacilityMapsLink
-                                latitude={facilityData.latitude.toString()}
-                                longitude={facilityData.longitude.toString()}
-                              />
-                            )}
-                        </span>
-                      </div>
+                      {facilityData?.latitude && facilityData?.longitude && (
+                        <div className="flex flex-col mt-2">
+                          <span className="font-semibold">
+                            {t("location_details")}
+                          </span>
+                          <span className="text-sm">
+                            <FacilityMapsLink
+                              latitude={facilityData.latitude}
+                              longitude={facilityData.longitude}
+                            />
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -385,11 +324,8 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
-                      {facilityData.features?.map((featureId) => (
-                        <FeatureBadge
-                          key={featureId}
-                          featureId={featureId as number}
-                        />
+                      {facilityData.features?.map((featureId: number) => (
+                        <FeatureBadge key={featureId} featureId={featureId} />
                       ))}
                     </div>
                   </CardContent>
@@ -423,42 +359,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                           {t("delete_facility_description")}
                         </p>
                       </div>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            className="cursor-pointer font-semibold w-fit"
-                            variant="destructive"
-                            size="sm"
-                          >
-                            <Trash2 className="mr-2 size-4" />
-                            {t("delete_facility")}
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              {t("delete_facility")}
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              {t("delete_facility_confirmation", {
-                                name: facilityData?.name,
-                              })}
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => deleteFacility()}
-                              className={cn(
-                                buttonVariants({ variant: "destructive" }),
-                              )}
-                              disabled={isDeleting}
-                            >
-                              {isDeleting ? t("deleting") : t("delete")}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      <FacilityDeleteDialog facility={facilityData} />
                     </div>
                   </CardContent>
                 </Card>

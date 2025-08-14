@@ -99,7 +99,7 @@ const careConfig = {
      */
     defaultDateFilter: env.REACT_APPOINTMENTS_DEFAULT_DATE_FILTER
       ? parseInt(env.REACT_APPOINTMENTS_DEFAULT_DATE_FILTER)
-      : 7,
+      : 0,
 
     // Kill switch in-case the heatmap API doesn't scale as expected
     useAvailabilityStatsAPI: boolean(

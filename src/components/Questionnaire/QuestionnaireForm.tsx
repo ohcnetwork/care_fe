@@ -39,11 +39,11 @@ import {
   saveOfflineWrite,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import { PLUGIN_Component } from "@/PluginEngine";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import { BatchRequestBody } from "@/types/base/batch/batch";
+import batchApi from "@/types/base/batch/batchApi";
 import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { PatientRead } from "@/types/emr/patient/patient";
@@ -350,6 +350,166 @@ const STRUCTURED_TYPE_VALIDATORS = {
   },
 } as const;
 
+const initializeResponses = (
+  questions: Question[],
+  existingResponses?: QuestionnaireResponse[],
+): QuestionnaireResponse[] => {
+  const responses: QuestionnaireResponse[] = [];
+
+  const processQuestion = (q: Question) => {
+    if (q.type === "group" && q.questions) {
+      q.questions.forEach(processQuestion);
+    } else {
+      const existing = existingResponses?.find((er) => er.question_id === q.id);
+
+      responses.push({
+        question_id: q.id,
+        link_id: q.link_id,
+        values: existing ? existing.values : [],
+        note: existing ? existing.note : undefined,
+        body_site: existing ? existing.body_site : undefined,
+        method: existing ? existing.method : undefined,
+        structured_type: q.structured_type ?? null,
+      });
+    }
+  };
+
+  questions.forEach(processQuestion);
+  return responses;
+};
+
+const initializeStructuredResponses = (
+  questions: Question[],
+  requestBody: any,
+  reference_id: string,
+  fullRequest?: any,
+): QuestionnaireResponse[] => {
+  const responses: QuestionnaireResponse[] = [];
+
+  const processQuestion = (q: Question) => {
+    if (q.type === "group" && q.questions) {
+      q.questions.forEach(processQuestion);
+    } else if (q.type === "structured" && q.structured_type) {
+      let structuredData: any = null;
+
+      if (requestBody.datapoints && Array.isArray(requestBody.datapoints)) {
+        // For datapoint-based structures (allergy, diagnosis, medication, etc.)
+        structuredData = requestBody.datapoints;
+      } else {
+        // For direct body structures (encounter, appointment, files, time_of_death)
+        switch (reference_id) {
+          case "encounter":
+            structuredData = [requestBody];
+            break;
+          case "appointment": {
+            // Extract slot_id from URL - format: /api/v1/facility/{facilityId}/slots/{slotId}/create_appointment/
+            const slotMatch = fullRequest?.url?.match(
+              /\/slots\/([^/]+)\/create_appointment\//,
+            );
+            const slot_id = slotMatch ? slotMatch[1] : null;
+
+            structuredData = [
+              {
+                note: requestBody.note,
+                tags: requestBody.tags,
+                slot_id: slot_id,
+              },
+            ];
+
+            break;
+          }
+          case "files": {
+            // Convert base64 to File object with proper MIME type
+            let fileObject: File | null = null;
+            if (requestBody.file_data && requestBody.original_name) {
+              try {
+                const extension = requestBody.original_name
+                  .split(".")
+                  .pop()
+                  ?.toLowerCase();
+                const mimeTypes: Record<string, string> = {
+                  pdf: "application/pdf",
+                  jpg: "image/jpeg",
+                  jpeg: "image/jpeg",
+                  png: "image/png",
+                  gif: "image/gif",
+                  txt: "text/plain",
+                  doc: "application/msword",
+                  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                  xls: "application/vnd.ms-excel",
+                  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                };
+                const mimeType =
+                  mimeTypes[extension || ""] || "application/octet-stream";
+
+                // Modern one-liner base64 to File conversion
+                fileObject = new File(
+                  [
+                    Uint8Array.from(atob(requestBody.file_data), (c) =>
+                      c.charCodeAt(0),
+                    ),
+                  ],
+                  requestBody.original_name,
+                  { type: mimeType },
+                );
+              } catch (error) {
+                console.error("Error converting file data:", error);
+              }
+            }
+
+            structuredData = [
+              {
+                name: requestBody.name,
+                original_name: requestBody.original_name,
+                file_data: fileObject,
+                file_category: requestBody.file_category,
+                file_type: requestBody.file_type,
+                associating_id: requestBody.associating_id,
+              },
+            ];
+            break;
+          }
+          case "time_of_death":
+            structuredData = [requestBody.deceased_datetime];
+            break;
+          default:
+            structuredData = [requestBody];
+        }
+      }
+
+      responses.push({
+        question_id: q.id,
+        link_id: q.link_id,
+        values: structuredData
+          ? [
+              {
+                value: structuredData,
+                type: q.structured_type as any,
+              },
+            ]
+          : [],
+        note: undefined,
+        body_site: undefined,
+        method: undefined,
+        structured_type: q.structured_type,
+      });
+    } else {
+      responses.push({
+        question_id: q.id,
+        link_id: q.link_id,
+        values: [],
+        note: undefined,
+        body_site: undefined,
+        method: undefined,
+        structured_type: q.structured_type ?? null,
+      });
+    }
+  };
+
+  questions.forEach(processQuestion);
+  return responses;
+};
+
 export function QuestionnaireForm({
   questionnaireSlug,
   patientId,
@@ -395,10 +555,10 @@ export function QuestionnaireForm({
   });
 
   const { mutate: submitBatch, isPending } = useMutation({
-    mutationFn: mutate(routes.batchRequest, { silent: true }),
-    onSuccess: async (response: { results: BatchSubmissionResult[] }) => {
+    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
+    onSuccess: (response: { results: BatchSubmissionResult[] }) => {
       if (editMode && offlineEntry) {
-        await handleOfflineRecordSuccess(offlineEntry.id, response);
+        handleOfflineRecordSuccess(offlineEntry.id, response);
       }
       setServerErrors(undefined);
       toast.success(t("questionnaire_submitted_successfully"));
@@ -689,168 +849,6 @@ export function QuestionnaireForm({
       </Alert>
     );
   }
-
-  const initializeResponses = (
-    questions: Question[],
-    existingResponses?: QuestionnaireResponse[],
-  ): QuestionnaireResponse[] => {
-    const responses: QuestionnaireResponse[] = [];
-
-    const processQuestion = (q: Question) => {
-      if (q.type === "group" && q.questions) {
-        q.questions.forEach(processQuestion);
-      } else {
-        const existing = existingResponses?.find(
-          (er) => er.question_id === q.id,
-        );
-
-        responses.push({
-          question_id: q.id,
-          link_id: q.link_id,
-          values: existing ? existing.values : [],
-          note: existing ? existing.note : undefined,
-          body_site: existing ? existing.body_site : undefined,
-          method: existing ? existing.method : undefined,
-          structured_type: q.structured_type ?? null,
-        });
-      }
-    };
-
-    questions.forEach(processQuestion);
-    return responses;
-  };
-
-  const initializeStructuredResponses = (
-    questions: Question[],
-    requestBody: any,
-    reference_id: string,
-    fullRequest?: any,
-  ): QuestionnaireResponse[] => {
-    const responses: QuestionnaireResponse[] = [];
-
-    const processQuestion = (q: Question) => {
-      if (q.type === "group" && q.questions) {
-        q.questions.forEach(processQuestion);
-      } else if (q.type === "structured" && q.structured_type) {
-        let structuredData: any = null;
-
-        if (requestBody.datapoints && Array.isArray(requestBody.datapoints)) {
-          // For datapoint-based structures (allergy, diagnosis, medication, etc.)
-          structuredData = requestBody.datapoints;
-        } else {
-          // For direct body structures (encounter, appointment, files, time_of_death)
-          switch (reference_id) {
-            case "encounter":
-              structuredData = [requestBody];
-              break;
-            case "appointment": {
-              // Extract slot_id from URL - format: /api/v1/facility/{facilityId}/slots/{slotId}/create_appointment/
-              const slotMatch = fullRequest?.url?.match(
-                /\/slots\/([^/]+)\/create_appointment\//,
-              );
-              const slot_id = slotMatch ? slotMatch[1] : null;
-
-              structuredData = [
-                {
-                  note: requestBody.note,
-                  tags: requestBody.tags,
-                  slot_id: slot_id,
-                },
-              ];
-
-              break;
-            }
-            case "files": {
-              // Convert base64 to File object with proper MIME type
-              let fileObject: File | null = null;
-              if (requestBody.file_data && requestBody.original_name) {
-                try {
-                  const extension = requestBody.original_name
-                    .split(".")
-                    .pop()
-                    ?.toLowerCase();
-                  const mimeTypes: Record<string, string> = {
-                    pdf: "application/pdf",
-                    jpg: "image/jpeg",
-                    jpeg: "image/jpeg",
-                    png: "image/png",
-                    gif: "image/gif",
-                    txt: "text/plain",
-                    doc: "application/msword",
-                    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    xls: "application/vnd.ms-excel",
-                    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                  };
-                  const mimeType =
-                    mimeTypes[extension || ""] || "application/octet-stream";
-
-                  // Modern one-liner base64 to File conversion
-                  fileObject = new File(
-                    [
-                      Uint8Array.from(atob(requestBody.file_data), (c) =>
-                        c.charCodeAt(0),
-                      ),
-                    ],
-                    requestBody.original_name,
-                    { type: mimeType },
-                  );
-                } catch (error) {
-                  console.error("Error converting file data:", error);
-                }
-              }
-
-              structuredData = [
-                {
-                  name: requestBody.name,
-                  original_name: requestBody.original_name,
-                  file_data: fileObject,
-                  file_category: requestBody.file_category,
-                  file_type: requestBody.file_type,
-                  associating_id: requestBody.associating_id,
-                },
-              ];
-              break;
-            }
-            case "time_of_death":
-              structuredData = [requestBody.deceased_datetime];
-              break;
-            default:
-              structuredData = [requestBody];
-          }
-        }
-
-        responses.push({
-          question_id: q.id,
-          link_id: q.link_id,
-          values: structuredData
-            ? [
-                {
-                  value: structuredData,
-                  type: q.structured_type as any,
-                },
-              ]
-            : [],
-          note: undefined,
-          body_site: undefined,
-          method: undefined,
-          structured_type: q.structured_type,
-        });
-      } else {
-        responses.push({
-          question_id: q.id,
-          link_id: q.link_id,
-          values: [],
-          note: undefined,
-          body_site: undefined,
-          method: undefined,
-          structured_type: q.structured_type ?? null,
-        });
-      }
-    };
-
-    questions.forEach(processQuestion);
-    return responses;
-  };
 
   const handleSubmissionError = (results: ValidationErrorResponse[]) => {
     const updatedForms = [...questionnaireForms];

@@ -1,4 +1,4 @@
-import { UseQueryOptions, useQueries, useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { Building, ChevronDown, ChevronRight, Loader2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -28,32 +28,23 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { HTTPError } from "@/Utils/request/types";
-import {
-  FacilityOrganization,
-  FacilityOrganizationResponse,
-} from "@/types/facilityOrganization/facilityOrganization";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface FacilityOrganizationSelectorProps {
   value?: string[] | null;
   onChange: (value: string[] | null) => void;
   facilityId: string;
-  currentOrganizations?: FacilityOrganization[];
+
+  currentOrganizations?: FacilityOrganizationRead[];
 
   setCurrentSelectedOrganizations?: (
-    organizations: FacilityOrganization[] | null,
+    organizations: FacilityOrganizationRead[],
   ) => void;
+
   singleSelection?: boolean;
 }
-type OrgKey = ["organizations", string, string];
 
-type OrgQueryOptions = UseQueryOptions<
-  FacilityOrganizationResponse, // TQueryFnData
-  HTTPError, // TError
-  FacilityOrganizationResponse, // TData
-  OrgKey // TQueryKey
->;
 export default function FacilityOrganizationSelector(
   props: FacilityOrganizationSelectorProps,
 ) {
@@ -67,12 +58,12 @@ export default function FacilityOrganizationSelector(
   } = props;
 
   const [selectedOrganizations, setSelectedOrganizations] = useState<
-    FacilityOrganization[]
+    FacilityOrganizationRead[]
   >([]);
   const [currentSelection, setCurrentSelection] =
-    useState<FacilityOrganization | null>(null);
+    useState<FacilityOrganizationRead | null>(null);
   const [navigationLevels, setNavigationLevels] = useState<
-    FacilityOrganization[]
+    FacilityOrganizationRead[]
   >([]);
   const [facilityOrgSearch, setFacilityOrgSearch] = useState("");
   const [showAllOrgs, setShowAllOrgs] = useState(false);
@@ -114,12 +105,12 @@ export default function FacilityOrganizationSelector(
         },
       }),
       meta: { persist: true },
-      networkMode: "online",
+      networkMode: "online" as const,
       enabled: !!level.id,
-    })) as OrgQueryOptions[],
+    })),
   });
 
-  const handleSelect = (org: FacilityOrganization) => {
+  const handleSelect = (org: FacilityOrganizationRead) => {
     const isAlreadySelected = !!currentOrganizations?.find(
       (o) => o.id === org.id,
     );
@@ -138,7 +129,7 @@ export default function FacilityOrganizationSelector(
     setFacilityOrgSearch("");
   };
 
-  const handleConfirmSelection = (org: FacilityOrganization) => {
+  const handleConfirmSelection = (org: FacilityOrganizationRead) => {
     if (!selectedOrganizations.includes(org)) {
       const newSelection = [...selectedOrganizations, org];
       setSelectedOrganizations(newSelection);

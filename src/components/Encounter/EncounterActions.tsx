@@ -144,7 +144,13 @@ export default function EncounterActions({
       const updatedEncounter: EncounterRead = {
         ...encounter,
         status: "completed",
-        updated_by: normalizeUserBase(authUser),
+        updated_by: {
+          ...normalizeUserBase(authUser),
+          last_login: authUser.last_login ?? "",
+          profile_picture_url: authUser.profile_picture_url ?? "",
+          mfa_enabled: authUser.mfa_enabled ?? false,
+          deleted: authUser.deleted ?? false,
+        },
         is_updated_offline: true,
       };
 

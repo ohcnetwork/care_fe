@@ -70,12 +70,45 @@ export default function MedicationRequestTable() {
     selectedEncounterPermissions: { canViewEncounter, canWriteEncounter },
     currentEncounterId,
   } = useEncounter();
+
+  // 🔍 DEBUGGING: Log all encounter context data
+  console.log("🔍 DEBUGGING - Encounter Context:", {
+    encounter,
+    encounterId,
+    patientId,
+    canViewClinicalData,
+    canViewEncounter,
+    currentEncounterId,
+    encounterFacilityId: encounter?.facility?.id,
+    encounterFacilityName: encounter?.facility?.name,
+    encounterStatus: encounter?.status,
+  });
+
   const [searchQuery, setSearchQuery] = useState("");
   const [showStopped, setShowStopped] = useState(false);
   const canAccess = canViewClinicalData || canViewEncounter;
+
+  // 🔍 DEBUGGING: Check URL path matching
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;
+  console.log("🔍 DEBUGGING - URL Path Analysis:", {
+    subpathMatch,
+    facilityIdExists,
+    currentPath: window.location.pathname,
+    isFacilityRoute: window.location.pathname.includes("/facility/"),
+    isOrganizationRoute: window.location.pathname.includes("/organization/"),
+  });
+
   const { facilityId } = useCurrentFacility();
+
+  // 🔍 DEBUGGING: Final facilityId analysis
+  console.log("🔍 DEBUGGING - Final FacilityId Analysis:", {
+    fromUseCurrentFacility: facilityId,
+    fromEncounterData: encounter?.facility?.id,
+    fromEncounterDataName: encounter?.facility?.name,
+    finalFacilityId: facilityId || encounter?.facility?.id,
+    isMissing: !facilityId && !encounter?.facility?.id,
+  });
   const canWrite =
     !!encounter &&
     encounterId === currentEncounterId &&

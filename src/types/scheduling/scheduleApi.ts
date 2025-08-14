@@ -19,7 +19,7 @@ import {
   ScheduleTemplateUpdateRequest,
   TokenSlot,
 } from "@/types/scheduling/schedule";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export default {
   /**
@@ -164,11 +164,12 @@ export default {
     availableUsers: {
       path: "/api/v1/facility/{facilityId}/appointments/available_users/",
       method: HttpMethod.GET,
-      TRes: Type<{ users: UserBase[] }>(),
+      TRes: Type<{ users: UserReadMinimal[] }>(),
     },
     getPublicScheduleableFacilityUser: {
       path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
-      TRes: Type<UserBase>(),
+      method: HttpMethod.GET,
+      TRes: Type<UserReadMinimal>(),
     },
     /**
      * Get appointments across facilities

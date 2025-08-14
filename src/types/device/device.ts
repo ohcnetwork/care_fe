@@ -1,8 +1,8 @@
 import { ContactPoint } from "@/types/common/contactPoint";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationList } from "@/types/location/location";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export const DeviceStatuses = [
   "active",
@@ -53,10 +53,10 @@ export interface DeviceDetail extends DeviceBase {
   id: string;
   current_encounter: EncounterRead | undefined;
   current_location: LocationList | undefined;
-  created_by: UserBase;
-  updated_by: UserBase;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
   care_metadata: Record<string, unknown>;
-  managing_organization: FacilityOrganization | null;
+  managing_organization: FacilityOrganizationRead | null;
 }
 
 export interface DeviceList extends DeviceBase {
@@ -67,7 +67,7 @@ export interface DeviceList extends DeviceBase {
 export interface DeviceEncounterHistory {
   id: string;
   encounter: EncounterRead;
-  created_by: UserBase;
+  created_by: UserReadMinimal;
   start: string;
   end: string;
 }
@@ -85,7 +85,7 @@ export interface ServiceHistoryWriteRequest {
 
 export interface DeviceLocationHistory {
   id: string;
-  created_by: UserBase;
+  created_by: UserReadMinimal;
   location: LocationList;
   start: string;
   end: string;

@@ -61,6 +61,7 @@ import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
   getYearOfBirth,
   handleOfflineRecordSuccess,
+  isOfflineId,
   normalizeOfflinePatientRecord,
   pickPatientCreateFields,
   saveOfflineWrite,
@@ -83,6 +84,7 @@ import {
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { Organization } from "@/types/organization/organization";
 import { PatientIdentifier } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
@@ -124,7 +126,6 @@ export default function PatientRegistration(
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
-  const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
 
   const [suppressOfflineDuplicateWarning, setSuppressOfflineDuplicateWarning] =
     useState(!!patientId);
@@ -188,6 +189,7 @@ export default function PatientRegistration(
               value: z.string().optional(),
             }),
           ),
+          tags: z.array(z.string()),
         })
         .superRefine((data, ctx) => {
           if (data.age_or_dob === "dob" && !data.date_of_birth) {
@@ -275,9 +277,16 @@ export default function PatientRegistration(
       same_address: true,
       _selected_levels: [],
       _is_deceased: false,
+      tags: [],
     },
     mode: "onSubmit",
   });
+
+  const tagIds = form.watch("tags");
+  const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
+  const selectedTags = tagQueries
+    .map((query) => query.data)
+    .filter(Boolean) as TagConfig[];
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
     mutationKey: ["create_patient"],
@@ -492,7 +501,7 @@ export default function PatientRegistration(
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("values submit");
+    console.log("values submit : ", values);
     const editableIdentifiers = values.identifiers.filter((identifier) => {
       const config = facility?.patient_instance_identifier_configs.find(
         (c) => c.id === identifier.config,
@@ -545,7 +554,7 @@ export default function PatientRegistration(
           : values.permanent_address,
         facility: facilityId,
         pincode: values.pincode || undefined,
-        tags: selectedTags.map((tag) => tag.id),
+        tags: values.tags,
         identifiers: editableIdentifiers,
       };
       if (!onlineManager.isOnline()) {
@@ -660,6 +669,11 @@ export default function PatientRegistration(
             patientData.geo_organization as unknown as Organization
           )?.id,
           deceased_datetime: null,
+          tags:
+            offlineEntry?.type === OfflineKeyMap.create_patient ||
+            isOfflineId(patientId || "")
+              ? patientData.instance_tags.map((tag) => tag.id)
+              : [], // tag only populate in case of create type now.
           identifiers: facility.patient_instance_identifier_configs.map(
             (identifierConfig) => {
               const identifier = patientData.instance_identifiers?.find(
@@ -672,10 +686,6 @@ export default function PatientRegistration(
             },
           ),
         } as unknown as z.infer<typeof formSchema>);
-
-        if (patientData.instance_tags) {
-          setSelectedTags(patientData.instance_tags);
-        }
       }
     } else if (facility) {
       form.setValue(
@@ -927,14 +937,25 @@ export default function PatientRegistration(
 
               {/* Tag Selector (only for create) */}
               {!patientId && (
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">{t("tags")}</h3>
-                  <TagSelectorPopover
-                    selected={selectedTags}
-                    onChange={setSelectedTags}
-                    resource={TagResource.PATIENT}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("tags")}</FormLabel>
+                      <FormControl>
+                        <TagSelectorPopover
+                          selected={selectedTags}
+                          onChange={(tags) => {
+                            field.onChange(tags.map((tag) => tag.id));
+                          }}
+                          resource={TagResource.PATIENT}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
 
               <Tabs

@@ -48,7 +48,7 @@ import {
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
-import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 
 export interface PatientInfoCardProps {
   patient: PatientRead;
@@ -554,7 +554,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
     </>
   );
 
-  function organizationBadge(org: FacilityOrganization) {
+  function organizationBadge(org: FacilityOrganizationRead) {
     return (
       <Badge
         key={org.id}

@@ -1,7 +1,14 @@
 import {
   Ambulance,
+  Ban,
   BedDouble,
+  Calendar,
+  Check,
+  CirclePause,
+  CircleX,
+  FileQuestion,
   Home,
+  LoaderCircle,
   LucideIcon,
   MonitorSmartphone,
   Siren,
@@ -13,10 +20,10 @@ import { Badge } from "@/components/ui/badge";
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
-import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationAssociationStatus } from "@/types/location/association";
 import { LocationList } from "@/types/location/location";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export const ENCOUNTER_ADMIT_SOURCE = [
   "hosp_trans",
@@ -137,12 +144,16 @@ export const ENCOUNTER_CLASS_ICONS = {
 } as const satisfies Record<EncounterClass, LucideIcon>;
 
 export const ENCOUNTER_STATUS_ICONS = {
-  planned: "l-calender",
-  in_progress: "l-spinner",
-  discharged: "l-home",
-  completed: "l-check",
-  cancelled: "l-x",
-} as const satisfies Partial<Record<EncounterStatus, string>>;
+  planned: Calendar,
+  in_progress: LoaderCircle,
+  discharged: Home,
+  completed: Check,
+  cancelled: CircleX,
+  on_hold: CirclePause,
+  discontinued: CircleX,
+  entered_in_error: Ban,
+  unknown: FileQuestion,
+} as const satisfies Record<EncounterStatus, LucideIcon>;
 
 export const ENCOUNTER_CLASSES_COLORS = {
   imp: "indigo", // Inpatient
@@ -220,14 +231,15 @@ export interface EncounterRead
     id: string;
     name: string;
   };
-  created_by: UserBase;
-  updated_by: UserBase;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
   created_date: string;
   modified_date: string;
   encounter_class_history: EncounterClassHistory;
   status_history: StatusHistory;
-  organizations: FacilityOrganization[];
+
   current_location: LocationList | null;
+  organizations: FacilityOrganizationRead[];
   location_history: LocationHistory[];
   permissions: string[];
   care_team: CareTeamResponse[];

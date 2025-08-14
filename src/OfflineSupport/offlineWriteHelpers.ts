@@ -2,7 +2,6 @@ import { QueryClient } from "@tanstack/react-query";
 import { max, startOfToday } from "date-fns";
 import dayjs from "dayjs";
 
-import { FacilityModel } from "@/components/Facility/models";
 import { AuthUserModel } from "@/components/Users/models";
 
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -23,8 +22,9 @@ import {
 } from "@/types/emr/patient/patient";
 import { Symptom } from "@/types/emr/symptom/symptom";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
-import { FacilityBareMinimum, FacilityData } from "@/types/facility/facility";
-import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import { FacilityRead } from "@/types/facility/facility";
+import { FacilityBareMinimum } from "@/types/facility/facility";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { Organization } from "@/types/organization/organization";
 import { PatientIdentifier } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
@@ -41,7 +41,7 @@ import {
   AvailabilityHeatmapResponse,
   TokenSlot,
 } from "@/types/scheduling/schedule";
-import { UserBase } from "@/types/user/user";
+import { UserBase, UserReadMinimal } from "@/types/user/user";
 
 import { OfflineWritesEntry } from "./AppcacheDB";
 import { AppCacheDB } from "./AppcacheDB";
@@ -257,14 +257,14 @@ export const normalizeOfflineEncounterRecord = (
   authUser: AuthUserModel,
   selectedTags: TagConfig[],
   permissions?: string[],
-  currentOrganizations?: FacilityOrganization[],
-  created_by?: UserBase,
+  currentOrganizations?: FacilityOrganizationRead[],
+  created_by?: UserReadMinimal,
   created_date?: string,
   modified_date?: string,
 ): EncounterRead => {
   const payload = entry.payload as EncounterCreate;
 
-  const facilityData = queryClient.getQueryData<FacilityData>([
+  const facilityData = queryClient.getQueryData<FacilityRead>([
     "facility",
     payload.facility,
   ]);
@@ -283,8 +283,22 @@ export const normalizeOfflineEncounterRecord = (
     hospitalization: payload?.hospitalization,
     priority: payload.priority ?? "Unknown (offline)",
     external_identifier: payload?.external_identifier,
-    created_by: created_by ? created_by : normalizeUserBase(authUser),
-    updated_by: normalizeUserBase(authUser),
+    created_by: created_by
+      ? created_by
+      : {
+          ...normalizeUserBase(authUser),
+          last_login: authUser.last_login ?? "",
+          profile_picture_url: authUser.profile_picture_url ?? "",
+          mfa_enabled: authUser.mfa_enabled ?? false,
+          deleted: authUser.deleted ?? false,
+        },
+    updated_by: {
+      ...normalizeUserBase(authUser),
+      last_login: authUser.last_login ?? "",
+      profile_picture_url: authUser.profile_picture_url ?? "",
+      mfa_enabled: authUser.mfa_enabled ?? false,
+      deleted: authUser.deleted ?? false,
+    },
     created_date: created_date
       ? created_date
       : new Date(entry.clientTimestamp).toISOString(),
@@ -311,13 +325,13 @@ export const normalizeOfflineEncounterRecord = (
 export const normaliZedResourcerequestRecord = (
   entry: OfflineWritesEntry,
   patientData: PatientRead | undefined,
-  assigned_facility: FacilityModel | undefined,
-  assignToUser: UserBase | undefined,
+  assigned_facility: FacilityRead | undefined,
+  assignToUser: UserReadMinimal | undefined,
   queryClient: QueryClient,
   user: AuthUserModel,
   created_date?: string,
   modified_date?: string,
-  approving_facility?: FacilityModel,
+  approving_facility?: FacilityRead,
 ): ResourceRequest => {
   const payload = entry.payload as
     | UpdateResourceRequest
@@ -325,10 +339,10 @@ export const normaliZedResourcerequestRecord = (
 
   const nowIso = new Date(entry.clientTimestamp).toISOString();
   const originFacilityId = payload.origin_facility;
-  let originfacility: FacilityModel | undefined;
+  let originfacility: FacilityRead | undefined;
 
   if (originFacilityId && originFacilityId !== "") {
-    originfacility = queryClient.getQueryData<FacilityModel>([
+    originfacility = queryClient.getQueryData<FacilityRead>([
       "facility",
       originFacilityId,
     ]);
@@ -350,8 +364,20 @@ export const normaliZedResourcerequestRecord = (
     status: payload.status ?? "unknown(offline)",
     title: payload.title ?? "unknown(offline)",
     assigned_to: assignToUser ?? null,
-    created_by: normalizeUserBase(user),
-    updated_by: normalizeUserBase(user),
+    created_by: {
+      ...normalizeUserBase(user),
+      last_login: user.last_login ?? "",
+      profile_picture_url: user.profile_picture_url ?? "",
+      mfa_enabled: user.mfa_enabled ?? false,
+      deleted: user.deleted ?? false,
+    },
+    updated_by: {
+      ...normalizeUserBase(user),
+      last_login: user.last_login ?? "",
+      profile_picture_url: user.profile_picture_url ?? "",
+      mfa_enabled: user.mfa_enabled ?? false,
+      deleted: user.deleted ?? false,
+    },
     created_date: created_date ? created_date : nowIso,
     modified_date: modified_date ? modified_date : nowIso,
     related_patient: patientData ?? null,
@@ -365,7 +391,7 @@ export const normalizedAppointmentRecord = (
   patientData: PatientRead,
   bookedBy: AuthUserModel | null,
   status: AppointmentNonCancelledStatus,
-  practitioner: UserBase,
+  practitioner: UserReadMinimal,
   facility: FacilityBareMinimum,
   selectedTags: TagConfig[],
 ): AppointmentRead => {
@@ -376,15 +402,40 @@ export const normalizedAppointmentRecord = (
     token_slot: selectedTokenSlot,
     patient: patientData ?? null,
     booked_on: nowIso,
-    booked_by: bookedBy ? normalizeUserBase(bookedBy) : null,
+    booked_by: bookedBy
+      ? {
+          ...normalizeUserBase(bookedBy),
+          last_login: bookedBy.last_login ?? "",
+          profile_picture_url: bookedBy.profile_picture_url ?? "",
+          mfa_enabled: bookedBy.mfa_enabled ?? false,
+          deleted: bookedBy.deleted ?? false,
+        }
+      : null,
     status: status,
     note: payload?.note,
     user: practitioner,
     facility: facility,
     is_updated_offline: true,
     modified_date: nowIso,
-    updated_by: bookedBy ? normalizeUserBase(bookedBy) : null,
-    created_by: bookedBy ? normalizeUserBase(bookedBy) : null,
+    updated_by: bookedBy
+      ? {
+          ...normalizeUserBase(bookedBy),
+          last_login: bookedBy.last_login ?? "",
+          profile_picture_url: bookedBy.profile_picture_url ?? "",
+          mfa_enabled: bookedBy.mfa_enabled ?? false,
+          deleted: bookedBy.deleted ?? false,
+        }
+      : null,
+    created_by: bookedBy
+      ? {
+          ...normalizeUserBase(bookedBy),
+          last_login: bookedBy.last_login ?? "",
+          profile_picture_url: bookedBy.profile_picture_url ?? "",
+          mfa_enabled: bookedBy.mfa_enabled ?? false,
+          deleted: bookedBy.deleted ?? false,
+        }
+      : null,
+
     tags: selectedTags,
   };
 };
@@ -503,17 +554,14 @@ export function normalizeUserBase(authUser: AuthUserModel): UserBase {
     id: authUser?.external_id,
     first_name: authUser?.first_name,
     username: authUser?.username,
-    email: authUser?.email,
+
     last_name: authUser?.last_name,
     user_type: authUser?.user_type,
-    last_login: authUser?.last_login ?? "",
-    profile_picture_url: authUser?.profile_picture_url ?? "",
+
     phone_number: authUser?.phone_number ?? "unknown(offline)",
     gender: authUser?.gender ?? "male",
     suffix: authUser?.suffix,
     prefix: authUser?.prefix,
-    mfa_enabled: authUser?.mfa_enabled ?? false,
-    deleted: authUser?.deleted ?? false,
   };
 }
 
@@ -613,7 +661,13 @@ export const normalizedQuestionnairRequest = (
     responses: questionnair.body.results ?? [],
     encounter: encounterID ?? null,
     patient: patientID,
-    created_by: normalizeUserBase(authUser),
+    created_by: {
+      ...normalizeUserBase(authUser),
+      last_login: authUser.last_login ?? "",
+      profile_picture_url: authUser.profile_picture_url ?? "",
+      mfa_enabled: authUser.mfa_enabled ?? false,
+      deleted: authUser.deleted ?? false,
+    },
     is_updated_offline: true,
   };
 };

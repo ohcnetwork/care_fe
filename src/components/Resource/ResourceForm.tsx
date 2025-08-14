@@ -43,7 +43,6 @@ import { Textarea } from "@/components/ui/textarea";
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 import UserSelector from "@/components/Common/UserSelector";
-import { FacilityModel } from "@/components/Facility/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -67,14 +66,15 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import patientApi from "@/types/emr/patient/patientApi";
-import { FacilityData } from "@/types/facility/facility";
-import facilityApi from "@/types/facility/facilityApi";
+import { FacilityPublicRead, FacilityRead } from "@/types/facility/facility";
+import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import {
   CreateResourceRequest,
+  RESOURCE_REQUEST_STATUSES,
   ResourceRequest,
   UpdateResourceRequest,
 } from "@/types/resourceRequest/resourceRequest";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface ResourceProps {
   facilityId: number;
@@ -85,18 +85,20 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const [facilitySearch, setFacilitySearch] = useState("");
   const { goBack } = useAppHistory();
   const { t } = useTranslation();
+
   const [{ related_patient, offlineEntryId }] = useQueryParams();
-  const [assignedToUser, setAssignedToUser] = useState<UserBase>();
-  const [assignFacility, setAssignFacility] = useState<FacilityModel>();
+  const [assignedToUser, setAssignedToUser] = useState<UserReadMinimal>();
+  const [assignFacility, setAssignFacility] = useState<FacilityRead>();
   const [offlineEntry, setOfflineEntry] = useState<OfflineWritesEntry | null>(
     null,
   );
   const [isLoadingOfflineEntry, setIsLoadingOfflineEntry] = useState(false);
+
   const authUser = useAuthUser();
   const queryClient = useQueryClient();
   const db = new AppCacheDB();
   const resourceFormSchema = z.object({
-    status: z.string().min(1, { message: t("field_required") }),
+    status: z.enum(RESOURCE_REQUEST_STATUSES),
     category: z.string().min(1, { message: t("field_required") }),
     assigned_facility: z.object({
       id: z.string(),
@@ -104,7 +106,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     }),
     emergency: z.enum(["true", "false"]),
     title: z.string().min(1, { message: t("field_required") }),
-    reason: z.string().min(1, { message: t("field_required") }),
+    reason: z
+      .string()
+      .trim()
+      .min(1, { message: t("field_required") }),
     referring_facility_contact_name: z
       .string()
       .min(1, { message: t("field_required") }),
@@ -236,23 +241,34 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     },
   });
 
-  const toFacilityModel = (facility: FacilityData): FacilityModel => ({
+  const toFacilityRead = (facility: FacilityPublicRead): FacilityRead => ({
     id: facility.id,
     name: facility.name,
-    address: facility.address,
     description: facility.description,
-    facility_type: facility.facility_type,
+    address: facility.address,
     phone_number: facility.phone_number,
-    read_cover_image_url: facility.read_cover_image_url,
+    facility_type: facility.facility_type,
+    is_public: facility.is_public,
     latitude: facility.latitude,
     longitude: facility.longitude,
-    location:
-      facility.latitude !== undefined && facility.longitude !== undefined
-        ? { latitude: facility.latitude, longitude: facility.longitude }
-        : undefined,
+    middleware_address: facility.middleware_address,
     pincode: facility.pincode,
-    geo_organization: facility.geo_organization?.id ?? undefined,
-    is_public: facility.is_public,
+    read_cover_image_url: facility.cover_image_url,
+    geo_organization: facility.geo_organization,
+    features: facility.features,
+    instance_discount_codes: [],
+    instance_discount_monetary_components: [],
+    instance_informational_codes: [],
+    instance_tax_codes: [],
+    instance_tax_monetary_components: [],
+    invoice_number_expression: "",
+    discount_codes: [],
+    discount_monetary_components: [],
+    patient_instance_identifier_configs: [],
+    patient_facility_identifier_configs: [],
+    permissions: [],
+    root_org_permissions: [],
+    child_org_permissions: [],
   });
 
   const queueUpdatedResourceRequest = async (
@@ -506,7 +522,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
   const { data: facilities } = useQuery({
     queryKey: ["facilities", facilitySearch],
-    queryFn: query.debounced(facilityApi.getAllFacilities, {
+    queryFn: query.debounced(publicFacilityApi.getAll, {
       queryParams: {
         search_text: facilitySearch ? facilitySearch : undefined,
         limit: 50,
@@ -521,7 +537,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     value: facility.id,
   }));
 
-  const handleUserChange = (user: UserBase) => {
+  const handleUserChange = (user: UserReadMinimal) => {
     form.setValue("assigned_to", user.id, { shouldDirty: true });
     setAssignedToUser(user);
   };
@@ -623,8 +639,8 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                               shouldDirty: true,
                               shouldValidate: true,
                             });
-                            const facilityModel = toFacilityModel(facility);
-                            setAssignFacility(facilityModel);
+                            const facilityRead = toFacilityRead(facility);
+                            setAssignFacility(facilityRead);
                           } else {
                             form.resetField("assigned_facility");
                             setAssignFacility(undefined);
