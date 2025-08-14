@@ -39,7 +39,7 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
         icon={<HealthWorkerIcon className="size-8 text-teal-700" />}
         title={t("forms")}
         shortcut="F"
-        href={`questionnaire/encounter`}
+        href={`questionnaire`}
       />
     </div>
   );
