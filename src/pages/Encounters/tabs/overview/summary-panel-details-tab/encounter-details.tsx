@@ -33,14 +33,11 @@ export const EncounterDetails = () => {
       <div className="flex items-center justify-between w-full text-gray-950 pl-2">
         <span className="font-semibold ">{t("encounter_details")}</span>
         {canWriteSelectedEncounter && (
-          <Button variant="ghost" size="xs" asChild>
+          <Button variant="ghost" size="sm" asChild>
             <Link
               href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
             >
-              <SquarePen
-                className="size-4 text-gray-950 cursor-pointer"
-                strokeWidth={1.5}
-              />
+              <SquarePen className="text-gray-950" strokeWidth={1.5} />
             </Link>
           </Button>
         )}

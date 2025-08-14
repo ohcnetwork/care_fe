@@ -19,16 +19,16 @@ export const DepartmentsAndTeams = () => {
   if (!encounter) return null;
 
   return (
-    <div className="bg-gray-100 rounded-md w-full border border-gray-200">
-      <div className="flex justify-between items-center pl-3 pr-2 py-1 text-gray-950">
+    <div className="bg-gray-100 rounded-md w-full border border-gray-200 pt-2 p-1 space-y-1">
+      <div className="flex justify-between items-center pl-2 text-gray-950">
         <span className=" font-semibold">{t("departments_and_teams")}</span>
         {canEdit && (
-          <Button variant="ghost" size="icon" onClick={manageDepartments}>
-            <SquarePen className="size-4 cursor-pointer" strokeWidth={1.5} />
+          <Button variant="ghost" size="sm" onClick={manageDepartments}>
+            <SquarePen className="cursor-pointer" strokeWidth={1.5} />
           </Button>
         )}
       </div>
-      <div className="space-y-2 bg-white rounded-lg p-2 mx-1 mb-1 shadow">
+      <div className="space-y-2 bg-white rounded-md p-2 shadow">
         {encounter.organizations.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {encounter.organizations.map((org) => (

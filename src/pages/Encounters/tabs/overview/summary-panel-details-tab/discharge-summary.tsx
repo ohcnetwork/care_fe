@@ -29,13 +29,13 @@ export const DischargeDetails = () => {
   );
 
   return (
-    <div className="bg-gray-100 rounded-md w-full border border-gray-200 pt-2">
-      <div className="flex justify-between items-center p-2 pl-3">
+    <div className="bg-gray-100 rounded-md w-full border border-gray-200 p-1 pt-2 space-y-1">
+      <div className="flex justify-between items-center pl-2">
         <span className="text-gray-950 font-semibold">
           {t("discharge_details")}
         </span>
         {canWriteSelectedEncounter && (
-          <Button variant="ghost" size="xs" asChild>
+          <Button variant="ghost" size="sm" asChild>
             <Link
               href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter`}
             >
@@ -47,7 +47,7 @@ export const DischargeDetails = () => {
           </Button>
         )}
       </div>
-      <div className="bg-white rounded-md p-2 shadow flex flex-col gap-3 mx-1 mb-1">
+      <div className="bg-white rounded-md p-2 shadow flex flex-col gap-3">
         {dischargeStatus ? (
           <>
             <div className="flex justify-between items-center">
