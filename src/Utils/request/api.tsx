@@ -1,8 +1,3 @@
-import {
-  CommentModel,
-  FacilityModel,
-  FacilityRequest,
-} from "@/components/Facility/models";
 import { FileUploadModel } from "@/components/Patient/models";
 import { AuthUserModel, UpdatePasswordForm } from "@/components/Users/models";
 
@@ -12,19 +7,15 @@ import { MFAAuthenticationToken } from "@/types/auth/otp";
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import { Code } from "@/types/base/code/code";
 import { PatientRead } from "@/types/emr/patient/patient";
-import {
-  BaseFacility,
-  CreateFacility,
-  FacilityData,
-} from "@/types/facility/facility";
 import { PlugConfig } from "@/types/plugConfig";
 import { BatchSubmissionResult } from "@/types/questionnaire/batch";
+import { CommentModel } from "@/types/resourceRequest/resourceRequest";
 import {
   CreateResourceRequest,
   ResourceRequest,
   UpdateResourceRequest,
 } from "@/types/resourceRequest/resourceRequest";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -142,27 +133,8 @@ const routes = {
     TBody: Type<void>(),
   },
 
-  getPermittedFacility: {
-    path: "/api/v1/facility/{id}/",
-    method: "GET",
-    TRes: Type<FacilityData>(),
-  },
-
-  getAnyFacility: {
-    path: "/api/v1/getallfacilities/{id}/",
-    method: "GET",
-    TRes: Type<FacilityModel>(),
-  },
-
-  updateFacility: {
-    path: "/api/v1/facility/{id}/",
-    method: "PUT",
-    TRes: Type<FacilityModel>(),
-    TBody: Type<FacilityRequest>(),
-  },
-
-  deleteFacilityCoverImage: {
-    path: "/api/v1/facility/{id}/cover_image/",
+  deleteUser: {
+    path: "/api/v1/users/{username}/",
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
     TBody: Type<void>(),
@@ -170,20 +142,12 @@ const routes = {
 
   getScheduleAbleFacilityUser: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
-    TRes: Type<UserBase>(),
+    TRes: Type<UserReadMinimal>(),
   },
 
   getScheduleAbleFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/",
-    TRes: Type<PaginatedResponse<UserBase>>(),
-  },
-
-  //Profile
-
-  getUserDetails: {
-    path: "/api/v1/users/{username}/",
-    method: "GET",
-    TRes: Type<UserBase>(),
+    TRes: Type<PaginatedResponse<UserReadMinimal>>(),
   },
 
   viewUpload: {
@@ -242,30 +206,6 @@ const routes = {
     method: "POST",
     TRes: Type<CommentModel>(),
     TBody: Type<Partial<CommentModel>>(),
-  },
-
-  facility: {
-    getUsers: {
-      path: "/api/v1/facility/{facility_id}/users/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<UserBase>>(),
-    },
-    list: {
-      path: "/api/v1/facility/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<BaseFacility>>(),
-    },
-    create: {
-      path: "/api/v1/facility/",
-      method: "POST",
-      TRes: Type<BaseFacility>(),
-      TBody: Type<CreateFacility>(),
-    },
-    show: {
-      path: "/api/v1/facility/{id}/",
-      method: "GET",
-      TRes: Type<FacilityData>(),
-    },
   },
 
   valueset: {
