@@ -23,7 +23,7 @@ export const Forms = () => {
   } = useEncounter();
 
   const { data: questionnaireOptions } = useQuery({
-    queryKey: ["questionnaires", "encounter_actions"] as const,
+    queryKey: ["questionnaires", "encounter_actions"],
     queryFn: query(questionnaireApi.list, {
       queryParams: {
         tag_slug: "encounter_actions",
