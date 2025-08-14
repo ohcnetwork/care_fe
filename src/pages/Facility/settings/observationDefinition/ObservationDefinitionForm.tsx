@@ -424,7 +424,9 @@ function ObservationDefinitionFormContent({
                               ))}
                             </SelectContent>
                           </Select>
-                          <FormMessage />
+                          <div style={{ minHeight: "1.25rem" }}>
+                            <FormMessage />
+                          </div>
                         </FormItem>
                       );
                     }}
