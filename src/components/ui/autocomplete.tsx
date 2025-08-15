@@ -268,9 +268,12 @@ export default function Autocomplete({
           aria-invalid={props["aria-invalid"]}
           aria-expanded={open}
           className={cn(
-            "w-full justify-between inline-flex items-center rounded-md border px-3 py-2 text-sm outline-none",
-            disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+            "w-full justify-between inline-flex items-center rounded-md border px-3 py-2 text-sm outline-neutral-800",
+            disabled
+              ? "opacity-50 cursor-not-allowed"
+              : "cursor-pointer border border-gray-400",
             className,
+            props["aria-invalid"] && "border-red-500 ring-red-500",
           )}
           data-cy={dataCy}
           onClick={handleTriggerClick}
