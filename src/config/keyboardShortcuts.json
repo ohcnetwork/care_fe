@@ -121,7 +121,7 @@
       { "key": "m c",                 "action": "mark-as-completed",
                                       "description": "Mark as Completed",
                                       "when": "canEdit" },
-     { "key": "a l",                 "action": "assign-location",
+     { "key": "l",                 "action": "assign-location",
                                       "description": "Mark as Completed",
                                       "when": "canEdit" }
     ]
