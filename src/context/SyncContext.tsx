@@ -37,7 +37,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
         () => {},
         facilityId,
       );
-      console.log("Sync result:", result);
+
     } catch (error) {
       console.error("Sync failed:", error);
       setIsSyncing(false);

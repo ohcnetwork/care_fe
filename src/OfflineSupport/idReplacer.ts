@@ -31,9 +31,6 @@ async function resolveAncestorIds(
   if (parentEntry.syncStatus === "success" && parentEntry.response) {
     const response = parentEntry.response as any;
     if (response.id) {
-      console.log(
-        `Resolved ancestor ID: ${parentMutationId} -> ${response.id}`,
-      );
       idMap.addMapping(parentMutationId, response.id);
     }
   }
@@ -83,21 +80,17 @@ export async function replaceOfflineIdsInWrite(
     !write.parentMutationId ||
     !write.parentMutationId.startsWith("offline-")
   ) {
-    console.log(
-      `No parent mutation found for ${write.id}, skipping ID replacement`,
-    );
     return write;
   }
-  console.log("parentt id", write.parentMutationId);
+
   const newWrite: OfflineWritesEntry = JSON.parse(JSON.stringify(write));
 
   const tempIdMap = new IdMap();
 
   await resolveAncestorIds(write.parentMutationId, tempIdMap);
-  console.log("tempIdMap", tempIdMap);
   for (const dep of deps) {
     let container = newWrite[dep.location as keyof OfflineWritesEntry];
-    console.log("container", container);
+
     if (!container) continue;
     walkAndReplace(container, dep.path, tempIdMap);
   }
