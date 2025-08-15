@@ -119,7 +119,7 @@ export function PatientHeader({
                 </div>
               </div>
             </div>
-            <DialogFooter className="sm:justify-start mt-4">
+            <DialogFooter>
               <DialogClose asChild>
                 <Button
                   type="button"
