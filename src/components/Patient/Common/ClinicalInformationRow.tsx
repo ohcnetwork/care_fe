@@ -15,7 +15,7 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 
 import { formatName } from "@/Utils/utils";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 type Column = {
   key: string;
@@ -26,7 +26,7 @@ type Column = {
 interface RowProps {
   columns: Column[];
   note?: string;
-  createdBy: UserBase;
+  createdBy: UserReadMinimal;
   onViewEncounter?: () => void;
 }
 
@@ -88,10 +88,9 @@ export default function ClinicalInformationRow({
               </DropdownMenuItem>
             )}
 
-            {!!onViewEncounter ||
-              (note && (
-                <div className="my-2 border-t border-dashed border-gray-300" />
-              ))}
+            {(!!onViewEncounter || note) && (
+              <div className="my-2 border-t border-dashed border-gray-300" />
+            )}
 
             <div className="p-1 text-sm">
               <div className="text-gray-500">{t("reported_by")}:</div>
