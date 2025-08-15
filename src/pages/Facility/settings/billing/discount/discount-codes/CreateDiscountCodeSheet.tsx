@@ -25,7 +25,7 @@ export function CreateDiscountCodeSheet() {
   const [open, setOpen] = useState(false);
 
   const { mutate: createCode } = useMutation({
-    mutationFn: mutate(facilityApi.updateMonetaryComponents, {
+    mutationFn: mutate(facilityApi.setMonetaryComponents, {
       pathParams: { facilityId },
     }),
     onSuccess: () => {

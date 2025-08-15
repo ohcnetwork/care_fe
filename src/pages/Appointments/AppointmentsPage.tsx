@@ -73,7 +73,7 @@ import {
   CardListSkeleton,
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
-import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
+import PatientEncounterOrIdentifierFilter from "@/components/Patient/PatientEncounterOrIdentifierFilter";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -107,7 +107,7 @@ import {
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 import { MultiPractitionerSelector } from "./components/MultiPractitionerSelect";
 
@@ -451,7 +451,7 @@ export default function AppointmentsPage() {
             <MultiPractitionerSelector
               facilityId={facilityId}
               selected={practitioners ?? null}
-              onSelect={(users: UserBase[] | null) => {
+              onSelect={(users: UserReadMinimal[] | null) => {
                 if (users) {
                   updateQuery({
                     practitioners: users.map((user) => user.id).join(","),
@@ -669,9 +669,9 @@ export default function AppointmentsPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 items-center">
-          <PatientIdentifierFilter
+          <PatientEncounterOrIdentifierFilter
             onSelect={(patientId) => updateQuery({ patient: patientId })}
-            placeholder={t("filter_by_patient")}
+            placeholder={t("search_patients")}
             className="w-full sm:w-auto"
             patientId={qParams.patient}
           />
