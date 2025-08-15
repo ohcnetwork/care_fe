@@ -1,21 +1,11 @@
 import { StarFilledIcon, StarIcon } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -25,6 +15,8 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -358,76 +350,46 @@ export default function ValueSetSearchContent({
       </CommandList>
 
       {/* Individual Item Removal Confirmation */}
-      <AlertDialog
+      <ConfirmActionDialog
         open={!!itemToRemove && !showBulkClearConfirm}
         onOpenChange={(open) => {
           if (!open) {
             setItemToRemove(null);
           }
         }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {t("are_you_sure_want_to_clear_favourite", {
-                name: itemToRemove?.display,
-              })}
-            </AlertDialogTitle>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-            <AlertDialogAction
-              className={cn(buttonVariants({ variant: "destructive" }))}
-              onClick={() => {
-                if (itemToRemove) {
-                  removeFavouriteMutation.mutate(itemToRemove);
-                }
-              }}
-            >
-              {removeFavouriteMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                t("confirm")
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title={t("are_you_sure_want_to_clear_favourite", {
+          name: itemToRemove?.display,
+        })}
+        description=""
+        confirmText={t("confirm")}
+        cancelText={t("cancel")}
+        variant="destructive"
+        disabled={removeFavouriteMutation.isPending}
+        onConfirm={() => {
+          if (itemToRemove) {
+            removeFavouriteMutation.mutate(itemToRemove);
+          }
+        }}
+      />
 
       {/* Bulk Clear Confirmation */}
-      <AlertDialog
+      <ConfirmActionDialog
         open={showBulkClearConfirm && !itemToRemove}
         onOpenChange={(open) => {
           if (!open) {
             setShowBulkClearConfirm(false);
           }
         }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {t("are_you_sure_clear_starred")}
-            </AlertDialogTitle>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowBulkClearConfirm(false)}>
-              {t("cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className={cn(buttonVariants({ variant: "destructive" }))}
-              onClick={() => {
-                clearFavouritesMutation.mutate({});
-              }}
-            >
-              {clearFavouritesMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                t("confirm")
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title={t("are_you_sure_clear_starred")}
+        description=""
+        confirmText={t("confirm")}
+        cancelText={t("cancel")}
+        variant="destructive"
+        disabled={clearFavouritesMutation.isPending}
+        onConfirm={() => {
+          clearFavouritesMutation.mutate({});
+        }}
+      />
     </Command>
   );
 }
