@@ -83,7 +83,12 @@ export const BLOOD_GROUPS = BLOOD_GROUP_CHOICES.map((bg) => bg.id) as [
 export default function PatientRegistration(
   props: PatientRegistrationPageProps,
 ) {
-  const { enableMinimalPatientRegistration } = careConfig;
+  const {
+    patientRegistration: {
+      minGeoOrganizationLevelsRequired,
+      minimalPatientRegistration,
+    },
+  } = careConfig;
   const [{ phone_number }] = useQueryParams();
   const { patientId, facilityId } = props;
   const { t } = useTranslation();
@@ -124,7 +129,7 @@ export default function PatientRegistration(
             .min(1, t("age_must_be_positive"))
             .max(120, t("age_must_be_below_120"))
             .optional(),
-          address: enableMinimalPatientRegistration
+          address: minimalPatientRegistration
             ? z.string().trim().optional()
             : z.string().trim().nonempty(t("address_is_required")),
           same_address: z.boolean(),
@@ -134,8 +139,10 @@ export default function PatientRegistration(
             : validators().pincode,
           nationality: z.string().nonempty(t("nationality_is_required")),
           geo_organization: z.string().uuid({
-            message: enableMinimalPatientRegistration
-              ? t("minimal_patient_registration_geo_organization_required")
+            message: minGeoOrganizationLevelsRequired
+              ? t("govt_organization_required_depth_validation", {
+                  depth: minGeoOrganizationLevelsRequired,
+                })
               : t("geo_organization_is_required"),
           }),
           _selected_levels: z.array(z.custom<Organization>()),
@@ -840,9 +847,7 @@ export default function PatientRegistration(
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel
-                      aria-required={!enableMinimalPatientRegistration}
-                    >
+                    <FormLabel aria-required={!minimalPatientRegistration}>
                       {t("current_address")}
                     </FormLabel>
                     <FormControl>
@@ -901,9 +906,7 @@ export default function PatientRegistration(
                 disabled={form.watch("same_address")}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel
-                      aria-required={!enableMinimalPatientRegistration}
-                    >
+                    <FormLabel aria-required={!minimalPatientRegistration}>
                       {t("permanent_address")}
                     </FormLabel>
                     <FormControl>
@@ -919,9 +922,7 @@ export default function PatientRegistration(
                 name="pincode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel
-                      aria-required={!enableMinimalPatientRegistration}
-                    >
+                    <FormLabel aria-required={!minimalPatientRegistration}>
                       {t("pincode")}
                     </FormLabel>
                     <FormControl>
@@ -983,7 +984,8 @@ export default function PatientRegistration(
                         <FormControl>
                           <GovtOrganizationSelector
                             {...field}
-                            required={!enableMinimalPatientRegistration}
+                            required={minGeoOrganizationLevelsRequired == null}
+                            requiredDepth={minGeoOrganizationLevelsRequired}
                             selected={form.watch("_selected_levels")}
                             value={form.watch("geo_organization")}
                             onChange={(value) =>

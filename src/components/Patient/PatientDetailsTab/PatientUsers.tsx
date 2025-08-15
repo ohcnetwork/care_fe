@@ -21,13 +21,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -38,6 +31,7 @@ import {
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { RoleSelect } from "@/components/Common/RoleSelect";
 import UserSelector from "@/components/Common/UserSelector";
 
 import { getPermissions } from "@/common/Permissions";
@@ -47,7 +41,7 @@ import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import patientApi from "@/types/emr/patient/patientApi";
-import roleApi from "@/types/emr/role/roleApi";
+import { RoleBase } from "@/types/emr/role/role";
 import { UserReadMinimal } from "@/types/user/user";
 
 import { PatientProps } from ".";
@@ -61,13 +55,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserReadMinimal>();
-  const [selectedRole, setSelectedRole] = useState<string>("");
-
-  const { data: roles } = useQuery({
-    queryKey: ["roles"],
-    queryFn: query(roleApi.listRoles),
-    enabled: open,
-  });
+  const [selectedRole, setSelectedRole] = useState<RoleBase>();
 
   const { mutate: assignUser } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
@@ -82,7 +70,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
       toast.success("User added to patient successfully");
       setOpen(false);
       setSelectedUser(undefined);
-      setSelectedRole("");
+      setSelectedRole(undefined);
     },
     onError: (error) => {
       const errorData = error.cause as { errors: { msg: string }[] };
@@ -100,13 +88,13 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 
     assignUser({
       user: selectedUser.id,
-      role: selectedRole,
+      role: selectedRole.id,
     });
   };
 
   const handleUserChange = (user: UserReadMinimal) => {
     setSelectedUser(user);
-    setSelectedRole("");
+    setSelectedRole(undefined);
   };
 
   return (
@@ -184,25 +172,9 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                 <label className="text-sm font-medium">
                   {t("select_role")}
                 </label>
-                <Select value={selectedRole} onValueChange={setSelectedRole}>
-                  <SelectTrigger data-cy="patient-user-role-select">
-                    <SelectValue placeholder={t("select_role")} />
-                  </SelectTrigger>
-                  <SelectContent className="w-[var(--radix-select-trigger-width)]">
-                    {roles?.results?.map((role) => (
-                      <SelectItem key={role.id} value={role.id}>
-                        <div className="flex flex-col items-start">
-                          <span>{role.name}</span>
-                          {role.description && (
-                            <span className="text-xs text-gray-500">
-                              {role.description}
-                            </span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div>
+                  <RoleSelect value={selectedRole} onChange={setSelectedRole} />
+                </div>
               </div>
 
               <Button

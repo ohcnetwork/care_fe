@@ -9,13 +9,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -25,12 +18,13 @@ import {
 } from "@/components/ui/sheet";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { RoleSelect } from "@/components/Common/RoleSelect";
 import UserSelector from "@/components/Common/UserSelector";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import roleApi from "@/types/emr/role/roleApi";
+import { RoleBase } from "@/types/emr/role/role";
 import organizationApi from "@/types/organization/organizationApi";
 import { UserReadMinimal } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
@@ -51,7 +45,7 @@ export default function LinkUserSheet({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedUser, setSelectedUser] = useState<UserReadMinimal>();
-  const [selectedRole, setSelectedRole] = useState<string>("");
+  const [selectedRole, setSelectedRole] = useState<RoleBase>();
 
   const { data: preSelectedUser } = useQuery({
     queryKey: ["user", preSelectedUsername],
@@ -67,12 +61,6 @@ export default function LinkUserSheet({
     }
   }, [preSelectedUser]);
 
-  const { data: roles } = useQuery({
-    queryKey: ["roles"],
-    queryFn: query(roleApi.listRoles),
-    enabled: open,
-  });
-
   const { mutate: assignUser } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
       mutate(organizationApi.assignUser, {
@@ -86,7 +74,7 @@ export default function LinkUserSheet({
       toast.success("User added to organization successfully");
       setOpen(false);
       setSelectedUser(undefined);
-      setSelectedRole("");
+      setSelectedRole(undefined);
     },
     onError: (error) => {
       const errorData = error.cause as { errors: { msg: string }[] };
@@ -104,13 +92,13 @@ export default function LinkUserSheet({
 
     assignUser({
       user: selectedUser.id,
-      role: selectedRole,
+      role: selectedRole.id,
     });
   };
 
   const handleUserChange = (value: UserReadMinimal) => {
     setSelectedUser(value);
-    setSelectedRole("");
+    setSelectedRole(undefined);
   };
 
   return (
@@ -186,28 +174,9 @@ export default function LinkUserSheet({
                 <Label className="text-sm font-medium">
                   {t("select_role")}
                 </Label>
-                <Select value={selectedRole} onValueChange={setSelectedRole}>
-                  <SelectTrigger
-                    className="h-12"
-                    data-cy="select-role-dropdown"
-                  >
-                    <SelectValue placeholder={t("select_role")} />
-                  </SelectTrigger>
-                  <SelectContent className="w-[var(--radix-select-trigger-width)]">
-                    {roles?.results?.map((role) => (
-                      <SelectItem key={role.id} value={role.id}>
-                        <div className="flex flex-col text-left">
-                          <span>{role.name}</span>
-                          {role.description && (
-                            <span className="text-xs text-gray-500">
-                              {role.description}
-                            </span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div>
+                  <RoleSelect value={selectedRole} onChange={setSelectedRole} />
+                </div>
               </div>
               <Button
                 className="w-full"
