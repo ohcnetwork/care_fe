@@ -134,7 +134,7 @@ export default function PatientRegistration(
             : z.string().trim().nonempty(t("address_is_required")),
           same_address: z.boolean(),
           permanent_address: z.string().trim().optional(),
-          pincode: enableMinimalPatientRegistration
+          pincode: minimalPatientRegistration
             ? validators().pincode.optional()
             : validators().pincode,
           nationality: z.string().nonempty(t("nationality_is_required")),
@@ -204,7 +204,7 @@ export default function PatientRegistration(
               }
             }
           }
-          if (!enableMinimalPatientRegistration && !data.same_address) {
+          if (!minimalPatientRegistration && !data.same_address) {
             if (
               !data.permanent_address ||
               data.permanent_address.trim() === ""
