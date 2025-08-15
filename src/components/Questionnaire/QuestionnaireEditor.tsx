@@ -219,7 +219,11 @@ function findFirstErrorPath(errors: any, path: number[] = []): number[] | null {
 
     if (current && typeof current === "object") {
       const hasOwnErrors = Object.entries(current).some(([key, value]) => {
-        return key !== "questions" && value !== undefined;
+        // Ignore nested question arrays (they will be traversed separately)
+        if (key === "questions" && Array.isArray(value)) return false;
+
+        // Any defined value (including objects holding a "message") indicates an error on the current node
+        return value !== undefined;
       });
 
       if (hasOwnErrors) {
@@ -652,7 +656,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     const hasOrganizations = validateOrganizations();
     const hasValidStructuredType = validateStructuredType();
 
-    const validateQuestions = (questions: any[], path = "questions") => {
+    const validateQuestions = (questions: Question[], path = "questions") => {
       questions.forEach((question, idx) => {
         const currentPath = `${path}.${idx}`;
 
@@ -666,6 +670,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
         if (question.type === "group" && Array.isArray(question.questions)) {
           validateQuestions(question.questions, `${currentPath}.questions`);
+          if (question.questions.length === 0) {
+            form.setError(`${currentPath}.questions`, {
+              type: "manual",
+              message: t("group_must_have_sub_questions"),
+            });
+            isValid = false;
+          }
         }
       });
     };
@@ -679,7 +690,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           if (fieldName !== "questions") {
             const el = document.querySelector(`[name="${fieldName}"]`);
             if (el) {
-              el.scrollIntoView({ behavior: "smooth", block: "center" });
+              el.scrollIntoView();
               break;
             }
           } else {
@@ -708,10 +719,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   errorQuestion?.link_id &&
                   questionRefs.current[errorQuestion.link_id]
                 ) {
-                  questionRefs.current[errorQuestion.link_id]?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                  });
+                  questionRefs.current[errorQuestion.link_id]?.scrollIntoView();
                 }
               }, 200);
             }
@@ -1197,7 +1205,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               depth={0}
                               onMoveUp={() => {
                                 if (index > 0) {
-                                  const newQuestions = swapElements<Question>(
+                                  const newQuestions = swapElements(
                                     rootQuestions,
                                     index,
                                     index - 1,
@@ -1207,7 +1215,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               }}
                               onMoveDown={() => {
                                 if (index < rootQuestions.length - 1) {
-                                  const newQuestions = swapElements<Question>(
+                                  const newQuestions = swapElements(
                                     rootQuestions,
                                     index,
                                     index + 1,
@@ -1251,16 +1259,16 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                         </Button>
                       </div>
                     ) : (
-                      <div
-                        className="cursor-pointer"
-                        onClick={handleAddQuestion}
-                      >
-                        <EmptyState
-                          icon="l-question"
-                          title={t("no_questions_yet")}
-                          description={t("click_to_add_first_question")}
-                        />
-                      </div>
+                      <EmptyState
+                        icon="l-plus"
+                        title={t("no_questions_yet")}
+                        description={t("click_to_add_first_question")}
+                        action={
+                          <Button variant="outline" onClick={handleAddQuestion}>
+                            {t("add_question")}
+                          </Button>
+                        }
+                      />
                     )}
                   </div>
                 </form>
@@ -2008,6 +2016,18 @@ function QuestionEditor({
                     } else {
                       updateField("type", val, {
                         repeats: false,
+                        questions:
+                          (question.questions?.length ?? 0) > 0
+                            ? question.questions
+                            : [
+                                {
+                                  id: crypto.randomUUID(),
+                                  link_id: `Q-${Date.now()}`,
+                                  text: "New Sub-Question",
+                                  type: "string",
+                                  questions: [],
+                                },
+                              ],
                       });
                     }
                   }}
@@ -2684,6 +2704,11 @@ function QuestionEditor({
                   {t("add_sub_question")}
                 </Button>
               </div>
+              <FormField
+                control={form.control}
+                name={`${name}.questions`}
+                render={() => <FormMessage />}
+              />
               <div className="space-y-4">
                 {(questions || []).map((subQuestion, idx) => (
                   <div

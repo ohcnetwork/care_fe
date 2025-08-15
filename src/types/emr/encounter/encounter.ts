@@ -20,10 +20,10 @@ import { Badge } from "@/components/ui/badge";
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
-import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationAssociationStatus } from "@/types/location/association";
 import { LocationList } from "@/types/location/location";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export const ENCOUNTER_ADMIT_SOURCE = [
   "hosp_trans",
@@ -231,13 +231,13 @@ export interface EncounterRead
     id: string;
     name: string;
   };
-  created_by: UserBase;
-  updated_by: UserBase;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
   created_date: string;
   modified_date: string;
   encounter_class_history: EncounterClassHistory;
   status_history: StatusHistory;
-  organizations: FacilityOrganization[];
+  organizations: FacilityOrganizationRead[];
   current_location: LocationList;
   location_history: LocationHistory[];
   permissions: string[];
