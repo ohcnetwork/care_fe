@@ -52,7 +52,7 @@ export const SummaryPanelEncounterDetails = () => {
   const EncounterClassIcon = ENCOUNTER_CLASS_ICONS[encounter.encounter_class];
   return (
     <div className="flex flex-col gap-2">
-      <div className="hidden @xs:flex flex-col sm:flex-row p-3 bg-white -mt-1 rounded-lg gap-4 shadow">
+      <div className="xl:hidden flex flex-col sm:flex-row p-3 bg-white -mt-1 rounded-lg gap-4 shadow">
         <div className="flex flex-col gap-4 sm:border-r border-gray-200 pr-4">
           <div className="flex flex-row gap-8">
             <div className="flex flex-col gap-4">
@@ -162,26 +162,23 @@ export const SummaryPanelEncounterDetails = () => {
                   )}
                 </div>
               </div>
-
-              <div>
-                <span className="text-sm font-medium text-gray-700">
-                  {t("hospitalisation")}:
-                </span>
+              {encounter.hospitalization?.re_admission && (
                 <div>
-                  <Badge variant="blue">
-                    {encounter.hospitalization?.re_admission
-                      ? t("re_admission")
-                      : t("new_admission")}
-                  </Badge>
+                  <span className="text-sm font-medium text-gray-700">
+                    {t("hospitalisation")}:
+                  </span>
+                  <div>
+                    <Badge variant="blue">{t("re_admission")}</Badge>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
           <OverviewSidebarSheet
             trigger={
               <Button
                 variant="outline"
-                className="hidden @md:flex flex-row w-full text-gray-950"
+                className="hidden sm:flex flex-row w-full text-gray-950"
               >
                 <SquarePen className="size-3 text-gray-950" strokeWidth={1.5} />
                 <span className="font-semibold">{t("update_details")}</span>
