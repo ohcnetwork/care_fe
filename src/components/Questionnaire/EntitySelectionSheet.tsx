@@ -164,13 +164,20 @@ export function EntitySelectionSheet({
             if (!target) return;
 
             // Prevent sheet close if click is inside dropdown menu
-            if (target.closest('[data-slot="select-content"]')) {
+            if (
+              target.closest('[data-slot="select-content"]') ||
+              target.closest('[data-slot="sheet-overlay"]')
+            ) {
               event.preventDefault();
               return;
             }
 
             const sheetContent = document.getElementById("sheet-content");
-            if (sheetContent && sheetContent.contains(target)) {
+            const sheetOverlay = document.getElementById("sheet-overlay");
+            if (
+              (sheetContent && sheetContent.contains(target)) ||
+              (sheetOverlay && sheetOverlay.contains(target))
+            ) {
               event.preventDefault();
               return;
             }
