@@ -565,14 +565,26 @@ const NewAvailabilityCard = ({
       end_time: z.string().min(1, t("field_required")) as z.ZodType<
         Time | undefined
       >,
-      slot_size_in_minutes: z.number().min(1, t("field_required")),
-      tokens_per_slot: z.number().min(1, t("field_required")),
+      slot_size_in_minutes: z
+        .number({
+          required_error: t("field_required"),
+        })
+        .min(1, t("number_min_error", { min: 0 })),
+      tokens_per_slot: z
+        .number({
+          required_error: t("field_required"),
+        })
+        .min(1, t("number_min_error", { min: 0 })),
       reason: z.string().trim(),
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek>)
         .min(1, t("schedule_weekdays_min_error")),
       is_auto_fill: z.boolean().optional(),
-      num_of_slots: z.number().min(1, t("number_min_error", { min: 0 })),
+      num_of_slots: z
+        .number({
+          required_error: t("field_required"),
+        })
+        .min(1, t("number_min_error", { min: 0 })),
     })
     .refine(
       (data) => {
@@ -847,9 +859,8 @@ const NewAvailabilityCard = ({
                                 {...field}
                                 className="shadow-none"
                                 onChange={(e) => {
-                                  const value = e.target.value;
                                   field.onChange(
-                                    value === ""
+                                    e.target.value === ""
                                       ? undefined
                                       : e.target.valueAsNumber,
                                   );
@@ -883,9 +894,13 @@ const NewAvailabilityCard = ({
                           placeholder="e.g. 10"
                           {...field}
                           value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(e.target.valueAsNumber)
-                          }
+                          onChange={(e) => {
+                            field.onChange(
+                              e.target.value === ""
+                                ? undefined
+                                : e.target.valueAsNumber,
+                            );
+                          }}
                           disabled={form.watch("is_auto_fill")}
                         />
                       </FormControl>
@@ -911,9 +926,13 @@ const NewAvailabilityCard = ({
                           placeholder="e.g. 1"
                           {...field}
                           value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(e.target.valueAsNumber)
-                          }
+                          onChange={(e) => {
+                            field.onChange(
+                              e.target.value === ""
+                                ? undefined
+                                : e.target.valueAsNumber,
+                            );
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
