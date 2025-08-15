@@ -154,7 +154,7 @@ export function EntitySelectionSheet({
       )}
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
-          style={{ pointerEvents: "auto" }}
+          // style={{ pointerEvents: "auto" }}
           className="px-0 pt-2 pb-0 rounded-t-3xl sm:max-w-md sm:mx-auto [&>button:first-child]:hidden"
           side="bottom"
           onInteractOutside={(event) => {
@@ -162,26 +162,18 @@ export function EntitySelectionSheet({
               event.target) as Element | null;
             if (!target) return;
 
-            const selectContent = document.querySelector(
+            const openSelect = document.querySelector(
               '[data-slot="select-content"]',
             );
-            const datePickerPopup = document.querySelector(
-              '[data-slot="datepicker-popup"]',
-            );
 
-            if (selectContent || datePickerPopup) {
+            if (openSelect) {
               event.preventDefault();
-              if (selectContent) {
+
+              if (openSelect) {
                 const trigger = document.querySelector(
                   '[data-slot="select-trigger"]',
                 ) as HTMLElement | null;
-                trigger?.click(); // closes select
-              }
-              if (datePickerPopup) {
-                const trigger = document.querySelector(
-                  '[data-slot="datepicker-trigger"]',
-                ) as HTMLElement | null;
-                trigger?.click(); // closes date picker
+                trigger?.click();
               }
               return;
             }
@@ -189,6 +181,7 @@ export function EntitySelectionSheet({
             const sheetContent = document.getElementById("sheet-content");
             if (sheetContent && sheetContent.contains(target)) {
               event.preventDefault();
+              return;
             }
           }}
         >
