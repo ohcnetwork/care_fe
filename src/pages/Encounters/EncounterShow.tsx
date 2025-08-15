@@ -122,7 +122,7 @@ export const EncounterShow = (props: Props) => {
   return (
     <Page title={t("encounter")} className="block" hideTitleOnPage>
       <EncounterHeader />
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-2 mt-4 h-[calc(100vh-10rem)]">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-2 mt-4 sm:h-[calc(100vh-10rem)]">
         <EncounterHistorySelector />
         <div className="w-full overflow-x-auto">
           <div className="w-full border-b-2 border-secondary-200 ">
@@ -155,7 +155,7 @@ export const EncounterShow = (props: Props) => {
               </div>
             </div>
           </div>
-          <div className="mt-4 h-[calc(100vh-14rem)] overflow-y-auto">
+          <div className="mt-4 sm:h-[calc(100vh-14rem)] sm:overflow-y-auto">
             <PageHeadTitle title={t(`ENCOUNTER_TAB__${props.tab}`)} />
             {CareTab && <CareTab />}
             {PluginTab &&

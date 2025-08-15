@@ -145,6 +145,14 @@ export const getMapUrl = (latitude: string, longitude: string) => {
         .replace("{long}", longitude);
 };
 
+export const isValidLatitude = (latitude: number) => {
+  return Number.isFinite(latitude) && latitude >= -90 && latitude <= 90;
+};
+
+export const isValidLongitude = (longitude: number) => {
+  return Number.isFinite(longitude) && longitude >= -180 && longitude <= 180;
+};
+
 const getRelativeDateSuffix = (abbreviated: boolean) => {
   return {
     day: abbreviated ? "d" : "days",

@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -27,9 +26,9 @@ import {
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import batchApi from "@/types/base/batch/batchApi";
 import {
   EncounterRead,
   LocationHistory,
@@ -436,7 +435,7 @@ export function LocationSheet({
         reference_id: "completeCurrentLocation",
         body: {
           encounter: encounter.id,
-          end_datetime: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss"),
+          end_datetime: new Date().toISOString(),
           status: "completed",
           start_datetime: activeLocation.start_datetime,
         },
@@ -450,7 +449,7 @@ export function LocationSheet({
         reference_id: "updatePlannedLocation",
         body: {
           encounter: encounter.id,
-          start_datetime: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss"),
+          start_datetime: new Date().toISOString(),
           status: "active" as LocationAssociationStatus,
           end_datetime: null,
         },
@@ -462,15 +461,9 @@ export function LocationSheet({
         reference_id: "createLocationAssociation",
         body: {
           encounter: encounter.id,
-          start_datetime: format(
-            sheetState.timeConfig.start,
-            "yyyy-MM-dd'T'HH:mm:ss",
-          ),
+          start_datetime: new Date(sheetState.timeConfig.start).toISOString(),
           ...(sheetState.timeConfig.end && {
-            end_datetime: format(
-              sheetState.timeConfig.end,
-              "yyyy-MM-dd'T'HH:mm:ss",
-            ),
+            end_datetime: new Date(sheetState.timeConfig.end).toISOString(),
           }),
           status: sheetState.timeConfig.status,
         },
@@ -502,12 +495,12 @@ export function LocationSheet({
     reference_id: "updateLocation",
     body: {
       encounter: encounter.id,
-      start_datetime: format(config.start, "yyyy-MM-dd'T'HH:mm:ss"),
+      start_datetime: new Date(config.start).toISOString(),
       ...(config.status === "active"
         ? { end_datetime: null }
         : config.end
           ? {
-              end_datetime: format(config.end, "yyyy-MM-dd'T'HH:mm:ss"),
+              end_datetime: new Date(config.end).toISOString(),
             }
           : {}),
       status: config.status,
@@ -562,12 +555,9 @@ export function LocationSheet({
       ? {
           id: selectedBedDetails.id,
           location: selectedBedDetails,
-          start_datetime: format(
-            sheetState.timeConfig.start,
-            "yyyy-MM-dd'T'HH:mm:ss",
-          ),
+          start_datetime: new Date(sheetState.timeConfig.start).toISOString(),
           end_datetime: sheetState.timeConfig.end
-            ? format(sheetState.timeConfig.end, "yyyy-MM-dd'T'HH:mm:ss")
+            ? new Date(sheetState.timeConfig.end).toISOString()
             : undefined,
           status: sheetState.timeConfig.status,
         }
@@ -751,7 +741,7 @@ export function LocationSheet({
   };
 
   const { mutate: executeBatch, isPending } = useMutation({
-    mutationFn: mutate(routes.batchRequest, { silent: true }),
+    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       toast.success(t("bed_assigned_successfully"));
       resetStates();

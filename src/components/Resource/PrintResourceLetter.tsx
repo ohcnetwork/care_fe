@@ -90,7 +90,7 @@ export default function PrintResourceLetter({ id }: { id: string }) {
             <div className="mb-4">
               <span className="font-semibold">{t("current_status")}: </span>
               <span className="rounded bg-gray-100 px-2 py-1">
-                {data.status}
+                {t(`resource_status__${data.status}`)}
               </span>
             </div>
           </div>
@@ -107,12 +107,11 @@ export default function PrintResourceLetter({ id }: { id: string }) {
               </div>
             </div>
 
-            {data.status !== "PENDING" && (
+            {["approved", "rejected"].includes(data.status) && (
               <div>
                 <div className="mb-20">
                   <div className="font-semibold">
-                    {data.status === "REJECTED" ? t("rejected") : t("approved")}{" "}
-                    {t("by")}:
+                    {t(`resource_status__${data.status}`)} {t("by")}:
                   </div>
                   <div>{formatName(data.updated_by)}</div>
                   <div className="text-sm text-gray-600">
