@@ -114,7 +114,9 @@ export default function ProductView({ facilityId, productId }: Props) {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Product ID: {product.id}</h1>
+            <h1 className="text-2xl font-bold">
+              {t("product_id")}: {product.id}
+            </h1>
             <div className="mt-2">
               <Badge variant={PRODUCT_STATUS_COLORS[product.status]}>
                 {t(product.status)}
