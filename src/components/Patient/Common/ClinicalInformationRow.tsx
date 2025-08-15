@@ -71,7 +71,7 @@ export default function ClinicalInformationRow({
             {note && (
               <DropdownMenuItem
                 onClick={() => setShowNote(!showNote)}
-                className="flex items-center gap-2 px-3 py-2 font-semibold"
+                className="flex items-center gap-2 px-3 py-2 font-semibold hover:cursor-pointer"
               >
                 <File className="size-4" />
                 <span>{showNote ? t("hide_note") : t("see_note")}</span>
@@ -81,14 +81,17 @@ export default function ClinicalInformationRow({
             {!!onViewEncounter && (
               <DropdownMenuItem
                 onClick={onViewEncounter}
-                className="flex items-center gap-2 px-3 py-2 font-semibold"
+                className="flex items-center gap-2 px-3 py-2 font-semibold hover:cursor-pointer"
               >
                 <ExternalLink className="size-4" />
                 <span>{t("go_to_encounter")}</span>
               </DropdownMenuItem>
             )}
 
-            <div className="my-2 border-t border-dashed border-gray-300" />
+            {!!onViewEncounter ||
+              (note && (
+                <div className="my-2 border-t border-dashed border-gray-300" />
+              ))}
 
             <div className="p-1 text-sm">
               <div className="text-gray-500">{t("reported_by")}:</div>

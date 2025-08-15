@@ -170,14 +170,16 @@ export const DiagnosisTable = ({
         <DiagnosisCard
           key={diagnosis.id}
           diagnosis={diagnosis}
-          {...(showViewEncounter && {
-            onViewEncounter: () =>
-              navigate(
-                facilityId
-                  ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
-                  : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
-              ),
-          })}
+          onViewEncounter={
+            showViewEncounter
+              ? () =>
+                  navigate(
+                    facilityId
+                      ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
+                      : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
+                  )
+              : undefined
+          }
         />
       ))}
     </div>
@@ -206,14 +208,16 @@ export const DiagnosisTable = ({
               key={diagnosis.id}
               note={diagnosis.note}
               createdBy={diagnosis.created_by}
-              {...(showViewEncounter && {
-                onViewEncounter: () =>
-                  navigate(
-                    facilityId
-                      ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
-                      : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
-                  ),
-              })}
+              onViewEncounter={
+                showViewEncounter
+                  ? () =>
+                      navigate(
+                        facilityId
+                          ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
+                          : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
+                      )
+                  : undefined
+              }
               columns={[
                 {
                   key: "display",

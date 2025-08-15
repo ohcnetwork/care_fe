@@ -168,14 +168,16 @@ export const AllergyTable = ({
           <AllergyCard
             key={allergy.id}
             allergy={allergy}
-            {...(showViewEncounter && {
-              onViewEncounter: () =>
-                navigate(
-                  facilityId
-                    ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
-                    : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
-                ),
-            })}
+            onViewEncounter={
+              showViewEncounter
+                ? () =>
+                    navigate(
+                      facilityId
+                        ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
+                        : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
+                    )
+                : undefined
+            }
           />
         );
       })}
@@ -204,14 +206,16 @@ export const AllergyTable = ({
           {allergies.map((allergy) => (
             <ClinicalInformationRow
               key={allergy.id}
-              {...(showViewEncounter && {
-                onViewEncounter: () =>
-                  navigate(
-                    facilityId
-                      ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
-                      : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
-                  ),
-              })}
+              onViewEncounter={
+                showViewEncounter
+                  ? () =>
+                      navigate(
+                        facilityId
+                          ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
+                          : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
+                      )
+                  : undefined
+              }
               note={allergy.note}
               createdBy={allergy.created_by}
               columns={[
