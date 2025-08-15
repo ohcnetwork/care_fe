@@ -113,7 +113,7 @@ export function PaymentReconciliationShow({
               {t("payment")}
             </h1>
             <span className="text-sm text-gray-500">#{payment.id}</span>
-            <div className="grid grid-cols-2 gap-2 mt-1 w-full sm:flex sm:flex-wrap">
+            <div className="grid grid-cols-2 gap-2 mt-1 w-full md:grid-cols-4">
               <Badge
                 variant={PAYMENT_RECONCILIATION_STATUS_COLORS[payment.status]}
               >
