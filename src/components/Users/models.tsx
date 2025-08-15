@@ -1,6 +1,7 @@
-import { Gender, UserType } from "@/components/Users/UserFormValidations";
+import { Gender } from "@/components/Users/UserFormValidations";
 
 import { Organization } from "@/types/organization/organization";
+import { UserType } from "@/types/user/user";
 
 export type UpdatePasswordForm = {
   old_password: string;
