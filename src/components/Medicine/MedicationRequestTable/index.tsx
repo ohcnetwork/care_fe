@@ -71,8 +71,6 @@ export default function MedicationRequestTable() {
     currentEncounterId,
   } = useEncounter();
 
-
-
   const [searchQuery, setSearchQuery] = useState("");
   const [showStopped, setShowStopped] = useState(false);
   const canAccess = canViewClinicalData || canViewEncounter;
@@ -80,10 +78,8 @@ export default function MedicationRequestTable() {
   // 🔍 DEBUGGING: Check URL path matching
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;
- 
 
   const { facilityId } = useCurrentFacility();
-
 
   const canWrite =
     !!encounter &&

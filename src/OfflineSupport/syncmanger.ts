@@ -261,12 +261,8 @@ export class SyncManager {
       queryParams: write.mutationQueryParams,
     });
 
-    try {
-      const response = await runMutation(write.payload);
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    const response = await runMutation(write.payload);
+    return response;
   }
 
   private async checkBlockedParents(parentId: string): Promise<boolean> {

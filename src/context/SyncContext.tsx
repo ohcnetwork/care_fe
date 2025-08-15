@@ -23,7 +23,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
 
     setSyncInProgress(true);
     try {
-      const result = await syncOfflineRecords(
+      await syncOfflineRecords(
         userId,
         (syncedCount, totalCount) => {
           setSyncedCount(syncedCount);
@@ -37,7 +37,6 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
         () => {},
         facilityId,
       );
-
     } catch (error) {
       console.error("Sync failed:", error);
       setIsSyncing(false);

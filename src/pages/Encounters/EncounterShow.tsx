@@ -130,7 +130,6 @@ export const EncounterShow = (props: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCurrentEncounterLoading, isPatientLoading]);
 
-
   if (
     isCurrentEncounterLoading ||
     !currentEncounter ||

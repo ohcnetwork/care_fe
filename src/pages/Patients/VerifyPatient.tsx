@@ -129,8 +129,6 @@ export default function VerifyPatient() {
     enabled: !!patientData?.id && canListEncounters,
   });
 
-
-
   useEffect(() => {
     if (encounters && encounters.results.length >= 5) {
       setHasReachedEncounterLimitOffline(true);
