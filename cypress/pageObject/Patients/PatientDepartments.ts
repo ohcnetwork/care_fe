@@ -177,12 +177,12 @@ export class PatientDepartments {
   }
 
   selectRoleOfUser(role: string) {
-    cy.clickAndSelectOption('[data-cy="select-role-dropdown"]', role);
+    cy.typeAndSelectOption('button:contains("Select Role")', role, false);
     return this;
   }
 
   selectRoleOfUserInEdit(role: string) {
-    cy.clickAndSelectOption('[data-cy="select-updated-role"]', role);
+    cy.typeAndSelectOption('button:contains("Select Role")', role, false);
     return this;
   }
 
