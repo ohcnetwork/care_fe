@@ -8,8 +8,8 @@ import { formatPhoneNumberIntl } from "react-phone-number-input";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { Markdown } from "@/components/ui/markdown";
 
+import { ClickableAddress } from "@/components/Common/ClickableAddress";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
@@ -48,20 +48,6 @@ export const Demography = (props: PatientProps) => {
       section.scrollIntoView();
     }
   };
-
-  const renderClickableAddress = (address: string) => (
-    <div
-      className="[&_a]:text-sky-600 [&_a]:underline [&_a]:hover:text-sky-300 break-words overflow-wrap-anywhere"
-      onClick={(e) => {
-        if (e.target instanceof HTMLAnchorElement && e.target.href) {
-          e.preventDefault();
-          window.open(e.target.href, "_blank", "noopener,noreferrer");
-        }
-      }}
-    >
-      <Markdown content={address || ""} prose={false} />
-    </div>
-  );
 
   const handleEditClick = (sectionId: string) => {
     if (sectionId === "tags") {
@@ -217,11 +203,13 @@ export const Demography = (props: PatientProps) => {
         />,
         {
           label: t("current_address"),
-          value: renderClickableAddress(patientData.address || ""),
+          value: <ClickableAddress address={patientData.address || ""} />,
         },
         {
           label: t("permanent_address"),
-          value: renderClickableAddress(patientData.permanent_address || ""),
+          value: (
+            <ClickableAddress address={patientData.permanent_address || ""} />
+          ),
         },
         ...getGeoOrgDetails(patientData.geo_organization),
       ],

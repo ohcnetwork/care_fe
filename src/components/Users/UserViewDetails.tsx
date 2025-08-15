@@ -7,10 +7,10 @@ import {
   Organization,
   renderGeoOrganizations,
 } from "@/types/organization/organization";
-import { UserBase } from "@/types/user/user";
+import { UserRead } from "@/types/user/user";
 
 interface UserViewDetailsProps {
-  user: UserBase;
+  user: UserRead;
 }
 
 const LabelValue = ({

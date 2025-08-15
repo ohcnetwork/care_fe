@@ -84,7 +84,7 @@ const careConfig = {
      */
     defaultDateFilter: env.REACT_APPOINTMENTS_DEFAULT_DATE_FILTER
       ? parseInt(env.REACT_APPOINTMENTS_DEFAULT_DATE_FILTER)
-      : 7,
+      : 0,
 
     // Kill switch in-case the heatmap API doesn't scale as expected
     useAvailabilityStatsAPI: boolean(
@@ -92,11 +92,6 @@ const careConfig = {
       true,
     ),
   },
-
-  enableMinimalPatientRegistration: boolean(
-    "REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION",
-    false,
-  ),
 
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
@@ -141,6 +136,27 @@ const careConfig = {
   imageUploadMaxSizeInMB: env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB
     ? parseInt(env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB, 10)
     : 2,
+
+  patientRegistration: {
+    /**
+     * Minimum number of geo-organization levels the user must select
+     * during patient registration.
+     *
+     * If not set, all levels are required.
+     */
+    minGeoOrganizationLevelsRequired:
+      env.REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED
+        ? Math.max(
+            parseInt(env.REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED, 10),
+            1,
+          )
+        : undefined,
+
+    minimalPatientRegistration: boolean(
+      "REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION",
+      false,
+    ),
+  },
 } as const;
 
 export default careConfig;
