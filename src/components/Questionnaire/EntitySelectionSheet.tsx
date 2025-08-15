@@ -158,28 +158,37 @@ export function EntitySelectionSheet({
           className="px-0 pt-2 pb-0 rounded-t-3xl sm:max-w-md sm:mx-auto [&>button:first-child]:hidden"
           side="bottom"
           onInteractOutside={(event) => {
-            // Try to get the real click/tap target from Radix's originalEvent
             const target = (event.detail?.originalEvent?.target ??
               event.target) as Element | null;
             if (!target) return;
 
-            // Prevent sheet close if click is inside dropdown menu
-            if (
-              target.closest('[data-slot="select-content"]') ||
-              target.closest('[data-slot="sheet-overlay"]')
-            ) {
+            const selectContent = document.querySelector(
+              '[data-slot="select-content"]',
+            );
+            const datePickerPopup = document.querySelector(
+              '[data-slot="datepicker-popup"]',
+            );
+
+            if (selectContent || datePickerPopup) {
               event.preventDefault();
+              if (selectContent) {
+                const trigger = document.querySelector(
+                  '[data-slot="select-trigger"]',
+                ) as HTMLElement | null;
+                trigger?.click(); // closes select
+              }
+              if (datePickerPopup) {
+                const trigger = document.querySelector(
+                  '[data-slot="datepicker-trigger"]',
+                ) as HTMLElement | null;
+                trigger?.click(); // closes date picker
+              }
               return;
             }
 
             const sheetContent = document.getElementById("sheet-content");
-            const sheetOverlay = document.getElementById("sheet-overlay");
-            if (
-              (sheetContent && sheetContent.contains(target)) ||
-              (sheetOverlay && sheetOverlay.contains(target))
-            ) {
+            if (sheetContent && sheetContent.contains(target)) {
               event.preventDefault();
-              return;
             }
           }}
         >
