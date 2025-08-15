@@ -17,6 +17,8 @@
 import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -154,8 +156,9 @@ export function EntitySelectionSheet({
       )}
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
-          // style={{ pointerEvents: "auto" }}
-          className="px-0 pt-2 pb-0 rounded-t-3xl sm:max-w-md sm:mx-auto [&>button:first-child]:hidden"
+          className={cn(
+            "px-0 pt-2 pb-0 rounded-t-3xl sm:max-w-md sm:mx-auto [&>button:first-child]:hidden disabled:pointer-events-none",
+          )}
           side="bottom"
           onInteractOutside={(event) => {
             const target = (event.detail?.originalEvent?.target ??
