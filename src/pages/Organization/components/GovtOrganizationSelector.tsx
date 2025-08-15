@@ -14,6 +14,7 @@ interface GovtOrganizationSelectorProps {
   value?: string;
   onChange: (value: string) => void;
   required?: boolean;
+  requiredDepth?: number;
   authToken?: string;
   selected?: Organization[];
 
@@ -101,15 +102,26 @@ function OrganizationLevelSelect({
   );
 }
 
-export default function GovtOrganizationSelector(
-  props: GovtOrganizationSelectorProps,
-) {
-  const { onChange, required, selected, authToken } = props;
+export default function GovtOrganizationSelector({
+  onChange,
+  required,
+  selected,
+  authToken,
+  requiredDepth,
+  ...props
+}: GovtOrganizationSelectorProps) {
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
 
   useEffect(() => {
+    // Needs the child-most level to be selected to be valid
     if (required && selectedLevels[selectedLevels.length - 1]?.has_children) {
       onChange("");
+      return;
+    }
+
+    if (requiredDepth != null && selectedLevels.length < requiredDepth) {
+      onChange("");
+      return;
     }
   }, [selectedLevels]);
 
@@ -141,6 +153,11 @@ export default function GovtOrganizationSelector(
         return newLevels;
       });
       if (!required || (required && !organization.has_children)) {
+        onChange(organization.id);
+      } else if (
+        requiredDepth != null &&
+        selectedLevels.length >= requiredDepth
+      ) {
         onChange(organization.id);
       } else {
         onChange("");
