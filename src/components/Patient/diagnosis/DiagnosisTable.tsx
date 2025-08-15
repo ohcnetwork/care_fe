@@ -38,7 +38,7 @@ const DiagnosisCard = ({
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
   return (
-    <div className="border-1 shadow rounded-md p-4 bg-white">
+    <div className="border shadow rounded-md p-4 bg-white">
       <div className="flex justify-between items-start flex-wrap gap-3">
         <div className="flex-1 font-semibold text-gray-900 break-words">
           {diagnosis.code.display}
@@ -49,7 +49,6 @@ const DiagnosisCard = ({
             variant={
               DIAGNOSIS_CLINICAL_STATUS_COLORS[diagnosis.clinical_status]
             }
-            className="whitespace-nowrap"
           >
             {t(diagnosis.clinical_status)}
           </Badge>
@@ -111,7 +110,6 @@ const DiagnosisCard = ({
                 diagnosis.verification_status
               ]
             }
-            className="whitespace-nowrap"
           >
             {t(diagnosis.verification_status)}
           </Badge>
@@ -234,7 +232,6 @@ export const DiagnosisTable = ({
                           diagnosis.clinical_status
                         ]
                       }
-                      className="whitespace-nowrap"
                     >
                       {t(diagnosis.clinical_status)}
                     </Badge>
@@ -249,7 +246,6 @@ export const DiagnosisTable = ({
                           diagnosis.verification_status
                         ]
                       }
-                      className="whitespace-nowrap"
                     >
                       {t(diagnosis.verification_status)}
                     </Badge>

@@ -39,7 +39,7 @@ const SymptomCard = ({
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
   return (
-    <div className="border-1 shadow rounded-md p-4 bg-white">
+    <div className="border shadow rounded-md p-4 bg-white">
       <div className="flex justify-between items-start flex-wrap gap-3">
         <div className="flex-1 font-semibold text-gray-900 break-words">
           {symptom.code.display}
@@ -48,7 +48,6 @@ const SymptomCard = ({
         <div className="flex items-center gap-2">
           <Badge
             variant={SYMPTOM_CLINICAL_STATUS_COLORS[symptom.clinical_status]}
-            className="whitespace-nowrap"
           >
             {t(symptom.clinical_status)}
           </Badge>
@@ -101,24 +100,20 @@ const SymptomCard = ({
           </DropdownMenu>
         </div>
       </div>
-      <div className="mt-4 flex gap-8 flex-wrap">
+      <div className="mt-4 flex gap-5 flex-wrap">
         <div>
           <div className="text-sm text-gray-600 mb-1">{t("verification")}</div>
           <Badge
             variant={
               SYMPTOM_VERIFICATION_STATUS_COLORS[symptom.verification_status]
             }
-            className="whitespace-nowrap"
           >
             {t(symptom.verification_status)}
           </Badge>
         </div>
         <div>
           <div className="text-sm text-gray-600 mb-1">{t("severity")}</div>
-          <Badge
-            variant={SYMPTOM_SEVERITY_COLORS[symptom.severity]}
-            className="whitespace-nowrap"
-          >
+          <Badge variant={SYMPTOM_SEVERITY_COLORS[symptom.severity]}>
             {t(symptom.severity)}
           </Badge>
         </div>
@@ -236,10 +231,7 @@ export const SymptomTable = ({
                 {
                   key: "severity",
                   render: () => (
-                    <Badge
-                      variant={SYMPTOM_SEVERITY_COLORS[symptom.severity]}
-                      className="whitespace-nowrap"
-                    >
+                    <Badge variant={SYMPTOM_SEVERITY_COLORS[symptom.severity]}>
                       {t(symptom.severity)}
                     </Badge>
                   ),
@@ -251,7 +243,6 @@ export const SymptomTable = ({
                       variant={
                         SYMPTOM_CLINICAL_STATUS_COLORS[symptom.clinical_status]
                       }
-                      className="whitespace-nowrap"
                     >
                       {t(symptom.clinical_status)}
                     </Badge>
@@ -266,7 +257,6 @@ export const SymptomTable = ({
                           symptom.verification_status
                         ]
                       }
-                      className="whitespace-nowrap"
                     >
                       {t(symptom.verification_status)}
                     </Badge>

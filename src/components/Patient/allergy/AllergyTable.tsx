@@ -38,7 +38,7 @@ const AllergyCard = ({
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
   return (
-    <div className="border-1 shadow rounded-md p-4 bg-white">
+    <div className="border shadow rounded-md p-4 bg-white">
       <div className="flex justify-between items-start flex-wrap gap-2">
         <div className="flex-1 min-w-0">
           <div className="text-base font-semibold text-gray-900 break-words">
@@ -50,7 +50,6 @@ const AllergyCard = ({
         <div className="flex items-center gap-2">
           <Badge
             variant={ALLERGY_CLINICAL_STATUS_COLORS[allergy.clinical_status]}
-            className="whitespace-nowrap"
           >
             {t(allergy.clinical_status)}
           </Badge>
@@ -106,10 +105,7 @@ const AllergyCard = ({
       <div className="mt-4 flex gap-8 flex-wrap">
         <div>
           <div className="text-sm text-gray-600 mb-1">{t("criticality")}</div>
-          <Badge
-            variant={ALLERGY_CRITICALITY_COLORS[allergy.criticality]}
-            className="whitespace-nowrap"
-          >
+          <Badge variant={ALLERGY_CRITICALITY_COLORS[allergy.criticality]}>
             {t(allergy.criticality)}
           </Badge>
         </div>
@@ -119,7 +115,6 @@ const AllergyCard = ({
             variant={
               ALLERGY_VERIFICATION_STATUS_COLORS[allergy.verification_status]
             }
-            className="whitespace-nowrap"
           >
             {t(allergy.verification_status)}
           </Badge>
@@ -232,7 +227,6 @@ export const AllergyTable = ({
                       variant={
                         ALLERGY_CLINICAL_STATUS_COLORS[allergy.clinical_status]
                       }
-                      className="whitespace-nowrap"
                     >
                       {t(allergy.clinical_status)}
                     </Badge>
@@ -243,7 +237,6 @@ export const AllergyTable = ({
                   render: () => (
                     <Badge
                       variant={ALLERGY_CRITICALITY_COLORS[allergy.criticality]}
-                      className="whitespace-nowrap"
                     >
                       {t(allergy.criticality)}
                     </Badge>
@@ -258,7 +251,6 @@ export const AllergyTable = ({
                           allergy.verification_status
                         ]
                       }
-                      className="whitespace-nowrap"
                     >
                       {t(allergy.verification_status)}
                     </Badge>
