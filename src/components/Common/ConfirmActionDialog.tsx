@@ -26,7 +26,6 @@ interface ConfirmActionDialogProps {
   variant?: "primary" | "destructive" | "default" | "outline_primary";
   disabled?: boolean;
   hideCancel?: boolean;
-  onCancel?: () => void;
 }
 
 export default function ConfirmActionDialog({
@@ -40,7 +39,6 @@ export default function ConfirmActionDialog({
   variant = "primary",
   disabled,
   hideCancel,
-  onCancel,
 }: ConfirmActionDialogProps) {
   const { t } = useTranslation();
   return (
@@ -52,9 +50,7 @@ export default function ConfirmActionDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           {!hideCancel && (
-            <AlertDialogCancel onClick={onCancel}>
-              {cancelText || t("cancel")}
-            </AlertDialogCancel>
+            <AlertDialogCancel>{cancelText || t("cancel")}</AlertDialogCancel>
           )}
           <AlertDialogAction
             onClick={onConfirm}

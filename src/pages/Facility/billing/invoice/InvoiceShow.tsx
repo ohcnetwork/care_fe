@@ -21,18 +21,8 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertTitle } from "@/components/ui/alert";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -57,6 +47,7 @@ import {
 } from "@/components/ui/table";
 
 import AddChargeItemSheet from "@/components/Billing/Invoice/AddChargeItemSheet";
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -1007,31 +998,18 @@ export function InvoiceShow({
         accountId={invoice.account.id}
       />
 
-      <AlertDialog
+      <ConfirmActionDialog
         open={!!chargeItemToRemove}
         onOpenChange={(open) => !open && setChargeItemToRemove(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("remove_charge_item")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("remove_charge_item_confirmation")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-            <AlertDialogAction
-              className={cn(buttonVariants({ variant: "destructive" }))}
-              onClick={handleRemoveChargeItem}
-              disabled={isRemoving}
-            >
-              {isRemoving ? t("removing_with_dots") : t("remove")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title={t("remove_charge_item")}
+        description={t("remove_charge_item_confirmation")}
+        confirmText={isRemoving ? t("removing_with_dots") : t("remove")}
+        variant="destructive"
+        onConfirm={handleRemoveChargeItem}
+        disabled={isRemoving}
+      />
 
-      <AlertDialog
+      <ConfirmActionDialog
         open={reasonDialogOpen}
         onOpenChange={(open) => {
           setReasonDialogOpen(open);
@@ -1039,36 +1017,20 @@ export function InvoiceShow({
             setTimeout(() => setSelectedStatus(null), 150);
           }
         }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("confirm")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {selectedStatus === InvoiceStatus.balanced
-                ? t("are_you_sure_want_to_mark_as_balanced")
-                : selectedStatus === InvoiceStatus.entered_in_error
-                  ? t("are_you_sure_want_to_mark_as_error")
-                  : t("are_you_sure_want_to_cancel_invoice")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDialogSubmit}
-              className={cn(
-                buttonVariants({
-                  variant:
-                    selectedStatus === InvoiceStatus.balanced
-                      ? "primary"
-                      : "destructive",
-                }),
-              )}
-            >
-              {t("confirm")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title={t("confirm")}
+        description={
+          selectedStatus === InvoiceStatus.balanced
+            ? t("are_you_sure_want_to_mark_as_balanced")
+            : selectedStatus === InvoiceStatus.entered_in_error
+              ? t("are_you_sure_want_to_mark_as_error")
+              : t("are_you_sure_want_to_cancel_invoice")
+        }
+        confirmText={t("confirm")}
+        onConfirm={handleDialogSubmit}
+        variant={
+          selectedStatus === InvoiceStatus.balanced ? "primary" : "destructive"
+        }
+      />
 
       {sourceUrl && (
         <Alert className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-2xl w-full mx-auto shadow-lg rounded-lg p-0 bg-white border border-gray-200">

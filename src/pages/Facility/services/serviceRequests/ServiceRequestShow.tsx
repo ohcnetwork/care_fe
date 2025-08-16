@@ -7,17 +7,6 @@ import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -27,6 +16,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -102,6 +93,7 @@ export default function ServiceRequestShow({
     open: false,
     chargeItems: [],
   });
+  const [showMarkCompleteDialog, setShowMarkCompleteDialog] = useState(false);
 
   const { data: request, isLoading: isLoadingRequest } = useQuery({
     queryKey: ["serviceRequest", facilityId, serviceRequestId],
@@ -357,33 +349,15 @@ export default function ServiceRequestShow({
               {request?.diagnostic_reports?.[0]?.status ===
                 DiagnosticReportStatus.final && (
                 <div className="flex items-center gap-2">
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        disabled={request.status === Status.completed}
-                        className="font-semibold border border-gray-400"
-                      >
-                        {t("mark_as_complete")}
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          {t("confirm_completion")}
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          {t("service_request_completion_confirmation")}
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => markAsComplete()}>
-                          {t("confirm")}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  <Button
+                    variant="outline"
+                    disabled={request.status === Status.completed}
+                    className="font-semibold border border-gray-400"
+                    onClick={() => setShowMarkCompleteDialog(true)}
+                  >
+                    {t("mark_as_complete")}
+                  </Button>
+
                   <Button
                     variant="primary"
                     className="font-semibold"
@@ -395,6 +369,16 @@ export default function ServiceRequestShow({
                   >
                     {t("view_report")}
                   </Button>
+                  <ConfirmActionDialog
+                    open={showMarkCompleteDialog}
+                    onOpenChange={setShowMarkCompleteDialog}
+                    title={t("confirm_completion")}
+                    description={
+                      <>{t("service_request_completion_confirmation")}</>
+                    }
+                    confirmText={t("confirm")}
+                    onConfirm={() => markAsComplete()}
+                  />
                 </div>
               )}
 
