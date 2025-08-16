@@ -1,5 +1,8 @@
 {
-  "ignorePatterns": ["node_modules/**", "**/*.d.ts"],
+  "ignorePatterns": [
+    "node_modules/**",
+    "**/*.d.ts"
+  ],
   "ignoreUnimported": [
     "src/Locale/update_locale.js",
     "src/PluginRegistry.ts",
@@ -19,8 +22,18 @@
     "normalize-wheel"
   ],
   "ignoreUnresolved": [
-    ["./pluginMap", ["src/pluginTypes.ts"]],
-    ["@/supportedBrowsers", ["src/components/ErrorPages/BrowserWarning.tsx"]],
+    [
+      "./pluginMap",
+      [
+        "src/pluginTypes.ts"
+      ]
+    ],
+    [
+      "@/supportedBrowsers",
+      [
+        "src/components/ErrorPages/BrowserWarning.tsx"
+      ]
+    ],
     [
       "tailwindcss/colors",
       [
@@ -30,7 +43,9 @@
     ],
     [
       "tailwindcss/defaultTheme",
-      ["node_modules/@tailwindcss/forms/src/index.js"]
+      [
+        "node_modules/@tailwindcss/forms/src/index.js"
+      ]
     ],
     [
       "tailwindcss/plugin",
@@ -40,8 +55,18 @@
         "node_modules/@tailwindcss/container-queries/dist/index.js"
       ]
     ],
-    ["tsx/cjs", ["node_modules/find-cypress-specs/src/index.js"]],
-    ["virtual:pwa-register", ["src/index.tsx"]]
+    [
+      "tsx/cjs",
+      [
+        "node_modules/find-cypress-specs/src/index.js"
+      ]
+    ],
+    [
+      "virtual:pwa-register",
+      [
+        "src/index.tsx"
+      ]
+    ]
   ],
   "respectGitignore": true,
   "entry": [
