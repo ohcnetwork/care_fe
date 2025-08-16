@@ -225,7 +225,9 @@ export class PatientDepartments {
     return this;
   }
   clickConfirmRemove() {
-    cy.verifyAndClickElement('[data-cy="confirm-remove-user"]', "Remove");
+    cy.get('div[data-slot="alert-dialog-footer"] button')
+      .contains("Remove")
+      .click();
     return this;
   }
 
