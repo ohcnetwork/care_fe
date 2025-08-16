@@ -125,12 +125,16 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
 
   return (
     <div className="flex flex-col gap-2 max-w-4xl mx-auto">
-      <div className="ml-2 flex gap-3 items-center">
-        <DeviceTypeIcon
-          type={device.care_type}
-          className="size-5 mb-1 md:mb-3"
-        />
-        <PageTitle title={device.registered_name} className="break-all" />
+      <div className="ml-2 flex gap-3 items-start">
+        <div className="mt-2">
+          <DeviceTypeIcon type={device.care_type} className="size-5 " />
+        </div>
+        <div>
+          <PageTitle
+            title={device.registered_name}
+            className="text-lg font-semibold break-all"
+          />
+        </div>
       </div>
 
       <div className="flex flex-col gap-4 xl:gap-6" data-cy="device-details">
