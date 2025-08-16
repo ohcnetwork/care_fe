@@ -403,7 +403,7 @@ function ObservationDefinitionFormContent({
                     name="permitted_data_type"
                     render={({ field }) => {
                       return (
-                        <FormItem>
+                        <FormItem className="flex flex-col">
                           <FormLabel aria-required>{t("data_type")}</FormLabel>
                           <Select
                             onValueChange={field.onChange}
@@ -445,6 +445,7 @@ function ObservationDefinitionFormContent({
                             display: code.display,
                             system: code.system,
                           });
+                          form.clearErrors("code");
                         }}
                         showCode={true}
                       />
