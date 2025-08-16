@@ -4,21 +4,8 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
-
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +14,8 @@ import {
   DialogHeader,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
@@ -54,7 +43,7 @@ function AppointmentDialog({
   const queryClient = useQueryClient();
   const patient = usePatientContext();
   const tokenData = patient?.tokenData;
-  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
   const handleRescheduleAppointment = (appointment: Appointment) => {
     navigate(
       `/facility/${appointment.facility.id}/appointments/${appointment.user.id}/reschedule/${appointment.id}`,
@@ -113,62 +102,15 @@ function AppointmentDialog({
             </span>
             {!AppointmentFinalStatuses.includes(appointment.status) && (
               <span className="flex flex-row gap-2">
-                <AlertDialog
-                  open={isCancelDialogOpen}
-                  onOpenChange={(open) => setIsCancelDialogOpen(open)}
+                <Button
+                  variant="destructive"
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => setShowCancelDialog(true)}
                 >
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="destructive"
-                      type="button"
-                      disabled={isPending}
-                      onClick={() => setIsCancelDialogOpen(true)}
-                    >
-                      <span>{t("cancel")}</span>
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        <Alert variant="destructive" className="mt-4">
-                          <AlertTitle>{t("warning")}</AlertTitle>
-                          <AlertDescription>
-                            {t(
-                              "this_will_permanently_cancel_the_appointment_and_cannot_be_undone",
-                              {
-                                date: formatAppointmentSlotTime(appointment),
-                                practitioner: formatName(appointment.user),
-                                facility: appointment.facility.name,
-                              },
-                            )}
-                          </AlertDescription>
-                        </Alert>
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel
-                        onClick={() => setIsCancelDialogOpen(false)}
-                      >
-                        {t("cancel")}
-                      </AlertDialogCancel>
-                      <AlertDialogAction
-                        className={cn(
-                          buttonVariants({ variant: "destructive" }),
-                        )}
-                        onClick={() => {
-                          cancelAppointment({
-                            appointment: appointment.id,
-                            patient: appointment.patient.id,
-                          });
-                          setIsCancelDialogOpen(false);
-                        }}
-                      >
-                        {t("confirm")}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                  <span>{t("cancel")}</span>
+                </Button>
+
                 {appointment.status !== "in_consultation" && (
                   <Button
                     variant="secondary"
@@ -182,6 +124,35 @@ function AppointmentDialog({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ConfirmActionDialog
+        open={showCancelDialog}
+        onOpenChange={setShowCancelDialog}
+        title={t("are_you_sure")}
+        description={
+          <Alert variant="destructive" className="mt-4">
+            <AlertTitle>{t("warning")}</AlertTitle>
+            <AlertDescription>
+              {t(
+                "this_will_permanently_cancel_the_appointment_and_cannot_be_undone",
+                {
+                  date: formatAppointmentSlotTime(appointment),
+                  practitioner: formatName(appointment.user),
+                  facility: appointment.facility.name,
+                },
+              )}
+            </AlertDescription>
+          </Alert>
+        }
+        variant="destructive"
+        onConfirm={() => {
+          cancelAppointment({
+            appointment: appointment.id,
+            patient: appointment.patient.id,
+          });
+          setShowCancelDialog(false);
+        }}
+        confirmText={t("confirm")}
+      />
     </>
   );
 }

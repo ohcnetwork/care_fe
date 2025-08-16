@@ -1378,7 +1378,6 @@ export function DiagnosticReportForm({
         description={t("observation_delete_confirmation")}
         onConfirm={handleConfirmDelete}
         confirmText={t("delete")}
-        cancelText={t("cancel")}
         variant="destructive"
       />
     </Card>

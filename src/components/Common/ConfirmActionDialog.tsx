@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -25,6 +26,7 @@ interface ConfirmActionDialogProps {
   variant?: "primary" | "destructive" | "default" | "outline_primary";
   disabled?: boolean;
   hideCancel?: boolean;
+  onCancel?: () => void;
 }
 
 export default function ConfirmActionDialog({
@@ -38,7 +40,9 @@ export default function ConfirmActionDialog({
   variant = "primary",
   disabled,
   hideCancel,
+  onCancel,
 }: ConfirmActionDialogProps) {
+  const { t } = useTranslation();
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -47,7 +51,11 @@ export default function ConfirmActionDialog({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          {!hideCancel && <AlertDialogCancel>{cancelText}</AlertDialogCancel>}
+          {!hideCancel && (
+            <AlertDialogCancel onClick={onCancel}>
+              {cancelText || t("cancel")}
+            </AlertDialogCancel>
+          )}
           <AlertDialogAction
             onClick={onConfirm}
             className={cn(buttonVariants({ variant }))}

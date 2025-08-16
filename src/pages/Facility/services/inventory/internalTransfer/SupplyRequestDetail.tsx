@@ -544,7 +544,6 @@ export default function SupplyRequestDetail({
         onConfirm={dialog.onConfirm}
         variant={dialog.variant}
         confirmText={t("confirm")}
-        cancelText={t("cancel")}
       />
     </div>
   );

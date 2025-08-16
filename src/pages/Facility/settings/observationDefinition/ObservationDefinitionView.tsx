@@ -217,7 +217,6 @@ export default function ObservationDefinitionView({
             </Alert>
           }
           confirmText={isDeleting ? t("deleting") : t("confirm")}
-          cancelText={t("cancel")}
           onConfirm={handleDelete}
           variant="destructive"
           disabled={isDeleting}
