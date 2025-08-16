@@ -130,7 +130,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
           type={device.care_type}
           className="size-5 mb-1 md:mb-3"
         />
-        <PageTitle title={device.registered_name} />
+        <PageTitle title={device.registered_name} className="break-all" />
       </div>
 
       <div className="flex flex-col gap-4 xl:gap-6" data-cy="device-details">
@@ -155,7 +155,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                   <h4 className="text-sm font-medium text-gray-500">
                     {t("registered_name")}
                   </h4>
-                  <p className="mt-1">{device.registered_name}</p>
+                  <p className="mt-1 break-all">{device.registered_name}</p>
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-gray-500">

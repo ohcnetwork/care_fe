@@ -42,7 +42,7 @@ export default function DeviceCard({ device, encounter }: Props) {
                 />
               </div>
               <div>
-                <CardTitle className="text-lg font-semibold line-clamp-1">
+                <CardTitle className="text-lg font-semibold break-all">
                   {device.registered_name}
                 </CardTitle>
                 {device.user_friendly_name && (
