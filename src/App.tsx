@@ -11,7 +11,6 @@ import { Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 
 import Loading from "@/components/Common/Loading";
-import { SyncBannerWrapper } from "@/components/Common/SyncBannerWrapper";
 
 import Integrations from "@/Integrations";
 import PluginEngine from "@/PluginEngine";
@@ -71,7 +70,6 @@ const App = () => {
                     <Routers.AppRouter />
                   </AuthUserProvider>
                 </HistoryAPIProvider>
-                <SyncBannerWrapper />
                 <Toaster
                   position="top-right"
                   theme="light"

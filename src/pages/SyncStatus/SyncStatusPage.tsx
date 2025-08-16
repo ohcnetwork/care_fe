@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -82,7 +82,7 @@ async function getWritesByStatus(
 }
 
 function useSyncData(facilityId?: string, refreshTrigger?: number) {
-  const [syncData, setSyncData] = React.useState({
+  const [syncData, setSyncData] = useState({
     lastSync: "Never",
     statistics: {
       pending: 0,
@@ -96,7 +96,7 @@ function useSyncData(facilityId?: string, refreshTrigger?: number) {
   const { isSyncing } = useSync();
   const user = useAuthUser();
 
-  React.useEffect(() => {
+  useEffect(() => {
     async function fetchSyncData() {
       try {
         const db = new AppCacheDB();
@@ -234,9 +234,31 @@ const SyncStatusHeader: React.FC<{
   refreshTrigger?: number;
 }> = ({ facilityId, refreshTrigger }) => {
   const { syncData } = useSyncData(facilityId, refreshTrigger);
-  const { startSync, isSyncing } = useSync();
+  const { startSync, isSyncing, syncedCount, totalCount } = useSync();
   const user = useAuthUser();
   const { open: isSidebarOpen } = useSidebar();
+  const { t } = useTranslation();
+  const [showCompletionState, setShowCompletionState] = useState(false);
+
+  // Show completion state briefly when sync finishes
+  useEffect(() => {
+    if (isSyncing && syncedCount === totalCount && totalCount > 0) {
+      setShowCompletionState(true);
+    }
+
+    if (isSyncing && syncedCount === 0) {
+      setShowCompletionState(false);
+    }
+  }, [isSyncing, syncedCount, totalCount]);
+
+  useEffect(() => {
+    if (!isSyncing && showCompletionState) {
+      const timer = setTimeout(() => {
+        setShowCompletionState(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSyncing, showCompletionState]);
 
   const handleSyncNow = async () => {
     try {
@@ -260,29 +282,91 @@ const SyncStatusHeader: React.FC<{
   };
 
   return (
-    <div
-      className={`flex flex-col  justify-between ${isSidebarOpen ? "md:flex-col" : "md:flex-row"} lg:flex-row gap-4 mb-6`}
-    >
-      <div>
-        <p className="text-gray-600 mt-1">
-          Monitor and manage your offline data synchronization
-        </p>
-      </div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <CareIcon icon="l-clock" className="w-4 h-4" />
-          <span>Last Sync: {syncData.lastSync}</span>
+    <>
+      <div
+        className={`flex flex-col  justify-between ${isSidebarOpen ? "md:flex-col" : "md:flex-row"} lg:flex-row gap-4 mb-6`}
+      >
+        <div>
+          <p className="text-gray-600 mt-1">
+            Monitor and manage your offline data synchronization
+          </p>
         </div>
-        <Button
-          variant="primary"
-          size="md"
-          onClick={handleSyncNow}
-          disabled={isSyncing}
-        >
-          {isSyncing ? "Syncing..." : "Sync Now"}
-        </Button>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <CareIcon icon="l-clock" className="w-4 h-4" />
+            <span>Last Sync: {syncData.lastSync}</span>
+          </div>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={handleSyncNow}
+            disabled={isSyncing}
+          >
+            {isSyncing ? "Syncing..." : "Sync Now"}
+          </Button>
+        </div>
       </div>
-    </div>
+
+      {/* Sync Progress Bar */}
+      {(isSyncing || showCompletionState) && totalCount > 0 && (
+        <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <div
+                className={`p-2 rounded-full ${showCompletionState ? "bg-green-100" : "bg-blue-100"}`}
+              >
+                <CareIcon
+                  icon={showCompletionState ? "l-check-circle" : "l-sync"}
+                  className={`w-5 h-5 ${showCompletionState ? "text-green-600" : "text-blue-600"} ${!showCompletionState ? "animate-spin" : ""}`}
+                />
+              </div>
+              <div>
+                <span
+                  className={`font-semibold text-lg ${showCompletionState ? "text-green-900" : "text-blue-900"}`}
+                >
+                  {showCompletionState
+                    ? t("sync_completed_successfully")
+                    : t("syncing_offline_records")}
+                </span>
+                <div className="text-sm text-gray-600 mt-1">
+                  {showCompletionState
+                    ? t("all_records_synchronized")
+                    : t("please_wait_processing_offline_data")}
+                </div>
+              </div>
+            </div>
+            <div className="text-right">
+              <span
+                className={`text-2xl font-bold ${showCompletionState ? "text-green-700" : "text-blue-700"}`}
+              >
+                {syncedCount}
+              </span>
+              <span className="text-sm text-gray-500"> / {totalCount}</span>
+              <div className="text-xs text-gray-500 mt-1">{t("records")}</div>
+            </div>
+          </div>
+
+          <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+            <div
+              className={`h-4 rounded-full transition-all duration-500 ease-out ${
+                showCompletionState
+                  ? "bg-gradient-to-r from-green-500 to-green-600"
+                  : "bg-gradient-to-r from-blue-500 to-blue-600"
+              }`}
+              style={{ width: `${(syncedCount / totalCount) * 100}%` }}
+            />
+          </div>
+
+          <div className="mt-2 text-center">
+            <span
+              className={`text-sm font-medium ${showCompletionState ? "text-green-700" : "text-blue-700"}`}
+            >
+              {Math.round((syncedCount / totalCount) * 100)}% {t("complete")}
+            </span>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
@@ -396,13 +480,11 @@ const PendingWritesTable: React.FC<{
 
   refreshTrigger: number;
 }> = ({ facilityId, onEdit, onRetry, onDelete, refreshTrigger }) => {
-  const [pendingWrites, setPendingWrites] = React.useState<
-    OfflineWritesEntry[]
-  >([]);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [pendingWrites, setPendingWrites] = useState<OfflineWritesEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const user = useAuthUser();
   const { isSyncing } = useSync();
-  React.useEffect(() => {
+  useEffect(() => {
     async function fetchPendingWrites() {
       try {
         setIsLoading(true);
@@ -534,13 +616,11 @@ const FailedWritesTable: React.FC<{
 
   refreshTrigger,
 }) => {
-  const [failedWrites, setFailedWrites] = React.useState<OfflineWritesEntry[]>(
-    [],
-  );
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [failedWrites, setFailedWrites] = useState<OfflineWritesEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const user = useAuthUser();
   const { isSyncing } = useSync();
-  React.useEffect(() => {
+  useEffect(() => {
     async function fetchFailedWrites() {
       try {
         setIsLoading(true);
@@ -681,13 +761,13 @@ const ConflictedWritesTable: React.FC<{
   setEditConfirmEntry,
   refreshTrigger,
 }) => {
-  const [conflictedWrites, setConflictedWrites] = React.useState<
+  const [conflictedWrites, setConflictedWrites] = useState<
     OfflineWritesEntry[]
   >([]);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const user = useAuthUser();
   const { isSyncing } = useSync();
-  React.useEffect(() => {
+  useEffect(() => {
     async function fetchConflictedWrites() {
       try {
         setIsLoading(true);
@@ -810,13 +890,11 @@ const BlockedWritesTable: React.FC<{
   onDelete: (entry: OfflineWritesEntry) => void;
   refreshTrigger: number;
 }> = ({ facilityId, onDelete, refreshTrigger }) => {
-  const [blockedWrites, setBlockedWrites] = React.useState<
-    OfflineWritesEntry[]
-  >([]);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [blockedWrites, setBlockedWrites] = useState<OfflineWritesEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const user = useAuthUser();
   const { isSyncing } = useSync();
-  React.useEffect(() => {
+  useEffect(() => {
     async function fetchBlockedWrites() {
       try {
         setIsLoading(true);
@@ -927,7 +1005,7 @@ const SyncStatusTabs: React.FC<{
   setEditConfirmEntry,
   refreshTrigger,
 }) => {
-  const [activeTab, setActiveTab] = React.useState("pending");
+  const [activeTab, setActiveTab] = useState("pending");
   const { syncData } = useSyncData(facilityId, refreshTrigger);
 
   const tabs = [
@@ -1026,20 +1104,20 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const [selectedEncounterEntry, setSelectedEncounterEntry] =
-    React.useState<OfflineWritesEntry | null>(null);
-  const [isEncounterFormOpen, setIsEncounterFormOpen] = React.useState(false);
+    useState<OfflineWritesEntry | null>(null);
+  const [isEncounterFormOpen, setIsEncounterFormOpen] = useState(false);
   const [selectedUserAssignmentEntry, setSelectedUserAssignmentEntry] =
-    React.useState<OfflineWritesEntry | null>(null);
+    useState<OfflineWritesEntry | null>(null);
   const [isUserAssignmentFormOpen, setIsUserAssignmentFormOpen] =
-    React.useState(false);
+    useState(false);
   const [deleteConfirmEntry, setDeleteConfirmEntry] =
-    React.useState<OfflineWritesEntry | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
+    useState<OfflineWritesEntry | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editConfirmEntry, setEditConfirmEntry] =
-    React.useState<OfflineWritesEntry | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
+    useState<OfflineWritesEntry | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  const [refreshTrigger, setRefreshTrigger] = React.useState(0);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const triggerRefresh = () => {
     setRefreshTrigger((prev) => prev + 1);

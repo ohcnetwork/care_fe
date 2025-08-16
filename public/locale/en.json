@@ -4973,6 +4973,14 @@
   "edit_offline_user_assignment": "Edit Offline User Assignment",
   "edit_offline_user_assignment_description": "Edit the offline user assignment for this patient",
   "sync_status": "Sync Status",
+  "syncing_offline_records": "Syncing Offline Records...",
+  "sync_completed_successfully": "Sync completed successfully",
+  "processing_records_please_wait": "Processing records... Please wait",
+  "sync_success_toast": "Successfully synced {{count}} offline records",
+  "all_records_synchronized": "All records have been synchronized",
+  "please_wait_processing_offline_data": "Please wait while we process your offline data",
+  "records": "records",
+  "complete": "Complete",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out"
 }

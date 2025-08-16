@@ -18,32 +18,38 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   const [totalCount, setTotalCount] = useState(0);
   const [syncInProgress, setSyncInProgress] = useState(false);
 
-  const startSync = useCallback(async (userId: string, facilityId?: string) => {
-    if (isSyncing || syncInProgress) return;
+  const startSync = useCallback(
+    async (userId: string, facilityId?: string) => {
+      if (isSyncing || syncInProgress) return;
 
-    setSyncInProgress(true);
-    try {
-      await syncOfflineRecords(
-        userId,
-        (syncedCount, totalCount) => {
-          setSyncedCount(syncedCount);
-          setTotalCount(totalCount);
-        },
-        (totalCount) => {
-          setIsSyncing(true);
-          setSyncedCount(0);
-          setTotalCount(totalCount);
-        },
-        () => {},
-        facilityId,
-      );
-    } catch (error) {
-      console.error("Sync failed:", error);
-      setIsSyncing(false);
-    } finally {
-      setSyncInProgress(false);
-    }
-  }, []);
+      setSyncInProgress(true);
+      try {
+        await syncOfflineRecords(
+          userId,
+          (syncedCount, totalCount) => {
+            setSyncedCount(syncedCount);
+            setTotalCount(totalCount);
+          },
+          (totalCount) => {
+            setIsSyncing(true);
+            setSyncedCount(0);
+            setTotalCount(totalCount);
+          },
+          () => {
+            // Sync completed
+            setIsSyncing(false);
+          },
+          facilityId,
+        );
+      } catch (error) {
+        console.error("Sync failed:", error);
+        setIsSyncing(false);
+      } finally {
+        setSyncInProgress(false);
+      }
+    },
+    [isSyncing, syncInProgress],
+  );
 
   const resetSync = useCallback(() => {
     setIsSyncing(false);
