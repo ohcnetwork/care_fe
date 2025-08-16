@@ -81,6 +81,9 @@
       { "key": "cmd+e",              "action": "open-command-dialog",
                                       "description": "Open Command Dialog",
                                       "when": "canEdit" },
+      { "key": "ctrl+e",             "action": "open-command-dialog",
+                                      "description": "Open Command Dialog",
+                                      "when": "canEdit" },
 
       { "key": "q 1",                 "action": "questionnaire-1",
                                       "description": "Questionnaire 1",
