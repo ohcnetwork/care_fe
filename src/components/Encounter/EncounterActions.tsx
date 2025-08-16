@@ -29,17 +29,8 @@ import { getPermissions } from "@/common/Permissions";
 
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import {
-  OfflineKeyMap,
-  PathParamsObject,
-  QueryParamsObject,
-} from "@/OfflineSupport/offlineKeys";
-import {
   handleOfflineRecordSuccess,
   isOfflineId,
-  normalizeUserBase,
-  saveOfflineWrite,
-  saveOfflineWriteData,
-  updateActiveEncounterList,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import { PLUGIN_Component } from "@/PluginEngine";
 import mutate from "@/Utils/request/mutate";
@@ -51,6 +42,8 @@ import {
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
+
+import { queueMarkAscompleteRecord } from "./offlineQueue";
 
 interface EncounterActionsProps {
   encounter: EncounterRead;
@@ -102,79 +95,6 @@ export default function EncounterActions({
     },
   });
 
-  const queueMarkAscompleteRecord = async (
-    encounterUpdatedData: EncounterEdit,
-  ) => {
-    if (isOfflineId(encounter.id)) {
-      toast.error(t("cannot_mark_offline_created_encounter_as_complete"));
-      return;
-    }
-
-    const useQueryParams: QueryParamsObject<typeof encounterApi.get> = encounter
-      .facility.id
-      ? { facility: encounter.facility.id }
-      : { patient: encounter.patient.id };
-
-    const offlineWrite: saveOfflineWriteData = {
-      id: encounter.id,
-      userId: authUser.external_id,
-      facilityId: encounter.facility.id,
-      mutationSyncRouteKey: OfflineKeyMap.mark_encounter_as_complete,
-      type: OfflineKeyMap.mark_encounter_as_complete,
-      resourceType: "Encounter",
-      mutationPathParams: { id: encounter.id } satisfies PathParamsObject<
-        typeof encounterApi.update
-      >,
-      payload: encounterUpdatedData,
-      serverTimestamp: encounter.modified_date,
-      useQueryRouteKey: "getEncounter",
-      useQueryPathParams: { id: encounter.id } satisfies PathParamsObject<
-        typeof encounterApi.get
-      >,
-      useQueryParams: useQueryParams,
-    };
-
-    try {
-      const saveResult = await saveOfflineWrite(offlineWrite);
-      if (!saveResult.success) {
-        toast.error(saveResult.error);
-        return;
-      }
-
-      const updatedEncounter: EncounterRead = {
-        ...encounter,
-        status: "completed",
-        updated_by: {
-          ...normalizeUserBase(authUser),
-          last_login: authUser.last_login ?? "",
-          profile_picture_url: authUser.profile_picture_url ?? "",
-          mfa_enabled: authUser.mfa_enabled ?? false,
-          deleted: authUser.deleted ?? false,
-        },
-        is_updated_offline: true,
-      };
-
-      // Update the offline write entry with normalized data for display/editing
-      await db.OfflineWrites.update(saveResult.entry.id, {
-        normalizedData: updatedEncounter,
-      });
-
-      updateActiveEncounterList({
-        queryClient,
-        action: "markAsCompleteEncounter",
-        patientID: encounter.patient.id,
-        normalizeEncounter: updatedEncounter,
-      });
-
-      queryClient.setQueryData(["encounter", encounter.id], updatedEncounter);
-
-      toast.success(t("encounter_marked_as_complete"));
-    } catch (error) {
-      console.error("Error while Marking Encounter as Complete : ", error);
-      toast.error(t("error_updating_encounter"));
-    }
-  };
-
   const handleMarkAsComplete = async () => {
     const encounterUpdatedData = {
       ...encounter,
@@ -197,7 +117,20 @@ export default function EncounterActions({
     };
 
     if (!onlineManager.isOnline()) {
-      await queueMarkAscompleteRecord(encounterUpdatedData);
+      await queueMarkAscompleteRecord({
+        encounter,
+        encounterUpdatedData,
+        userId: authUser.external_id,
+        queryClient,
+        authUser,
+        onSuccess: () => {
+          toast.success(t("encounter_marked_as_complete"));
+        },
+        onError: (error) => {
+          console.error("Error while Marking Encounter as Complete : ", error);
+          toast.error(t("error_updating_encounter"));
+        },
+      });
     } else updateEncounter(encounterUpdatedData);
   };
 

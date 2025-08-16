@@ -55,17 +55,8 @@ import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
-import { OfflineKeyMap } from "@/OfflineSupport/offlineKeys";
-import {
-  handleOfflineRecordSuccess,
-  isOfflineId,
-  normalizeOfflineEncounterRecord,
-  saveOfflineWrite,
-  saveOfflineWriteData,
-  updateActiveEncounterList,
-} from "@/OfflineSupport/offlineWriteHelpers";
+import { handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers";
 import mutate from "@/Utils/request/mutate";
-import { PaginatedResponse } from "@/Utils/request/types";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
   ENCOUNTER_CLASS,
@@ -76,10 +67,11 @@ import {
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
-import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
+
+import { queueNewEncounterOffline } from "./offlineQueue";
 
 interface Props {
   patientId: string;
@@ -109,7 +101,6 @@ export default function CreateEncounterForm({
   const authUser = useAuthUser();
   const { t } = useTranslation();
 
-  const db = new AppCacheDB();
   const [currentSelectedOrganizations, setCurrentSelectedOrganizations] =
     useState<FacilityOrganizationRead[]>([]);
 
@@ -139,7 +130,7 @@ export default function CreateEncounterForm({
   const tagIds = form.watch("tags");
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
 
-  const newSelectedTags = tagQueries
+  const selectedTags = tagQueries
     .map((query) => query.data)
     .filter(Boolean) as TagConfig[];
 
@@ -155,6 +146,8 @@ export default function CreateEncounterForm({
           return;
         } catch (error) {
           console.error("Error marking offline entry as successful:", error);
+          toast.error(t("error_marking_offline_entry_as_successful"));
+          return;
         }
       }
 
@@ -169,145 +162,45 @@ export default function CreateEncounterForm({
     },
   });
 
-  const queueNewEncounterOffline = async (
-    encounterRequestData: EncounterCreate,
-  ) => {
-    try {
-      const generatedId = `offline-${crypto.randomUUID()}`;
-
-      const offlineWrite: saveOfflineWriteData = {
-        id: generatedId,
-        userId: authUser.external_id,
-        facilityId: facilityId,
-        mutationSyncRouteKey: OfflineKeyMap.create_encounter,
-        type: OfflineKeyMap.create_encounter,
-        resourceType: "Encounter",
-        payload: encounterRequestData,
-        parentMutationId: isOfflineId(patientId) ? patientId : undefined,
-      };
-
-      const saveResult = await saveOfflineWrite(offlineWrite);
-      if (!saveResult.success) {
-        toast.error(saveResult.error);
-        return;
-      }
-
-      const patientData = queryClient.getQueryData<PatientRead>([
-        "patient",
-        patientId,
-      ]);
-      if (!patientData) {
-        toast.error(t("encounter_created_but_patient_cache_missing"));
-        return;
-      }
-
-      const permissions = queryClient.getQueryData<string[]>([
-        "encounterPermissions",
-        facilityId,
-      ]);
-
-      const normalizeEncounter = normalizeOfflineEncounterRecord(
-        queryClient,
-        saveResult.entry,
-        patientData,
-        authUser,
-        newSelectedTags,
-        permissions,
-        currentSelectedOrganizations || [],
-      );
-
-      await db.OfflineWrites.update(saveResult.entry.id, {
-        normalizedData: normalizeEncounter,
-      });
-
-      queryClient.setQueryData(
-        ["encounter", normalizeEncounter.id],
-        normalizeEncounter,
-      );
-
-      const encounterListKey = ["encounterHistory", patientId, {}];
-
-      const prevEncounterList =
-        queryClient.getQueryData<PaginatedResponse<EncounterRead>>(
-          encounterListKey,
-        );
-
-      const updatedList: PaginatedResponse<EncounterRead> = prevEncounterList
-        ? {
-            ...prevEncounterList,
-            count: prevEncounterList.count + 1,
-            results: [normalizeEncounter, ...prevEncounterList.results],
-          }
-        : {
-            count: 1,
-            results: [normalizeEncounter],
-          };
-
-      queryClient.setQueryData(encounterListKey, updatedList);
-
-      updateActiveEncounterList({
-        queryClient: queryClient,
-        action: "createEncounter",
-        patientID: patientId,
-        normalizeEncounter: normalizeEncounter,
-      });
-
-      toast.success(t("encounter_created_offline"));
-      setIsOpen(false);
-      form.reset();
-      navigate(
-        `/facility/${facilityId}/patient/${patientId}/encounter/${generatedId}/updates`,
-      );
-    } catch (error) {
-      console.error("Error saving offline encounter:", error);
-      toast.error(t("offline_encounter_create_error"));
-    }
-  };
-
   useEffect(() => {
     if (offlineEntryId) {
       setIsOpen(true);
     }
   }, [offlineEntryId]);
 
+  const fetchAndPopulateForm = async () => {
+    try {
+      const db = new AppCacheDB();
+      const entry = await db.OfflineWrites.get(offlineEntryId!);
+
+      if (entry && entry.normalizedData) {
+        const normalizedData = entry.normalizedData as EncounterRead;
+
+        const formData = {
+          ...normalizedData,
+          status:
+            normalizedData.status === "planned" ||
+            normalizedData.status === "in_progress" ||
+            normalizedData.status === "on_hold"
+              ? normalizedData.status
+              : "planned",
+          organizations:
+            normalizedData.organizations?.map((org) => org.id) || [],
+          start_date: normalizedData.period?.start || new Date().toISOString(),
+          tags: normalizedData.tags?.map((tag) => tag.id) || [],
+        };
+
+        form.reset(formData);
+      }
+    } catch (error) {
+      console.error("Error fetching offline entry:", error);
+      toast.error("Error loading offline encounter data");
+    }
+  };
+
+  // only when offlineEntryId is passed to populate offline create encounter form,
   useEffect(() => {
     if (offlineEntryId) {
-      const fetchAndPopulateForm = async () => {
-        try {
-          const db = new AppCacheDB();
-          const entry = await db.OfflineWrites.get(offlineEntryId);
-
-          if (entry && entry.normalizedData) {
-            const normalizedData = entry.normalizedData as EncounterRead;
-
-            const formData = {
-              status:
-                normalizedData.status === "planned" ||
-                normalizedData.status === "in_progress" ||
-                normalizedData.status === "on_hold"
-                  ? normalizedData.status
-                  : "planned",
-              encounter_class: normalizedData.encounter_class,
-              priority: normalizedData.priority,
-              organizations:
-                normalizedData.organizations?.map((org) => org.id) || [],
-              start_date:
-                normalizedData.period?.start || new Date().toISOString(),
-              tags: normalizedData.tags?.map((tag) => tag.id) || [],
-            };
-
-            form.reset(formData);
-
-            // if (normalizedData.tags && normalizedData.tags.length > 0) {
-            //   setSelectedTags(normalizedData.tags);
-            // }
-          }
-        } catch (error) {
-          console.error("Error fetching offline entry:", error);
-          toast.error("Error loading offline encounter data");
-        }
-      };
-
       fetchAndPopulateForm();
     }
   }, [offlineEntryId, form]);
@@ -324,7 +217,28 @@ export default function CreateEncounterForm({
     };
 
     if (!onlineManager.isOnline()) {
-      await queueNewEncounterOffline(encounterRequest);
+      await queueNewEncounterOffline({
+        encounterRequestData: encounterRequest,
+        userId: authUser.external_id,
+        facilityId: facilityId,
+        patientId: patientId,
+        queryClient: queryClient,
+        authUser: authUser,
+        selectedTags: selectedTags,
+        currentSelectedOrganizations: currentSelectedOrganizations,
+        onSuccess: (encounterId) => {
+          toast.success(t("encounter_created_offline"));
+          setIsOpen(false);
+          form.reset();
+          navigate(
+            `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+          );
+        },
+        onError: (error) => {
+          console.error("Error saving offline encounter:", error);
+          toast.error(t("offline_encounter_create_error"));
+        },
+      });
     } else createEncounter(encounterRequest);
   }
 
@@ -546,7 +460,7 @@ export default function CreateEncounterForm({
                     <FormLabel>{t("tags")}</FormLabel>
                     <FormControl className="mt-0">
                       <TagSelectorPopover
-                        selected={newSelectedTags}
+                        selected={selectedTags}
                         onChange={(tags) => {
                           field.onChange(tags.map((tag) => tag.id));
                         }}

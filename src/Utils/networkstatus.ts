@@ -11,7 +11,8 @@ import { toast } from "sonner";
 
 import { createUserPersister } from "@/OfflineSupport/createUserPersister";
 
-const CHECK_URL = "https://careapi.ohc.network";
+const CHECK_URL =
+  import.meta.env.VITE_CONNECTIVITY_CHECK_URL || "https://careapi.ohc.network";
 
 export default function useNetworkStatus() {
   const [isOnline, setIsOnline] = useState(true);
