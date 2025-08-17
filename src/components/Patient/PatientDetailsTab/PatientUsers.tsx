@@ -51,7 +51,6 @@ import { useOfflineEntry } from "@/hooks/useOfflineEntry";
 
 import { getPermissions } from "@/common/Permissions";
 
-import { OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import { handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";

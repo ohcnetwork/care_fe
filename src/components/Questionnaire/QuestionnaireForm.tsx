@@ -76,7 +76,7 @@ import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import {
   FIXED_QUESTIONNAIRES,
   STRUCTURED_QUESTIONS,
-  StructuredQuestionnaireReferenceId,
+  StructuredQuestionType,
 } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
 
@@ -1263,7 +1263,7 @@ export function QuestionnaireForm({
         (
           q,
         ): q is (typeof questionnairPaylod.requests)[number] & {
-          reference_id: StructuredQuestionnaireReferenceId;
+          reference_id: StructuredQuestionType;
         } => STRUCTURED_QUESTIONS.some((s) => s.value === q.reference_id),
       );
       const nonStructuredQuestionnaires = questionnairPaylod.requests.filter(

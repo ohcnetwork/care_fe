@@ -131,7 +131,6 @@ export const queueRemoveUserFromPatient = async ({
   onSuccess,
   onError,
 }: QueueRemoveUserFromPatientParams): Promise<void> => {
-  const { t } = useTranslation();
   const db = new AppCacheDB();
 
   try {

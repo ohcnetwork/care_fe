@@ -4981,6 +4981,7 @@
   "please_wait_processing_offline_data": "Please wait while we process your offline data",
   "records": "records",
   "complete": "Complete",
+  "error_marking_offline_entry_as_successful": "Error marking offline entry as successful",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out"
 }

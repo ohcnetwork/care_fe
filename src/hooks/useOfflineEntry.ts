@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
 import { useQueryParams } from "raviger";
+import { useEffect, useState } from "react";
 
 import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 
 export function useOfflineEntry() {
   const [{ offlineEntryId }] = useQueryParams();
-  const [offlineEntry, setOfflineEntry] = useState<OfflineWritesEntry | null>(null);
+  const [offlineEntry, setOfflineEntry] = useState<OfflineWritesEntry | null>(
+    null,
+  );
   const [isLoadingOfflineEntry, setIsLoadingOfflineEntry] = useState(false);
   const db = new AppCacheDB();
 

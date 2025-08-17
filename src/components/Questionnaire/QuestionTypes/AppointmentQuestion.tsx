@@ -1,6 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -18,7 +17,6 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
-import query from "@/Utils/request/query";
 import { AppointmentSlotPicker } from "@/pages/Appointments/components/AppointmentSlotPicker";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
@@ -38,7 +36,6 @@ import {
   CreateAppointmentQuestion,
   TokenSlot,
 } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 interface AppointmentQuestionProps {

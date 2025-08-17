@@ -37,7 +37,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
-import { AddUserSheet } from "@/components/Patient/PatientDetailsTab/PatientUsers";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -1102,7 +1101,7 @@ const SyncStatusTabs: React.FC<{
 
 const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
   const { t } = useTranslation();
-  const authUser = useAuthUser();
+
   const [selectedEncounterEntry, setSelectedEncounterEntry] =
     useState<OfflineWritesEntry | null>(null);
   const [isEncounterFormOpen, setIsEncounterFormOpen] = useState(false);

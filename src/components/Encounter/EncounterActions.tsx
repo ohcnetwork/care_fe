@@ -28,15 +28,11 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { getPermissions } from "@/common/Permissions";
 
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
-import {
-  handleOfflineRecordSuccess,
-  isOfflineId,
-} from "@/OfflineSupport/offlineWriteHelpers";
+import { handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers";
 import { PLUGIN_Component } from "@/PluginEngine";
 import mutate from "@/Utils/request/mutate";
 import { usePermissions } from "@/context/PermissionContext";
 import {
-  EncounterEdit,
   EncounterRead,
   EncounterStatus,
   inactiveEncounterStatus,
@@ -72,7 +68,6 @@ export default function EncounterActions({
     hasPermission,
     encounter.permissions,
   );
-  const db = new AppCacheDB();
 
   const organizationId = usePathParams("/organization/:organizationId/*");
   const canWrite =
