@@ -65,6 +65,7 @@ interface Props {
   patientId: string;
   facilityId: string;
   patientName: string;
+  appointment?: string;
   encounterClass?: EncounterClass;
   trigger?: React.ReactNode;
   onSuccess?: () => void;
@@ -74,6 +75,7 @@ export default function CreateEncounterForm({
   patientId,
   facilityId,
   patientName,
+  appointment,
   encounterClass,
   trigger,
   onSuccess,
@@ -134,6 +136,7 @@ export default function CreateEncounterForm({
         start: data.start_date,
       },
       tags: data.tags,
+      appointment: appointment,
     };
 
     createEncounter(encounterRequest);

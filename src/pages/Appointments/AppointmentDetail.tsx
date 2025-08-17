@@ -50,6 +50,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ClickableAddress } from "@/components/Common/ClickableAddress";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -687,22 +688,24 @@ const AppointmentActions = ({
       )}
 
       {["booked", "checked_in"].includes(currentStatus) && (
-        <Button
-          disabled={!canCheckIn}
-          variant={
-            currentStatus === "checked_in" ? "outline_primary" : "outline"
+        <CreateEncounterForm
+          patientId={appointment.patient.id}
+          facilityId={facilityId}
+          patientName={appointment.patient.name}
+          appointment={appointment.id}
+          trigger={
+            <Button
+              disabled={!canCheckIn}
+              variant={
+                currentStatus === "checked_in" ? "outline_primary" : "outline"
+              }
+              size="lg"
+            >
+              <PlusCircledIcon className="size-4 mr-2" />
+              {t("start_consultation")}
+            </Button>
           }
-          onClick={() =>
-            updateAppointment({
-              status: "in_consultation",
-              note: appointment.note,
-            })
-          }
-          size="lg"
-        >
-          <PlusCircledIcon className="size-4 mr-2" />
-          {t("start_consultation")}
-        </Button>
+        />
       )}
 
       {currentStatus === "in_consultation" && (
