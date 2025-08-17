@@ -300,6 +300,7 @@ export function ChargeItemDefinitionForm({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
+        form.clearErrors("slug");
         form.setValue("slug", generateSlug(value.title || ""), {
           shouldValidate: true,
         });
