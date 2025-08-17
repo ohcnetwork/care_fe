@@ -46,10 +46,9 @@ export class PatientDetails {
   }
 
   confirmUserRemoval() {
-    cy.verifyAndClickElement(
-      '[data-cy="patient-user-remove-confirm-button"]',
-      "Remove",
-    );
+    cy.get('div[data-slot="alert-dialog-footer"] button')
+      .contains("Remove")
+      .click();
     return this;
   }
 

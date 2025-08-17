@@ -883,7 +883,10 @@ export function LocationSheet({
       {/* Discharge Dialog */}
       <ConfirmActionDialog
         open={showDischargeDialog}
-        onOpenChange={(open) => !open && setSelectedDischargedBed(null)}
+        onOpenChange={(open) => {
+          setShowDischargeDialog(open);
+          if (!open) setSelectedDischargedBed(null);
+        }}
         title={t("confirm_selection")}
         description={t("bed_available_soon_discharged_message")}
         onConfirm={handleDischargeConfirm}
@@ -893,7 +896,12 @@ export function LocationSheet({
       {/* Delete Dialog */}
       <ConfirmActionDialog
         open={showDeleteDialog}
-        onOpenChange={(open) => !open && setLocationToDelete(null)}
+        onOpenChange={(open) => {
+          setShowDeleteDialog(open);
+          if (!open) {
+            setLocationToDelete(null);
+          }
+        }}
         title={t("confirm")}
         description={
           locationStatus === "active"
