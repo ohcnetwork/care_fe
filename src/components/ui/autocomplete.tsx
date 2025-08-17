@@ -1,5 +1,4 @@
 import { CaretSortIcon, CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -241,9 +240,9 @@ export default function Autocomplete({
           aria-describedby={undefined}
           className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
         >
-          <VisuallyHidden>
-            <SheetTitle>{t("autocomplete_options")}</SheetTitle>
-          </VisuallyHidden>
+          <SheetTitle className="sr-only">
+            {t("autocomplete_options")}
+          </SheetTitle>
 
           <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
           <div className="mt-6 h-full">
