@@ -163,22 +163,19 @@ export const handleAssignUserToPatientEdit = async (
 ) => {
   // Extract patient ID from the mutation path params
   const patientId = (entry.mutationPathParams as any)?.patientId;
-  
+
   if (!patientId) {
     toast.error("Patient information not found in offline entry");
     return;
   }
 
   // Navigate to the patient users page with offlineEntryId in query params
-  navigate(
-    `/facility/${entry.facilityId}/patient/${patientId}`,
-    {
-      query: {
-        offlineEntryId: entry.id,
-        tab: "users",
-      },
+  navigate(`/facility/${entry.facilityId}/patient/${patientId}`, {
+    query: {
+      offlineEntryId: entry.id,
+      tab: "users",
     },
-  );
+  });
 };
 
 export const handleRemoveUserFromPatientEdit = async (
@@ -321,54 +318,9 @@ export const handleNonStructuredQuestionnaireEdit = async (
   }
 };
 
-export const handleAppointmentQuestionnaireEdit = async (
-  entry: OfflineWritesEntry,
-) => {
-  if (entry.type !== "appointment") {
-    toast.error("Invalid entry type for appointment editing");
-    return;
-  }
-
-  try {
-    const payload = entry.payload as {
-      requests: Array<{
-        url: string;
-        method: string;
-        reference_id: string;
-        body: {
-          note: string;
-          patient: string;
-          tags: string[];
-        };
-      }>;
-    };
-
-    if (!payload.requests || payload.requests.length === 0) {
-      toast.error("No appointment data found in offline entry");
-      return;
-    }
-
-    const firstRequest = payload.requests[0];
-    const patientId = firstRequest.body.patient;
-
-    if (!patientId) {
-      toast.error("Patient information not found in offline entry");
-      return;
-    }
-
-    navigate(
-      `/facility/${entry.facilityId}/patient/${patientId}/questionnaire`,
-      {
-        query: {
-          offlineEntryId: entry.id,
-          editMode: "true",
-        },
-      },
-    );
-  } catch (error) {
-    console.error("Error handling appointment edit:", error);
-    toast.error("Failed to open appointment questionnaire for editing");
-  }
+export const handleAppointmentQuestionnaireEdit = async () => {
+  toast.error("offline edit for appointment type is not supported");
+  return;
 };
 
 export const handleFilesQuestionnaireEdit = async () => {

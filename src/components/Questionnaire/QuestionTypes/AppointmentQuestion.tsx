@@ -131,23 +131,6 @@ export function AppointmentQuestion({
   // Query to get slot details for display
   const [selectedSlot, setSelectedSlot] = useState<TokenSlot>();
 
-  // help to populate the data during ofline record edit
-
-  const { data: slotData } = useQuery({
-    queryKey: ["slot", facilityId, value.slot_id],
-    queryFn: query(scheduleApis.slots.retrieve, {
-      pathParams: { facilityId, slotId: value.slot_id! },
-    }),
-    enabled: !!value.slot_id && !!facilityId,
-    meta: { persist: true },
-  });
-
-  useEffect(() => {
-    if (slotData) {
-      setSelectedSlot(slotData as TokenSlot);
-    }
-  }, [slotData]);
-
   // Update slot details when a slot is selected
   const handleSlotSelect = (slotId: string | undefined) => {
     handleUpdate({ slot_id: slotId });
@@ -284,7 +267,7 @@ export function AppointmentQuestion({
                 {resource && (
                   <AppointmentSlotPicker
                     facilityId={facilityId}
-                    resourceId={resource?.id}
+                    resourceId={resource.id}
                     onSlotSelect={handleSlotSelect}
                     selectedSlotId={value.slot_id}
                     onSlotDetailsChange={setSelectedSlot}

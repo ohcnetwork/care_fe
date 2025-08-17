@@ -1,3 +1,4 @@
+import { onlineManager } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 
 import UpdatableApp, { checkForUpdate } from "@/components/Common/UpdatableApp";
 
-// import { clearQueryPersistenceCache } from "@/Utils/request/queryClient";
+import { createUserPersister } from "@/OfflineSupport/createUserPersister";
 
 export default function UserSoftwareUpdate() {
   const [updateStatus, setUpdateStatus] = useState({
@@ -18,7 +19,14 @@ export default function UserSoftwareUpdate() {
   const { t } = useTranslation();
 
   const checkUpdates = async () => {
-    // clearQueryPersistenceCache();
+    // First clear cache, then check for updates
+    try {
+      const persister = createUserPersister();
+      await persister.removeClient();
+    } catch (error) {
+      console.error("Failed to clear cache:", error);
+    }
+
     setUpdateStatus({ ...updateStatus, isChecking: true });
     await new Promise((resolve) => setTimeout(resolve, 500));
     if ((await checkForUpdate()) != null) {
@@ -68,7 +76,11 @@ export default function UserSoftwareUpdate() {
         </UpdatableApp>
       ) : (
         // Default state to check for updates
-        <Button variant="primary" onClick={checkUpdates}>
+        <Button
+          variant="primary"
+          onClick={checkUpdates}
+          disabled={!onlineManager.isOnline()}
+        >
           <div className="flex items-center gap-4">
             <CareIcon icon="l-sync" className="text-xl" />
             {t("check_for_update")}

@@ -1120,6 +1120,8 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
     setRefreshTrigger((prev) => prev + 1);
   };
 
+  // handle edit are specially for editing offlien record once we are back to online and we want to edit those record
+  // handle edit will not work when we are offline and try to edit record  through sync status page
   const handleEdit = async (entry?: OfflineWritesEntry) => {
     const targetEntry = entry || editConfirmEntry;
     if (!targetEntry) return;
@@ -1187,7 +1189,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
         await handleTimeOfDeathEdit(targetEntry);
         break;
       case "appointment":
-        await handleAppointmentQuestionnaireEdit(targetEntry);
+        await handleAppointmentQuestionnaireEdit();
         break;
       case "files":
         await handleFilesQuestionnaireEdit();
@@ -1285,7 +1287,6 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
           />
         )}
 
-     
         {/* Delete Confirmation Dialog */}
         <AlertDialog
           open={isDeleteDialogOpen}
