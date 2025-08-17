@@ -74,6 +74,7 @@ function DeleteOrgDialog({
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
+            data-cy="delete-organization-button"
             variant="ghost"
             size="icon"
             onClick={() => setShowDeleteDialog(true)}

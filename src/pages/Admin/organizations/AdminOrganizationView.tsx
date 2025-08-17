@@ -133,6 +133,7 @@ function OrganizationCard({
         onConfirm={() => deleteOrganization({})}
         confirmText={t("delete")}
         variant="destructive"
+        disabled={!canDelete}
       />
     </Card>
   );

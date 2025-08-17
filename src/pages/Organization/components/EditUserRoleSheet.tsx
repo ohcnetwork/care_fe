@@ -180,6 +180,7 @@ export default function EditUserRoleSheet({
                 variant="destructive"
                 className="w-full"
                 onClick={() => setShowRemoveDialog(true)}
+                data-cy="remove-user"
               >
                 {t("remove_user")}
               </Button>
