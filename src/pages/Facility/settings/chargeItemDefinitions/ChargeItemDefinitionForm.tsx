@@ -300,7 +300,6 @@ export function ChargeItemDefinitionForm({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.clearErrors("slug");
         form.setValue("slug", generateSlug(value.title || ""), {
           shouldValidate: true,
         });
@@ -379,7 +378,13 @@ export function ChargeItemDefinitionForm({
     if (selected) {
       newComponents = [
         ...currentComponents,
-        { ...component, monetary_component_type: type },
+        {
+          ...component,
+          monetary_component_type: type,
+          factor: component.factor != null ? component.factor : undefined,
+          amount:
+            component.factor != null ? undefined : String(component.amount),
+        },
       ];
     } else {
       newComponents = currentComponents.filter(
