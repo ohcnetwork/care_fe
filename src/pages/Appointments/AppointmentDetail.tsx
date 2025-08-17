@@ -13,7 +13,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, differenceInYears, format, isBefore } from "date-fns";
-import { BanIcon, Loader2, PrinterIcon } from "lucide-react";
+import { BanIcon, EyeIcon, Loader2, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -69,6 +69,11 @@ import { usePermissions } from "@/context/PermissionContext";
 import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import {
+  ENCOUNTER_CLASSES_COLORS,
+  ENCOUNTER_PRIORITY_COLORS,
+  ENCOUNTER_STATUS_COLORS,
+} from "@/types/emr/encounter/encounter";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityRead } from "@/types/facility/facility";
 import {
@@ -201,9 +206,112 @@ export default function AppointmentDetail(props: Props) {
                 <span>{t("save")}</span>
               </Button>
             </div>
+            <Separator className="my-2" />
+            {appointment.associated_encounter?.id && (
+              <div className="w-full p-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      {t("encounter")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Encounter Status and Class */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge
+                        variant={
+                          ENCOUNTER_STATUS_COLORS[
+                            appointment.associated_encounter.status
+                          ]
+                        }
+                        className="text-xs"
+                      >
+                        {t(
+                          `encounter_status__${appointment.associated_encounter.status}`,
+                        )}
+                      </Badge>
+                      <Badge
+                        variant={
+                          ENCOUNTER_CLASSES_COLORS[
+                            appointment.associated_encounter.encounter_class
+                          ]
+                        }
+                        className="text-xs"
+                      >
+                        {t(
+                          `encounter_class__${appointment.associated_encounter.encounter_class}`,
+                        )}
+                      </Badge>
+                      <Badge
+                        variant={
+                          ENCOUNTER_PRIORITY_COLORS[
+                            appointment.associated_encounter.priority
+                          ]
+                        }
+                        className="text-xs"
+                      >
+                        {t(
+                          `encounter_priority__${appointment.associated_encounter.priority}`,
+                        )}
+                      </Badge>
+                    </div>
+
+                    {/* Tags */}
+                    {appointment.associated_encounter.tags &&
+                      appointment.associated_encounter.tags.length > 0 && (
+                        <div className="text-sm">
+                          <div className="flex flex-wrap gap-1">
+                            {appointment.associated_encounter.tags.map(
+                              (tag) => (
+                                <Badge
+                                  variant="outline"
+                                  key={tag.id}
+                                  className="text-xs"
+                                >
+                                  {getTagHierarchyDisplay(tag)}
+                                </Badge>
+                              ),
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          navigate(
+                            `/facility/${facility.id}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
+                          )
+                        }
+                        className="flex items-center gap-2"
+                      >
+                        <EyeIcon className="size-4" />
+                        {t("view_encounter")}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          navigate(
+                            `/facility/${facility.id}/patient/${appointment.patient.id}`,
+                          )
+                        }
+                        className="flex items-center gap-2"
+                      >
+                        <PersonIcon className="size-4" />
+                        {t("view_patient")}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
             {canUpdateAppointment && (
               <>
-                <Separator className="my-4" />
+                <Separator className="my-2" />
                 <div className="md:mx-6 mt-10">
                   <AppointmentActions
                     facilityId={facilityId}
