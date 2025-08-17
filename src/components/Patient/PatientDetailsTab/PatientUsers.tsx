@@ -294,7 +294,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
                 <Trans
                   i18nKey="are_you_sure_want_to_remove"
                   values={{
-                    name: userToRemove ? formatName(userToRemove) : undefined,
+                    name: formatName(userToRemove!),
                   }}
                   components={{
                     strong: (
@@ -305,7 +305,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
               }
               variant="destructive"
               confirmText={t("remove")}
-              onConfirm={() => userToRemove && removeUser(userToRemove.id)}
+              onConfirm={() => removeUser(userToRemove!.id)}
             />
           </div>
         ))}

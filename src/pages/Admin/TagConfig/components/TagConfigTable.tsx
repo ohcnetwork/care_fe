@@ -277,7 +277,7 @@ export default function TagConfigTable({
                               description={
                                 <>
                                   {t("archive_child_tag_confirmation", {
-                                    name: tagConfigToArchive?.display,
+                                    name: tagConfigToArchive!.display,
                                   })}
                                 </>
                               }
