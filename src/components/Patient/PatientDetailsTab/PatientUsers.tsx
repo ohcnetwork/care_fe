@@ -183,7 +183,9 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 
 export const PatientUsers = ({ patientData }: PatientProps) => {
   const patientId = patientData.id;
-  const [showRemoveDialog, setShowRemoveDialog] = useState(false);
+  const [userToRemove, setUserToRemove] = useState<UserReadMinimal | null>(
+    null,
+  );
 
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -265,7 +267,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
                   size="icon"
                   data-cy="patient-user-remove-button"
                   className="absolute top-0 right-0"
-                  onClick={() => setShowRemoveDialog(true)}
+                  onClick={() => setUserToRemove(user)}
                 >
                   <CareIcon icon="l-trash" />
                 </Button>
@@ -285,13 +287,15 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
               </div>
             </div>
             <ConfirmActionDialog
-              open={showRemoveDialog}
-              onOpenChange={setShowRemoveDialog}
+              open={!!userToRemove}
+              onOpenChange={(open) => !open && setUserToRemove(null)}
               title={t("remove_user")}
               description={
                 <Trans
                   i18nKey="are_you_sure_want_to_remove"
-                  values={{ name: formatName(user) }}
+                  values={{
+                    name: userToRemove ? formatName(userToRemove) : undefined,
+                  }}
                   components={{
                     strong: (
                       <strong className="inline-block align-bottom truncate max-w-32 sm:max-w-96 md:max-w-32 lg:max-w-28 xl:max-w-36" />
@@ -301,7 +305,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
               }
               variant="destructive"
               confirmText={t("remove")}
-              onConfirm={() => removeUser(user.id)}
+              onConfirm={() => userToRemove && removeUser(userToRemove.id)}
             />
           </div>
         ))}

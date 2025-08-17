@@ -93,9 +93,8 @@ function TagConfigCard({
             {showArchiveAction && onArchive && config.status !== "archived" && (
               <>
                 <Button
-                  variant="outline"
+                  variant="destructive"
                   size="sm"
-                  className="text-red-600 hover:text-red-700"
                   onClick={() => setShowArchiveDialog(true)}
                 >
                   <CareIcon icon="l-trash" className="size-4" />
@@ -142,7 +141,8 @@ export default function TagConfigTable({
   emptyStateIcon = "l-tag-alt" as IconName,
 }: TagConfigTableProps) {
   const { t } = useTranslation();
-  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
+  const [tagConfigToArchive, setTagConfigToArchive] =
+    useState<TagConfig | null>(null);
 
   if (isLoading) {
     return (
@@ -268,25 +268,27 @@ export default function TagConfigTable({
                               variant="outline"
                               size="sm"
                               className="text-red-600 hover:text-red-700"
-                              onClick={() => setShowArchiveDialog(true)}
+                              onClick={() => setTagConfigToArchive(config)}
                             >
                               <CareIcon icon="l-trash" className="size-4" />
                               {t("archive")}
                             </Button>
                             <ConfirmActionDialog
-                              open={showArchiveDialog}
-                              onOpenChange={setShowArchiveDialog}
+                              open={!!tagConfigToArchive}
+                              onOpenChange={(open) =>
+                                !open && setTagConfigToArchive(null)
+                              }
                               title={t("archive_child_tag")}
                               description={
                                 <>
                                   {t("archive_child_tag_confirmation", {
-                                    name: config.display,
+                                    name: tagConfigToArchive?.display,
                                   })}
                                 </>
                               }
                               variant="destructive"
                               onConfirm={() => {
-                                onArchive(config);
+                                onArchive(tagConfigToArchive!);
                               }}
                               confirmText={t("archive")}
                             />
