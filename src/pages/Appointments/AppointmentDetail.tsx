@@ -210,146 +210,149 @@ export default function AppointmentDetail(props: Props) {
                 <span>{t("save")}</span>
               </Button>
             </div>
-
-            <div className="md:mx-4 mt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <AvatarIcon className="size-5 text-primary" />
-                    {t("encounter")}
-                  </CardTitle>
-                </CardHeader>
-                {appointment.associated_encounter?.id ? (
-                  <CardContent className="space-y-2">
-                    {/* Encounter Status and Class */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge
-                        variant={
-                          ENCOUNTER_STATUS_COLORS[
-                            appointment.associated_encounter.status
-                          ]
-                        }
-                        className="text-xs"
-                      >
-                        {t(
-                          `encounter_status__${appointment.associated_encounter.status}`,
-                        )}
-                      </Badge>
-                      <Badge
-                        variant={
-                          ENCOUNTER_CLASSES_COLORS[
-                            appointment.associated_encounter.encounter_class
-                          ]
-                        }
-                        className="text-xs"
-                      >
-                        {t(
-                          `encounter_class__${appointment.associated_encounter.encounter_class}`,
-                        )}
-                      </Badge>
-                      <Badge
-                        variant={
-                          ENCOUNTER_PRIORITY_COLORS[
-                            appointment.associated_encounter.priority
-                          ]
-                        }
-                        className="text-xs"
-                      >
-                        {t(
-                          `encounter_priority__${appointment.associated_encounter.priority}`,
-                        )}
-                      </Badge>
-                    </div>
-
-                    {/* Tags */}
-                    {appointment.associated_encounter.tags &&
-                      appointment.associated_encounter.tags.length > 0 && (
-                        <div className="text-sm">
-                          <div className="flex flex-wrap gap-1">
-                            {appointment.associated_encounter.tags.map(
-                              (tag) => (
-                                <Badge
-                                  variant="outline"
-                                  key={tag.id}
-                                  className="text-xs"
-                                >
-                                  {getTagHierarchyDisplay(tag)}
-                                </Badge>
-                              ),
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                    {/* Action Buttons */}
-                    <div className="flex md:flex-row flex-col gap-2 mt-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          navigate(
-                            `/facility/${facility.id}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
-                          )
-                        }
-                        className="flex items-center gap-2"
-                      >
-                        <EyeIcon className="size-4" />
-                        {t("view_encounter")}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          navigate(
-                            `/facility/${facility.id}/patient/${appointment.patient.id}`,
-                          )
-                        }
-                        className="flex items-center gap-2"
-                      >
-                        <PersonIcon className="size-4" />
-                        {t("view_patient")}
-                      </Button>
-                    </div>
-                  </CardContent>
-                ) : (
-                  <CardContent className="space-y-2">
-                    <div className="text-center">
-                      <CardDescription>
-                        {t("no_encounter_linked")}
-                      </CardDescription>
-                      <div className="text-gray-800 mb-4">
-                        <p className="text-xs">
-                          {t("create_encounter_description")}
-                        </p>
+            {/* Lets only show encounter details if the appointment is not fulfilled or if there is an encounter linked to the appointment */}
+            {(appointment.status !== "fulfilled" ||
+              appointment.associated_encounter?.id) && (
+              <div className="md:mx-4 mt-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <AvatarIcon className="size-5 text-primary" />
+                      {t("encounter")}
+                    </CardTitle>
+                  </CardHeader>
+                  {appointment.associated_encounter?.id ? (
+                    <CardContent className="space-y-2">
+                      {/* Encounter Status and Class */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge
+                          variant={
+                            ENCOUNTER_STATUS_COLORS[
+                              appointment.associated_encounter.status
+                            ]
+                          }
+                          className="text-xs"
+                        >
+                          {t(
+                            `encounter_status__${appointment.associated_encounter.status}`,
+                          )}
+                        </Badge>
+                        <Badge
+                          variant={
+                            ENCOUNTER_CLASSES_COLORS[
+                              appointment.associated_encounter.encounter_class
+                            ]
+                          }
+                          className="text-xs"
+                        >
+                          {t(
+                            `encounter_class__${appointment.associated_encounter.encounter_class}`,
+                          )}
+                        </Badge>
+                        <Badge
+                          variant={
+                            ENCOUNTER_PRIORITY_COLORS[
+                              appointment.associated_encounter.priority
+                            ]
+                          }
+                          className="text-xs"
+                        >
+                          {t(
+                            `encounter_priority__${appointment.associated_encounter.priority}`,
+                          )}
+                        </Badge>
                       </div>
-                      <CreateEncounterForm
-                        patientId={appointment.patient.id}
-                        facilityId={facility.id}
-                        patientName={appointment.patient.name}
-                        appointment={appointment.id}
-                        disableRedirectOnSuccess={true}
-                        trigger={
-                          <Button
-                            variant="default"
-                            size="lg"
-                            className="w-full max-w-xs"
-                          >
-                            <PlusCircledIcon className="size-4 mr-2" />
-                            {t("create_encounter")}
-                          </Button>
-                        }
-                        onSuccess={() => {
-                          // Refresh the appointment data to show the new encounter
-                          queryClient.invalidateQueries({
-                            queryKey: ["appointment", appointment.id],
-                          });
-                        }}
-                      />
-                    </div>
-                  </CardContent>
-                )}
-              </Card>
-            </div>
+
+                      {/* Tags */}
+                      {appointment.associated_encounter.tags &&
+                        appointment.associated_encounter.tags.length > 0 && (
+                          <div className="text-sm">
+                            <div className="flex flex-wrap gap-1">
+                              {appointment.associated_encounter.tags.map(
+                                (tag) => (
+                                  <Badge
+                                    variant="outline"
+                                    key={tag.id}
+                                    className="text-xs"
+                                  >
+                                    {getTagHierarchyDisplay(tag)}
+                                  </Badge>
+                                ),
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                      {/* Action Buttons */}
+                      <div className="flex md:flex-row flex-col gap-2 mt-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            navigate(
+                              `/facility/${facility.id}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
+                            )
+                          }
+                          className="flex items-center gap-2"
+                        >
+                          <EyeIcon className="size-4" />
+                          {t("view_encounter")}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            navigate(
+                              `/facility/${facility.id}/patient/${appointment.patient.id}`,
+                            )
+                          }
+                          className="flex items-center gap-2"
+                        >
+                          <PersonIcon className="size-4" />
+                          {t("view_patient")}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  ) : (
+                    <CardContent className="space-y-2">
+                      <div className="text-center">
+                        <CardDescription>
+                          {t("no_encounter_linked")}
+                        </CardDescription>
+                        <div className="text-gray-800 mb-4">
+                          <p className="text-xs">
+                            {t("create_encounter_description")}
+                          </p>
+                        </div>
+                        <CreateEncounterForm
+                          patientId={appointment.patient.id}
+                          facilityId={facility.id}
+                          patientName={appointment.patient.name}
+                          appointment={appointment.id}
+                          disableRedirectOnSuccess={true}
+                          trigger={
+                            <Button
+                              variant="default"
+                              size="lg"
+                              className="w-full max-w-xs"
+                            >
+                              <PlusCircledIcon className="size-4 mr-2" />
+                              {t("create_encounter")}
+                            </Button>
+                          }
+                          onSuccess={() => {
+                            // Refresh the appointment data to show the new encounter
+                            queryClient.invalidateQueries({
+                              queryKey: ["appointment", appointment.id],
+                            });
+                          }}
+                        />
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+              </div>
+            )}
 
             {canUpdateAppointment && (
               <>
