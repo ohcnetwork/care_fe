@@ -522,6 +522,12 @@ export default function QuestionnaireResponsesList({
     queryFn: async () => [],
     enabled: false,
   });
+  // Merge both online and offline data for unified rendering
+  const responsesData = [
+    ...(questionnarieResponses?.results || []),
+    ...(offlineResponses || []),
+  ];
+
   return (
     <div className="gap-4">
       <div className="max-w-full">
@@ -531,12 +537,7 @@ export default function QuestionnaireResponsesList({
           </div>
         ) : (
           <div>
-            {(
-              onlineManager.isOnline()
-                ? questionnarieResponses?.results?.length === 0
-                : offlineResponses.length === 0 &&
-                  questionnarieResponses?.results?.length === 0
-            ) ? (
+            {responsesData.length === 0 ? (
               <Card
                 className={cn(
                   "p-6",
@@ -549,27 +550,15 @@ export default function QuestionnaireResponsesList({
               </Card>
             ) : (
               <ul className="grid gap-4">
-                {!onlineManager.isOnline() &&
-                  offlineResponses.map((item: QuestionnaireResponse) => (
-                    <li key={item.id} className="w-full">
-                      <ResponseCard
-                        item={item}
-                        isPrintPreview={isPrintPreview}
-                      />
-                    </li>
-                  ))}
-
-                {questionnarieResponses?.results?.map(
-                  (item: QuestionnaireResponse) => (
-                    <li key={item.id} className="w-full">
-                      <ResponseCard
-                        key={item.id}
-                        item={item}
-                        isPrintPreview={isPrintPreview}
-                      />
-                    </li>
-                  ),
-                )}
+                {responsesData.map((item: QuestionnaireResponse) => (
+                  <li key={item.id} className="w-full">
+                    <ResponseCard
+                      key={item.id}
+                      item={item}
+                      isPrintPreview={isPrintPreview}
+                    />
+                  </li>
+                ))}
 
                 {!isPrintPreview && (
                   <div className="flex w-full items-center justify-center mt-4">
