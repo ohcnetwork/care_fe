@@ -225,9 +225,7 @@ export class PatientDepartments {
     return this;
   }
   clickConfirmRemove() {
-    cy.get('div[data-slot="alert-dialog-footer"] button')
-      .contains("Remove")
-      .click();
+    cy.clickConfirmAction("Remove");
     return this;
   }
 

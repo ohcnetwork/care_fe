@@ -119,9 +119,7 @@ export class FacilityDevices {
     cy.intercept("DELETE", "/api/v1/facility/**/device/**").as("deleteDevice");
 
     cy.verifyAndClickElement('[data-cy="delete-device-button"]', "Delete");
-    cy.get('div[data-slot="alert-dialog-footer"] button')
-      .contains("Delete")
-      .click();
+    cy.clickConfirmAction("Delete");
 
     // Wait for the delete request to complete and verify status code is 204
     cy.wait("@deleteDevice").its("response.statusCode").should("eq", 204);

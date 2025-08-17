@@ -97,9 +97,7 @@ export class PatientPrescription {
       .then(($button) => {
         if (!$button.is(":disabled")) {
           cy.wrap($button).click();
-          cy.get('div[data-slot="alert-dialog-footer"] button')
-            .contains("Remove")
-            .click();
+          cy.clickConfirmAction("Remove");
         }
       });
     return this;
