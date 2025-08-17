@@ -42,7 +42,9 @@ export class PatientLocation {
 
   clickFirstDeleteLocationButton() {
     cy.get(this.selectors.deleteLocationButton).first().click({ force: true });
-    cy.verifyAndClickElement(this.selectors.removeLocationButton, "Remove");
+    cy.get('div[data-slot="alert-dialog-footer"] button')
+      .contains("Remove")
+      .click();
     return this;
   }
 
