@@ -403,9 +403,10 @@ export function ChargeItemDefinitionForm({
     if (componentIndex === -1) return;
 
     const newComponents = [...currentComponents];
+    const isFactor = component.factor != null;
     newComponents[componentIndex] = {
       ...component,
-      [component.factor != null ? "factor" : "amount"]: value,
+      [isFactor ? "factor" : "amount"]: isFactor ? value : String(value),
     };
 
     form.setValue("price_components", newComponents, { shouldValidate: true });
