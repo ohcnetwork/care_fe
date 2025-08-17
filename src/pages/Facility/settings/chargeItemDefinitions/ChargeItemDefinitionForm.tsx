@@ -300,7 +300,9 @@ export function ChargeItemDefinitionForm({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug", generateSlug(value.title || ""));
+        form.setValue("slug", generateSlug(value.title || ""), {
+          shouldValidate: true,
+        });
       }
     });
 
@@ -376,13 +378,7 @@ export function ChargeItemDefinitionForm({
     if (selected) {
       newComponents = [
         ...currentComponents,
-        {
-          ...component,
-          monetary_component_type: type,
-          factor: component.factor != null ? component.factor : undefined,
-          amount:
-            component.factor != null ? undefined : String(component.amount),
-        },
+        { ...component, monetary_component_type: type },
       ];
     } else {
       newComponents = currentComponents.filter(
@@ -409,8 +405,7 @@ export function ChargeItemDefinitionForm({
     const newComponents = [...currentComponents];
     newComponents[componentIndex] = {
       ...component,
-      factor: component.factor != null ? value : undefined,
-      amount: component.factor != null ? undefined : String(value),
+      [component.factor != null ? "factor" : "amount"]: value,
     };
 
     form.setValue("price_components", newComponents, { shouldValidate: true });
