@@ -104,7 +104,7 @@ export default function TagConfigForm({
     const subscription = form.watch((value, { name }) => {
       if (name === "display") {
         form.setValue("slug", generateSlug(value.display || ""), {
-          shouldValidate: false,
+          shouldValidate: true,
         });
       }
     });
