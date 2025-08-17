@@ -8,14 +8,24 @@ import {
   PenLine,
   Trash,
 } from "lucide-react";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -30,8 +40,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import mutate from "@/Utils/request/mutate";
 import { LocationList, LocationTypeIcons } from "@/types/location/location";
@@ -67,7 +75,6 @@ export function LocationTable({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const deleteLocation = useMutation({
     mutationFn: (locationId: string) => {
@@ -257,39 +264,53 @@ export function LocationTable({
                         {/* Delete button or spacer */}
                         {!location.has_children &&
                         !location.current_encounter ? (
-                          <>
+                          <AlertDialog>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="text-destructive hover:text-destructive"
-                                  onClick={() => setShowDeleteDialog(true)}
-                                  data-cy="delete-location-button"
-                                >
-                                  <Trash className="size-4" />
-                                </Button>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="text-destructive hover:text-destructive"
+                                    data-cy="delete-location-button"
+                                  >
+                                    <Trash className="size-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
                               </TooltipTrigger>
                               <TooltipContent>{t("delete")}</TooltipContent>
                             </Tooltip>
-                            <ConfirmActionDialog
-                              open={showDeleteDialog}
-                              onOpenChange={setShowDeleteDialog}
-                              title={t("remove_name", { name: location.name })}
-                              description={
-                                <>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  {t("remove_name", {
+                                    name: location.name,
+                                  })}
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
                                   {t("are_you_sure_want_to_delete", {
                                     name: location.name,
                                   })}
-                                </>
-                              }
-                              confirmText={t("remove")}
-                              onConfirm={() =>
-                                deleteLocation.mutate(location.id)
-                              }
-                              variant="destructive"
-                            />
-                          </>
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>
+                                  {t("cancel")}
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  data-cy="remove-location-button"
+                                  onClick={() =>
+                                    deleteLocation.mutate(location.id)
+                                  }
+                                  className={buttonVariants({
+                                    variant: "destructive",
+                                  })}
+                                >
+                                  {t("remove")}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         ) : (
                           <div className="size-9"></div>
                         )}
