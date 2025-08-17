@@ -130,9 +130,7 @@ export function PlugConfigEdit({ slug }: Props) {
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         title={t("are_you_sure")}
-        description={
-          <>{t("delete_config_description", { slug: config.slug })}</>
-        }
+        description={t("delete_config_description", { slug: config.slug })}
         confirmText={t("delete")}
         onConfirm={handleDelete}
         variant="destructive"

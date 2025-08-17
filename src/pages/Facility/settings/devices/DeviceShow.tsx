@@ -431,7 +431,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                 open={showDeleteDialog}
                 onOpenChange={setShowDeleteDialog}
                 title={t("delete_device")}
-                description={<>{t("delete_device_confirmation")}</>}
+                description={t("delete_device_confirmation")}
                 variant="destructive"
                 confirmText={isDeleting ? t("deleting") : t("delete")}
                 disabled={isDeleting}

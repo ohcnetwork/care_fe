@@ -373,9 +373,7 @@ export default function ServiceRequestShow({
                     open={showMarkCompleteDialog}
                     onOpenChange={setShowMarkCompleteDialog}
                     title={t("confirm_completion")}
-                    description={
-                      <>{t("service_request_completion_confirmation")}</>
-                    }
+                    description={t("service_request_completion_confirmation")}
                     confirmText={t("confirm")}
                     onConfirm={() => markAsComplete()}
                   />
