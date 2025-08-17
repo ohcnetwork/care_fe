@@ -112,7 +112,6 @@ export const queueAssignUserToPatient = async ({
 
     queryClient.setQueryData(["patientUsers", patientId], updatedUserList);
 
-   
     onSuccess?.();
   } catch (error) {
     const errorObj =
@@ -166,19 +165,18 @@ export const queueRemoveUserFromPatient = async ({
       normalizedData: normalizedData,
     });
 
-      
-      await db.OfflineWrites.where({
-        type: OfflineKeyMap.assign_user_to_patient,
-        resourceType: "patient",
+    await db.OfflineWrites.where({
+      type: OfflineKeyMap.assign_user_to_patient,
+      resourceType: "patient",
+    })
+      .and((entry) => {
+        const payload = entry.payload as { user: string; role: string };
+        return (
+          entry.mutationPathParams?.patientId === patientId &&
+          payload?.user === removeUserId
+        );
       })
-        .and((entry) => {
-          const payload = entry.payload as { user: string; role: string };
-          return (
-            entry.mutationPathParams?.patientId === patientId &&
-            payload?.user === removeUserId
-          );
-        })
-        .delete();
+      .delete();
 
     const users = queryClient.getQueryData<PaginatedResponse<UserReadMinimal>>([
       "patientUsers",
