@@ -160,11 +160,25 @@ export const handleCreateandUpdateResourceRequestEdit = async (
 
 export const handleAssignUserToPatientEdit = async (
   entry: OfflineWritesEntry,
-  setSelectedUserAssignmentEntry: (entry: OfflineWritesEntry | null) => void,
-  setIsUserAssignmentFormOpen: (open: boolean) => void,
 ) => {
-  setSelectedUserAssignmentEntry(entry);
-  setIsUserAssignmentFormOpen(true);
+  // Extract patient ID from the mutation path params
+  const patientId = (entry.mutationPathParams as any)?.patientId;
+  
+  if (!patientId) {
+    toast.error("Patient information not found in offline entry");
+    return;
+  }
+
+  // Navigate to the patient users page with offlineEntryId in query params
+  navigate(
+    `/facility/${entry.facilityId}/patient/${patientId}`,
+    {
+      query: {
+        offlineEntryId: entry.id,
+        tab: "users",
+      },
+    },
+  );
 };
 
 export const handleRemoveUserFromPatientEdit = async (

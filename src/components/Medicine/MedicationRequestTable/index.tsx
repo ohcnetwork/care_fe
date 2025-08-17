@@ -75,7 +75,6 @@ export default function MedicationRequestTable() {
   const [showStopped, setShowStopped] = useState(false);
   const canAccess = canViewClinicalData || canViewEncounter;
 
-  // 🔍 DEBUGGING: Check URL path matching
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;
 

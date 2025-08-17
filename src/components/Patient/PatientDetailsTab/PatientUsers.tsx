@@ -47,17 +47,12 @@ import UserSelector from "@/components/Common/UserSelector";
 import { AuthUserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import { useOfflineEntry } from "@/hooks/useOfflineEntry";
 
 import { getPermissions } from "@/common/Permissions";
 
-import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
-import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
-import {
-  handleOfflineRecordSuccess,
-  isOfflineId,
-  saveOfflineWrite,
-  saveOfflineWriteData,
-} from "@/OfflineSupport/offlineWriteHelpers";
+import { OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
+import { handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -70,14 +65,16 @@ import roleApi from "@/types/emr/role/roleApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 import { PatientProps } from ".";
+import {
+  queueAssignUserToPatient,
+  queueRemoveUserFromPatient,
+} from "./offlineQueue";
 
 interface AddUserSheetProps {
   patientId: string;
   users: PaginatedResponse<UserReadMinimal> | undefined;
   authUser: AuthUserModel;
   patientData?: PatientRead;
-  offlineEntryId?: string;
-
   onClose?: () => void;
 }
 
@@ -86,20 +83,16 @@ export function AddUserSheet({
   users,
   authUser,
   patientData,
-  offlineEntryId,
   onClose,
 }: AddUserSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { facilityId } = useCurrentFacility();
-  const db = new AppCacheDB();
+  const { offlineEntryId, offlineEntry } = useOfflineEntry();
 
   const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserReadMinimal>();
   const [selectedRole, setSelectedRole] = useState<string>("");
-  const [offlineEntry, setOfflineEntry] = useState<OfflineWritesEntry | null>(
-    null,
-  );
 
   const { data: roles } = useQuery({
     queryKey: ["roles"],
@@ -109,22 +102,7 @@ export function AddUserSheet({
     enabled: open,
   });
 
-  useEffect(() => {
-    if (offlineEntryId) {
-      const loadOfflineEntry = async () => {
-        try {
-          const entry = await db.OfflineWrites.get(offlineEntryId);
-          if (entry && entry.normalizedData) {
-            setOfflineEntry(entry);
-          }
-        } catch (error) {
-          console.error("Error loading offline entry:", error);
-        }
-      };
-      loadOfflineEntry();
-    }
-  }, [offlineEntryId]);
-
+  // Set form values when offline entry data is available
   useEffect(() => {
     if (offlineEntry?.normalizedData) {
       const normalizedData = offlineEntry.normalizedData as {
@@ -132,20 +110,21 @@ export function AddUserSheet({
         role: string;
       };
 
-      if (normalizedData.user) {
+      if (normalizedData.user && !selectedUser) {
         setSelectedUser(normalizedData.user);
       }
-      if (normalizedData.role) {
+      if (normalizedData.role && !selectedRole) {
         setSelectedRole(normalizedData.role);
       }
     }
-  }, [offlineEntry, offlineEntryId]);
+  }, [offlineEntry, selectedUser, selectedRole]);
 
+  // Auto-open sheet when offline entry is present
   useEffect(() => {
-    if (offlineEntryId) {
+    if (offlineEntryId && !open) {
       setOpen(true);
     }
-  }, [offlineEntryId]);
+  }, [offlineEntryId, open]);
 
   const { mutate: assignUser } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
@@ -173,76 +152,6 @@ export function AddUserSheet({
     },
   });
 
-  const queueNewAssignUseroffline = async (
-    assignUserData: { user: string; role: string },
-    selectedUser: UserReadMinimal,
-    users: PaginatedResponse<UserReadMinimal> | undefined,
-  ) => {
-    try {
-      const canAddUser = !users?.results?.some(
-        (user) => user.id === selectedUser.id,
-      );
-
-      if (!canAddUser) {
-        toast.error(t("user_already_assigned_to_this_patient"));
-        return;
-      }
-      const generatedId = `offline-${crypto.randomUUID()}`;
-      const offlineWrite: saveOfflineWriteData = {
-        id: generatedId,
-        userId: authUser.external_id,
-        facilityId: facilityId,
-        mutationSyncRouteKey: OfflineKeyMap.assign_user_to_patient,
-        mutationPathParams: { patientId } satisfies PathParamsObject<
-          typeof patientApi.addUser
-        >,
-        type: OfflineKeyMap.assign_user_to_patient,
-        resourceType: "patient",
-        payload: assignUserData,
-        parentMutationId: isOfflineId(patientId) ? patientId : undefined,
-      };
-
-      const saveResult = await saveOfflineWrite(offlineWrite);
-      if (!saveResult.success) {
-        toast.error(saveResult.error);
-        return;
-      }
-
-      const normalizedData = {
-        user: selectedUser,
-        role: selectedRole,
-        patientName: patientData?.name || "Unknown Patient",
-      };
-      await db.OfflineWrites.update(saveResult.entry.id, {
-        normalizedData: normalizedData,
-      });
-
-      const updatedUserList: PaginatedResponse<UserReadMinimal> = users?.results
-        ? {
-            ...users,
-            results: [
-              ...users.results,
-              { ...selectedUser, is_updated_offline: true },
-            ],
-            count: (users.count ?? users.results.length) + 1,
-          }
-        : {
-            count: 1,
-            results: [{ ...selectedUser, is_updated_offline: true }],
-          };
-
-      queryClient.setQueryData(["patientUsers", patientId], updatedUserList);
-
-      toast.success(t("user_added_to_patient_successfully"));
-      setOpen(false);
-      setSelectedUser(undefined);
-      setSelectedRole("");
-    } catch (error) {
-      console.error("Error while queueing assign user offline:", error);
-      toast.error(t("error_while_queueing_assign_user_offline"));
-    }
-  };
-
   const handleAddUser = async () => {
     if (!selectedUser || !selectedRole) {
       toast.error(t("please_select_both_user_and_role"));
@@ -254,7 +163,26 @@ export function AddUserSheet({
       role: selectedRole,
     };
     if (!onlineManager.isOnline()) {
-      await queueNewAssignUseroffline(assignUserData, selectedUser, users);
+      await queueAssignUserToPatient({
+        assignUserData,
+        selectedUser,
+        users,
+        patientId,
+        facilityId,
+        authUser,
+        queryClient,
+        patientData,
+        onSuccess: () => {
+          toast.success(t("user_added_to_patient_successfully"));
+          setOpen(false);
+          setSelectedUser(undefined);
+          setSelectedRole("");
+        },
+        onError: (error) => {
+          console.error("Error while queueing assign user offline:", error);
+          toast.error(t("error_while_queueing_assign_user_offline"));
+        },
+      });
       return;
     }
 
@@ -398,7 +326,6 @@ export function AddUserSheet({
 
 export const PatientUsers = ({ patientData }: PatientProps) => {
   const patientId = patientData.id;
-  const db = new AppCacheDB();
   const authUser = useAuthUser();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -418,73 +345,6 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
     meta: { persist: true },
     networkMode: "online",
   });
-
-  const queueRemoveUserOffline = async (
-    removeUserId: string,
-    userToRemove: UserReadMinimal,
-  ) => {
-    try {
-      const generatedId = `offline-${crypto.randomUUID()}`;
-      const offlineWrite = {
-        id: generatedId,
-        userId: authUser.external_id,
-        facilityId: facilityId,
-        mutationSyncRouteKey: OfflineKeyMap.remove_user_from_patient,
-        mutationPathParams: { patientId } satisfies PathParamsObject<
-          typeof patientApi.removeUser
-        >,
-        type: OfflineKeyMap.remove_user_from_patient,
-        resourceType: "patient",
-        payload: { user: removeUserId },
-        parentMutationId: isOfflineId(patientId) ? patientId : undefined,
-      };
-
-      const saveResult = await saveOfflineWrite(offlineWrite);
-      if (!saveResult.success) {
-        toast.error(saveResult.error);
-        return;
-      }
-
-      const normalizedData = {
-        user: userToRemove,
-        patientName: patientData.name,
-      };
-      await db.OfflineWrites.update(saveResult.entry.id, {
-        normalizedData: normalizedData,
-      });
-
-      await db.OfflineWrites.where({
-        type: "assignUser",
-        resourceType: "patient",
-      })
-        .and((entry) => {
-          const payload = entry.payload as { user: string; role: string };
-          return (
-            entry.mutationPathParams?.patientId === patientId &&
-            payload?.user === removeUserId
-          );
-        })
-        .delete();
-
-      const users = queryClient.getQueryData<
-        PaginatedResponse<UserReadMinimal>
-      >(["patientUsers", patientId]);
-      const updatedUserList = users
-        ? {
-            ...users,
-            results: users.results.filter((u) => u.id !== removeUserId),
-            count: users.count - 1,
-          }
-        : { count: 0, results: [] };
-
-      queryClient.setQueryData(["patientUsers", patientId], updatedUserList);
-
-      toast.success(t("user_removed_successfully"));
-    } catch (err) {
-      console.error("Error queuing remove user offline:", err);
-      toast.error("error_while_remove_user_offline");
-    }
-  };
 
   const { mutate: removeUser } = useMutation({
     mutationFn: (user: string) =>
@@ -520,7 +380,22 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
         toast.error("User data is missing");
         return;
       }
-      await queueRemoveUserOffline(userId, userToRemove);
+      await queueRemoveUserFromPatient({
+        removeUserId: userId,
+        userToRemove,
+        patientId,
+        facilityId,
+        authUser,
+        patientData,
+        queryClient,
+        onSuccess: () => {
+          toast.success(t("user_removed_successfully"));
+        },
+        onError: (error) => {
+          console.error("Error queuing remove user offline:", error);
+          toast.error("error_while_remove_user_offline");
+        },
+      });
       return;
     }
 

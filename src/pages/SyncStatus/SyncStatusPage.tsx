@@ -1106,10 +1106,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
   const [selectedEncounterEntry, setSelectedEncounterEntry] =
     useState<OfflineWritesEntry | null>(null);
   const [isEncounterFormOpen, setIsEncounterFormOpen] = useState(false);
-  const [selectedUserAssignmentEntry, setSelectedUserAssignmentEntry] =
-    useState<OfflineWritesEntry | null>(null);
-  const [isUserAssignmentFormOpen, setIsUserAssignmentFormOpen] =
-    useState(false);
+
   const [deleteConfirmEntry, setDeleteConfirmEntry] =
     useState<OfflineWritesEntry | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -1173,11 +1170,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
         await handleCreateandUpdateResourceRequestEdit(targetEntry, facilityId);
         break;
       case "assign_user_to_patient":
-        await handleAssignUserToPatientEdit(
-          targetEntry,
-          setSelectedUserAssignmentEntry,
-          setIsUserAssignmentFormOpen,
-        );
+        await handleAssignUserToPatientEdit(targetEntry);
         break;
       case "remove_user_from_patient":
         await handleRemoveUserFromPatientEdit(targetEntry);
@@ -1292,24 +1285,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
           />
         )}
 
-        {/* Global AddUserSheet for editing offline user assignments */}
-        {selectedUserAssignmentEntry && isUserAssignmentFormOpen && (
-          <AddUserSheet
-            patientId={
-              (selectedUserAssignmentEntry.mutationPathParams as any)
-                ?.patientId || ""
-            }
-            users={undefined}
-            authUser={authUser}
-            offlineEntryId={selectedUserAssignmentEntry.id}
-            onClose={() => {
-              setIsUserAssignmentFormOpen(false);
-              setSelectedUserAssignmentEntry(null);
-              triggerRefresh();
-            }}
-          />
-        )}
-
+     
         {/* Delete Confirmation Dialog */}
         <AlertDialog
           open={isDeleteDialogOpen}
