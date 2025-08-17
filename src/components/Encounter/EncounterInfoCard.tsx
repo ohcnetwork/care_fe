@@ -116,7 +116,11 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
             title={t("view_patient")}
           >
             <CareIcon icon="l-user" className="size-2 flex-shrink-0" />
-            <span className="leading-none truncate">{t("view_patient")}</span>
+            <span className="leading-none truncate">
+              {encounter.status === "completed"
+                ? t("view_patient_actions")
+                : t("view_patient")}
+            </span>
           </Button>
         </Link>
         <Link

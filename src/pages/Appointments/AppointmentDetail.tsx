@@ -692,7 +692,7 @@ const AppointmentActions = ({
             className="w-full justify-start h-12"
           >
             <PersonIcon className="size-4 mr-3" />
-            {t("view_patient")}
+            {t("view_patient_actions")}
           </Button>
 
           {/* Check In - Only for booked appointments */}
