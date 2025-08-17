@@ -88,14 +88,9 @@ function DeleteOrgDialog({
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         title={t("remove_name", { name: org.name })}
-        description={
-          <>
-            {" "}
-            {t("are_you_sure_want_to_delete", {
-              name: org.name,
-            })}
-          </>
-        }
+        description={t("are_you_sure_want_to_delete", {
+          name: org.name,
+        })}
         variant="destructive"
         confirmText={t("remove")}
         onConfirm={() => deleteOrganization()}

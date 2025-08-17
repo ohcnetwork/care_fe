@@ -103,14 +103,9 @@ function TagConfigCard({
                   open={showArchiveDialog}
                   onOpenChange={setShowArchiveDialog}
                   title={t("archive_child_tag")}
-                  description={
-                    <>
-                      {" "}
-                      {t("archive_child_tag_confirmation", {
-                        name: config.display,
-                      })}
-                    </>
-                  }
+                  description={t("archive_child_tag_confirmation", {
+                    name: config.display,
+                  })}
                   variant="destructive"
                   onConfirm={() => {
                     onArchive(config);

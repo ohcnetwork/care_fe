@@ -239,13 +239,9 @@ export function LocationCard({
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         title={t("remove_name", { name: location.name })}
-        description={
-          <>
-            {t("are_you_sure_want_to_delete", {
-              name: location.name,
-            })}
-          </>
-        }
+        description={t("are_you_sure_want_to_delete", {
+          name: location.name,
+        })}
         confirmText={t("remove")}
         onConfirm={() => removeLocation({})}
         variant="destructive"

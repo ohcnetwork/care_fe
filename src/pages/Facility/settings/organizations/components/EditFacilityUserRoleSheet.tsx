@@ -186,14 +186,10 @@ export default function EditUserRoleSheet({
         open={showRemoveDialog}
         onOpenChange={setShowRemoveDialog}
         title={t("remove_user_organization")}
-        description={
-          <>
-            {t("remove_user_warn", {
-              firstName: userRole.user.first_name,
-              lastName: userRole.user.last_name,
-            })}
-          </>
-        }
+        description={t("remove_user_warn", {
+          firstName: userRole.user.first_name,
+          lastName: userRole.user.last_name,
+        })}
         confirmText={t("remove")}
         variant="destructive"
         onConfirm={() => removeRole()}

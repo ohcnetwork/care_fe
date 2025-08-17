@@ -355,13 +355,9 @@ export function CareTeamSheet({
           open={!!memberToRemove}
           onOpenChange={(open) => !open && setMemberToRemove(undefined)}
           title={t("confirm_removing_member")}
-          description={
-            <>
-              {t("confirm_removing_member_description", {
-                member: memberToRemove ? formatName(memberToRemove) : "",
-              })}
-            </>
-          }
+          description={t("confirm_removing_member_description", {
+            member: memberToRemove ? formatName(memberToRemove) : "",
+          })}
           onConfirm={handleRemoveMember}
           confirmText={t("remove")}
         />
