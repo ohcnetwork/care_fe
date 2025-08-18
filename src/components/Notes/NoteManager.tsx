@@ -122,7 +122,7 @@ function MessageItem({
 }: React.ComponentProps<"div"> & { message: Message }) {
   const authUser = useAuthUser();
   const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
-  const isCurrentUser = authUser?.external_id === message.created_by.id;
+  const isCurrentUser = authUser?.id === message.created_by.id;
 
   return (
     <div

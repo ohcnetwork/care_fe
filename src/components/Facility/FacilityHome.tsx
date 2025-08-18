@@ -24,18 +24,15 @@ import FacilityDeleteDialog from "@/components/Facility/FacilityDeleteDialog";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
-import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import uploadFile from "@/Utils/request/uploadFile";
-import { getAuthorizationHeader } from "@/Utils/request/utils";
-import { sleep } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { FeatureBadge } from "@/pages/Facility/Utils";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
+import { FACILITY_FEATURE_TYPES } from "@/types/facility/facility";
+import facilityApi from "@/types/facility/facilityApi";
 import { renderGeoOrganizations } from "@/types/organization/organization";
 
 import { FacilityMapsLink } from "./FacilityMapLink";
@@ -63,8 +60,8 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
   const { data: facilityData, isLoading } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(routes.facility.show, {
-      pathParams: { id: facilityId },
+    queryFn: query(facilityApi.get, {
+      pathParams: { facilityId },
     }),
   });
 
@@ -72,10 +69,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
     hasPermission,
     facilityData?.root_org_permissions ?? [],
   );
-
   const { mutateAsync: deleteAvatar } = useMutation({
-    mutationFn: mutate(routes.deleteFacilityCoverImage, {
-      pathParams: { id: facilityId },
+    mutationFn: mutate(facilityApi.deleteCoverImage, {
+      pathParams: { facilityId },
     }),
     onSuccess: () => {
       toast.success(t("cover_image_deleted"));
@@ -86,38 +82,32 @@ export const FacilityHome = ({ facilityId }: Props) => {
     },
   });
 
+  const { mutateAsync: uploadCoverImage } = useMutation({
+    mutationFn: mutate(facilityApi.uploadCoverImage, {
+      pathParams: { facilityId },
+    }),
+    onSuccess: () => {
+      setEditCoverImage(false);
+      queryClient.invalidateQueries({
+        queryKey: ["facility", facilityId],
+      });
+      toast.success(t("cover_image_updated"));
+    },
+  });
+
   const handleCoverImageUpload = async (
     file: File,
     onSuccess: () => void,
     onError: () => void,
   ) => {
-    const formData = new FormData();
-    formData.append("cover_image", file);
-    const url = `${careConfig.apiUrl}/api/v1/facility/${facilityId}/cover_image/`;
-
-    await uploadFile(
-      url,
-      formData,
-      "POST",
-      { Authorization: getAuthorizationHeader() },
-      async (xhr: XMLHttpRequest) => {
-        if (xhr.status === 200) {
-          setEditCoverImage(false);
-          await sleep(1000);
-          queryClient.invalidateQueries({
-            queryKey: ["facility", facilityId],
-          });
-          toast.success(t("cover_image_updated"));
-          onSuccess();
-        } else {
-          onError();
-        }
-      },
-      null,
-      () => {
-        onError();
-      },
-    );
+    try {
+      const formData = new FormData();
+      formData.append("cover_image", file);
+      await uploadCoverImage(formData);
+      onSuccess();
+    } catch {
+      onError();
+    }
   };
   const handleCoverImageDelete = async (
     onSuccess: () => void,
@@ -130,8 +120,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
       onError();
     }
   };
-
-  const isValidCoordinate = (val: number) => val && Number(val) !== 0;
 
   if (isLoading) {
     return <Loading />;
@@ -288,21 +276,19 @@ export const FacilityHome = ({ facilityId }: Props) => {
                           />
                         </span>
                       </div>
-
-                      <div className="flex flex-col mt-2">
-                        <span className="font-semibold">
-                          {t("location_details")}
-                        </span>
-                        <span className="text-sm">
-                          {isValidCoordinate(facilityData.latitude) &&
-                            isValidCoordinate(facilityData.longitude) && (
-                              <FacilityMapsLink
-                                latitude={facilityData.latitude.toString()}
-                                longitude={facilityData.longitude.toString()}
-                              />
-                            )}
-                        </span>
-                      </div>
+                      {facilityData?.latitude && facilityData?.longitude && (
+                        <div className="flex flex-col mt-2">
+                          <span className="font-semibold">
+                            {t("location_details")}
+                          </span>
+                          <span className="text-sm">
+                            <FacilityMapsLink
+                              latitude={facilityData.latitude}
+                              longitude={facilityData.longitude}
+                            />
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -338,11 +324,8 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
-                      {facilityData.features?.map((featureId) => (
-                        <FeatureBadge
-                          key={featureId}
-                          featureId={featureId as number}
-                        />
+                      {facilityData.features?.map((featureId: number) => (
+                        <FeatureBadge key={featureId} featureId={featureId} />
                       ))}
                     </div>
                   </CardContent>

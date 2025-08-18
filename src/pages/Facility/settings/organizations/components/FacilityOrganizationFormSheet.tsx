@@ -40,28 +40,20 @@ import {
 
 import mutate from "@/Utils/request/mutate";
 import {
-  FacilityOrganization,
-  FacilityOrganizationCreate,
-  FacilityOrganizationEdit,
+  FacilityOrganizationRead,
+  FacilityOrganizationType,
 } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface Props {
   facilityId: string;
   parentId?: string;
-  org?: FacilityOrganization;
+  org?: FacilityOrganizationRead;
 
   trigger: React.ReactNode;
 
   tooltip?: string;
 }
-
-const ORG_TYPES = [
-  { value: "dept", label: "department" },
-  { value: "team", label: "team" },
-] as const;
-
-type OrgType = (typeof ORG_TYPES)[number]["value"];
 
 export default function FacilityOrganizationFormSheet({
   facilityId,
@@ -81,8 +73,18 @@ export default function FacilityOrganizationFormSheet({
       .string()
       .trim()
       .min(1, { message: t("field_required") }),
-    description: z.string().optional(),
-    org_type: z.enum(["dept", "team"]),
+    description: z.string().trim().default(""),
+    org_type: z.nativeEnum(FacilityOrganizationType).refine(
+      (val) => {
+        return (
+          val === FacilityOrganizationType.DEPT ||
+          val === FacilityOrganizationType.TEAM
+        );
+      },
+      {
+        message: t("invalid_organization_type"),
+      },
+    ),
   });
 
   const form = useForm({
@@ -90,7 +92,7 @@ export default function FacilityOrganizationFormSheet({
     defaultValues: {
       name: "",
       description: "",
-      org_type: "dept" as OrgType,
+      org_type: FacilityOrganizationType.DEPT,
     },
   });
 
@@ -99,17 +101,15 @@ export default function FacilityOrganizationFormSheet({
       form.reset({
         name: org.name || "",
         description: org.description || "",
-        org_type: org.org_type as OrgType,
+        org_type: org.org_type,
       });
     }
   }, [isEditMode, org, open]);
 
   const { mutate: createOrganization, isPending: isCreating } = useMutation({
-    mutationFn: (body: FacilityOrganizationCreate) =>
-      mutate(facilityOrganizationApi.create, {
-        pathParams: { facilityId },
-        body,
-      })(body),
+    mutationFn: mutate(facilityOrganizationApi.create, {
+      pathParams: { facilityId },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["facilityOrganization"],
@@ -127,11 +127,9 @@ export default function FacilityOrganizationFormSheet({
   });
 
   const { mutate: updateOrganization, isPending: isUpdating } = useMutation({
-    mutationFn: (body: FacilityOrganizationEdit) =>
-      mutate(facilityOrganizationApi.update, {
-        pathParams: { facilityId, organizationId: org?.id },
-        body,
-      })(body),
+    mutationFn: mutate(facilityOrganizationApi.update, {
+      pathParams: { facilityId, organizationId: org?.id },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["facilityOrganization"],
@@ -144,7 +142,7 @@ export default function FacilityOrganizationFormSheet({
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const data = {
       name: values.name.trim(),
-      description: values.description?.trim() || undefined,
+      description: values.description.trim(),
       org_type: values.org_type,
       parent: parentId,
     };
@@ -152,7 +150,7 @@ export default function FacilityOrganizationFormSheet({
     if (isEditMode) {
       updateOrganization({ ...data, facility: facilityId });
     } else {
-      createOrganization(data);
+      createOrganization({ ...data, facility: facilityId });
     }
   };
 
@@ -224,11 +222,19 @@ export default function FacilityOrganizationFormSheet({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {ORG_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {t(type.label)}
-                        </SelectItem>
-                      ))}
+                      {Object.values(FacilityOrganizationType)
+                        .filter(
+                          (type) => type !== FacilityOrganizationType.ROOT,
+                        )
+                        .map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {t(
+                              type === FacilityOrganizationType.DEPT
+                                ? t("department")
+                                : t("team"),
+                            )}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />

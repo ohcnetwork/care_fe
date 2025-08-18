@@ -1,60 +1,44 @@
-import { PaginatedResponse } from "@/Utils/request/types";
-import { UserBase } from "@/types/user/user";
+import { RoleRead } from "@/types/emr/role/role";
+import { UserReadMinimal } from "@/types/user/user";
 
-type org_type = "root" | "dept" | "team";
+export enum FacilityOrganizationType {
+  ROOT = "root",
+  DEPT = "dept",
+  TEAM = "team",
+}
 
 export interface FacilityOrganizationParent {
   id: string;
   name: string;
   description?: string;
-  org_type: org_type;
+  org_type: FacilityOrganizationType;
   level_cache: number;
   parent?: FacilityOrganizationParent;
 }
 
-export interface FacilityOrganization {
-  id: string;
+export interface FacilityOrganizationBase {
   name: string;
-  description?: string;
-  org_type: org_type;
+  description: string;
+  org_type: FacilityOrganizationType;
+}
+
+export interface FacilityOrganizationRead extends FacilityOrganizationBase {
+  id: string;
+  parent?: FacilityOrganizationParent;
+  active: boolean;
   level_cache: number;
   has_children: boolean;
-  active: boolean;
-  parent?: FacilityOrganizationParent;
   created_at: string;
   updated_at: string;
 }
 
-export interface FacilityOrganizationCreate {
-  name: string;
-  description?: string;
-  org_type: org_type;
-  parent?: string;
-}
-
-export interface FacilityOrganizationEdit extends FacilityOrganizationCreate {
+export interface FacilityOrganizationCreate extends FacilityOrganizationBase {
   facility: string;
+  parent?: string;
 }
 
 export interface FacilityOrganizationUserRole {
   id: string;
-  user: UserBase;
-  role: {
-    id: string;
-    name: string;
-  };
+  user: UserReadMinimal;
+  role: RoleRead;
 }
-
-export interface Role {
-  id: string;
-  name: string;
-  description?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export type FacilityOrganizationResponse =
-  PaginatedResponse<FacilityOrganization>;
-export type FacilityOrganizationUserRoleResponse =
-  PaginatedResponse<FacilityOrganizationUserRole>;
-export type RoleResponse = PaginatedResponse<Role>;
