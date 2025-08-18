@@ -131,14 +131,25 @@ const ScheduleExceptionItem = (
                 {formatTimeShort(props.start_time)} -{" "}
                 {formatTimeShort(props.end_time)}
               </span>
-              <span> {t("from")} </span>
-              <span className="font-medium">
-                {format(parseISO(props.valid_from), "EEE, dd MMM yyyy")}
-              </span>
-              <span> {t("to")} </span>
-              <span className="font-medium">
-                {format(parseISO(props.valid_to), "EEE, dd MMM yyyy")}
-              </span>
+              {props.valid_from === props.valid_to ? (
+                <>
+                  <span> {t("on")} </span>
+                  <span className="font-medium">
+                    {format(parseISO(props.valid_from), "EEE, dd MMM yyyy")}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span> {t("from")} </span>
+                  <span className="font-medium">
+                    {format(parseISO(props.valid_from), "EEE, dd MMM yyyy")}
+                  </span>
+                  <span> {t("to")} </span>
+                  <span className="font-medium">
+                    {format(parseISO(props.valid_to), "EEE, dd MMM yyyy")}
+                  </span>
+                </>
+              )}
             </span>
           </div>
         </div>
