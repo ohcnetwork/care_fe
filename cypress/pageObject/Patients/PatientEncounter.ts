@@ -22,7 +22,7 @@ export class PatientEncounter {
   }
 
   clickUpdateEncounter() {
-    cy.get("button:contains('Update Encounter')").click();
+    cy.get("a:contains('Update Encounter')").filter(":visible").click();
     return this;
   }
 
@@ -72,16 +72,19 @@ export class PatientEncounter {
   }
 
   clickEncounterMarkAsComplete() {
-    cy.get("button[data-slot='dropdown-menu-trigger']")
-      .contains("Update")
+    cy.get("button[data-slot='tabs-trigger']")
+      .filter(":visible")
+      .contains("Actions")
       .click();
-    cy.get('[role="menuitem"]').contains("Mark as Complete").click();
+    cy.get("button").contains("Mark as completed").click();
     return this;
   }
 
   clickConfirmEncounterAsComplete() {
     cy.intercept("GET", "**/api/v1/encounter/**").as("getEncounter");
-    cy.get("button:contains('Mark as Complete')").click();
+    cy.get("div[data-slot='alert-dialog-footer']")
+      .contains("Mark as complete")
+      .click();
     cy.wait("@getEncounter").then((interception) => {
       expect(interception.response?.statusCode).to.eq(200); // Verify status code
       expect(interception.response?.body).to.have.property(
