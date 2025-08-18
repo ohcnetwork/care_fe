@@ -210,8 +210,10 @@ export default function AppointmentDetail(props: Props) {
                 <span>{t("save")}</span>
               </Button>
             </div>
-            {/* Lets only show encounter details if the appointment is not fulfilled or if there is an encounter linked to the appointment */}
-            {(appointment.status !== "fulfilled" ||
+            {/* Lets only show encounter details if the appointment is not in a final status or if there is an encounter linked to the appointment */}
+            {(![...AppointmentFinalStatuses, "noshow"].includes(
+              appointment.status,
+            ) ||
               appointment.associated_encounter?.id) && (
               <div className="md:mx-4 mt-4">
                 <Card>
