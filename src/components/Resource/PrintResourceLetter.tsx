@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
+import { Badge } from "@/components/ui/badge";
+
 import Loading from "@/components/Common/Loading";
 
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
@@ -10,7 +12,6 @@ import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
-import { Badge } from "@/components/ui/badge";
 
 export default function PrintResourceLetter({ id }: { id: string }) {
   const { t } = useTranslation();
