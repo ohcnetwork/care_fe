@@ -612,10 +612,10 @@ export function ChargeItemDefinitionForm({
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Base Price and MRP */}
-            <div className="p-4 bg-gray-50 rounded-lg border">
+            {/* <div className="p-4 bg-gray-50 rounded-lg border">
               <div className="space-y-4">
                 {/* MRP */}
-                {/* <div className="flex items-center justify-between">
+            {/* <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-medium text-gray-900">{t("mrp")}</h4>
                     <p className="text-sm text-gray-600">
@@ -630,40 +630,40 @@ export function ChargeItemDefinitionForm({
                     />
                   </div>
                 </div> */}
-
-                {/* Base Price */}
-                <FormField
-                  control={form.control}
-                  name="price_components.0.amount"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center justify-between gap-2">
-                      <FormLabel className="font-medium text-gray-900 text-xl">
-                        {t("base_price")}
-                      </FormLabel>
-                      <div className="flex flex-col items-end gap-2">
-                        <FormControl className="w-48">
-                          <MonetaryAmountInput
-                            {...field}
-                            value={field.value ?? 0}
-                            onChange={(e) =>
-                              field.onChange(String(e.target.value))
-                            }
-                            placeholder="0.00"
-                          />
-                        </FormControl>
-                        <FormMessage>
-                          {
-                            form.formState.errors.price_components?.[0]?.amount
-                              ?.message
-                          }
-                        </FormMessage>
-                      </div>
-                    </FormItem>
-                  )}
-                />
+            {/* Base Price */}
+            <div className="rounded-lg border p-4 bg-gray-50 space-y-2">
+              <div>
+                <h4 className="text-lg font-medium text-gray-900">
+                  {t("base_price")}
+                </h4>
+                <p className="text-sm text-gray-600">
+                  {t("base_price_explanation")}
+                </p>
               </div>
-            </div>
 
+              <FormField
+                control={form.control}
+                name="price_components.0.amount"
+                render={({ field }) => (
+                  <FormItem className="w-full space-y-1">
+                    <FormControl>
+                      <MonetaryAmountInput
+                        {...field}
+                        value={field.value ?? 0}
+                        onChange={(e) => field.onChange(String(e.target.value))}
+                        placeholder="0.00"
+                      />
+                    </FormControl>
+                    <FormMessage>
+                      {
+                        form.formState.errors.price_components?.[0]?.amount
+                          ?.message
+                      }
+                    </FormMessage>
+                  </FormItem>
+                )}
+              />
+            </div>
             {/* Discounts */}
             <MonetaryComponentSelectionSection
               title={t("discounts")}
