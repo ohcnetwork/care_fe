@@ -57,8 +57,6 @@ export function useKeyboardShortcuts(
       };
 
       try {
-        // Simple expression evaluation for conditions like "canEdit && questionnairesEnabled"
-        // Replace variable names with their values
         let expression = whenClause;
         Object.entries(evalContext).forEach(([key, value]) => {
           const regex = new RegExp(`\\b${key}\\b`, "g");
@@ -116,6 +114,47 @@ export function useKeyboardShortcuts(
     return { direct, prefixGroups, modified };
   }, [shortcuts, evaluateWhenCondition]);
 
+  // Helper function to check if this is a browser shortcut we should not override
+  const isBrowserShortcut = useCallback((event: KeyboardEvent): boolean => {
+    const key = event.key.toLowerCase();
+
+    // Common browser shortcuts that should never be overridden
+    if (event.ctrlKey || event.metaKey) {
+      const browserShortcuts = [
+        "f", // Find
+        "r", // Reload
+        "t", // New tab
+        "w", // Close tab
+        "n", // New window
+        "l", // Location bar
+        "d", // Bookmark
+        "h", // History
+        "j", // Downloads
+        "u", // View source
+        "p", // Print
+        "s", // Save
+        "o", // Open
+        "z", // Undo
+        "y", // Redo
+        "x", // Cut
+        "c", // Copy
+        "v", // Paste
+        "a", // Select all
+        "+", // Zoom in
+        "-", // Zoom out
+        "0", // Reset zoom
+        "shift+i", // Developer tools
+        "shift+c", // Developer tools
+        "shift+j", // Developer tools
+      ];
+
+      const keyCombo = event.shiftKey ? `shift+${key}` : key;
+      return browserShortcuts.includes(keyCombo);
+    }
+
+    return false;
+  }, []);
+
   // Helper function to check if event matches key combination
   const matchesKeyCombo = useCallback(
     (keyCombo: string, event: KeyboardEvent): boolean => {
@@ -165,7 +204,6 @@ export function useKeyboardShortcuts(
     }
   }, [activePrefix]);
 
-  // Handle keyboard events
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       // Skip if typing in input fields (unless explicitly allowed)
@@ -179,9 +217,11 @@ export function useKeyboardShortcuts(
         return;
       }
 
-      const key = event.key.toLowerCase();
+      if (isBrowserShortcut(event)) {
+        return;
+      }
 
-      // Handle modified key shortcuts first
+      const key = event.key.toLowerCase();
       const modifiedShortcut = Object.entries(
         categorizedShortcuts.modified,
       ).find(([keyCombo]) => matchesKeyCombo(keyCombo, event));
@@ -239,7 +279,7 @@ export function useKeyboardShortcuts(
         }
       }
     },
-    [categorizedShortcuts, handlers, matchesKeyCombo],
+    [categorizedShortcuts, handlers, matchesKeyCombo, isBrowserShortcut],
   );
 
   // Attach event listeners

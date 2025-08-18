@@ -33,12 +33,10 @@ export function useEncounterShortcuts(
 
   const buildEncounterUrl = useCallback(
     (path: string) => {
-      // Early return if encounter is not available
       if (!encounter) {
         return "";
       }
 
-      // Always use the current encounter ID for the main URL path
       const currentEncounterIdToUse =
         conditions.currentEncounterId || encounter.id;
       const baseUrl = `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${currentEncounterIdToUse}${path}`;
@@ -63,7 +61,6 @@ export function useEncounterShortcuts(
     if (!encounter) {
       return {
         "close-dialog": () => {
-          // Close any open dialogs/modals
           const escapeEvent = new KeyboardEvent("keydown", {
             key: "Escape",
             code: "Escape",
@@ -182,7 +179,6 @@ export function useEncounterShortcutDescriptions() {
   return descriptions;
 }
 
-// Helper function to format key display
 function formatKeyDisplay(key: string): string {
   return formatKeyboardShortcut(key);
 }
