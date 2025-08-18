@@ -16,7 +16,10 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
   const { t } = useTranslation();
 
   return (
-    <div {...props} className={cn("flex gap-3", props.className)}>
+    <div
+      {...props}
+      className={cn("grid gap-3 grid-cols-2 sm:grid-cols-4", props.className)}
+    >
       <QuickAction
         icon={<AllergyIcon className="size-8 text-yellow-700" />}
         title={t("allergy")}
