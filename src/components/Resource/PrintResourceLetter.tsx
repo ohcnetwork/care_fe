@@ -10,6 +10,7 @@ import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import { Badge } from "../ui/badge";
 
 export default function PrintResourceLetter({ id }: { id: string }) {
   const { t } = useTranslation();
@@ -89,9 +90,9 @@ export default function PrintResourceLetter({ id }: { id: string }) {
             {/* Status Section */}
             <div className="mb-4">
               <span className="font-semibold">{t("current_status")}: </span>
-              <span className="rounded bg-gray-100 px-2 py-1">
+              <Badge variant="secondary">
                 {t(`resource_status__${data.status}`)}
-              </span>
+              </Badge>
             </div>
           </div>
 
