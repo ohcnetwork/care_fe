@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { PencilIcon, PlusIcon } from "lucide-react";
-import { Link, usePathParams } from "raviger";
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -18,8 +18,6 @@ import { MedicationStatementList } from "@/components/Patient/MedicationStatemen
 
 import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
@@ -65,23 +63,12 @@ export default function MedicationRequestTable() {
   const {
     patientId,
     selectedEncounterId: encounterId,
-    selectedEncounter: encounter,
-    patientPermissions: { canViewClinicalData },
-    selectedEncounterPermissions: { canViewEncounter, canWriteEncounter },
-    currentEncounterId,
+    canWriteClinicalData: canWrite,
+    canReadClinicalData: canAccess,
+    facilityId,
   } = useEncounter();
   const [searchQuery, setSearchQuery] = useState("");
   const [showStopped, setShowStopped] = useState(false);
-  const canAccess = canViewClinicalData || canViewEncounter;
-  const subpathMatch = usePathParams("/facility/:facilityId/*");
-  const facilityIdExists = !!subpathMatch?.facilityId;
-  const { facilityId } = useCurrentFacility();
-  const canWrite =
-    !!encounter &&
-    encounterId === currentEncounterId &&
-    facilityIdExists &&
-    canWriteEncounter &&
-    !inactiveEncounterStatus.includes(encounter.status);
 
   const { data: activeMedications, isLoading: loadingActive } = useQuery({
     queryKey: ["medication_requests_active", patientId, encounterId],
@@ -207,7 +194,7 @@ export default function MedicationRequestTable() {
                       </Link>
                     </Button>
                   )}
-                  {facilityIdExists && (
+                  {!!facilityId && (
                     <Button
                       variant="outline"
                       disabled={!activeMedications?.results?.length}
