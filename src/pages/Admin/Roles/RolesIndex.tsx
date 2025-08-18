@@ -34,15 +34,15 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import RoleForm from "@/pages/Admin/Roles/RoleForm";
 import permissionApi from "@/types/emr/permission/permissionApi";
-import { Role } from "@/types/emr/role/role";
+import { RoleRead } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
 
 function RoleCard({
   role,
   onEdit,
 }: {
-  role: Role;
-  onEdit: (role: Role) => void;
+  role: RoleRead;
+  onEdit: (role: RoleRead) => void;
 }) {
   const { t } = useTranslation();
   return (
@@ -88,7 +88,7 @@ export default function RolesIndex() {
     disableCache: true,
   });
 
-  const [selectedRole, setSelectedRole] = React.useState<Role | null>(null);
+  const [selectedRole, setSelectedRole] = React.useState<RoleRead | null>(null);
 
   const { data: rolesResponse, isLoading: rolesLoading } = useQuery({
     queryKey: ["roles", qParams],
@@ -115,7 +115,7 @@ export default function RolesIndex() {
   const roles = rolesResponse?.results || [];
   const permissions = permissionsResponse?.results || [];
 
-  const handleEdit = (role: Role) => {
+  const handleEdit = (role: RoleRead) => {
     setSelectedRole(role);
   };
 
@@ -149,6 +149,7 @@ export default function RolesIndex() {
                     name: "",
                     description: "",
                     permissions: [],
+                    is_system: false,
                   });
                 }
               }}
@@ -216,7 +217,7 @@ export default function RolesIndex() {
           <>
             {/* Mobile Card View */}
             <div className="grid gap-4 md:hidden">
-              {roles.map((role: Role) => (
+              {roles.map((role: RoleRead) => (
                 <RoleCard key={role.id} role={role} onEdit={handleEdit} />
               ))}
             </div>
@@ -233,7 +234,7 @@ export default function RolesIndex() {
                     </TableRow>
                   </TableHeader>
                   <TableBody className="bg-white">
-                    {roles.map((role: Role) => (
+                    {roles.map((role: RoleRead) => (
                       <TableRow key={role.id} className="divide-x">
                         <TableCell className="font-medium">
                           {role.name}

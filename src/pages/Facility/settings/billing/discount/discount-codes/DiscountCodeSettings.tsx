@@ -51,7 +51,7 @@ export function DiscountCodeSettings() {
   const { facility, facilityId } = useCurrentFacility();
 
   const { mutate: deleteCode, isPending } = useMutation({
-    mutationFn: mutate(facilityApi.updateMonetaryComponents, {
+    mutationFn: mutate(facilityApi.setMonetaryComponents, {
       pathParams: { facilityId },
     }),
     onSuccess: () => {

@@ -36,7 +36,7 @@ import {
   CreateAppointmentQuestion,
   TokenSlot,
 } from "@/types/scheduling/schedule";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface AppointmentQuestionProps {
   question: Question;
@@ -96,7 +96,7 @@ export function AppointmentQuestion({
   facilityId,
 }: AppointmentQuestionProps) {
   const { t } = useTranslation();
-  const [resource, setResource] = useState<UserBase>();
+  const [resource, setResource] = useState<UserReadMinimal>();
   const [open, setOpen] = useState(false);
   const { hasError } = useFieldError(question.id, errors);
 
