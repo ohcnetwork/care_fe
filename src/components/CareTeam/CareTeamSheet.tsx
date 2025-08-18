@@ -47,6 +47,8 @@ type CareTeamSheetProps = {
   trigger: React.ReactNode;
   encounter: EncounterRead;
   canWrite: boolean;
+  open?: boolean;
+  setOpen?: (open: boolean) => void;
 };
 
 export function EmptyState() {
@@ -67,9 +69,10 @@ export function CareTeamSheet({
   trigger,
   encounter,
   canWrite,
+  ...props
 }: CareTeamSheetProps) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
+  const [open, _setOpen] = useState(false);
   const queryClient = useQueryClient();
   const [selectedUser, setSelectedUser] = useState<
     UserReadMinimal | undefined
@@ -79,6 +82,17 @@ export function CareTeamSheet({
   const [memberToRemove, setMemberToRemove] = useState<
     UserReadMinimal | undefined
   >();
+
+  useEffect(() => {
+    if (props.open != null) {
+      _setOpen(props.open);
+    }
+  }, [props.open]);
+
+  const setOpen = (open: boolean) => {
+    _setOpen(open);
+    props.setOpen?.(open);
+  };
 
   // Reset state when sheet is closed
   useEffect(() => {

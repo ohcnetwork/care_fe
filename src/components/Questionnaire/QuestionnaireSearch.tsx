@@ -1,5 +1,6 @@
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -37,6 +38,7 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 interface QuestionnaireSearchProps {
   placeholder?: string;
+  trigger?: React.ReactNode;
   onSelect?: (questionnaire: QuestionnaireDetail) => void;
   subjectType?: string;
   disabled?: boolean;
@@ -45,6 +47,7 @@ interface QuestionnaireSearchProps {
 
 export function QuestionnaireSearch({
   placeholder,
+  trigger,
   size = "default",
   onSelect = (selected) => navigate(`questionnaire/${selected.slug}`),
   subjectType,
@@ -119,25 +122,27 @@ export function QuestionnaireSearch({
     return (
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
-          <Button
-            data-cy="add-questionnaire-button"
-            variant="outline"
-            role="combobox"
-            disabled={disabled || isLoading}
-          >
-            {isLoading ? (
-              <>
-                <CareIcon
-                  icon="l-spinner"
-                  className="mr-2 size-4 animate-spin"
-                />
-                {t("loading")}
-              </>
-            ) : (
-              <span>{placeholder || t("add_questionnaire")}</span>
-            )}
-            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-          </Button>
+          {trigger || (
+            <Button
+              data-cy="add-questionnaire-button"
+              variant="outline"
+              role="combobox"
+              disabled={disabled || isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <CareIcon
+                    icon="l-spinner"
+                    className="mr-2 size-4 animate-spin"
+                  />
+                  {t("loading")}
+                </>
+              ) : (
+                <span>{placeholder || t("add_questionnaire")}</span>
+              )}
+              <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+            </Button>
+          )}
         </SheetTrigger>
 
         <SheetContent
@@ -155,24 +160,31 @@ export function QuestionnaireSearch({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button
-          size={size}
-          data-cy="add-questionnaire-button"
-          variant="outline"
-          role="combobox"
-          className="w-full justify-between"
-          disabled={disabled || isLoading}
-        >
-          {isLoading ? (
-            <>
-              <CareIcon icon="l-spinner" className="mr-2 size-4 animate-spin" />
-              {t("loading")}
-            </>
-          ) : (
-            <span>{placeholder || t("add_questionnaire")}</span>
-          )}
-          <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-        </Button>
+        {trigger || (
+          <Button
+            size={size}
+            data-cy="add-questionnaire-button"
+            variant="outline"
+            role="combobox"
+            className="w-full border border-primary-600"
+            disabled={disabled || isLoading}
+          >
+            {isLoading ? (
+              <>
+                <CareIcon
+                  icon="l-spinner"
+                  className="mr-2 size-4 animate-spin"
+                />
+                {t("loading")}
+              </>
+            ) : (
+              <div className="flex justify-start items-center gap-2 text-primary-800 w-full">
+                <Plus className="size-4" />
+                <span>{placeholder || t("add_questionnaire")}</span>
+              </div>
+            )}
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0" align="start">
         {content}
