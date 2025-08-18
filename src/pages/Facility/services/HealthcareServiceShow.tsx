@@ -26,7 +26,16 @@ function LocationCard({
   const { t } = useTranslation();
 
   return (
-    <Card className="transition-all duration-200 hover:border-primary/50 hover:shadow-sm rounded-md">
+    <Card
+      onClick={() =>
+        navigate(
+          service_type === InternalType.pharmacy
+            ? `/facility/${facilityId}/locations/${location.id}/medication_requests/`
+            : `/facility/${facilityId}/locations/${location.id}/service_requests/`,
+        )
+      }
+      className="cursor-pointer transition-all duration-200 hover:border-primary/50 hover:shadow-sm rounded-md"
+    >
       <CardContent className="flex items-start gap-3 py-3 px-4">
         <div className="shrink-0 relative size-10 rounded-sm flex p-4 items-center justify-center">
           <ColoredIndicator
