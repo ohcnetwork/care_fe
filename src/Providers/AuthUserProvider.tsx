@@ -25,7 +25,6 @@ import routes, {
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { userAtom } from "@/atoms/user-atom";
-// import { useSync } from "@/context/SyncContext";
 import authApi from "@/types/auth/authApi";
 import { MFAAuthenticationToken, TokenData } from "@/types/auth/otp";
 
@@ -51,7 +50,6 @@ export default function AuthUserProvider({
   otpAuthorized,
 }: Props) {
   const queryClient = useQueryClient();
-  // const { startSync, isSyncing } = useSync();
   const [accessToken, setAccessToken] = useState(
     localStorage.getItem(LocalStorageKeys.accessToken),
   );
@@ -216,39 +214,6 @@ export default function AuthUserProvider({
     };
   }, [signOut]);
   const isRestoring = useIsRestoring();
-
-  // useEffect(() => {
-  //   // Don't start sync if user is on session expired page
-  //   const isOnSessionExpiredPage = location.pathname === "/session-expired";
-
-  //   if (
-  //     !onlineManager.isOnline() ||
-  //     !user?.external_id ||
-  //     isSyncing ||
-  //     localStorage.getItem(LocalStorageKeys.accessToken) === null ||
-  //     isOnSessionExpiredPage
-  //   ) {
-  //
-  //     return;
-  //   }
-
-  //
-  //   const timeout = setTimeout(() => {
-  //
-  //     startSync(user.external_id);
-  //   }, 3000);
-
-  //   return () => {
-  //
-  //     clearTimeout(timeout);
-  //   };
-  // }, [
-  //   user?.external_id,
-  //   onlineManager.isOnline(),
-  //   startSync,
-  //   isSyncing,
-  //   location.pathname,
-  // ]);
 
   if (isLoading || isRestoring || !isChecked) {
     return <Loading />;

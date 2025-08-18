@@ -1,5 +1,4 @@
 import { QueryClient } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { AuthUserModel } from "@/components/Users/models";
@@ -52,8 +51,10 @@ export const queueAssignUserToPatient = async ({
   patientData,
   onSuccess,
   onError,
-}: QueueAssignUserToPatientParams): Promise<void> => {
-  const { t } = useTranslation();
+  t,
+}: QueueAssignUserToPatientParams & {
+  t: (key: string) => string;
+}): Promise<void> => {
   const db = new AppCacheDB();
 
   try {
@@ -130,7 +131,10 @@ export const queueRemoveUserFromPatient = async ({
   queryClient,
   onSuccess,
   onError,
-}: QueueRemoveUserFromPatientParams): Promise<void> => {
+  t,
+}: QueueRemoveUserFromPatientParams & {
+  t: (key: string) => string;
+}): Promise<void> => {
   const db = new AppCacheDB();
 
   try {
@@ -194,7 +198,7 @@ export const queueRemoveUserFromPatient = async ({
     onSuccess?.();
   } catch (err) {
     const errorObj =
-      err instanceof Error ? err : new Error("Unknown error occurred");
+      err instanceof Error ? err : new Error(t("unknown_error_occurred"));
     onError?.(errorObj);
   }
 };

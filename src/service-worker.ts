@@ -74,6 +74,10 @@ registerRoute(
     try {
       return await fetch(request);
     } catch {
+      //TODO: Handle offline case
+      // If the fetch fails,  return a custom offline page or message.
+      // For now, we return a simple text response.
+
       return new Response("Offline and no cached version available.", {
         status: 503,
         headers: { "Content-Type": "text/html" },

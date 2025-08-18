@@ -171,6 +171,7 @@ export function AddUserSheet({
         authUser,
         queryClient,
         patientData,
+        t,
         onSuccess: () => {
           toast.success(t("user_added_to_patient_successfully"));
           setOpen(false);
@@ -370,13 +371,13 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
     userToRemove?: UserReadMinimal,
   ) => {
     if (!userId) {
-      toast.error("User ID is missing");
+      toast.error(t("user_id_missing"));
       return;
     }
 
     if (!onlineManager.isOnline()) {
       if (!userToRemove) {
-        toast.error("User data is missing");
+        toast.error(t("user_data_missing"));
         return;
       }
       await queueRemoveUserFromPatient({
@@ -387,12 +388,13 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
         authUser,
         patientData,
         queryClient,
+        t,
         onSuccess: () => {
           toast.success(t("user_removed_successfully"));
         },
         onError: (error) => {
           console.error("Error queuing remove user offline:", error);
-          toast.error("error_while_remove_user_offline");
+          toast.error(t("error_while_remove_user_offline"));
         },
       });
       return;

@@ -267,15 +267,15 @@ const SyncStatusHeader: React.FC<{
       );
 
       if (pendingWrites.length === 0) {
-        toast.info("No offline records to sync");
+        toast.info(t("no_offline_records_to_sync"));
         return;
       }
 
       await startSync(user.external_id, facilityId);
     } catch (error) {
       console.error("Sync failed:", error);
-      toast.error("Failed to start sync", {
-        description: "Please try again later.",
+      toast.error(t("failed_to_start_sync"), {
+        description: t("failed_to_start_sync_description"),
       });
     }
   };
@@ -286,14 +286,12 @@ const SyncStatusHeader: React.FC<{
         className={`flex flex-col  justify-between ${isSidebarOpen ? "md:flex-col" : "md:flex-row"} lg:flex-row gap-4 mb-6`}
       >
         <div>
-          <p className="text-gray-600 mt-1">
-            Monitor and manage your offline data synchronization
-          </p>
+          <p className="text-gray-600 mt-1">{t("monitor_offline_sync")}</p>
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <CareIcon icon="l-clock" className="w-4 h-4" />
-            <span>Last Sync: {syncData.lastSync}</span>
+            <span>{t("last_sync", { time: syncData.lastSync })}</span>
           </div>
           <Button
             variant="primary"
@@ -301,7 +299,7 @@ const SyncStatusHeader: React.FC<{
             onClick={handleSyncNow}
             disabled={isSyncing}
           >
-            {isSyncing ? "Syncing..." : "Sync Now"}
+            {isSyncing ? t("syncing") : t("sync_now")}
           </Button>
         </div>
       </div>
@@ -479,6 +477,7 @@ const PendingWritesTable: React.FC<{
 
   refreshTrigger: number;
 }> = ({ facilityId, onEdit, onRetry, onDelete, refreshTrigger }) => {
+  const { t } = useTranslation();
   const [pendingWrites, setPendingWrites] = useState<OfflineWritesEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const user = useAuthUser();
@@ -522,7 +521,7 @@ const PendingWritesTable: React.FC<{
           icon="l-spinner"
           className="w-8 h-8 mx-auto mb-2 text-gray-400 animate-spin"
         />
-        <p>Loading pending writes...</p>
+        <p>{t("loading_pending_writes")}</p>
       </div>
     );
   }
@@ -534,7 +533,7 @@ const PendingWritesTable: React.FC<{
           icon="l-check-circle"
           className="w-8 h-8 mx-auto mb-2 text-gray-400"
         />
-        <p>No pending writes found</p>
+        <p>{t("no_pending_writes_found")}</p>
       </div>
     );
   }
@@ -544,9 +543,9 @@ const PendingWritesTable: React.FC<{
       <Table>
         <TableHeader className="bg-gray-100">
           <TableRow className="divide-gray-200">
-            <TableHead>Type</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>{t("table_header_type")}</TableHead>
+            <TableHead>{t("table_header_created")}</TableHead>
+            <TableHead>{t("table_header_actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white">
@@ -615,6 +614,7 @@ const FailedWritesTable: React.FC<{
 
   refreshTrigger,
 }) => {
+  const { t } = useTranslation();
   const [failedWrites, setFailedWrites] = useState<OfflineWritesEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const user = useAuthUser();
@@ -658,7 +658,7 @@ const FailedWritesTable: React.FC<{
           icon="l-spinner"
           className="w-8 h-8 mx-auto mb-2 text-gray-400 animate-spin"
         />
-        <p>Loading failed writes...</p>
+        <p>{t("loading_failed_writes")}</p>
       </div>
     );
   }
@@ -670,7 +670,7 @@ const FailedWritesTable: React.FC<{
           icon="l-check-circle"
           className="w-8 h-8 mx-auto mb-2 text-gray-400"
         />
-        <p>No failed writes found</p>
+        <p>{t("no_failed_writes_found")}</p>
       </div>
     );
   }
@@ -680,10 +680,10 @@ const FailedWritesTable: React.FC<{
       <Table>
         <TableHeader className="bg-gray-100">
           <TableRow className="divide-gray-200">
-            <TableHead>Type</TableHead>
-            <TableHead>Failed At</TableHead>
-            <TableHead>Error</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>{t("table_header_type")}</TableHead>
+            <TableHead>{t("table_header_failed_at")}</TableHead>
+            <TableHead>{t("table_header_error")}</TableHead>
+            <TableHead>{t("table_header_actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white">
@@ -760,6 +760,7 @@ const ConflictedWritesTable: React.FC<{
   setEditConfirmEntry,
   refreshTrigger,
 }) => {
+  const { t } = useTranslation();
   const [conflictedWrites, setConflictedWrites] = useState<
     OfflineWritesEntry[]
   >([]);
@@ -810,7 +811,7 @@ const ConflictedWritesTable: React.FC<{
   if (conflictedWrites.length === 0) {
     return (
       <div className="text-center py-8">
-        <div className="text-gray-500">No conflicted writes found</div>
+        <div className="text-gray-500">{t("no_conflicted_writes_found")}</div>
       </div>
     );
   }
@@ -820,10 +821,10 @@ const ConflictedWritesTable: React.FC<{
       <Table>
         <TableHeader>
           <TableRow className="bg-gray-50">
-            <TableHead>Resource</TableHead>
-            <TableHead>Last Attempt</TableHead>
-            <TableHead>Conflict Details</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>{t("table_header_resource")}</TableHead>
+            <TableHead>{t("table_header_last_attempt")}</TableHead>
+            <TableHead>{t("table_header_conflict_details")}</TableHead>
+            <TableHead>{t("table_header_actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white">
@@ -889,6 +890,7 @@ const BlockedWritesTable: React.FC<{
   onDelete: (entry: OfflineWritesEntry) => void;
   refreshTrigger: number;
 }> = ({ facilityId, onDelete, refreshTrigger }) => {
+  const { t } = useTranslation();
   const [blockedWrites, setBlockedWrites] = useState<OfflineWritesEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const user = useAuthUser();
@@ -928,7 +930,7 @@ const BlockedWritesTable: React.FC<{
   if (blockedWrites.length === 0) {
     return (
       <div className="text-center py-8">
-        <div className="text-gray-500">No blocked writes found</div>
+        <div className="text-gray-500">{t("no_blocked_writes_found")}</div>
       </div>
     );
   }
@@ -938,10 +940,10 @@ const BlockedWritesTable: React.FC<{
       <Table>
         <TableHeader>
           <TableRow className="bg-gray-50">
-            <TableHead>Resource</TableHead>
-            <TableHead>Last Attempt</TableHead>
-            <TableHead>Blocked By</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>{t("table_header_resource")}</TableHead>
+            <TableHead>{t("table_header_last_attempt")}</TableHead>
+            <TableHead>{t("table_header_blocked_by")}</TableHead>
+            <TableHead>{t("table_header_actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white">
@@ -1138,7 +1140,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
         }
       } catch (error) {
         console.error("Error checking parent status:", error);
-        toast.error("Error checking parent status. Please try again.");
+        toast.error(t("error_checking_parent_status"));
         return;
       }
     }
@@ -1171,7 +1173,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
         await handleCreateandUpdateResourceRequestEdit(targetEntry, facilityId);
         break;
       case "assign_user_to_patient":
-        await handleAssignUserToPatientEdit(targetEntry);
+        await handleAssignUserToPatientEdit(targetEntry, t);
         break;
       case "remove_user_from_patient":
         await handleRemoveUserFromPatientEdit(targetEntry);
@@ -1179,22 +1181,22 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
       case "reschedule_appointment":
       case "update_appointment_status":
       case "cancel_appointment":
-        await handleAppointmentEdit(targetEntry);
+        await handleAppointmentEdit(targetEntry, t);
         break;
       case "non_structured_questionnaire":
-        await handleNonStructuredQuestionnaireEdit(targetEntry);
+        await handleNonStructuredQuestionnaireEdit(targetEntry, t);
         break;
       case "time_of_death":
-        await handleTimeOfDeathEdit(targetEntry);
+        await handleTimeOfDeathEdit(targetEntry, t);
         break;
       case "appointment":
-        await handleAppointmentQuestionnaireEdit();
+        await handleAppointmentQuestionnaireEdit(t);
         break;
       case "files":
-        await handleFilesQuestionnaireEdit();
+        await handleFilesQuestionnaireEdit(t);
         break;
       case "encounter":
-        await handleEncounterQuestionnaireEdit(targetEntry);
+        await handleEncounterQuestionnaireEdit(targetEntry, t);
         break;
 
       case "allergy_intolerance":
@@ -1202,7 +1204,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
       case "symptom":
       case "medication_request":
       case "medication_statement":
-        await handleStructuredQuestionnaireEdit(targetEntry);
+        await handleStructuredQuestionnaireEdit(targetEntry, t);
         break;
       case "update_encounter_questionnaire":
       default:
@@ -1218,7 +1220,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
 
   const handleDeleteConfirmAction = async () => {
     if (deleteConfirmEntry) {
-      const success = await handleDeleteRecord(deleteConfirmEntry);
+      const success = await handleDeleteRecord(deleteConfirmEntry, t);
       if (success) {
         setIsDeleteDialogOpen(false);
         setDeleteConfirmEntry(null);
@@ -1232,12 +1234,10 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
     try {
       const parentCheck = await checkParentSyncStatus(entry.parentMutationId);
       if (!parentCheck.isSynced) {
-        toast.error(
-          "Parent entries must be successfully synced before retrying this entry.",
-        );
+        toast.error(t("parent_entries_must_be_synced"));
         return;
       }
-      await handleRetryRecord(entry);
+      await handleRetryRecord(entry, t);
       triggerRefresh();
     } catch (error) {
       console.error("Error in retry:", error);
@@ -1293,10 +1293,9 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
         >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Record</AlertDialogTitle>
+              <AlertDialogTitle>{t("delete_record")}</AlertDialogTitle>
               <AlertDialogDescription>
-                When the record is deleted, all its child records (whose status
-                is not success) will be deleted as well.
+                {t("delete_record_description")}
                 <br />
                 <br />
                 <strong>Type:</strong> {deleteConfirmEntry?.type}
@@ -1317,20 +1316,16 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
         <AlertDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Edit Offline Data</AlertDialogTitle>
+              <AlertDialogTitle>{t("edit_offline_data")}</AlertDialogTitle>
               <AlertDialogDescription>
                 <div className="space-y-3">
+                  <p>{t("edit_offline_data_description")}</p>
                   <p>
-                    The form will contain the data you filled when offline, not
-                    the current server data.
-                  </p>
-                  <p>
-                    <strong>Important:</strong> You can modify and save to
-                    overwrite the server data with your local changes.
+                    <strong>{t("important")}:</strong>{" "}
+                    {t("edit_offline_data_important")}
                   </p>
                   <p className="text-sm text-gray-600">
-                    To view the current server data, navigate to the original
-                    record.
+                    {t("edit_offline_data_view_server")}
                   </p>
                   <div className="bg-blue-50 p-3 rounded-md">
                     <p className="text-sm text-blue-800">

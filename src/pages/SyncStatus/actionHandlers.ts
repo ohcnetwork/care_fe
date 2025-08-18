@@ -11,6 +11,7 @@ import { UserBase } from "@/types/user/user";
 // Unified handler for structured questionnaire types (allergy, diagnosis, symptom, medication)
 export const handleStructuredQuestionnaireEdit = async (
   entry: OfflineWritesEntry,
+  t: (key: string) => string,
 ) => {
   const structuredTypes = [
     "allergy_intolerance",
@@ -21,7 +22,7 @@ export const handleStructuredQuestionnaireEdit = async (
   ];
 
   if (!structuredTypes.includes(entry.type as any)) {
-    toast.error("Invalid entry type for structured questionnaire editing");
+    toast.error(t("invalid_entry_type_structured_questionnaire"));
     return;
   }
 
@@ -44,7 +45,7 @@ export const handleStructuredQuestionnaireEdit = async (
     };
 
     if (!payload.requests || payload.requests.length === 0) {
-      toast.error("No questionnaire data found in offline entry");
+      toast.error(t("no_questionnaire_data_offline"));
       return;
     }
 
@@ -52,7 +53,7 @@ export const handleStructuredQuestionnaireEdit = async (
 
     const datapoint = firstRequest.body.datapoints?.[0];
     if (!datapoint) {
-      toast.error("No datapoint found in offline entry");
+      toast.error(t("no_datapoint_found_offline"));
       return;
     }
 
@@ -73,12 +74,12 @@ export const handleStructuredQuestionnaireEdit = async (
     }
 
     if (!patientId) {
-      toast.error("Patient information not found in offline entry");
+      toast.error(t("patient_info_not_found_offline"));
       return;
     }
 
     if (!encounterId) {
-      toast.error("Encounter information not found in offline entry");
+      toast.error(t("encounter_info_not_found_offline"));
       return;
     }
 
@@ -93,7 +94,7 @@ export const handleStructuredQuestionnaireEdit = async (
     );
   } catch (error) {
     console.error("Error handling structured questionnaire edit:", error);
-    toast.error("Failed to open questionnaire for editing");
+    toast.error(t("failed_to_open_questionnaire"));
   }
 };
 
@@ -160,12 +161,13 @@ export const handleCreateandUpdateResourceRequestEdit = async (
 
 export const handleAssignUserToPatientEdit = async (
   entry: OfflineWritesEntry,
+  t: (key: string) => string,
 ) => {
   // Extract patient ID from the mutation path params
   const patientId = (entry.mutationPathParams as any)?.patientId;
 
   if (!patientId) {
-    toast.error("Patient information not found in offline entry");
+    toast.error(t("patient_info_not_found_offline"));
     return;
   }
 
@@ -194,14 +196,17 @@ export const handleRemoveUserFromPatientEdit = async (
   );
 };
 
-export const handleAppointmentEdit = async (entry: OfflineWritesEntry) => {
+export const handleAppointmentEdit = async (
+  entry: OfflineWritesEntry,
+  t: (key: string) => string,
+) => {
   switch (entry.type) {
     case "create_appointment": {
       const normalizedData = entry.normalizedData as Appointment;
       const patientId = normalizedData?.patient?.id;
 
       if (!patientId) {
-        toast.error("Patient information not found in offline entry");
+        toast.error(t("patient_info_not_found_offline"));
         return;
       }
 
@@ -238,7 +243,7 @@ export const handleAppointmentEdit = async (entry: OfflineWritesEntry) => {
       const patientId = normalizedData?.patient?.id;
 
       if (!patientId) {
-        toast.error("Patient information not found in offline entry");
+        toast.error(t("patient_info_not_found_offline"));
         return;
       }
 
@@ -261,9 +266,10 @@ export const handleAppointmentEdit = async (entry: OfflineWritesEntry) => {
 
 export const handleNonStructuredQuestionnaireEdit = async (
   entry: OfflineWritesEntry,
+  t: (key: string) => string,
 ) => {
   if (entry.type !== "non_structured_questionnaire") {
-    toast.error("Invalid entry type for questionnaire editing");
+    toast.error(t("invalid_entry_type_questionnaire"));
     return;
   }
 
@@ -283,7 +289,7 @@ export const handleNonStructuredQuestionnaireEdit = async (
     };
 
     if (!payload.requests || payload.requests.length === 0) {
-      toast.error("No questionnaire data found in offline entry");
+      toast.error(t("no_questionnaire_data_offline"));
       return;
     }
 
@@ -314,25 +320,30 @@ export const handleNonStructuredQuestionnaireEdit = async (
     }
   } catch (error) {
     console.error("Error handling questionnaire edit:", error);
-    toast.error("Failed to open questionnaire for editing");
+    toast.error(t("failed_to_open_questionnaire"));
   }
 };
 
-export const handleAppointmentQuestionnaireEdit = async () => {
-  toast.error("offline edit for appointment type is not supported");
+export const handleAppointmentQuestionnaireEdit = async (
+  t: (key: string) => string,
+) => {
+  toast.error(t("offline_edit_appointment_not_supported"));
   return;
 };
 
-export const handleFilesQuestionnaireEdit = async () => {
-  toast.error("offline edit for files type is not supported");
+export const handleFilesQuestionnaireEdit = async (
+  t: (key: string) => string,
+) => {
+  toast.error(t("offline_edit_files_not_supported"));
   return;
 };
 
 export const handleEncounterQuestionnaireEdit = async (
   entry: OfflineWritesEntry,
+  t: (key: string) => string,
 ) => {
   if (entry.type !== "encounter") {
-    toast.error("Invalid entry type for encounter editing");
+    toast.error(t("invalid_entry_type_encounter"));
     return;
   }
 
@@ -360,7 +371,7 @@ export const handleEncounterQuestionnaireEdit = async (
     };
 
     if (!payload.requests || payload.requests.length === 0) {
-      toast.error("No encounter data found in offline entry");
+      toast.error(t("no_encounter_data_offline"));
       return;
     }
 
@@ -371,12 +382,12 @@ export const handleEncounterQuestionnaireEdit = async (
     const encounterId = urlMatch ? urlMatch[1] : null;
 
     if (!patientId) {
-      toast.error("Patient information not found in offline entry");
+      toast.error(t("patient_info_not_found_offline"));
       return;
     }
 
     if (!encounterId) {
-      toast.error("Encounter information not found in offline entry");
+      toast.error(t("encounter_info_not_found_offline"));
       return;
     }
 
@@ -391,13 +402,16 @@ export const handleEncounterQuestionnaireEdit = async (
     );
   } catch (error) {
     console.error("Error handling encounter edit:", error);
-    toast.error("Failed to open encounter questionnaire for editing");
+    toast.error(t("failed_to_open_encounter_questionnaire"));
   }
 };
 
-export const handleTimeOfDeathEdit = async (entry: OfflineWritesEntry) => {
+export const handleTimeOfDeathEdit = async (
+  entry: OfflineWritesEntry,
+  t: (key: string) => string,
+) => {
   if (entry.type !== "time_of_death") {
-    toast.error("Invalid entry type for time of death editing");
+    toast.error(t("invalid_entry_type_time_of_death"));
     return;
   }
 
@@ -414,7 +428,7 @@ export const handleTimeOfDeathEdit = async (entry: OfflineWritesEntry) => {
     };
 
     if (!payload.requests || payload.requests.length === 0) {
-      toast.error("No time of death data found in offline entry");
+      toast.error(t("no_time_of_death_data_offline"));
       return;
     }
 
@@ -424,7 +438,7 @@ export const handleTimeOfDeathEdit = async (entry: OfflineWritesEntry) => {
     const patientId = urlMatch ? urlMatch[1] : null;
 
     if (!patientId) {
-      toast.error("Patient information not found in offline entry");
+      toast.error(t("patient_info_not_found_offline"));
       return;
     }
 
@@ -439,7 +453,7 @@ export const handleTimeOfDeathEdit = async (entry: OfflineWritesEntry) => {
     );
   } catch (error) {
     console.error("Error handling time of death edit:", error);
-    toast.error("Failed to open time of death questionnaire for editing");
+    toast.error(t("failed_to_open_time_of_death_questionnaire"));
   }
 };
 
@@ -447,7 +461,10 @@ export const handleUnsupportedTypeEdit = (entry: OfflineWritesEntry) => {
   toast.info(`Edit functionality for ${entry.type} is not implemented yet`);
 };
 
-export const handleRetryRecord = async (entry: OfflineWritesEntry) => {
+export const handleRetryRecord = async (
+  entry: OfflineWritesEntry,
+  t: (key: string, options?: any) => string,
+) => {
   try {
     const syncManager = new SyncManager({
       userId: entry.userId,
@@ -457,19 +474,24 @@ export const handleRetryRecord = async (entry: OfflineWritesEntry) => {
     const result = await syncManager.processSingleWrite(entry);
 
     if (result.status === "success") {
-      toast.success(`Successfully retried ${entry.type}`);
+      toast.success(t("successfully_retried", { type: entry.type }));
     } else {
-      toast.error(`Retry failed: ${result.error || "Unknown error"}`);
+      toast.error(
+        t("retry_failed", { error: result.error || t("unknown_error") }),
+      );
     }
   } catch (error) {
     console.error("Error retrying record:", error);
-    toast.error("Failed to retry record");
+    toast.error(t("failed_to_retry_record"));
   }
 };
 
 // DELETE HANDLERS
 
-export const handleDeleteRecord = async (entry: OfflineWritesEntry) => {
+export const handleDeleteRecord = async (
+  entry: OfflineWritesEntry,
+  t: (key: string) => string,
+) => {
   try {
     const db = new AppCacheDB();
 
@@ -481,12 +503,12 @@ export const handleDeleteRecord = async (entry: OfflineWritesEntry) => {
       await db.OfflineWrites.delete(child.id);
     }
 
-    toast.success(`Successfully deleted record`);
+    toast.success(t("successfully_deleted_record"));
 
     return true;
   } catch (error) {
     console.error("Error deleting record:", error);
-    toast.error("Failed to delete record");
+    toast.error(t("failed_to_delete_record"));
     return false;
   }
 };

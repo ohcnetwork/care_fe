@@ -36,7 +36,7 @@ export default function useNetworkStatus() {
     if (isRestoring) return;
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout ( after that it will consider as offline)
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout ( after that it will consider as offline)
 
       const response = await fetch(CHECK_URL, {
         method: "HEAD",

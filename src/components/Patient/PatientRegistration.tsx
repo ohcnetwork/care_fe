@@ -328,9 +328,6 @@ export default function PatientRegistration(
       if (offlineEntryId) {
         try {
           await handleOfflineRecordSuccess(offlineEntryId, resp);
-          toast.success(t("patient_update_success"));
-          navigate(`/facility/${facilityId}/settings/sync-status`);
-          return;
         } catch (error) {
           console.error(`Error handling offline record success:`, error);
         }

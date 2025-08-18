@@ -382,7 +382,7 @@ const initializeStructuredResponses = (
   questions: Question[],
   requestBody: any,
   reference_id: string,
-  fullRequest?: any,
+  _fullRequest?: any,
 ): QuestionnaireResponse[] => {
   const responses: QuestionnaireResponse[] = [];
 
@@ -402,71 +402,9 @@ const initializeStructuredResponses = (
             structuredData = [requestBody];
             break;
           case "appointment": {
-            // Extract slot_id from URL - format: /api/v1/facility/{facilityId}/slots/{slotId}/create_appointment/
-            const slotMatch = fullRequest?.url?.match(
-              /\/slots\/([^/]+)\/create_appointment\//,
-            );
-            const slot_id = slotMatch ? slotMatch[1] : null;
-
-            structuredData = [
-              {
-                note: requestBody.note,
-                tags: requestBody.tags,
-                slot_id: slot_id,
-              },
-            ];
-
             break;
           }
           case "files": {
-            // Convert base64 to File object with proper MIME type
-            let fileObject: File | null = null;
-            if (requestBody.file_data && requestBody.original_name) {
-              try {
-                const extension = requestBody.original_name
-                  .split(".")
-                  .pop()
-                  ?.toLowerCase();
-                const mimeTypes: Record<string, string> = {
-                  pdf: "application/pdf",
-                  jpg: "image/jpeg",
-                  jpeg: "image/jpeg",
-                  png: "image/png",
-                  gif: "image/gif",
-                  txt: "text/plain",
-                  doc: "application/msword",
-                  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                  xls: "application/vnd.ms-excel",
-                  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                };
-                const mimeType =
-                  mimeTypes[extension || ""] || "application/octet-stream";
-
-                // Modern one-liner base64 to File conversion
-                fileObject = new File(
-                  [
-                    Uint8Array.from(atob(requestBody.file_data), (c) =>
-                      c.charCodeAt(0),
-                    ),
-                  ],
-                  requestBody.original_name,
-                  { type: mimeType },
-                );
-              } catch (error) {
-                console.error("Error converting file data:", error);
-              }
-            }
-
-            structuredData = [
-              {
-                name: requestBody.name,
-                original_name: requestBody.original_name,
-                file_data: fileObject,
-                file_category: requestBody.file_category,
-                file_type: requestBody.file_type,
-                associating_id: requestBody.associating_id,
-              },
-            ];
             break;
           }
           case "time_of_death":
@@ -794,12 +732,6 @@ export function QuestionnaireForm({
             reference_id,
             request, // Pass the full request for URL parsing
           );
-
-          if (offlineEntry.type === "appointment") {
-            toast.warning(
-              t("practitioner_and_tags_not_available_for_offline_edit"),
-            );
-          }
 
           setQuestionnaireForms([
             {

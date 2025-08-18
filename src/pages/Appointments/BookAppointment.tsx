@@ -323,7 +323,7 @@ export default function BookAppointment({ patientId }: Props) {
         `/facility/${facilityId}/patient/${patientId}/appointments/${data.id}`,
       );
     } catch {
-      toast.error("Failed to create appointment");
+      toast.error(t("failed_to_create_appointment"));
     }
   };
 

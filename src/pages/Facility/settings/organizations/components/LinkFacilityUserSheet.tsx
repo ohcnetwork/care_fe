@@ -99,7 +99,7 @@ export default function LinkFacilityUserSheet({
 
   const handleAddUser = () => {
     if (!selectedUser || !selectedRole) {
-      toast.error("Please select both user and role");
+      toast.error(t("please_select_both_user_and_role"));
       return;
     }
 

@@ -27,7 +27,6 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
-import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import { handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers";
 import { PLUGIN_Component } from "@/PluginEngine";
 import mutate from "@/Utils/request/mutate";

@@ -39,7 +39,7 @@ const OfflinePatientWarningDialog = ({
         }}
       >
         <DialogHeader>
-          <DialogTitle>{t("You_are_Offline")}</DialogTitle>
+          <DialogTitle>{t("you_are_offline")}</DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-1 gap-4">

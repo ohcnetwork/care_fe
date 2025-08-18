@@ -221,10 +221,10 @@ export default function LinkDepartmentsSheet({
         if (errorMessages?.length) {
           errorMessages.forEach((msg) => toast.error(msg));
         } else {
-          toast.error("An unexpected error occurred");
+          toast.error(t("an_unexpected_error_occurred"));
         }
       } catch {
-        toast.error("An unexpected error occurred");
+        toast.error(t("an_unexpected_error_occurred"));
       }
     },
   });
