@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { ExternalLink } from "lucide-react";
 import { Link } from "raviger";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -31,24 +31,6 @@ export function EncounterHeader({
   const [actionsOpen, setActionsOpen] = useState(false);
   const getShortcutDisplay = useEncounterShortcutDisplays();
   const readOnly = !canWriteSelectedEncounter;
-
-  useEffect(() => {
-    const handleOpenCommandDialog = () => {
-      setActionsOpen(true);
-    };
-
-    document.addEventListener(
-      "open-encounter-command-dialog",
-      handleOpenCommandDialog,
-    );
-
-    return () => {
-      document.removeEventListener(
-        "open-encounter-command-dialog",
-        handleOpenCommandDialog,
-      );
-    };
-  }, []);
 
   if (!encounter) {
     return <CardListSkeleton count={1} />;
@@ -126,20 +108,21 @@ export function EncounterHeader({
               className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
             />
 
-            <Button
-              variant="primary_gradient"
-              onClick={() => setActionsOpen(true)}
-              className="text-base font-semibold rounded-md"
-            >
-              {t("encounter_actions")}
-              <CommandShortcut className="text-white hidden md:inline">
-                {getShortcutDisplay("open-command-dialog")}
-              </CommandShortcut>
-            </Button>
-
             <EncounterCommandDialog
               open={actionsOpen}
               onOpenChange={setActionsOpen}
+              trigger={
+                <Button
+                  variant="primary_gradient"
+                  onClick={() => setActionsOpen(true)}
+                  className="text-base font-semibold rounded-md"
+                >
+                  {t("encounter_actions")}
+                  <CommandShortcut className="text-white hidden md:inline">
+                    {getShortcutDisplay("open-command-dialog")}
+                  </CommandShortcut>
+                </Button>
+              }
             />
           </div>
         )}

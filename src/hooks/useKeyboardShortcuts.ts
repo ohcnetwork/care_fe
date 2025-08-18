@@ -28,7 +28,6 @@ export function useKeyboardShortcuts(
   conditions: ShortcutConditions,
   handlers: ShortcutHandlers,
 ) {
-  // Get shortcuts for all specified contexts
   const shortcuts = useMemo(() => {
     const allShortcuts: KeyboardShortcut[] = [];
 
@@ -47,7 +46,6 @@ export function useKeyboardShortcuts(
     (whenClause: string): boolean => {
       if (whenClause === "always") return true;
 
-      // Create evaluation context
       const evalContext = {
         canEdit: conditions.canEdit || false,
         canCreate: conditions.canCreate || false,
@@ -63,7 +61,6 @@ export function useKeyboardShortcuts(
           expression = expression.replace(regex, String(value));
         });
 
-        // Evaluate the boolean expression
         return new Function(`return ${expression}`)();
       } catch (error) {
         console.warn(
@@ -76,14 +73,13 @@ export function useKeyboardShortcuts(
     [conditions],
   );
 
-  // Parse and categorize shortcuts
   const categorizedShortcuts = useMemo(() => {
     const direct: Record<string, KeyboardShortcut> = {};
     const prefixGroups: Record<string, Record<string, KeyboardShortcut>> = {};
     const modified: Record<string, KeyboardShortcut> = {};
 
     shortcuts.forEach((shortcut) => {
-      // Check if this shortcut should be active
+      //should be active or not check
       if (!evaluateWhenCondition(shortcut.when)) {
         return;
       }
@@ -114,82 +110,49 @@ export function useKeyboardShortcuts(
     return { direct, prefixGroups, modified };
   }, [shortcuts, evaluateWhenCondition]);
 
-  // Helper function to check if this is a browser shortcut we should not override
-  const isBrowserShortcut = useCallback((event: KeyboardEvent): boolean => {
-    const key = event.key.toLowerCase();
-
-    // Common browser shortcuts that should never be overridden
-    if (event.ctrlKey || event.metaKey) {
-      const browserShortcuts = [
-        "f", // Find
-        "r", // Reload
-        "t", // New tab
-        "w", // Close tab
-        "n", // New window
-        "l", // Location bar
-        "d", // Bookmark
-        "h", // History
-        "j", // Downloads
-        "u", // View source
-        "p", // Print
-        "s", // Save
-        "o", // Open
-        "z", // Undo
-        "y", // Redo
-        "x", // Cut
-        "c", // Copy
-        "v", // Paste
-        "a", // Select all
-        "+", // Zoom in
-        "-", // Zoom out
-        "0", // Reset zoom
-        "shift+i", // Developer tools
-        "shift+c", // Developer tools
-        "shift+j", // Developer tools
-      ];
-
-      const keyCombo = event.shiftKey ? `shift+${key}` : key;
-      return browserShortcuts.includes(keyCombo);
-    }
-
-    return false;
-  }, []);
-
-  // Helper function to check if event matches key combination
   const matchesKeyCombo = useCallback(
     (keyCombo: string, event: KeyboardEvent): boolean => {
       const parts = keyCombo.split("+");
-      if (parts.length === 1) {
-        // Simple key
-        return event.key.toLowerCase() === parts[0].toLowerCase();
-      }
-
-      // Modifier + key combination
       const key = parts[parts.length - 1].toLowerCase();
       const modifiers = parts.slice(0, -1);
 
       if (event.key.toLowerCase() !== key) return false;
 
-      return modifiers.every((mod) => {
+      const requiredModifiers = {
+        shift: false,
+        ctrl: false,
+        meta: false,
+        alt: false,
+      };
+
+      modifiers.forEach((mod) => {
         switch (mod.toLowerCase()) {
           case "shift":
-            return event.shiftKey;
+            requiredModifiers.shift = true;
+            break;
           case "ctrl":
-            return event.ctrlKey;
+            requiredModifiers.ctrl = true;
+            break;
           case "cmd":
           case "meta":
-            return event.metaKey;
+            requiredModifiers.meta = true;
+            break;
           case "alt":
-            return event.altKey;
-          default:
-            return false;
+            requiredModifiers.alt = true;
+            break;
         }
       });
+
+      return (
+        event.shiftKey === requiredModifiers.shift &&
+        event.ctrlKey === requiredModifiers.ctrl &&
+        event.metaKey === requiredModifiers.meta &&
+        event.altKey === requiredModifiers.alt
+      );
     },
     [],
   );
 
-  // Dynamic prefix state management
   const prefixActiveRef = useRef<string | null>(null);
   const [activePrefix, setActivePrefix] = useState<string | null>(null);
 
@@ -217,10 +180,6 @@ export function useKeyboardShortcuts(
         return;
       }
 
-      if (isBrowserShortcut(event)) {
-        return;
-      }
-
       const key = event.key.toLowerCase();
       const modifiedShortcut = Object.entries(
         categorizedShortcuts.modified,
@@ -237,7 +196,6 @@ export function useKeyboardShortcuts(
         }
       }
 
-      // Handle prefix sequences using refs for reliable state
       if (prefixActiveRef.current) {
         const currentPrefix = prefixActiveRef.current;
         const prefixShortcuts =
@@ -259,18 +217,28 @@ export function useKeyboardShortcuts(
         return;
       }
 
-      // Handle prefix initiators
       const availablePrefixes = Object.keys(categorizedShortcuts.prefixGroups);
-      if (availablePrefixes.includes(key)) {
+      if (
+        availablePrefixes.includes(key) &&
+        !event.shiftKey &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.altKey
+      ) {
         prefixActiveRef.current = key;
         setActivePrefix(key);
         event.preventDefault();
         return;
       }
 
-      // Handle direct shortcuts
       const directShortcut = categorizedShortcuts.direct[key];
-      if (directShortcut) {
+      if (
+        directShortcut &&
+        !event.shiftKey &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.altKey
+      ) {
         const handler = handlers[directShortcut.action];
         if (handler) {
           event.preventDefault();
@@ -279,16 +247,14 @@ export function useKeyboardShortcuts(
         }
       }
     },
-    [categorizedShortcuts, handlers, matchesKeyCombo, isBrowserShortcut],
+    [categorizedShortcuts, handlers, matchesKeyCombo],
   );
 
-  // Attach event listeners
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  // Return available shortcuts for display
   return {
     shortcuts: shortcuts.filter((shortcut) =>
       evaluateWhenCondition(shortcut.when),

@@ -12,7 +12,7 @@ import {
   Plus,
   Users,
 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -48,11 +48,13 @@ interface ActionGroup {
 interface EncounterCommandDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  trigger?: React.ReactNode;
 }
 
 export function EncounterCommandDialog({
   open,
   onOpenChange,
+  trigger,
 }: EncounterCommandDialogProps) {
   const { t } = useTranslation();
   const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
@@ -73,6 +75,25 @@ export function EncounterCommandDialog({
 
   const [recentActionsState, setRecentActionsState] =
     useState<string[]>(getRecentActions);
+
+  // Handle keyboard shortcut to open command dialog
+  useEffect(() => {
+    const handleOpenCommandDialog = () => {
+      onOpenChange(true);
+    };
+
+    document.addEventListener(
+      "open-encounter-command-dialog",
+      handleOpenCommandDialog,
+    );
+
+    return () => {
+      document.removeEventListener(
+        "open-encounter-command-dialog",
+        handleOpenCommandDialog,
+      );
+    };
+  }, [onOpenChange]);
 
   const addRecentAction = useCallback(
     (actionId: string): void => {
@@ -140,7 +161,7 @@ export function EncounterCommandDialog({
           {
             id: "consents",
             label: t("manage_consents"),
-            shortcut: getShortcutDisplay(""),
+            shortcut: getShortcutDisplay("consents"),
             icon: <NotebookPen />,
           },
           {
@@ -315,45 +336,48 @@ export function EncounterCommandDialog({
   );
 
   return (
-    <CommandDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      className="md:max-w-2xl"
-    >
-      <div className="border-b border-gray-100 shadow-xs">
-        <CommandInput
-          placeholder={t("search_encounter_command")}
-          className="border-none focus:ring-0"
-        />
-      </div>
-      <CommandList className="h-[80vh] max-h-[80vh] w-full">
-        <CommandEmpty>{t("no_results")}</CommandEmpty>
-        {encounterActions.map((group) => (
-          <div key={group.group}>
-            <CommandGroup heading={group.group} className="px-2">
-              {group.items.map((action) => (
-                <CommandItem
-                  key={action.id}
-                  value={action.id}
-                  onSelect={() => handleSelect(action.id)}
-                  className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
-                  autoFocus={false}
-                  disabled={action.disabled}
-                >
-                  {action.icon}
-                  <span className="flex-1">{action.label}</span>
-                  {action.shortcut && (
-                    <CommandShortcut className="ml-2 text-xs text-gray-500 bg-white border border-gray-200 shadow-xs px-1.5 py-0.5 rounded">
-                      {action.shortcut}
-                    </CommandShortcut>
-                  )}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-            <CommandSeparator />
-          </div>
-        ))}
-      </CommandList>
-    </CommandDialog>
+    <>
+      {trigger}
+      <CommandDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        className="md:max-w-2xl"
+      >
+        <div className="border-b border-gray-100 shadow-xs">
+          <CommandInput
+            placeholder={t("search_encounter_command")}
+            className="border-none focus:ring-0"
+          />
+        </div>
+        <CommandList className="h-[80vh] max-h-[80vh] w-full">
+          <CommandEmpty>{t("no_results")}</CommandEmpty>
+          {encounterActions.map((group) => (
+            <div key={group.group}>
+              <CommandGroup heading={group.group} className="px-2">
+                {group.items.map((action) => (
+                  <CommandItem
+                    key={action.id}
+                    value={action.id}
+                    onSelect={() => handleSelect(action.id)}
+                    className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
+                    autoFocus={false}
+                    disabled={action.disabled}
+                  >
+                    {action.icon}
+                    <span className="flex-1">{action.label}</span>
+                    {action.shortcut && (
+                      <CommandShortcut className="ml-2 text-xs text-gray-500 bg-white border border-gray-200 shadow-xs px-1.5 py-0.5 rounded">
+                        {action.shortcut}
+                      </CommandShortcut>
+                    )}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+              <CommandSeparator />
+            </div>
+          ))}
+        </CommandList>
+      </CommandDialog>
+    </>
   );
 }
