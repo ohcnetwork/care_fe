@@ -10,7 +10,7 @@ import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
-import { Badge } from "../ui/badge";
+import { Badge } from "@/components/ui/badge";
 
 export default function PrintResourceLetter({ id }: { id: string }) {
   const { t } = useTranslation();

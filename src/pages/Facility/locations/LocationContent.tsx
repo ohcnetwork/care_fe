@@ -132,7 +132,7 @@ function LocationCard({ location, onClick }: LocationCardProps) {
                   ? "green"
                   : "secondary"
               }
-              className="capitaliz"
+              className="capitalize"
               size="sm"
             >
               {location.availability_status}
