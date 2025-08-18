@@ -2,17 +2,12 @@ import { SquareArrowOutUpRight } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { getMapUrl, isAndroidDevice } from "@/Utils/utils";
-
-const isValidLatitude = (latitude: string) => {
-  const lat = parseFloat(latitude.trim());
-  return Number.isFinite(lat) && lat >= -90 && lat <= 90;
-};
-
-const isValidLongitude = (longitude: string) => {
-  const long = parseFloat(longitude.trim());
-  return Number.isFinite(long) && long >= -180 && long <= 180;
-};
+import {
+  getMapUrl,
+  isAndroidDevice,
+  isValidLatitude,
+  isValidLongitude,
+} from "@/Utils/utils";
 
 export const FacilityMapsLink = ({
   latitude,
@@ -23,7 +18,10 @@ export const FacilityMapsLink = ({
 }) => {
   const { t } = useTranslation();
 
-  if (!isValidLatitude(latitude) || !isValidLongitude(longitude)) {
+  if (
+    !isValidLatitude(Number(latitude)) ||
+    !isValidLongitude(Number(longitude))
+  ) {
     return null;
   }
   const target = isAndroidDevice ? "_self" : "_blank";
