@@ -129,7 +129,7 @@ export function AccountShow({
           : AccountBillingStatus.closed_baddebt,
       });
     }
-  }, [account]);
+  }, [account, isAccountBillingClosed]);
 
   const rebalanceMutation = useMutation({
     mutationFn: mutate(accountApi.rebalanceAccount, {
@@ -475,7 +475,11 @@ export function AccountShow({
         </div>
 
         <TabsContent value="charge_items" className="mt-4">
-          <ChargeItemsTable facilityId={facilityId} accountId={accountId} />
+          <ChargeItemsTable
+            facilityId={facilityId}
+            accountId={accountId}
+            patientId={account.patient.id}
+          />
         </TabsContent>
 
         <TabsContent value="invoices" className="mt-4">

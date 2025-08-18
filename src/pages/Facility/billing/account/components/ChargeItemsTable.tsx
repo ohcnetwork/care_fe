@@ -1,10 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ChevronDown,
   ChevronUp,
   ExternalLinkIcon,
   MoreHorizontal,
   PencilIcon,
+  PlusIcon,
 } from "lucide-react";
 import { Link } from "raviger";
 import { useState } from "react";
@@ -53,7 +54,9 @@ import {
   ChargeItemStatus,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 
+import AddChargeItemsBillingSheet from "./AddChargeItemsBillingSheet";
 import EditChargeItemSheet from "./EditChargeItemSheet";
 
 interface PriceComponentRowProps {
@@ -90,16 +93,20 @@ function PriceComponentRow({ label, components }: PriceComponentRowProps) {
 export interface ChargeItemsTableProps {
   facilityId: string;
   accountId: string;
+  patientId: string;
 }
 
 export function ChargeItemsTable({
   facilityId,
   accountId,
+  patientId,
 }: ChargeItemsTableProps) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
     {},
   );
+  const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = useState(false);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
@@ -120,6 +127,27 @@ export function ChargeItemsTable({
   }) as {
     data: { results: ChargeItemRead[]; count: number } | undefined;
     isLoading: boolean;
+  };
+
+  // Get current encounter for the patient to use when creating charge items
+  const { data: encounters } = useQuery({
+    queryKey: ["encounters", patientId],
+    queryFn: query(encounterApi.list, {
+      queryParams: {
+        patient: patientId,
+        limit: 1,
+        ordering: "-modified_date",
+      },
+    }),
+    enabled: !!patientId,
+  });
+
+  const currentEncounter = encounters?.results?.[0];
+
+  const handleChargeItemsAdded = () => {
+    queryClient.invalidateQueries({
+      queryKey: ["chargeItems", qParams, accountId],
+    });
   };
 
   const toggleItemExpand = (itemId: string) => {
@@ -148,7 +176,7 @@ export function ChargeItemsTable({
 
   return (
     <div>
-      <div className="mb-4">
+      <div className="mb-4 flex flex-col sm:flex-row justify-between items-center gap-2">
         {/* Desktop Tabs */}
         <Tabs
           value={qParams.charge_item_status ?? "all"}
@@ -189,6 +217,16 @@ export function ChargeItemsTable({
             ))}
           </SelectContent>
         </Select>
+
+        <Button
+          variant="outline"
+          onClick={() => setIsAddChargeItemsOpen(true)}
+          disabled={!currentEncounter}
+          className="w-full sm:w-auto"
+        >
+          <PlusIcon className="size-4 mr-2" />
+          {t("add_charge_items")}
+        </Button>
       </div>
       {isLoading ? (
         <TableSkeleton count={3} />
@@ -402,6 +440,16 @@ export function ChargeItemsTable({
         </div>
       )}
       <Pagination totalCount={chargeItems?.count || 0} />
+
+      {currentEncounter && (
+        <AddChargeItemsBillingSheet
+          open={isAddChargeItemsOpen}
+          onOpenChange={setIsAddChargeItemsOpen}
+          facilityId={facilityId}
+          encounterId={currentEncounter.id}
+          onChargeItemsAdded={handleChargeItemsAdded}
+        />
+      )}
     </div>
   );
 }

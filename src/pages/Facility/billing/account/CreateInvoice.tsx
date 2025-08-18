@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   useInfiniteQuery,
   useMutation,
+  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp, PlusIcon } from "lucide-react";
@@ -39,6 +40,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import accountApi from "@/types/billing/account/accountApi";
 import {
   ChargeItemRead,
   ChargeItemStatus,
@@ -50,6 +52,9 @@ import {
   InvoiceStatus,
 } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
+import encounterApi from "@/types/emr/encounter/encounterApi";
+
+import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -139,6 +144,7 @@ export function CreateInvoicePage({
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
     {},
   );
+  const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -149,6 +155,35 @@ export function CreateInvoicePage({
       charge_items: preSelectedChargeItems?.map((item) => item.id) || [],
     },
   });
+
+  const { data: account } = useQuery({
+    queryKey: ["account", accountId],
+    queryFn: query(accountApi.retrieveAccount, {
+      pathParams: { facilityId, accountId },
+    }),
+    enabled: !!facilityId && !!accountId,
+  });
+
+  // Get current encounter for the patient to use when creating charge items
+  const { data: encounters } = useQuery({
+    queryKey: ["encounters", account?.patient?.id],
+    queryFn: query(encounterApi.list, {
+      queryParams: {
+        patient: account?.patient?.id,
+        limit: 1,
+        ordering: "-modified_date",
+      },
+    }),
+    enabled: !!account?.patient?.id,
+  });
+
+  const currentEncounter = encounters?.results?.[0];
+
+  const handleChargeItemsAdded = () => {
+    queryClient.invalidateQueries({
+      queryKey: ["chargeItems", facilityId, accountId],
+    });
+  };
 
   const {
     data: chargeItemsData,
@@ -322,8 +357,19 @@ export function CreateInvoicePage({
           </div>
 
           <div className="pb-2">
-            <div className="text-sm font-medium text-gray-950">
-              {t("billable_charge_items")}
+            <div className="flex justify-between items-center mb-4">
+              <div className="text-sm font-medium text-gray-950">
+                {t("billable_charge_items")}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsAddChargeItemsOpen(true)}
+                disabled={!currentEncounter}
+              >
+                <PlusIcon className="size-4 mr-2" />
+                {t("add_charge_items")}
+              </Button>
             </div>
             {isLoading ? (
               <TableSkeleton count={3} />
@@ -541,6 +587,16 @@ export function CreateInvoicePage({
           </div>
         </form>
       </Form>
+
+      {currentEncounter && (
+        <AddChargeItemsBillingSheet
+          open={isAddChargeItemsOpen}
+          onOpenChange={setIsAddChargeItemsOpen}
+          facilityId={facilityId}
+          encounterId={currentEncounter.id}
+          onChargeItemsAdded={handleChargeItemsAdded}
+        />
+      )}
     </div>
   );
 }
