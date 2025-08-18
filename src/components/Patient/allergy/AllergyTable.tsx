@@ -62,7 +62,7 @@ const AllergyCard = ({
                 <BadgeInfo size={16} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent className="mx-1">
               {allergy.note && (
                 <DropdownMenuItem
                   onClick={() => setShowNote(!showNote)}
@@ -83,7 +83,9 @@ const AllergyCard = ({
                 </DropdownMenuItem>
               )}
 
-              <div className="my-2 border-t border-dashed border-gray-300" />
+              {(!!onViewEncounter || allergy.note) && (
+                <div className="my-2 border-t border-dashed border-gray-300" />
+              )}
 
               <div className="p-1 text-sm">
                 <div className="text-gray-500">{t("reported_by")}:</div>
