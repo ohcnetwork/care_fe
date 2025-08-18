@@ -357,10 +357,10 @@ export default function ValueSetSearchContent({
             setItemToRemove(null);
           }
         }}
-        title={t("are_you_sure_want_to_clear_favourite", {
+        title={t("are_you_sure")}
+        description={t("are_you_sure_want_to_clear_favourite", {
           name: itemToRemove?.display,
         })}
-        description=""
         confirmText={t("confirm")}
         cancelText={t("cancel")}
         variant="destructive"
@@ -380,8 +380,8 @@ export default function ValueSetSearchContent({
             setShowBulkClearConfirm(false);
           }
         }}
-        title={t("are_you_sure_clear_starred")}
-        description=""
+        title={t("are_you_sure")}
+        description={t("are_you_sure_clear_starred")}
         confirmText={t("confirm")}
         cancelText={t("cancel")}
         variant="destructive"
