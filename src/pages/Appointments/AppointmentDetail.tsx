@@ -680,11 +680,6 @@ const AppointmentActions = ({
       <CardContent className="space-y-4">
         {/* Primary Actions */}
         <div className="space-y-3">
-          <div className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-            {t("primary_actions")}
-          </div>
-
-          {/* View Patient - Always visible */}
           <Button
             variant="outline"
             onClick={onViewPatient}
@@ -692,7 +687,7 @@ const AppointmentActions = ({
             className="w-full justify-start h-12"
           >
             <PersonIcon className="size-4 mr-3" />
-            {t("view_patient_actions")}
+            {t("patient_home")}
           </Button>
 
           {/* Check In - Only for booked appointments */}
@@ -787,9 +782,7 @@ const AppointmentActions = ({
         {/* Secondary Actions */}
         {canCreateAppointment && (
           <div className="space-y-3">
-            <div className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-              {t("secondary_actions")}
-            </div>
+            <Separator />
 
             {/* Reschedule */}
             <AlertDialog
