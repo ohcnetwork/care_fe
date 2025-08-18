@@ -8,7 +8,7 @@ import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { ObservationRead } from "@/types/emr/observation/observation";
 import { SpecimenRead } from "@/types/emr/specimen/specimen";
 import { LocationList } from "@/types/location/location";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum Status {
   draft = "draft",
@@ -95,8 +95,8 @@ export interface ServiceRequestReadSpec extends BaseServiceRequestSpec {
   specimens: SpecimenRead[];
   observations?: ObservationRead[];
   diagnostic_reports: DiagnosticReportRead[];
-  created_by: UserBase;
-  updated_by: UserBase;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
   created_date: string;
   updated_at: string;
 }
