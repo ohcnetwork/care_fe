@@ -188,15 +188,28 @@ export function DiscountMonetaryComponentForm({
                 />
               )}
             </div>
-            <Select value={valueType} onValueChange={handleValueTypeChange}>
-              <SelectTrigger className="flex-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="factor">{t("factor")}</SelectItem>
-                <SelectItem value="amount">{t("amount")}</SelectItem>
-              </SelectContent>
-            </Select>
+            <FormField
+              control={form.control}
+              name="factor"
+              render={({ field: _field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Select
+                      value={valueType}
+                      onValueChange={handleValueTypeChange}
+                    >
+                      <SelectTrigger className="flex-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="factor">{t("factor")}</SelectItem>
+                        <SelectItem value="amount">{t("amount")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           </div>
           <FormDescription>
             {valueType === "factor"
