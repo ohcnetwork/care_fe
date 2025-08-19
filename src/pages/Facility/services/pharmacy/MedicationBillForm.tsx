@@ -9,7 +9,7 @@ import {
   PlusIcon,
   Shuffle,
 } from "lucide-react";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -695,6 +695,7 @@ export default function MedicationBillForm({ patientId }: Props) {
   const queryClient = useQueryClient();
   const { facilityId } = useCurrentFacility();
   const { locationId } = useCurrentLocation();
+  const [{ encounterId }] = useQueryParams();
   const [productKnowledgeInventoriesMap, setProductKnowledgeInventoriesMap] =
     useState<Record<string, InventoryRead[] | undefined>>({});
   const [isInvoiceSheetOpen, setIsInvoiceSheetOpen] = useState(false);
@@ -1167,7 +1168,8 @@ export default function MedicationBillForm({ patientId }: Props) {
           category: MedicationDispenseCategory.outpatient,
           when_prepared: new Date(),
           dosage_instruction: item.dosageInstructions ?? [],
-          encounter: medication?.encounter ?? defaultEncounterId!,
+          encounter:
+            medication?.encounter ?? defaultEncounterId! ?? encounterId,
           location: locationId,
           authorizing_prescription: medication?.id ?? null,
           item: selectedInventory.id,
