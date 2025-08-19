@@ -35,7 +35,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
-import { Code } from "@/types/base/code/code";
+import { Code, CodeSchema } from "@/types/base/code/code";
 import { DOSAGE_UNITS_CODES } from "@/types/emr/medicationRequest/medicationRequest";
 import {
   ProductKnowledgeBase,
@@ -47,19 +47,12 @@ import {
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 
-// Define a Code schema to match the API type
-const codeSchema = z.object({
-  code: z.string().min(1, "Code is required"),
-  display: z.string().min(1, "Display name is required"),
-  system: z.string().min(1, "System is required"),
-});
-
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   slug: z.string().min(1, "Slug is required"),
   product_type: z.nativeEnum(ProductKnowledgeType),
   status: z.nativeEnum(ProductKnowledgeStatus),
-  code: codeSchema.nullable(),
+  code: CodeSchema.nullable(),
   names: z
     .array(
       z.object({
@@ -75,7 +68,7 @@ const formSchema = z.object({
         stability_duration: z
           .object({
             value: z.number({ invalid_type_error: "Required" }),
-            unit: codeSchema,
+            unit: CodeSchema,
           })
           .refine((data) => data.value !== undefined && data.value !== null),
       }),
@@ -83,18 +76,15 @@ const formSchema = z.object({
     .default([]),
   definitional: z
     .object({
-      dosage_form: codeSchema.optional(),
+      dosage_form: CodeSchema.optional(),
       intended_routes: z
         .array(
-          z
-            .object({
-              code: z.string(),
-              display: z.string(),
-              system: z.string(),
-            })
-            .refine((data) => data.code && data.display && data.system, {
+          CodeSchema.refine(
+            (data) => data.code && data.display && data.system,
+            {
               message: "Required",
-            }),
+            },
+          ),
         )
         .default([]),
     })
