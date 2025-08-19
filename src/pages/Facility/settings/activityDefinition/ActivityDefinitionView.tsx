@@ -157,7 +157,7 @@ export default function ActivityDefinitionView({
           {t("back")}
         </Button>
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-row items-center justify-between gap-2 flex-wrap">
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold">{definition.title}</h1>
@@ -178,7 +178,7 @@ export default function ActivityDefinitionView({
                 onClick={() => setShowDeleteDialog(true)}
                 disabled={isDeleting}
               >
-                <CareIcon icon="l-trash" className="mr-2 size-4" />
+                <CareIcon icon="l-trash" className="size-4" />
                 {t("delete")}
               </Button>
             )}
@@ -190,7 +190,7 @@ export default function ActivityDefinitionView({
                 )
               }
             >
-              <CareIcon icon="l-pen" className="mr-2 size-4" />
+              <CareIcon icon="l-pen" className=" size-4" />
               {t("edit")}
             </Button>
           </div>
