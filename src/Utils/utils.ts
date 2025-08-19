@@ -220,6 +220,20 @@ export const keysOf = <T extends object>(obj: T) => {
   return Object.keys(obj) as (keyof T)[];
 };
 
+/**
+ * Although same as `Objects.entries(...)`, this provides better type-safety.
+ */
+export const entriesOf = <T extends object>(obj: T) => {
+  return Object.entries(obj) as [keyof T, T[keyof T]][];
+};
+
+/**
+ * Although same as `Objects.values(...)`, this provides better type-safety.
+ */
+export const valuesOf = <T extends object>(obj: T) => {
+  return Object.values(obj) as T[keyof T][];
+};
+
 export const properCase = (str: string) => {
   return str
     .split("_")

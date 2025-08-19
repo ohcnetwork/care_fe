@@ -26,11 +26,9 @@ export const EncounterPlotsTab = () => {
   const {
     patientId,
     selectedEncounterId: encounterId,
-    patientPermissions: { canViewClinicalData },
-    selectedEncounterPermissions: { canViewEncounter },
+    canReadClinicalData: canAccess,
   } = useEncounter();
 
-  const canAccess = canViewClinicalData || canViewEncounter;
   const plotColumns = useBreakpoints({ default: 1, lg: 2 });
 
   const { data, isLoading } = useQuery<ObservationPlotConfig>({
