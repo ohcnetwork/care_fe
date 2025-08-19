@@ -74,7 +74,7 @@ const formSchema = z.object({
         note: z.string().min(1, "Note is required"),
         stability_duration: z
           .object({
-            value: z.number().int().optional(),
+            value: z.number({ invalid_type_error: "Required" }),
             unit: codeSchema,
           })
           .refine((data) => data.value !== undefined && data.value !== null),
@@ -84,7 +84,19 @@ const formSchema = z.object({
   definitional: z
     .object({
       dosage_form: codeSchema.optional(),
-      intended_routes: z.array(codeSchema).default([]),
+      intended_routes: z
+        .array(
+          z
+            .object({
+              code: z.string(),
+              display: z.string(),
+              system: z.string(),
+            })
+            .refine((data) => data.code && data.display && data.system, {
+              message: "Required",
+            }),
+        )
+        .default([]),
     })
     .nullable()
     .optional()
@@ -589,7 +601,7 @@ function ProductKnowledgeFormContent({
                       storageGuidelinesArray.append({
                         note: "",
                         stability_duration: {
-                          value: undefined,
+                          value: undefined as unknown as number,
                           unit: defaultUnitCode,
                         },
                       });
@@ -649,11 +661,7 @@ function ProductKnowledgeFormContent({
                                       }
                                     />
                                   </FormControl>
-                                  <FormMessage>
-                                    {form.formState.errors.storage_guidelines?.[
-                                      index
-                                    ]?.stability_duration && t("required")}
-                                  </FormMessage>
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
@@ -758,37 +766,40 @@ function ProductKnowledgeFormContent({
                             <FormLabel aria-required>
                               {t("dosage_form")}
                             </FormLabel>
-                            <Select
-                              value={field.value?.code || ""}
-                              onValueChange={(value) => {
-                                const selectedUnit = DOSAGE_UNITS_CODES.find(
-                                  (unit) => unit.code === value,
-                                );
-                                if (selectedUnit) field.onChange(selectedUnit);
-                              }}
-                            >
-                              <FormControl>
+                            <FormControl>
+                              <Select
+                                value={field.value?.code || ""}
+                                onValueChange={(value) => {
+                                  const selectedUnit = DOSAGE_UNITS_CODES.find(
+                                    (unit) => unit.code === value,
+                                  );
+                                  if (selectedUnit)
+                                    field.onChange(selectedUnit);
+                                }}
+                              >
                                 <SelectTrigger>
                                   <SelectValue
                                     placeholder={t("dosage_form_placeholder")}
                                   />
                                 </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {DOSAGE_UNITS_CODES.map((unit) => (
-                                  <SelectItem key={unit.code} value={unit.code}>
-                                    {unit.display}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage>
-                              {form.formState.errors.definitional &&
-                                t("required")}
-                            </FormMessage>
+                                <SelectContent>
+                                  {DOSAGE_UNITS_CODES.map((unit) => (
+                                    <SelectItem
+                                      key={unit.code}
+                                      value={unit.code}
+                                    >
+                                      {unit.display}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
                           </FormItem>
                         )}
                       />
+                      <FormMessage>
+                        {form.formState.errors.definitional && t("required")}
+                      </FormMessage>
                     </div>
 
                     <div className="space-y-4">
@@ -849,11 +860,7 @@ function ProductKnowledgeFormContent({
                                           showCode={true}
                                         />
                                       </FormControl>
-                                      <FormMessage>
-                                        {form.formState.errors.definitional
-                                          ?.intended_routes?.[index] &&
-                                          t("required")}
-                                      </FormMessage>
+                                      <FormMessage />
                                     </FormItem>
                                   )}
                                 />
