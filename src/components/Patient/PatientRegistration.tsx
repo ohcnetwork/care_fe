@@ -521,42 +521,38 @@ export default function PatientRegistration(
                         data-cy="patient-phone-input"
                       />
                     </FormControl>
-                    <FormDescription>
-                      <FormField
-                        control={form.control}
-                        name="same_phone_number"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center gap-2">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={(v) => {
-                                  field.onChange(v);
-                                  if (v) {
-                                    form.setValue(
-                                      "emergency_phone_number",
-                                      form.watch("phone_number"),
-                                      { shouldValidate: true },
-                                    );
-                                  } else {
-                                    form.setValue(
-                                      "emergency_phone_number",
-                                      "",
-                                      { shouldValidate: true },
-                                    );
-                                  }
-                                }}
-                                data-cy="same-phone-number-checkbox"
-                                className="mt-2"
-                              />
-                            </FormControl>
-                            <FormLabel>
-                              {t("use_phone_number_for_emergency")}
-                            </FormLabel>
-                          </FormItem>
-                        )}
-                      />
-                    </FormDescription>
+                    <FormField
+                      control={form.control}
+                      name="same_phone_number"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center gap-2">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={(v) => {
+                                field.onChange(v);
+                                if (v) {
+                                  form.setValue(
+                                    "emergency_phone_number",
+                                    form.watch("phone_number"),
+                                    { shouldValidate: true },
+                                  );
+                                } else {
+                                  form.setValue("emergency_phone_number", "", {
+                                    shouldValidate: true,
+                                  });
+                                }
+                              }}
+                              data-cy="same-phone-number-checkbox"
+                              className="mt-2"
+                            />
+                          </FormControl>
+                          <FormLabel>
+                            {t("use_phone_number_for_emergency")}
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -856,35 +852,31 @@ export default function PatientRegistration(
                         data-cy="current-address-input"
                       />
                     </FormControl>
-                    <FormDescription>
-                      <FormField
-                        control={form.control}
-                        name="same_address"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center gap-2">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={(v) => {
-                                  field.onChange(v);
-                                  if (v) {
-                                    form.setValue(
-                                      "permanent_address",
-                                      form.getValues("address"),
-                                      { shouldValidate: true },
-                                    );
-                                  }
-                                }}
-                                data-cy="same-address-checkbox"
-                              />
-                            </FormControl>
-                            <FormLabel>
-                              {t("use_address_as_permanent")}
-                            </FormLabel>
-                          </FormItem>
-                        )}
-                      />
-                    </FormDescription>
+                    <FormField
+                      control={form.control}
+                      name="same_address"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center gap-2">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={(v) => {
+                                field.onChange(v);
+                                if (v) {
+                                  form.setValue(
+                                    "permanent_address",
+                                    form.getValues("address"),
+                                    { shouldValidate: true },
+                                  );
+                                }
+                              }}
+                              data-cy="same-address-checkbox"
+                            />
+                          </FormControl>
+                          <FormLabel>{t("use_address_as_permanent")}</FormLabel>
+                        </FormItem>
+                      )}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
