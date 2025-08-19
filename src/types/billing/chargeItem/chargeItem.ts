@@ -2,6 +2,7 @@ import { BatchSuccessResponse } from "@/types/base/batch/batch";
 import { MonetaryComponent } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum ChargeItemStatus {
   planned = "planned",
@@ -86,6 +87,7 @@ export interface ChargeItemRead extends ChargeItemBase {
   total_price_components: MonetaryComponent[];
   total_price: string;
   charge_item_definition: ChargeItemDefinitionBase;
+  commission_agent: UserReadMinimal;
 }
 
 export interface ChargeItemBatchResponse {

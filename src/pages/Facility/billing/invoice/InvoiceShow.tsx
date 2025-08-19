@@ -7,6 +7,7 @@ import {
   CreditCard,
   FileCheck,
   FileText,
+  HandCoins,
   MoreHorizontal,
   Wallet,
 } from "lucide-react";
@@ -55,8 +56,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import AddChargeItemSheet from "@/components/Billing/Invoice/AddChargeItemSheet";
+import { Avatar } from "@/components/Common/Avatar";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -501,6 +504,9 @@ export function InvoiceShow({
                       <TableHead className={tableHeadClass}>
                         {t("discount")}
                       </TableHead>
+                      <TableHead className={tableHeadClass}>
+                        <HandCoins className="w-full size-4 justify-center" />
+                      </TableHead>
                       {getApplicableTaxColumns(invoice).map((taxCode) => (
                         <TableHead key={taxCode} className={tableHeadClass}>
                           {t(taxCode)}
@@ -607,6 +613,26 @@ export function InvoiceShow({
                                     </div>
                                   ))}
                               </div>
+                            </TableCell>
+                            <TableCell
+                              className={cn(tableCellClass, "text-center")}
+                            >
+                              {item.commission_agent && (
+                                <div className="flex justify-center">
+                                  <TooltipComponent
+                                    content={`${item.commission_agent.first_name} ${item.commission_agent.last_name}`}
+                                  >
+                                    <Avatar
+                                      name={`${item.commission_agent.first_name} ${item.commission_agent.last_name}`}
+                                      imageUrl={
+                                        item.commission_agent
+                                          .profile_picture_url
+                                      }
+                                      className="size-6"
+                                    />
+                                  </TooltipComponent>
+                                </div>
+                              )}
                             </TableCell>
                             {facilityData &&
                               getApplicableTaxColumns(invoice).map(
