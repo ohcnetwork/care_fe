@@ -5,6 +5,7 @@ export interface RoleBase {
   name: string;
   description: string;
   is_system: boolean;
+  is_archived: boolean;
 }
 
 export interface RoleRead extends RoleBase {

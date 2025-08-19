@@ -150,6 +150,7 @@ export default function RolesIndex() {
                     description: "",
                     permissions: [],
                     is_system: false,
+                    is_archived: false,
                   });
                 }
               }}
@@ -230,6 +231,7 @@ export default function RolesIndex() {
                       <TableHead>{t("name")}</TableHead>
                       <TableHead>{t("description")}</TableHead>
                       <TableHead>{t("permissions")}</TableHead>
+                      <TableHead>{t("status")}</TableHead>
                       <TableHead>{t("actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -259,6 +261,11 @@ export default function RolesIndex() {
                               </Badge>
                             )}
                           </div>
+                        </TableCell>
+                        <TableCell>
+                          {role.is_archived && (
+                            <Badge variant="destructive">{t("archived")}</Badge>
+                          )}
                         </TableCell>
                         <TableCell>
                           <Button

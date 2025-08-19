@@ -44,6 +44,7 @@ export default function RoleForm({
     permissions: z
       .array(z.string())
       .min(1, t("at_least_one_permission_required")),
+    is_archived: z.boolean().default(false),
   });
 
   const form = useForm({
@@ -52,6 +53,7 @@ export default function RoleForm({
       name: role?.name || "",
       description: role?.description || "",
       permissions: role?.permissions.map((p) => p.slug) || [],
+      is_archived: role?.is_archived ?? false,
     },
   });
 
@@ -80,6 +82,7 @@ export default function RoleForm({
       name: data.name,
       description: data.description,
       permissions: data.permissions,
+      is_archived: data.is_archived,
     };
 
     if (role?.id) {
@@ -153,6 +156,25 @@ export default function RoleForm({
                 />
               </FormControl>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="is_archived"
+          render={({ field }) => (
+            <FormItem className="flex items-center space-x-2">
+              <FormControl>
+                <Checkbox
+                  id="is_archived"
+                  checked={field.value}
+                  onCheckedChange={(checked) => field.onChange(!!checked)}
+                />
+              </FormControl>
+              <FormLabel htmlFor="is_archived" className="cursor-pointer">
+                {t("archive_role")}
+              </FormLabel>
             </FormItem>
           )}
         />
