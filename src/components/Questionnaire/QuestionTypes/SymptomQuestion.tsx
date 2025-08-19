@@ -88,6 +88,7 @@ const SYMPTOM_INITIAL_VALUE: Omit<SymptomRequest, "encounter"> = {
   onset: { onset_datetime: new Date().toISOString().split("T")[0] },
 };
 
+
 function DatePickerField({
   onsetDatetime,
   onChange,
@@ -112,6 +113,7 @@ function DatePickerField({
     />
   );
 }
+
 
 function StatusSelect({
   status,
@@ -366,12 +368,15 @@ const SymptomRow = React.memo(function SymptomRow({
           <div className="text-sm font-medium text-gray-700 mb-1">
             {t("onset_date")}
           </div>
-          <DatePickerField
-            onsetDatetime={symptom.onset?.onset_datetime}
+          <CombinedDatePicker
+            value={
+              symptom.onset?.onset_datetime
+                ? new Date(symptom.onset.onset_datetime)
+                : undefined
+            }
             onChange={handleDateChange}
-            disabled={disabled}
-            isSymptomInSheet={isSymptomInSheet}
-            hasId={!!symptom.id}
+            disabled={disabled || (!isSymptomInSheet && !!symptom.id)}
+            buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </div>
         <div>
@@ -508,12 +513,15 @@ const SymptomRow = React.memo(function SymptomRow({
                   <div className="block text-sm font-medium  mb-1">
                     {t("onset_date")}
                   </div>
-                  <DatePickerField
-                    onsetDatetime={symptom.onset?.onset_datetime}
+                  <CombinedDatePicker
+                    value={
+                      symptom.onset?.onset_datetime
+                        ? new Date(symptom.onset.onset_datetime)
+                        : undefined
+                    }
                     onChange={handleDateChange}
-                    disabled={disabled}
-                    isSymptomInSheet={isSymptomInSheet}
-                    hasId={!!symptom.id}
+                    disabled={disabled || (!isSymptomInSheet && !!symptom.id)}
+                    buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
                   />
                 </div>
                 <div>
@@ -575,12 +583,15 @@ const SymptomRow = React.memo(function SymptomRow({
           </div>
         </TableCell>
         <TableCell>
-          <DatePickerField
-            onsetDatetime={symptom.onset?.onset_datetime}
+          <CombinedDatePicker
+            value={
+              symptom.onset?.onset_datetime
+                ? new Date(symptom.onset.onset_datetime)
+                : undefined
+            }
             onChange={handleDateChange}
-            disabled={disabled}
-            isSymptomInSheet={isSymptomInSheet}
-            hasId={!!symptom.id}
+            disabled={disabled || (!isSymptomInSheet && !!symptom.id)}
+            buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </TableCell>
         <TableCell>

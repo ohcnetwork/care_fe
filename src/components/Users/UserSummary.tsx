@@ -1,8 +1,5 @@
-import { useMutation } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -25,8 +22,6 @@ import {
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import routes from "@/Utils/request/api";
-import mutate from "@/Utils/request/mutate";
 import EditUserSheet from "@/pages/Organization/components/EditUserSheet";
 
 export default function UserSummaryTab({
@@ -34,35 +29,12 @@ export default function UserSummaryTab({
   permissions,
 }: userChildProps) {
   const { t } = useTranslation();
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const authUser = useAuthUser();
   const [showEditUserSheet, setShowEditUserSheet] = useState(false);
 
-  const { mutate: deleteUser, isPending: isDeleting } = useMutation({
-    mutationFn: mutate(routes.deleteUser, {
-      pathParams: { username: userData?.username || "" },
-    }),
-    onSuccess: () => {
-      toast.success(t("user_deleted_successfully"));
-      setShowDeleteDialog(false);
-      if (window.history.length > 1) {
-        window.history.back();
-      } else {
-        navigate("/");
-      }
-    },
-    onError: () => {
-      setShowDeleteDialog(false);
-      toast.error(t("user_delete_error"));
-    },
-  });
   if (!userData) {
     return <></>;
   }
-
-  const handleSubmit = async () => {
-    deleteUser();
-  };
 
   const userColumnsData = {
     userData,
@@ -99,17 +71,6 @@ export default function UserSummaryTab({
 
   return (
     <>
-      {showDeleteDialog && (
-        <UserDeleteDialog
-          show={showDeleteDialog}
-          name={userData.username}
-          handleOk={handleSubmit}
-          handleCancel={() => {
-            setShowDeleteDialog(false);
-          }}
-        />
-      )}
-
       <EditUserSheet
         existingUsername={userData.username}
         open={showEditUserSheet}
@@ -222,16 +183,7 @@ export default function UserSummaryTab({
                     {t("delete_account_note")}
                   </p>
                 </div>
-                <Button
-                  onClick={() => setShowDeleteDialog(true)}
-                  variant="destructive"
-                  data-testid="user-delete-button"
-                  disabled={isDeleting}
-                  className="w-fit"
-                >
-                  <CareIcon icon="l-trash" className="h-4 mr-2" />
-                  {t("delete")}
-                </Button>
+                <UserDeleteDialog user={userData} />
               </div>
             </CardContent>
           </Card>

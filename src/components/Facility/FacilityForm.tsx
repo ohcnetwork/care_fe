@@ -25,15 +25,14 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { Textarea } from "@/components/ui/textarea";
 
 import LocationPicker from "@/components/Common/GeoLocationPicker";
-import { FacilityModel } from "@/components/Facility/models";
-
-import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
-import { BaseFacility } from "@/types/facility/facility";
+import { FACILITY_TYPES } from "@/types/facility/facility";
+import { FACILITY_FEATURE_TYPES } from "@/types/facility/facility";
+import { FacilityRead } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
@@ -57,14 +56,18 @@ export default function FacilityForm({
   const facilityFormSchema = z.object({
     facility_type: z.string().min(1, t("facility_type_required")),
     name: z.string().min(1, t("name_is_required")),
-    description: z.string().optional(),
+    description: z.string().trim().default(""),
     features: z.array(z.number()).default([]),
     pincode: validators().pincode,
     geo_organization: z.string().min(1, t("field_required")),
     address: z.string().min(1, t("address_is_required")),
     phone_number: validators().phoneNumber.required,
-    latitude: validators().coordinates.latitude.optional(),
-    longitude: validators().coordinates.longitude.optional(),
+    latitude: validators()
+      .coordinates.latitude.transform((val) => (val ? Number(val) : undefined))
+      .optional(),
+    longitude: validators()
+      .coordinates.longitude.transform((val) => (val ? Number(val) : undefined))
+      .optional(),
     is_public: z.boolean().default(false),
   });
 
@@ -103,7 +106,7 @@ export default function FacilityForm({
 
   const { mutate: createFacility, isPending } = useMutation({
     mutationFn: mutate(facilityApi.create),
-    onSuccess: (_data: BaseFacility) => {
+    onSuccess: (_data: FacilityRead) => {
       toast.success(t("facility_added_successfully"));
       queryClient.invalidateQueries({ queryKey: ["organizationFacilities"] });
       form.reset();
@@ -111,10 +114,10 @@ export default function FacilityForm({
     },
   });
   const { mutate: updateFacility, isPending: isUpdatePending } = useMutation({
-    mutationFn: mutate(facilityApi.updateFacility, {
-      pathParams: { id: facilityId || "" },
+    mutationFn: mutate(facilityApi.update, {
+      pathParams: { facilityId: facilityId || "" },
     }),
-    onSuccess: (_data: FacilityModel) => {
+    onSuccess: (_data: FacilityRead) => {
       toast.success(t("facility_updated_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["organizationFacilities"],
@@ -132,8 +135,8 @@ export default function FacilityForm({
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(facilityApi.getFacility, {
-      pathParams: { id: facilityId || "" },
+    queryFn: query(facilityApi.get, {
+      pathParams: { facilityId: facilityId || "" },
     }),
     enabled: !!facilityId,
   });
@@ -144,11 +147,15 @@ export default function FacilityForm({
     if (facilityId) {
       updateFacility({
         ...data,
-        latitude: data.latitude ?? 0,
-        longitude: data.longitude ?? 0,
+        latitude: data.latitude ? String(data.latitude) : undefined,
+        longitude: data.longitude ? String(data.longitude) : undefined,
       });
     } else {
-      createFacility(data);
+      createFacility({
+        ...data,
+        latitude: data.latitude ? String(data.latitude) : undefined,
+        longitude: data.longitude ? String(data.longitude) : undefined,
+      });
     }
   };
 
@@ -185,18 +192,14 @@ export default function FacilityForm({
   // Update form when facility data is loaded
   useEffect(() => {
     if (facilityData) {
-      setSelectedLevels([
-        facilityData.geo_organization as unknown as Organization,
-      ]);
+      setSelectedLevels([facilityData.geo_organization]);
       form.reset({
         facility_type: facilityData.facility_type,
         name: facilityData.name,
         description: facilityData.description || "",
         features: facilityData.features || [],
         pincode: facilityData.pincode || undefined,
-        geo_organization: (
-          facilityData.geo_organization as unknown as Organization
-        )?.id,
+        geo_organization: facilityData.geo_organization.id,
         address: facilityData.address,
         phone_number: facilityData.phone_number,
         latitude: facilityData.latitude

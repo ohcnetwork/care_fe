@@ -1,11 +1,13 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: false
 ---
+
 # Data Fetching and API Guidelines
 
 ## TanStack Query Usage
+
 - Use TanStack Query with the `query` and `mutate` utilities from `@/Utils/request/`
 - Use appropriate query keys following the resource pattern
 - Leverage built-in features for pagination and debouncing
@@ -14,6 +16,7 @@ alwaysApply: false
 ## API Route Definitions
 
 ### Modern Route Pattern
+
 Routes are defined in dedicated API files (`*Api.ts`) within the corresponding type directory:
 
 ```typescript
@@ -22,14 +25,14 @@ export default {
   list: {
     path: "/api/v1/users/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<UserBase>>(),
+    TRes: Type<PaginatedResponse<UserReadMinimal>>(),
   },
   create: {
     path: "/api/v1/users/",
     method: HttpMethod.POST,
-    TRes: Type<UserBase>(),
-    TBody: Type<CreateUserModel>(),
-  }
+    TRes: Type<UserReadMinimal>(),
+    TBody: Type<UserCreate>(),
+  },
 } as const;
 
 // src/types/facility/facilityApi.ts
@@ -37,21 +40,22 @@ export default {
   getFacility: {
     path: "/api/v1/facility/{id}/",
     method: HttpMethod.GET,
-    TRes: Type<FacilityData>(),
+    TRes: Type<FacilityRead>(),
   },
   updateMonetaryComponents: {
     path: "/api/v1/facility/{facilityId}/set_monetary_codes/",
     method: HttpMethod.POST,
-    TRes: Type<FacilityData>(),
+    TRes: Type<FacilityRead>(),
     TBody: Type<{
       discount_codes: Code[];
       discount_monetary_components: MonetaryComponentRead[];
     }>(),
-  }
+  },
 } as const;
 ```
 
 ### Legacy Route Pattern
+
 Legacy routes are defined in `src/Utils/api.tsx`:
 
 ```typescript
@@ -64,14 +68,15 @@ export const routes = {
     logout: {
       path: "/api/v1/auth/logout/",
       method: "POST",
-    } as ApiRoute<void>
-  }
+    } as ApiRoute<void>,
+  },
 } as const;
 ```
 
 ## Query Patterns
 
 ### Basic Queries
+
 ```typescript
 // Using modern routes
 const { data } = useQuery({
@@ -87,6 +92,7 @@ const { data } = useQuery({
 ```
 
 ### With Parameters
+
 ```typescript
 // Path parameters
 const { data } = useQuery({
@@ -106,22 +112,24 @@ const { data } = useQuery({
 ```
 
 ## Mutation Patterns
+
 ```typescript
 // Using modern routes
 const { mutate: createUser } = useMutation({
   mutationFn: mutate(userApi.create),
   onSuccess: () => {
-    queryClient.invalidateQueries(['users'])
-  }
+    queryClient.invalidateQueries(["users"]);
+  },
 });
 
 // Using legacy routes
 const { mutate: login } = useMutation({
-  mutationFn: mutate(routes.auth.login)
+  mutationFn: mutate(routes.auth.login),
 });
 ```
 
 ## Error Handling
+
 - Errors are handled globally by default
 - Common scenarios are automatically handled:
   - Session expiry → Redirects to /session-expired

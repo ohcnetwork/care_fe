@@ -21,9 +21,9 @@ import {
 
 import { DEFAULT_ALLOWED_EXTENSIONS } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import uploadFile from "@/Utils/request/uploadFile";
+import filesApi from "@/types/files/filesApi";
 
 export type FileUploadOptions = {
   multiple?: boolean;
@@ -203,10 +203,8 @@ export default function useFileUpload(
         data: CreateFileResponse;
         associating_id: string;
       }) =>
-        mutate(routes.markUploadCompleted, {
-          pathParams: {
-            id: body.data.id,
-          },
+        mutate(filesApi.markUploadCompleted, {
+          pathParams: { id: body.data.id },
         })(body),
       onSuccess: (_, { data, associating_id }) => {
         queryClient.invalidateQueries({
@@ -273,7 +271,7 @@ export default function useFileUpload(
       file_category: FileCategory;
       mime_type: string;
     }) =>
-      mutate(routes.createUpload, {
+      mutate(filesApi.createUpload, {
         body: {
           original_name: body.original_name,
           file_type: body.file_type,
@@ -307,7 +305,7 @@ export default function useFileUpload(
           allowNameFallback && uploadFileNames[index] === "" && file
             ? file.name
             : uploadFileNames[index];
-        if (!filename) {
+        if (!filename.trim()) {
           setError(t("file_error__single_file_name"));
           return;
         }
