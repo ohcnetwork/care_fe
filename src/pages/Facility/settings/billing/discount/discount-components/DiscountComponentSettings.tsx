@@ -108,14 +108,16 @@ export function DiscountComponentSettings() {
       <Page
         title={t("discount_monetary_components")}
         options={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col lg:flex-row items-center gap-2 w-full">
             <Input
               placeholder={t("search")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-[300px]"
+              className="w-full lg:w-[300px]"
             />
-            <CreateDiscountMonetaryComponentSheet />
+            <div className="w-full lg:w-auto">
+              <CreateDiscountMonetaryComponentSheet />
+            </div>
           </div>
         }
       >
