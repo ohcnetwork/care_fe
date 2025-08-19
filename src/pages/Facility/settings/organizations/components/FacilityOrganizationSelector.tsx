@@ -56,13 +56,20 @@ interface OrganizationPopoverProps {
   onCancel: () => void;
   onConfirm: () => void;
   isDisabled?: boolean;
+  showAllOrgs: boolean;
 }
 
-const getCurrentSelectionPathLabel = (
-  navigationLevels: FacilityOrganization[],
-  currentSelection: FacilityOrganization | null,
-  t: (key: string) => string,
-) => {
+interface CurrentSelectionPathLabelProps {
+  navigationLevels: FacilityOrganization[];
+  currentSelection: FacilityOrganization | null;
+}
+
+function CurrentSelectionPathLabel({
+  navigationLevels,
+  currentSelection,
+}: CurrentSelectionPathLabelProps) {
+  const { t } = useTranslation();
+
   const path = [...navigationLevels];
   if (
     currentSelection &&
@@ -70,9 +77,11 @@ const getCurrentSelectionPathLabel = (
   ) {
     path.push(currentSelection);
   }
-  if (path.length === 0) return t("select_department");
+
+  if (path.length === 0) return <span>{t("select_department")}</span>;
+
   return (
-    <div className="flex items-center gap-1 flex-wrap">
+    <div className="flex items-center flex-wrap">
       {path.map((org, index) => (
         <div key={org.id} className="flex items-center">
           <span className="truncate">{org.name}</span>
@@ -83,7 +92,7 @@ const getCurrentSelectionPathLabel = (
       ))}
     </div>
   );
-};
+}
 
 function OrganizationPopover({
   facilityId,
@@ -94,17 +103,23 @@ function OrganizationPopover({
   onCancel,
   onConfirm,
   isDisabled = false,
+  showAllOrgs,
 }: OrganizationPopoverProps) {
   const { t } = useTranslation();
   const [facilityOrgSearch, setFacilityOrgSearch] = useState("");
 
   const isRootLevel = navigationLevels.length === 0;
   const { data: rootOrganizations, isLoading: isLoadingRoot } = useQuery({
-    queryKey: ["facilityOrganization", facilityOrgSearch],
-    queryFn: query.debounced(facilityOrganizationApi.list, {
-      pathParams: { facilityId },
-      queryParams: { parent: "", name: facilityOrgSearch },
-    }),
+    queryKey: ["facilityOrganization", facilityOrgSearch, showAllOrgs],
+    queryFn: query.debounced(
+      showAllOrgs
+        ? facilityOrganizationApi.list
+        : facilityOrganizationApi.listMine,
+      {
+        pathParams: { facilityId },
+        queryParams: { parent: "", name: facilityOrgSearch },
+      },
+    ),
     enabled: isRootLevel,
   });
 
@@ -190,17 +205,16 @@ function OrganizationPopover({
       </CommandList>
 
       {currentSelection && (
-        <div className="md:m-0 m-2 flex flex-wrap sm:justify-between justify-center px-2 py-2 bg-blue-100 border-sky-200 rounded-md">
+        <div className="m-1 flex flex-wrap sm:justify-between justify-center px-2 py-2 bg-blue-100 border-sky-200 rounded-md">
           <div className="flex flex-col">
             <span className="text-xs text-gray-500 mb-0.5">
               {t("selected")}
             </span>
             <span className="font-medium text-sm text-sky-900">
-              {getCurrentSelectionPathLabel(
-                navigationLevels,
-                currentSelection,
-                t,
-              )}
+              <CurrentSelectionPathLabel
+                navigationLevels={navigationLevels}
+                currentSelection={currentSelection}
+              />
             </span>
           </div>
           {pendingSelection && (
@@ -323,7 +337,7 @@ export default function FacilityOrganizationSelector(
     }
   };
 
-  const isDisabled = (() => {
+  const isDisabled = () => {
     const selectedIds = selectedOrganizations.map(
       (path) => path[path.length - 1].id,
     );
@@ -332,7 +346,7 @@ export default function FacilityOrganizationSelector(
       (!!currentOrganizations &&
         currentOrganizations.some((org) => org.id === pendingSelection?.id))
     );
-  })();
+  };
 
   return (
     <div className="space-y-2">
@@ -370,12 +384,12 @@ export default function FacilityOrganizationSelector(
                         type="button"
                       >
                         <span className="truncate text-gray-500">
-                          {getCurrentSelectionPathLabel(
-                            navigationLevels,
-                            currentSelection,
-                            t,
-                          )}
+                          <CurrentSelectionPathLabel
+                            navigationLevels={navigationLevels}
+                            currentSelection={currentSelection}
+                          />
                         </span>
+
                         <ChevronDown className="ml-2 size-4 shrink-0 opacity-50" />
                       </Button>
                     </SheetTrigger>
@@ -391,7 +405,8 @@ export default function FacilityOrganizationSelector(
                         pendingSelection={pendingSelection}
                         onCancel={handleCancelSelection}
                         onConfirm={handleConfirmSelection}
-                        isDisabled={isDisabled}
+                        isDisabled={isDisabled()}
+                        showAllOrgs={showAllOrgs}
                       />
                     </SheetContent>
                   </Sheet>
@@ -407,12 +422,12 @@ export default function FacilityOrganizationSelector(
                       data-cy="facility-organization"
                     >
                       <span className="truncate text-gray-500">
-                        {getCurrentSelectionPathLabel(
-                          navigationLevels,
-                          currentSelection,
-                          t,
-                        )}
+                        <CurrentSelectionPathLabel
+                          navigationLevels={navigationLevels}
+                          currentSelection={currentSelection}
+                        />
                       </span>
+
                       <ChevronRight className="ml-2 size-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
@@ -429,7 +444,8 @@ export default function FacilityOrganizationSelector(
                       pendingSelection={pendingSelection}
                       onCancel={handleCancelSelection}
                       onConfirm={handleConfirmSelection}
-                      isDisabled={isDisabled}
+                      isDisabled={isDisabled()}
+                      showAllOrgs={showAllOrgs}
                     />
                   </PopoverContent>
                 </Popover>

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, Building, Loader2, Trash2 } from "lucide-react";
-import { JSX, useState } from "react";
+import React, { JSX, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -333,6 +333,19 @@ export default function LinkDepartmentsSheet({
               <div className=" space-y-2 mt-2">
                 {currentOrganizations.map((org) => {
                   const orgPath = buildOrgPath(org);
+
+                  const orgChildren = orgPath.props.children;
+
+                  const updatedChildren = orgChildren.map(
+                    (child: JSX.Element, index: number) => {
+                      if (index === orgChildren.length - 1) {
+                        return <strong key={index}>{child}</strong>;
+                      }
+                      return child;
+                    },
+                  );
+                  // console.log(orgPath.props.children.length-1)
+
                   return (
                     <div
                       key={org.id}
@@ -342,10 +355,12 @@ export default function LinkDepartmentsSheet({
                         <Building className="size-4 text-gray-700" />
                         <div className="flex flex-col">
                           <span
-                            className="font-bold"
+                            className="font-normal"
                             data-cy="link-organisation-name"
                           >
-                            {orgPath}
+                            {React.cloneElement(orgPath, {
+                              children: updatedChildren,
+                            })}
                           </span>
                           {org.description && (
                             <span className="text-xs text-gray-500">
