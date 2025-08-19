@@ -226,7 +226,6 @@ export const normalizeOfflinePatientRecord = (
       user_type: user.user_type,
       last_login: user.last_login ?? "",
       profile_picture_url: user.profile_picture_url ?? "",
-      external_id: user.external_id,
       suffix: user.suffix,
       prefix: user.prefix,
     },
@@ -240,7 +239,7 @@ export const normalizeOfflinePatientRecord = (
       user_type: user.user_type,
       last_login: user.last_login ?? "",
       profile_picture_url: user.profile_picture_url ?? "",
-      external_id: user.external_id,
+
       suffix: user.suffix,
       prefix: user.prefix,
     },
@@ -551,7 +550,7 @@ export const updateSlotCacheAfterOfflineAppointment = ({
 
 export function normalizeUserBase(authUser: AuthUserModel): UserBase {
   return {
-    id: authUser?.external_id,
+    id: authUser.id,
     first_name: authUser?.first_name,
     username: authUser?.username,
 

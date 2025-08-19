@@ -1,4 +1,8 @@
-import { onlineManager, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  onlineManager,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -15,15 +19,17 @@ import {
 } from "@/components/ui/alert-dialog";
 import { buttonVariants } from "@/components/ui/button";
 
+import { queueMarkAscompleteRecord } from "@/components/Encounter/offlineQueue";
+
+import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
+import { useOfflineEntry } from "@/hooks/useOfflineEntry";
+
+import { handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers";
 import { PLUGIN_Component } from "@/PluginEngine";
 import mutate from "@/Utils/request/mutate";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import encounterApi from "@/types/emr/encounter/encounterApi";
-import { useOfflineEntry } from "@/hooks/useOfflineEntry";
-import { handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers";
-import { queueMarkAscompleteRecord } from "@/components/Encounter/offlineQueue";
 import { EncounterStatus } from "@/types/emr/encounter/encounter";
-import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 
 export function MarkEncounterAsCompletedDialog(
   props: React.ComponentProps<typeof AlertDialog>,
@@ -31,8 +37,8 @@ export function MarkEncounterAsCompletedDialog(
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { selectedEncounter: encounter } = useEncounter();
-  const { offlineEntryId } = useOfflineEntry()
-const user = useAuthUser()
+  const { offlineEntryId } = useOfflineEntry();
+  const user = useAuthUser();
 
   const { mutate: updateEncounter } = useMutation({
     mutationFn: mutate(encounterApi.update, {

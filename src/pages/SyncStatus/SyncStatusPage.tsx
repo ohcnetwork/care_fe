@@ -99,8 +99,7 @@ function useSyncData(facilityId?: string, refreshTrigger?: number) {
     async function fetchSyncData() {
       try {
         const db = new AppCacheDB();
-        const userId = user.external_id;
-
+        const userId = user.id;
 
         let query = db.OfflineWrites.where("userId").equals(userId);
 
@@ -157,7 +156,7 @@ function useSyncData(facilityId?: string, refreshTrigger?: number) {
     }
 
     fetchSyncData();
-  }, [isSyncing, user.external_id, facilityId, refreshTrigger]);
+  }, [isSyncing, user.id, facilityId, refreshTrigger]);
 
   return { syncData };
 }
@@ -263,7 +262,7 @@ const SyncStatusHeader: React.FC<{
   const handleSyncNow = async () => {
     try {
       const pendingWrites = await getPendingAndRetryableWrites(
-        user.external_id,
+        user.id,
         facilityId,
       );
 
@@ -272,7 +271,7 @@ const SyncStatusHeader: React.FC<{
         return;
       }
 
-      await startSync(user.external_id, facilityId);
+      await startSync(user.id, facilityId);
     } catch (error) {
       console.error("Sync failed:", error);
       toast.error(t("failed_to_start_sync"), {
@@ -487,11 +486,7 @@ const PendingWritesTable: React.FC<{
     async function fetchPendingWrites() {
       try {
         setIsLoading(true);
-        const writes = await getWritesByStatus(
-          user.external_id,
-          facilityId,
-          "pending",
-        );
+        const writes = await getWritesByStatus(user.id, facilityId, "pending");
         setPendingWrites(writes);
       } catch (error) {
         console.error("Error fetching pending writes:", error);
@@ -501,7 +496,7 @@ const PendingWritesTable: React.FC<{
     }
 
     fetchPendingWrites();
-  }, [user.external_id, facilityId, refreshTrigger, isSyncing]);
+  }, [user.id, facilityId, refreshTrigger, isSyncing]);
 
   const handleEdit = (entry: OfflineWritesEntry) => {
     onEdit(entry);
@@ -624,11 +619,7 @@ const FailedWritesTable: React.FC<{
     async function fetchFailedWrites() {
       try {
         setIsLoading(true);
-        const writes = await getWritesByStatus(
-          user.external_id,
-          facilityId,
-          "failed",
-        );
+        const writes = await getWritesByStatus(user.id, facilityId, "failed");
         setFailedWrites(writes);
       } catch (error) {
         console.error("Failed to fetch failed writes:", error);
@@ -638,7 +629,7 @@ const FailedWritesTable: React.FC<{
     }
 
     fetchFailedWrites();
-  }, [user.external_id, facilityId, refreshTrigger, isSyncing]);
+  }, [user.id, facilityId, refreshTrigger, isSyncing]);
 
   const handleEdit = (entry: OfflineWritesEntry) => {
     onEdit(entry);
@@ -772,11 +763,7 @@ const ConflictedWritesTable: React.FC<{
     async function fetchConflictedWrites() {
       try {
         setIsLoading(true);
-        const writes = await getWritesByStatus(
-          user.external_id,
-          facilityId,
-          "conflict",
-        );
+        const writes = await getWritesByStatus(user.id, facilityId, "conflict");
         setConflictedWrites(writes);
       } catch (error) {
         console.error("Error fetching conflicted writes:", error);
@@ -786,7 +773,7 @@ const ConflictedWritesTable: React.FC<{
     }
 
     fetchConflictedWrites();
-  }, [user.external_id, facilityId, refreshTrigger, isSyncing]);
+  }, [user.id, facilityId, refreshTrigger, isSyncing]);
 
   const handleEdit = (entry: OfflineWritesEntry) => {
     setEditConfirmEntry(entry);
@@ -900,11 +887,7 @@ const BlockedWritesTable: React.FC<{
     async function fetchBlockedWrites() {
       try {
         setIsLoading(true);
-        const writes = await getWritesByStatus(
-          user.external_id,
-          facilityId,
-          "blocked",
-        );
+        const writes = await getWritesByStatus(user.id, facilityId, "blocked");
         setBlockedWrites(writes);
       } catch (error) {
         console.error("Error fetching blocked writes:", error);
@@ -914,7 +897,7 @@ const BlockedWritesTable: React.FC<{
     }
 
     fetchBlockedWrites();
-  }, [user.external_id, facilityId, refreshTrigger, isSyncing]);
+  }, [user.id, facilityId, refreshTrigger, isSyncing]);
 
   const handleDelete = (entry: OfflineWritesEntry) => {
     onDelete(entry);

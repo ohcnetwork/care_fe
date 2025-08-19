@@ -15,15 +15,13 @@ import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 export function EncounterHeader({
-
-offlineEntryId,
+  offlineEntryId,
   encounter,
   canWriteSelectedEncounter,
 }: {
   offlineEntryId?: string;
   encounter?: EncounterRead;
   canWriteSelectedEncounter: boolean;
-
 }) {
   const { t } = useTranslation();
 

@@ -104,7 +104,6 @@ function OrganizationLevelSelect({
   );
 }
 
-
 export default function GovtOrganizationSelector({
   onChange,
   required,
@@ -114,7 +113,6 @@ export default function GovtOrganizationSelector({
   setSelectedOrganization,
   ...props
 }: GovtOrganizationSelectorProps) {
-
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
 
   useEffect(() => {
@@ -160,7 +158,6 @@ export default function GovtOrganizationSelector({
       if (!required || (required && !organization.has_children)) {
         onChange(organization.id);
         setSelectedOrganization?.(organization);
-
       } else if (
         requiredDepth != null &&
         selectedLevels.length >= requiredDepth

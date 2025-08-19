@@ -359,7 +359,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       } else {
         const offlineEntry: saveOfflineWriteData = {
           id: resourceId,
-          userId: authUser.external_id,
+          userId: authUser.id,
           facilityId: String(facilityId),
           mutationSyncRouteKey: OfflineKeyMap.update_resource_request,
           mutationPathParams: { id: String(id) } satisfies PathParamsObject<
@@ -423,7 +423,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
       const offlineEntry: saveOfflineWriteData = {
         id: generatedId,
-        userId: authUser.external_id,
+        userId: authUser.id,
         facilityId: String(facilityId),
         mutationSyncRouteKey: OfflineKeyMap.create_resource_request,
         type: OfflineKeyMap.create_resource_request,

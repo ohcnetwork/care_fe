@@ -21,6 +21,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { PatientRead } from "@/types/emr/patient/patient";
+
 import { AuthUserModel } from "../Users/models";
 
 interface QueueNewEncounterOfflineParams {

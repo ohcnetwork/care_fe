@@ -13,8 +13,8 @@ import {
 import { PaginatedResponse } from "@/Utils/request/types";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
-import { UserReadMinimal } from "@/types/user/user";
 import { RoleBase } from "@/types/emr/role/role";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface QueueAssignUserToPatientParams {
   assignUserData: { user: string; role: string };
@@ -22,7 +22,7 @@ interface QueueAssignUserToPatientParams {
   users: PaginatedResponse<UserReadMinimal> | undefined;
   patientId: string;
   facilityId: string;
-  authUser: AuthUserModel;  
+  authUser: AuthUserModel;
   queryClient: QueryClient;
   patientData?: PatientRead;
   onSuccess?: () => void;

@@ -859,7 +859,7 @@ export function QuestionnaireForm({
     for (const req of matchingRequests) {
       const newOfflineEntry = {
         id: generatedId,
-        userId: authUser.external_id,
+        userId: authUser.id,
         facilityId: facilityId,
         mutationSyncRouteKey:
           OfflineKeyMap[reference_id as keyof typeof OfflineKeyMap] ||
@@ -970,7 +970,7 @@ export function QuestionnaireForm({
 
       const newOfflineEntry = {
         id: recordId,
-        userId: authUser.external_id,
+        userId: authUser.id,
         facilityId: facilityId,
         mutationSyncRouteKey: OfflineKeyMap.diagnosis,
         type: OfflineKeyMap.diagnosis,
@@ -1055,7 +1055,7 @@ export function QuestionnaireForm({
 
       const newOfflineEntry = {
         id: recordId,
-        userId: authUser.external_id,
+        userId: authUser.id,
         facilityId: facilityId,
         mutationSyncRouteKey:
           OfflineKeyMap[reference_id as keyof typeof OfflineKeyMap] ||
@@ -1152,7 +1152,7 @@ export function QuestionnaireForm({
 
       const newOfflineEntry = {
         id: recordId,
-        userId: authUser.external_id,
+        userId: authUser.id,
         facilityId: facilityId,
         mutationSyncRouteKey: OfflineKeyMap.encounter,
         type: OfflineKeyMap.encounter,
@@ -1273,7 +1273,7 @@ export function QuestionnaireForm({
 
       const offlineEntry = {
         id: generatedId,
-        userId: authUser.external_id,
+        userId: authUser.id,
         facilityId: facilityId,
         mutationSyncRouteKey: OfflineKeyMap.non_structured_questionnaire,
         type: OfflineKeyMap.non_structured_questionnaire,

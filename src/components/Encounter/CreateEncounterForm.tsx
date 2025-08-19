@@ -84,7 +84,7 @@ interface Props {
   trigger?: React.ReactNode;
   onSuccess?: () => void;
 
-  onClose?: () => void,
+  onClose?: () => void;
   disableRedirectOnSuccess?: boolean;
 }
 
@@ -103,7 +103,7 @@ export default function CreateEncounterForm({
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
-  const authUser = useAuthUser();
+  const user = useAuthUser();
   const { t } = useTranslation();
 
   const [currentSelectedOrganizations, setCurrentSelectedOrganizations] =
@@ -227,11 +227,11 @@ export default function CreateEncounterForm({
     if (!onlineManager.isOnline()) {
       await queueNewEncounterOffline({
         encounterRequestData: encounterRequest,
-        userId: authUser.id,
+        userId: user.id,
         facilityId: facilityId,
         patientId: patientId,
         queryClient: queryClient,
-        authUser: authUser,
+        authUser: user,
         selectedTags: selectedTags,
         currentSelectedOrganizations: currentSelectedOrganizations,
         onSuccess: (encounterId) => {
