@@ -40,7 +40,7 @@ export default function ChargeItemPriceDisplay({
   );
 
   const baseAmount = baseComponents[0]?.amount || 0;
-  const mrpAmount = mrpComponents[0]?.amount || 0;
+  const mrpAmount = mrpComponents[0]?.amount || undefined;
 
   const renderComponentValue = (
     component: MonetaryComponent,
