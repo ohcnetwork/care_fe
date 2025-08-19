@@ -101,6 +101,7 @@ function useSyncData(facilityId?: string, refreshTrigger?: number) {
         const db = new AppCacheDB();
         const userId = user.external_id;
 
+
         let query = db.OfflineWrites.where("userId").equals(userId);
 
         if (facilityId) {
