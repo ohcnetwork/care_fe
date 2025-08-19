@@ -1,13 +1,19 @@
 import dayjs from "dayjs";
 import { ExternalLink } from "lucide-react";
 import { Link } from "raviger";
+import React, { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { CommandShortcut } from "@/components/ui/command";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
+
+import { useEncounterShortcutDisplays } from "@/hooks/useEncounterShortcuts";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import { formatPatientAge } from "@/Utils/utils";
@@ -22,7 +28,8 @@ export function EncounterHeader({
   canWriteSelectedEncounter: boolean;
 }) {
   const { t } = useTranslation();
-
+  const [actionsOpen, setActionsOpen] = useState(false);
+  const getShortcutDisplay = useEncounterShortcutDisplays();
   const readOnly = !canWriteSelectedEncounter;
 
   if (!encounter) {
@@ -99,6 +106,23 @@ export function EncounterHeader({
               __name="PatientInfoCardQuickActions"
               encounter={encounter}
               className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
+            />
+
+            <EncounterCommandDialog
+              open={actionsOpen}
+              onOpenChange={setActionsOpen}
+              trigger={
+                <Button
+                  variant="primary_gradient"
+                  onClick={() => setActionsOpen(true)}
+                  className="text-base font-semibold rounded-md"
+                >
+                  {t("encounter_actions")}
+                  <CommandShortcut className="text-white hidden md:inline">
+                    {getShortcutDisplay("open-command-dialog")}
+                  </CommandShortcut>
+                </Button>
+              }
             />
           </div>
         )}

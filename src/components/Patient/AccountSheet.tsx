@@ -98,33 +98,35 @@ export function AccountSheetButton({
           <SheetHeader className="mb-6">
             <SheetTitle className="text-xl flex items-center justify-start gap-2">
               {t("account")}
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex items-center gap-1"
-                  onClick={(e) => handleViewAccount(accounts[0], e)}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  {t("more_details")}
-                </Button>
-                {canWrite && (
+              {!!accounts.length && (
+                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     className="flex items-center gap-1"
-                    onClick={(e) => handleEditAccount(accounts[0], e)}
+                    onClick={(e) => handleViewAccount(accounts[0], e)}
                   >
-                    <Edit className="h-4 w-4" />
-                    {t("edit")}
+                    <ExternalLink className="size-4" />
+                    {t("more_details")}
                   </Button>
-                )}
-              </div>
+                  {canWrite && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-1"
+                      onClick={(e) => handleEditAccount(accounts[0], e)}
+                    >
+                      <Edit className="size-4" />
+                      {t("edit")}
+                    </Button>
+                  )}
+                </div>
+              )}
             </SheetTitle>
           </SheetHeader>
           {isLoading ? (
             <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <div className="animate-spin rounded-full size-8 border-b-2 border-primary"></div>
             </div>
           ) : (
             <div className="space-y-5 pr-2 max-h-[calc(100vh-120px)] overflow-y-auto">
