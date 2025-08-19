@@ -89,44 +89,7 @@ export default function EncounterActions({
     },
   });
 
-  const handleMarkAsComplete = async () => {
-    const encounterUpdatedData = {
-      ...encounter,
-
-      status: "completed" as EncounterStatus,
-
-      patient: encounter.patient.id,
-      encounter_class: encounter.encounter_class,
-      period: {
-        start: encounter.period.start,
-        end: encounter.period.end
-          ? encounter.period.end
-          : new Date().toISOString(),
-      },
-      hospitalization: encounter.hospitalization,
-      priority: encounter.priority,
-      external_identifier: encounter.external_identifier,
-      facility: encounter.facility.id,
-      discharge_summary_advice: encounter.discharge_summary_advice,
-    };
-
-    if (!onlineManager.isOnline()) {
-      await queueMarkAscompleteRecord({
-        encounter,
-        encounterUpdatedData,
-        userId: authUser.external_id,
-        queryClient,
-        authUser,
-        onSuccess: () => {
-          toast.success(t("encounter_marked_as_complete"));
-        },
-        onError: (error) => {
-          console.error("Error while Marking Encounter as Complete : ", error);
-          toast.error(t("error_updating_encounter"));
-        },
-      });
-    } else updateEncounter(encounterUpdatedData);
-  };
+  
 
   if (disableButtons) {
     return null;

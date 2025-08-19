@@ -72,7 +72,7 @@ export const EncounterObservationsTab = () => {
   const {
     selectedEncounterId: encounterId,
     patientId,
-    selectedEncounterPermissions: { canViewEncounter, canViewClinicalData },
+    canReadClinicalData,
   } = useEncounter();
   const { ref, inView } = useInView();
 
@@ -96,7 +96,7 @@ export const EncounterObservationsTab = () => {
         const currentOffset = allPages.length * 20;
         return currentOffset < lastPage.count ? currentOffset : null;
       },
-      enabled: canViewClinicalData || canViewEncounter,
+      enabled: canReadClinicalData,
     });
 
   useEffect(() => {

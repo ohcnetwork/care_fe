@@ -78,11 +78,14 @@ interface Props {
   facilityId: string;
   patientName: string;
   hasReachedEncounterLimitOffline?: boolean;
+  appointment?: string;
   encounterClass?: EncounterClass;
   offlineEntryId?: string;
   trigger?: React.ReactNode;
   onSuccess?: () => void;
-  onClose?: () => void;
+
+  onClose?: () => void,
+  disableRedirectOnSuccess?: boolean;
 }
 
 export default function CreateEncounterForm({
@@ -90,11 +93,13 @@ export default function CreateEncounterForm({
   facilityId,
   patientName,
   hasReachedEncounterLimitOffline,
+  appointment,
   encounterClass,
   offlineEntryId,
   trigger,
   onSuccess,
   onClose,
+  disableRedirectOnSuccess = false,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -156,9 +161,11 @@ export default function CreateEncounterForm({
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
       onSuccess?.();
-      navigate(
-        `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates`,
-      );
+      if (!disableRedirectOnSuccess) {
+        navigate(
+          `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates`,
+        );
+      }
     },
   });
 
@@ -214,12 +221,13 @@ export default function CreateEncounterForm({
         start: data.start_date,
       },
       tags: data.tags,
+      appointment: appointment,
     };
 
     if (!onlineManager.isOnline()) {
       await queueNewEncounterOffline({
         encounterRequestData: encounterRequest,
-        userId: authUser.external_id,
+        userId: authUser.id,
         facilityId: facilityId,
         patientId: patientId,
         queryClient: queryClient,

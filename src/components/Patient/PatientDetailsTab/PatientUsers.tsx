@@ -26,13 +26,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -43,6 +36,7 @@ import {
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { RoleSelect } from "@/components/Common/RoleSelect";
 import UserSelector from "@/components/Common/UserSelector";
 import { AuthUserModel } from "@/components/Users/models";
 
@@ -60,7 +54,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
-import roleApi from "@/types/emr/role/roleApi";
+import { RoleBase } from "@/types/emr/role/role";
 import { UserReadMinimal } from "@/types/user/user";
 
 import { PatientProps } from ".";
@@ -91,22 +85,14 @@ export function AddUserSheet({
 
   const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserReadMinimal>();
-  const [selectedRole, setSelectedRole] = useState<string>("");
-
-  const { data: roles } = useQuery({
-    queryKey: ["roles"],
-    queryFn: query(roleApi.listRoles),
-    meta: { persist: true },
-    networkMode: "online",
-    enabled: open,
-  });
+  const [selectedRole, setSelectedRole] = useState<RoleBase>();
 
   // Set form values when offline entry data is available
   useEffect(() => {
     if (offlineEntry?.normalizedData) {
       const normalizedData = offlineEntry.normalizedData as {
         user: UserReadMinimal;
-        role: string;
+        role: RoleBase;
       };
 
       if (normalizedData.user && !selectedUser) {
@@ -141,7 +127,7 @@ export function AddUserSheet({
       toast.success(t("user_added_to_patient_successfully"));
       setOpen(false);
       setSelectedUser(undefined);
-      setSelectedRole("");
+      setSelectedRole(undefined);
     },
     onError: (error) => {
       const errorData = error.cause as { errors: { msg: string }[] };
@@ -159,7 +145,7 @@ export function AddUserSheet({
 
     const assignUserData: { user: string; role: string } = {
       user: selectedUser.id,
-      role: selectedRole,
+      role: selectedRole.id,
     };
     if (!onlineManager.isOnline()) {
       await queueAssignUserToPatient({
@@ -176,7 +162,7 @@ export function AddUserSheet({
           toast.success(t("user_added_to_patient_successfully"));
           setOpen(false);
           setSelectedUser(undefined);
-          setSelectedRole("");
+          setSelectedRole(undefined);
         },
         onError: (error) => {
           console.error("Error while queueing assign user offline:", error);
@@ -191,7 +177,7 @@ export function AddUserSheet({
 
   const handleUserChange = (user: UserReadMinimal) => {
     setSelectedUser(user);
-    setSelectedRole("");
+    setSelectedRole(undefined);
   };
 
   return (
@@ -287,25 +273,9 @@ export function AddUserSheet({
                 <label className="text-sm font-medium">
                   {t("select_role")}
                 </label>
-                <Select value={selectedRole} onValueChange={setSelectedRole}>
-                  <SelectTrigger data-cy="patient-user-role-select">
-                    <SelectValue placeholder={t("select_role")} />
-                  </SelectTrigger>
-                  <SelectContent className="w-[var(--radix-select-trigger-width)]">
-                    {roles?.results?.map((role) => (
-                      <SelectItem key={role.id} value={role.id}>
-                        <div className="flex flex-col items-start">
-                          <span>{role.name}</span>
-                          {role.description && (
-                            <span className="text-xs text-gray-500">
-                              {role.description}
-                            </span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div>
+                  <RoleSelect value={selectedRole} onChange={setSelectedRole} />
+                </div>
               </div>
 
               <Button

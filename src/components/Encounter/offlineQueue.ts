@@ -21,6 +21,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { PatientRead } from "@/types/emr/patient/patient";
+import { AuthUserModel } from "../Users/models";
 
 interface QueueNewEncounterOfflineParams {
   encounterRequestData: EncounterCreate;
@@ -40,7 +41,7 @@ interface QueueMarkAsCompleteParams {
   encounterUpdatedData: EncounterEdit;
   userId: string;
   queryClient: QueryClient;
-  authUser: any;
+  user: AuthUserModel;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }
@@ -121,7 +122,7 @@ export const queueMarkAscompleteRecord = async ({
   encounterUpdatedData,
   userId,
   queryClient,
-  authUser,
+  user,
   onSuccess,
   onError,
 }: QueueMarkAsCompleteParams): Promise<void> => {
@@ -170,11 +171,11 @@ export const queueMarkAscompleteRecord = async ({
       ...encounter,
       status: "completed",
       updated_by: {
-        ...normalizeUserBase(authUser),
-        last_login: authUser.last_login ?? "",
-        profile_picture_url: authUser.profile_picture_url ?? "",
-        mfa_enabled: authUser.mfa_enabled ?? false,
-        deleted: authUser.deleted ?? false,
+        ...normalizeUserBase(user),
+        last_login: user.last_login ?? "",
+        profile_picture_url: user.profile_picture_url ?? "",
+        mfa_enabled: user.mfa_enabled ?? false,
+        deleted: user.deleted ?? false,
       },
       is_updated_offline: true,
     };

@@ -108,11 +108,6 @@ const careConfig = {
     ),
   },
 
-  enableMinimalPatientRegistration: boolean(
-    "REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION",
-    false,
-  ),
-
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
         const [module, cdn] = app.split("@");
@@ -159,6 +154,27 @@ const careConfig = {
 
   queryGcTime,
   queryPersistMaxAge,
+
+  patientRegistration: {
+    /**
+     * Minimum number of geo-organization levels the user must select
+     * during patient registration.
+     *
+     * If not set, all levels are required.
+     */
+    minGeoOrganizationLevelsRequired:
+      env.REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED
+        ? Math.max(
+            parseInt(env.REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED, 10),
+            1,
+          )
+        : undefined,
+
+    minimalPatientRegistration: boolean(
+      "REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION",
+      false,
+    ),
+  },
 } as const;
 
 export default careConfig;

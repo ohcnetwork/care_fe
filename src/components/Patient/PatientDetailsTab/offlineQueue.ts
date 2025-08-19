@@ -14,6 +14,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { UserReadMinimal } from "@/types/user/user";
+import { RoleBase } from "@/types/emr/role/role";
 
 interface QueueAssignUserToPatientParams {
   assignUserData: { user: string; role: string };
@@ -21,7 +22,7 @@ interface QueueAssignUserToPatientParams {
   users: PaginatedResponse<UserReadMinimal> | undefined;
   patientId: string;
   facilityId: string;
-  authUser: AuthUserModel;
+  authUser: AuthUserModel;  
   queryClient: QueryClient;
   patientData?: PatientRead;
   onSuccess?: () => void;
@@ -69,7 +70,7 @@ export const queueAssignUserToPatient = async ({
     const generatedId = `offline-${crypto.randomUUID()}`;
     const offlineWrite: saveOfflineWriteData = {
       id: generatedId,
-      userId: authUser.external_id,
+      userId: authUser.id,
       facilityId: facilityId,
       mutationSyncRouteKey: OfflineKeyMap.assign_user_to_patient,
       mutationPathParams: { patientId } satisfies PathParamsObject<
@@ -141,7 +142,7 @@ export const queueRemoveUserFromPatient = async ({
     const generatedId = `offline-${crypto.randomUUID()}`;
     const offlineWrite = {
       id: generatedId,
-      userId: authUser.external_id,
+      userId: authUser.id,
       facilityId: facilityId,
       mutationSyncRouteKey: OfflineKeyMap.remove_user_from_patient,
       mutationPathParams: { patientId } satisfies PathParamsObject<

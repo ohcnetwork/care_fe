@@ -223,7 +223,7 @@ function QuestionGroup({
       >
         {leftQuestions.length > 0 && (
           <div className="w-full">
-            <Table className="table-fixed w-full">
+            <Table className="w-full">
               <TableBody>{leftQuestions.map(renderQuestionRow)}</TableBody>
             </Table>
           </div>
@@ -231,7 +231,7 @@ function QuestionGroup({
 
         {shouldUseTwoColumns && rightQuestions.length > 0 && (
           <div className="w-full">
-            <Table className="table-fixed w-full">
+            <Table className="w-full">
               <TableBody>{rightQuestions.map(renderQuestionRow)}</TableBody>
             </Table>
           </div>
