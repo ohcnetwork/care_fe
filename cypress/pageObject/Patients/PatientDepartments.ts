@@ -177,12 +177,12 @@ export class PatientDepartments {
   }
 
   selectRoleOfUser(role: string) {
-    cy.clickAndSelectOption('[data-cy="select-role-dropdown"]', role);
+    cy.typeAndSelectOption('button:contains("Select Role")', role, false);
     return this;
   }
 
   selectRoleOfUserInEdit(role: string) {
-    cy.clickAndSelectOption('[data-cy="select-updated-role"]', role);
+    cy.typeAndSelectOption('button:contains("Select Role")', role, false);
     return this;
   }
 
@@ -266,7 +266,11 @@ export class PatientDepartments {
   }
 
   clickAddOrganization() {
-    cy.get("#root").contains("Update Department").scrollIntoView().click();
+    cy.get("button[data-slot='tabs-trigger']")
+      .filter(":visible")
+      .contains("Actions")
+      .click();
+    cy.get("button").contains("Update Department").click();
     return this;
   }
 
