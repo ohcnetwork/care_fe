@@ -87,8 +87,7 @@ const SYMPTOM_INITIAL_VALUE: Omit<SymptomRequest, "encounter"> = {
   category: "problem_list_item",
   onset: { onset_datetime: new Date().toISOString().split("T")[0] },
 };
-
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function DatePickerField({
   onsetDatetime,
   onChange,
@@ -113,8 +112,6 @@ function DatePickerField({
     />
   );
 }
-
-
 function StatusSelect({
   status,
   onValueChange,

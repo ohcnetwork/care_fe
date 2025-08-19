@@ -89,6 +89,7 @@ const DIAGNOSIS_INITIAL_VALUE: Omit<DiagnosisRequest, "encounter"> = {
   dirty: true,
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function DiagnosisDatePicker({
   onsetDatetime,
   onChange,
@@ -111,8 +112,6 @@ function DiagnosisDatePicker({
     />
   );
 }
-
-
 function ClinicalStatusSelect({
   status,
   onValueChange,
