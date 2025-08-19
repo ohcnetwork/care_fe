@@ -234,8 +234,8 @@ export function ChargeItemDefinitionForm({
   // Fetch facility data for available components
   const { data: facilityData, isLoading } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(facilityApi.getFacility, {
-      pathParams: { id: facilityId },
+    queryFn: query(facilityApi.get, {
+      pathParams: { facilityId },
     }),
   });
 
@@ -301,7 +301,9 @@ export function ChargeItemDefinitionForm({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug", generateSlug(value.title || ""));
+        form.setValue("slug", generateSlug(value.title || ""), {
+          shouldValidate: true,
+        });
       }
     });
 
@@ -377,7 +379,13 @@ export function ChargeItemDefinitionForm({
     if (selected) {
       newComponents = [
         ...currentComponents,
-        { ...component, monetary_component_type: type },
+        {
+          ...component,
+          monetary_component_type: type,
+          factor: component.factor != null ? component.factor : undefined,
+          amount:
+            component.factor != null ? undefined : String(component.amount),
+        },
       ];
     } else {
       newComponents = currentComponents.filter(
@@ -404,7 +412,8 @@ export function ChargeItemDefinitionForm({
     const newComponents = [...currentComponents];
     newComponents[componentIndex] = {
       ...component,
-      [component.factor != null ? "factor" : "amount"]: value,
+      factor: component.factor != null ? value : undefined,
+      amount: component.factor != null ? undefined : String(value),
     };
 
     form.setValue("price_components", newComponents, { shouldValidate: true });
@@ -595,40 +604,40 @@ export function ChargeItemDefinitionForm({
             <CardTitle>{t("pricing_components")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Base Price and MRP */}
-            <div className="p-4 bg-gray-50 rounded-lg border">
-              {/* Base Price */}
+            {/* Base Price */}
+            <div className="rounded-lg border p-4 bg-gray-50 space-y-2">
+              <div>
+                <h4 className="text-lg font-medium text-gray-900">
+                  {t("base_price")}
+                </h4>
+                <p className="text-sm text-gray-600">
+                  {t("base_price_explanation")}
+                </p>
+              </div>
+
               <FormField
                 control={form.control}
                 name="price_components.0.amount"
                 render={({ field }) => (
-                  <FormItem className="flex items-center justify-between gap-2">
-                    <FormLabel className="font-medium text-gray-900 text-xl">
-                      {t("base_price")}
-                    </FormLabel>
-                    <div className="flex flex-col items-end gap-2">
-                      <FormControl className="w-48">
-                        <MonetaryAmountInput
-                          {...field}
-                          value={field.value ?? 0}
-                          onChange={(e) =>
-                            field.onChange(String(e.target.value))
-                          }
-                          placeholder="0.00"
-                        />
-                      </FormControl>
-                      <FormMessage>
-                        {
-                          form.formState.errors.price_components?.[0]?.amount
-                            ?.message
-                        }
-                      </FormMessage>
-                    </div>
+                  <FormItem className="w-full space-y-1">
+                    <FormControl>
+                      <MonetaryAmountInput
+                        {...field}
+                        value={field.value ?? 0}
+                        onChange={(e) => field.onChange(String(e.target.value))}
+                        placeholder="0.00"
+                      />
+                    </FormControl>
+                    <FormMessage>
+                      {
+                        form.formState.errors.price_components?.[0]?.amount
+                          ?.message
+                      }
+                    </FormMessage>
                   </FormItem>
                 )}
               />
             </div>
-
             {/* Discounts */}
             <MonetaryComponentSelectionSection
               title={t("discounts")}

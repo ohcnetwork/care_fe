@@ -16,14 +16,18 @@ import { Textarea } from "@/components/ui/textarea";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
+import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
-import { ProcessingSpec } from "@/types/emr/specimen/specimen";
+import {
+  ProcessingReadSpec,
+  ProcessingSpec,
+} from "@/types/emr/specimen/specimen";
 
 interface ProcessSpecimenProps {
   onAddProcessing: (processing: ProcessingSpec) => void;
   onUpdateProcessing: (index: number, processing: ProcessingSpec) => void;
-  existingProcessing?: ProcessingSpec[];
+  existingProcessing?: ProcessingReadSpec[];
   diagnosticReports?: DiagnosticReportRead[];
 }
 
@@ -125,9 +129,9 @@ export function ProcessSpecimen({
                   )}
               </div>
               <div>
-                {process.performer && (
+                {process.performer_object && (
                   <div className="text-sm text-gray-600 mt-0.5">
-                    {t("performed_by")}: {process.performer}
+                    {t("performed_by")}: {formatName(process.performer_object)}
                   </div>
                 )}
                 <div className="text-sm text-gray-600 mt-0.5">
