@@ -376,7 +376,13 @@ export function ChargeItemDefinitionForm({
     if (selected) {
       newComponents = [
         ...currentComponents,
-        { ...component, monetary_component_type: type },
+        {
+          ...component,
+          monetary_component_type: type,
+          factor: component.factor != null ? component.factor : undefined,
+          amount:
+            component.factor != null ? undefined : String(component.amount),
+        },
       ];
     } else {
       newComponents = currentComponents.filter(
@@ -403,7 +409,8 @@ export function ChargeItemDefinitionForm({
     const newComponents = [...currentComponents];
     newComponents[componentIndex] = {
       ...component,
-      [component.factor != null ? "factor" : "amount"]: value,
+      factor: component.factor != null ? value : undefined,
+      amount: component.factor != null ? undefined : String(value),
     };
 
     form.setValue("price_components", newComponents, { shouldValidate: true });
