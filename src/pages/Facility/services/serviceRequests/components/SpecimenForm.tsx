@@ -50,7 +50,7 @@ export function SpecimenForm({
 }: SpecimenFormProps) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
-  const currentUserId = authUser.external_id;
+  const currentUserId = authUser.id;
   const queryClient = useQueryClient();
 
   const [identifierMode, setIdentifierMode] = useState<"scan" | "generate">(
