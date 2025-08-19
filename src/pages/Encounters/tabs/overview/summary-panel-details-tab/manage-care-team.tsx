@@ -60,7 +60,7 @@ export const ManageCareTeam = () => {
                       {member.member.first_name}
                     </span>
                     <span className="text-xs text-gray-500">
-                      {member.member.user_type}
+                      {member.role.display}
                     </span>
                   </div>
                   {index === 0 && (
