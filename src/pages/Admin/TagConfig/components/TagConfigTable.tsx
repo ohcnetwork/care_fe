@@ -18,6 +18,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import {
+  ExpandableText,
+  ExpandableTextContent,
+  ExpandableTextExpandButton,
+} from "@/components/ui/expandable-text";
 
 import {
   CardGridSkeleton,
@@ -92,7 +97,14 @@ function TagConfigCard({
               {t(config.resource)} | {t("priority")}: {config.priority}
             </p>
             {config.description && (
-              <p className="mt-2 text-sm text-gray-600">{config.description}</p>
+              <ExpandableText>
+                <ExpandableTextContent className="mt-2 text-sm text-gray-600">
+                  {config.description}
+                </ExpandableTextContent>
+                <ExpandableTextExpandButton>
+                  {t("read_more")}
+                </ExpandableTextExpandButton>
+              </ExpandableText>
             )}
           </div>
           <div className="flex items-center gap-2">
@@ -225,18 +237,19 @@ export default function TagConfigTable({
             </TableHeader>
             <TableBody className="bg-white">
               {sortedConfigs.map((config: TagConfig) => (
-                <TableRow
-                  key={config.id}
-                  className="divide-x cursor-pointer hover:bg-gray-50"
-                  onClick={() => onView(config.id)}
-                >
+                <TableRow key={config.id} className="divide-x hover:bg-gray-50">
                   <TableCell className="font-medium">
-                    <div>
-                      <div>{config.display}</div>
+                    <div className="flex flex-col text-sm break-words whitespace-normal">
+                      <span>{config.display}</span>
                       {config.description && (
-                        <div className="text-sm text-gray-500">
-                          {config.description}
-                        </div>
+                        <ExpandableText>
+                          <ExpandableTextContent className="text-gray-500">
+                            {config.description}
+                          </ExpandableTextContent>
+                          <ExpandableTextExpandButton>
+                            {t("read_more")}
+                          </ExpandableTextExpandButton>
+                        </ExpandableText>
                       )}
                     </div>
                   </TableCell>
