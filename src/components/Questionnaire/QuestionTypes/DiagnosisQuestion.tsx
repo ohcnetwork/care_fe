@@ -112,6 +112,7 @@ function DiagnosisDatePicker({
   );
 }
 
+
 function ClinicalStatusSelect({
   status,
   onValueChange,
@@ -217,15 +218,19 @@ function DiagnosisDetailsForm({
     <div className="flex flex-col gap-4">
       <div className="space-y-2">
         <Label className="text-sm">{t("date")}</Label>
-        <DiagnosisDatePicker
-          onsetDatetime={diagnosis.onset?.onset_datetime}
+        <CombinedDatePicker
+          value={
+            diagnosis.onset?.onset_datetime
+              ? new Date(diagnosis.onset.onset_datetime)
+              : undefined
+          }
           onChange={(date) =>
             onUpdate({
               onset: { onset_datetime: dateQueryString(date) },
             })
           }
-          disabled={disabled}
-          hasId={!!diagnosis.id}
+          disabled={disabled || !!diagnosis.id}
+          buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
         />
       </div>
       <div className="space-y-2">
@@ -695,13 +700,19 @@ const DiagnosisTableRow = ({
           </div>
         </TableCell>
         <TableCell className="py-1">
-          <DiagnosisDatePicker
-            onsetDatetime={diagnosis.onset?.onset_datetime}
-            onChange={(date) =>
-              onUpdate?.({ onset: { onset_datetime: dateQueryString(date) } })
+          <CombinedDatePicker
+            value={
+              diagnosis.onset?.onset_datetime
+                ? new Date(diagnosis.onset.onset_datetime)
+                : undefined
             }
-            disabled={disabled}
-            hasId={!!diagnosis.id}
+            onChange={(date) =>
+              onUpdate?.({
+                onset: { onset_datetime: dateQueryString(date) },
+              })
+            }
+            disabled={disabled || !!diagnosis.id}
+            buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </TableCell>
         <TableCell className="py-1">

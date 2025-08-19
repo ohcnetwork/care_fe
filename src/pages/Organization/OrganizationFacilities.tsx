@@ -15,10 +15,10 @@ import useFilters from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
-import { BaseFacility } from "@/types/facility/facility";
+import { FacilityListRead } from "@/types/facility/facility";
+import facilityApi from "@/types/facility/facilityApi";
 
 import AddFacilitySheet from "./components/AddFacilitySheet";
 import EntityBadge from "./components/EntityBadge";
@@ -41,7 +41,7 @@ export default function OrganizationFacilities({
 
   const { data: facilities, isFetching } = useQuery({
     queryKey: ["organizationFacilities", id, qParams],
-    queryFn: query.debounced(routes.facility.list, {
+    queryFn: query.debounced(facilityApi.list, {
       queryParams: {
         page: qParams.page,
         limit: resultsPerPage,
@@ -113,7 +113,7 @@ export default function OrganizationFacilities({
                   </CardContent>
                 </Card>
               ) : (
-                facilities?.results?.map((facility: BaseFacility) => (
+                facilities?.results?.map((facility: FacilityListRead) => (
                   <Card
                     key={facility.id}
                     className="h-full hover:border-primary/50 transition-colors overflow-hidden"

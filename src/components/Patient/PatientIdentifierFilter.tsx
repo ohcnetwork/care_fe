@@ -156,19 +156,19 @@ export default function PatientIdentifierFilter({
 
   return (
     <>
-      <div className={cn("flex overflow-hidden rounded-lg border", className)}>
+      <div
+        className={cn(
+          "flex overflow-hidden border-gray-400 rounded-lg border",
+          className,
+        )}
+      >
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
               role="combobox"
               aria-expanded={open}
-              className={cn(
-                "flex-1 justify-between bg-white",
-                selectedPatient && !verificationOpen
-                  ? "border-primary-500"
-                  : "border-gray-200",
-              )}
+              className="flex-1 justify-between bg-white border-none rounded-none font-normal"
             >
               {selectedPatient && !verificationOpen ? (
                 <span className="text-primary-500 text-sm">
@@ -272,7 +272,7 @@ export default function PatientIdentifierFilter({
               setSearchTerm("");
               onSelect(undefined);
             }}
-            className="h-auto border-l px-2 hover:bg-transparent"
+            className="h-auto border-l px-2 hover:bg-transparent w-8 mr-3 pr-px rounded-none border-gray-400 text-gray-950"
           >
             <X className="size-4" />
           </Button>
