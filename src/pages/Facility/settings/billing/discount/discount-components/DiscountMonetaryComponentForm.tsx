@@ -123,8 +123,6 @@ export function DiscountMonetaryComponentForm({
     }
   };
 
-  const hasValueTypeChanged = valueType !== initialValueType;
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -282,7 +280,7 @@ export function DiscountMonetaryComponentForm({
           <Button
             type="submit"
             className="w-full"
-            disabled={!(form.formState.isDirty || hasValueTypeChanged)}
+            disabled={!form.formState.isDirty}
           >
             {t("save")}
           </Button>
