@@ -27,7 +27,7 @@ import {
 
 import BackButton from "@/components/Common/BackButton";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
-import Page from "@/components/Common/Page";
+import Loading from "@/components/Common/Loading";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import mutate from "@/Utils/request/mutate";
@@ -268,15 +268,7 @@ export default function SupplyRequestDetail({
   };
 
   if (isLoading || !supplyRequest) {
-    return (
-      <Page title={t("loading")} hideTitleOnPage>
-        <div className="container mx-auto max-w-6xl">
-          <div className="flex justify-center items-center h-64">
-            <div className="text-lg">{t("loading")}</div>
-          </div>
-        </div>
-      </Page>
-    );
+    return <Loading />;
   }
 
   const backUrl =
