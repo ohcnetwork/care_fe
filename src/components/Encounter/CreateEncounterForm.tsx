@@ -58,18 +58,22 @@ interface Props {
   patientId: string;
   facilityId: string;
   patientName: string;
+  appointment?: string;
   encounterClass?: EncounterClass;
   trigger?: React.ReactNode;
   onSuccess?: () => void;
+  disableRedirectOnSuccess?: boolean;
 }
 
 export default function CreateEncounterForm({
   patientId,
   facilityId,
   patientName,
+  appointment,
   encounterClass,
   trigger,
   onSuccess,
+  disableRedirectOnSuccess = false,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -112,9 +116,11 @@ export default function CreateEncounterForm({
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
       onSuccess?.();
-      navigate(
-        `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates`,
-      );
+      if (!disableRedirectOnSuccess) {
+        navigate(
+          `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates`,
+        );
+      }
     },
   });
 
@@ -127,6 +133,7 @@ export default function CreateEncounterForm({
         start: data.start_date,
       },
       tags: data.tags,
+      appointment: appointment,
     };
 
     createEncounter(encounterRequest);
