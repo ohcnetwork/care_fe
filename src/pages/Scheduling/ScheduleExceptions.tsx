@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { format, parseISO } from "date-fns";
+import { format, isSameDay, parseISO } from "date-fns";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -100,7 +100,8 @@ const ScheduleExceptionItem = (
       });
     },
   });
-
+  const fromDate = parseISO(props.valid_from);
+  const toDate = parseISO(props.valid_to);
   return (
     <div
       className={cn(
@@ -120,14 +121,25 @@ const ScheduleExceptionItem = (
                 {formatTimeShort(props.start_time)} -{" "}
                 {formatTimeShort(props.end_time)}
               </span>
-              <span> {t("from")} </span>
-              <span className="font-medium">
-                {format(parseISO(props.valid_from), "EEE, dd MMM yyyy")}
-              </span>
-              <span> {t("to")} </span>
-              <span className="font-medium">
-                {format(parseISO(props.valid_to), "EEE, dd MMM yyyy")}
-              </span>
+              {isSameDay(fromDate, toDate) ? (
+                <>
+                  <span> {t("on")} </span>
+                  <span className="font-medium">
+                    {format(fromDate, "EEE, dd MMM yyyy")}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span> {t("from")} </span>
+                  <span className="font-medium">
+                    {format(fromDate, "EEE, dd MMM yyyy")}
+                  </span>
+                  <span> {t("to")} </span>
+                  <span className="font-medium">
+                    {format(toDate, "EEE, dd MMM yyyy")}
+                  </span>
+                </>
+              )}
             </span>
           </div>
         </div>

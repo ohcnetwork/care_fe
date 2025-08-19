@@ -266,7 +266,11 @@ export class PatientDepartments {
   }
 
   clickAddOrganization() {
-    cy.get("#root").contains("Update Department").scrollIntoView().click();
+    cy.get("button[data-slot='tabs-trigger']")
+      .filter(":visible")
+      .contains("Actions")
+      .click();
+    cy.get("button").contains("Update Department").click();
     return this;
   }
 

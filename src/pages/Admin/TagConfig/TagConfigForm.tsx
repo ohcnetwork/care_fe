@@ -104,7 +104,7 @@ export default function TagConfigForm({
     const subscription = form.watch((value, { name }) => {
       if (name === "display") {
         form.setValue("slug", generateSlug(value.display || ""), {
-          shouldValidate: false,
+          shouldValidate: true,
         });
       }
     });
@@ -403,7 +403,7 @@ export default function TagConfigForm({
         )}
 
         <div className="flex justify-end space-x-2">
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading || !form.formState.isDirty}>
             {isLoading
               ? t("saving")
               : isEditing

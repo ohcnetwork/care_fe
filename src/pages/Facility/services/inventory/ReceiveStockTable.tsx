@@ -47,7 +47,7 @@ export function ReceiveStockTable({
 
   const getUnitInformation = (entry: any) => {
     const priceComponents: MonetaryComponent[] =
-      entry.supplied_item?.charge_item_definition.price_components;
+      entry.supplied_item?.charge_item_definition?.price_components ?? [];
     const tax = priceComponents
       ?.filter(
         (component) =>
