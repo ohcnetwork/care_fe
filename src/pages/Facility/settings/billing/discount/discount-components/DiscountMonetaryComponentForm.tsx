@@ -42,10 +42,6 @@ export function DiscountMonetaryComponentForm({
 }: DiscountMonetaryComponentFormProps) {
   const { t } = useTranslation();
 
-  const isEditMode = Boolean(
-    defaultValues?.title || defaultValues?.factor || defaultValues?.amount,
-  );
-
   const initialValueType = defaultValues?.factor != null ? "factor" : "amount";
   const [valueType, setValueType] = useState<"factor" | "amount">(
     initialValueType,
@@ -213,15 +209,28 @@ export function DiscountMonetaryComponentForm({
                 />
               )}
             </div>
-            <Select value={valueType} onValueChange={handleValueTypeChange}>
-              <SelectTrigger className="flex-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="factor">{t("factor")}</SelectItem>
-                <SelectItem value="amount">{t("amount")}</SelectItem>
-              </SelectContent>
-            </Select>
+            <FormField
+              control={form.control}
+              name="factor"
+              render={({ field: _field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Select
+                      value={valueType}
+                      onValueChange={handleValueTypeChange}
+                    >
+                      <SelectTrigger className="flex-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="factor">{t("factor")}</SelectItem>
+                        <SelectItem value="amount">{t("amount")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           </div>
           <FormDescription>
             {valueType === "factor"
@@ -273,11 +282,7 @@ export function DiscountMonetaryComponentForm({
           <Button
             type="submit"
             className="w-full"
-            disabled={
-              isEditMode
-                ? !(form.formState.isDirty || hasValueTypeChanged)
-                : !form.formState.isValid
-            }
+            disabled={!(form.formState.isDirty || hasValueTypeChanged)}
           >
             {t("save")}
           </Button>
