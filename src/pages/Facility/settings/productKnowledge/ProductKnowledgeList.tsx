@@ -66,19 +66,20 @@ function ProductKnowledgeCard({
               </p>
             )}
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/settings/product_knowledge/${product.id}`,
-              )
-            }
-          >
-            <CareIcon icon="l-edit" className="size-4" />
-            {t("see_details")}
-          </Button>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="ml-auto block"
+          onClick={() =>
+            navigate(
+              `/facility/${facilityId}/settings/product_knowledge/${product.id}`,
+            )
+          }
+        >
+          <CareIcon icon="l-edit" className="size-4" />
+          {t("see_details")}
+        </Button>
       </CardContent>
     </Card>
   );
