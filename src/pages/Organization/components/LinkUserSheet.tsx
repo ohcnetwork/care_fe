@@ -32,7 +32,7 @@ import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import roleApi from "@/types/emr/role/roleApi";
 import organizationApi from "@/types/organization/organizationApi";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
 
 interface Props {
@@ -50,7 +50,7 @@ export default function LinkUserSheet({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [selectedUser, setSelectedUser] = useState<UserBase>();
+  const [selectedUser, setSelectedUser] = useState<UserReadMinimal>();
   const [selectedRole, setSelectedRole] = useState<string>("");
 
   const { data: preSelectedUser } = useQuery({
@@ -108,7 +108,7 @@ export default function LinkUserSheet({
     });
   };
 
-  const handleUserChange = (value: UserBase) => {
+  const handleUserChange = (value: UserReadMinimal) => {
     setSelectedUser(value);
     setSelectedRole("");
   };
@@ -149,9 +149,6 @@ export default function LinkUserSheet({
                     <p className="font-medium text-lg truncate">
                       {formatName(selectedUser)}
                     </p>
-                    <span className="text-sm text-gray-500">
-                      {selectedUser.email}
-                    </span>
                   </div>
                 </div>
 

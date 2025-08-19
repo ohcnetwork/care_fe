@@ -31,7 +31,7 @@ import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import roleApi from "@/types/emr/role/roleApi";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
 
 interface Props {
@@ -51,7 +51,7 @@ export default function LinkFacilityUserSheet({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [selectedUser, setSelectedUser] = useState<UserBase>();
+  const [selectedUser, setSelectedUser] = useState<UserReadMinimal>();
   const [selectedRole, setSelectedRole] = useState<string>("");
 
   const { data: preSelectedUser } = useQuery({
@@ -109,7 +109,7 @@ export default function LinkFacilityUserSheet({
     });
   };
 
-  const handleUserChange = (user: UserBase) => {
+  const handleUserChange = (user: UserReadMinimal) => {
     setSelectedUser(user);
     setSelectedRole("");
   };
@@ -150,9 +150,6 @@ export default function LinkFacilityUserSheet({
                     <p className="font-medium text-lg truncate">
                       {formatName(selectedUser)}
                     </p>
-                    <span className="text-sm text-gray-500">
-                      {selectedUser.email}
-                    </span>
                   </div>
                 </div>
 

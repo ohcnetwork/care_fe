@@ -7,7 +7,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { formatName } from "@/Utils/utils";
 import { DeviceEncounterHistory } from "@/types/device/device";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface EncounterCardProps {
   encounterData: DeviceEncounterHistory;
@@ -15,7 +15,7 @@ interface EncounterCardProps {
 
 interface EncounterNodeProps {
   encounter: EncounterRead;
-  created_by?: UserBase;
+  created_by?: UserReadMinimal;
   start: string;
   end: string;
   children?: React.ReactNode;

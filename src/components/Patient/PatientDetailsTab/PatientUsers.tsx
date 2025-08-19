@@ -48,7 +48,7 @@ import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import patientApi from "@/types/emr/patient/patientApi";
 import roleApi from "@/types/emr/role/roleApi";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 import { PatientProps } from ".";
 
@@ -60,7 +60,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UserBase>();
+  const [selectedUser, setSelectedUser] = useState<UserReadMinimal>();
   const [selectedRole, setSelectedRole] = useState<string>("");
 
   const { data: roles } = useQuery({
@@ -104,7 +104,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
     });
   };
 
-  const handleUserChange = (user: UserBase) => {
+  const handleUserChange = (user: UserReadMinimal) => {
     setSelectedUser(user);
     setSelectedRole("");
   };
@@ -147,9 +147,6 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                         {formatName(selectedUser)}
                       </p>
                     </TooltipComponent>
-                    <span className="text-sm text-gray-500">
-                      {selectedUser.email}
-                    </span>
                   </div>
                 </div>
 
