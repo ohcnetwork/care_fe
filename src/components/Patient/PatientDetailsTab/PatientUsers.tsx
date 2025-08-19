@@ -292,7 +292,9 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
                             name: formatName(user),
                           }}
                           components={{
-                            strong: <strong />,
+                            strong: (
+                              <strong className="inline-block align-bottom truncate max-w-72 sm:max-w-full md:max-w-full lg:max-w-full xl:max-w-full" />
+                            ),
                           }}
                         />
                       </AlertDialogDescription>
