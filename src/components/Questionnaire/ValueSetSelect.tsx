@@ -33,12 +33,16 @@ import mutate from "@/Utils/request/mutate";
 import { Code } from "@/types/base/code/code";
 import valuesetRoutes from "@/types/valueset/valuesetApi";
 
+type ButtonProps = Omit<
+  React.ComponentProps<typeof Button>,
+  keyof Props | "value"
+>;
+
 interface Props {
   system: string;
   value?: Code | null;
   onSelect: (value: Code) => void;
   placeholder?: string;
-  disabled?: boolean;
   count?: number;
   searchPostFix?: string;
   hideTrigger?: boolean;
@@ -47,8 +51,6 @@ interface Props {
   title?: string;
   asSheet?: boolean;
   closeOnSelect?: boolean;
-  ref?: React.RefCallback<HTMLButtonElement | null>;
-  "aria-invalid"?: boolean;
 }
 
 export default function ValueSetSelect({
@@ -56,7 +58,6 @@ export default function ValueSetSelect({
   value,
   onSelect,
   placeholder = "Search...",
-  disabled,
   count = 10,
   searchPostFix = "",
   hideTrigger = false,
@@ -65,9 +66,8 @@ export default function ValueSetSelect({
   showCode = false,
   title,
   asSheet = false,
-  ref,
   ...props
-}: Props) {
+}: Props & ButtonProps) {
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -138,8 +138,6 @@ export default function ValueSetSelect({
       <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
         <SheetTrigger asChild>
           <Button
-            ref={ref}
-            aria-invalid={props["aria-invalid"]}
             variant="outline"
             role="combobox"
             onClick={() => setInternalOpen(true)}
@@ -148,7 +146,7 @@ export default function ValueSetSelect({
               "h-auto md:h-9 whitespace-normal text-left md:truncate",
               !value?.display && "text-gray-400",
             )}
-            disabled={disabled}
+            {...props}
           >
             <span>{value?.display || placeholder}</span>
             <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
@@ -185,15 +183,13 @@ export default function ValueSetSelect({
       <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
         <SheetTrigger asChild>
           <Button
-            ref={ref}
-            aria-invalid={props["aria-invalid"]}
             variant="outline"
             role="combobox"
             className={cn(
               "w-full justify-between border border-primary rounded-md px-2 h-auto whitespace-normal text-left",
               !value?.display && "text-gray-400",
             )}
-            disabled={disabled}
+            {...props}
           >
             <div className="flex items-center">
               <CareIcon
@@ -247,11 +243,9 @@ export default function ValueSetSelect({
         modal={true}
       >
         {!hideTrigger && (
-          <PopoverTrigger asChild disabled={disabled}>
+          <PopoverTrigger asChild>
             <div className="w-full">
               <Button
-                ref={ref}
-                aria-invalid={props["aria-invalid"]}
                 type="button"
                 variant="outline"
                 role="combobox"
@@ -259,6 +253,7 @@ export default function ValueSetSelect({
                   "justify-between truncate",
                   !value?.display && "text-gray-400",
                 )}
+                {...props}
               >
                 <span className="truncate">
                   {value?.display || placeholder}
