@@ -1,23 +1,11 @@
 import { CaretSortIcon } from "@radix-ui/react-icons";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
@@ -29,9 +17,7 @@ import ValueSetSearchContent from "@/components/Questionnaire/ValueSetSearchCont
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
-import mutate from "@/Utils/request/mutate";
 import { Code } from "@/types/base/code/code";
-import valuesetRoutes from "@/types/valueset/valuesetApi";
 
 interface Props {
   system: string;
@@ -64,25 +50,10 @@ export default function ValueSetSelect({
   title,
   asSheet = false,
 }: Props) {
-  const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
-  const [isClearingFavourites, setIsClearingFavourites] = useState(false);
-  const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const clearFavouritesMutation = useMutation({
-    mutationFn: mutate(valuesetRoutes.clearFavourites, {
-      pathParams: { slug: system },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["valueset", system, "favourites"],
-      });
-      setIsClearingFavourites(false);
-    },
-  });
 
   useEffect(() => {
     if (controlledOpen || internalOpen) {
@@ -98,36 +69,6 @@ export default function ValueSetSelect({
       return () => clearTimeout(timer);
     }
   }, [internalOpen, isMobile]);
-
-  const alert = (
-    <AlertDialog
-      open={isClearingFavourites}
-      onOpenChange={(open) => setIsClearingFavourites(open)}
-    >
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{t("are_you_sure_clear_starred")}</AlertDialogTitle>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setIsClearingFavourites(false)}>
-            {t("cancel")}
-          </AlertDialogCancel>
-          <AlertDialogAction
-            className={cn(buttonVariants({ variant: "destructive" }))}
-            onClick={() => {
-              clearFavouritesMutation.mutate({});
-            }}
-          >
-            {clearFavouritesMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              t("confirm")
-            )}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
 
   if (isMobile && !hideTrigger && asSheet) {
     return (
@@ -237,25 +178,23 @@ export default function ValueSetSelect({
       >
         {!hideTrigger && (
           <PopoverTrigger asChild disabled={disabled}>
-            <div className="w-full">
-              <Button
-                type="button"
-                variant="outline"
-                role="combobox"
-                className={cn(
-                  "justify-between truncate",
-                  !value?.display && "text-gray-400",
+            <Button
+              type="button"
+              variant="outline"
+              role="combobox"
+              className={cn(
+                "justify-between truncate",
+                !value?.display && "text-gray-400",
+              )}
+            >
+              <span className="truncate">
+                {value?.display || placeholder}
+                {value?.display && showCode && (
+                  <span className="text-xs ml-1">({value?.code})</span>
                 )}
-              >
-                <span className="truncate">
-                  {value?.display || placeholder}
-                  {value?.display && showCode && (
-                    <span className="text-xs ml-1">({value?.code})</span>
-                  )}
-                </span>
-                <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-              </Button>
-            </div>
+              </span>
+              <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+            </Button>
           </PopoverTrigger>
         )}
 
@@ -300,7 +239,6 @@ export default function ValueSetSelect({
           </PopoverContent>
         )}
       </Popover>
-      {alert}
     </>
   );
 }
