@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -67,19 +67,14 @@ function ProductKnowledgeCard({
             )}
           </div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="ml-auto block"
-          onClick={() =>
-            navigate(
-              `/facility/${facilityId}/settings/product_knowledge/${product.id}`,
-            )
-          }
+        <Link
+          href={`/facility/${facilityId}/settings/product_knowledge/${product.id}`}
         >
-          <CareIcon icon="l-edit" className="size-4" />
-          {t("see_details")}
-        </Button>
+          <Button variant="outline" size="sm" className="ml-auto block">
+            <CareIcon icon="l-edit" className="size-4" />
+            {t("see_details")}
+          </Button>
+        </Link>
       </CardContent>
     </Card>
   );
@@ -252,18 +247,14 @@ export default function ProductKnowledgeList({
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              navigate(
-                                `/facility/${facilityId}/settings/product_knowledge/${product.id}`,
-                              )
-                            }
+                          <Link
+                            href={`/facility/${facilityId}/settings/product_knowledge/${product.id}`}
                           >
-                            <CareIcon icon="l-edit" className="size-4" />
-                            {t("see_details")}
-                          </Button>
+                            <Button variant="outline" size="sm">
+                              <CareIcon icon="l-edit" className="size-4" />
+                              {t("see_details")}
+                            </Button>
+                          </Link>
                         </TableCell>
                       </TableRow>
                     ))}
