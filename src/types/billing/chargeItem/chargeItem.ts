@@ -56,18 +56,12 @@ export interface ChargeItemCreate
   account?: string;
 }
 
-export interface ChargeItemUpsert
-  extends Omit<ChargeItemBase, "id" | "paid_invoice" | "total_price"> {
-  id?: string;
-  account?: string;
-  encounter: string;
-  charge_item_definition: string;
-}
-
 export interface ApplyChargeItemDefinitionRequest {
   charge_item_definition: string;
   quantity: string;
   encounter: string;
+  service_resource?: "service_request";
+  service_resource_id?: string;
 }
 
 export interface ApplyMultipleChargeItemDefinitionRequest {

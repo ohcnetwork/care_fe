@@ -83,6 +83,7 @@ import {
   StructuredQuestionType,
 } from "@/components/Questionnaire/data/StructuredFormData";
 
+import useBreakpoints from "@/hooks/useBreakpoints";
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
 import mutate from "@/Utils/request/mutate";
@@ -219,7 +220,11 @@ function findFirstErrorPath(errors: any, path: number[] = []): number[] | null {
 
     if (current && typeof current === "object") {
       const hasOwnErrors = Object.entries(current).some(([key, value]) => {
-        return key !== "questions" && value !== undefined;
+        // Ignore nested question arrays (they will be traversed separately)
+        if (key === "questions" && Array.isArray(value)) return false;
+
+        // Any defined value (including objects holding a "message") indicates an error on the current node
+        return value !== undefined;
       });
 
       if (hasOwnErrors) {
@@ -270,6 +275,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   >(new Map());
   const [expandPath, setExpandPath] = useState<string[]>([]);
   const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  const isMobile = useBreakpoints({ default: true, md: false });
 
   const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
     const errorData = (
@@ -652,7 +659,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     const hasOrganizations = validateOrganizations();
     const hasValidStructuredType = validateStructuredType();
 
-    const validateQuestions = (questions: any[], path = "questions") => {
+    const validateQuestions = (questions: Question[], path = "questions") => {
       questions.forEach((question, idx) => {
         const currentPath = `${path}.${idx}`;
 
@@ -666,6 +673,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
         if (question.type === "group" && Array.isArray(question.questions)) {
           validateQuestions(question.questions, `${currentPath}.questions`);
+          if (question.questions.length === 0) {
+            form.setError(`${currentPath}.questions`, {
+              type: "manual",
+              message: t("group_must_have_sub_questions"),
+            });
+            isValid = false;
+          }
         }
       });
     };
@@ -679,7 +693,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           if (fieldName !== "questions") {
             const el = document.querySelector(`[name="${fieldName}"]`);
             if (el) {
-              el.scrollIntoView({ behavior: "smooth", block: "center" });
+              el.scrollIntoView();
               break;
             }
           } else {
@@ -708,10 +722,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   errorQuestion?.link_id &&
                   questionRefs.current[errorQuestion.link_id]
                 ) {
-                  questionRefs.current[errorQuestion.link_id]?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                  });
+                  questionRefs.current[errorQuestion.link_id]?.scrollIntoView();
                 }
               }, 200);
             }
@@ -953,79 +964,75 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="edit">
-          <div className="flex flex-col lg:flex-row gap-2">
-            <div className="space-y-4 lg:w-60 top-4 self-start h-fit max-h-screen overflow-y-auto lg:sticky">
-              <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
-                <CardHeader className="p-0">
-                  <CardTitle>{t("navigation")}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <nav className="space-y-1">
-                    {rootQuestions.map((question, index) => {
-                      const hasSubQuestions =
-                        question.type === "group" &&
-                        question.questions &&
-                        question.questions.length > 0;
-                      return (
-                        <div key={question.link_id} className="space-y-1">
-                          <button
-                            onClick={() => {
-                              scrollToQuestion(question.link_id);
-                              toggleQuestionExpanded(question.link_id);
-                            }}
-                            className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
-                              expandedQuestions.has(question.link_id)
-                                ? "bg-accent"
-                                : ""
-                            }`}
-                          >
-                            <span className="font-medium text-gray-500">
-                              {index + 1}.
-                            </span>
-                            <span className="flex-1 truncate">
-                              {question.text || t("untitled_question")}
-                            </span>
-                          </button>
-                          {hasSubQuestions && question.questions && (
-                            <div className="ml-6 border-l-2 border-gray-200 pl-2 space-y-1">
-                              {question.questions.map(
-                                (subQuestion, subIndex) => (
-                                  <button
-                                    key={subQuestion.id}
-                                    onClick={() => {
-                                      if (
-                                        !expandedQuestions.has(question.link_id)
-                                      ) {
-                                        toggleQuestionExpanded(
-                                          question.link_id,
-                                        );
-                                        setTimeout(() => {
-                                          scrollToQuestion(subQuestion.link_id);
-                                        }, 100);
-                                      } else {
-                                        scrollToQuestion(subQuestion.link_id);
-                                      }
-                                    }}
-                                    className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
-                                  >
-                                    <span className="font-medium text-gray-500">
-                                      {index + 1}.{subIndex + 1}
-                                    </span>
-                                    <span className="flex-1 truncate">
-                                      {subQuestion.text || "Untitled Question"}
-                                    </span>
-                                  </button>
-                                ),
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </nav>
-                </CardContent>
-              </Card>
-              <div className="space-y-4 max-w-sm lg:hidden">
+          <div className="flex flex-col md:flex-row gap-2">
+            <Card className="hidden lg:block w-60 sticky top-4 self-start h-fit max-h-screen overflow-y-auto rounded-none border-none bg-transparent shadow-none space-y-3 mt-2">
+              <CardHeader className="p-0">
+                <CardTitle>{t("navigation")}</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <nav className="space-y-1">
+                  {rootQuestions.map((question, index) => {
+                    const hasSubQuestions =
+                      question.type === "group" &&
+                      question.questions &&
+                      question.questions.length > 0;
+                    return (
+                      <div key={question.link_id} className="space-y-1">
+                        <button
+                          onClick={() => {
+                            scrollToQuestion(question.link_id);
+                            toggleQuestionExpanded(question.link_id);
+                          }}
+                          className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
+                            expandedQuestions.has(question.link_id)
+                              ? "bg-accent"
+                              : ""
+                          }`}
+                        >
+                          <span className="font-medium text-gray-500">
+                            {index + 1}.
+                          </span>
+                          <span className="flex-1 truncate">
+                            {question.text || t("untitled_question")}
+                          </span>
+                        </button>
+                        {hasSubQuestions && question.questions && (
+                          <div className="ml-6 border-l-2 border-gray-200 pl-2 space-y-1">
+                            {question.questions.map((subQuestion, subIndex) => (
+                              <button
+                                key={subQuestion.id}
+                                onClick={() => {
+                                  if (
+                                    !expandedQuestions.has(question.link_id)
+                                  ) {
+                                    toggleQuestionExpanded(question.link_id);
+                                    setTimeout(() => {
+                                      scrollToQuestion(subQuestion.link_id);
+                                    }, 100);
+                                  } else {
+                                    scrollToQuestion(subQuestion.link_id);
+                                  }
+                                }}
+                                className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
+                              >
+                                <span className="font-medium text-gray-500">
+                                  {index + 1}.{subIndex + 1}
+                                </span>
+                                <span className="flex-1 truncate">
+                                  {subQuestion.text || "Untitled Question"}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </nav>
+              </CardContent>
+            </Card>
+            {isMobile && (
+              <div className="space-y-4">
                 <QuestionnaireProperties
                   form={form}
                   updateQuestionnaireField={updateQuestionnaireField}
@@ -1061,8 +1068,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   setExpandedQuestions={setExpandedQuestions}
                 />
               </div>
-            </div>
-
+            )}
             <div className="space-y-4 flex-1">
               <Form {...form}>
                 <form>
@@ -1197,7 +1203,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               depth={0}
                               onMoveUp={() => {
                                 if (index > 0) {
-                                  const newQuestions = swapElements<Question>(
+                                  const newQuestions = swapElements(
                                     rootQuestions,
                                     index,
                                     index - 1,
@@ -1207,7 +1213,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               }}
                               onMoveDown={() => {
                                 if (index < rootQuestions.length - 1) {
-                                  const newQuestions = swapElements<Question>(
+                                  const newQuestions = swapElements(
                                     rootQuestions,
                                     index,
                                     index + 1,
@@ -1251,22 +1257,22 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                         </Button>
                       </div>
                     ) : (
-                      <div
-                        className="cursor-pointer"
-                        onClick={handleAddQuestion}
-                      >
-                        <EmptyState
-                          icon="l-question"
-                          title={t("no_questions_yet")}
-                          description={t("click_to_add_first_question")}
-                        />
-                      </div>
+                      <EmptyState
+                        icon="l-plus"
+                        title={t("no_questions_yet")}
+                        description={t("click_to_add_first_question")}
+                        action={
+                          <Button variant="outline" onClick={handleAddQuestion}>
+                            {t("add_question")}
+                          </Button>
+                        }
+                      />
                     )}
                   </div>
                 </form>
               </Form>
             </div>
-            <div className="space-y-4 w-60 hidden lg:block top-4 self-start h-fit lg:sticky">
+            <div className="space-y-4 w-60 hidden md:block sticky top-4 self-start h-fit">
               <QuestionnaireProperties
                 form={form}
                 updateQuestionnaireField={updateQuestionnaireField}
@@ -2008,6 +2014,18 @@ function QuestionEditor({
                     } else {
                       updateField("type", val, {
                         repeats: false,
+                        questions:
+                          (question.questions?.length ?? 0) > 0
+                            ? question.questions
+                            : [
+                                {
+                                  id: crypto.randomUUID(),
+                                  link_id: `Q-${Date.now()}`,
+                                  text: "New Sub-Question",
+                                  type: "string",
+                                  questions: [],
+                                },
+                              ],
                       });
                     }
                   }}
@@ -2684,6 +2702,11 @@ function QuestionEditor({
                   {t("add_sub_question")}
                 </Button>
               </div>
+              <FormField
+                control={form.control}
+                name={`${name}.questions`}
+                render={() => <FormMessage />}
+              />
               <div className="space-y-4">
                 {(questions || []).map((subQuestion, idx) => (
                   <div

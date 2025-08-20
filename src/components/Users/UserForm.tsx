@@ -48,11 +48,11 @@ import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
-import { CreateUserModel, UpdateUserModel, UserBase } from "@/types/user/user";
+import { UserCreate, UserReadMinimal, UserUpdate } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 
 interface Props {
-  onSubmitSuccess?: (user: UserBase) => void;
+  onSubmitSuccess?: (user: UserReadMinimal) => void;
   existingUsername?: string;
   organizationId?: string;
 }
@@ -70,11 +70,14 @@ export default function UserForm({
 
   const userFormSchema = z
     .object({
-      user_type: isEditMode
-        ? z
-            .enum(["doctor", "nurse", "staff", "volunteer", "administrator"])
-            .optional()
-        : z.enum(["doctor", "nurse", "staff", "volunteer", "administrator"]),
+      user_type: z.enum([
+        "doctor",
+        "nurse",
+        "staff",
+        "volunteer",
+        "administrator",
+      ]),
+
       username: isEditMode
         ? z.string().optional()
         : z
@@ -188,7 +191,6 @@ export default function UserForm({
         user_type: userData.user_type,
         first_name: userData.first_name,
         last_name: userData.last_name,
-        email: userData.email,
         phone_number: userData.phone_number || "",
         gender: userData.gender || undefined,
         prefix: userData.prefix || "",
@@ -252,7 +254,7 @@ export default function UserForm({
   const { mutate: createUser, isPending: createPending } = useMutation({
     mutationKey: ["create_user"],
     mutationFn: mutate(userApi.create),
-    onSuccess: (resp: UserBase) => {
+    onSuccess: (resp: UserReadMinimal) => {
       toast.success(t("user_added_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["facilityUsers"],
@@ -275,7 +277,7 @@ export default function UserForm({
     mutationFn: mutate(userApi.update, {
       pathParams: { username: existingUsername! },
     }),
-    onSuccess: (resp: UserBase) => {
+    onSuccess: (resp: UserReadMinimal) => {
       toast.success(t("user_updated_successfully"));
       [
         ["facilityUsers"],
@@ -290,23 +292,36 @@ export default function UserForm({
 
   const onSubmit = async (data: UserFormValues) => {
     if (isEditMode) {
-      updateUser({
-        ...data,
-      } as UpdateUserModel);
+      const updatePayload: UserUpdate = {
+        user_type: data.user_type,
+        username: data.username || existingUsername!,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        phone_number: data.phone_number,
+        prefix: data.prefix || "",
+        suffix: data.suffix || "",
+        gender: data.gender,
+        geo_organization: data.geo_organization || undefined,
+      };
+      updateUser(updatePayload);
     } else {
-      createUser({
-        ...data,
+      const createPayload: UserCreate = {
+        user_type: data.user_type!,
+        username: data.username!,
         password:
           data.password_setup_method === "immediate"
-            ? data.password
+            ? data.password!
             : undefined,
-        c_password:
-          data.password_setup_method === "immediate"
-            ? data.c_password
-            : undefined,
-        profile_picture_url: "",
-        geo_organization: data.geo_organization || null,
-      } as CreateUserModel);
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email!,
+        phone_number: data.phone_number,
+        prefix: data.prefix || "",
+        suffix: data.suffix || "",
+        gender: data.gender,
+        geo_organization: data.geo_organization || undefined,
+      };
+      createUser(createPayload);
     }
   };
 

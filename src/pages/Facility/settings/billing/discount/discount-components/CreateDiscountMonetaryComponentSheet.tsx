@@ -25,7 +25,7 @@ export function CreateDiscountMonetaryComponentSheet() {
   const [open, setOpen] = useState(false);
 
   const { mutate: createComponent } = useMutation({
-    mutationFn: mutate(facilityApi.updateMonetaryComponents, {
+    mutationFn: mutate(facilityApi.setMonetaryComponents, {
       pathParams: { facilityId },
     }),
     onSuccess: () => {

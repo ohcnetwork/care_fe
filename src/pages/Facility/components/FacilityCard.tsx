@@ -9,10 +9,10 @@ import { Avatar } from "@/components/Common/Avatar";
 import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
 
 import { FeatureBadge } from "@/pages/Facility/Utils";
-import { FacilityData } from "@/types/facility/facility";
+import { FacilityPublicRead, FacilityRead } from "@/types/facility/facility";
 
 interface Props {
-  facility: FacilityData;
+  facility: FacilityRead | FacilityPublicRead;
   className?: string;
 }
 
@@ -39,8 +39,8 @@ export function FacilityCard({ facility, className }: Props) {
                 {[facility.address].filter(Boolean).join(", ")}
                 {facility.latitude && facility.longitude && (
                   <FacilityMapsLink
-                    latitude={facility.latitude.toString()}
-                    longitude={facility.longitude.toString()}
+                    latitude={facility.latitude}
+                    longitude={facility.longitude}
                   />
                 )}
               </p>

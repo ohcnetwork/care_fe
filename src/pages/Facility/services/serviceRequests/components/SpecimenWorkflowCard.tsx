@@ -114,7 +114,7 @@ export function SpecimenWorkflowCard({
 }: SpecimenWorkflowCardProps) {
   const queryClient = useQueryClient();
   const authUser = useAuthUser();
-  const currentUserId = authUser.external_id;
+  const currentUserId = authUser.id;
   const isDraft = specimen?.status === SpecimenStatus.draft;
   const collectedSpecimen = !isDraft ? specimen : undefined;
   const container = requirement.type_tested?.container;
