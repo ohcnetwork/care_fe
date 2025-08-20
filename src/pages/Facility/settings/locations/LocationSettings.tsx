@@ -23,10 +23,10 @@ import {
 
 import { useLocationManagement } from "@/hooks/useLocationManagement";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
 import { LocationTreeNode } from "@/pages/Facility/locations/LocationNavbar";
+import facilityApi from "@/types/facility/facilityApi";
 import { LocationList as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -53,8 +53,8 @@ export default function LocationSettings({
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(routes.facility.show, {
-      pathParams: { id: facilityId },
+    queryFn: query(facilityApi.get, {
+      pathParams: { facilityId },
     }),
   });
 

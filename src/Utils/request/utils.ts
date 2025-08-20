@@ -38,10 +38,17 @@ const makeQueryParams = (query: QueryParams) => {
   return qParams.toString();
 };
 
-export function makeHeaders(noAuth: boolean, additionalHeaders?: HeadersInit) {
+export function makeHeaders(
+  noAuth: boolean,
+  additionalHeaders?: HeadersInit,
+  isFormData?: boolean,
+) {
   const headers = new Headers(additionalHeaders);
 
-  headers.set("Content-Type", "application/json");
+  // Don't set Content-Type for FormData - let browser set it with boundary
+  if (!isFormData) {
+    headers.set("Content-Type", "application/json");
+  }
   headers.append("Accept", "application/json");
 
   const authorizationHeader = getAuthorizationHeader();

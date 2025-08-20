@@ -16,7 +16,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import query from "@/Utils/request/query";
 import OrganizationFilter from "@/pages/Organization/components/OrganizationFilter";
-import facilityApi from "@/types/facility/facilityApi";
+import publicFacilityApi from "@/types/facility/publicFacilityApi";
 
 import { FacilityCard } from "./components/FacilityCard";
 
@@ -41,7 +41,7 @@ export function FacilitiesPage() {
 
   const { data: facilitiesResponse, isLoading } = useQuery({
     queryKey: ["facilities", qParams],
-    queryFn: query.debounced(facilityApi.getAllFacilities, {
+    queryFn: query.debounced(publicFacilityApi.getAll, {
       queryParams: {
         name: qParams.name,
         ...(qParams.facility_type && { facility_type: qParams.facility_type }),

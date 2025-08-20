@@ -3,10 +3,11 @@ import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
 import { Badge } from "@/components/ui/badge";
 
 import { Time } from "@/Utils/types";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export type ScheduleSlotType = "appointment" | "open" | "closed";
 
@@ -22,8 +23,8 @@ export interface ScheduleTemplate {
   valid_from: string;
   valid_to: string;
   availabilities: ScheduleAvailability[];
-  created_by: UserBase;
-  updated_by: UserBase;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
 }
 
 type ScheduleAvailabilityBase = {
@@ -169,16 +170,17 @@ export interface Appointment {
   booked_on: string;
   status: AppointmentNonCancelledStatus;
   note: string;
-  user: UserBase;
-  booked_by: UserBase | null; // This is null if the appointment was booked by the patient itself.
+  user: UserReadMinimal;
+  booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
   facility: FacilityBareMinimum;
 }
 
 export interface AppointmentRead extends Appointment {
   tags: TagConfig[];
-  updated_by: UserBase | null;
-  created_by: UserBase;
+  updated_by: UserReadMinimal | null;
+  created_by: UserReadMinimal;
   modified_date: string;
+  associated_encounter?: EncounterRead;
 }
 
 export interface AppointmentCreateRequest {
@@ -214,3 +216,11 @@ export interface AppointmentRescheduleRequest {
   new_booking_note: string;
   tags: string[];
 }
+
+export const getUserFromLocalStorage = (): UserReadMinimal => {
+  return JSON.parse(localStorage.getItem("user") ?? "{}");
+};
+
+export const storeUserInLocalStorage = (user: UserReadMinimal) => {
+  localStorage.setItem("user", JSON.stringify(user));
+};
