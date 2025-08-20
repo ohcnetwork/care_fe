@@ -3439,6 +3439,7 @@
   "product_details": "Product Details",
   "product_is_already_in_the_list": "Product is already added in the list",
   "product_knowledge": "Product Knowledge",
+  "product_knowledge_alternate_identifier": "HSN Code",
   "product_knowledge_created_successfully": "Product knowledge created successfully",
   "product_knowledge_description": "Base information about this product",
   "product_knowledge_names_description": "Alternative names for the product",
