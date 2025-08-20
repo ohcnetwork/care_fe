@@ -19,8 +19,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
-import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -85,7 +85,7 @@ export default function ObservationDefinitionView({
   };
 
   if (isLoading) {
-    return <Loading />;
+    return <CardListWithHeaderSkeleton count={3} />;
   }
 
   if (isError || !definition) {

@@ -16,8 +16,8 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
 import { Code } from "@/types/base/code/code";
@@ -61,7 +61,7 @@ export default function ProductKnowledgeView({
   });
 
   if (isLoading) {
-    return <Loading />;
+    return <CardListWithHeaderSkeleton count={3} />;
   }
 
   if (isError || !product) {

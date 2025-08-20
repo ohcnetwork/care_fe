@@ -16,8 +16,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
 import { PRODUCT_STATUS_COLORS } from "@/types/inventory/product/product";
@@ -47,7 +47,7 @@ export default function ProductView({ facilityId, productId }: Props) {
   });
 
   if (isLoading) {
-    return <Loading />;
+    return <CardListWithHeaderSkeleton count={3} />;
   }
 
   if (isError || !product) {
