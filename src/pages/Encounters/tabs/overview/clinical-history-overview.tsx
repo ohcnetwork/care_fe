@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { DropletIcon } from "lucide-react";
-import { Link } from "raviger";
+import { Link, usePath } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -18,13 +18,7 @@ import { completedEncounterStatus } from "@/types/emr/encounter/encounter";
 
 export const ClinicalHistoryOverview = (props: React.ComponentProps<"div">) => {
   const { t } = useTranslation();
-  const {
-    facilityId,
-    patientId,
-    patient,
-    primaryEncounter,
-    primaryEncounterId,
-  } = useEncounter();
+  const { facilityId, patientId, patient, primaryEncounter } = useEncounter();
 
   const { data: allergies } = useQuery({
     queryKey: ["allergies", patientId, "confirmed"],
@@ -40,6 +34,7 @@ export const ClinicalHistoryOverview = (props: React.ComponentProps<"div">) => {
       !completedEncounterStatus.includes(primaryEncounter.status),
   });
 
+  const sourceUrl = usePath();
   return (
     <div
       {...props}
@@ -88,7 +83,11 @@ export const ClinicalHistoryOverview = (props: React.ComponentProps<"div">) => {
           className="md:w-auto w-full"
         >
           <Link
-            href={`/facility/${facilityId}/patient/${patientId}/history/symptoms?sourceUrl=${encodeURIComponent(`/facility/${facilityId}/patient/${patientId}/encounter/${primaryEncounterId}/updates`)}`}
+            href={
+              facilityId
+                ? `/facility/${facilityId}/patient/${patientId}/history/symptoms?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
+                : `/patient/${patientId}/history/symptoms?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
+            }
           >
             <img
               src="/images/icons/clinical_history.svg"
