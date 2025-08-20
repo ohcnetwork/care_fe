@@ -1,0 +1,5 @@
+"Type Changes":
+  - all:
+    - changed-files:
+      - any-glob-to-any-file:
+        - src/types/**

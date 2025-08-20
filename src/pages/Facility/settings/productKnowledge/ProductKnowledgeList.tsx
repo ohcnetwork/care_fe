@@ -65,6 +65,12 @@ function ProductKnowledgeCard({
                 {product.code.system} | {product.code.code}
               </p>
             )}
+            {product.alternate_identifier && (
+              <p className="mt-1 text-sm text-gray-500">
+                {t("product_knowledge_alternate_identifier")}:{" "}
+                {product.alternate_identifier}
+              </p>
+            )}
           </div>
           <Button
             variant="outline"
@@ -219,6 +225,9 @@ export default function ProductKnowledgeList({
                   <TableHeader className="bg-gray-100">
                     <TableRow>
                       <TableHead>{t("name")}</TableHead>
+                      <TableHead>
+                        {t("product_knowledge_alternate_identifier")}
+                      </TableHead>
                       <TableHead>{t("product_type")}</TableHead>
                       <TableHead>{t("status")}</TableHead>
                       <TableHead>{t("actions")}</TableHead>
@@ -229,6 +238,9 @@ export default function ProductKnowledgeList({
                       <TableRow key={product.id} className="divide-x">
                         <TableCell className="font-medium">
                           {product.name}
+                        </TableCell>
+                        <TableCell>
+                          {product.alternate_identifier || "-"}
                         </TableCell>
                         <TableCell>
                           <Badge
