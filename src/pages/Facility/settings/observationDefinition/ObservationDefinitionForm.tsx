@@ -119,7 +119,7 @@ export default function ObservationDefinitionForm({
   const isEditMode = Boolean(observationDefinitionId);
 
   const { data: existingData, isFetching } = useQuery({
-    queryKey: ["observationDefinition", observationDefinitionId],
+    queryKey: ["observationDefinitions", observationDefinitionId],
     queryFn: query(observationDefinitionApi.retrieveObservationDefinition, {
       pathParams: {
         observationDefinitionId: observationDefinitionId!,
@@ -228,9 +228,6 @@ function ObservationDefinitionFormContent({
       }),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["observationDefinitions"] });
-        queryClient.invalidateQueries({
-          queryKey: ["observationDefinition", observationDefinitionId],
-        });
         toast.success(t("observation_definition_updated"));
         navigate(
           `/facility/${facilityId}/settings/observation_definitions/${observationDefinitionId}`,
@@ -403,7 +400,7 @@ function ObservationDefinitionFormContent({
                     name="permitted_data_type"
                     render={({ field }) => {
                       return (
-                        <FormItem>
+                        <FormItem className="flex flex-col">
                           <FormLabel aria-required>{t("data_type")}</FormLabel>
                           <Select
                             onValueChange={field.onChange}
@@ -443,6 +440,7 @@ function ObservationDefinitionFormContent({
                             display: code.display,
                             system: code.system,
                           });
+                          form.clearErrors("code");
                         }}
                         showCode={true}
                       />
@@ -533,7 +531,7 @@ function ObservationDefinitionFormContent({
                     <h2 className="text-base font-medium text-gray-900">
                       {t("components")}{" "}
                       <span className="text-sm font-normal text-gray-500">
-                        (Optional)
+                        {t("optional")}
                       </span>
                     </h2>
                     <p className="mt-0.5 text-sm text-gray-500">
@@ -628,7 +626,7 @@ function ObservationDefinitionFormContent({
                         </div>
 
                         <div className="mb-2 text-sm font-medium text-gray-700">
-                          Component {index + 1}
+                          {t("component_with_index", { index: index + 1 })}
                         </div>
 
                         <div className="grid gap-4">
@@ -665,7 +663,7 @@ function ObservationDefinitionFormContent({
                               control={form.control}
                               name={`component.${index}.permitted_data_type`}
                               render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="flex flex-col gap-1">
                                   <FormLabel>{t("data_type")}</FormLabel>
                                   <Select
                                     onValueChange={field.onChange}
@@ -695,7 +693,7 @@ function ObservationDefinitionFormContent({
                               control={form.control}
                               name={`component.${index}.permitted_unit`}
                               render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="flex flex-col gap-1">
                                   <FormLabel aria-required>
                                     {t("unit")}
                                   </FormLabel>

@@ -288,10 +288,12 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
                       <AlertDialogDescription>
                         <Trans
                           i18nKey="are_you_sure_want_to_remove"
-                          values={{ name: formatName(user) }}
+                          values={{
+                            name: formatName(user),
+                          }}
                           components={{
                             strong: (
-                              <strong className="inline-block align-bottom truncate max-w-32 sm:max-w-96 md:max-w-32 lg:max-w-28 xl:max-w-36" />
+                              <strong className="inline-block align-bottom truncate max-w-72 sm:max-w-full md:max-w-full lg:max-w-full xl:max-w-full" />
                             ),
                           }}
                         />
@@ -313,7 +315,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
                 </AlertDialog>
               )}
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
+            <div className="mt-4 grid grid-cols-2  gap-y-2">
               <div className="text-sm">
                 <div className="text-gray-500">{t("phone_number")}</div>
                 <div className="font-medium">
@@ -321,7 +323,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
                     formatPhoneNumberIntl(user.phone_number)}
                 </div>
               </div>
-              <div className="text-sm">
+              <div className="text-sm ml-4">
                 <div className="text-gray-500">{t("user_type")}</div>
                 <div className="font-medium">{user.user_type}</div>
               </div>
