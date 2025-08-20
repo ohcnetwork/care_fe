@@ -49,11 +49,14 @@ function RoleCard({
   const { t } = useTranslation();
   return (
     <Card>
-      <CardContent
-        className={cn("p-6", role.is_archived && "line-through text-gray-400")}
-      >
+      <CardContent className="p-6">
         <div className="mb-4 flex items-start justify-between gap-4">
-          <div className="flex-1">
+          <div
+            className={cn(
+              "flex-1",
+              role.is_archived && "line-through text-gray-400",
+            )}
+          >
             <h3 className="font-medium text-gray-900 mb-2">{role.name}</h3>
             {role.description && (
               <p className="text-sm text-gray-600 mb-3">{role.description}</p>
@@ -240,21 +243,28 @@ export default function RolesIndex() {
                   </TableHeader>
                   <TableBody className="bg-white">
                     {roles.map((role: RoleRead) => (
-                      <TableRow
-                        key={role.id}
-                        className={
-                          role.is_archived
-                            ? "divide-x line-through text-gray-400"
-                            : "divide-x"
-                        }
-                      >
-                        <TableCell className="font-medium">
+                      <TableRow key={role.id} className="divide-x">
+                        <TableCell
+                          className={cn(
+                            "font-medium",
+                            role.is_archived && "line-through text-gray-400",
+                          )}
+                        >
                           {role.name}
                         </TableCell>
-                        <TableCell className="text-gray-600">
+                        <TableCell
+                          className={cn(
+                            "text-gray-600",
+                            role.is_archived && "line-through text-gray-400",
+                          )}
+                        >
                           {role.description || "-"}
                         </TableCell>
-                        <TableCell>
+                        <TableCell
+                          className={cn(
+                            role.is_archived && "line-through text-gray-400",
+                          )}
+                        >
                           <div className="flex flex-wrap gap-1">
                             {role.permissions.slice(0, 3).map((permission) => (
                               <Badge
