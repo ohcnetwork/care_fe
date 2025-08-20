@@ -33,10 +33,7 @@ import mutate from "@/Utils/request/mutate";
 import { Code } from "@/types/base/code/code";
 import valuesetRoutes from "@/types/valueset/valuesetApi";
 
-type ButtonProps = Omit<
-  React.ComponentProps<typeof Button>,
-  keyof Props | "value"
->;
+type ButtonProps = Omit<React.ComponentProps<typeof Button>, keyof Props>;
 
 interface Props {
   system: string;
