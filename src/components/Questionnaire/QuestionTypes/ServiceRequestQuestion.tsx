@@ -27,6 +27,7 @@ import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError"
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import query from "@/Utils/request/query";
+import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import {
   Intent,
@@ -109,11 +110,10 @@ interface ServiceRequestFormProps {
   questionId?: string;
   index?: number;
   isPreview?: boolean;
-  facilityId: string;
+  activityDefinition?: ActivityDefinitionReadSpec;
 }
 
 function ServiceRequestForm({
-  facilityId,
   serviceRequest,
   onUpdate,
   onRemove,
@@ -123,21 +123,9 @@ function ServiceRequestForm({
   questionId,
   index,
   isPreview = false,
+  activityDefinition,
 }: ServiceRequestFormProps) {
   const { t } = useTranslation();
-  const [locationSearch] = useState("");
-  const { data: locations } = useQuery({
-    queryKey: ["locations", locationSearch],
-    queryFn: query(locationApi.list, {
-      pathParams: {
-        facility_id: facilityId,
-      },
-      queryParams: {
-        limit: 100,
-        search: locationSearch,
-      },
-    }),
-  });
 
   const renderInfoSection = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-2 w-full">
@@ -191,17 +179,16 @@ function ServiceRequestForm({
         <span className="font-medium text-sm text-gray-700">
           {t("locations")}:
         </span>
-        {serviceRequest.service_request.locations &&
-          serviceRequest.service_request.locations.length > 0 &&
-          serviceRequest.service_request.locations.map((locId) => {
-            const location = locations?.results.find((loc) => loc.id === locId);
+        {activityDefinition?.locations &&
+          activityDefinition?.locations.length > 0 &&
+          activityDefinition?.locations.map((location) => {
             return (
               <Badge
-                key={locId}
+                key={location.id}
                 variant="outline"
                 className="bg-gray-50 text-gray-700 border-gray-200"
               >
-                {location?.name || locId}
+                {location?.name || location.id}
               </Badge>
             );
           })}
@@ -658,7 +645,6 @@ export function ServiceRequestQuestion({
     <div className="space-y-4">
       {serviceRequests.map((serviceRequest, index) => (
         <ServiceRequestForm
-          facilityId={facilityId}
           key={`${serviceRequest.service_request.code.code}-${index}`}
           serviceRequest={serviceRequest}
           onUpdate={(updates) => handleUpdateServiceRequest(index, updates)}
@@ -693,8 +679,8 @@ export function ServiceRequestQuestion({
 
       {previewServiceRequest && !isLoadingSelectedAD && (
         <ServiceRequestForm
-          facilityId={facilityId}
           serviceRequest={previewServiceRequest}
+          activityDefinition={selectedActivityDefinitionData}
           onUpdate={handlePreviewServiceRequestUpdate}
           onRemove={() => {
             setPreviewServiceRequest(null);
