@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  QueryClient,
   onlineManager,
   useMutation,
   useQuery,
@@ -51,31 +50,28 @@ import { useOfflineEntry } from "@/hooks/useOfflineEntry";
 import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 
-import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
-import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
   handleOfflineRecordSuccess,
   isOfflineId,
-  normaliZedResourcerequestRecord,
-  saveOfflineWrite,
-  saveOfflineWriteData,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import patientApi from "@/types/emr/patient/patientApi";
 import { FacilityPublicRead, FacilityRead } from "@/types/facility/facility";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import {
-  CreateResourceRequest,
   RESOURCE_REQUEST_STATUSES,
   ResourceRequest,
-  UpdateResourceRequest,
 } from "@/types/resourceRequest/resourceRequest";
 import { UserReadMinimal } from "@/types/user/user";
+
+import {
+  queueNewResourceRequest,
+  queueUpdatedResourceRequest,
+} from "./offlineQueue";
 
 interface ResourceProps {
   facilityId: number;
@@ -95,7 +91,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
   const authUser = useAuthUser();
   const queryClient = useQueryClient();
-  const db = new AppCacheDB();
+
   const resourceFormSchema = z.object({
     status: z.enum(RESOURCE_REQUEST_STATUSES),
     category: z.string().min(1, { message: t("field_required") }),
@@ -251,225 +247,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     child_org_permissions: [],
   });
 
-  const queueUpdatedResourceRequest = async (
-    resourcePayload: UpdateResourceRequest,
-    resourceId: string,
-  ) => {
-    if (!resourceId) {
-      toast.error(t("resource_id_missing"));
-      return;
-    }
-    const updatePaginatedResourceCache = <T extends { id: string }>(
-      queryClient: QueryClient,
-      queryKey: unknown[],
-      updatedResource: T,
-    ) => {
-      const prevList = queryClient.getQueryData<PaginatedResponse<T>>(queryKey);
-
-      if (prevList?.results?.length) {
-        const updatedList: PaginatedResponse<T> = {
-          ...prevList,
-          results: prevList.results.map((entry) =>
-            entry.id === updatedResource.id ? updatedResource : entry,
-          ),
-        };
-
-        queryClient.setQueryData(queryKey, updatedList);
-      }
-    };
-    try {
-      const entry = await db.OfflineWrites.get(resourceId);
-
-      if (entry) {
-        const isCreate = entry.type === OfflineKeyMap.create_resource_request;
-
-        const existingPayload = isCreate
-          ? (entry.payload as CreateResourceRequest)
-          : (entry.payload as UpdateResourceRequest);
-
-        // only assign if resourcePayload.related_patient is undefined/null,
-        //  it will happen when updating un-synced resource req
-        if (resourcePayload.related_patient == null) {
-          resourcePayload.related_patient = existingPayload.related_patient;
-        }
-        let updatedPayload: CreateResourceRequest | UpdateResourceRequest;
-
-        if (isCreate) {
-          const { id: _id, ...rest } = resourcePayload; // remove id to match this of type `createresourcereuest`
-          updatedPayload = {
-            ...existingPayload,
-            ...rest,
-          };
-        } else {
-          updatedPayload = {
-            ...existingPayload,
-            ...resourcePayload,
-          };
-        }
-
-        const updatedEntry: OfflineWritesEntry = {
-          ...entry,
-          payload: updatedPayload,
-        };
-
-        await db.OfflineWrites.update(resourceId, updatedEntry);
-        const normalizedResource = normaliZedResourcerequestRecord(
-          updatedEntry,
-          patientData,
-          assignFacility,
-          assignedToUser,
-          queryClient,
-          authUser,
-        );
-
-        await db.OfflineWrites.update(updatedEntry.id, {
-          normalizedData: normalizedResource,
-        });
-
-        updatePaginatedResourceCache(
-          queryClient,
-          ["resourceRequests", resourceData?.related_patient?.id],
-          normalizedResource,
-        );
-
-        queryClient.setQueryData(
-          ["resource_request", resourceId],
-          normalizedResource,
-        );
-      } else {
-        const offlineEntry: saveOfflineWriteData = {
-          id: resourceId,
-          userId: authUser.id,
-          facilityId: String(facilityId),
-          mutationSyncRouteKey: OfflineKeyMap.update_resource_request,
-          mutationPathParams: { id: String(id) } satisfies PathParamsObject<
-            typeof routes.updateResource
-          >,
-          type: OfflineKeyMap.update_resource_request,
-          resourceType: "resourceRequest",
-          payload: resourcePayload,
-          serverTimestamp: resourceData?.modified_date,
-          useQueryRouteKey: "getResourceDetails",
-          useQueryPathParams: { id: String(id) } satisfies PathParamsObject<
-            typeof routes.getResourceDetails
-          >,
-        };
-        const saveResult = await saveOfflineWrite(offlineEntry);
-        if (!saveResult.success) {
-          toast.error(saveResult.error);
-          return;
-        }
-
-        const normalizedResource = normaliZedResourcerequestRecord(
-          saveResult.entry,
-          patientData,
-          assignFacility,
-          assignedToUser,
-          queryClient,
-          authUser,
-        );
-
-        await db.OfflineWrites.update(saveResult.entry.id, {
-          normalizedData: normalizedResource,
-        });
-
-        updatePaginatedResourceCache(
-          queryClient,
-          ["resourceRequests", resourceData?.related_patient?.id],
-          normalizedResource,
-        );
-
-        queryClient.setQueryData(
-          ["resource_request", resourceId],
-          normalizedResource,
-        );
-      }
-
-      toast.success(t("resource_updated_successfully"));
-
-      navigate(`/facility/${facilityId}/resource/${resourceId}`);
-    } catch (error) {
-      console.error("Error while queuing resource update:", error);
-      toast.error(t("unexpected_error_while_updating_resource"));
-      return;
-    }
-  };
-
-  const queueNewResourceRequest = async (
-    resourcePayload: CreateResourceRequest,
-  ) => {
-    try {
-      const generatedId = `offline-${crypto.randomUUID()}`;
-
-      const offlineEntry: saveOfflineWriteData = {
-        id: generatedId,
-        userId: authUser.id,
-        facilityId: String(facilityId),
-        mutationSyncRouteKey: OfflineKeyMap.create_resource_request,
-        type: OfflineKeyMap.create_resource_request,
-        resourceType: "resourceRequest",
-        payload: resourcePayload,
-        parentMutationId: isOfflineId(related_patient)
-          ? related_patient
-          : undefined,
-      };
-
-      const saveResult = await saveOfflineWrite(offlineEntry);
-      if (!saveResult.success) {
-        toast.error(saveResult.error);
-        return;
-      }
-
-      const normalizedResource = normaliZedResourcerequestRecord(
-        saveResult.entry,
-        patientData,
-        assignFacility,
-        assignedToUser,
-        queryClient,
-        authUser,
-      );
-
-      await db.OfflineWrites.update(saveResult.entry.id, {
-        normalizedData: normalizedResource,
-      });
-
-      const prevResourceRequestList = queryClient.getQueryData<
-        PaginatedResponse<ResourceRequest>
-      >(["resourceRequests", related_patient]);
-
-      const updatedResourceRequestList: PaginatedResponse<ResourceRequest> =
-        prevResourceRequestList?.results
-          ? {
-              ...prevResourceRequestList,
-              results: [...prevResourceRequestList.results, normalizedResource],
-              count:
-                (prevResourceRequestList.count ??
-                  prevResourceRequestList.results.length) + 1,
-            }
-          : {
-              count: 1,
-              results: [normalizedResource],
-            };
-
-      queryClient.setQueryData(
-        ["resourceRequests", related_patient],
-        updatedResourceRequestList,
-      );
-
-      queryClient.setQueryData(
-        ["resource_request", generatedId],
-        normalizedResource,
-      );
-
-      toast.success(t("resource_created_successfully"));
-      navigate(`/facility/${facilityId}/resource/${generatedId}`);
-    } catch (error) {
-      console.error("Error while queuing resource request:", error);
-      toast.error(t("unexpected_error_while_creating_resource"));
-      return;
-    }
-  };
-
   const onSubmit = (data: ResourceFormValues) => {
     const resourcePayload = {
       status: data.status,
@@ -489,12 +266,49 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
     if (id) {
       if (!onlineManager.isOnline()) {
-        queueUpdatedResourceRequest({ ...resourcePayload, id }, id);
+        queueUpdatedResourceRequest({
+          resourcePayload: { ...resourcePayload, id },
+          resourceId: id,
+          userId: authUser.id,
+          facilityId: String(facilityId),
+          queryClient,
+          authUser,
+          patientData,
+          assignFacility,
+          assignedToUser,
+          resourceData,
+          onSuccess: (resourceId, normalizedResource) => {
+            toast.success(t("resource_updated_successfully"));
+            navigate(`/facility/${facilityId}/resource/${resourceId}`);
+          },
+          onError: (error) => {
+            console.error("Error while queuing resource update:", error);
+            toast.error(t("unexpected_error_while_updating_resource"));
+          },
+        });
         return;
       } else updateResource({ ...resourcePayload, id });
     } else {
       if (!onlineManager.isOnline()) {
-        queueNewResourceRequest(resourcePayload);
+        queueNewResourceRequest({
+          resourcePayload,
+          userId: authUser.id,
+          facilityId: String(facilityId),
+          relatedPatient: related_patient,
+          queryClient,
+          authUser,
+          patientData,
+          assignFacility,
+          assignedToUser,
+          onSuccess: (resourceId, normalizedResource) => {
+            toast.success(t("resource_created_successfully"));
+            navigate(`/facility/${facilityId}/resource/${resourceId}`);
+          },
+          onError: (error) => {
+            console.error("Error while queuing resource request:", error);
+            toast.error(t("unexpected_error_while_creating_resource"));
+          },
+        });
         return;
       } else createResource(resourcePayload);
     }

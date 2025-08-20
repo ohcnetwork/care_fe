@@ -56,18 +56,15 @@ import { BLOOD_GROUP_CHOICES, GENDER_TYPES } from "@/common/constants";
 import { GENDERS } from "@/common/constants";
 import countryList from "@/common/static/countries.json";
 
-import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import OfflinePatientWarningDialog from "@/OfflineSupport/OfflinePatientCreateWarning";
-import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
+import { OfflineKeyMap } from "@/OfflineSupport/offlineKeys";
 import {
   getYearOfBirth,
   handleOfflineRecordSuccess,
   isOfflineId,
-  normalizeOfflinePatientRecord,
-  pickPatientCreateFields,
-  saveOfflineWrite,
-  saveOfflineWriteData,
 } from "@/OfflineSupport/offlineWriteHelpers";
+
+import { queueNewPatientOffline, queuePatientUpdateOffline } from "./offlineQueue";
 import { PLUGIN_Component } from "@/PluginEngine";
 import dayjs from "@/Utils/dayjs";
 import mutate from "@/Utils/request/mutate";
@@ -101,7 +98,7 @@ export const BLOOD_GROUPS = BLOOD_GROUP_CHOICES.map((bg) => bg.id) as [
 export default function PatientRegistration(
   props: PatientRegistrationPageProps,
 ) {
-  const db = new AppCacheDB();
+
   const [navTarget, setNavTarget] = useState<
     "back" | { to: string; options?: any } | null
   >(null);
@@ -348,161 +345,9 @@ export default function PatientRegistration(
     },
   });
 
-  const queuePatientUpdateOffline = async (
-    updatePatientData: PatientUpdate,
-    identifiers: PatientIdentifier[],
-  ) => {
-    if (!patientId) {
-      toast.error(t("patient_id_missing_cannot_able_to_update_patient"));
-      return;
-    }
-    try {
-      const entry = await db.OfflineWrites.get(patientId);
-      const permissions = patientQuery.data?.permissions ?? [];
-      const existingTags = patientQuery.data?.instance_tags ?? [];
-      if (entry) {
-        const isCreateType = entry.type === OfflineKeyMap.create_patient;
-        const updatedEntry = isCreateType
-          ? {
-              ...entry,
-              payload: pickPatientCreateFields({
-                ...(entry.payload as PatientCreate),
-                ...updatePatientData,
-              }),
-            }
-          : {
-              ...entry,
-              payload: {
-                ...(entry.payload as PatientUpdate),
-                ...updatePatientData,
-              },
-            };
-        await db.OfflineWrites.update(patientId, updatedEntry);
-        const permissions = patientQuery.data?.permissions || [];
 
-        const normalizePatient = normalizeOfflinePatientRecord(
-          updatedEntry,
-          user,
-          selectedOrganization,
-          existingTags,
-          identifiers,
-          permissions,
-        );
 
-        await db.OfflineWrites.update(patientId, {
-          normalizedData: normalizePatient,
-        });
-        queryClient.setQueryData(["patient", patientId], normalizePatient);
-      } else {
-        const offlineWrite: saveOfflineWriteData = {
-          id: patientId,
-          userId: user.id,
-          facilityId: facilityId,
-          mutationSyncRouteKey: OfflineKeyMap.update_patient,
-          type: OfflineKeyMap.update_patient,
-          resourceType: "patient",
-          mutationPathParams: {
-            id: patientId || "",
-          } satisfies PathParamsObject<typeof patientApi.updatePatient>,
-          payload: updatePatientData,
-          serverTimestamp: patientQuery?.data?.modified_date,
-          useQueryRouteKey: "getPatient",
-          useQueryPathParams: { id: patientId || "" },
-        };
-        const saveResult = await saveOfflineWrite(offlineWrite);
-        if (!saveResult.success) {
-          toast.error(saveResult.error);
-          return;
-        }
 
-        const normalizePatient = normalizeOfflinePatientRecord(
-          saveResult.entry,
-          user,
-          selectedOrganization,
-          existingTags,
-          identifiers,
-          permissions,
-          patientQuery.data?.created_date,
-          patientQuery.data?.modified_date,
-        );
-
-        queryClient.setQueryData(["patient", patientId], normalizePatient);
-
-        await db.OfflineWrites.update(saveResult.entry.id, {
-          normalizedData: normalizePatient,
-        });
-      }
-      toast.success(t("patient_update_success"));
-      setNavTarget("back");
-    } catch (error) {
-      console.error("Error updating unsynced patient:", error);
-      toast.error(t("patient_update_error"));
-      return;
-    }
-  };
-
-  const queueNewPatientOffline = async (
-    createPatientData: PatientCreate,
-    identifiers: PatientIdentifier[],
-  ) => {
-    try {
-      const generatedId = `offline-${crypto.randomUUID()}`;
-
-      const offlineWrite: saveOfflineWriteData = {
-        id: generatedId,
-        userId: user.id,
-        facilityId: facilityId,
-        mutationSyncRouteKey: OfflineKeyMap.create_patient,
-        type: OfflineKeyMap.create_patient,
-        resourceType: "patient",
-        payload: createPatientData,
-      };
-
-      const saveResult = await saveOfflineWrite(offlineWrite);
-      if (!saveResult.success) {
-        toast.error(saveResult.error);
-        return;
-      }
-      const permissions = queryClient.getQueryData<string[]>([
-        "patientPermissions",
-        facilityId,
-      ]);
-      const normalizePatient = normalizeOfflinePatientRecord(
-        saveResult.entry,
-        user,
-        selectedOrganization,
-        selectedTags,
-        identifiers,
-        permissions,
-      );
-
-      queryClient.setQueryData(["patient", generatedId], normalizePatient);
-
-      await db.OfflineWrites.update(saveResult.entry.id, {
-        normalizedData: normalizePatient,
-      });
-
-      const yob = getYearOfBirth(
-        createPatientData.date_of_birth,
-        createPatientData.age,
-      );
-
-      setNavTarget({
-        to: `/facility/${facilityId}/patients/verify`,
-        options: {
-          query: {
-            phone_number: createPatientData.phone_number,
-            year_of_birth: yob,
-            partial_id: generatedId,
-          },
-        },
-      });
-      toast.success(t("patient_update_success"));
-    } catch (error) {
-      console.error("Error saving offline patient:", error);
-      toast.error(t("patient_update_error"));
-    }
-  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const editableIdentifiers = values.identifiers.filter((identifier) => {
@@ -543,7 +388,29 @@ export default function PatientRegistration(
       };
 
       if (!onlineManager.isOnline()) {
-        await queuePatientUpdateOffline(updatePatientData, fullIdentifiers);
+        await queuePatientUpdateOffline({
+          updatePatientData,
+          identifiers: fullIdentifiers,
+          patientId: patientId!,
+          userId: user.id,
+          facilityId: facilityId!,
+          queryClient,
+          authUser: user,
+          selectedOrganization,
+          existingTags: patientQuery.data?.instance_tags ?? [],
+          permissions: patientQuery.data?.permissions,
+          createdDate: patientQuery.data?.created_date,
+          modifiedDate: patientQuery.data?.modified_date,
+          onSuccess: (patientId, normalizedPatient) => {
+            toast.success(t("patient_update_success"));
+            setNavTarget("back");
+          },
+          onError: (error) => {
+            console.error("Error updating unsynced patient:", error);
+            toast.error(t("patient_update_error"));
+          },
+        });
+        return;
       } else updatePatient(updatePatientData);
       return;
     } else if (facilityId) {
@@ -561,7 +428,38 @@ export default function PatientRegistration(
         identifiers: editableIdentifiers,
       };
       if (!onlineManager.isOnline()) {
-        await queueNewPatientOffline(createPatientData, fullIdentifiers);
+        await queueNewPatientOffline({
+          createPatientData,
+          identifiers: fullIdentifiers,
+          userId: user.id,
+          facilityId: facilityId!,
+          queryClient,
+          authUser: user,
+          selectedOrganization,
+          selectedTags,
+          onSuccess: (patientId, normalizedPatient) => {
+            const yob = getYearOfBirth(
+              createPatientData.date_of_birth,
+              createPatientData.age,
+            );
+
+            setNavTarget({
+              to: `/facility/${facilityId}/patients/verify`,
+              options: {
+                query: {
+                  phone_number: createPatientData.phone_number,
+                  year_of_birth: yob,
+                  partial_id: patientId,
+                },
+              },
+            });
+            toast.success(t("patient_update_success"));
+          },
+          onError: (error) => {
+            console.error("Error saving offline patient:", error);
+            toast.error(t("patient_update_error"));
+          },
+        });
         return;
       } else {
         createPatient(createPatientData);

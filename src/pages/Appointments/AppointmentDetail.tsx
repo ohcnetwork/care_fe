@@ -59,6 +59,11 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
+import {
+  queueCancelAppointmentRecord,
+  queueRescheduleOfflineRecord,
+  queueUpdateAppointmentRecordOffline,
+} from "@/components/Appointment/offlineQueue";
 import { ClickableAddress } from "@/components/Common/ClickableAddress";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -206,108 +211,6 @@ export default function AppointmentDetail(props: Props) {
     },
   });
 
-  const queueUpdateAppointmentRecordOffline = async (
-    updateAppointmentData: AppointmentUpdateRequest,
-    appointment: Appointment,
-    authUser: AuthUserModel,
-    status: AppointmentNonCancelledStatus,
-  ) => {
-    const statusupdateId = isOfflineId(appointment.id)
-      ? `${appointment.id}-statusUpdate`
-      : `offline-${appointment.id}-statusUpdate`;
-
-    const rescheduleId = isOfflineId(appointment.id)
-      ? `${appointment.id}-reschedule`
-      : `offline-${appointment.id}-reschedule`;
-
-    const existingStatusEntry = await db.OfflineWrites.get(statusupdateId);
-    const existingRescheduleEntry = await db.OfflineWrites.get(rescheduleId);
-
-    const baseEntry = {
-      id: statusupdateId,
-      userId: authUser.id,
-      facilityId: facilityId,
-      mutationSyncRouteKey: OfflineKeyMap.update_appointment_status,
-      mutationPathParams: {
-        facilityId,
-        id: props.appointmentId,
-      } satisfies PathParamsObject<typeof scheduleApis.appointments.update>,
-      type: OfflineKeyMap.update_appointment_status,
-      resourceType: "Appointment",
-      payload: updateAppointmentData,
-      normalizedData: {
-        ...appointment,
-        status,
-        is_updated_offline: true,
-      },
-      parentMutationId: isOfflineId(appointment.id)
-        ? appointment.id
-        : existingRescheduleEntry
-          ? rescheduleId //  reschedule write exists and if we are updating status
-          : undefined,
-    };
-
-    const writeEntry: saveOfflineWriteData = !isOfflineId(appointment.id)
-      ? {
-          ...baseEntry,
-          serverTimestamp: appointment.modified_date,
-          useQueryRouteKey: "retrieveAppointment",
-          useQueryPathParams: {
-            facility_id: appointment.facility.id,
-            id: appointment.id,
-          },
-        }
-      : baseEntry;
-
-    try {
-      if (existingStatusEntry) {
-        await db.OfflineWrites.update(statusupdateId, writeEntry);
-      } else {
-        const saveResult = await saveOfflineWrite(writeEntry);
-        if (!saveResult.success) {
-          toast.error(saveResult.error);
-          return;
-        }
-      }
-
-      const updatedAppointment = {
-        ...appointment,
-        status,
-        is_updated_offline: true,
-      };
-      queryClient.setQueryData(
-        ["appointment", appointment.id],
-        updatedAppointment,
-      );
-
-      const prevAppointmentList = queryClient.getQueryData<
-        PaginatedResponse<Appointment>
-      >(["patient-appointments", appointment.patient.id]);
-
-      if (prevAppointmentList?.results?.length) {
-        const updatedAppointmentList = {
-          ...prevAppointmentList,
-          results: prevAppointmentList.results.map((entry) =>
-            entry.id === appointment.id ? updatedAppointment : entry,
-          ),
-        };
-
-        queryClient.setQueryData(
-          ["patient-appointments", appointment.patient.id],
-          updatedAppointmentList,
-        );
-      }
-
-      toast.success(t("appointment_updated_successfully"));
-      if (status === "in_consultation") {
-        redirectToPatientPage();
-      }
-    } catch (error) {
-      console.error("Failed to queue status update:", error);
-      toast.error(t("unexpected_error_updating_appointment_status"));
-    }
-  };
-
   const handleUpdateAppointment = async (
     appointmentUpdateData: AppointmentUpdateRequest,
   ) => {
@@ -316,12 +219,26 @@ export default function AppointmentDetail(props: Props) {
     }
 
     if (!onlineManager.isOnline()) {
-      queueUpdateAppointmentRecordOffline(
-        appointmentUpdateData,
+      queueUpdateAppointmentRecordOffline({
+        updateAppointmentData: appointmentUpdateData,
         appointment,
         authUser,
-        appointmentUpdateData.status,
-      );
+        status: appointmentUpdateData.status,
+        facilityId,
+        queryClient,
+        t,
+        db,
+        onSuccess: (appointmentId, normalizedAppointment) => {
+          toast.success(t("appointment_updated_successfully"));
+          if (appointmentUpdateData.status === "in_consultation") {
+            redirectToPatientPage();
+          }
+        },
+        onError: (error) => {
+          console.error("Failed to queue status update:", error);
+          toast.error(t("unexpected_error_updating_appointment_status"));
+        },
+      });
       return;
     }
 
@@ -878,108 +795,6 @@ const AppointmentActions = ({
     },
   });
 
-  const queueCancelAppointmentRecord = async (
-    cancelAppointmentData: AppointmentCancelRequest,
-    appointment: Appointment,
-    authUser: AuthUserModel,
-    status: AppointmentCancelledStatus,
-  ) => {
-    const cancelAppointmentID = isOfflineId(appointment.id)
-      ? `${appointment.id}-cancel`
-      : `offline-${appointment.id}-cancel`;
-
-    const offlineEntry: saveOfflineWriteData = {
-      id: cancelAppointmentID,
-      userId: authUser?.id,
-      facilityId: facilityId,
-      mutationSyncRouteKey: OfflineKeyMap.cancel_appointment,
-      mutationPathParams: {
-        facilityId,
-        id: appointment.id,
-      } satisfies PathParamsObject<typeof scheduleApis.appointments.cancel>,
-      type: OfflineKeyMap.cancel_appointment,
-      resourceType: "Appointment",
-      payload: cancelAppointmentData,
-      normalizedData: {
-        ...appointment,
-        status,
-        is_updated_offline: true,
-      },
-    };
-
-    const prevTokenSlot = appointment.token_slot; //prev slot
-    const prevDate = new Date(appointment.token_slot.start_datetime); // previous date
-    const prevMonth = getMonthFromDate(appointment.token_slot.start_datetime); // previous month
-    try {
-      if (isOfflineId(appointment.id)) {
-        const existingCreateEntry = await db.OfflineWrites.get(appointment.id);
-        if (existingCreateEntry?.type === OfflineKeyMap.create_appointment) {
-          await db.OfflineWrites.delete(appointment.id);
-
-          toast.success(t("unsynced_appointment_cancelled"));
-        }
-      } else {
-        const saveResult = await saveOfflineWrite(offlineEntry);
-        if (!saveResult.success) {
-          toast.error(saveResult.error);
-        }
-      }
-      const statusUpdateID = isOfflineId(appointment.id)
-        ? `${appointment.id}-statusUpdate`
-        : `offline-${appointment.id}-statusUpdate`;
-
-      const rescheduleID = isOfflineId(appointment.id)
-        ? `${appointment.id}+reschedule`
-        : `offline-${appointment.id}-reschedule`;
-
-      await Promise.allSettled([
-        db.OfflineWrites.delete(statusUpdateID),
-        db.OfflineWrites.delete(rescheduleID),
-      ]);
-
-      const updatedAppointment = {
-        ...appointment,
-        status,
-        is_updated_offline: true,
-      };
-      queryClient.setQueryData(
-        ["appointment", appointment.id],
-        updatedAppointment,
-      );
-
-      const prevAppointmentList = queryClient.getQueryData<
-        PaginatedResponse<Appointment>
-      >(["patient-appointments", appointment.patient.id]);
-
-      if (prevAppointmentList?.results?.length) {
-        const updatedAppointmentList = {
-          ...prevAppointmentList,
-          results: prevAppointmentList.results.map((entry) =>
-            entry.id === appointment.id ? updatedAppointment : entry,
-          ),
-        };
-
-        queryClient.setQueryData(
-          ["patient-appointments", appointment.patient.id],
-          updatedAppointmentList,
-        );
-      }
-
-      updateSlotCacheAfterOfflineAppointment({
-        queryClient: queryClient,
-        selectedPracticioner: appointment.user,
-        facilityId: appointment.facility.id,
-        action: "cancel",
-        previousSlot: prevTokenSlot, //prev slot
-        previousDate: prevDate, // previous date
-        previousMonth: prevMonth, // previous month
-      });
-    } catch (error) {
-      console.error("Error while cancelling appointment : ", error);
-      toast.error(t("unexpected_error_while_cancelling_appointment"));
-    }
-  };
-
   const handleAppointmentCancel = async ({
     reason,
     note,
@@ -989,12 +804,23 @@ const AppointmentActions = ({
     }
 
     if (!onlineManager.isOnline()) {
-      queueCancelAppointmentRecord(
-        { reason: reason, note: note },
+      queueCancelAppointmentRecord({
+        cancelAppointmentData: { reason: reason, note: note },
         appointment,
         authUser,
-        reason,
-      );
+        status: reason,
+        facilityId,
+        queryClient,
+        t,
+        db,
+        onSuccess: (appointmentId, normalizedAppointment) => {
+          toast.success(t("unsynced_appointment_cancelled"));
+        },
+        onError: (error) => {
+          console.error("Error while cancelling appointment : ", error);
+          toast.error(t("unexpected_error_while_cancelling_appointment"));
+        },
+      });
       return;
     }
 
@@ -1023,178 +849,6 @@ const AppointmentActions = ({
       },
     });
 
-  const queuerescheduleOfflineRecord = async (
-    rescheduleAppointmentData: AppointmentRescheduleRequest,
-    selectedSlot: TokenSlot | undefined,
-    selectedPracticioner: UserReadMinimal,
-    authUser: AuthUserModel,
-    appointment: Appointment,
-    db: AppCacheDB,
-  ) => {
-    if (!selectedSlot) {
-      toast.error(t("slot_is_not_selected"));
-      return;
-    }
-    if (!selectedPracticioner) {
-      toast.error(t("practicioner_is_not_selected"));
-      return;
-    }
-    try {
-      const rescheduleID = isOfflineId(appointment.id)
-        ? `${appointment.id}-reschedule`
-        : `offline-${appointment.id}-reschedule`;
-      const rescheduleEntryExist = await db.OfflineWrites.get(rescheduleID);
-      const createAppointmentExist = await db.OfflineWrites.get(appointment.id);
-
-      if (
-        createAppointmentExist &&
-        createAppointmentExist.type === OfflineKeyMap.create_appointment
-      ) {
-        const updateEntry: OfflineWritesEntry = {
-          ...createAppointmentExist,
-          mutationPathParams: {
-            facilityId: facilityId,
-            slotId: rescheduleAppointmentData.new_slot,
-          } satisfies PathParamsObject<
-            typeof scheduleApis.slots.createAppointment
-          >,
-        };
-
-        await db.OfflineWrites.update(createAppointmentExist.id, updateEntry);
-      } else if (
-        rescheduleEntryExist &&
-        rescheduleEntryExist.type === OfflineKeyMap.reschedule_appointment
-      ) {
-        const updateEntry: OfflineWritesEntry = {
-          ...rescheduleEntryExist,
-          payload: rescheduleAppointmentData,
-        };
-
-        await db.OfflineWrites.update(rescheduleEntryExist.id, updateEntry);
-      } else {
-        const offlineEntry: saveOfflineWriteData = {
-          id: rescheduleID,
-          userId: authUser?.id,
-          facilityId: facilityId,
-          mutationSyncRouteKey: OfflineKeyMap.reschedule_appointment,
-          mutationPathParams: {
-            facilityId,
-            id: appointment.id,
-          } satisfies PathParamsObject<
-            typeof scheduleApis.appointments.reschedule
-          >,
-          type: OfflineKeyMap.reschedule_appointment,
-          resourceType: "Appointment",
-          payload: rescheduleAppointmentData,
-          serverTimestamp: appointment.modified_date,
-          useQueryRouteKey: "retrieveAppointment",
-          useQueryPathParams: {
-            facility_id: appointment.facility.id,
-            id: appointment.id,
-          },
-        };
-
-        const saveResult = await saveOfflineWrite(offlineEntry);
-
-        if (!saveResult.success) {
-          toast.error(saveResult.error);
-        }
-
-        const updatedAppointment: Appointment = {
-          ...appointment,
-          token_slot: selectedSlot,
-          user: selectedPracticioner,
-          status: "booked" as AppointmentNonCancelledStatus,
-          booked_on: new Date().toISOString(),
-          booked_by: {
-            ...normalizeUserBase(authUser),
-            last_login: authUser?.last_login ?? "",
-            profile_picture_url: authUser?.profile_picture_url ?? "",
-            mfa_enabled: authUser?.mfa_enabled ?? false,
-            deleted: authUser?.deleted ?? false,
-          },
-          is_updated_offline: true,
-        };
-
-        const prevAppointmentList = queryClient.getQueryData<
-          PaginatedResponse<Appointment>
-        >(["patient-appointments", appointment.patient.id]);
-
-        if (prevAppointmentList?.results?.length) {
-          const updatedAppointmentList = {
-            ...prevAppointmentList,
-            results: prevAppointmentList.results.map((entry) =>
-              entry.id === appointment.id ? updatedAppointment : entry,
-            ),
-          };
-
-          queryClient.setQueryData(
-            ["patient-appointments", appointment.patient.id],
-            updatedAppointmentList,
-          );
-        }
-      }
-
-      const statusUpdateId = isOfflineId(appointment.id)
-        ? `${appointment.id}-statusUpdate`
-        : `offline-${appointment.id}-statusUpdate`;
-
-      const existingStatusEntry = await db.OfflineWrites.get(statusUpdateId);
-
-      if (
-        existingStatusEntry &&
-        existingStatusEntry.type === OfflineKeyMap.update_appointment_status
-      ) {
-        await db.OfflineWrites.delete(statusUpdateId);
-      }
-
-      updateSlotCacheAfterOfflineAppointment({
-        queryClient: queryClient,
-        selectedSlot: selectedSlot,
-        selectedPracticioner: selectedPracticioner,
-        facilityId: appointment.facility.id,
-        selectedDate: selectedDateOffline,
-        selectedMonth: selectedMonthOffline,
-        action: "rescheduled",
-        previousSlot: appointment.token_slot,
-        previousDate: new Date(appointment.token_slot.start_datetime),
-        previousMonth: getMonthFromDate(appointment.token_slot.start_datetime),
-      });
-
-      const updatedCacheAppointment: Appointment = {
-        ...appointment,
-        token_slot: selectedSlot,
-        user: selectedPracticioner,
-        status: "booked" as AppointmentNonCancelledStatus,
-        booked_on: new Date().toISOString(),
-        booked_by: {
-          ...normalizeUserBase(authUser),
-          last_login: authUser?.last_login ?? "",
-          profile_picture_url: authUser?.profile_picture_url ?? "",
-          mfa_enabled: authUser?.mfa_enabled ?? false,
-          deleted: authUser?.deleted ?? false,
-        },
-        is_updated_offline: true,
-      };
-
-      queryClient.setQueryData(
-        ["appointment", appointment.id],
-        updatedCacheAppointment,
-      );
-
-      toast.success(t("appointment_rescheduled"));
-      setIsRescheduleOpen(false);
-      setSelectedSlotId(undefined);
-      setOfflineSelectedSlot(undefined);
-      navigate(
-        `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`,
-      );
-    } catch (error) {
-      console.error("Error while Reschudling Appointment", error);
-      toast.error(t("unexpected_error_while_rescheduling_appointment"));
-    }
-  };
-
   const handleRescheduleSubmit = async (
     rescheduleAppointmentData: AppointmentRescheduleRequest,
   ) => {
@@ -1204,14 +858,32 @@ const AppointmentActions = ({
     }
 
     if (!onlineManager.isOnline()) {
-      await queuerescheduleOfflineRecord(
+      await queueRescheduleOfflineRecord({
         rescheduleAppointmentData,
-        OfflineSelectedSlot,
-        selectedPractitioner,
+        selectedSlot: OfflineSelectedSlot,
+        selectedPracticioner: selectedPractitioner,
         authUser,
         appointment,
         db,
-      );
+        facilityId,
+        queryClient,
+        t,
+        selectedDateOffline,
+        selectedMonthOffline,
+        onSuccess: (appointmentId, normalizedAppointment) => {
+          toast.success(t("appointment_rescheduled"));
+          setIsRescheduleOpen(false);
+          setSelectedSlotId(undefined);
+          setOfflineSelectedSlot(undefined);
+          navigate(
+            `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`,
+          );
+        },
+        onError: (error) => {
+          console.error("Error while Rescheduling Appointment", error);
+          toast.error(t("unexpected_error_while_rescheduling_appointment"));
+        },
+      });
       return;
     }
     rescheduleAppointment(rescheduleAppointmentData);

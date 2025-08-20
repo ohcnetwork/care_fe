@@ -53,6 +53,7 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
+import { queueNewAppointmentOffline } from "@/components/Appointment/offlineQueue";
 
 interface Props {
   patientId: string;
@@ -144,128 +145,7 @@ export default function BookAppointment({ patientId }: Props) {
     },
   });
 
-  const queueAppointmentRecordOffline = async (
-    createAppointmentData: AppointmentCreateRequest,
-    selectedSlot: TokenSlot | undefined,
-    selectedPracticioner: UserReadMinimal | null,
-    authUser: AuthUserModel,
-    status: AppointmentNonCancelledStatus,
-  ) => {
-    if (!selectedSlot) {
-      toast.error(t("slot_is_not_selected"));
-      return;
-    }
-    if (!selectedPracticioner) {
-      toast.error(t("practicioner_is_not_selected"));
-      return;
-    }
-    try {
-      const generatedId = `offline-${crypto.randomUUID()}`;
-      const offlineEntry: saveOfflineWriteData = {
-        id: generatedId,
-        userId: authUser?.id,
-        facilityId: facilityId,
-        mutationSyncRouteKey: OfflineKeyMap.create_appointment,
-        mutationPathParams: {
-          facilityId,
-          slotId: selectedSlotId ?? "",
-        } satisfies PathParamsObject<
-          typeof scheduleApis.slots.createAppointment
-        >,
-        type: OfflineKeyMap.create_appointment,
-        resourceType: "Appointment",
-        payload: createAppointmentData,
-        parentMutationId: isOfflineId(patientId) ? patientId : undefined,
-      };
 
-      const saveResult = await saveOfflineWrite(offlineEntry);
-
-      if (!saveResult.success) {
-        toast.error(saveResult.error);
-        return;
-      }
-
-      const facilityData = queryClient.getQueryData<FacilityRead>([
-        "facility",
-        facilityId,
-      ]);
-
-      const FacilityBareMinimumData = {
-        id: facilityData?.id ?? "-",
-        name: facilityData?.name ?? "-",
-      };
-
-      const Patientdata = queryClient.getQueryData<PatientRead>([
-        "patient",
-        patientId,
-      ]);
-
-      if (!Patientdata) {
-        toast.error(t("appointment_display_failed_missing_patient"));
-        return;
-      }
-      const normalizeAppointment = normalizedAppointmentRecord(
-        saveResult.entry,
-        selectedSlot,
-        Patientdata ?? Patientdata,
-        authUser,
-        status,
-        selectedPracticioner,
-        FacilityBareMinimumData,
-        selectedTags,
-      );
-
-      await db.OfflineWrites.update(saveResult.entry.id, {
-        normalizedData: normalizeAppointment,
-      });
-
-      queryClient.setQueryData(
-        ["appointment", generatedId],
-        normalizeAppointment,
-      );
-
-      updateSlotCacheAfterOfflineAppointment({
-        queryClient: queryClient,
-        selectedSlot: selectedSlot,
-        selectedPracticioner: selectedPracticioner,
-        facilityId: facilityId,
-        selectedDate: selectedDateOffline,
-        selectedMonth: selectedMonthOffline,
-        action: "booked",
-      });
-
-      const prevAppointmentList = queryClient.getQueryData<
-        PaginatedResponse<Appointment>
-      >(["patient-appointments", patientId]);
-
-      const updatedAppointmentList: PaginatedResponse<Appointment> =
-        prevAppointmentList?.results
-          ? {
-              ...prevAppointmentList,
-              results: [...prevAppointmentList.results, normalizeAppointment],
-              count:
-                (prevAppointmentList.count ??
-                  prevAppointmentList.results.length) + 1,
-            }
-          : {
-              count: 1,
-              results: [normalizeAppointment],
-            };
-
-      queryClient.setQueryData(
-        ["patient-appointments", patientId],
-        updatedAppointmentList,
-      );
-
-      toast.success(t("appointment_booking_success"));
-      navigate(
-        `/facility/${facilityId}/patient/${patientId}/appointments/${generatedId}`,
-      );
-    } catch (error) {
-      console.error("Error while scheduling appointment", error);
-      toast.error(t("unexpected_error_while_booking_appointment"));
-    }
-  };
 
   const handleSubmit = async () => {
     if (!resourceId) {
@@ -286,13 +166,32 @@ export default function BookAppointment({ patientId }: Props) {
 
       if (!onlineManager.isOnline()) {
         const status = "booked";
-        await queueAppointmentRecordOffline(
+        await queueNewAppointmentOffline({
           createAppointmentData,
-          OfflineSelectedSlot,
+          selectedSlot: OfflineSelectedSlot,
           selectedPracticioner,
           authUser,
           status,
-        );
+          facilityId,
+          patientId,
+          selectedSlotId,
+          selectedTags,
+          selectedDateOffline,
+          selectedMonthOffline,
+          queryClient,
+          db,
+          t,
+          onSuccess: (appointmentId, normalizedAppointment) => {
+            toast.success(t("appointment_booking_success"));
+            navigate(
+              `/facility/${facilityId}/patient/${patientId}/appointments/${appointmentId}`,
+            );
+          },
+          onError: (error) => {
+            console.error("Error while scheduling appointment", error);
+            toast.error(t("unexpected_error_while_booking_appointment"));
+          },
+        });
 
         return;
       }
