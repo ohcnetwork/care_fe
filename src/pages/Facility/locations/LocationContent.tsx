@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -126,17 +125,16 @@ function LocationCard({ location, onClick }: LocationCardProps) {
           </div>
 
           <div className="flex items-center">
-            <Badge
-              variant={
+            <span
+              className={cn(
+                "capitalize",
                 location.availability_status === "available"
-                  ? "green"
-                  : "secondary"
-              }
-              className="capitalize"
-              size="sm"
+                  ? "text-green-600"
+                  : "text-gray-600",
+              )}
             >
               {location.availability_status}
-            </Badge>
+            </span>
           </div>
         </div>
       </div>
