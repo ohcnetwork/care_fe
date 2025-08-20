@@ -1,6 +1,5 @@
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import React, { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -52,7 +51,6 @@ export default function ValueSetSelect({
   asSheet = false,
   ...props
 }: Props & ButtonProps) {
-  const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
