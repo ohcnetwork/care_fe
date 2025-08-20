@@ -178,7 +178,7 @@ export function ChargeItemQuestion({
   const [cidSearch, setCidSearch] = useState("");
 
   const { data: chargeItemDefinitions, isLoading } = useQuery({
-    queryKey: ["charge_item_definitions", cidSearch],
+    queryKey: ["chargeItemDefinitions", cidSearch],
     queryFn: query.debounced(chargeItemDefinitionApi.listChargeItemDefinition, {
       pathParams: { facilityId },
       queryParams: { limit: 100, status: "active", title: cidSearch },
