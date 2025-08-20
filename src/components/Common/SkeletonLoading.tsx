@@ -127,7 +127,7 @@ export function CardListWithHeaderSkeleton({ count }: { count: number }) {
           <div className="h-4 w-32 animate-pulse rounded-md bg-gray-200" />
         </div>
       </div>
-      <CardListSkeleton count={count} />
+      <CardGridSkeleton count={count} />
     </div>
   );
 }
