@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
@@ -47,7 +49,9 @@ function RoleCard({
   const { t } = useTranslation();
   return (
     <Card>
-      <CardContent className="p-6">
+      <CardContent
+        className={cn("p-6", role.is_archived && "line-through text-gray-400")}
+      >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div className="flex-1">
             <h3 className="font-medium text-gray-900 mb-2">{role.name}</h3>
@@ -231,13 +235,19 @@ export default function RolesIndex() {
                       <TableHead>{t("name")}</TableHead>
                       <TableHead>{t("description")}</TableHead>
                       <TableHead>{t("permissions")}</TableHead>
-                      <TableHead>{t("status")}</TableHead>
                       <TableHead>{t("actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody className="bg-white">
                     {roles.map((role: RoleRead) => (
-                      <TableRow key={role.id} className="divide-x">
+                      <TableRow
+                        key={role.id}
+                        className={
+                          role.is_archived
+                            ? "divide-x line-through text-gray-400"
+                            : "divide-x"
+                        }
+                      >
                         <TableCell className="font-medium">
                           {role.name}
                         </TableCell>
@@ -261,11 +271,6 @@ export default function RolesIndex() {
                               </Badge>
                             )}
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          {role.is_archived && (
-                            <Badge variant="destructive">{t("archived")}</Badge>
-                          )}
                         </TableCell>
                         <TableCell>
                           <Button

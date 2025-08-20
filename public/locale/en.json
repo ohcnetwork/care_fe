@@ -634,7 +634,7 @@
   "archive_child_tag": "Archive Child Tag",
   "archive_child_tag_confirmation": "Are you sure you want to archive {{name}} child tag? This action cannot be undone.",
   "archive_file": "Archive File",
-  "archive_role": "Archived",
+  "archive_role": "Archive",
   "archived": "Archived",
   "archived_at": "Archived at",
   "archived_by": "Archived by",
