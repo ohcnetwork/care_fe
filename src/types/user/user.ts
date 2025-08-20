@@ -37,9 +37,8 @@ export interface UserRead extends UserReadMinimal {
   flags: string[];
 }
 
-// Todo: Once BE cleanup PR for this is merged then update this.
 export interface CurrentUserRead extends UserBase, Permissions {
-  external_id: string;
+  id: string;
   alt_phone_number?: string;
   date_of_birth?: string;
   is_superuser: boolean;
@@ -47,7 +46,6 @@ export interface CurrentUserRead extends UserBase, Permissions {
   facilities: FacilityBareMinimum[];
   organizations: Organization[];
   profile_picture_url: string;
-  user_flags: string[];
   last_login: string;
 }
 
