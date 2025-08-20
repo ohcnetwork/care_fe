@@ -77,8 +77,12 @@ describe("All combination of questionnaire submissions", () => {
     cy.visit("/");
     facilityCreation.selectFirstRandomFacility();
     cy.getFacilityIdAndNavigate("encounters/patients");
+    cy.get("button").contains("In Progress").first().click();
     cy.get("button").contains("View Encounter").first().click();
-    cy.get("button").contains("Add Questionnaire").click();
+    cy.get("button").contains("Update Details").click();
+    cy.get("div[role='dialog']").within(() => {
+      cy.get('[data-cy="add-questionnaire-button"]').click();
+    });
     cy.typeAndSelectOption(
       "input[placeholder='Search Questionnaires']",
       questionnaireName,
@@ -87,11 +91,12 @@ describe("All combination of questionnaire submissions", () => {
 
     // Add allergy information to the questionnaire
     cy.get("button").contains("Allergy").click();
-    cy.typeAndSelectOption(
-      "input[placeholder='Add Allergy']",
-      allergyName,
-      false,
-    );
+    cy.get(
+      "input[placeholder='Add Allergy'], input[placeholder='Add another Allergy']",
+    ).then(($input) => {
+      cy.wrap($input).type(allergyName);
+      cy.get("[cmdk-item]").contains(allergyName).click();
+    });
     cy.get("button").contains("Done").click();
 
     // Submit the questionnaire and verify success
