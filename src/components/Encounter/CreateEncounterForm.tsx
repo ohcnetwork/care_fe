@@ -179,7 +179,7 @@ export default function CreateEncounterForm({
                   return (
                     <FormItem>
                       <FormLabel>{t("date_and_time")}</FormLabel>
-                      <div className="flex sm:gap-2 flex-wrap">
+                      <div className="flex gap-2">
                         <DatePicker
                           date={date}
                           onChange={(newDate) => {
@@ -189,11 +189,11 @@ export default function CreateEncounterForm({
                             updatedDate.setMinutes(date.getMinutes());
                             field.onChange(updatedDate.toISOString());
                           }}
-                          className="flex-1"
+                          className="h-9"
                         />
                         <Input
                           type="time"
-                          className="sm:w-[150px] border-t-0 sm:border-t text-sm py-px border-gray-400 shadow-sm h-8"
+                          className="border-gray-400 text-sm sm:py-px shadow-sm"
                           value={date.toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
