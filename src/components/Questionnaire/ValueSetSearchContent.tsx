@@ -228,7 +228,7 @@ export default function ValueSetSearchContent({
         />
       </div>
       {searchQuery.isFetching ? (
-        <div className="flex justify-center items-center py-6 text-gray-500">
+        <div className="h-75 flex justify-center items-center py-6 text-gray-500">
           <Loader2 className="h-5 w-5 animate-spin mr-2" />
           {t("searching")}
         </div>
@@ -270,12 +270,12 @@ export default function ValueSetSearchContent({
                       const isFavorited = favouritesQuery.data?.find(
                         (favourite) => favourite.code === option.code,
                       );
-                    if (isFavorited) {
+                      if (isFavorited) {
                         setItemToRemove(option);
-                    } else {
+                      } else {
                         addFavouriteMutation.mutate(option);
                       }
-                  }}
+                    }}
                     isFavourite={
                       !!favouritesQuery.data?.find(
                         (favourite) => favourite.code === option.code,
@@ -286,76 +286,76 @@ export default function ValueSetSearchContent({
               </CommandGroup>
             </div>
 
-          <div
-            className={cn(
-              activeTab === 1 ? "block" : "hidden",
-              "md:block flex-1",
-              (search.length < 3 && !searchQuery.isFetching) ||
-                (!favourites?.length && !resultsWithRecents.length)
-                ? ""
-                : "md:border-l",
-              "border-gray-200",
-            )}
-          >
-            <CommandGroup className="h-75 overflow-auto">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-normal text-gray-700 p-1">
-                  {t("starred")}
-                </span>
-                {favouritesQuery.data && favouritesQuery.data.length > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowBulkClearConfirm(true)}
-                    className="h-6 px-1 text-xs text-gray-500 hover:text-gray-700"
-                  >
-                    {t("clear")}
-                  </Button>
-                )}
-              </div>
-              {favouritesQuery.isFetched &&
-                favouritesQuery.data?.length === 0 && (
-                  <div className="flex items-center flex-col justify-center h-[200px] md:h-[250px] text-xs text-gray-500">
-                    {t("no_starred", {
-                      star: "☆",
-                    })}
-                  </div>
-                )}
-              {favourites?.map((option) => (
-                <Item
-                  key={option.code}
-                  option={option}
-                  showCode={showCode}
-                  onSelect={() => {
-                    onSelect({
-                      code: option.code,
-                      display: option.display || "",
-                      system: option.system || "",
-                    });
-                    addRecentMutation.mutate(option);
-                  }}
-                  onFavourite={() => {
-                    const isFavorited = favouritesQuery.data?.find(
-                      (favourite) => favourite.code === option.code,
-                    );
-                    if (isFavorited) {
-                      setItemToRemove(option);
-                    } else {
-                      addFavouriteMutation.mutate(option);
+            <div
+              className={cn(
+                activeTab === 1 ? "block" : "hidden",
+                "md:block flex-1",
+                (search.length < 3 && !searchQuery.isFetching) ||
+                  (!favourites?.length && !resultsWithRecents.length)
+                  ? ""
+                  : "md:border-l",
+                "border-gray-200",
+              )}
+            >
+              <CommandGroup className="h-75 overflow-auto">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-normal text-gray-700 p-1">
+                    {t("starred")}
+                  </span>
+                  {favouritesQuery.data && favouritesQuery.data.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowBulkClearConfirm(true)}
+                      className="h-6 px-1 text-xs text-gray-500 hover:text-gray-700"
+                    >
+                      {t("clear")}
+                    </Button>
+                  )}
+                </div>
+                {favouritesQuery.isFetched &&
+                  favouritesQuery.data?.length === 0 && (
+                    <div className="flex items-center flex-col justify-center h-[200px] md:h-[250px] text-xs text-gray-500">
+                      {t("no_starred", {
+                        star: "☆",
+                      })}
+                    </div>
+                  )}
+                {favourites?.map((option) => (
+                  <Item
+                    key={option.code}
+                    option={option}
+                    showCode={showCode}
+                    onSelect={() => {
+                      onSelect({
+                        code: option.code,
+                        display: option.display || "",
+                        system: option.system || "",
+                      });
+                      addRecentMutation.mutate(option);
+                    }}
+                    onFavourite={() => {
+                      const isFavorited = favouritesQuery.data?.find(
+                        (favourite) => favourite.code === option.code,
+                      );
+                      if (isFavorited) {
+                        setItemToRemove(option);
+                      } else {
+                        addFavouriteMutation.mutate(option);
+                      }
+                    }}
+                    isFavourite={
+                      !!favouritesQuery.data?.find(
+                        (favourite) => favourite.code === option.code,
+                      )
                     }
-                  }}
-                  isFavourite={
-                    !!favouritesQuery.data?.find(
-                      (favourite) => favourite.code === option.code,
-                    )
-                  }
-                />
-              ))}
-            </CommandGroup>
+                  />
+                ))}
+              </CommandGroup>
+            </div>
           </div>
-        </div>
-      </CommandList>
-
+        </CommandList>
+      )}
       {/* Individual Item Removal Confirmation */}
       <ConfirmActionDialog
         open={!!itemToRemove && !showBulkClearConfirm}
