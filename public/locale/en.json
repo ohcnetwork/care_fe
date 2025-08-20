@@ -1059,6 +1059,7 @@
   "component_type": "Component Type",
   "component_value": "Component value",
   "component_wise_breakdown": "Component Wise Breakdown",
+  "component_with_index": "Component {{index}}",
   "components": "Components",
   "computer_generated_medication_administration": "This is a computer generated medication administration.",
   "computer_generated_prescription": "This is a computer generated prescription.",

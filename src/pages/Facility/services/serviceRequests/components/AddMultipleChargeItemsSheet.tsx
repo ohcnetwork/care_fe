@@ -73,7 +73,7 @@ export default function AddMultipleChargeItemsSheet({
   >(null);
 
   const { data: chargeItemDefinitions, isLoading } = useQuery({
-    queryKey: ["charge_item_definitions", search],
+    queryKey: ["chargeItemDefinitions", search],
     queryFn: query.debounced(chargeItemDefinitionApi.listChargeItemDefinition, {
       pathParams: { facilityId },
       queryParams: { limit: 100, status: "active", title: search },
