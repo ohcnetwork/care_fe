@@ -18,7 +18,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -219,8 +224,13 @@ export default function Autocomplete({
           </SheetTrigger>
           <SheetContent
             side="bottom"
+            aria-describedby={undefined}
             className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
           >
+            <SheetTitle className="sr-only">
+              {t("autocomplete_options")}
+            </SheetTitle>
+
             <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
             <div className="mt-6 h-full">
               <Command>{commandContent}</Command>

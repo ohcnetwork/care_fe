@@ -36,29 +36,26 @@ export function SpecimenDefinitionDetail({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { data: specimenDefinition, isLoading } = useQuery({
-    queryKey: ["specimen_definitions", facilityId, specimenDefinitionId],
+    queryKey: ["specimenDefinitions", facilityId, specimenDefinitionId],
     queryFn: query(specimenDefinitionApi.retrieveSpecimenDefinition, {
       pathParams: { facilityId, specimenDefinitionId },
     }),
   });
 
-  const { mutate: updateSpecimenDefinition } = useMutation({
-    mutationFn: mutate(specimenDefinitionApi.updateSpecimenDefinition, {
-      pathParams: { facilityId, specimenDefinitionId },
-    }),
-    onSuccess: () => {
-      toast.success(t("specimen_definition_retired_successfully"));
-      queryClient.invalidateQueries({ queryKey: ["specimen_definitions"] });
-      queryClient.invalidateQueries({
-        queryKey: ["specimen_definitions", facilityId, specimenDefinitionId],
-      });
-
-      navigate(`/facility/${facilityId}/settings/specimen_definitions`);
-    },
-    onError: () => {
-      toast.error(t("error_retiring_specimen_definition"));
-    },
-  });
+  const { mutate: updateSpecimenDefinition, isPending: isDeleting } =
+    useMutation({
+      mutationFn: mutate(specimenDefinitionApi.updateSpecimenDefinition, {
+        pathParams: { facilityId, specimenDefinitionId },
+      }),
+      onSuccess: () => {
+        toast.success(t("specimen_definition_retired_successfully"));
+        queryClient.invalidateQueries({ queryKey: ["specimenDefinitions"] });
+        navigate(`/facility/${facilityId}/settings/specimen_definitions`);
+      },
+      onError: () => {
+        toast.error(t("error_retiring_specimen_definition"));
+      },
+    });
 
   const handleDelete = () => {
     if (!specimenDefinition) return;
@@ -359,6 +356,7 @@ export function SpecimenDefinitionDetail({
         confirmText={t("confirm")}
         onConfirm={handleDelete}
         variant="destructive"
+        disabled={isDeleting}
       />
     </div>
   );

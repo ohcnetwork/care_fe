@@ -140,7 +140,6 @@ export default function ConsentFormSheet({
 
   const form = useForm({
     resolver: zodResolver(consentFormSchema(isEdit)),
-    mode: "onChange",
     defaultValues: {
       decision: "permit",
       category: "treatment",
@@ -161,7 +160,8 @@ export default function ConsentFormSheet({
       name: fileUpload.fileNames[index] || "",
     }));
     form.setValue("fileEntries", fileEntries, {
-      shouldValidate: fileEntries.length > 0,
+      shouldValidate: false,
+      shouldDirty: true,
     });
   }, [fileUpload.files, fileUpload.fileNames, form]);
 
