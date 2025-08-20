@@ -160,24 +160,26 @@ export default function RoleForm({
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="is_archived"
-          render={({ field }) => (
-            <FormItem className="flex items-center space-x-2">
-              <FormControl>
-                <Checkbox
-                  id="is_archived"
-                  checked={field.value}
-                  onCheckedChange={(checked) => field.onChange(!!checked)}
-                />
-              </FormControl>
-              <FormLabel htmlFor="is_archived" className="cursor-pointer">
-                {t("archive_role")}
-              </FormLabel>
-            </FormItem>
-          )}
-        />
+        {role?.id && (
+          <FormField
+            control={form.control}
+            name="is_archived"
+            render={({ field }) => (
+              <FormItem className="flex items-center space-x-2">
+                <FormControl>
+                  <Checkbox
+                    id="is_archived"
+                    checked={field.value}
+                    onCheckedChange={(checked) => field.onChange(!!checked)}
+                  />
+                </FormControl>
+                <FormLabel htmlFor="is_archived" className="cursor-pointer">
+                  {t("archive_role")}
+                </FormLabel>
+              </FormItem>
+            )}
+          />
+        )}
 
         <Card>
           <CardHeader>
