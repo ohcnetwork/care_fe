@@ -64,7 +64,6 @@ export default function EncounterQuestionnaire({
               subjectType={subjectType}
               encounterId={encounterId}
               questionnaireSlug={questionnaireSlug}
-              offlineEntryId={offlineEntryId}
               editMode={editMode === "true"}
               onSubmit={() => {
                 if (encounterId && facilityId) {

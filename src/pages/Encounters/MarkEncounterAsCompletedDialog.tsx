@@ -21,7 +21,7 @@ import { buttonVariants } from "@/components/ui/button";
 
 import { queueMarkAscompleteRecord } from "@/components/Encounter/offlineQueue";
 
-import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
+import useAuthUser from "@/hooks/useAuthUser";
 import { useOfflineEntry } from "@/hooks/useOfflineEntry";
 
 import { handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers";

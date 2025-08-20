@@ -46,6 +46,7 @@ import UserSelector from "@/components/Common/UserSelector";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
+import { useOfflineEntry } from "@/hooks/useOfflineEntry";
 
 import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
@@ -86,13 +87,11 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const { goBack } = useAppHistory();
   const { t } = useTranslation();
 
-  const [{ related_patient, offlineEntryId }] = useQueryParams();
+  const [{ related_patient }] = useQueryParams();
+  const { offlineEntryId, offlineEntry, isLoadingOfflineEntry } =
+    useOfflineEntry();
   const [assignedToUser, setAssignedToUser] = useState<UserReadMinimal>();
   const [assignFacility, setAssignFacility] = useState<FacilityRead>();
-  const [offlineEntry, setOfflineEntry] = useState<OfflineWritesEntry | null>(
-    null,
-  );
-  const [isLoadingOfflineEntry, setIsLoadingOfflineEntry] = useState(false);
 
   const authUser = useAuthUser();
   const queryClient = useQueryClient();
@@ -182,25 +181,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       setAssignFacility(undefined);
     }
   };
-
-  useEffect(() => {
-    if (offlineEntryId && !id) {
-      setIsLoadingOfflineEntry(true);
-      const loadOfflineEntry = async () => {
-        try {
-          const entry = await db.OfflineWrites.get(offlineEntryId);
-          if (entry && entry.normalizedData) {
-            setOfflineEntry(entry);
-          }
-        } catch (error) {
-          console.error("Error loading offline entry:", error);
-        } finally {
-          setIsLoadingOfflineEntry(false);
-        }
-      };
-      loadOfflineEntry();
-    }
-  }, [offlineEntryId]);
 
   useEffect(() => {
     const loadResourcerequest = async () => {

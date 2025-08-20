@@ -50,6 +50,7 @@ import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
+import { useOfflineEntry } from "@/hooks/useOfflineEntry";
 
 import { BLOOD_GROUP_CHOICES, GENDER_TYPES } from "@/common/constants";
 import { GENDERS } from "@/common/constants";
@@ -107,7 +108,9 @@ export default function PatientRegistration(
 
   const user = useAuthUser();
 
-  const [{ phone_number, offlineEntryId }] = useQueryParams();
+  const [{ phone_number }] = useQueryParams();
+  const { offlineEntryId, offlineEntry, isLoadingOfflineEntry } =
+    useOfflineEntry();
 
   const {
     patientRegistration: {
@@ -135,10 +138,6 @@ export default function PatientRegistration(
 
   const [suppressOfflineDuplicateWarning, setSuppressOfflineDuplicateWarning] =
     useState(!!patientId);
-  const [offlineEntry, setOfflineEntry] = useState<OfflineWritesEntry | null>(
-    null,
-  );
-  const [isLoadingOfflineEntry, setIsLoadingOfflineEntry] = useState(false);
   const queryClient = useQueryClient();
 
   const formSchema = useMemo(
@@ -614,26 +613,6 @@ export default function PatientRegistration(
     networkMode: "online",
     enabled: !!patientId,
   });
-
-  useEffect(() => {
-    if (offlineEntryId) {
-      setIsLoadingOfflineEntry(true);
-      const loadOfflineEntry = async () => {
-        try {
-          const entry = await db.OfflineWrites.get(offlineEntryId);
-
-          if (entry && entry.normalizedData) {
-            setOfflineEntry(entry);
-          }
-        } catch (error) {
-          console.error("Error loading offline entry:", error);
-        } finally {
-          setIsLoadingOfflineEntry(false);
-        }
-      };
-      loadOfflineEntry();
-    }
-  }, [offlineEntryId]);
 
   useEffect(() => {
     if ((patientQuery.data && facility) || (offlineEntry && facility)) {

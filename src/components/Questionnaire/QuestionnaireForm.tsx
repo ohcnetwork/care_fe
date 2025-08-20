@@ -23,6 +23,7 @@ import Loading from "@/components/Common/Loading";
 import { AuthUserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import { useOfflineEntry } from "@/hooks/useOfflineEntry";
 
 import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import { OfflineKeyMap } from "@/OfflineSupport/offlineKeys";
@@ -107,7 +108,6 @@ export interface QuestionnaireFormProps {
   onSubmit?: () => void;
   onCancel?: () => void;
   facilityId?: string;
-  offlineEntryId?: string;
   editMode?: boolean;
 }
 
@@ -456,12 +456,13 @@ export function QuestionnaireForm({
   onSubmit,
   onCancel,
   facilityId,
-  offlineEntryId,
   editMode = false,
 }: QuestionnaireFormProps) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const queryClient = useQueryClient();
+  const { offlineEntryId, offlineEntry, isLoadingOfflineEntry } =
+    useOfflineEntry();
   const [isDirty, setIsDirty] = useState(false);
   const [questionnaireForms, setQuestionnaireForms] = useState<
     QuestionnaireFormState[]
@@ -472,10 +473,6 @@ export function QuestionnaireForm({
 
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
-  const [offlineEntry, setOfflineEntry] = useState<OfflineWritesEntry | null>(
-    null,
-  );
-  const [isLoadingOfflineEntry, setIsLoadingOfflineEntry] = useState(false);
   const db = new AppCacheDB();
 
   const {
@@ -592,29 +589,6 @@ export function QuestionnaireForm({
   // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
   useNavigationPrompt(isDirty && !import.meta.env.DEV, t("unsaved_changes"));
 
-  // Load offline entry for editing
-  useEffect(() => {
-    if (editMode && offlineEntryId && !offlineEntry) {
-      setIsLoadingOfflineEntry(true);
-
-      db.OfflineWrites.get(offlineEntryId)
-        .then((entry) => {
-          if (entry) {
-            setOfflineEntry(entry);
-          } else {
-            toast.error(t("offline_questionnaire_not_found"));
-          }
-        })
-        .catch((error) => {
-          console.error("Error loading offline entry:", error);
-          toast.error(t("failed_to_load_offline_questionnaire"));
-        })
-        .finally(() => {
-          setIsLoadingOfflineEntry(false);
-        });
-    }
-  }, [editMode, offlineEntryId, offlineEntry, patientId, encounterId]);
-
   function extractSlugFromUrl(url: string) {
     const match = url?.match(/\/questionnaire\/([^/]+)\//);
     return match ? match[1] : null;
@@ -636,7 +610,7 @@ export function QuestionnaireForm({
       }),
       meta: { persist: true },
       networkMode: "online" as const,
-      enabled: !!slug && !FIXED_QUESTIONNAIRES[slug] && !!offlineEntryId,
+      enabled: !!slug && !FIXED_QUESTIONNAIRES[slug] && !!offlineEntry,
     })),
   }) as any[];
 

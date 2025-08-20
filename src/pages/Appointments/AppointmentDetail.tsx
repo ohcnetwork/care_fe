@@ -68,6 +68,7 @@ import { AuthUserModel } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
+import { useOfflineEntry } from "@/hooks/useOfflineEntry";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -130,7 +131,7 @@ export default function AppointmentDetail(props: Props) {
   const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
-  const [{ offlineEntryId }] = useQueryParams();
+  const { offlineEntryId } = useOfflineEntry();
 
   const db = new AppCacheDB();
   const authUser = useAuthUser();

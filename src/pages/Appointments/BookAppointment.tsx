@@ -22,6 +22,7 @@ import { AuthUserModel } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
+import { useOfflineEntry } from "@/hooks/useOfflineEntry";
 
 import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
@@ -64,7 +65,7 @@ export default function BookAppointment({ patientId }: Props) {
   const authUser = useAuthUser();
   const queryClient = useQueryClient();
   const db = new AppCacheDB();
-  const [{ offlineEntryId }] = useQueryParams();
+  const { offlineEntryId, offlineEntry } = useOfflineEntry();
 
   const [selectedPracticioner, setSelectedPracticioner] =
     useState<UserReadMinimal | null>(null);
@@ -80,9 +81,6 @@ export default function BookAppointment({ patientId }: Props) {
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
   const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
   const [reason, setReason] = useState("");
-  const [offlineEntry, setOfflineEntry] = useState<OfflineWritesEntry | null>(
-    null,
-  );
 
   const resourcesQuery = useQuery({
     queryKey: ["practitioners", facilityId],
@@ -93,23 +91,6 @@ export default function BookAppointment({ patientId }: Props) {
     networkMode: "online",
   });
   const resource = resourcesQuery.data?.users.find((r) => r.id === resourceId);
-
-  // Load offline entry when offlineEntryId is present
-  useEffect(() => {
-    if (offlineEntryId) {
-      const loadOfflineEntry = async () => {
-        try {
-          const entry = await db.OfflineWrites.get(offlineEntryId);
-          if (entry && entry.normalizedData) {
-            setOfflineEntry(entry);
-          }
-        } catch (error) {
-          console.error("Error loading offline entry:", error);
-        }
-      };
-      loadOfflineEntry();
-    }
-  }, [offlineEntryId]);
 
   useEffect(() => {
     const users = resourcesQuery.data?.users;

@@ -68,7 +68,6 @@ export const EncounterShow = (props: Props) => {
 
   const queryClient = useQueryClient();
 
-  const [{ offlineEntryId }] = useQueryParams();
   queryClient.setQueryDefaults(["patientPermissions"], {
     meta: { persist: true },
     networkMode: "online",
@@ -202,7 +201,6 @@ export const EncounterShow = (props: Props) => {
       hideTitleOnPage
     >
       <EncounterHeader
-        offlineEntryId={offlineEntryId}
         encounter={selectedEncounter}
         canWriteSelectedEncounter={canWriteSelectedEncounter}
       />
