@@ -111,9 +111,9 @@
     "pigeon-maps": "^0.22.1",
     "qrcode.react": "^4.1.0",
     "raviger": "^5.0.0-2",
-    "react": "19.1.0",
+    "react": "19.1.1",
     "react-day-picker": "^9.6.3",
-    "react-dom": "19.1.0",
+    "react-dom": "19.1.1",
     "react-easy-crop": "^5.4.2",
     "react-google-recaptcha": "^3.1.0",
     "react-hook-form": "^7.55.0",
@@ -193,8 +193,8 @@
   "optionalDependencies": {
     "@esbuild/linux-arm64": "latest",
     "@esbuild/linux-x64": "latest",
-    "@rollup/rollup-linux-arm64-gnu": "4.46.1",
-    "@rollup/rollup-linux-x64-gnu": "4.46.1"
+    "@rollup/rollup-linux-arm64-gnu": "4.46.4",
+    "@rollup/rollup-linux-x64-gnu": "4.46.4"
   },
   "browserslist": {
     "production": [
