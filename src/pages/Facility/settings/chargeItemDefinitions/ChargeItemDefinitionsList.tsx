@@ -99,7 +99,7 @@ export function ChargeItemDefinitionsList({
   }, []);
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["charge_item_definitions", facilityId, qParams],
+    queryKey: ["chargeItemDefinitions", facilityId, qParams],
     queryFn: query.debounced(chargeItemDefinitionApi.listChargeItemDefinition, {
       pathParams: { facilityId },
       queryParams: {
