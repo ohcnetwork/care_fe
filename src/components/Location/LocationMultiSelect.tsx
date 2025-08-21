@@ -16,7 +16,7 @@ import locationApi from "@/types/location/locationApi";
 
 interface LocationTreeNodeProps {
   location: LocationList;
-  selectedLocationIds: string[];
+  selectedLocations: LocationValue[];
   onSelect: (locationId: string) => void;
   expandedLocations: Set<string>;
   onToggleExpand: (locationId: string) => void;
@@ -27,7 +27,7 @@ interface LocationTreeNodeProps {
 
 function LocationTreeNode({
   location,
-  selectedLocationIds,
+  selectedLocations,
   onSelect,
   expandedLocations,
   onToggleExpand,
@@ -36,7 +36,7 @@ function LocationTreeNode({
   searchQuery,
 }: LocationTreeNodeProps) {
   const isExpanded = expandedLocations.has(location.id);
-  const isSelected = selectedLocationIds.includes(location.id);
+  const isSelected = selectedLocations.some((loc) => loc.id === location.id);
   const Icon =
     LocationTypeIcons[location.form as keyof typeof LocationTypeIcons];
 
@@ -126,7 +126,7 @@ function LocationTreeNode({
             <LocationTreeNode
               key={child.id}
               location={child}
-              selectedLocationIds={selectedLocationIds}
+              selectedLocations={selectedLocations}
               onSelect={onSelect}
               expandedLocations={expandedLocations}
               onToggleExpand={onToggleExpand}
@@ -141,52 +141,32 @@ function LocationTreeNode({
   );
 }
 
+interface LocationValue {
+  id: string;
+  name: string;
+}
+
 interface LocationMultiSelectProps {
   facilityId: string;
-  value: string[];
-  onChange: (value: string[]) => void;
+  value: LocationValue[];
+  onChange: (value: LocationValue[]) => void;
 }
 
 function SelectedLocationPill({
-  locationId,
-  locations,
+  location,
   onRemove,
 }: {
-  locationId: string;
-  locations?: LocationList[];
+  location: LocationValue;
   onRemove: (id: string) => void;
 }) {
-  const location = locations?.find((loc) => loc.id === locationId);
-
-  if (!locations) {
-    return (
-      <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5">
-        <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
-        <Button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onRemove(locationId);
-          }}
-          className="h-5 w-5 rounded-full p-0"
-          variant="ghost"
-        >
-          <X className="size-3" />
-        </Button>
-      </div>
-    );
-  }
-
   return (
     <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5">
-      <span className="text-sm font-medium">
-        {location?.name || locationId}
-      </span>
+      <span className="text-sm font-medium">{location.name}</span>
       <Button
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          onRemove(locationId);
+          onRemove(location.id);
         }}
         className="h-5 w-5 rounded-full p-0"
         variant="ghost"
@@ -256,15 +236,19 @@ export default function LocationMultiSelect({
   };
 
   const handleSelect = (locationId: string) => {
-    onChange(
-      value.includes(locationId)
-        ? value.filter((id) => id !== locationId)
-        : [...value, locationId],
-    );
+    const location = locationsMap.get(locationId);
+    if (!location) return;
+
+    const newValue = value.some((v) => v.id === locationId)
+      ? value.filter((v) => v.id !== locationId)
+      : [...value, { id: location.id, name: location.name }];
+    onChange(newValue);
   };
 
   const handleRemove = (locationId: string) => {
-    onChange(value.filter((id) => id !== locationId));
+    const location = locationsMap.get(locationId);
+    if (!location) return;
+    onChange(value.filter((v) => v.id !== locationId));
   };
 
   return (
@@ -273,11 +257,10 @@ export default function LocationMultiSelect({
         <>
           <ScrollArea className="max-h-[calc(20vh-2rem)]">
             <div className="flex flex-wrap gap-2 px-3">
-              {value.map((locationId) => (
+              {value.map((location) => (
                 <SelectedLocationPill
-                  key={locationId}
-                  locationId={locationId}
-                  locations={Array.from(locationsMap.values())}
+                  key={location.id}
+                  location={location}
                   onRemove={handleRemove}
                 />
               ))}
@@ -316,7 +299,7 @@ export default function LocationMultiSelect({
                 <LocationTreeNode
                   key={location.id}
                   location={location}
-                  selectedLocationIds={value}
+                  selectedLocations={value}
                   onSelect={handleSelect}
                   expandedLocations={expandedLocations}
                   onToggleExpand={handleToggleExpand}
