@@ -355,7 +355,7 @@ export default function AppointmentsPage() {
         (r) => r.username === authUser.username,
       )
     ) {
-      qParams.practitioners = authUser.external_id;
+      qParams.practitioners = authUser.id;
     }
 
     // Set default date range if no dates are present

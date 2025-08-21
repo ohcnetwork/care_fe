@@ -12,33 +12,35 @@ import {
   StethoscopeIcon,
 } from "@/CAREUI/icons/CustomIcons";
 
+import { useEncounterShortcutDisplays } from "@/hooks/useEncounterShortcuts";
+
 export const QuickActions = (props: React.ComponentProps<"div">) => {
   const { t } = useTranslation();
-
+  const getShortcutDisplay = useEncounterShortcutDisplays();
   return (
     <div {...props} className={cn("flex gap-3", props.className)}>
       <QuickAction
         icon={<AllergyIcon className="size-8 text-yellow-700" />}
         title={t("allergy")}
-        shortcut="A"
+        shortcut={getShortcutDisplay("add-allergy")}
         href={`questionnaire/allergy_intolerance`}
       />
       <QuickAction
         icon={<ChillIcon className="size-8 text-pink-700" />}
         title={t("symptoms")}
-        shortcut="S"
+        shortcut={getShortcutDisplay("add-symptoms")}
         href={`questionnaire/symptom`}
       />
       <QuickAction
         icon={<StethoscopeIcon className="size-8 text-blue-800" />}
         title={t("diagnosis")}
-        shortcut="D"
+        shortcut={getShortcutDisplay("add-diagnosis")}
         href={`questionnaire/diagnosis`}
       />
       <QuickAction
         icon={<HealthWorkerIcon className="size-8 text-teal-700" />}
         title={t("forms")}
-        shortcut="F"
+        shortcut={getShortcutDisplay("add-questionnaire")}
         href={`questionnaire`}
       />
     </div>
@@ -53,7 +55,7 @@ const QuickAction = ({
 }: {
   icon: React.ReactNode;
   title: string;
-  shortcut: string;
+  shortcut?: string;
   href: string;
 }) => {
   return (
@@ -62,9 +64,13 @@ const QuickAction = ({
       className="flex-1 flex flex-col gap-1.25 p-1 pb-2 rounded-lg shadow bg-white"
     >
       <div className="relative flex py-3 rounded-t-lg rounded-b-xl bg-gray-100">
-        <div className="flex items-center justify-center absolute top-1 right-1 size-5 bg-gradient-to-b from-white to gray-500/20 rounded-md border border-gray-200">
-          <span className="font-medium text-xs text-gray-700">{shortcut}</span>
-        </div>
+        {shortcut && (
+          <div className="flex items-center justify-center absolute top-1 right-1 size-5 bg-gradient-to-b from-white to gray-500/20 rounded-md border border-gray-200">
+            <span className="font-medium text-xs text-gray-700">
+              {shortcut}
+            </span>
+          </div>
+        )}
         <div className="rounded-xl bg-white p-2 size-12 shadow mx-auto">
           {icon}
         </div>

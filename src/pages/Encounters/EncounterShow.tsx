@@ -12,6 +12,7 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
+import { useEncounterShortcuts } from "@/hooks/useEncounterShortcuts";
 import { useSidebarAutoCollapse } from "@/hooks/useSidebarAutoCollapse";
 
 import { getPermissions } from "@/common/Permissions";
@@ -76,6 +77,7 @@ export const EncounterShow = (props: Props) => {
     primaryEncounter?.permissions ?? [],
   );
 
+  useEncounterShortcuts();
   const { canViewClinicalData } = getPermissions(
     hasPermission,
     patient?.permissions ?? [],
