@@ -913,7 +913,10 @@ function ActivityDefinitionFormContent({
                         onSearch={setChargeItemSearch}
                         canCreate={true}
                         createForm={(onSuccess) => (
-                          <div className="py-2">
+                          <div className="py-2 space-y-4 px-4">
+                            <h1 className="text-xl font-semibold">
+                              {t("create_charge_item_definition")}
+                            </h1>
                             <ChargeItemDefinitionForm
                               facilityId={facilityId}
                               onSuccess={onSuccess}
