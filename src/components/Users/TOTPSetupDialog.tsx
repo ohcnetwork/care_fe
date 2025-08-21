@@ -21,7 +21,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 
-import { TOTPSetupResponse } from "@/types/auth/otp";
+import { TOTPSetupResponse } from "@/types/auth/auth";
 
 interface TOTPSetupDialogProps {
   open: boolean;

@@ -13,9 +13,13 @@ import { LocalStorageKeys } from "@/common/constants";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { userAtom } from "@/atoms/user-atom";
-import { JwtTokenObtainPair, LoginResponse } from "@/types/auth/auth";
+import {
+  JwtTokenObtainPair,
+  LoginResponse,
+  MFAAuthenticationToken,
+} from "@/types/auth/auth";
 import authApi from "@/types/auth/authApi";
-import { MFAAuthenticationToken, TokenData } from "@/types/auth/otp";
+import { TokenData } from "@/types/auth/otp";
 import userApi from "@/types/user/userApi";
 
 interface Props {

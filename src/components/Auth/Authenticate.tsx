@@ -25,7 +25,7 @@ import {
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
-import { MFAMethod, MFAOption } from "@/types/auth/otp";
+import { MFAMethod, MFAOption } from "@/types/auth/auth";
 
 import { AuthHero } from "./AuthHero";
 

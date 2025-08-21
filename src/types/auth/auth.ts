@@ -1,5 +1,3 @@
-import { MFAAuthenticationToken } from "@/types/auth/otp";
-
 export enum RequestStatus {
   NOT_FOUND = "not_found",
   EXPIRED = "expired",
@@ -40,4 +38,40 @@ export interface UpdatePasswordRequest {
   old_password: string;
   username: string;
   new_password: string;
+}
+
+/** MFA related types */
+
+export type MFAMethod = "totp" | "backup";
+
+export interface MFAOption {
+  id: MFAMethod;
+  label: string;
+}
+
+export interface PasswordRequest {
+  password: string;
+}
+
+export interface TOTPSetupResponse {
+  uri: string;
+  secret_key: string;
+}
+
+export interface TOTPVerifyRequest {
+  code: string;
+}
+
+export interface BackupCodesRespone {
+  backup_codes: string[];
+}
+
+export interface MFALoginRequest {
+  method: MFAMethod;
+  code: string;
+  temp_token: string;
+}
+
+export interface MFAAuthenticationToken {
+  temp_token: string;
 }

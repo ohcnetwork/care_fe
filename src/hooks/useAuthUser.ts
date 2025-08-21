@@ -1,7 +1,11 @@
 import { createContext, useContext } from "react";
 
-import { LoginRequest, LoginResponse } from "@/types/auth/auth";
-import { MFALoginRequest, TokenData } from "@/types/auth/otp";
+import {
+  LoginRequest,
+  LoginResponse,
+  MFALoginRequest,
+} from "@/types/auth/auth";
+import { TokenData } from "@/types/auth/otp";
 import { CurrentUserRead } from "@/types/user/user";
 
 interface AuthContextType {
