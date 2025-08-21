@@ -47,8 +47,10 @@ import {
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
-import { Status } from "@/types/emr/serviceRequest/serviceRequest";
-import { toServiceRequestUpdateSpec } from "@/types/emr/serviceRequest/serviceRequest";
+import {
+  Status,
+  toServiceRequestUpdateSpec,
+} from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import {
   SpecimenRead,

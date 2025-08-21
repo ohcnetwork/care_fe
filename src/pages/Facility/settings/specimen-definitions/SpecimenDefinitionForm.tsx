@@ -41,9 +41,9 @@ import {
   Preference,
   RETENTION_TIME_UNITS,
   SPECIMEN_DEFINITION_UNITS_CODES,
+  SpecimenDefinitionCreate,
   SpecimenDefinitionStatus,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
-import { SpecimenDefinitionCreate } from "@/types/emr/specimenDefinition/specimenDefinition";
 
 const typeTestedSchema = z.object({
   is_derived: z.boolean(),
