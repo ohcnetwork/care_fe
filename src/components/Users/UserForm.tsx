@@ -39,8 +39,7 @@ import {
   validateRule,
 } from "@/components/Users/UserFormValidations";
 
-import { GENDER_TYPES, NAME_PREFIXES } from "@/common/constants";
-import { GENDERS } from "@/common/constants";
+import { GENDERS, GENDER_TYPES, NAME_PREFIXES } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
