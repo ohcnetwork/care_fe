@@ -95,7 +95,7 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
           <h1 className="text-2xl font-bold text-gray-700">
             {t("tag_config")}
           </h1>
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-gray-600 text-sm">
                 {t("manage_tag_config_description")}
