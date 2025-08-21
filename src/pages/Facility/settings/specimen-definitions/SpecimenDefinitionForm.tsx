@@ -33,7 +33,6 @@ import ComboboxQuantityInput from "@/components/Common/ComboboxQuantityInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import { generateSlug } from "@/Utils/utils";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { Code, CodeSchema } from "@/types/base/code/code";
 import {
   ContainerSpec,
@@ -116,8 +115,6 @@ export function SpecimenDefinitionForm({
   onCancel,
 }: SpecimenDefinitionFormProps) {
   const { t } = useTranslation();
-
-  const { facilityId: _facilityId } = useCurrentFacility();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),

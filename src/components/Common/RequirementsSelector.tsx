@@ -126,7 +126,6 @@ export default function RequirementsSelector({
 
   const onSuccess = () => {
     setIsCreateSheetOpen(false);
-    setIsOpen(false);
   };
 
   const onCancel = () => {
