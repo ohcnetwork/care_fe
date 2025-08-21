@@ -82,11 +82,11 @@ import {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
-import { UserReadMinimal } from "@/types/user/user";
 import {
   useFieldError,
   validateFields,
 } from "@/types/questionnaire/validation";
+import { UserReadMinimal } from "@/types/user/user";
 
 function formatDoseRange(range?: DoseRange): string {
   if (!range?.high?.value) return "";
