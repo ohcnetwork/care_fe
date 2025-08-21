@@ -4,8 +4,8 @@ import { RoleCreate } from "@/types/emr/role/role";
 
 dotenv.config({ path: [".env.local", ".env"] });
 
-const CSV_URL =
-  "https://docs.google.com/spreadsheets/d/1nihZMLqvssW_jl4zubHrj4bgI6xJGUNuiENDjvEooFY/gviz/tq?tqx=out:csv&sheet=role%20permissions";
+const GOOGLE_SHEET_ID = "1nihZMLqvssW_jl4zubHrj4bgI6xJGUNuiENDjvEooFY";
+const CSV_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=role%20permissions`;
 const API_BASE_URL = process.env.REACT_CARE_API_URL;
 
 const fetchRolePermissionsCsv = async () => {
