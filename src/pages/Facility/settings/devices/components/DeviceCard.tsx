@@ -1,4 +1,5 @@
 import { Link } from "raviger";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceTypeIcon";
 import {
@@ -25,6 +32,15 @@ interface Props {
 export default function DeviceCard({ device, encounter }: Props) {
   const { t } = useTranslation();
 
+  const textRef = useRef<HTMLDivElement>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
+
+  useEffect(() => {
+    if (textRef.current) {
+      setIsTruncated(textRef.current.scrollWidth > textRef.current.clientWidth);
+    }
+  }, [device.registered_name]);
+
   return (
     <Link
       href={`/devices/${device.id}`}
@@ -34,17 +50,32 @@ export default function DeviceCard({ device, encounter }: Props) {
       <Card className="hover:shadow-md transition-shadow h-full">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between">
-            <div className="flex items-start gap-2">
+            <div className="flex items-start gap-2 min-w-0">
               <div className="mt-1">
                 <DeviceTypeIcon
                   className="size-5 text-gray-500"
                   type={device.care_type}
                 />
               </div>
-              <div>
-                <CardTitle className="text-lg font-semibold break-all">
-                  {device.registered_name}
-                </CardTitle>
+              <div className="min-w-0 max-w-full">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <CardTitle
+                        ref={textRef}
+                        className="text-lg font-semibold truncate"
+                      >
+                        {device.registered_name}
+                      </CardTitle>
+                    </TooltipTrigger>
+                    {isTruncated && (
+                      <TooltipContent className="max-w-sm sm:max-w-md break-words">
+                        <p>{device.registered_name}</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
+
                 {device.user_friendly_name && (
                   <CardDescription className="line-clamp-1">
                     {device.user_friendly_name}
