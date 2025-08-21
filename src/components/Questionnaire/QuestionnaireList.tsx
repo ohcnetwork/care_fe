@@ -40,8 +40,10 @@ import {
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
-import { QUESTIONNAIRE_STATUS_COLORS } from "@/types/questionnaire/questionnaire";
-import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
+import {
+  QUESTIONNAIRE_STATUS_COLORS,
+  QuestionnaireDetail,
+} from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 function EmptyState() {
