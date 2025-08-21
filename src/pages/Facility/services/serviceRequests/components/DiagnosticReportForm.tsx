@@ -47,8 +47,8 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
-import { DIAGNOSTIC_REPORT_STATUS_COLORS } from "@/types/emr/diagnosticReport/diagnosticReport";
 import {
+  DIAGNOSTIC_REPORT_STATUS_COLORS,
   DiagnosticReportRead,
   DiagnosticReportStatus,
 } from "@/types/emr/diagnosticReport/diagnosticReport";

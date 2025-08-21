@@ -18,13 +18,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-import FilePreviewDialog from "@/components/Common/FilePreviewDialog";
-import { StateInterface } from "@/components/Common/FilePreviewDialog";
+import FilePreviewDialog, {
+  StateInterface,
+} from "@/components/Common/FilePreviewDialog";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
-import { formatDateTime } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import {
   FILE_EXTENSIONS,
   FileReadMinimal,
