@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
+import BackButton from "@/components/Common/BackButton";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -136,24 +137,17 @@ export function ChargeItemDefinitionDetail({
   }
 
   return (
-    <Page title={chargeItemDefinition.title}>
+    <Page title={chargeItemDefinition.title} hideTitleOnPage={true}>
       <div className="container mx-auto">
-        <Button
-          variant="outline"
-          size="xs"
-          className="mb-2 mt-2"
-          onClick={() =>
-            navigate(`/facility/${facilityId}/settings/charge_item_definitions`)
-          }
-        >
-          <CareIcon icon="l-arrow-left" className="size-4" />
-          {t("back")}
-        </Button>
+        <BackButton />
 
         <div className="mb-4">
           <div className="mb-6 flex items-center justify-between">
             <div>
               <div className="mt-2 flex items-center gap-2">
+                <h1 className="text-2xl font-bold">
+                  {chargeItemDefinition.title}
+                </h1>
                 <Badge
                   variant={
                     CHARGE_ITEM_DEFINITION_STATUS_COLORS[
