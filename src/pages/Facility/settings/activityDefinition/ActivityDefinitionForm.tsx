@@ -827,12 +827,7 @@ function ActivityDefinitionFormContent({
                         createForm={(onSuccess) => (
                           <CreateSpecimenDefinition
                             facilityId={facilityId}
-                            onSuccess={() => {
-                              queryClient.invalidateQueries({
-                                queryKey: ["specimenDefinitions"],
-                              });
-                              onSuccess();
-                            }}
+                            onSuccess={onSuccess}
                           />
                         )}
                       />
@@ -895,12 +890,7 @@ function ActivityDefinitionFormContent({
                           <div className="py-2">
                             <ObservationDefinitionForm
                               facilityId={facilityId}
-                              onSuccess={() => {
-                                queryClient.invalidateQueries({
-                                  queryKey: ["observationDefinitions"],
-                                });
-                                onSuccess();
-                              }}
+                              onSuccess={onSuccess}
                             />
                           </div>
                         )}
@@ -949,12 +939,7 @@ function ActivityDefinitionFormContent({
                           <div className="py-2">
                             <ChargeItemDefinitionForm
                               facilityId={facilityId}
-                              onSuccess={() => {
-                                queryClient.invalidateQueries({
-                                  queryKey: ["chargeItemDefinitions"],
-                                });
-                                onSuccess();
-                              }}
+                              onSuccess={onSuccess}
                             />
                           </div>
                         )}
