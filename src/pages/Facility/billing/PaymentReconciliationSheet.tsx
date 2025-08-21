@@ -90,15 +90,7 @@ const formSchema = z.object({
       message: t("enter_valid_amount"),
     },
   ),
-  returned_amount: z.string().refine(
-    (val) => {
-      const num = Number(val);
-      return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
-    },
-    {
-      message: t("enter_valid_amount"),
-    },
-  ),
+  returned_amount: z.string().optional(),
   target_invoice: z.string().optional(),
   reference_number: z.string().optional(),
   authorization: z.string().optional(),
@@ -212,6 +204,14 @@ export function PaymentReconciliationSheet({
   });
 
   const handleSubmit = form.handleSubmit((data) => {
+    if (Number(data.tendered_amount) < Number(data.amount)) {
+      form.setError("tendered_amount", {
+        type: "manual",
+        message: t("tender_amount_cannot_be_less_than_payment_amount"),
+      });
+      return;
+    }
+
     // Convert form data to PaymentReconciliationCreate type
     const submissionData: PaymentReconciliationCreate = {
       ...data,
@@ -230,7 +230,9 @@ export function PaymentReconciliationSheet({
           <SheetTitle>{t("record_payment")}</SheetTitle>
           <SheetDescription>
             {invoice
-              ? t("recording_payment_for_invoice", { id: invoice.id })
+              ? t("recording_payment_for_invoice", {
+                  id: invoice.number,
+                })
               : t("recording_payment")}
           </SheetDescription>
         </SheetHeader>
@@ -395,13 +397,13 @@ export function PaymentReconciliationSheet({
                   />
 
                   {Number(returnedAmount) > 0 && (
-                    <div className="rounded-md bg-muted p-3">
+                    <div className="rounded-md bg-green-50 border border-green-200 p-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">
+                        <span className="text-sm font-medium text-green-800">
                           {t("change_to_return")}
                         </span>
                         <MonetaryDisplay
-                          className="font-semibold"
+                          className="font-semibold text-green-800"
                           amount={returnedAmount}
                         />
                       </div>
