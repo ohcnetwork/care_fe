@@ -10,7 +10,7 @@ import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { ServiceRequestApplyActivityDefinitionSpec } from "@/types/emr/serviceRequest/serviceRequest";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
 import { FileUploadQuestion } from "@/types/files/file";
-import { AppointmentCreate } from "@/types/scheduling/schedule";
+import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 // Map structured types to their data types
 export interface StructuredDataMap {
@@ -20,7 +20,7 @@ export interface StructuredDataMap {
   diagnosis: DiagnosisRequest;
   medication_statement: MedicationStatementRequest;
   encounter: EncounterEdit;
-  appointment: AppointmentCreate;
+  appointment: CreateAppointmentQuestion;
   files: FileUploadQuestion;
   time_of_death: string;
   service_request: ServiceRequestApplyActivityDefinitionSpec;
@@ -35,7 +35,7 @@ export interface StructuredRequestMap {
   diagnosis: { datapoints: DiagnosisRequest[] };
   medication_statement: { datapoints: MedicationStatementRequest[] };
   encounter: EncounterEdit;
-  appointment: AppointmentCreate;
+  appointment: CreateAppointmentQuestion;
   service_request: ServiceRequestApplyActivityDefinitionSpec;
   files: FileUploadQuestion;
   time_of_death: {

@@ -9,7 +9,7 @@ import { MedicationRequest } from "@/types/emr/medicationRequest/medicationReque
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
 import { FileUploadQuestion } from "@/types/files/file";
-import { AppointmentCreate } from "@/types/scheduling/schedule";
+import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 /**
  * A short hand for defining response value types
@@ -34,7 +34,7 @@ export type ResponseValue =
   | RV<"symptom", SymptomRequest[]>
   | RV<"diagnosis", DiagnosisRequest[]>
   | RV<"encounter", EncounterEdit[]>
-  | RV<"appointment", AppointmentCreate[]>
+  | RV<"appointment", CreateAppointmentQuestion[]>
   | RV<"time_of_death", string[]>
   | RV<"files", FileUploadQuestion[]>
   | RV<"time", string | undefined>

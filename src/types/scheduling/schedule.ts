@@ -176,6 +176,11 @@ export interface AppointmentCreate {
   tags: string[];
 }
 
+export interface CreateAppointmentQuestion {
+  note: string;
+  slot_id: string;
+  tags: string[];
+}
 export interface PublicAppointmentCreate {
   patient: string;
   note: string;
