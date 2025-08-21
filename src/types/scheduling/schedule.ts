@@ -3,6 +3,7 @@ import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
 import { Badge } from "@/components/ui/badge";
 
 import { Time } from "@/Utils/types";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientOTPRead } from "@/types/auth/otp";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
@@ -168,6 +169,7 @@ export interface AppointmentRead extends AppointmentBase {
   created_by?: UserReadMinimal | null;
   modified_date: string;
   created_date: string;
+  associated_encounter?: EncounterRead;
 }
 
 export interface AppointmentCreate {

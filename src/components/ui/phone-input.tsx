@@ -35,6 +35,7 @@ type PhoneInputProps = Omit<
 function PhoneInput({
   className,
   onChange,
+  value,
   ...props
 }: React.ComponentProps<typeof RPNInput.default> & PhoneInputProps) {
   return (
@@ -51,6 +52,7 @@ function PhoneInput({
       countrySelectComponent={CountrySelect}
       inputComponent={InputComponent}
       defaultCountry={careConfig.defaultCountry.code}
+      value={value || undefined}
       smartCaret={true}
       /**
        * Handles the onChange event.
