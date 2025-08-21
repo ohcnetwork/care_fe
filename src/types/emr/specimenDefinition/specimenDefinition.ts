@@ -100,6 +100,12 @@ export interface SpecimenDefinitionCreate
   type_tested?: TypeTestedSpec;
 }
 
+export interface SpecimenDefinitionUpsert
+  extends Omit<SpecimenDefinition, "id" | "facility"> {
+  id?: string;
+  type_tested?: TypeTestedSpec;
+}
+
 export interface SpecimenDefinitionRead extends SpecimenDefinition {
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;

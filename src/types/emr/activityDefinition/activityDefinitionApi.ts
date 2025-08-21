@@ -4,6 +4,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import {
   ActivityDefinitionCreateSpec,
   ActivityDefinitionReadSpec,
+  ActivityDefinitionUpsert,
 } from "./activityDefinition";
 
 export default {
@@ -26,5 +27,11 @@ export default {
     path: "/api/v1/facility/{facilityId}/activity_definition/{activityDefinitionId}/",
     method: HttpMethod.PUT,
     TRes: Type<ActivityDefinitionCreateSpec>(),
+  },
+  upsertActivityDefinition: {
+    path: "/api/v1/facility/{facilityId}/activity_definition/upsert/",
+    method: HttpMethod.POST,
+    TRes: Type<PaginatedResponse<ActivityDefinitionReadSpec>>(),
+    TBody: Type<ActivityDefinitionUpsert>(),
   },
 } as const;

@@ -69,3 +69,13 @@ export interface ActivityDefinitionReadSpec extends BaseActivityDefinitionSpec {
   observation_result_requirements: ObservationDefinitionReadSpec[];
   locations: LocationList[];
 }
+
+export interface ActivityDefinitionUpsert
+  extends Omit<BaseActivityDefinitionSpec, "id" | "facility"> {
+  id?: string;
+  facility: string;
+  specimen_requirements: string[];
+  charge_item_definitions: string[];
+  observation_result_requirements: string[];
+  locations: string[];
+}

@@ -6,7 +6,6 @@ import {
   DEFAULT_CONFIG,
   type ProcessedRow,
   colorize,
-  createSlug,
   getLogger,
   loadData,
   makeApiCall,
@@ -24,16 +23,29 @@ const __dirname = path.dirname(__filename);
 
 const logger = getLogger();
 
-interface ChargeItemData {
+interface SpecimenData {
   title: string;
-  basePrice: number;
   slug: string;
+  status: string;
+  description: string;
+  type_collected: {
+    code: string;
+    system: string;
+    display: string;
+  };
+  preference: string;
+  container_cap: {
+    code: string;
+    system: string;
+    display: string;
+  };
+  container_minimumvolume: number;
 }
 
 // Configuration
 const CONFIG: BaseConfig = {
-  inputFile: path.join(__dirname, "services.csv"),
-  outputFile: path.join(__dirname, "services-output.csv"),
+  inputFile: path.join(__dirname, "SpecimenDefinition.csv"),
+  outputFile: path.join(__dirname, "specimens-output.csv"),
   facilityId: DEFAULT_CONFIG.facilityId,
   apiBaseUrl: DEFAULT_CONFIG.apiBaseUrl,
   parser: DEFAULT_CONFIG.parser,
@@ -43,37 +55,47 @@ const CONFIG: BaseConfig = {
 };
 
 // Function to process CSV data
-function processCsvData(rows: Record<string, string>[]): ChargeItemData[] {
+function processCsvData(rows: Record<string, string>[]): SpecimenData[] {
   return rows.map((row) => {
-    const basePrice = parseFloat(row["Base Price"].replace(/[^\d.-]/g, ""));
-    const slug = createSlug(row.Service);
+    const minimumVolume = parseFloat(row.container_minimumvolume || "0");
 
     return {
-      title: row.Service,
-      basePrice: isNaN(basePrice) ? 0 : basePrice,
-      slug: slug,
+      title: row.title,
+      slug: row.slug,
+      status: row.status || "active",
+      description: row.description,
+      type_collected: {
+        code: row.type_collected_code || "",
+        system: row.type_collected_system || "",
+        display: row.type_collected_display || "",
+      },
+      preference: row.preference || "preferred",
+      container_cap: {
+        code: row.container_cap_code || "",
+        system: row.container_cap_system || "",
+        display: row.container_cap_display || "",
+      },
+      container_minimumvolume: isNaN(minimumVolume) ? 0 : minimumVolume,
     };
   });
 }
 
-// Function to upsert charge item definition
-async function upsertChargeItemDefinition(data: ChargeItemData): Promise<any> {
-  const chargeItemData = {
+// Function to upsert specimen definition
+async function upsertSpecimenDefinition(data: SpecimenData): Promise<any> {
+  const specimenData = {
     title: data.title,
     slug: data.slug,
-    status: "active",
-    description: `Service: ${data.title}`,
-    price_components: [
-      {
-        monetary_component_type: "base",
-        amount: data.basePrice.toString(),
-      },
-    ],
+    description: data.description,
+    status: data.status,
+    type_collected: data.type_collected,
+    preference: data.preference,
+    container_cap: data.container_cap,
+    container_minimumvolume: data.container_minimumvolume,
   };
 
   return await makeApiCall(
-    `/api/v1/facility/${CONFIG.facilityId}/charge_item_definition/upsert/`,
-    chargeItemData,
+    `/api/v1/facility/${CONFIG.facilityId}/specimen_definition/upsert/`,
+    specimenData,
     CONFIG,
   );
 }
@@ -83,7 +105,7 @@ async function main(configOverride?: Partial<typeof CONFIG>) {
   const finalConfig = mergeConfigWithCli(CONFIG, configOverride);
 
   try {
-    logger(colorize("Starting charge item definition loader...", 0));
+    logger(colorize("Starting specimen definition loader...", 0));
 
     // Load CSV data
     logger(colorize("Loading data...", 0));
@@ -102,27 +124,24 @@ async function main(configOverride?: Partial<typeof CONFIG>) {
 
     // Create output data for CSV
     let outputData: ProcessedRow[] = processedData.map((item) => ({
-      Service: item.title,
-      "Base Price": item.basePrice.toString(),
+      Title: item.title,
       Slug: item.slug,
       Status: "Pending",
     }));
 
-    // Upsert charge item definitions via API using batch processing
-    logger(colorize("Upserting charge item definitions...", 0));
+    // Upsert specimen definitions via API using batch processing
+    logger(colorize("Upserting specimen definitions...", 0));
     const results = await makeBatchApiCall(
-      `/api/v1/facility/${finalConfig.facilityId}/charge_item_definition/upsert/`,
+      `/api/v1/facility/${finalConfig.facilityId}/specimen_definition/upsert/`,
       processedData.map((item) => ({
         title: item.title,
         slug: item.slug,
-        status: "active",
-        description: `Service: ${item.title}`,
-        price_components: [
-          {
-            monetary_component_type: "base",
-            amount: item.basePrice.toString(),
-          },
-        ],
+        description: item.description,
+        status: item.status,
+        type_collected: item.type_collected,
+        preference: item.preference,
+        container_cap: item.container_cap,
+        container_minimumvolume: item.container_minimumvolume,
       })),
       finalConfig,
     );
@@ -133,6 +152,7 @@ async function main(configOverride?: Partial<typeof CONFIG>) {
       return {
         ...row,
         Status: result?.success ? "Success" : "Failed",
+        Errors: result?.error?.errorText || "",
       };
     });
 
@@ -141,7 +161,7 @@ async function main(configOverride?: Partial<typeof CONFIG>) {
     await writeOutputCsv(outputData, finalConfig.outputFile);
 
     // Process and return results
-    return processApiResults(results, "charge item");
+    return processApiResults(results, "specimen");
   } catch (error) {
     logger(colorize(`Error in main process: ${error}`, 1));
     throw error;
@@ -153,11 +173,11 @@ if (require.main === module) {
   const cliArgs = parseCliArgs();
 
   if (cliArgs.help) {
-    showCliHelp("sudheendra-scripts/load-chargeItem.ts");
+    showCliHelp("sudheendra-scripts/load-specimenDefinition.ts");
     process.exit(0);
   }
 
   main();
 }
 
-export { main, loadData, processCsvData, upsertChargeItemDefinition };
+export { main, loadData, processCsvData, upsertSpecimenDefinition };

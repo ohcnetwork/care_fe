@@ -3,6 +3,17 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import {
+  type BaseConfig,
+  DEFAULT_CONFIG,
+  colorize,
+  getLogger,
+  makeBatchApiCall,
+  mergeConfigWithCli,
+  parseCliArgs,
+  showCliHelp,
+} from "./utils.js";
+
 /**
  * Types & Enums
  */
@@ -91,11 +102,17 @@ dotenv.config({ path: [".env.local", ".env"] });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const CONFIG = {
+const logger = getLogger();
+
+const CONFIG: BaseConfig = {
   inputFile: path.join(__dirname, "observation_definitions.csv"),
   outputFile: path.join(__dirname, "observations-output.csv"),
-  facilityId: process.env.FACILITY_ID || "9bff2c5b-0151-4f09-97cb-2a7b91cbdf04",
-  apiBaseUrl: process.env.API_BASE_URL || "http://localhost:9000",
+  facilityId: DEFAULT_CONFIG.facilityId,
+  apiBaseUrl: DEFAULT_CONFIG.apiBaseUrl,
+  parser: DEFAULT_CONFIG.parser,
+  sheetName: DEFAULT_CONFIG.sheetName,
+  batchSize: DEFAULT_CONFIG.batchSize,
+  maxWorkers: DEFAULT_CONFIG.maxWorkers,
 };
 
 /**
@@ -174,7 +191,7 @@ function parseCSV(csvContent: string): CSVRow[] {
     rows.push(row as unknown as CSVRow);
   }
 
-  return rows;
+  return rows.filter((row) => row.title);
 }
 
 /**
@@ -187,8 +204,12 @@ function parseCode(
 ): Code | null {
   if (!system || !code) return null;
   let cleanCode = code.trim();
-  if (cleanCode.includes(".") && cleanCode.endsWith(".0")) {
-    cleanCode = cleanCode.slice(0, -2);
+  if (cleanCode.includes(".")) {
+    if (cleanCode.endsWith(".0")) {
+      cleanCode = cleanCode.slice(0, -2);
+    } else {
+      cleanCode = cleanCode.replace(/\.0/g, "");
+    }
   }
   return {
     system: system.trim(),
@@ -303,10 +324,62 @@ async function upsertObservationDefinition(data: ParsedObservationDefinition) {
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `HTTP ${response.status}: ${response.statusText} - ${errorText}`,
-    );
+    const errorText = await response.json();
+
+    // Check if it's a "slug must be unique" error
+    const errorString = JSON.stringify(errorText).toLowerCase();
+    if (errorString.includes("slug must be unique")) {
+      throw {
+        status: response.status,
+        statusText: response.statusText,
+        errorText: "slug must be unique",
+        isAlreadyExists: true,
+      };
+    }
+
+    // Extract specific error message from Django/Pydantic error object
+    let specificError = "Unknown error";
+    if (typeof errorText === "string") {
+      specificError = errorText;
+    } else if (errorText?.errors && Array.isArray(errorText.errors)) {
+      // Pydantic validation errors: [{type, loc, msg, input, url}, ...]
+      specificError = errorText.errors
+        .map((err: any) => {
+          const field = err.loc ? err.loc.join(" > ") : "unknown field";
+          const message =
+            typeof err.msg === "string" ? err.msg : JSON.stringify(err.msg);
+          return `${field}: ${message}`;
+        })
+        .join("; ");
+    } else if (typeof errorText === "object" && errorText !== null) {
+      // Structured errors: {field_name: [errors], ...}
+      const fieldErrors = Object.entries(errorText)
+        .map(([field, errors]) => {
+          if (Array.isArray(errors)) {
+            return errors
+              .map((err: any) => {
+                if (typeof err === "string") return `${field}: ${err}`;
+                if (err?.msg) return `${field}: ${err.msg}`;
+                if (err?.message) return `${field}: ${err.message}`;
+                return `${field}: ${JSON.stringify(err)}`;
+              })
+              .join("; ");
+          } else if (typeof errors === "string") {
+            return `${field}: ${errors}`;
+          }
+          return `${field}: ${JSON.stringify(errors)}`;
+        })
+        .join("; ");
+      specificError = fieldErrors || JSON.stringify(errorText);
+    } else {
+      specificError = JSON.stringify(errorText);
+    }
+
+    throw {
+      status: response.status,
+      statusText: response.statusText,
+      errorText: specificError,
+    };
   }
   return await response.json();
 }
@@ -314,53 +387,75 @@ async function upsertObservationDefinition(data: ParsedObservationDefinition) {
 /**
  * Main script
  */
-async function main() {
-  try {
-    console.log("Starting observation definition loader...");
+async function main(configOverride?: Partial<typeof CONFIG>) {
+  const finalConfig = mergeConfigWithCli(CONFIG, configOverride);
 
-    if (!CONFIG.inputFile || !fs.existsSync(CONFIG.inputFile)) {
+  try {
+    logger(colorize("Starting observation definition loader...", 0));
+
+    if (!finalConfig.inputFile || !fs.existsSync(finalConfig.inputFile)) {
       throw new Error(
-        `Input file not found or path is invalid: ${CONFIG.inputFile}`,
+        `Input file not found or path is invalid: ${finalConfig.inputFile}`,
       );
     }
 
-    const csvContent = fs.readFileSync(CONFIG.inputFile, "utf-8");
+    const csvContent = fs.readFileSync(finalConfig.inputFile, "utf-8");
     const rows = parseCSV(csvContent);
     if (rows.length === 0) throw new Error("No valid rows found in CSV file");
 
-    const processedRows: ProcessedRow[] = [];
+    logger(colorize(`Processing ${rows.length} observation definitions...`, 0));
+
+    // Process all rows and prepare for batch API call
+    const validDefinitions: ParsedObservationDefinition[] = [];
+    const invalidRows: { row: CSVRow; errors: string[] }[] = [];
 
     for (const row of rows) {
       try {
         const definition = csvRowToObservationDefinition(
           row,
-          CONFIG.facilityId,
+          finalConfig.facilityId,
         );
         const errors = validateObservationDefinition(definition);
         if (errors.length > 0) {
-          processedRows.push({
-            Slug: definition.slug,
-            Title: definition.title,
-            Status: "Validation Failed",
-            Errors: errors.join("; "),
-          });
-          continue;
+          invalidRows.push({ row, errors });
+        } else {
+          validDefinitions.push(definition);
         }
-        await upsertObservationDefinition(definition);
-        processedRows.push({
-          Slug: definition.slug,
-          Title: definition.title,
-          Status: "Success",
-        });
-      } catch (err) {
-        processedRows.push({
-          Slug: row.slug || "UNKNOWN",
-          Title: row.title || "UNKNOWN",
-          Status: "Failed",
-          Errors: (err as Error).message,
-        });
+      } catch (error: any) {
+        invalidRows.push({ row, errors: [error.message] });
       }
     }
+
+    // Process valid definitions using batch API call
+    logger(colorize("Upserting observation definitions...", 0));
+    const results = await makeBatchApiCall(
+      `/api/v1/observation_definition/upsert/`,
+      validDefinitions,
+      finalConfig,
+    );
+
+    // Create processed rows for output
+    const processedRows: ProcessedRow[] = [];
+
+    // Add invalid rows
+    invalidRows.forEach(({ row, errors }) => {
+      processedRows.push({
+        Slug: row.slug || "UNKNOWN",
+        Title: row.title || "UNKNOWN",
+        Status: "Validation Failed",
+        Errors: errors.join("; "),
+      });
+    });
+
+    // Add results from batch processing
+    results.forEach((result) => {
+      processedRows.push({
+        Slug: result.item.slug,
+        Title: result.item.title,
+        Status: result.success ? "Success" : "Failed",
+        Errors: result.error?.errorText || result.error?.message || "",
+      });
+    });
 
     const csvOutput = [
       "Slug,Title,Status,Errors",
@@ -369,19 +464,61 @@ async function main() {
           `"${r.Slug}","${r.Title}","${r.Status}","${r.Errors || ""}"`,
       ),
     ].join("\n");
-    fs.writeFileSync(CONFIG.outputFile, csvOutput, "utf-8");
+    fs.writeFileSync(finalConfig.outputFile, csvOutput, "utf-8");
 
-    console.log(`Output written to ${CONFIG.outputFile}`);
-    console.log(`Total processed: ${processedRows.length}`);
-    console.log(
-      `Success: ${processedRows.filter((r: ProcessedRow) => r.Status === "Success").length}`,
+    logger(colorize(`Output written to ${finalConfig.outputFile}`, 0));
+    logger(colorize(`Total processed: ${processedRows.length}`, 0));
+    logger(
+      colorize(
+        `Success: ${processedRows.filter((r: ProcessedRow) => r.Status === "Success").length}`,
+        0,
+      ),
     );
-    console.log(
-      `Failed: ${processedRows.filter((r: ProcessedRow) => r.Status !== "Success").length}`,
+    logger(
+      colorize(
+        `Failed: ${processedRows.filter((r: ProcessedRow) => r.Status !== "Success").length}`,
+        1,
+      ),
     );
+
+    if (results.filter((r) => !r.success).length > 0) {
+      logger(colorize("\nFailed items:", 1));
+      results
+        .filter((r) => !r.success)
+        .forEach((r) => {
+          const errorMessage =
+            r.error?.errorText || r.error?.message || JSON.stringify(r.error);
+          logger(colorize(`- ${r.item.title}: ${errorMessage}`, 1));
+        });
+    }
+
+    // Return results for use by other scripts
+    return {
+      successful: results.filter((r) => r.success).map((r) => r.item.slug),
+      failed: results.filter((r) => !r.success).map((r) => r.item.slug),
+      results,
+    };
   } catch (err) {
-    console.error("Error in main process:", err);
+    logger(colorize(`Error in main process: ${err}`, 1));
+    throw err;
   }
 }
 
-main();
+// Run the script
+if (require.main === module) {
+  const cliArgs = parseCliArgs();
+
+  if (cliArgs.help) {
+    showCliHelp("sudheendra-scripts/load-observation_definition.ts");
+    process.exit(0);
+  }
+
+  main();
+}
+
+export {
+  main,
+  parseCSV,
+  csvRowToObservationDefinition,
+  upsertObservationDefinition,
+};

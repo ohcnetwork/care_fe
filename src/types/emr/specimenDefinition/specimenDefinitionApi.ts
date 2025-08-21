@@ -4,6 +4,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import {
   SpecimenDefinitionCreate,
   SpecimenDefinitionRead,
+  SpecimenDefinitionUpsert,
 } from "./specimenDefinition";
 
 export default {
@@ -28,5 +29,11 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<SpecimenDefinitionRead>(),
     TBody: Type<SpecimenDefinitionCreate>(),
+  },
+  upsertSpecimenDefinition: {
+    path: "/api/v1/facility/{facilityId}/specimen_definition/upsert/",
+    method: HttpMethod.POST,
+    TRes: Type<PaginatedResponse<SpecimenDefinitionRead>>(),
+    TBody: Type<SpecimenDefinitionUpsert>(),
   },
 };
