@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -14,6 +15,8 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -89,6 +92,8 @@ export default function ValueSetSearchContent({
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState(0);
+  const [itemToRemove, setItemToRemove] = useState<Code | null>(null);
+  const [showBulkClearConfirm, setShowBulkClearConfirm] = useState(false);
 
   const searchQuery = useQuery({
     queryKey: ["valueset", system, "expand", count, search],
@@ -122,6 +127,25 @@ export default function ValueSetSearchContent({
       queryClient.invalidateQueries({
         queryKey: ["valueset", system, "favourites"],
       });
+      setItemToRemove(null);
+    },
+    onError: () => {
+      setItemToRemove(null);
+    },
+  });
+
+  const clearFavouritesMutation = useMutation({
+    mutationFn: mutate(valuesetRoutes.clearFavourites, {
+      pathParams: { slug: system },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["valueset", system, "favourites"],
+      });
+      setShowBulkClearConfirm(false);
+    },
+    onError: () => {
+      setShowBulkClearConfirm(false);
     },
   });
 
@@ -236,11 +260,14 @@ export default function ValueSetSearchContent({
                     addRecentMutation.mutate(option);
                   }}
                   onFavourite={() => {
-                    favouritesQuery.data?.find(
+                    const isFavorited = favouritesQuery.data?.find(
                       (favourite) => favourite.code === option.code,
-                    )
-                      ? removeFavouriteMutation.mutate(option)
-                      : addFavouriteMutation.mutate(option);
+                    );
+                    if (isFavorited) {
+                      setItemToRemove(option);
+                    } else {
+                      addFavouriteMutation.mutate(option);
+                    }
                   }}
                   isFavourite={
                     !!favouritesQuery.data?.find(
@@ -268,6 +295,16 @@ export default function ValueSetSearchContent({
                 <span className="text-xs font-normal text-gray-700 p-1">
                   {t("starred")}
                 </span>
+                {favouritesQuery.data && favouritesQuery.data.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowBulkClearConfirm(true)}
+                    className="h-6 px-1 text-xs text-gray-500 hover:text-gray-700"
+                  >
+                    {t("clear")}
+                  </Button>
+                )}
               </div>
               {favouritesQuery.isFetched &&
                 favouritesQuery.data?.length === 0 && (
@@ -291,11 +328,14 @@ export default function ValueSetSearchContent({
                     addRecentMutation.mutate(option);
                   }}
                   onFavourite={() => {
-                    favouritesQuery.data?.find(
+                    const isFavorited = favouritesQuery.data?.find(
                       (favourite) => favourite.code === option.code,
-                    )
-                      ? removeFavouriteMutation.mutate(option)
-                      : addFavouriteMutation.mutate(option);
+                    );
+                    if (isFavorited) {
+                      setItemToRemove(option);
+                    } else {
+                      addFavouriteMutation.mutate(option);
+                    }
                   }}
                   isFavourite={
                     !!favouritesQuery.data?.find(
@@ -308,6 +348,48 @@ export default function ValueSetSearchContent({
           </div>
         </div>
       </CommandList>
+
+      {/* Individual Item Removal Confirmation */}
+      <ConfirmActionDialog
+        open={!!itemToRemove && !showBulkClearConfirm}
+        onOpenChange={(open) => {
+          if (!open) {
+            setItemToRemove(null);
+          }
+        }}
+        title={t("are_you_sure")}
+        description={t("are_you_sure_want_to_clear_favourite", {
+          name: itemToRemove?.display,
+        })}
+        confirmText={t("confirm")}
+        cancelText={t("cancel")}
+        variant="destructive"
+        disabled={removeFavouriteMutation.isPending}
+        onConfirm={() => {
+          if (itemToRemove) {
+            removeFavouriteMutation.mutate(itemToRemove);
+          }
+        }}
+      />
+
+      {/* Bulk Clear Confirmation */}
+      <ConfirmActionDialog
+        open={showBulkClearConfirm && !itemToRemove}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowBulkClearConfirm(false);
+          }
+        }}
+        title={t("are_you_sure")}
+        description={t("are_you_sure_clear_starred")}
+        confirmText={t("confirm")}
+        cancelText={t("cancel")}
+        variant="destructive"
+        disabled={clearFavouritesMutation.isPending}
+        onConfirm={() => {
+          clearFavouritesMutation.mutate({});
+        }}
+      />
     </Command>
   );
 }

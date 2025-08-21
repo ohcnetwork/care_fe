@@ -18,8 +18,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-import FilePreviewDialog from "@/components/Common/FilePreviewDialog";
-import { StateInterface } from "@/components/Common/FilePreviewDialog";
+import FilePreviewDialog, {
+  StateInterface,
+} from "@/components/Common/FilePreviewDialog";
 import { FileUploadModel } from "@/components/Patient/models";
 
 import {
@@ -30,8 +31,7 @@ import {
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
-import { formatDateTime } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
 export interface FileManagerOptions {
   type: string;

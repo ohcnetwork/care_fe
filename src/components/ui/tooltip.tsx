@@ -86,8 +86,8 @@ TooltipComponent.displayName = "TooltipComponent";
 
 export {
   Tooltip,
-  TooltipTrigger,
+  TooltipComponent,
   TooltipContent,
   TooltipProvider,
-  TooltipComponent,
+  TooltipTrigger,
 };
