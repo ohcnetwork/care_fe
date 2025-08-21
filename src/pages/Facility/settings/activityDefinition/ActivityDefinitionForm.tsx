@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
 import Page from "@/components/Common/Page";
@@ -914,9 +915,9 @@ function ActivityDefinitionFormContent({
                         canCreate={true}
                         createForm={(onSuccess) => (
                           <div className="py-2 space-y-4 px-4">
-                            <h1 className="text-xl font-semibold">
+                            <SheetTitle>
                               {t("create_charge_item_definition")}
-                            </h1>
+                            </SheetTitle>
                             <ChargeItemDefinitionForm
                               facilityId={facilityId}
                               onSuccess={onSuccess}
