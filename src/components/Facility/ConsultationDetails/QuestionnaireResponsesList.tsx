@@ -222,7 +222,7 @@ function QuestionGroup({
       >
         {leftQuestions.length > 0 && (
           <div className="w-full">
-            <Table className="table-fixed w-full">
+            <Table className="w-full">
               <TableBody>{leftQuestions.map(renderQuestionRow)}</TableBody>
             </Table>
           </div>
@@ -230,7 +230,7 @@ function QuestionGroup({
 
         {shouldUseTwoColumns && rightQuestions.length > 0 && (
           <div className="w-full">
-            <Table className="table-fixed w-full">
+            <Table className="w-full">
               <TableBody>{rightQuestions.map(renderQuestionRow)}</TableBody>
             </Table>
           </div>
@@ -533,7 +533,7 @@ export default function QuestionnaireResponsesList({
               <ul className="grid gap-4">
                 {questionnarieResponses?.results?.map(
                   (item: QuestionnaireResponse) => (
-                    <li key={item.id} className="w-full">
+                    <li key={item.id}>
                       <ResponseCard
                         key={item.id}
                         item={item}
