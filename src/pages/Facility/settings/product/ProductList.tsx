@@ -32,7 +32,6 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import {
   PRODUCT_STATUS_COLORS,
-  ProductBase,
   ProductRead,
   ProductStatusOptions,
 } from "@/types/inventory/product/product";
@@ -57,7 +56,7 @@ function ProductCard({
               </Badge>
             </div>
             <h3 className="font-medium text-gray-900 break-normal">
-              Product Name: {product.product_knowledge.name}
+              {product.product_knowledge.name}
             </h3>
             {product.batch?.lot_number && (
               <p className="mt-1 text-sm text-gray-500">
