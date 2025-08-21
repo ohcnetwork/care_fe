@@ -4,6 +4,7 @@ interface IconProps {
   className?: string;
 }
 
+// todo : delete if vinu approved to use StethoscopeIcon icon
 export const DiagnosisIcon: React.FC<IconProps> = ({
   className = "size-4",
 }) => (
