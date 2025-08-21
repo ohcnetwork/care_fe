@@ -1,12 +1,12 @@
 import { createContext, useContext } from "react";
 
-import { LoginCredentials, LoginResponse } from "@/Utils/request/api";
+import { LoginRequest, LoginResponse } from "@/types/auth/auth";
 import { MFALoginRequest, TokenData } from "@/types/auth/otp";
 import { CurrentUserRead } from "@/types/user/user";
 
 interface AuthContextType {
   user: CurrentUserRead | undefined;
-  signIn: (creds: LoginCredentials) => Promise<LoginResponse>;
+  signIn: (creds: LoginRequest) => Promise<LoginResponse>;
   verifyMFA: (data: MFALoginRequest) => Promise<LoginResponse>;
   isAuthenticating: boolean;
   isVerifyingMFA: boolean;

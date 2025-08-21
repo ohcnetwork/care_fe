@@ -1,4 +1,14 @@
-import { HttpMethod, JwtTokenObtainPair, Type } from "@/Utils/request/api";
+import { HttpMethod, Type } from "@/Utils/request/api";
+import {
+  CheckResetTokenRequest,
+  ForgotPasswordRequest,
+  JwtTokenObtainPair,
+  LoginRequest,
+  LoginResponse,
+  PasswordResetResponse,
+  ResetPasswordRequest,
+  UpdatePasswordRequest,
+} from "@/types/auth/auth";
 
 import {
   MFALoginRequest,
@@ -9,6 +19,59 @@ import {
 } from "./otp";
 
 export default {
+  /**
+   * Auth related APIs
+   */
+  login: {
+    path: "/api/v1/auth/login/",
+    method: HttpMethod.POST,
+    noAuth: true,
+    TRes: Type<LoginResponse>(),
+    TBody: Type<LoginRequest>(),
+  },
+  logout: {
+    path: "/api/v1/auth/logout/",
+    method: HttpMethod.POST,
+    TBody: Type<JwtTokenObtainPair>(),
+    TRes: Type<void>(),
+  },
+  tokenRefresh: {
+    path: "/api/v1/auth/token/refresh/",
+    method: HttpMethod.POST,
+    TRes: Type<JwtTokenObtainPair>(),
+    TBody: Type<{ refresh: JwtTokenObtainPair["refresh"] }>(),
+  },
+  updatePassword: {
+    path: "/api/v1/password_change/",
+    method: HttpMethod.PUT,
+    TRes: Type<PasswordResetResponse>(),
+    TBody: Type<UpdatePasswordRequest>(),
+  },
+
+  forgotPassword: {
+    path: "/api/v1/password_reset/",
+    method: HttpMethod.POST,
+    noAuth: true,
+    TRes: Type<PasswordResetResponse>(),
+    TBody: Type<ForgotPasswordRequest>(),
+  },
+
+  checkResetToken: {
+    path: "/api/v1/password_reset/check/",
+    method: HttpMethod.POST,
+    noAuth: true,
+    TBody: Type<CheckResetTokenRequest>(),
+    TRes: Type<PasswordResetResponse>(),
+  },
+
+  resetPassword: {
+    path: "/api/v1/password_reset/confirm/",
+    method: HttpMethod.POST,
+    noAuth: true,
+    TBody: Type<ResetPasswordRequest>(),
+    TRes: Type<PasswordResetResponse>(),
+  },
+
   /**
    * TOTP (Time-based One-Time Password) related APIs
    */
