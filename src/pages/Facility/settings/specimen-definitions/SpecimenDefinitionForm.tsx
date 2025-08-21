@@ -3,7 +3,7 @@ import { t } from "i18next";
 import { PlusCircle, XCircle } from "lucide-react";
 import { navigate } from "raviger";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { useFieldArray } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
