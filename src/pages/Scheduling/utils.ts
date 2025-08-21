@@ -11,7 +11,7 @@ import { Time } from "@/Utils/types";
 import {
   AppointmentRead,
   ScheduleAvailabilityRead,
-  ScheduleException,
+  ScheduleExceptionRead,
 } from "@/types/scheduling/schedule";
 
 export const isDateInRange = (
@@ -47,12 +47,12 @@ type VirtualSlot = {
   start_time: Time;
   end_time: Time;
   isAvailable: boolean;
-  exceptions: ScheduleException[];
+  exceptions: ScheduleExceptionRead[];
 };
 
 export function computeAppointmentSlots(
   availability: ScheduleAvailabilityRead,
-  exceptions: ScheduleException[],
+  exceptions: ScheduleExceptionRead[],
   referenceDate: Date = new Date(),
 ) {
   const startTime = parse(

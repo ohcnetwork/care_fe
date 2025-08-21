@@ -32,10 +32,7 @@ import {
   useFieldError,
   validateFields,
 } from "@/types/questionnaire/validation";
-import {
-  CreateAppointmentQuestion,
-  TokenSlot,
-} from "@/types/scheduling/schedule";
+import { AppointmentCreate, TokenSlot } from "@/types/scheduling/schedule";
 import { UserReadMinimal } from "@/types/user/user";
 
 interface AppointmentQuestionProps {
@@ -67,7 +64,7 @@ const APPOINTMENT_FIELDS: FieldDefinitions = {
 } as const;
 
 export function validateAppointmentQuestion(
-  value: CreateAppointmentQuestion,
+  value: AppointmentCreate,
   questionId: string,
   required: boolean,
 ): QuestionValidationError[] {
@@ -101,11 +98,10 @@ export function AppointmentQuestion({
   const { hasError } = useFieldError(question.id, errors);
 
   const values =
-    (questionnaireResponse.values?.[0]?.value as CreateAppointmentQuestion[]) ||
-    [];
+    (questionnaireResponse.values?.[0]?.value as AppointmentCreate[]) || [];
   const value = values[0] ?? { tags: [] };
 
-  const handleUpdate = (updates: Partial<CreateAppointmentQuestion>) => {
+  const handleUpdate = (updates: Partial<AppointmentCreate>) => {
     const updatedValue = { ...value, ...updates };
     if (
       !updatedValue.note?.trim() &&

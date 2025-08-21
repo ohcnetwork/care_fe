@@ -37,7 +37,7 @@ import {
 } from "@/types/questionnaire/question";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
-import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
+import { AppointmentCreate } from "@/types/scheduling/schedule";
 
 import { QuestionRenderer } from "./QuestionRenderer";
 import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion";
@@ -288,8 +288,7 @@ const STRUCTURED_TYPE_VALIDATORS = {
     questionId: string,
     required?: boolean,
   ) => {
-    const appointmentData =
-      (response?.value as CreateAppointmentQuestion[]) || [];
+    const appointmentData = (response?.value as AppointmentCreate[]) || [];
     return validateAppointmentQuestion(
       appointmentData[0],
       questionId,

@@ -53,8 +53,7 @@ export interface ScheduleAvailabilityRead extends ScheduleAvailabilityBase {
 
 export type ScheduleAvailabilityCreate = ScheduleAvailabilityBase;
 
-export interface ScheduleException {
-  id: string;
+export interface ScheduleExceptionBase {
   reason: string;
   valid_from: string; // date in YYYY-MM-DD format
   valid_to: string; // date in YYYY-MM-DD format
@@ -62,13 +61,12 @@ export interface ScheduleException {
   end_time: Time;
 }
 
-export interface ScheduleExceptionCreateRequest {
-  user: string; // user's id
-  reason: string;
-  valid_from: string;
-  valid_to: string;
-  start_time: Time;
-  end_time: Time;
+export interface ScheduleExceptionRead extends ScheduleExceptionBase {
+  id: string;
+}
+
+export interface ScheduleExceptionCreate extends ScheduleExceptionBase {
+  user: string;
 }
 
 export interface TokenSlot {
@@ -172,34 +170,28 @@ export interface AppointmentRead extends AppointmentBase {
   created_date: string;
 }
 
-export interface AppointmentCreateRequest {
+export interface AppointmentCreate {
   patient: string;
   note: string;
   tags: string[];
 }
 
-export interface AppointmentCreatePublicRequest {
+export interface PublicAppointmentCreate {
   patient: string;
   note: string;
 }
 
-export interface AppointmentUpdateRequest {
+export interface AppointmentUpdate {
   status: AppointmentStatus;
   note: string;
 }
 
-export interface CreateAppointmentQuestion {
-  note: string;
-  slot_id: string;
-  tags: string[];
-}
-
-export interface AppointmentCancelRequest {
+export interface AppointmentCancel {
   reason: AppointmentCancelledStatus;
   note?: string;
 }
 
-export interface AppointmentRescheduleRequest {
+export interface AppointmentReschedule {
   new_slot: string;
   previous_booking_note: string;
   new_booking_note: string;

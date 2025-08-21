@@ -51,7 +51,7 @@ import {
 } from "@/pages/Scheduling/utils";
 import {
   AvailabilityDateTime,
-  ScheduleException,
+  ScheduleExceptionRead,
   ScheduleRead,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -289,7 +289,7 @@ function DayDetailsPopover({
 }: {
   date: Date;
   templates: ScheduleRead[];
-  unavailableExceptions: ScheduleException[];
+  unavailableExceptions: ScheduleExceptionRead[];
   setQParams: (params: AvailabilityTabQueryParams) => void;
   user: UserReadMinimal;
 }) {
@@ -406,7 +406,7 @@ function ScheduleTemplateAvailabilityItem({
   date,
 }: {
   availability: ScheduleRead["availabilities"][0];
-  unavailableExceptions: ScheduleException[];
+  unavailableExceptions: ScheduleExceptionRead[];
   date: Date;
 }) {
   const { t } = useTranslation();

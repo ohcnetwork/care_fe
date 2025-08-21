@@ -29,11 +29,11 @@ import Loading from "@/components/Common/Loading";
 import mutate from "@/Utils/request/mutate";
 import { formatTimeShort } from "@/Utils/utils";
 import { useIsUserSchedulableResource } from "@/pages/Scheduling/useIsUserSchedulableResource";
-import { ScheduleException } from "@/types/scheduling/schedule";
+import { ScheduleExceptionRead } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface Props {
-  items?: ScheduleException[];
+  items?: ScheduleExceptionRead[];
   facilityId: string;
   userId: string;
 }
@@ -88,7 +88,7 @@ export default function ScheduleExceptions({
 }
 
 const ScheduleExceptionItem = (
-  props: ScheduleException & { facilityId: string; userId: string },
+  props: ScheduleExceptionRead & { facilityId: string; userId: string },
 ) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();

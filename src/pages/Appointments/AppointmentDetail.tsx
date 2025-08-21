@@ -74,7 +74,7 @@ import {
   APPOINTMENT_STATUS_COLORS,
   AppointmentFinalStatuses,
   AppointmentRead,
-  AppointmentUpdateRequest,
+  AppointmentUpdate,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
@@ -140,7 +140,7 @@ export default function AppointmentDetail(props: Props) {
   const { mutate: updateAppointment, isPending: isUpdating } = useMutation<
     AppointmentRead,
     unknown,
-    AppointmentUpdateRequest
+    AppointmentUpdate
   >({
     mutationFn: mutate(scheduleApis.appointments.update, {
       pathParams: { facilityId, id: props.appointmentId },
@@ -443,7 +443,7 @@ const AppointmentDetails = ({
 interface AppointmentActionsProps {
   facilityId: string;
   appointment: AppointmentRead;
-  updateAppointment: (data: AppointmentUpdateRequest) => void;
+  updateAppointment: (data: AppointmentUpdate) => void;
   onViewPatient: () => void;
   canCreateAppointment: boolean;
   isUpdating: boolean;

@@ -1,19 +1,19 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import {
-  AppointmentCancelRequest,
-  AppointmentCreateRequest,
+  AppointmentCancel,
+  AppointmentCreate,
   AppointmentRead,
-  AppointmentRescheduleRequest,
-  AppointmentUpdateRequest,
+  AppointmentReschedule,
+  AppointmentUpdate,
   AvailabilityHeatmapRequest,
   AvailabilityHeatmapResponse,
   GetSlotsForDayResponse,
   ScheduleAvailabilityCreate,
   ScheduleAvailabilityRead,
   ScheduleCreate,
-  ScheduleException,
-  ScheduleExceptionCreateRequest,
+  ScheduleExceptionCreate,
+  ScheduleExceptionRead,
   ScheduleRead,
   ScheduleUpdate,
 } from "@/types/scheduling/schedule";
@@ -79,13 +79,13 @@ export default {
     create: {
       path: "/api/v1/facility/{facilityId}/schedule_exceptions/",
       method: HttpMethod.POST,
-      TRes: Type<ScheduleException>(),
-      TBody: Type<ScheduleExceptionCreateRequest>(),
+      TRes: Type<ScheduleExceptionRead>(),
+      TBody: Type<ScheduleExceptionCreate>(),
     },
     list: {
       path: "/api/v1/facility/{facilityId}/schedule_exceptions/",
       method: HttpMethod.GET,
-      TRes: Type<PaginatedResponse<ScheduleException>>(),
+      TRes: Type<PaginatedResponse<ScheduleExceptionRead>>(),
     },
     delete: {
       path: "/api/v1/facility/{facilityId}/schedule_exceptions/{id}/",
@@ -114,7 +114,7 @@ export default {
     createAppointment: {
       path: "/api/v1/facility/{facilityId}/slots/{slotId}/create_appointment/",
       method: HttpMethod.POST,
-      TBody: Type<AppointmentCreateRequest>(),
+      TBody: Type<AppointmentCreate>(),
       TRes: Type<AppointmentRead>(),
     },
   },
@@ -136,19 +136,19 @@ export default {
     update: {
       path: "/api/v1/facility/{facilityId}/appointments/{id}/",
       method: HttpMethod.PUT,
-      TBody: Type<AppointmentUpdateRequest>(),
+      TBody: Type<AppointmentUpdate>(),
       TRes: Type<AppointmentRead>(),
     },
     cancel: {
       path: "/api/v1/facility/{facilityId}/appointments/{id}/cancel/",
       method: HttpMethod.POST,
-      TBody: Type<AppointmentCancelRequest>(),
+      TBody: Type<AppointmentCancel>(),
       TRes: Type<AppointmentRead>(),
     },
     reschedule: {
       path: "/api/v1/facility/{facilityId}/appointments/{id}/reschedule/",
       method: HttpMethod.POST,
-      TBody: Type<AppointmentRescheduleRequest>(),
+      TBody: Type<AppointmentReschedule>(),
       TRes: Type<AppointmentRead>(),
     },
     /**
