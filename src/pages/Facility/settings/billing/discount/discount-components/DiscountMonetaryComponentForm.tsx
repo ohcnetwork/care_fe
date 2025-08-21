@@ -61,7 +61,7 @@ export function DiscountMonetaryComponentForm({
           title: z.string().min(1, { message: t("field_required") }),
         })
         .refine((data) => data.factor != null || data.amount != null, {
-          message: "Either factor or amount must be provided",
+          message: t("either_amount_or_factor_required"),
           path: ["factor", "amount"],
         })
         .refine(
@@ -70,7 +70,7 @@ export function DiscountMonetaryComponentForm({
             return data.code == null || data.code.display.length > 0;
           },
           {
-            message: "Display text is required for custom codes",
+            message: t("display_text_is_required_for_custom_codes"),
             path: ["code"],
           },
         ),
