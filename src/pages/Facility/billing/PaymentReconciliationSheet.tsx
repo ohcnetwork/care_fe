@@ -66,38 +66,43 @@ interface PaymentReconciliationSheetProps {
 }
 
 // Add schema before the component
-const formSchema = z.object({
-  reconciliation_type: z.nativeEnum(PaymentReconciliationType),
-  status: z.nativeEnum(PaymentReconciliationStatus),
-  kind: z.nativeEnum(PaymentReconciliationKind),
-  issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
-  outcome: z.nativeEnum(PaymentReconciliationOutcome),
-  method: z.nativeEnum(PaymentReconciliationPaymentMethod),
-  payment_datetime: z.string(),
-  amount: z.string().refine(
-    (val) => {
-      const num = Number(val);
-      return !isNaN(num) && num > 0 && /^\d+(\.\d{0,2})?$/.test(val);
-    },
-    { message: t("enter_valid_amount") },
-  ),
-  tendered_amount: z.string().refine(
-    (val) => {
-      const num = Number(val);
-      return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
-    },
-    {
-      message: t("enter_valid_amount"),
-    },
-  ),
-  returned_amount: z.string().optional(),
-  target_invoice: z.string().optional(),
-  reference_number: z.string().optional(),
-  authorization: z.string().optional(),
-  disposition: z.string().optional(),
-  note: z.string().optional(),
-  account: z.string(),
-});
+const formSchema = z
+  .object({
+    reconciliation_type: z.nativeEnum(PaymentReconciliationType),
+    status: z.nativeEnum(PaymentReconciliationStatus),
+    kind: z.nativeEnum(PaymentReconciliationKind),
+    issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
+    outcome: z.nativeEnum(PaymentReconciliationOutcome),
+    method: z.nativeEnum(PaymentReconciliationPaymentMethod),
+    payment_datetime: z.string(),
+    amount: z.string().refine(
+      (val) => {
+        const num = Number(val);
+        return !isNaN(num) && num > 0 && /^\d+(\.\d{0,2})?$/.test(val);
+      },
+      { message: t("enter_valid_amount") },
+    ),
+    tendered_amount: z.string().refine(
+      (val) => {
+        const num = Number(val);
+        return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
+      },
+      {
+        message: t("enter_valid_amount"),
+      },
+    ),
+    returned_amount: z.string().optional(),
+    target_invoice: z.string().optional(),
+    reference_number: z.string().optional(),
+    authorization: z.string().optional(),
+    disposition: z.string().optional(),
+    note: z.string().optional(),
+    account: z.string(),
+  })
+  .refine((data) => Number(data.tendered_amount) >= Number(data.amount), {
+    message: t("tender_amount_cannot_be_less_than_payment_amount"),
+    path: ["tendered_amount"],
+  });
 
 export function PaymentReconciliationSheet({
   open,
@@ -204,14 +209,6 @@ export function PaymentReconciliationSheet({
   });
 
   const handleSubmit = form.handleSubmit((data) => {
-    if (Number(data.tendered_amount) < Number(data.amount)) {
-      form.setError("tendered_amount", {
-        type: "manual",
-        message: t("tender_amount_cannot_be_less_than_payment_amount"),
-      });
-      return;
-    }
-
     // Convert form data to PaymentReconciliationCreate type
     const submissionData: PaymentReconciliationCreate = {
       ...data,
