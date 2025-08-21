@@ -141,7 +141,6 @@
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.9",
     "@tailwindcss/typography": "^0.5.15",
-    "@trivago/prettier-plugin-sort-imports": "^5.0.0",
     "@types/events": "^3.0.3",
     "@types/google.maps": "^3.58.1",
     "@types/jsdom": "^21.1.7",
@@ -175,6 +174,7 @@
     "local-cypress": "^1.2.6",
     "marked": "^15.0.0",
     "prettier": "^3.3.3",
+    "prettier-plugin-organize-imports": "^4.2.0",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "snyk": "^1.1294.0",
     "tailwindcss": "^4.1.3",
@@ -210,7 +210,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
-      "prettier --write --ignore-unknown --plugin prettier-plugin-tailwindcss --plugin @trivago/prettier-plugin-sort-imports",
+      "prettier --write --ignore-unknown --plugin prettier-plugin-tailwindcss --plugin prettier-plugin-organize-imports",
       "cross-env PRE_COMMIT=true eslint --fix --config eslint.config.mjs",
       "git update-index --again"
     ],

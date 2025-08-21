@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { ExternalLink } from "lucide-react";
 import { Link } from "raviger";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
