@@ -4,6 +4,7 @@ import { Code } from "@/types/base/code/code";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import { UserReadMinimal } from "@/types/user/user";
 
 export const MEDICATION_REQUEST_STATUS_COLORS = {
   active: "primary",
@@ -215,6 +216,12 @@ export interface MedicationRequest {
   requested_product?: string;
   requested_product_internal?: ProductKnowledgeBase;
   dispense_status?: MedicationRequestDispenseStatus;
+  requester: UserReadMinimal;
+}
+
+export interface MedicationRequestRequest
+  extends Omit<MedicationRequest, "requester"> {
+  requester?: string;
 }
 
 export enum MedicationPriority {
@@ -251,6 +258,7 @@ export interface MedicationRequestRead {
   requested_product?: ProductKnowledgeBase;
   inventory_items_internal?: InventoryRead[];
   dispense_status?: MedicationRequestDispenseStatus;
+  requester?: UserReadMinimal;
 }
 
 export interface MedicationRequestSummary {
@@ -583,6 +591,7 @@ export const MEDICATION_REQUEST_TIMING_OPTIONS: Record<
  * You can extend the dictionaries & regex to cover more cases (IV, subcutaneous, brand names, etc.).
  */
 export function parseMedicationStringToRequest(
+  requester: UserReadMinimal,
   medication?: Code,
   productKnowledge?: ProductKnowledgeBase,
 ): MedicationRequest {
@@ -615,6 +624,7 @@ export function parseMedicationStringToRequest(
     priority: "routine",
     category: "inpatient",
     authored_on: new Date().toISOString(),
+    requester: requester,
   };
 
   return medicationRequest;
