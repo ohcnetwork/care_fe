@@ -1,5 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 
+import { AuthUserModel } from "@/components/Users/models";
+
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
@@ -17,8 +19,6 @@ import patientApi from "@/types/emr/patient/patientApi";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { Organization } from "@/types/organization/organization";
 import { PatientIdentifier } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
-
-import { AuthUserModel } from "../Users/models";
 
 interface QueueNewPatientOfflineParams {
   createPatientData: PatientCreate;
@@ -65,7 +65,7 @@ interface NormalizeAndSetQueryDataParams {
 
 const normalizeAndSetQueryData = async ({
   entry,
-  patientData,
+  patientData: _patientData,
   queryClient,
   authUser,
   selectedOrganization,

@@ -1,5 +1,4 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { Link, useQueryParams } from "raviger";
 import { navigate } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";

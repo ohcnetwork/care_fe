@@ -63,8 +63,6 @@ import {
   handleOfflineRecordSuccess,
   isOfflineId,
 } from "@/OfflineSupport/offlineWriteHelpers";
-
-import { queueNewPatientOffline, queuePatientUpdateOffline } from "./offlineQueue";
 import { PLUGIN_Component } from "@/PluginEngine";
 import dayjs from "@/Utils/dayjs";
 import mutate from "@/Utils/request/mutate";
@@ -86,6 +84,11 @@ import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { Organization } from "@/types/organization/organization";
 import { PatientIdentifier } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
+import {
+  queueNewPatientOffline,
+  queuePatientUpdateOffline,
+} from "./offlineQueue";
+
 interface PatientRegistrationPageProps {
   facilityId?: string;
   patientId?: string;
@@ -98,7 +101,6 @@ export const BLOOD_GROUPS = BLOOD_GROUP_CHOICES.map((bg) => bg.id) as [
 export default function PatientRegistration(
   props: PatientRegistrationPageProps,
 ) {
-
   const [navTarget, setNavTarget] = useState<
     "back" | { to: string; options?: any } | null
   >(null);
@@ -345,10 +347,6 @@ export default function PatientRegistration(
     },
   });
 
-
-
-
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const editableIdentifiers = values.identifiers.filter((identifier) => {
       const config = facility?.patient_instance_identifier_configs.find(
@@ -401,7 +399,7 @@ export default function PatientRegistration(
           permissions: patientQuery.data?.permissions,
           createdDate: patientQuery.data?.created_date,
           modifiedDate: patientQuery.data?.modified_date,
-          onSuccess: (patientId, normalizedPatient) => {
+          onSuccess: () => {
             toast.success(t("patient_update_success"));
             setNavTarget("back");
           },
@@ -437,7 +435,7 @@ export default function PatientRegistration(
           authUser: user,
           selectedOrganization,
           selectedTags,
-          onSuccess: (patientId, normalizedPatient) => {
+          onSuccess: (patientId, _normalizedPatient) => {
             const yob = getYearOfBirth(
               createPatientData.date_of_birth,
               createPatientData.age,

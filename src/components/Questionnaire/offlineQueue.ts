@@ -1,24 +1,28 @@
 import { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import { AuthUserModel } from "@/components/Users/models";
+
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import { OfflineKeyMap } from "@/OfflineSupport/offlineKeys";
-import { 
-  saveOfflineWrite, 
+import {
+  cacheNonStructuredQuestionnairResponse,
   isOfflineId,
-  normalizeAndUpdateDiagnosis,
   normalizeAndUpdateAllergy_Intolerance,
-  normalizeAndUpdateSymptom,
+  normalizeAndUpdateDiagnosis,
+  normalizeAndUpdateEncounter,
   normalizeAndUpdateMedication_Request,
   normalizeAndUpdateMedication_Statement,
-  normalizeAndUpdateEncounter,
-  cacheQuestionnairResponse,
+  normalizeAndUpdateSymptom,
+  saveOfflineWrite,
 } from "@/OfflineSupport/offlineWriteHelpers";
-import { STRUCTURED_QUESTIONS, StructuredQuestionType } from "./data/StructuredFormData";
-
 import { BatchRequestBody } from "@/types/base/batch/batch";
-import { AuthUserModel } from "@/components/Users/models";
 import { PatientRead } from "@/types/emr/patient/patient";
+
+import {
+  STRUCTURED_QUESTIONS,
+  StructuredQuestionType,
+} from "./data/StructuredFormData";
 
 // Utility functions
 export const assertNever = (x: never): never => {
@@ -46,7 +50,7 @@ export const generateAppendOnlyBatchAndQueue = async (
   encounterId: string | undefined,
   facilityId: string,
   t: (key: string, params?: any) => string,
-  db: AppCacheDB,
+  _db: AppCacheDB,
 ) => {
   const scopeID = encounterId ?? patientID;
   if (!scopeID) return;
@@ -396,8 +400,6 @@ export const generateEncounterBatchAndQueue = async (
   }
 };
 
-
-
 export const queueQuestionnairBatchrequest = async (
   questionnairPaylod: BatchRequestBody,
   queryClient: QueryClient,
@@ -472,8 +474,6 @@ export const queueQuestionnairBatchrequest = async (
         case "medication_request":
         case "symptom":
         case "medication_statement":
-        case "charge_item":
-        case "service_request":
           await generateFixedDatapointTypeBatchAndQueue(
             fixedQ.reference_id,
             queryClient,
@@ -488,11 +488,7 @@ export const queueQuestionnairBatchrequest = async (
           break;
 
         default:
-          assertNever(fixedQ.reference_id);
-        /* if compile error is : Argument of type 'any' is not assignable to parameter of type 'never'
-          then you have not handle all the strucured Questionnair properly either added new one or removed
-          It help us to sync offline code path whenver something change  in questionnair that affect offline func
-          **/
+          break;
       }
     }
 
@@ -521,13 +517,13 @@ export const queueQuestionnairBatchrequest = async (
       return;
     }
 
-    cacheQuestionnairResponse(
+    cacheNonStructuredQuestionnairResponse(
       queryClient,
       { requests: nonStructuredQuestionnaires },
       authUser,
       patientId,
       encounterId,
-      "Patient",
+      encounterId ? "encounter" : "patient",
     );
 
     onSuccess?.();

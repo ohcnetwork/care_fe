@@ -1952,6 +1952,7 @@
   "facility_preference": "Facility preference",
   "facility_type": "Facility Type",
   "facility_type_required": "Facility type is required",
+  "facility_id_required_for_offline_submission": "Facility ID is required for offline submission",
   "facility_updated_success": "Facility updated successfully",
   "facility_updated_successfully": "Facility updated successfully",
   "factor": "Factor",

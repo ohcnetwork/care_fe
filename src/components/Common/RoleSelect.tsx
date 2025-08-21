@@ -65,6 +65,8 @@ export function RoleSelect({
       })({ signal });
       return response;
     },
+    networkMode: "online",
+    meta: { persist: true },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
       const currentOffset = allPages.length * PAGE_LIMIT;

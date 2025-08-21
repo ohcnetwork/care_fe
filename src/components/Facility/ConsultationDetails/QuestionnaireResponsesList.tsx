@@ -521,7 +521,9 @@ export default function QuestionnaireResponsesList({
     ],
     queryFn: async () => [],
     enabled: false,
+    meta: { persist: true },
   });
+
   // Merge both online and offline data for unified rendering
   const responsesData = [
     ...(questionnarieResponses?.results || []),

@@ -1,5 +1,4 @@
 import {
-  QueryClient,
   onlineManager,
   useMutation,
   useQueries,
@@ -20,25 +19,12 @@ import { Button } from "@/components/ui/button";
 
 import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
-import { AuthUserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import { useOfflineEntry } from "@/hooks/useOfflineEntry";
 
-import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
-import { OfflineKeyMap } from "@/OfflineSupport/offlineKeys";
-import {
-  cacheQuestionnairResponse,
-  handleOfflineRecordSuccess,
-  isOfflineId,
-  normalizeAndUpdateAllergy_Intolerance,
-  normalizeAndUpdateDiagnosis,
-  normalizeAndUpdateEncounter,
-  normalizeAndUpdateMedication_Request,
-  normalizeAndUpdateMedication_Statement,
-  normalizeAndUpdateSymptom,
-  saveOfflineWrite,
-} from "@/OfflineSupport/offlineWriteHelpers";
+import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers";
 import { PLUGIN_Component } from "@/PluginEngine";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -47,7 +33,6 @@ import { BatchRequestBody } from "@/types/base/batch/batch";
 import batchApi from "@/types/base/batch/batchApi";
 import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
-import { PatientRead } from "@/types/emr/patient/patient";
 import { FileUploadQuestion } from "@/types/files/files";
 import {
   BatchSubmissionResult,

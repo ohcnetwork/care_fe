@@ -29,7 +29,7 @@ export default function EncounterQuestionnaire({
   subjectType,
 }: Props) {
   const { t } = useTranslation();
-  const [{ offlineEntryId, editMode }] = useQueryParams();
+  const [{ editMode }] = useQueryParams();
 
   const { goBack } = useAppHistory();
   const { data: encounter } = useQuery({

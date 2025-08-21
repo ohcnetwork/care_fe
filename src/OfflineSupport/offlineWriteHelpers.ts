@@ -1185,7 +1185,7 @@ export const normalizeAndUpdateEncounter = (
   }
 };
 
-export const cacheQuestionnairResponse = (
+export const cacheNonStructuredQuestionnairResponse = (
   queryClient: QueryClient,
   questionnairpaylod: BatchRequestBody,
   authUser: AuthUserModel,

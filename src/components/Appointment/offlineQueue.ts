@@ -1,6 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { toast } from "sonner";
+
+import { AuthUserModel } from "@/components/Users/models";
 
 import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
@@ -19,18 +20,16 @@ import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityRead } from "@/types/facility/facility";
 import {
   Appointment,
+  AppointmentCancelRequest,
+  AppointmentCancelledStatus,
   AppointmentCreateRequest,
   AppointmentNonCancelledStatus,
   AppointmentRescheduleRequest,
   AppointmentUpdateRequest,
-  AppointmentCancelRequest,
-  AppointmentCancelledStatus,
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserReadMinimal } from "@/types/user/user";
-
-import { AuthUserModel } from "../Users/models";
 
 interface NormalizeAndSetQueryDataParams {
   entry: any;
@@ -224,8 +223,8 @@ const normalizeAndSetQueryDataForReschedule = async ({
   authUser,
   selectedSlot,
   selectedPracticioner,
-  rescheduleAppointmentData,
-  facilityId,
+  rescheduleAppointmentData: _rescheduleAppointmentData,
+  facilityId: _facilityId,
   selectedDateOffline,
   selectedMonthOffline,
   db,
@@ -298,9 +297,9 @@ const normalizeAndSetQueryDataForUpdate = async ({
   entry,
   appointment,
   queryClient,
-  authUser,
+  authUser: _authUser,
   status,
-  facilityId,
+  facilityId: _facilityId,
   db,
 }: {
   entry: any;
@@ -351,9 +350,9 @@ const normalizeAndSetQueryDataForCancel = async ({
   entry,
   appointment,
   queryClient,
-  authUser,
+  authUser: _authUser,
   status,
-  facilityId,
+  facilityId: _facilityId,
   db,
   prevTokenSlot,
   prevDate,
@@ -384,10 +383,7 @@ const normalizeAndSetQueryDataForCancel = async ({
   }
 
   // Update individual appointment cache
-  queryClient.setQueryData(
-    ["appointment", appointment.id],
-    updatedAppointment,
-  );
+  queryClient.setQueryData(["appointment", appointment.id], updatedAppointment);
 
   // Update patient appointments list cache
   const prevAppointmentList = queryClient.getQueryData<
@@ -435,7 +431,7 @@ export const queueNewAppointmentOffline = async ({
   selectedDateOffline,
   selectedMonthOffline,
   queryClient,
-  db,
+  db: _db,
   t,
   onSuccess,
   onError,
@@ -644,7 +640,7 @@ export const queueUpdateAppointmentRecordOffline = async ({
   status,
   facilityId,
   queryClient,
-  t,
+  t: _t,
   db,
   onSuccess,
   onError,
@@ -734,7 +730,7 @@ export const queueCancelAppointmentRecord = async ({
   status,
   facilityId,
   queryClient,
-  t,
+  t: _t,
   db,
   onSuccess,
   onError,

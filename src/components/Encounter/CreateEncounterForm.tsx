@@ -234,6 +234,7 @@ export default function CreateEncounterForm({
         authUser: user,
         selectedTags: selectedTags,
         currentSelectedOrganizations: currentSelectedOrganizations,
+        appointmentId: appointment,
         onSuccess: (encounterId) => {
           toast.success(t("encounter_created_offline"));
           setIsOpen(false);

@@ -5,7 +5,6 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -16,36 +15,24 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
+import { queueNewAppointmentOffline } from "@/components/Appointment/offlineQueue";
 import Page from "@/components/Common/Page";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
-import { AuthUserModel } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 import { useOfflineEntry } from "@/hooks/useOfflineEntry";
 
-import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
-import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
-import {
-  handleOfflineRecordSuccess,
-  isOfflineId,
-  normalizedAppointmentRecord,
-  saveOfflineWrite,
-  saveOfflineWriteData,
-  updateSlotCacheAfterOfflineAppointment,
-} from "@/OfflineSupport/offlineWriteHelpers";
+import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
-import { FacilityRead } from "@/types/facility/facility";
 import {
   Appointment,
   AppointmentCreateRequest,
-  AppointmentNonCancelledStatus,
   AppointmentRead,
   TokenSlot,
 } from "@/types/scheduling/schedule";
@@ -53,7 +40,6 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
-import { queueNewAppointmentOffline } from "@/components/Appointment/offlineQueue";
 
 interface Props {
   patientId: string;
@@ -145,8 +131,6 @@ export default function BookAppointment({ patientId }: Props) {
     },
   });
 
-
-
   const handleSubmit = async () => {
     if (!resourceId) {
       toast.error(t("practicioner_is_not_selected"));
@@ -181,7 +165,7 @@ export default function BookAppointment({ patientId }: Props) {
           queryClient,
           db,
           t,
-          onSuccess: (appointmentId, normalizedAppointment) => {
+          onSuccess: (appointmentId, _normalizedAppointment) => {
             toast.success(t("appointment_booking_success"));
             navigate(
               `/facility/${facilityId}/patient/${patientId}/appointments/${appointmentId}`,

@@ -1,5 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 
+import { AuthUserModel } from "@/components/Users/models";
+
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import { OfflineKeyMap } from "@/OfflineSupport/offlineKeys";
 import {
@@ -22,8 +24,6 @@ import {
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { PatientRead } from "@/types/emr/patient/patient";
 
-import { AuthUserModel } from "../Users/models";
-
 interface QueueNewEncounterOfflineParams {
   encounterRequestData: EncounterCreate;
   userId: string;
@@ -33,6 +33,7 @@ interface QueueNewEncounterOfflineParams {
   authUser: any;
   selectedTags: any[];
   currentSelectedOrganizations: any[];
+  appointmentId?: string;
   onSuccess?: (encounterId: string, normalizedEncounter: EncounterRead) => void;
   onError?: (error: Error) => void;
 }
@@ -56,6 +57,7 @@ interface NormalizeAndSetQueryDataParams {
   permissions: string[] | undefined;
   currentSelectedOrganizations: any[];
   patientId: string;
+  appointmentId?: string;
 }
 
 const normalizeAndSetQueryData = async ({
@@ -67,6 +69,7 @@ const normalizeAndSetQueryData = async ({
   permissions,
   currentSelectedOrganizations,
   patientId,
+  appointmentId,
 }: NormalizeAndSetQueryDataParams): Promise<EncounterRead> => {
   const normalizeEncounter = normalizeOfflineEncounterRecord(
     queryClient,
@@ -87,6 +90,20 @@ const normalizeAndSetQueryData = async ({
     ["encounter", normalizeEncounter.id],
     normalizeEncounter,
   );
+
+  if (appointmentId) {
+    const existingAppointment = queryClient.getQueryData<any>([
+      "appointment",
+      appointmentId,
+    ]);
+
+    if (existingAppointment) {
+      queryClient.setQueryData(["appointment", appointmentId], {
+        ...existingAppointment,
+        associated_encounter: normalizeEncounter,
+      });
+    }
+  }
 
   const encounterListKey = ["encounterHistory", patientId, {}];
 
@@ -213,6 +230,7 @@ export const queueNewEncounterOffline = async ({
   authUser,
   selectedTags,
   currentSelectedOrganizations,
+  appointmentId,
   onSuccess,
   onError,
 }: QueueNewEncounterOfflineParams): Promise<string | null> => {
@@ -227,9 +245,11 @@ export const queueNewEncounterOffline = async ({
       type: OfflineKeyMap.create_encounter,
       resourceType: "Encounter",
       payload: encounterRequestData,
-      parentMutationId: patientId.startsWith("offline-")
-        ? patientId
-        : undefined,
+      parentMutationId: appointmentId?.startsWith("offline-")
+        ? appointmentId
+        : patientId.startsWith("offline-")
+          ? patientId
+          : undefined,
     };
 
     const saveResult = await saveOfflineWrite(offlineWrite);
@@ -263,6 +283,7 @@ export const queueNewEncounterOffline = async ({
       permissions,
       currentSelectedOrganizations,
       patientId,
+      appointmentId,
     });
 
     // Call success callback with the generated ID and normalized encounter

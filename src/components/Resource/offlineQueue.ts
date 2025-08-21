@@ -1,5 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 
+import { AuthUserModel } from "@/components/Users/models";
+
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
@@ -17,8 +19,6 @@ import {
   UpdateResourceRequest,
 } from "@/types/resourceRequest/resourceRequest";
 import { UserReadMinimal } from "@/types/user/user";
-
-import { AuthUserModel } from "../Users/models";
 
 interface QueueNewResourceRequestParams {
   resourcePayload: CreateResourceRequest;

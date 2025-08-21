@@ -18,6 +18,7 @@ export const dependencySchema: DependencySchema = {
   // Encounter mutations (depend on patient)
   create_encounter: [
     { location: "payload", path: ["patient"], resourceType: "patient" },
+    { location: "payload", path: ["appointment"], resourceType: "appointment" },
   ],
   mark_encounter_as_complete: [
     { location: "mutationPathParams", path: ["id"], resourceType: "encounter" },

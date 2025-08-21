@@ -20,7 +20,7 @@ import {
 } from "@tanstack/react-query";
 import { addDays, differenceInYears, format, isBefore } from "date-fns";
 import { BanIcon, EyeIcon, Loader2, PrinterIcon } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
+import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -78,22 +78,15 @@ import { useOfflineEntry } from "@/hooks/useOfflineEntry";
 import { getPermissions } from "@/common/Permissions";
 
 import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
-import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
   handleOfflineRecordSuccess,
   isOfflineId,
-  normalizeUserBase,
-  saveOfflineWrite,
-  saveOfflineWriteData,
-  updateSlotCacheAfterOfflineAppointment,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import { PendingSyncBadge } from "@/OfflineSupport/pendingSyncbadge";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import {
   formatName,
-  getMonthFromDate,
   getReadableDuration,
   saveElementAsImage,
   stringifyNestedObject,
@@ -113,9 +106,7 @@ import {
   APPOINTMENT_STATUS_COLORS,
   Appointment,
   AppointmentCancelRequest,
-  AppointmentCancelledStatus,
   AppointmentFinalStatuses,
-  AppointmentNonCancelledStatus,
   AppointmentRead,
   AppointmentRescheduleRequest,
   AppointmentUpdateRequest,
@@ -228,7 +219,7 @@ export default function AppointmentDetail(props: Props) {
         queryClient,
         t,
         db,
-        onSuccess: (appointmentId, normalizedAppointment) => {
+        onSuccess: (_appointmentId, _normalizedAppointment) => {
           toast.success(t("appointment_updated_successfully"));
           if (appointmentUpdateData.status === "in_consultation") {
             redirectToPatientPage();
@@ -813,7 +804,7 @@ const AppointmentActions = ({
         queryClient,
         t,
         db,
-        onSuccess: (appointmentId, normalizedAppointment) => {
+        onSuccess: (_appointmentId, _normalizedAppointment) => {
           toast.success(t("unsynced_appointment_cancelled"));
         },
         onError: (error) => {
@@ -870,7 +861,7 @@ const AppointmentActions = ({
         t,
         selectedDateOffline,
         selectedMonthOffline,
-        onSuccess: (appointmentId, normalizedAppointment) => {
+        onSuccess: (_appointmentId, _normalizedAppointment) => {
           toast.success(t("appointment_rescheduled"));
           setIsRescheduleOpen(false);
           setSelectedSlotId(undefined);

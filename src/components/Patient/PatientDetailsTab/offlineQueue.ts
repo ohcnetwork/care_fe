@@ -13,7 +13,6 @@ import {
 import { PaginatedResponse } from "@/Utils/request/types";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
-import { RoleBase } from "@/types/emr/role/role";
 import { UserReadMinimal } from "@/types/user/user";
 
 interface QueueAssignUserToPatientParams {

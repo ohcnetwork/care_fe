@@ -277,7 +277,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           assignFacility,
           assignedToUser,
           resourceData,
-          onSuccess: (resourceId, normalizedResource) => {
+          onSuccess: (resourceId, _normalizedResource) => {
             toast.success(t("resource_updated_successfully"));
             navigate(`/facility/${facilityId}/resource/${resourceId}`);
           },
@@ -300,7 +300,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           patientData,
           assignFacility,
           assignedToUser,
-          onSuccess: (resourceId, normalizedResource) => {
+          onSuccess: (resourceId, _normalizedResource) => {
             toast.success(t("resource_created_successfully"));
             navigate(`/facility/${facilityId}/resource/${resourceId}`);
           },
