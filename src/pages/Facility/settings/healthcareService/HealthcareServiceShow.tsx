@@ -161,7 +161,12 @@ export default function HealthcareServiceShow({
                   {healthcareService.locations.map((location) => (
                     <div
                       key={location.id}
-                      className="flex items-center justify-between rounded-lg border p-3"
+                      className="cursor-pointer flex items-center justify-between rounded-lg border p-3"
+                      onClick={() =>
+                        navigate(
+                          `/facility/${facilityId}/locations/${location.id}/medication_requests`,
+                        )
+                      }
                     >
                       <div>
                         <p className="font-medium text-gray-900">
