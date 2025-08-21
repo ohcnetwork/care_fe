@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader } from "lucide-react";
-import { Info } from "lucide-react";
+import { Info, Loader } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -558,7 +557,7 @@ export default function PatientIdentifierConfigForm({
             <Button
               type="submit"
               className="w-full mt-6"
-              disabled={isCreating || isUpdating}
+              disabled={!form.formState.isDirty || isCreating || isUpdating}
             >
               {isCreating || isUpdating ? (
                 <span className="flex items-center gap-2">

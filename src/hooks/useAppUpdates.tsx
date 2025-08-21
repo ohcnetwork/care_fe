@@ -10,6 +10,7 @@ const APP_UPDATED_KEY = "app-updated";
 export const useAppUpdates = (
   silentlyAutoUpdate?: boolean,
   onDismissUpdateToast?: () => void,
+  hideUpdateToast?: boolean,
 ) => {
   const [newVersion, setNewVersion] = useState<string>();
   const [appUpdated, setAppUpdated] = useState(false);
@@ -57,7 +58,7 @@ export const useAppUpdates = (
   if (newVersion && silentlyAutoUpdate) updateApp();
 
   useEffect(() => {
-    if (newVersion && !silentlyAutoUpdate) {
+    if (newVersion && !silentlyAutoUpdate && !hideUpdateToast) {
       toast(t("software_update"), {
         description: t("a_new_version_of_care_is_available"),
         duration: Infinity,
@@ -72,7 +73,7 @@ export const useAppUpdates = (
         },
       });
     }
-  }, [newVersion, isUpdating]);
+  }, [newVersion, isUpdating, hideUpdateToast]);
 
   useEffect(() => {
     if (appUpdated) {

@@ -19,6 +19,7 @@ import query from "@/Utils/request/query";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { formatName, sleep } from "@/Utils/utils";
+import userApi from "@/types/user/userApi";
 
 export default function UserAvatar({ username }: { username: string }) {
   const { t } = useTranslation();
@@ -43,7 +44,7 @@ export default function UserAvatar({ username }: { username: string }) {
 
   const { data: userData, isLoading } = useQuery({
     queryKey: ["getUserDetails", username],
-    queryFn: query(routes.getUserDetails, {
+    queryFn: query(userApi.get, {
       pathParams: { username },
     }),
   });

@@ -16,9 +16,9 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
+import facilityApi from "@/types/facility/facilityApi";
 
 interface FacilityOverviewProps {
   facilityId: string;
@@ -31,8 +31,8 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(routes.getPermittedFacility, {
-      pathParams: { id: facilityId },
+    queryFn: query(facilityApi.get, {
+      pathParams: { facilityId },
     }),
   });
 
