@@ -489,7 +489,7 @@ function ObservationDefinitionFormContent({
                   <h2 className="text-base font-medium text-gray-900">
                     {t("additional_details")}{" "}
                     <span className="text-sm font-normal text-gray-500">
-                      ({t("optional")})
+                      {t("optional")}
                     </span>
                   </h2>
                   <p className="mt-0.5 text-sm text-gray-500">
@@ -560,7 +560,7 @@ function ObservationDefinitionFormContent({
                     <h2 className="text-base font-medium text-gray-900">
                       {t("components")}{" "}
                       <span className="text-sm font-normal text-gray-500">
-                            {t("optional")}
+                        {t("optional")}
                       </span>
                     </h2>
                     <p className="mt-0.5 text-sm text-gray-500">
