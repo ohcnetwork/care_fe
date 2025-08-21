@@ -179,17 +179,30 @@ function ProductKnowledgeFormContent({
         definitional:
           existingData.definitional &&
           Object.keys(existingData.definitional).length > 0
-            ? existingData.definitional
-            : null,
+            ? {
+                dosage_form: existingData.definitional.dosage_form || undefined,
+                intended_routes:
+                  existingData.definitional.intended_routes || [],
+              }
+            : {
+                intended_routes: [],
+                dosage_form: undefined,
+              },
       };
     }
     return {
+      name: "",
+      slug: "",
       product_type: ProductKnowledgeType.medication,
       names: [],
       storage_guidelines: [],
       code: null,
-      definitional: null,
+      definitional: {
+        intended_routes: [],
+        dosage_form: undefined,
+      },
       status: ProductKnowledgeStatus.active,
+      alternate_identifier: "",
     };
   }, [isEditMode, existingData]);
 
@@ -197,15 +210,6 @@ function ProductKnowledgeFormContent({
     resolver: zodResolver(formSchema),
     defaultValues: getDefaultValues(),
   });
-
-  const [hasInitialized, setHasInitialized] = React.useState(false);
-
-  React.useEffect(() => {
-    if (isEditMode && existingData && !hasInitialized) {
-      form.reset(getDefaultValues());
-      setHasInitialized(true);
-    }
-  }, [isEditMode, existingData, form, getDefaultValues, hasInitialized]);
 
   React.useEffect(() => {
     if (isEditMode) return;
@@ -914,12 +918,7 @@ function ProductKnowledgeFormContent({
               </Button>
               <Button
                 type="submit"
-                disabled={
-                  isPending ||
-                  (isEditMode
-                    ? !form.formState.isDirty
-                    : !form.watch("name")?.trim())
-                }
+                disabled={isPending || !form.formState.isDirty}
               >
                 {isPending ? t("saving") : t("save")}
               </Button>

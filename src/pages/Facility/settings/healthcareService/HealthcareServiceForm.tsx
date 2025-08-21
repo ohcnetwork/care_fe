@@ -148,8 +148,10 @@ function HealthcareServiceFormContent({
             locations: existingData.locations.map((loc) => loc.id),
           }
         : {
+            name: "",
             styling_metadata: { careIcon: "" },
             extra_details: "",
+            internal_type: undefined,
             locations: [],
           },
   });
@@ -429,12 +431,7 @@ function HealthcareServiceFormContent({
               </Button>
               <Button
                 type="submit"
-                disabled={
-                  isPending ||
-                  (isEditMode
-                    ? !form.formState.isDirty
-                    : !form.formState.isValid)
-                }
+                disabled={isPending || !form.formState.isDirty}
               >
                 {isPending
                   ? isEditMode

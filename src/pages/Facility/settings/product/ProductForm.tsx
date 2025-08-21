@@ -74,7 +74,7 @@ const formSchema = z.object({
   charge_item_definition: z.string().optional(),
   batch: z
     .object({
-      lot_number: z.string().optional(),
+      lot_number: z.string().min(1).optional(),
     })
     .required(),
   expiration_date: z.date(),
@@ -246,6 +246,9 @@ export function ProductFormContent({
         : {
             status: ProductStatusOptions.active,
             product_knowledge: productKnowledgeId,
+            charge_item_definition: undefined,
+            batch: { lot_number: undefined },
+            expiration_date: undefined,
           },
   });
 
@@ -533,11 +536,7 @@ export function ProductFormContent({
             </Button>
             <Button
               type="submit"
-              disabled={
-                isPending || isEditMode
-                  ? !form.formState.isDirty
-                  : !form.formState.isValid
-              }
+              disabled={isPending || !form.formState.isDirty}
             >
               {isPending ? t("saving") : isEditMode ? t("update") : t("create")}
             </Button>
