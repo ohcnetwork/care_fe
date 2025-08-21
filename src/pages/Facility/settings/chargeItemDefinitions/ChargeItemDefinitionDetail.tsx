@@ -138,6 +138,18 @@ export function ChargeItemDefinitionDetail({
   return (
     <Page title={chargeItemDefinition.title}>
       <div className="container mx-auto">
+        <Button
+          variant="outline"
+          size="xs"
+          className="mb-2 mt-2"
+          onClick={() =>
+            navigate(`/facility/${facilityId}/settings/charge_item_definitions`)
+          }
+        >
+          <CareIcon icon="l-arrow-left" className="size-4" />
+          {t("back")}
+        </Button>
+
         <div className="mb-4">
           <div className="mb-6 flex items-center justify-between">
             <div>
