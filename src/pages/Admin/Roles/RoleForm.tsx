@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
@@ -165,17 +166,33 @@ export default function RoleForm({
             control={form.control}
             name="is_archived"
             render={({ field }) => (
-              <FormItem className="flex items-center space-x-2">
+              <FormItem>
+                <FormLabel className="mb-2">{t("status")}</FormLabel>
                 <FormControl>
-                  <Checkbox
-                    id="is_archived"
-                    checked={field.value}
-                    onCheckedChange={(checked) => field.onChange(!!checked)}
-                  />
+                  <RadioGroup
+                    onValueChange={(val) => field.onChange(val === "true")}
+                    value={String(field.value)}
+                    className="flex space-x-4"
+                  >
+                    <FormItem className="flex items-center space-x-2">
+                      <FormControl>
+                        <RadioGroupItem value="false" id="unarchive" />
+                      </FormControl>
+                      <FormLabel htmlFor="unarchive" className="cursor-pointer">
+                        {t("unarchive")}
+                      </FormLabel>
+                    </FormItem>
+
+                    <FormItem className="flex items-center space-x-2">
+                      <FormControl>
+                        <RadioGroupItem value="true" id="archive" />
+                      </FormControl>
+                      <FormLabel htmlFor="archive" className="cursor-pointer">
+                        {t("archive")}
+                      </FormLabel>
+                    </FormItem>
+                  </RadioGroup>
                 </FormControl>
-                <FormLabel htmlFor="is_archived" className="cursor-pointer">
-                  {t("archive_role")}
-                </FormLabel>
               </FormItem>
             )}
           />
