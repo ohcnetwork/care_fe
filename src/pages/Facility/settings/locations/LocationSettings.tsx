@@ -95,12 +95,12 @@ export default function LocationSettings({
 
   const { data: mapLocations } = useQuery({
     queryKey: ["locations", facilityId, "map"],
-    queryFn: query(locationApi.list, {
+    queryFn: query.paginated(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
-        limit: 1000,
         ordering: "sort_index",
       },
+      pageSize: 100,
     }),
     enabled: activeTab === "map",
   });
