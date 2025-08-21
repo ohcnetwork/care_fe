@@ -1,8 +1,12 @@
-import React from "react";
+import { CircleStop } from "lucide-react";
+import React, { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Button } from "@/components/ui/button";
 
 import { getMonthStartAndEnd } from "@/Utils/utils";
 
@@ -18,6 +22,8 @@ export default function Calendar(props: Props) {
   const currentMonth = props.month ?? new Date();
   const highlightToday = props.highlightToday ?? true;
   const currentMonthRange = getMonthStartAndEnd(currentMonth);
+  const { t } = useTranslation();
+  const todayRef = useRef<HTMLDivElement>(null);
 
   // Calculate days to display from previous month
   const startingDayOfWeek = currentMonthRange.start.getDay();
@@ -53,6 +59,41 @@ export default function Calendar(props: Props) {
     props.onMonthChange?.(nextMonth);
   };
 
+  const handleToday = () => {
+    const today = new Date();
+    props.onMonthChange?.(today);
+
+    // Scroll to today's date after a short delay to ensure the calendar has updated
+    setTimeout(() => {
+      if (todayRef.current) {
+        todayRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    }, 100);
+  };
+
+  // Effect to scroll to today when the month changes to current month
+  useEffect(() => {
+    const today = new Date();
+    const isCurrentMonth =
+      currentMonth.getMonth() === today.getMonth() &&
+      currentMonth.getFullYear() === today.getFullYear();
+
+    if (isCurrentMonth && todayRef.current) {
+      // Small delay to ensure DOM is updated
+      setTimeout(() => {
+        if (todayRef.current) {
+          todayRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      }, 50);
+    }
+  }, [currentMonth]);
+
   const weekDays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
   return (
@@ -65,18 +106,28 @@ export default function Calendar(props: Props) {
           })}
         </h2>
         <div className="flex gap-2">
-          <button
+          <Button variant="ghost" size="lg" onClick={handleToday}>
+            <CircleStop className="size-4" />
+            <span className="text-xs font-semibold underline">
+              {t("today")}
+            </span>
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
             onClick={handlePrevMonth}
-            className="rounded-lg bg-gray-100 p-2 hover:bg-gray-200"
+            className="rounded-lg bg-white py-2 px-2.5"
           >
             <CareIcon icon="l-angle-left" />
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
             onClick={handleNextMonth}
-            className="rounded-lg bg-gray-100 p-2 hover:bg-gray-200"
+            className="rounded-lg bg-white py-2 px-2.5"
           >
             <CareIcon icon="l-angle-right" />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -97,13 +148,23 @@ export default function Calendar(props: Props) {
           return (
             <div
               key={index}
+              ref={isToday ? todayRef : null}
               className={cn(
-                "relative min-h-16 rounded-lg",
-                isToday && highlightToday && "ring-2 ring-primary-400",
+                "relative min-h-16 rounded-lg transition-all",
+                isToday &&
+                  highlightToday &&
+                  "ring-2 ring-primary-400 shadow-lg",
               )}
             >
               {props.renderDay?.(date) ?? (
-                <span className="block text-right p-2 transition-all rounded-lg bg-white text-gray-900">
+                <span
+                  className={cn(
+                    "block text-right p-2 transition-all rounded-lg bg-white text-gray-900",
+                    isToday &&
+                      highlightToday &&
+                      "bg-primary-50 font-bold text-primary-900",
+                  )}
+                >
                   {date.getDate()}
                 </span>
               )}

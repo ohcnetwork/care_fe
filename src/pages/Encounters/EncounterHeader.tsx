@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { ExternalLink } from "lucide-react";
 import { Link } from "raviger";
@@ -16,27 +17,43 @@ import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandD
 import { useEncounterShortcutDisplays } from "@/hooks/useEncounterShortcuts";
 
 import { PLUGIN_Component } from "@/PluginEngine";
+import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
+import patientApi from "@/types/emr/patient/patientApi";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 export function EncounterHeader({
   encounter,
   canWriteSelectedEncounter,
+  patientId,
+  facilityId,
 }: {
   encounter?: EncounterRead;
   canWriteSelectedEncounter: boolean;
+  patientId?: string;
+  facilityId?: string;
 }) {
   const { t } = useTranslation();
   const [actionsOpen, setActionsOpen] = useState(false);
   const getShortcutDisplay = useEncounterShortcutDisplays();
   const readOnly = !canWriteSelectedEncounter;
 
-  if (!encounter) {
+  const { data: patientDetails } = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: query(patientApi.getPatient, {
+      pathParams: { id: patientId ?? "" },
+    }),
+    enabled: !!patientId,
+  });
+
+  const { patient: encounterPatient } = encounter || {};
+
+  const patient = encounterPatient ? encounterPatient : patientDetails;
+
+  if (!patient) {
     return <CardListSkeleton count={1} />;
   }
-
-  const { patient, facility } = encounter;
 
   return (
     <>
@@ -47,7 +64,7 @@ export function EncounterHeader({
               <Avatar name={patient.name} />
             </div>
             <Link
-              href={`/facility/${facility.id}/patient/${patient.id}`}
+              href={`/facility/${facilityId}/patient/${patient.id}`}
               className="flex flex-col"
             >
               <div className="flex gap-2 items-center">
@@ -74,39 +91,68 @@ export function EncounterHeader({
                 </span>
               </div>
             ))}
-            <div className="flex flex-col gap-1 items-start">
-              <span className="text-xs text-gray-700">
-                {t("encounter_tags")}:
-              </span>
-              <div className="flex flex-wrap gap-2 text-sm">
-                {encounter.tags.length > 0 ? (
-                  <>
-                    {encounter.tags.map((tag) => (
-                      <Badge
-                        key={tag.id}
-                        variant="secondary"
-                        className="capitalize"
-                        title={tag.description}
-                      >
-                        {getTagHierarchyDisplay(tag)}
-                      </Badge>
-                    ))}
-                  </>
-                ) : (
-                  <p className="text-sm text-gray-500">{t("no_tags")}</p>
-                )}
+            {encounter && (
+              <div className="flex flex-col gap-1 items-start">
+                <span className="text-xs text-gray-700">
+                  {t("encounter_tags")}:
+                </span>
+                <div className="flex flex-wrap gap-2 text-sm">
+                  {encounter.tags.length > 0 ? (
+                    <>
+                      {encounter.tags.map((tag) => (
+                        <Badge
+                          key={tag.id}
+                          variant="secondary"
+                          className="capitalize"
+                          title={tag.description}
+                        >
+                          {getTagHierarchyDisplay(tag)}
+                        </Badge>
+                      ))}
+                    </>
+                  ) : (
+                    <p className="text-sm text-gray-500">{t("no_tags")}</p>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
+            {patientDetails && (
+              <div className="flex flex-col gap-1 items-start">
+                <span className="text-xs text-gray-700">
+                  {t("patient_tags")}:
+                </span>
+                <div className="flex flex-wrap gap-2 text-sm">
+                  {patientDetails.instance_tags.length > 0 ? (
+                    <>
+                      {patientDetails.instance_tags.map((tag) => (
+                        <Badge
+                          key={tag.id}
+                          variant="secondary"
+                          className="capitalize"
+                          title={tag.description}
+                        >
+                          {getTagHierarchyDisplay(tag)}
+                        </Badge>
+                      ))}
+                    </>
+                  ) : (
+                    <p className="text-sm text-gray-500">{t("no_tags")}</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {!readOnly && (
           <div className="flex flex-col items-end justify-center gap-4">
-            <PLUGIN_Component
-              __name="PatientInfoCardQuickActions"
-              encounter={encounter}
-              className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
-            />
+            {encounter && (
+              <PLUGIN_Component
+                __name="PatientInfoCardQuickActions"
+                encounter={encounter}
+                className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
+              />
+            )}
 
             <EncounterCommandDialog
               open={actionsOpen}

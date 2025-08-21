@@ -51,6 +51,7 @@ export default function EncounterQuestionnaire({
           <EncounterHeader
             encounter={encounter}
             canWriteSelectedEncounter={false}
+            facilityId={facilityId}
           />
         )}
         <Card className="mt-2">

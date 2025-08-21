@@ -173,6 +173,7 @@ export const EncounterShow = (props: Props) => {
       <EncounterHeader
         encounter={selectedEncounter}
         canWriteSelectedEncounter={canWriteSelectedEncounter}
+        facilityId={facilityId}
       />
       <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
         <EncounterHistorySelector />

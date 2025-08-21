@@ -220,7 +220,7 @@ export function AppointmentSlotPicker({
 
   return (
     <>
-      <div>
+      <div className="w-full">
         <Calendar
           month={selectedMonth}
           onMonthChange={(month) => {
@@ -232,10 +232,18 @@ export function AppointmentSlotPicker({
         />
       </div>
 
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-medium">{t("available_time_slots")}</h3>
+      <div className="flex flex-col gap-3 w-full">
+        <div className="flex justify-between">
+          <span className="font-semibold text-gray-950 text-base">
+            {format(selectedDate, "MMMM d yyyy")}
+          </span>
+          {!!slotsQuery.data?.length && (
+            <span className="text-sm font-medium text-gray-700">
+              {slotsQuery.data?.length} {t("available_time_slots")}
+            </span>
+          )}
         </div>
+        <div className="border-b border-gray-200 w-full" />
         {slotsQuery.isFetching ? (
           <div className="flex flex-wrap gap-4">
             {Array.from({ length: 8 }).map((_, index) => (
@@ -243,8 +251,8 @@ export function AppointmentSlotPicker({
             ))}
           </div>
         ) : (
-          <ScrollArea>
-            <div className="max-h-96">
+          <ScrollArea className="h-[30rem]">
+            <div>
               {slotsQuery.data == null && (
                 <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
                   <p className="text-gray-400">
@@ -262,11 +270,11 @@ export function AppointmentSlotPicker({
               {!!slotsQuery.data?.length &&
                 groupSlotsByAvailability(slotsQuery.data).map(
                   ({ availability, slots }) => (
-                    <div key={availability.name}>
+                    <div key={availability.name} className="@container">
                       <h4 className="text-lg font-semibold mb-3">
                         {availability.name}
                       </h4>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex @max-[15rem]:flex-col flex-wrap gap-2">
                         {slots.map((slot) => (
                           <TokenSlotButton
                             key={slot.id}
@@ -280,6 +288,7 @@ export function AppointmentSlotPicker({
                                   : slot.id,
                               );
                             }}
+                            className="@max-[15rem]:w-full"
                           />
                         ))}
                       </div>
@@ -300,11 +309,13 @@ export const TokenSlotButton = ({
   availability,
   selectedSlotId,
   onClick,
+  className,
 }: {
   slot: Omit<TokenSlot, "availability">;
   availability: TokenSlot["availability"];
   selectedSlotId: string | undefined;
   onClick: () => void;
+  className?: string;
 }) => {
   const { t } = useTranslation();
 
@@ -322,7 +333,10 @@ export const TokenSlotButton = ({
       variant={selectedSlotId === slot.id ? "primary" : "outline"}
       onClick={onClick}
       disabled={slot.allocated === availability.tokens_per_slot}
-      className="flex flex-col items-center group gap-0 w-24 relative"
+      className={cn(
+        "flex flex-col items-center group gap-0 w-24 relative",
+        className,
+      )}
     >
       <span className="font-semibold">
         {format(slot.start_datetime, "HH:mm")}
