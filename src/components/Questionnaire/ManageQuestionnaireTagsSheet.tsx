@@ -155,7 +155,7 @@ export default function ManageQuestionnaireTagsSheet({ form, trigger }: Props) {
   const [selectedTags, setSelectedTags] = useState<QuestionnaireTagModel[]>([]);
 
   const { data: availableTags, isLoading } = useQuery({
-    queryKey: ["questionnaire_tags", searchQuery],
+    queryKey: ["questionnaireTags", searchQuery],
     queryFn: query.debounced(questionnaireApi.tags.list, {
       queryParams: searchQuery !== "" ? { name: searchQuery } : undefined,
     }),
@@ -182,7 +182,7 @@ export default function ManageQuestionnaireTagsSheet({ form, trigger }: Props) {
     onSuccess: (data: unknown) => {
       const tagData = data as QuestionnaireTagModel;
       queryClient.invalidateQueries({
-        queryKey: ["questionnaire_tags"],
+        queryKey: ["questionnaireTags"],
       });
       setSelectedTags((current) => [...current, tagData]);
       setNewTagName("");
