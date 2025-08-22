@@ -60,6 +60,7 @@ function BaseLocationTreeNode({
         limit: 100,
       },
     }),
+    enabled: isExpanded,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -70,7 +71,7 @@ function BaseLocationTreeNode({
     }
   }, [children?.results, addLocationsToMap]);
 
-  const hasChildren = children?.results && children.results.length > 0;
+  const hasChildren = location.has_children;
 
   const handleRowClick = () => {
     if (hasChildren) {
