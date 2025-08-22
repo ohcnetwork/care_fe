@@ -29,6 +29,7 @@ import useFileUpload from "@/hooks/useFileUpload";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import consentApi from "@/types/consent/consentApi";
+import { FileCategory, FileType } from "@/types/files/file";
 
 import { useEncounter } from "./utils/EncounterProvider";
 
@@ -59,8 +60,8 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
   });
 
   const fileUpload = useFileUpload({
-    type: "consent",
-    category: "consent_attachment",
+    type: FileType.CONSENT,
+    category: FileCategory.CONSENT_ATTACHMENT,
     multiple: false,
     allowedExtensions: ["jpg", "jpeg", "png", "pdf"],
     allowNameFallback: false,
@@ -74,7 +75,7 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
   });
 
   const fileManager = useFileManager({
-    type: "consent",
+    type: FileType.CONSENT,
     uploadedFiles: consent?.source_attachments || [],
     onArchive: () => {},
     onEdit: () => {},
@@ -342,7 +343,7 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
         onOpenChange={handleUploadDialogClose}
         fileUpload={fileUpload}
         associatingId={associatingId}
-        type="consent"
+        type={FileType.CONSENT}
       />
     </div>
   );
