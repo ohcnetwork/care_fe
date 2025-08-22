@@ -168,10 +168,10 @@ export default function MedicationValueSetSelect({
             mobileTrigger
           ) : (
             <Button
-              variant={null}
+              variant="white"
               role="combobox"
               className={cn(
-                "w-full justify-between font-normal border border-gray-300 shadow-xs",
+                "w-full justify-between font-normal border-gray-300 shadow-xs hover:bg-white",
                 wrapTextForSmallScreen
                   ? "h-auto whitespace-normal text-left"
                   : "truncate",
@@ -202,11 +202,11 @@ export default function MedicationValueSetSelect({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant={null}
+          variant="white"
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full justify-between font-normal border border-gray-300 shadow-xs",
+            "w-full justify-between font-normal hover:bg-white border-gray-300 shadow-xs",
             !value?.display && "text-gray-500",
           )}
           disabled={disabled}
