@@ -154,7 +154,12 @@ export function SymptomsList({
       className={className}
       editLink={!readOnly ? "questionnaire/symptom" : undefined}
       actionButton={
-        <Button variant="link" size="xs" asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          asChild
+          className="hover:bg-transparent text-gray-500 hover:text-gray-500"
+        >
           <Link
             href={
               facilityId

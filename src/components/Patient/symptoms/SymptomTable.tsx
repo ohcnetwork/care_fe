@@ -39,8 +39,8 @@ const SymptomCard = ({
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
   return (
-    <div className="border shadow rounded-md p-4 bg-white">
-      <div className="flex justify-between items-start flex-wrap gap-3">
+    <div className="border shadow rounded-md p-2 bg-white">
+      <div className="flex justify-between items-center flex-wrap gap-3">
         <div className="flex-1 font-semibold text-gray-900 break-words">
           {symptom.code.display}
         </div>

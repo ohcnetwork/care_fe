@@ -38,8 +38,8 @@ const DiagnosisCard = ({
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
   return (
-    <div className="border shadow rounded-md p-4 bg-white">
-      <div className="flex justify-between items-start flex-wrap gap-3">
+    <div className="border shadow rounded-md p-2 bg-white">
+      <div className="flex justify-between items-center flex-wrap gap-3">
         <div className="flex-1 font-semibold text-gray-900 break-words">
           {diagnosis.code.display}
         </div>
@@ -184,7 +184,7 @@ export const DiagnosisTable = ({
       ))}
     </div>
   ) : (
-    <div className="max-w-6xl mx-auto mb-4 overflow-x-auto">
+    <div className="max-w-6xl mx-auto overflow-x-auto">
       <div className="min-w-xl pb-2">
         <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-y-2">
           <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700">

@@ -182,7 +182,12 @@ export function AllergyList({
       className={className}
       editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
       actionButton={
-        <Button size="xs" variant={"link"} asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          asChild
+          className="hover:bg-transparent text-gray-500 hover:text-gray-500"
+        >
           <Link
             href={
               facilityId
