@@ -352,8 +352,8 @@ export default function ReceiveItem({
       </Label>
       <div className="text-lg font-bold mt-1">
         {delivery.supplied_item_quantity}{" "}
-        {delivery.supplied_item?.product_knowledge.definitional?.dosage_form
-          .display || t("units")}
+        {delivery.supplied_item?.product_knowledge.base_unit.display ||
+          t("units")}
       </div>
 
       {delivery.supplied_item_quantity !==
@@ -462,8 +462,8 @@ export default function ReceiveItem({
                 </Label>
                 <div className="text-normal font-semibold">
                   {delivery.supplied_item_quantity}{" "}
-                  {delivery.supplied_item?.product_knowledge.definitional
-                    ?.dosage_form.display || t("units")}
+                  {delivery.supplied_item?.product_knowledge.base_unit
+                    .display || t("units")}
                 </div>
               </div>
 
@@ -810,8 +810,8 @@ export default function ReceiveItem({
                 </Label>
                 <div className="font-semibold text-gray-950 text-normal">
                   {delivery.supply_request.quantity}{" "}
-                  {delivery.supplied_item?.product_knowledge.definitional
-                    ?.dosage_form.display || t("units")}
+                  {delivery.supplied_item?.product_knowledge.base_unit
+                    .display || t("units")}
                 </div>
               </div>
               <div>
