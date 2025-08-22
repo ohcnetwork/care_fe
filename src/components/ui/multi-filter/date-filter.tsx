@@ -2,16 +2,15 @@ import {
   format,
   formatDate,
   isBefore,
+  isSameDay,
   isValid,
   subDays,
   subMonths,
   subWeeks,
   subYears,
 } from "date-fns";
-import { isSameDay } from "date-fns";
 import { ChevronRight } from "lucide-react";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -24,8 +23,12 @@ import { Separator } from "@/components/ui/separator";
 import FilterHeader from "./filter-header";
 import NavigationHelper from "./utils/navigation-helper";
 import useNavigationShortcuts from "./utils/useNavigationShortcuts";
-import { FilterConfig, FilterDateRange, FilterValues } from "./utils/utils";
-import { DateRangeOption } from "./utils/utils";
+import {
+  DateRangeOption,
+  FilterConfig,
+  FilterDateRange,
+  FilterValues,
+} from "./utils/utils";
 
 export function RenderDateFilter({
   filter,

@@ -1,5 +1,4 @@
-import { TagResource } from "@/types/emr/tagConfig/tagConfig";
-import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 
 // Generic color palette for cycling through options
 export const COLOR_PALETTE = [

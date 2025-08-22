@@ -24,6 +24,7 @@ import {
 export const encounterStatusFilter = (
   key: string = "encounter_status",
   mode: FilterMode = "single",
+  customOperations?: string[],
 ) =>
   createFilterConfig(
     key,
@@ -50,12 +51,13 @@ export const encounterStatusFilter = (
       }
       return <></>;
     },
-    () => ["is", "is_not"],
+    () => customOperations || ["is"], // ["is", "is_not"],
     mode,
   );
 export const encounterClassFilter = (
   key: string = "encounter_class",
   mode: FilterMode = "single",
+  customOperations?: string[],
 ) =>
   createFilterConfig(
     key,
@@ -82,17 +84,19 @@ export const encounterClassFilter = (
       }
       return <></>;
     },
-    () => ["is", "is_not"],
+    () => customOperations || ["is"], // ["is", "is_not"],
     mode,
   );
 
 export const encounterPriorityFilter = (
   key: string = "encounter_priority",
   mode: FilterMode = "single",
+  customOperations?: string[],
+  label?: string,
 ) =>
   createFilterConfig(
     key,
-    "priority",
+    label || "priority",
     "command",
     Array.from(ENCOUNTER_PRIORITY).map((value) => ({
       value: value.toLowerCase(),
@@ -116,14 +120,17 @@ export const encounterPriorityFilter = (
       }
       return <></>;
     },
-    () => ["is", "is_not"],
+    () => customOperations || ["is"], // ["is", "is_not"],
     mode,
   );
 
-export const startedDateFilter = (key: string = "started_date") =>
+export const startedDateFilter = (
+  key: string = "started_date",
+  label?: string,
+) =>
   createFilterConfig(
     key,
-    "started_date",
+    label || "started_date",
     "date",
     [],
     undefined,
@@ -132,10 +139,13 @@ export const startedDateFilter = (key: string = "started_date") =>
     },
     (selected: FilterValues) => getDateOperations(selected as FilterDateRange),
   );
-export const completedDateFilter = (key: string = "completed_date") =>
+export const completedDateFilter = (
+  key: string = "completed_date",
+  label?: string,
+) =>
   createFilterConfig(
     key,
-    "completed_date",
+    label || "completed_date",
     "date",
     [],
     undefined,
@@ -148,10 +158,11 @@ export const tagFilter = (
   key: string = "tags",
   resource: TagResource = TagResource.ENCOUNTER,
   mode: FilterMode = "multi",
+  label?: string,
 ) =>
   createFilterConfig(
     key,
-    "tags",
+    label || "tags",
     "tag",
     [],
     resource,
@@ -160,8 +171,8 @@ export const tagFilter = (
     },
     (selected: FilterValues) => {
       const selectedTags = selected as TagConfig[];
-      if (selectedTags.length === 1) return ["includes", "does_not_include"];
-      return ["has_all_of", "has_any_of", "exclude_if_any", "exclude_if_all"];
+      if (selectedTags.length === 1) return ["includes"]; // ["includes", "does_not_include"];
+      return ["has_all_of"]; // ["has_all_of", "has_any_of", "exclude_if_any", "exclude_if_all"];
     },
     mode,
   );

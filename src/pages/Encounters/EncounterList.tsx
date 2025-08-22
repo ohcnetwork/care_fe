@@ -207,7 +207,7 @@ export function EncounterList({
     encounterStatusFilter("status"),
     encounterClassFilter("encounter_class"),
     encounterPriorityFilter("priority"),
-    tagFilter("tags", TagResource.ENCOUNTER),
+    tagFilter("tags", TagResource.ENCOUNTER, "multi", t("tags", { count: 2 })),
   ];
 
   const onFilterUpdate = (query: Record<string, unknown>) => {
@@ -253,7 +253,7 @@ export function EncounterList({
                       data-cy="search-encounter"
                       variant="outline"
                       className={cn(
-                        "min-w-32 justify-start text-gray-500 font-normal h-9 sm:w-auto w-full",
+                        "min-w-32 justify-start text-gray-500 font-normal h-10 sm:w-auto w-full",
                         (name || encounter_id || external_identifier) &&
                           "bg-primary/10 text-primary font-medium hover:bg-primary/20",
                       )}
@@ -296,7 +296,7 @@ export function EncounterList({
                   onClearAll={handleClearAll}
                   onClearFilter={handleClearFilter}
                   className="flex sm:flex-row items-center"
-                  triggerButtonClassName="h-9 self-start"
+                  triggerButtonClassName="h-[38px] self-start self-center"
                 />
                 <PatientIdentifierFilter
                   onSelect={(patientId) =>

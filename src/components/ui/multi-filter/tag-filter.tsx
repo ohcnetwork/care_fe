@@ -22,16 +22,123 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import query from "@/Utils/request/query";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import {
   TagConfig,
   TagResource,
   getTagHierarchyDisplay,
 } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
+import query from "@/Utils/request/query";
 
 import FilterHeader from "./filter-header";
 import { COLOR_PALETTE, FilterConfig, FilterDateRange } from "./utils/utils";
+
+function TreeViewItem({
+  tag,
+  selectedTags,
+  onTagToggle,
+  resource,
+  getColorForTag,
+  level = 0,
+}: {
+  tag: TagConfig;
+  selectedTags: TagConfig[];
+  onTagToggle: (tag: TagConfig) => void;
+  resource: TagResource;
+  getColorForTag: (tagId: string, index: number) => string;
+  level?: number;
+}) {
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
+  const { data: children } = useQuery({
+    queryKey: ["tags", resource, "parent", tag.id],
+    queryFn: query(tagConfigApi.list, {
+      queryParams: {
+        resource,
+        parent: tag.id,
+        status: "active",
+        ordering: "priority",
+      },
+    }),
+    enabled: tag.has_children && expanded,
+  });
+
+  const isSelected = selectedTags.some((t) => t.id === tag.id);
+  const isRootLevel = tag.has_children && (children?.results?.length ?? 0) > 0;
+  const allChildrenSelected =
+    children?.results?.every((childTag: TagConfig) =>
+      selectedTags.some((t) => t.id === childTag.id),
+    ) ?? false;
+
+  return (
+    <div>
+      <DropdownMenuItem
+        disabled={isRootLevel && allChildrenSelected}
+        onSelect={(e) => {
+          e.preventDefault();
+          if (isRootLevel) {
+            setExpanded(!expanded);
+          } else {
+            onTagToggle(tag);
+          }
+        }}
+        className="flex items-center gap-2 px-2 py-1 cursor-pointer"
+        style={{ paddingLeft: `${level * 16 + 8}px` }}
+      >
+        <div className="flex items-center gap-2 flex-1">
+          {isRootLevel ? (
+            <Component className="h-4 w-4 text-black/80" strokeWidth={1.25} />
+          ) : (
+            <Checkbox checked={isSelected} className="h-4 w-4" />
+          )}
+          <div
+            className={cn(
+              "h-3 w-3 rounded-full flex-shrink-0",
+              getColorForTag(tag.id, 0),
+            )}
+          />
+          <span className="text-sm">{tag.display}</span>
+          {tag.has_children && (
+            <Badge variant="secondary" className="text-xs p-0.5 ml-auto">
+              {t("group")}
+            </Badge>
+          )}
+          {isRootLevel && !allChildrenSelected && (
+            <ChevronRight
+              className={cn(
+                "h-3 w-3 transition-transform",
+                expanded && "rotate-90",
+              )}
+            />
+          )}
+        </div>
+      </DropdownMenuItem>
+      {expanded && isRootLevel && (
+        <div>
+          {children?.results?.map((childTag: TagConfig) => {
+            const childSelected = selectedTags.some(
+              (t) => t.id === childTag.id,
+            );
+            if (!childSelected) {
+              return (
+                <TreeViewItem
+                  key={childTag.id}
+                  tag={childTag}
+                  selectedTags={selectedTags}
+                  onTagToggle={onTagToggle}
+                  resource={resource}
+                  getColorForTag={getColorForTag}
+                  level={level + 1}
+                />
+              );
+            }
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function TagFilterDropdown({
   selectedTags,
@@ -48,6 +155,10 @@ function TagFilterDropdown({
 }) {
   const [search, setSearch] = useState("");
   const { t } = useTranslation();
+  const isMobile = useBreakpoints({
+    default: true,
+    md: false,
+  });
 
   // Fetch root-level tags
   const { data: rootTags, isLoading } = useQuery({
@@ -164,19 +275,32 @@ function TagFilterDropdown({
             <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
               {t("tag_groups")}
             </div>
-            {rootLevelGroupTags.map((group) => (
-              <GroupSubmenu
-                key={group.id}
-                group={group}
-                selectedTags={selectedTags}
-                onTagToggle={handleTagToggle}
-                resource={resource}
-                getColorForTag={getColorForTag}
-                onSubMenuOpen={(open) => {
-                  setHasOpenSubmenu(open);
-                }}
-              />
-            ))}
+            {isMobile
+              ? // Mobile tree view
+                rootLevelGroupTags.map((group) => (
+                  <TreeViewItem
+                    key={group.id}
+                    tag={group}
+                    selectedTags={selectedTags}
+                    onTagToggle={handleTagToggle}
+                    resource={resource}
+                    getColorForTag={getColorForTag}
+                  />
+                ))
+              : // Desktop submenu view
+                rootLevelGroupTags.map((group) => (
+                  <GroupSubmenu
+                    key={group.id}
+                    group={group}
+                    selectedTags={selectedTags}
+                    onTagToggle={handleTagToggle}
+                    resource={resource}
+                    getColorForTag={getColorForTag}
+                    onSubMenuOpen={(open) => {
+                      setHasOpenSubmenu(open);
+                    }}
+                  />
+                ))}
             <DropdownMenuSeparator />
           </>
         )}
@@ -267,6 +391,11 @@ function GroupSubmenu({
     }
   }, [open, onSubMenuOpen]);
 
+  const allChildrenSelected =
+    children?.results?.every((childTag: TagConfig) =>
+      selectedTags.some((t) => t.id === childTag.id),
+    ) ?? false;
+
   return (
     <DropdownMenuSub
       open={open}
@@ -274,7 +403,13 @@ function GroupSubmenu({
         setOpen(open);
       }}
     >
-      <DropdownMenuSubTrigger className="flex items-center gap-2 px-2 py-1">
+      <DropdownMenuSubTrigger
+        className={cn(
+          "flex items-center gap-2 px-2 py-1",
+          allChildrenSelected && "opacity-50 [&>svg:last-child]:hidden",
+        )}
+        disabled={allChildrenSelected}
+      >
         <div className="flex items-center gap-2 flex-1 justify-between">
           <div className="flex items-center gap-1">
             <Component className="h-4 w-4 text-black/80" strokeWidth={1.25} />
