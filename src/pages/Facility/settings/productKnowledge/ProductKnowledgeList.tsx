@@ -38,7 +38,6 @@ import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowl
 
 function ProductKnowledgeCard({
   product,
-  facilityId,
 }: {
   product: ProductKnowledgeBase;
   facilityId: string;
@@ -67,9 +66,7 @@ function ProductKnowledgeCard({
             )}
           </div>
         </div>
-        <Link
-          href={`/facility/${facilityId}/settings/product_knowledge/${product.id}`}
-        >
+        <Link href={`/product_knowledge/${product.id}`}>
           <Button variant="outline" size="sm" className="ml-auto block">
             <CareIcon icon="l-edit" className="size-4" />
             {t("see_details")}
@@ -247,9 +244,7 @@ export default function ProductKnowledgeList({
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Link
-                            href={`/facility/${facilityId}/settings/product_knowledge/${product.id}`}
-                          >
+                          <Link href={`/product_knowledge/${product.id}`}>
                             <Button variant="outline" size="sm">
                               <CareIcon icon="l-edit" className="size-4" />
                               {t("see_details")}
