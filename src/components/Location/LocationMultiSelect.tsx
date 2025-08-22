@@ -24,10 +24,7 @@ interface BaseLocationTreeNodeProps {
   level?: number;
   facilityId: string;
   addLocationsToMap: (locations: LocationList[]) => void;
-  renderLocationInfo: (
-    location: LocationList,
-    level: number,
-  ) => React.ReactNode;
+  renderLocationInfo: (location: LocationList) => React.ReactNode;
   getPaddingLeft: (level: number) => string;
   className?: string;
 }
@@ -72,9 +69,12 @@ function BaseLocationTreeNode({
   }, [children?.results, addLocationsToMap]);
 
   const hasChildren = location.has_children;
+  const hasChildrenResults = children?.results && children.results.length > 0;
+  const shouldShowExpand =
+    hasChildren && (isExpanded ? hasChildrenResults : true);
 
   const handleRowClick = () => {
-    if (hasChildren) {
+    if (shouldShowExpand) {
       onToggleExpand(location.id);
     }
   };
@@ -85,7 +85,7 @@ function BaseLocationTreeNode({
         className={cn(
           "group flex items-center py-1 px-2 rounded-md hover:bg-gray-50 transition-colors my-1",
           isSelected && "bg-primary-100/50 border border-primary-200",
-          hasChildren && "cursor-pointer hover:bg-gray-100",
+          shouldShowExpand && "cursor-pointer hover:bg-gray-100",
           className,
         )}
         style={{ paddingLeft: getPaddingLeft(level) }}
@@ -95,7 +95,7 @@ function BaseLocationTreeNode({
           <Button variant="ghost" size="icon" className="size-6">
             <div className="size-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
           </Button>
-        ) : hasChildren ? (
+        ) : shouldShowExpand ? (
           <Button
             variant="ghost"
             size="icon"
@@ -115,7 +115,7 @@ function BaseLocationTreeNode({
           <span className="w-6" />
         )}
 
-        {renderLocationInfo(location, level)}
+        {renderLocationInfo(location)}
 
         {!isSelected && (
           <Button
@@ -164,7 +164,6 @@ interface LocationTreeNodeProps {
   onToggleExpand: (locationId: string) => void;
   level?: number;
   facilityId: string;
-  searchQuery: string;
   addLocationsToMap: (locations: LocationList[]) => void;
 }
 
@@ -176,13 +175,12 @@ function LocationTreeNode({
   onToggleExpand,
   level = 0,
   facilityId,
-  searchQuery: _searchQuery,
   addLocationsToMap,
 }: LocationTreeNodeProps) {
   const Icon =
     LocationTypeIcons[location.form as keyof typeof LocationTypeIcons];
 
-  const renderLocationInfo = (location: LocationList, _level: number) => (
+  const renderLocationInfo = (location: LocationList) => (
     <div className="flex items-center flex-1 text-sm gap-2 h-8 w-0">
       <Icon className="size-4 shrink-0" />
       <span className="truncate font-medium">{location.name}</span>
@@ -207,7 +205,6 @@ function LocationTreeNode({
   );
 }
 
-// New component for search result tree nodes : )
 interface SearchResultTreeNodeProps {
   location: LocationList;
   selectedLocations: LocationValue[];
@@ -234,7 +231,7 @@ function SearchResultTreeNode({
   const Icon =
     LocationTypeIcons[location.form as keyof typeof LocationTypeIcons];
 
-  const renderLocationInfo = (location: LocationList, level: number) => (
+  const renderLocationInfo = (location: LocationList) => (
     <div className="flex items-center flex-1 text-sm gap-2 min-w-0">
       <Icon className="size-4 shrink-0 text-gray-600" />
       <div className="flex flex-col min-w-0 justify-center flex-1 h-8 w-0">
@@ -301,6 +298,21 @@ function SelectedLocationPill({
       >
         <X className="size-3" />
       </Button>
+    </div>
+  );
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="p-4">
+      <div className="space-y-2">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-8 w-full animate-pulse rounded-md bg-gray-200"
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -449,6 +461,70 @@ export default function LocationMultiSelect({
     onChange(value.filter((v) => v.id !== locationId));
   };
 
+  const renderContent = () => {
+    if (isLoadingLocations) {
+      return <LoadingSkeleton />;
+    }
+
+    if (searchQuery.trim()) {
+      if (isSearching) {
+        return <LoadingSkeleton />;
+      }
+
+      if (searchResults.length > 0) {
+        return (
+          <div className="space-y-1">
+            {searchResults.map((result) => (
+              <SearchResultTreeNode
+                key={result.location.id}
+                location={result.location}
+                selectedLocations={value}
+                onSelect={handleSelect}
+                expandedLocations={expandedLocations}
+                onToggleExpand={handleToggleExpand}
+                level={0}
+                facilityId={facilityId}
+                addLocationsToMap={addLocationsToMap}
+                path={result.path}
+              />
+            ))}
+          </div>
+        );
+      }
+
+      return (
+        <div className="p-4 text-sm text-gray-500">
+          {t("no_locations_found")}
+        </div>
+      );
+    }
+
+    if (topLevelLocations?.results && topLevelLocations.results.length > 0) {
+      return (
+        <>
+          {topLevelLocations.results.map((location) => (
+            <LocationTreeNode
+              key={location.id}
+              location={location}
+              selectedLocations={value}
+              onSelect={handleSelect}
+              expandedLocations={expandedLocations}
+              onToggleExpand={handleToggleExpand}
+              facilityId={facilityId}
+              addLocationsToMap={addLocationsToMap}
+            />
+          ))}
+        </>
+      );
+    }
+
+    return (
+      <div className="p-4 text-sm text-gray-500">
+        {t("no_locations_available")}
+      </div>
+    );
+  };
+
   return (
     <div className="h-full flex flex-col gap-2 overflow-hidden">
       {value.length > 0 && (
@@ -478,73 +554,7 @@ export default function LocationMultiSelect({
         />
       </div>
       <ScrollArea className="flex-1 min-h-0">
-        <div className="p-2 pb-4">
-          {isLoadingLocations ? (
-            <div className="p-4">
-              <div className="space-y-2">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-8 w-full animate-pulse rounded-md bg-gray-200"
-                  />
-                ))}
-              </div>
-            </div>
-          ) : searchQuery.trim() && searchResults.length > 0 ? (
-            <div className="space-y-1">
-              {searchResults.map((result) => (
-                <SearchResultTreeNode
-                  key={result.location.id}
-                  location={result.location}
-                  selectedLocations={value}
-                  onSelect={handleSelect}
-                  expandedLocations={expandedLocations}
-                  onToggleExpand={handleToggleExpand}
-                  level={0}
-                  facilityId={facilityId}
-                  addLocationsToMap={addLocationsToMap}
-                  path={result.path}
-                />
-              ))}
-            </div>
-          ) : searchQuery.trim() && isSearching ? (
-            <div className="p-4">
-              <div className="space-y-2">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-8 w-full animate-pulse rounded-md bg-gray-200"
-                  />
-                ))}
-              </div>
-            </div>
-          ) : searchQuery.trim() && searchResults.length === 0 ? (
-            <div className="p-4 text-sm text-gray-500">
-              {t("no_locations_found")}
-            </div>
-          ) : topLevelLocations?.results &&
-            topLevelLocations.results.length > 0 ? (
-            <>
-              {topLevelLocations.results.map((location) => (
-                <LocationTreeNode
-                  key={location.id}
-                  location={location}
-                  selectedLocations={value}
-                  onSelect={handleSelect}
-                  expandedLocations={expandedLocations}
-                  onToggleExpand={handleToggleExpand}
-                  facilityId={facilityId}
-                  searchQuery={searchQuery}
-                  addLocationsToMap={addLocationsToMap}
-                />
-              ))}
-            </>
-          ) : (
-            <div className="p-4 text-sm text-gray-500">
-              {t("no_locations_available")}
-            </div>
-          )}
-        </div>
+        <div className="p-2 pb-4">{renderContent()}</div>
       </ScrollArea>
     </div>
   );
