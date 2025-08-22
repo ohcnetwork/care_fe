@@ -145,7 +145,20 @@ function BaseLocationTreeNode({
               level={level + 1}
               facilityId={facilityId}
               addLocationsToMap={addLocationsToMap}
-              renderLocationInfo={renderLocationInfo}
+              renderLocationInfo={(childLocation) => {
+                const ChildIcon =
+                  LocationTypeIcons[
+                    childLocation.form as keyof typeof LocationTypeIcons
+                  ];
+                return (
+                  <div className="flex items-center flex-1 text-sm gap-2 h-8 w-0">
+                    <ChildIcon className="size-4 shrink-0 text-gray-600" />
+                    <span className="truncate font-medium text-gray-900">
+                      {childLocation.name}
+                    </span>
+                  </div>
+                );
+              }}
               getPaddingLeft={getPaddingLeft}
               className={className}
             />
@@ -395,33 +408,26 @@ export default function LocationMultiSelect({
     }> = [];
 
     // Function to build path from root to a location
-    const buildPath = (locationId: string): string[] => {
+    const buildPath = (location: LocationList): string[] => {
       const path: string[] = [];
-      let currentLocation = allFetchedLocations.get(locationId);
+      let currentParent = location.parent;
 
-      // Traverse up the parent chain to build the path
-      while (currentLocation?.parent?.id) {
-        const parentLocation = allFetchedLocations.get(
-          currentLocation.parent.id,
-        );
-        if (parentLocation) {
-          path.unshift(parentLocation.name);
-          currentLocation = parentLocation;
-        } else {
-          break;
-        }
+      // Traverse up the parent chain using the nested parent data from API
+      while (currentParent?.name) {
+        path.unshift(currentParent.name);
+        currentParent = currentParent.parent;
       }
 
       return path;
     };
 
     searchResultsData.results.forEach((location) => {
-      const path = buildPath(location.id);
+      const path = buildPath(location);
       results.push({ location, level: path.length, path });
     });
 
     return results;
-  }, [searchQuery, searchResultsData?.results, allFetchedLocations]);
+  }, [searchQuery, searchResultsData?.results]);
 
   // Create a map of all available locations for quick lookup
   const locationsMap = useMemo(() => {
