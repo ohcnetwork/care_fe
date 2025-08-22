@@ -1,9 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { groupItemsByTime } from "@/lib/time";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,12 +28,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -61,6 +58,7 @@ import {
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 
 interface MedicationTableProps {
+  facilityId: string;
   medications: MedicationDispenseRead[];
   selectedMedications: string[];
   onSelectionChange: (id: string) => void;
@@ -69,6 +67,7 @@ interface MedicationTableProps {
 }
 
 function MedicationTable({
+  facilityId,
   medications,
   selectedMedications,
   onSelectionChange,
@@ -129,6 +128,7 @@ function MedicationTable({
             <TableHead className="text-gray-700">
               {t("payment_status")}
             </TableHead>
+            <TableHead className="text-gray-700">{t("invoice")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white">
@@ -148,29 +148,16 @@ function MedicationTable({
               >
                 {shouldShowCheckbox && (
                   <TableCell className="text-gray-950 p-0">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="flex items-center justify-center p-2">
-                            {shouldShowCheckbox && isPaid && (
-                              <Checkbox
-                                checked={selectedMedications.includes(
-                                  medication.id,
-                                )}
-                                onCheckedChange={() =>
-                                  onSelectionChange(medication.id)
-                                }
-                              />
-                            )}
-                          </span>
-                        </TooltipTrigger>
-                        {shouldShowCheckbox && !isPaid && (
-                          <TooltipContent>
-                            <p>{t("cannot_complete_unpaid_medication")}</p>
-                          </TooltipContent>
-                        )}
-                      </Tooltip>
-                    </TooltipProvider>
+                    <span className="flex items-center justify-center p-2">
+                      {shouldShowCheckbox && (
+                        <Checkbox
+                          checked={selectedMedications.includes(medication.id)}
+                          onCheckedChange={() =>
+                            onSelectionChange(medication.id)
+                          }
+                        />
+                      )}
+                    </span>
                   </TableCell>
                 )}
                 <TableCell className="text-gray-950 font-semibold">
@@ -248,6 +235,24 @@ function MedicationTable({
                   <Badge variant={isPaid ? "green" : "destructive"}>
                     {isPaid ? t("paid") : t("unpaid")}
                   </Badge>
+                </TableCell>
+                <TableCell>
+                  {medication?.charge_item?.paid_invoice && (
+                    <Button variant="link" asChild>
+                      <Link
+                        href={`/facility/${facilityId}/billing/invoices/${medication.charge_item.paid_invoice?.id}`}
+                        basePath={`/`}
+                        className="hover:text-primary underline underline-offset-2"
+                        target="_blank"
+                      >
+                        {t("view_invoice")}
+                        <CareIcon
+                          icon="l-external-link-alt"
+                          className="size-3"
+                        />
+                      </Link>
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             );
@@ -459,14 +464,14 @@ export default function DispensedMedicationList({
                   {t("today")}
                 </h3>
                 <MedicationTable
+                  facilityId={facilityId}
                   medications={groupedMedications.today}
                   selectedMedications={selectedMedications}
                   onSelectionChange={handleSelectionChange}
                   onSelectAll={handleSelectAll}
                   showCheckbox={
-                    paymentFilter !== "unpaid" &&
-                    (status === MedicationDispenseStatus.preparation ||
-                      status === MedicationDispenseStatus.in_progress)
+                    status === MedicationDispenseStatus.preparation ||
+                    status === MedicationDispenseStatus.in_progress
                   }
                 />
               </div>
@@ -479,14 +484,14 @@ export default function DispensedMedicationList({
                   {t("yesterday")}
                 </h3>
                 <MedicationTable
+                  facilityId={facilityId}
                   medications={groupedMedications.yesterday}
                   selectedMedications={selectedMedications}
                   onSelectionChange={handleSelectionChange}
                   onSelectAll={handleSelectAll}
                   showCheckbox={
-                    paymentFilter !== "unpaid" &&
-                    (status === MedicationDispenseStatus.preparation ||
-                      status === MedicationDispenseStatus.in_progress)
+                    status === MedicationDispenseStatus.preparation ||
+                    status === MedicationDispenseStatus.in_progress
                   }
                 />
               </div>
@@ -499,14 +504,14 @@ export default function DispensedMedicationList({
                   {t("this_week")}
                 </h3>
                 <MedicationTable
+                  facilityId={facilityId}
                   medications={groupedMedications.thisWeek}
                   selectedMedications={selectedMedications}
                   onSelectionChange={handleSelectionChange}
                   onSelectAll={handleSelectAll}
                   showCheckbox={
-                    paymentFilter !== "unpaid" &&
-                    (status === MedicationDispenseStatus.preparation ||
-                      status === MedicationDispenseStatus.in_progress)
+                    status === MedicationDispenseStatus.preparation ||
+                    status === MedicationDispenseStatus.in_progress
                   }
                 />
               </div>
@@ -519,14 +524,14 @@ export default function DispensedMedicationList({
                   {t("this_month")}
                 </h3>
                 <MedicationTable
+                  facilityId={facilityId}
                   medications={groupedMedications.thisMonth}
                   selectedMedications={selectedMedications}
                   onSelectionChange={handleSelectionChange}
                   onSelectAll={handleSelectAll}
                   showCheckbox={
-                    paymentFilter !== "unpaid" &&
-                    (status === MedicationDispenseStatus.preparation ||
-                      status === MedicationDispenseStatus.in_progress)
+                    status === MedicationDispenseStatus.preparation ||
+                    status === MedicationDispenseStatus.in_progress
                   }
                 />
               </div>
@@ -539,14 +544,14 @@ export default function DispensedMedicationList({
                   {t("this_year")}
                 </h3>
                 <MedicationTable
+                  facilityId={facilityId}
                   medications={groupedMedications.thisYear}
                   selectedMedications={selectedMedications}
                   onSelectionChange={handleSelectionChange}
                   onSelectAll={handleSelectAll}
                   showCheckbox={
-                    paymentFilter !== "unpaid" &&
-                    (status === MedicationDispenseStatus.preparation ||
-                      status === MedicationDispenseStatus.in_progress)
+                    status === MedicationDispenseStatus.preparation ||
+                    status === MedicationDispenseStatus.in_progress
                   }
                 />
               </div>
@@ -559,14 +564,14 @@ export default function DispensedMedicationList({
                   {t("older")}
                 </h3>
                 <MedicationTable
+                  facilityId={facilityId}
                   medications={groupedMedications.older}
                   selectedMedications={selectedMedications}
                   onSelectionChange={handleSelectionChange}
                   onSelectAll={handleSelectAll}
                   showCheckbox={
-                    paymentFilter !== "unpaid" &&
-                    (status === MedicationDispenseStatus.preparation ||
-                      status === MedicationDispenseStatus.in_progress)
+                    status === MedicationDispenseStatus.preparation ||
+                    status === MedicationDispenseStatus.in_progress
                   }
                 />
               </div>
