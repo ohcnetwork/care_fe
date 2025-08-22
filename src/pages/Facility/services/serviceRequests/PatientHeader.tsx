@@ -52,10 +52,7 @@ export function PatientHeader({
           </DrawerContent>
         </Drawer>
         <Popover>
-          <PopoverTrigger
-            data-cy="patient-details"
-            className="hidden lg:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-10 focus-visible:ring-offset-background"
-          >
+          <PopoverTrigger className="hidden lg:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-10 focus-visible:ring-offset-background">
             <PatientInfoHoverCardTigger patient={patient} />
           </PopoverTrigger>
           <PopoverContent
@@ -113,7 +110,10 @@ const PatientInfoHoverCardTigger = ({ patient }: { patient: PatientRead }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="flex w-fit gap-3 items-center rounded-md hover:bg-gray-50 active:bg-gray-50 cursor-pointer">
+    <div
+      data-slot="patient-info-hover-card-trigger"
+      className="flex w-fit gap-3 items-center rounded-md hover:bg-gray-50 active:bg-gray-50 cursor-pointer"
+    >
       <div className="size-12">
         <Avatar name={patient.name} />
       </div>

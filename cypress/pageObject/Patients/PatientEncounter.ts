@@ -62,8 +62,10 @@ export class PatientEncounter {
   }
 
   clickPatientDetailsButton() {
-    cy.get("[data-cy='patient-details']").click();
-    cy.get("[data-cy='patient-details-button']").click();
+    cy.get("[data-slot='patient-info-hover-card-trigger']")
+      .filter(":visible")
+      .click();
+    cy.get("a").contains("View Profile").click();
     return this;
   }
 
