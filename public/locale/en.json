@@ -1504,6 +1504,7 @@
   "dispatched_quantity": "Dispatched Quantity",
   "dispense": "Dispense",
   "dispense_medications": "Dispense Medications",
+  "dispense_medicine": "Dispense Medicine",
   "dispense_selected": "Dispense Selected",
   "dispense_status_updated": "Medication dispense status updated",
   "dispensed": "Dispensed",
