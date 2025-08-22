@@ -23,13 +23,14 @@ import {
 } from "@/components/ui/tooltip";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+
+import query from "@/Utils/request/query";
 import {
   TagConfig,
   TagResource,
   getTagHierarchyDisplay,
 } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
-import query from "@/Utils/request/query";
 
 import FilterHeader from "./filter-header";
 import { COLOR_PALETTE, FilterConfig, FilterDateRange } from "./utils/utils";
