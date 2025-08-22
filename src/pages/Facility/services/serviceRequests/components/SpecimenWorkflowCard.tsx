@@ -46,11 +46,11 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
+  DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DropdownMenu } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -114,7 +114,7 @@ export function SpecimenWorkflowCard({
 }: SpecimenWorkflowCardProps) {
   const queryClient = useQueryClient();
   const authUser = useAuthUser();
-  const currentUserId = authUser.external_id;
+  const currentUserId = authUser.id;
   const isDraft = specimen?.status === SpecimenStatus.draft;
   const collectedSpecimen = !isDraft ? specimen : undefined;
   const container = requirement.type_tested?.container;

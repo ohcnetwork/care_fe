@@ -27,8 +27,10 @@ import {
 } from "@/components/ui/table";
 
 import Page from "@/components/Common/Page";
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import {
+  CardGridSkeleton,
+  TableSkeleton,
+} from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 

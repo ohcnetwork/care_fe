@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -56,7 +55,6 @@ const tagConfigSchema = z.object({
 });
 
 type TagConfigFormValues = z.infer<typeof tagConfigSchema>;
-
 interface TagConfigFormProps {
   configId?: string;
   parentId?: string;
@@ -74,6 +72,24 @@ export default function TagConfigForm({
   const queryClient = useQueryClient();
   const isEditing = Boolean(configId);
   const isCreatingChild = Boolean(parentId);
+
+  const tagConfigSchema = z.object({
+    slug: z.string().trim().min(1, t("field_required")),
+    display: z.string().trim().min(1, t("field_required")),
+    category: z.nativeEnum(TagCategory, {
+      required_error: t("field_required"),
+    }),
+    description: z.string().optional(),
+    priority: z.number().min(0, t("priority_non_negative")),
+    status: z.nativeEnum(TagStatus, {
+      required_error: t("field_required"),
+    }),
+    resource: z.nativeEnum(TagResource, {
+      required_error: t("field_required"),
+    }),
+  });
+
+  type TagConfigFormValues = z.infer<typeof tagConfigSchema>;
 
   // Fetch parent tag data when creating a child
   const { data: parentTag } = useQuery({
@@ -104,7 +120,7 @@ export default function TagConfigForm({
     const subscription = form.watch((value, { name }) => {
       if (name === "display") {
         form.setValue("slug", generateSlug(value.display || ""), {
-          shouldValidate: false,
+          shouldValidate: true,
         });
       }
     });
@@ -403,7 +419,7 @@ export default function TagConfigForm({
         )}
 
         <div className="flex justify-end space-x-2">
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading || !form.formState.isDirty}>
             {isLoading
               ? t("saving")
               : isEditing

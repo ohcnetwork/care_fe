@@ -49,8 +49,7 @@ import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import { BLOOD_GROUP_CHOICES, GENDER_TYPES } from "@/common/constants";
-import { GENDERS } from "@/common/constants";
+import { BLOOD_GROUP_CHOICES, GENDER_TYPES, GENDERS } from "@/common/constants";
 import countryList from "@/common/static/countries.json";
 
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -180,9 +179,9 @@ export default function PatientRegistration(
               path: ["geo_organization"],
             });
           }
-          if (data.deceased_datetime) {
+          if (data._is_deceased) {
             const deathDate = dayjs(data.deceased_datetime);
-            if (!deathDate.isValid()) {
+            if (!deathDate?.isValid()) {
               ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: t("invalid_date_format", {
@@ -237,6 +236,7 @@ export default function PatientRegistration(
       nationality: defaultCountry,
       phone_number: phone_number || "",
       emergency_phone_number: "",
+      deceased_datetime: null,
       age_or_dob: "dob",
       date_of_birth: "",
       same_phone_number: false,
@@ -513,49 +513,45 @@ export default function PatientRegistration(
                             form.setValue(
                               "emergency_phone_number",
                               value || "",
-                              { shouldDirty: true },
+                              { shouldDirty: true, shouldValidate: true },
                             );
                           }
                         }}
                         data-cy="patient-phone-input"
                       />
                     </FormControl>
-                    <FormDescription>
-                      <FormField
-                        control={form.control}
-                        name="same_phone_number"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center gap-2">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={(v) => {
-                                  field.onChange(v);
-                                  if (v) {
-                                    form.setValue(
-                                      "emergency_phone_number",
-                                      form.watch("phone_number"),
-                                      { shouldValidate: true },
-                                    );
-                                  } else {
-                                    form.setValue(
-                                      "emergency_phone_number",
-                                      "",
-                                      { shouldValidate: true },
-                                    );
-                                  }
-                                }}
-                                data-cy="same-phone-number-checkbox"
-                                className="mt-2"
-                              />
-                            </FormControl>
-                            <FormLabel>
-                              {t("use_phone_number_for_emergency")}
-                            </FormLabel>
-                          </FormItem>
-                        )}
-                      />
-                    </FormDescription>
+                    <FormField
+                      control={form.control}
+                      name="same_phone_number"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center gap-2">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={(v) => {
+                                field.onChange(v);
+                                if (v) {
+                                  form.setValue(
+                                    "emergency_phone_number",
+                                    form.watch("phone_number"),
+                                    { shouldValidate: true },
+                                  );
+                                } else {
+                                  form.setValue("emergency_phone_number", "", {
+                                    shouldValidate: true,
+                                  });
+                                }
+                              }}
+                              data-cy="same-phone-number-checkbox"
+                              className="mt-2"
+                            />
+                          </FormControl>
+                          <FormLabel>
+                            {t("use_phone_number_for_emergency")}
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -782,7 +778,7 @@ export default function PatientRegistration(
                         form.setValue("_is_deceased", checked as boolean);
                         form.setValue(
                           "deceased_datetime",
-                          checked ? form.getValues("deceased_datetime") : "",
+                          checked ? form.getValues("deceased_datetime") : null,
                         );
                       }}
                       data-cy="is-deceased-checkbox"
@@ -855,35 +851,31 @@ export default function PatientRegistration(
                         data-cy="current-address-input"
                       />
                     </FormControl>
-                    <FormDescription>
-                      <FormField
-                        control={form.control}
-                        name="same_address"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center gap-2">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={(v) => {
-                                  field.onChange(v);
-                                  if (v) {
-                                    form.setValue(
-                                      "permanent_address",
-                                      form.getValues("address"),
-                                      { shouldValidate: true },
-                                    );
-                                  }
-                                }}
-                                data-cy="same-address-checkbox"
-                              />
-                            </FormControl>
-                            <FormLabel>
-                              {t("use_address_as_permanent")}
-                            </FormLabel>
-                          </FormItem>
-                        )}
-                      />
-                    </FormDescription>
+                    <FormField
+                      control={form.control}
+                      name="same_address"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center gap-2">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={(v) => {
+                                field.onChange(v);
+                                if (v) {
+                                  form.setValue(
+                                    "permanent_address",
+                                    form.getValues("address"),
+                                    { shouldValidate: true },
+                                  );
+                                }
+                              }}
+                              data-cy="same-address-checkbox"
+                            />
+                          </FormControl>
+                          <FormLabel>{t("use_address_as_permanent")}</FormLabel>
+                        </FormItem>
+                      )}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}

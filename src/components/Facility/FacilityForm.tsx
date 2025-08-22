@@ -30,9 +30,11 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
-import { FACILITY_TYPES } from "@/types/facility/facility";
-import { FACILITY_FEATURE_TYPES } from "@/types/facility/facility";
-import { FacilityRead } from "@/types/facility/facility";
+import {
+  FACILITY_FEATURE_TYPES,
+  FACILITY_TYPES,
+  FacilityRead,
+} from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";

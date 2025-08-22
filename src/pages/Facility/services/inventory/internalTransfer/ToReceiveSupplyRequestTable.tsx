@@ -1,6 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRightSquare, BarChart3, SlidersHorizontal } from "lucide-react";
-import { Check } from "lucide-react";
+import {
+  ArrowUpRightSquare,
+  BarChart3,
+  Check,
+  SlidersHorizontal,
+} from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
