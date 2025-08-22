@@ -192,9 +192,9 @@ export default function useFileUpload(
         mutate(fileApi.markUploadCompleted, {
           pathParams: { fileId },
         })(undefined),
-      onSuccess: (data, fileId) => {
+      onSuccess: (data) => {
         queryClient.invalidateQueries({
-          queryKey: ["files", fileType, fileId],
+          queryKey: ["files", fileType, data.associating_id],
         });
         toast.success(t("file_uploaded"));
         setError(null);

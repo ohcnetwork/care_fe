@@ -224,12 +224,12 @@ export default function useFileManager(
       mutate(fileApi.update, {
         pathParams: { fileId: data.id },
       })(data),
-    onSuccess: (_, { id }) => {
+    onSuccess: (data) => {
       toast.success(t("file_name_changed_successfully"));
       setEditDialogueOpen(null);
       onEdit?.();
       queryClient.invalidateQueries({
-        queryKey: ["files", fileType, id],
+        queryKey: ["files", fileType, data.associating_id],
       });
     },
   });
