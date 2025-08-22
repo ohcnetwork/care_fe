@@ -1240,7 +1240,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               }
                               expandPath={expandPath}
                               questionRefs={questionRefs}
-                              totalquestion={rootQuestions.length}
+                              totalSiblings={rootQuestions.length}
                             />
                           </div>
                         ))}
@@ -1542,7 +1542,7 @@ interface QuestionEditorProps {
   handleEnableWhenDependentClick: (path: string[], targetId: string) => void;
   expandPath?: string[];
   questionRefs: React.RefObject<{ [key: string]: HTMLDivElement | null }>;
-  totalquestion?: number;
+  totalSiblings?: number;
 }
 
 function QuestionEditor({
@@ -1568,7 +1568,7 @@ function QuestionEditor({
   handleEnableWhenDependentClick,
   expandPath,
   questionRefs,
-  totalquestion,
+  totalSiblings,
 }: QuestionEditorProps): React.ReactElement {
   const { t } = useTranslation();
   const {
@@ -1871,7 +1871,7 @@ function QuestionEditor({
             <ChevronsUpDown className="size-4 text-gray-500" />
           )}
         </CollapsibleTrigger>
-        {!(depth > 0 && totalquestion === 1) && (
+        {!(depth > 0 && totalSiblings === 1) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="size-8">
@@ -2777,7 +2777,7 @@ function QuestionEditor({
                       isLast={idx === (questions?.length || 0) - 1}
                       expandPath={expandPath?.slice(1)}
                       questionRefs={questionRefs}
-                      totalquestion={questions?.length || 0}
+                      totalSiblings={questions?.length || 0}
                     />
                   </div>
                 ))}
