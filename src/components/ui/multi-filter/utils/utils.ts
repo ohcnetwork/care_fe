@@ -1,3 +1,5 @@
+import React from "react";
+
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 
 // Generic color palette for cycling through options
