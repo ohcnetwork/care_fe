@@ -1000,6 +1000,7 @@
   "click_the_settings_icon_in_browser_address_bar": "Click the settings icon in browser address bar",
   "click_to_add_dosage_instructions": "Click to add dosage instructions",
   "click_to_add_first_question": "Click to add the first question",
+  "clinical_history": "Clinical History",
   "clone": "Clone",
   "clone_questionnaire": "Clone Questionnaire",
   "clone_questionnaire_description": "Create a copy of this questionnaire with a new slug and select organizations.",
