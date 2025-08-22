@@ -62,7 +62,8 @@ export class PatientEncounter {
   }
 
   clickPatientDetailsButton() {
-    cy.get("svg.lucide-external-link").filter(":visible").first().click();
+    cy.get("[data-cy='patient-details']").click();
+    cy.get("[data-cy='patient-details-button']").click();
     return this;
   }
 

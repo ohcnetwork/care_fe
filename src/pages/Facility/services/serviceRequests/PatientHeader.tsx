@@ -52,7 +52,10 @@ export function PatientHeader({
           </DrawerContent>
         </Drawer>
         <Popover>
-          <PopoverTrigger className="hidden lg:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-10 focus-visible:ring-offset-background">
+          <PopoverTrigger
+            data-cy="patient-details"
+            className="hidden lg:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-10 focus-visible:ring-offset-background"
+          >
             <PatientInfoHoverCardTigger patient={patient} />
           </PopoverTrigger>
           <PopoverContent
