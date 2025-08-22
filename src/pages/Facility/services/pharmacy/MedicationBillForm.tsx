@@ -95,7 +95,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
-import { PatientHeader } from "@/pages/Facility/services/serviceRequests/components/PatientHeader";
+import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import batchApi from "@/types/base/batch/batchApi";
 import { Code } from "@/types/base/code/code";

@@ -41,7 +41,6 @@ import query from "@/Utils/request/query";
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import InvoicesData from "@/pages/Facility/billing/invoice/InvoicesData";
 import PaymentsData from "@/pages/Facility/billing/paymentReconciliation/PaymentsData";
-import { PatientHeader } from "@/pages/Facility/services/serviceRequests/components/PatientHeader";
 import {
   ACCOUNT_STATUS_COLORS,
   AccountBillingStatus,
@@ -52,6 +51,7 @@ import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
+import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
 import AccountSheet from "./AccountSheet";
 import ChargeItemsTable from "./components/ChargeItemsTable";
 
