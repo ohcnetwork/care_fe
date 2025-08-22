@@ -1,5 +1,7 @@
-import { PatientLocation } from "@/pageObject/Patients/PatientLocation";
-import { LocationData } from "@/pageObject/Patients/PatientLocation";
+import {
+  LocationData,
+  PatientLocation,
+} from "@/pageObject/Patients/PatientLocation";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
 import { viewPort } from "@/utils/viewPort";
 
