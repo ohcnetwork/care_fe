@@ -3,8 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { NavigationLink } from "@/components/ui/sidebar/nav-main";
-import { NavMain } from "@/components/ui/sidebar/nav-main";
+import { NavigationLink, NavMain } from "@/components/ui/sidebar/nav-main";
 
 import { UserFacilityModel } from "@/components/Users/models";
 
