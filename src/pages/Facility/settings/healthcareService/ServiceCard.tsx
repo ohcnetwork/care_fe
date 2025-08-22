@@ -14,10 +14,10 @@ type DuoToneIconName = keyof typeof duoToneIcons;
 
 interface Props {
   service: HealthcareServiceReadSpec;
-  facilityId: string;
+  link: string;
 }
 
-export function ServiceCard({ service, facilityId }: Props) {
+export function ServiceCard({ service, link }: Props) {
   const { t } = useTranslation();
   const getIconName = (name: string): DuoToneIconName =>
     `d-${name}` as DuoToneIconName;
@@ -51,11 +51,7 @@ export function ServiceCard({ service, facilityId }: Props) {
             </div>
           </div>
           <Button
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/settings/healthcare_services/${service.id}`,
-              )
-            }
+            onClick={() => navigate(link)}
             variant="outline"
             size="sm"
             className="px-3 text-xs whitespace-nowrap w-full md:w-auto"

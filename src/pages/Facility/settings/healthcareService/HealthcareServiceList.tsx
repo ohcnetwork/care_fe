@@ -97,7 +97,7 @@ export default function HealthcareServiceList({
               <ServiceCard
                 key={service.id}
                 service={service}
-                facilityId={facilityId}
+                link={`/facility/${facilityId}/settings/healthcare_services/${service.id}`}
               />
             ))}
           </div>
