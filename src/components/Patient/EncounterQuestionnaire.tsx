@@ -1,19 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 import { Card, CardContent } from "@/components/ui/card";
 
 import Page from "@/components/Common/Page";
 import { QuestionnaireForm } from "@/components/Questionnaire/QuestionnaireForm";
 
-import { Badge } from "@/components/ui/badge";
 import useAppHistory from "@/hooks/useAppHistory";
 
 import query from "@/Utils/request/query";
-import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
+import {
+  PatientDeceasedInfo,
+  PatientHeader,
+} from "@/pages/Facility/services/serviceRequests/PatientHeader";
 import encounterApi from "@/types/emr/encounter/encounterApi";
-import dayjs from "dayjs";
 
 interface Props {
   facilityId?: string;
@@ -50,38 +51,14 @@ export default function EncounterQuestionnaire({
     >
       <div className="flex flex-col space-y-4">
         {encounter && (
-          <>
+          <div className="flex flex-col gap-2">
             <PatientHeader
               patient={encounter.patient}
               facilityId={facilityId}
               className="bg-white shadow-sm rounded-sm"
             />
-            {encounter.patient.deceased_datetime && (
-              <div className="mt-2">
-                <Card className="p-2 items-center rounded-sm shadow-sm border-red-400 bg-red-100 md:p-4 flex flex-wrap justify-center gap-4">
-                  <Badge
-                    variant="danger"
-                    className="rounded-sm items-center px-1.5"
-                  >
-                    {t("deceased")}
-                  </Badge>
-                  <div className="text-sm font-semibold text-red-950">
-                    <Trans
-                      i18nKey="passed_away_on"
-                      values={{
-                        date: dayjs(encounter.patient.deceased_datetime).format(
-                          "MMMM DD, YYYY",
-                        ),
-                        time: dayjs(encounter.patient.deceased_datetime).format(
-                          "hh:mm A",
-                        ),
-                      }}
-                    ></Trans>
-                  </div>
-                </Card>
-              </div>
-            )}
-          </>
+            <PatientDeceasedInfo patient={encounter.patient} />
+          </div>
         )}
         <Card className="mt-2">
           <CardContent className="lg:p-4 p-0">
