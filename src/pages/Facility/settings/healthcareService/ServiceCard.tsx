@@ -23,7 +23,10 @@ export function ServiceCard({ service, link }: Props) {
     `d-${name}` as DuoToneIconName;
 
   return (
-    <Card className="transition-all duration-200 hover:border-primary/50 hover:shadow-sm rounded-md">
+    <Card
+      onClick={() => navigate(link)}
+      className="cursor-pointer transition-all duration-200 hover:border-primary/50 hover:shadow-sm rounded-md"
+    >
       <CardContent className="py-3 px-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <div className="flex items-center gap-3 flex-1 min-w-0">
