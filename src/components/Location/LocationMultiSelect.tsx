@@ -2,12 +2,13 @@
 // This doesn't account for nested locations.
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight, Plus, Search, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import query from "@/Utils/request/query";
@@ -23,6 +24,7 @@ interface LocationTreeNodeProps {
   level?: number;
   facilityId: string;
   searchQuery: string;
+  addLocationsToMap: (locations: LocationList[]) => void;
 }
 
 function LocationTreeNode({
@@ -34,6 +36,7 @@ function LocationTreeNode({
   level = 0,
   facilityId,
   searchQuery,
+  addLocationsToMap,
 }: LocationTreeNodeProps) {
   const isExpanded = expandedLocations.has(location.id);
   const isSelected = selectedLocations.some((loc) => loc.id === location.id);
@@ -49,29 +52,21 @@ function LocationTreeNode({
         parent: location.id,
         mode: "kind",
         ordering: "sort_index",
+        limit: 100,
       },
     }),
 
     staleTime: 5 * 60 * 1000,
   });
 
+  // Add children to the global map when they are fetched
+  useMemo(() => {
+    if (children?.results) {
+      addLocationsToMap(children.results);
+    }
+  }, [children?.results, addLocationsToMap]);
+
   const hasChildren = children?.results && children.results.length > 0;
-
-  // Filter children based on search query
-  const filteredChildren = children?.results?.filter((child) =>
-    child.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
-
-  // Check if this location or any of its children match the search query
-  const locationMatches = location.name
-    .toLowerCase()
-    .includes(searchQuery.toLowerCase());
-  const hasMatchingChildren = filteredChildren && filteredChildren.length > 0;
-
-  // If there's a search query and neither this location nor its children match, don't render
-  if (searchQuery && !locationMatches && !hasMatchingChildren) {
-    return null;
-  }
 
   return (
     <div className="space-y-1">
@@ -102,7 +97,7 @@ function LocationTreeNode({
         ) : (
           <span className="w-6" />
         )}
-        <div className="flex items-center flex-1 text-sm gap-2 w-0">
+        <div className="flex items-center flex-1 text-sm gap-2 h-8 w-0">
           <Icon className="size-4 shrink-0" />
           <span className="truncate">{location.name}</span>
         </div>
@@ -110,7 +105,7 @@ function LocationTreeNode({
           <Button
             variant="ghost"
             size="icon"
-            className="ml-2 h-8 w-8 shrink-0 rounded-lg border shadow-sm hover:bg-background"
+            className="ml-2 size-8 shrink-0 rounded-lg border shadow-sm hover:bg-background"
             onClick={(e) => {
               e.stopPropagation();
               onSelect(location.id);
@@ -120,9 +115,9 @@ function LocationTreeNode({
           </Button>
         )}
       </div>
-      {isExpanded && filteredChildren && filteredChildren.length > 0 && (
+      {isExpanded && children?.results && children.results.length > 0 && (
         <div className="pl-2">
-          {filteredChildren.map((child) => (
+          {children.results.map((child) => (
             <LocationTreeNode
               key={child.id}
               location={child}
@@ -133,6 +128,7 @@ function LocationTreeNode({
               level={level}
               facilityId={facilityId}
               searchQuery={searchQuery}
+              addLocationsToMap={addLocationsToMap}
             />
           ))}
         </div>
@@ -168,7 +164,7 @@ function SelectedLocationPill({
           e.stopPropagation();
           onRemove(location.id);
         }}
-        className="h-5 w-5 rounded-full p-0"
+        className="size-5 rounded-full p-0"
         variant="ghost"
       >
         <X className="size-3" />
@@ -187,6 +183,9 @@ export default function LocationMultiSelect({
     new Set(),
   );
   const [searchQuery, setSearchQuery] = useState("");
+  const [allFetchedLocations, setAllFetchedLocations] = useState<
+    Map<string, LocationList>
+  >(new Map());
 
   // Query for top-level locations
   const { data: topLevelLocations, isLoading: isLoadingLocations } = useQuery({
@@ -201,27 +200,96 @@ export default function LocationMultiSelect({
     }),
   });
 
-  // Query for all locations (needed for selected location details)
-  const { data: allLocations } = useQuery({
-    queryKey: ["locations", facilityId, "all", "kind"],
-    queryFn: query.paginated(locationApi.list, {
+  // Query for search results using backend search
+  const { data: searchResultsData, isLoading: isSearching } = useQuery({
+    queryKey: ["locations", facilityId, "search", searchQuery],
+    queryFn: query.debounced(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
         mode: "kind",
+        name: searchQuery.trim() || undefined,
         all: true,
+        limit: 100,
       },
-      pageSize: 1000,
     }),
+    enabled: searchQuery.trim().length > 0,
   });
 
-  // Create a map of all locations for quick lookup
+  // Update allFetchedLocations when new data comes in
+  useMemo(() => {
+    const newMap = new Map(allFetchedLocations);
+
+    topLevelLocations?.results?.forEach((loc) => {
+      newMap.set(loc.id, loc);
+    });
+
+    searchResultsData?.results?.forEach((loc) => {
+      newMap.set(loc.id, loc);
+    });
+
+    setAllFetchedLocations(newMap);
+  }, [topLevelLocations?.results, searchResultsData?.results]);
+
+  // Function to add locations to the global map (used by LocationTreeNode)
+  const addLocationsToMap = useCallback((locations: LocationList[]) => {
+    setAllFetchedLocations((prev) => {
+      const newMap = new Map(prev);
+      locations.forEach((loc) => {
+        newMap.set(loc.id, loc);
+      });
+      return newMap;
+    });
+  }, []);
+
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim() || !searchResultsData?.results) return [];
+
+    const results: Array<{
+      location: LocationList;
+      level: number;
+      path: string[];
+    }> = [];
+
+    // Function to build path from root to a location
+    const buildPath = (locationId: string): string[] => {
+      const path: string[] = [];
+      let currentLocation = allFetchedLocations.get(locationId);
+
+      // Traverse up the parent chain to build the path
+      while (currentLocation?.parent?.id) {
+        const parentLocation = allFetchedLocations.get(
+          currentLocation.parent.id,
+        );
+        if (parentLocation) {
+          path.unshift(parentLocation.name);
+          currentLocation = parentLocation;
+        } else {
+          break;
+        }
+      }
+
+      return path;
+    };
+
+    searchResultsData.results.forEach((location) => {
+      const path = buildPath(location.id);
+      results.push({ location, level: path.length, path });
+    });
+
+    return results;
+  }, [searchQuery, searchResultsData?.results, allFetchedLocations]);
+
+  // Create a map of all available locations for quick lookup
   const locationsMap = useMemo(() => {
     const map = new Map<string, LocationList>();
-    allLocations?.results?.forEach((loc) => {
+
+    // Add all fetched locations
+    allFetchedLocations.forEach((loc) => {
       map.set(loc.id, loc);
     });
+
     return map;
-  }, [allLocations?.results]);
+  }, [allFetchedLocations]);
 
   const handleToggleExpand = (locationId: string) => {
     setExpandedLocations((prev) => {
@@ -246,16 +314,14 @@ export default function LocationMultiSelect({
   };
 
   const handleRemove = (locationId: string) => {
-    const location = locationsMap.get(locationId);
-    if (!location) return;
     onChange(value.filter((v) => v.id !== locationId));
   };
 
   return (
-    <div className="h-full flex flex-col gap-2">
+    <div className="h-full flex flex-col gap-2 overflow-hidden">
       {value.length > 0 && (
         <>
-          <ScrollArea className="max-h-[calc(20vh-2rem)]">
+          <ScrollArea className="max-h-32">
             <div className="flex flex-wrap gap-2 px-3">
               {value.map((location) => (
                 <SelectedLocationPill
@@ -266,21 +332,21 @@ export default function LocationMultiSelect({
               ))}
             </div>
           </ScrollArea>
-          <div className="lex flex-col border-b py-1" />
+          <div className="flex flex-col border-b py-1" />
         </>
       )}
       <div className="relative w-full px-3 pt-1">
         <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 size-4" />
-        <input
+        <Input
           type="text"
           placeholder={t("search_locations")}
-          className="w-full rounded-md border border-input bg-background pl-8 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="w-full rounded-md bg-background pl-8 py-2 text-sm focus-visible:ring-0"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
-      <ScrollArea className="max-h-[calc(80vh-10rem)]">
-        <div className="p-2">
+      <ScrollArea className="flex-1 min-h-0">
+        <div className="p-2 pb-4">
           {isLoadingLocations ? (
             <div className="p-4">
               <div className="space-y-2">
@@ -291,6 +357,61 @@ export default function LocationMultiSelect({
                   />
                 ))}
               </div>
+            </div>
+          ) : searchQuery.trim() && searchResults.length > 0 ? (
+            <div className="space-y-1">
+              {searchResults.map((result) => {
+                const Icon =
+                  LocationTypeIcons[
+                    result.location.form as keyof typeof LocationTypeIcons
+                  ];
+                return (
+                  <div
+                    key={result.location.id}
+                    className="flex items-center py-1 rounded-md hover:bg-gray-50"
+                  >
+                    <span className="w-3" />
+                    <div className="flex items-center flex-1 text-sm gap-2">
+                      <Icon className="size-5 shrink-0" />
+                      <div className="flex flex-col min-w-0">
+                        <span className="truncate font-medium">
+                          {result.location.name}
+                        </span>
+                        {result.path.length > 0 && (
+                          <span className="text-xs text-gray-500 truncate">
+                            {result.path.join(" > ")}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {!value.some((v) => v.id === result.location.id) && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="mr-2 size-8 shrink-0 rounded-lg border shadow-sm hover:bg-background"
+                        onClick={() => handleSelect(result.location.id)}
+                      >
+                        <Plus className="size-4" />
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : searchQuery.trim() && isSearching ? (
+            <div className="p-4">
+              <div className="space-y-2">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-8 w-full animate-pulse rounded-md bg-gray-200"
+                  />
+                ))}
+              </div>
+            </div>
+          ) : searchQuery.trim() && searchResults.length === 0 ? (
+            <div className="p-4 text-sm text-gray-500">
+              {t("no_locations_found")}
             </div>
           ) : topLevelLocations?.results &&
             topLevelLocations.results.length > 0 ? (
@@ -305,6 +426,7 @@ export default function LocationMultiSelect({
                   onToggleExpand={handleToggleExpand}
                   facilityId={facilityId}
                   searchQuery={searchQuery}
+                  addLocationsToMap={addLocationsToMap}
                 />
               ))}
             </>
