@@ -156,7 +156,7 @@ export const AllergyTable = ({
   const { facilityId } = useCurrentFacilitySilently();
   const isMobile = useIsMobile();
   const baseHeaderClasses =
-    "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700";
+    "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700 text-sm";
 
   return isMobile ? (
     <div className="space-y-3">
@@ -183,7 +183,7 @@ export const AllergyTable = ({
     <div className="max-w-6xl overflow-x-auto">
       <div className="min-w-xl pb-2">
         <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-y-2">
-          <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700">
+          <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm">
             {t("allergen")}
           </div>
 
