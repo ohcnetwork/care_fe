@@ -105,6 +105,7 @@ export default function ActivityDefinitionView({
     if (!definition) return;
     updateActivityDefinition({
       ...definition,
+      locations: definition.locations.map((location) => location.id) || [],
       status: "retired",
       diagnostic_report_codes: definition.diagnostic_report_codes || [],
     });
