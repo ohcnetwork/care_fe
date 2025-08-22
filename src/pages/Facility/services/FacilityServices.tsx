@@ -62,7 +62,7 @@ export default function FacilityServicesPage({
               <ServiceCard
                 key={service.id}
                 service={service}
-                facilityId={facilityId}
+                link={`/facility/${facilityId}/services/${service.id}`}
               />
             ))}
           </div>
