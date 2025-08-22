@@ -409,8 +409,6 @@ export function ValueSetForm({
                     .safeParse({ name, slug });
                   if (!parsed.success) {
                     e.preventDefault();
-                    e.stopPropagation();
-                    e.nativeEvent.stopImmediatePropagation();
                     void validateAndFocus();
                     return;
                   }
