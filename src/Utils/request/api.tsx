@@ -1,8 +1,6 @@
 import { PaginatedResponse } from "@/Utils/request/types";
-import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import { Code } from "@/types/base/code/code";
-import { PatientRead } from "@/types/emr/patient/patient";
 import { PlugConfig } from "@/types/plugConfig";
 import { BatchSubmissionResult } from "@/types/questionnaire/batch";
 import { CommentModel } from "@/types/resourceRequest/resourceRequest";
@@ -136,48 +134,6 @@ const routes = {
       method: "DELETE",
       TRes: Type<Record<string, never>>(),
       TBody: Type<void>(),
-    },
-  },
-
-  // OTP Routes
-  otp: {
-    sendOtp: {
-      path: "/api/v1/otp/send/",
-      method: "POST",
-      TBody: Type<{ phone_number: string }>(),
-      TRes: Type<Record<string, never>>(),
-      auth: {
-        key: "Authorization",
-        value: "{OTP_API_KEY}",
-        type: "header",
-      },
-    },
-    loginByOtp: {
-      path: "/api/v1/otp/login/",
-      method: "POST",
-      TBody: Type<{ phone_number: string; otp: string }>(),
-      TRes: Type<{ access: string }>(),
-    },
-    getPatient: {
-      path: "/api/v1/otp/patient/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<PatientRead>>(),
-      auth: {
-        key: "Authorization",
-        value: "Bearer {token}",
-        type: "header",
-      },
-    },
-    createPatient: {
-      path: "/api/v1/otp/patient/",
-      method: "POST",
-      TBody: Type<Partial<AppointmentPatientRegister>>(),
-      TRes: Type<PatientRead>(),
-      auth: {
-        key: "Authorization",
-        value: "Bearer {token}",
-        type: "header",
-      },
     },
   },
 } as const;

@@ -18,7 +18,7 @@ import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 
 import { LocalStorageKeys } from "@/common/constants";
 
-import { TokenData } from "@/types/auth/otp";
+import { TokenData } from "@/types/otp/otp";
 
 export const LoginHeader = () => {
   const { t } = useTranslation();

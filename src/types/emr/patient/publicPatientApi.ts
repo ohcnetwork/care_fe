@@ -1,25 +1,26 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
-
-import { PatientRead } from "./patient";
+import {
+  PublicPatientCreate,
+  PublicPatientRead,
+} from "@/types/emr/patient/patient";
 
 export default {
-  createPatient: {
+  create: {
     path: "/api/v1/otp/patient/",
     method: HttpMethod.POST,
-    TBody: Type<Partial<AppointmentPatientRegister>>(),
-    TRes: Type<PatientRead>(),
+    TBody: Type<PublicPatientCreate>(),
+    TRes: Type<PublicPatientRead>(),
     auth: {
       key: "Authorization",
       value: "Bearer {token}",
       type: "header",
     },
   },
-  listPatient: {
+  list: {
     path: "/api/v1/otp/patient/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<PatientRead>>(),
+    TRes: Type<PaginatedResponse<PublicPatientRead>>(),
     auth: {
       key: "Authorization",
       value: "Bearer {token}",
