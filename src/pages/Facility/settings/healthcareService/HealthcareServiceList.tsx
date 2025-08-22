@@ -2,12 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import duoToneIcons from "@/CAREUI/icons/DuoTonePaths.json";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 
@@ -17,7 +14,6 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
-import { type HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 
 type DuoToneIconName = keyof typeof duoToneIcons;
@@ -82,6 +78,8 @@ function ServiceCard({
     </Card>
   );
 }
+
+import { ServiceCard } from "./ServiceCard";
 
 export default function HealthcareServiceList({
   facilityId,
@@ -162,7 +160,7 @@ export default function HealthcareServiceList({
               <ServiceCard
                 key={service.id}
                 service={service}
-                facilityId={facilityId}
+                link={`/facility/${facilityId}/settings/healthcare_services/${service.id}`}
               />
             ))}
           </div>
