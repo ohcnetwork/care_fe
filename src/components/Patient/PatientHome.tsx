@@ -89,6 +89,8 @@ export const PatientHome = (props: {
           <PatientHeader
             patient={patientData}
             className="bg-white shadow-sm border-none rounded-sm"
+            facilityId={facilityId}
+            isPatientPage={true}
           />
           <PatientDeceasedInfo patient={patientData} />
         </div>
