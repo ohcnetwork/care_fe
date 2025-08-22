@@ -647,10 +647,10 @@
   "are_you_still_watching": "Are you still watching?",
   "are_you_sure": "Are you sure?",
   "are_you_sure_cancel_planned_bed": "Are you sure you want to cancel the planned bed assignment?",
-  "are_you_sure_want_to_clear_favourite": "Are you sure you want to clear {{name}} from favourites?",
   "are_you_sure_clear_starred": "Are you sure you want to clear all starred?",
   "are_you_sure_mark_as_error_active_bed": "Are you sure you want to mark the active bed assignment as an error?",
   "are_you_sure_want_to_cancel_invoice": "Are you sure you want to mark this invoice as cancelled?",
+  "are_you_sure_want_to_clear_favourite": "Are you sure you want to clear {{name}} from favourites?",
   "are_you_sure_want_to_delete": "Are you sure you want to delete {{name}}?",
   "are_you_sure_want_to_delete_this_record": "Are you sure want to delete this record?",
   "are_you_sure_want_to_mark_as_balanced": "Are you sure you want to mark this invoice as balanced?",
@@ -4883,6 +4883,7 @@
   "view_patients": "View Patients",
   "view_payments": "View Payments",
   "view_prescriptions": "View Prescriptions",
+  "view_profile": "View Profile",
   "view_report": "View Report",
   "view_request": "View Request",
   "view_requests": "View Requests",
@@ -4943,6 +4944,5 @@
   "you_have_unsaved_changes_what_would_you_like_to_do": "You have unsaved changes. What would you like to do?",
   "you_need_at_least_a_location_to_create_an_assest": "You need at least a location to create an assest.",
   "zoom_in": "Zoom In",
-  "zoom_out": "Zoom Out",
-  "view_profile": "View Profile"
+  "zoom_out": "Zoom Out"
 }
