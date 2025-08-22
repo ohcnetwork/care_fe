@@ -55,7 +55,6 @@ const tagConfigSchema = z.object({
 });
 
 type TagConfigFormValues = z.infer<typeof tagConfigSchema>;
-
 interface TagConfigFormProps {
   configId?: string;
   parentId?: string;
@@ -73,6 +72,24 @@ export default function TagConfigForm({
   const queryClient = useQueryClient();
   const isEditing = Boolean(configId);
   const isCreatingChild = Boolean(parentId);
+
+  const tagConfigSchema = z.object({
+    slug: z.string().trim().min(1, t("field_required")),
+    display: z.string().trim().min(1, t("field_required")),
+    category: z.nativeEnum(TagCategory, {
+      required_error: t("field_required"),
+    }),
+    description: z.string().optional(),
+    priority: z.number().min(0, t("priority_non_negative")),
+    status: z.nativeEnum(TagStatus, {
+      required_error: t("field_required"),
+    }),
+    resource: z.nativeEnum(TagResource, {
+      required_error: t("field_required"),
+    }),
+  });
+
+  type TagConfigFormValues = z.infer<typeof tagConfigSchema>;
 
   // Fetch parent tag data when creating a child
   const { data: parentTag } = useQuery({
