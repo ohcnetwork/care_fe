@@ -9,10 +9,10 @@ import {
 } from "@/components/ui/dialog";
 
 import AudioPlayer from "@/components/Common/AudioPlayer";
-import { FileUploadModel } from "@/components/Patient/models";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { FileReadMinimal } from "@/types/files/file";
+import fileApi from "@/types/files/fileApi";
 
 export default function AudioPlayerDialog({
   open,
@@ -23,17 +23,17 @@ export default function AudioPlayerDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  file: FileUploadModel | null;
+  file: FileReadMinimal | null;
   type: "encounter" | "patient";
   associatingId: string;
 }) {
   const { t } = useTranslation();
 
   const { data: fileData } = useQuery({
-    queryKey: [routes.retrieveUpload, type, file?.id],
-    queryFn: query(routes.retrieveUpload, {
+    queryKey: [fileApi.get, type, file?.id],
+    queryFn: query(fileApi.get, {
       queryParams: { file_type: type, associating_id: associatingId },
-      pathParams: { id: file?.id || "" },
+      pathParams: { fileId: file?.id || "" },
     }),
     enabled: !!file?.id,
   });
