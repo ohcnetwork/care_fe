@@ -42,26 +42,6 @@ import {
 } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import patientIdentifierConfigApi from "@/types/patient/patientIdentifierConfig/patientIdentifierConfigApi";
 
-const formSchema = z.object({
-  config: z.object({
-    use: z.nativeEnum(PatientIdentifierUse),
-    description: z.string().min(1, "Description is required"),
-    system: z.string().min(1, "System is required"),
-    required: z.boolean(),
-    unique: z.boolean(),
-    regex: z.string(),
-    display: z.string().min(1, "Display is required"),
-    default_value: z.string().optional(),
-    retrieve_config: z.object({
-      retrieve_with_dob: z.boolean().optional(),
-      retrieve_with_year_of_birth: z.boolean().optional(),
-      retrieve_with_otp: z.boolean().optional(),
-    }),
-  }),
-  status: z.nativeEnum(PatientIdentifierConfigStatus),
-  facility: z.string().optional().nullable(),
-});
-
 interface PatientIdentifierConfigFormProps {
   facilityId?: string;
   configId?: string;
@@ -75,6 +55,26 @@ export default function PatientIdentifierConfigForm({
 }: PatientIdentifierConfigFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+
+  const formSchema = z.object({
+    config: z.object({
+      use: z.nativeEnum(PatientIdentifierUse),
+      description: z.string().trim().min(1, t("field_required")),
+      system: z.string().trim().min(1, t("field_required")),
+      required: z.boolean(),
+      unique: z.boolean(),
+      regex: z.string(),
+      display: z.string().trim().min(1, t("field_required")),
+      default_value: z.string().optional(),
+      retrieve_config: z.object({
+        retrieve_with_dob: z.boolean().optional(),
+        retrieve_with_year_of_birth: z.boolean().optional(),
+        retrieve_with_otp: z.boolean().optional(),
+      }),
+    }),
+    status: z.nativeEnum(PatientIdentifierConfigStatus),
+    facility: z.string().optional().nullable(),
+  });
 
   const { data: config, isLoading } = useQuery({
     queryKey: ["patientIdentifierConfig", configId, facilityId],
