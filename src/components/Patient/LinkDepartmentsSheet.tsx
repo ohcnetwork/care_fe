@@ -62,6 +62,9 @@ interface MutationParams {
   pathParams: PathParams;
   queryKey: string[];
 }
+interface BuildOrganizationPathOptions {
+  boldLast?: boolean;
+}
 
 function getMutationParams(
   entityType: "encounter" | "location" | "device",
@@ -178,27 +181,52 @@ function DeleteOrganizationButton({
   );
 }
 
-function buildOrgPath(
-  org: FacilityOrganization | null | undefined,
+function buildOrganizationPath(
+  organization: FacilityOrganization | null | undefined,
+  options?: BuildOrganizationPathOptions,
 ): JSX.Element {
-  if (!org) return <></>;
+  if (!organization) return <></>;
 
-  const path: string[] = [];
-  let currentOrg: FacilityOrganization | undefined = org;
-  while (currentOrg?.name) {
-    path.unshift(currentOrg.name);
-    currentOrg = currentOrg.parent as FacilityOrganization | undefined;
+  const organizationPath: { id: string; name: string }[] = [];
+  const visitedOrganizationIds = new Set<string>();
+
+  let currentOrganization:
+    | (FacilityOrganization & { parent?: unknown })
+    | undefined = organization;
+
+  while (
+    currentOrganization?.id &&
+    currentOrganization?.name &&
+    !visitedOrganizationIds.has(currentOrganization.id)
+  ) {
+    visitedOrganizationIds.add(currentOrganization.id);
+    organizationPath.unshift({
+      id: currentOrganization.id,
+      name: currentOrganization.name,
+    });
+    currentOrganization = currentOrganization.parent as
+      | (FacilityOrganization & { parent?: unknown })
+      | undefined;
   }
+
   return (
     <>
-      {path.map((name, index) => (
-        <span key={name}>
-          {name}
-          {index < path.length - 1 && (
-            <ArrowRight className="inline size-4 mx-1" />
-          )}
-        </span>
-      ))}
+      {organizationPath.map((pathSegment, index) => {
+        const isLast = index === organizationPath.length - 1;
+        const label =
+          options?.boldLast && isLast ? (
+            <strong className="font-bold">{pathSegment.name}</strong>
+          ) : (
+            pathSegment.name
+          );
+
+        return (
+          <span key={pathSegment.id}>
+            {label}
+            {!isLast && <ArrowRight className="inline size-4 mx-1" />}
+          </span>
+        );
+      })}
     </>
   );
 }
@@ -332,20 +360,6 @@ export default function LinkDepartmentsSheet({
               </span>
               <div className=" space-y-2 mt-2">
                 {currentOrganizations.map((org) => {
-                  const orgPath = buildOrgPath(org);
-
-                  const orgChildren = orgPath.props.children;
-
-                  const updatedChildren = orgChildren.map(
-                    (child: JSX.Element, index: number) => {
-                      if (index === orgChildren.length - 1) {
-                        return <strong key={index}>{child}</strong>;
-                      }
-                      return child;
-                    },
-                  );
-                  // console.log(orgPath.props.children.length-1)
-
                   return (
                     <div
                       key={org.id}
@@ -358,9 +372,7 @@ export default function LinkDepartmentsSheet({
                             className="font-normal"
                             data-cy="link-organisation-name"
                           >
-                            {React.cloneElement(orgPath, {
-                              children: updatedChildren,
-                            })}
+                            {buildOrganizationPath(org, { boldLast: true })}
                           </span>
                           {org.description && (
                             <span className="text-xs text-gray-500">
