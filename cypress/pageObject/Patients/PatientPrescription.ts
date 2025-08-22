@@ -8,7 +8,7 @@ interface MedicationDetails {
 
 export class PatientPrescription {
   clickMedicinesTab() {
-    cy.verifyAndClickElement('[data-cy="tab-medicines"]', "Medicines");
+    cy.get("[role='tablist']").contains("Medicines").click();
     return this;
   }
   clickEditPrescription() {

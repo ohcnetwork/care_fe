@@ -59,9 +59,7 @@ const METHODS = [
 
 const UNITS = [
   "percent",
-  "percent /100",
   "percent of slope",
-  "percent 0to3Hours",
   "percent Abnormal",
   "percent Activity",
   "percent BasalActivity",

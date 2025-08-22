@@ -13,10 +13,8 @@ class PatientVerify {
   }
 
   clickCreateEncounter() {
-    cy.verifyAndClickElement(
-      '[data-cy="create-encounter-button"]',
-      "Create Encounter",
-    );
+    cy.get('[data-cy="create-encounter-button"]').scrollIntoView();
+    cy.get("button").contains("Create Encounter").click();
     return this;
   }
 

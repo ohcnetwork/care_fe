@@ -11,7 +11,6 @@ import { Separator } from "@/components/ui/separator";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import { FacilityModel } from "@/components/Facility/models";
 import CommentSection from "@/components/Resource/ResourceCommentSection";
 
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
@@ -20,6 +19,7 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { PatientRead } from "@/types/emr/patient/patient";
+import { FacilityRead } from "@/types/facility/facility";
 
 function PatientCard({ patient }: { patient: PatientRead }) {
   const { t } = useTranslation();
@@ -80,7 +80,7 @@ function FacilityCard({
   facilityData,
 }: {
   title: string;
-  facilityData: FacilityModel;
+  facilityData: FacilityRead;
 }) {
   const { t } = useTranslation();
   return (
