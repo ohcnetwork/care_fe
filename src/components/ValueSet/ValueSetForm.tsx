@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
-import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
@@ -370,7 +369,6 @@ export function ValueSetForm({
 
   const form = useForm({
     resolver: zodResolver(valuesetFormSchema),
-    mode: "onChange",
     defaultValues: {
       name: initialData?.name || "",
       slug: initialData?.slug || "",
@@ -383,38 +381,30 @@ export function ValueSetForm({
       },
     },
   });
-
-  const [previewOpen, setPreviewOpen] = useState(false);
-
-  const handlePreviewClick = async () => {
-    const isValid = await form.trigger();
-    if (!isValid) {
-      form.trigger();
-      return;
-    }
-    setPreviewOpen(true);
-  };
-
   return (
     <Form {...form}>
       <div className="flex justify-end">
         {!initialData?.id && (
-          <>
-            <Button
-              variant="outline_primary"
-              type="button"
-              onClick={handlePreviewClick}
-            >
-              <CareIcon icon={"l-eye"} className="size-4" />
-              {t("valueset_preview")}
-            </Button>
-
-            <ValueSetPreview
-              valueset={form.watch()}
-              open={previewOpen}
-              onOpenChange={setPreviewOpen}
-            />
-          </>
+          <ValueSetPreview
+            valueset={form.watch()}
+            trigger={
+              <Button
+                variant="outline_primary"
+                onClickCapture={async (e) => {
+                  if (!e.isTrusted) {
+                    return;
+                  }
+                  const isValid = await form.trigger();
+                  if (!isValid) {
+                    e.preventDefault();
+                  }
+                }}
+              >
+                <CareIcon icon={"l-eye"} className="h-4 w-4" />
+                {t("valueset_preview")}
+              </Button>
+            }
+          />
         )}
       </div>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

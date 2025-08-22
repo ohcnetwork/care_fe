@@ -8,6 +8,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet";
 
 import query from "@/Utils/request/query";
@@ -17,15 +18,11 @@ import valuesetApi from "@/types/valueset/valuesetApi";
 
 interface ValueSetPreviewProps {
   valueset: ValuesetFormType;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  trigger: React.ReactNode;
 }
 
-export function ValueSetPreview({
-  valueset,
-  open,
-  onOpenChange,
-}: ValueSetPreviewProps) {
+export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
+  const [open, setOpen] = useState(false);
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
 
@@ -49,7 +46,8 @@ export function ValueSetPreview({
   });
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-lg pr-2 pl-3">
         <SheetHeader className="space-y-1 px-1">
           <SheetTitle className="text-xl font-semibold">
