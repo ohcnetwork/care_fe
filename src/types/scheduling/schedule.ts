@@ -3,8 +3,8 @@ import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
 import { Badge } from "@/components/ui/badge";
 
 import { Time } from "@/Utils/types";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientOTPRead } from "@/types/auth/otp";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { UserReadMinimal } from "@/types/user/user";
