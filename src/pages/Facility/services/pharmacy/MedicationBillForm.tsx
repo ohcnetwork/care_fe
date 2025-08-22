@@ -1268,7 +1268,7 @@ export default function MedicationBillForm({ patientId }: Props) {
         </div>
 
         {patient && (
-          <div className="mb-4 p-4 rounded-none shadow-none bg-gray-100">
+          <div className="mb-4 rounded-none shadow-none bg-gray-100">
             <PatientHeader patient={patient} facilityId={facilityId} />
           </div>
         )}

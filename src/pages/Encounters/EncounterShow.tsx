@@ -1,6 +1,6 @@
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { NavTabs } from "@/components/ui/nav-tabs";
@@ -35,10 +35,13 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import { entriesOf } from "@/Utils/utils";
 
 import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { CommandShortcut } from "@/components/ui/command";
 import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
 import { PLUGIN_Component } from "@/PluginEngine";
+import dayjs from "dayjs";
 import { EncounterDiagnosticReportsTab } from "./tabs/diagnostic-reports";
 import { EncounterNotesTab } from "./tabs/notes";
 import { EncounterServiceRequestTab } from "./tabs/service-requests";
@@ -214,6 +217,26 @@ export const EncounterShow = (props: Props) => {
           </>
         }
       />
+      {patient.deceased_datetime && (
+        <div className="mt-2">
+          <Card className="p-2 items-center rounded-sm shadow-sm border-red-400 bg-red-100 md:p-4 flex flex-wrap justify-center gap-4">
+            <Badge variant="danger" className="rounded-sm items-center px-1.5">
+              {t("deceased")}
+            </Badge>
+            <div className="text-sm font-semibold text-red-950">
+              <Trans
+                i18nKey="passed_away_on"
+                values={{
+                  date: dayjs(patient.deceased_datetime).format(
+                    "MMMM DD, YYYY",
+                  ),
+                  time: dayjs(patient.deceased_datetime).format("hh:mm A"),
+                }}
+              ></Trans>
+            </div>
+          </Card>
+        </div>
+      )}
       <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
         <EncounterHistorySelector />
         <NavTabs

@@ -94,12 +94,11 @@ export default function DiagnosticReportView({
       </div>
 
       <div className="space-y-6">
-        <div className="px-2">
-          <PatientHeader
-            patient={report.encounter.patient}
-            facilityId={report.encounter.facility.id}
-          />
-        </div>
+        <PatientHeader
+          patient={report.encounter.patient}
+          facilityId={report.encounter.facility.id}
+          className="md:p-0 p-0"
+        />
         {/* Report Details */}
         <Card>
           <CardHeader>

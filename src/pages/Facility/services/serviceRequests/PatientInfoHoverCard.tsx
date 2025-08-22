@@ -29,8 +29,9 @@ export const PatientInfoHoverCard = ({
             </span>
           </div>
         </div>
-        <Button variant="outline" size="lg" className="text-gray-950">
+        <Button variant="outline" size="lg" className="text-gray-950" asChild>
           <Link
+            basePath="/"
             href={
               facilityId
                 ? `/facility/${facilityId}/patient/${patient.id}`

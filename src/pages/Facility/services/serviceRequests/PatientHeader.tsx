@@ -1,5 +1,4 @@
-import dayjs from "dayjs";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -42,8 +41,8 @@ export function PatientHeader({
       >
         <div className="flex flex-col md:flex-row gap-4 xl:gap-8 xl:items-end">
           <Drawer>
-            <DrawerTrigger className="lg:hidden">
-              <PatientHeaderTigger patient={patient} />
+            <DrawerTrigger className="lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ">
+              <PatientInfoHoverCardTigger patient={patient} />
             </DrawerTrigger>
             <DrawerContent className="flex flex-col p-4 gap-4">
               <PatientInfoHoverCard
@@ -53,8 +52,8 @@ export function PatientHeader({
             </DrawerContent>
           </Drawer>
           <Popover>
-            <PopoverTrigger className="hidden lg:flex">
-              <PatientHeaderTigger patient={patient} />
+            <PopoverTrigger className="hidden lg:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-10 focus-visible:ring-offset-background">
+              <PatientInfoHoverCardTigger patient={patient} />
             </PopoverTrigger>
             <PopoverContent
               className="flex flex-col border border-gray-200 shadow-lg p-4 rounded-md gap-4 w-100"
@@ -108,36 +107,15 @@ export function PatientHeader({
         </div>
         {actions}
       </Card>
-
-      {patient.deceased_datetime && (
-        <div className="mt-2">
-          <Card className="p-2 items-center rounded-sm shadow-sm border-red-400 bg-red-100 md:p-4 flex flex-wrap justify-center gap-4">
-            <Badge variant="danger" className="rounded-sm items-center px-1.5">
-              {t("deceased")}
-            </Badge>
-            <div className="text-sm font-semibold text-red-950">
-              <Trans
-                i18nKey="passed_away_on"
-                values={{
-                  date: dayjs(patient.deceased_datetime).format(
-                    "MMMM DD, YYYY",
-                  ),
-                  time: dayjs(patient.deceased_datetime).format("hh:mm A"),
-                }}
-              ></Trans>
-            </div>
-          </Card>
-        </div>
-      )}
     </>
   );
 }
 
-const PatientHeaderTigger = ({ patient }: { patient: PatientRead }) => {
+const PatientInfoHoverCardTigger = ({ patient }: { patient: PatientRead }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="flex gap-3 items-center rounded-md hover:bg-gray-50 active:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background cursor-pointer">
+    <div className="flex w-fit gap-3 items-center rounded-md hover:bg-gray-50 active:bg-gray-50 cursor-pointer">
       <div className="size-12">
         <Avatar name={patient.name} />
       </div>
