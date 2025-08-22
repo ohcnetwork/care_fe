@@ -1,5 +1,5 @@
 import { Menu } from "lucide-react";
-import { Link, useRoutes } from "raviger";
+import { ActiveLink, Link, navigate, useFullPath, useRoutes } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -21,6 +21,7 @@ import { TaxCodeSettings } from "@/pages/Facility/settings/billing/tax/tax-codes
 import { TaxComponentSettings } from "@/pages/Facility/settings/billing/tax/tax-components/TaxComponentSettings";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 
+import { useEffect } from "react";
 import { InformationalCodeSettings } from "./informational/InformationalCodeSettings";
 import { BillingSettings } from "./settings/BillingSettings";
 
@@ -89,6 +90,24 @@ export function BillingSettingsLayout() {
     basePath: `/facility/${facilityId}/settings/billing`,
     routeProps: { facilityId },
   });
+  const fullPath = useFullPath();
+
+  useEffect(() => {
+    const baseBillingPath = `/facility/${facilityId}/settings/billing`;
+    if (fullPath === baseBillingPath || fullPath === `${baseBillingPath}/`) {
+      navigate(`${baseBillingPath}/discount_codes`);
+    }
+  }, [fullPath, facilityId]);
+
+  const subpath = () => {
+    const idx = fullPath.indexOf("/settings/billing");
+    if (idx !== -1) {
+      let suffix = fullPath.substring(idx + "/settings/billing".length);
+      if (!suffix || suffix === "/") return "/settings";
+      return suffix.startsWith("/") ? suffix : `/${suffix}`;
+    }
+    return "/settings";
+  };
 
   return (
     <div className="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
@@ -134,16 +153,18 @@ export function BillingSettingsLayout() {
                 </h4>
                 <div className="space-y-1">
                   {category.items.map((item) => (
-                    <Link
+                    <ActiveLink
                       key={item.href}
                       href={`/billing${item.href}`}
                       className={cn(
                         buttonVariants({ variant: "ghost" }),
                         "w-full justify-start",
+                        subpath() === item.href &&
+                          "bg-white text-green-700 shadow",
                       )}
                     >
                       {item.title}
-                    </Link>
+                    </ActiveLink>
                   ))}
                 </div>
               </div>
