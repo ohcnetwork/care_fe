@@ -39,7 +39,7 @@ export function EncounterAccordionLayout({
         <CollapsibleTrigger className="w-full flex items-center gap-2 px-2 py-1 hover:no-underline">
           <CardHeader className="w-full flex flex-row items-center justify-between p-0 pl-2">
             <CardTitle className="text-base mt-1">{t(title)}:</CardTitle>
-            <div className="flex divide-x rounded-md border lg:border-0 lg:divide-x-0 mt-1">
+            <div className="flex divide-x divide-gray-500 rounded-md border border-gray-500 lg:border-0 lg:divide-x-0 mt-1">
               {!readOnly && editLink && (
                 <div className="flex">
                   <Button

@@ -40,7 +40,7 @@ const AllergyCard = ({
   return (
     <div className="border shadow rounded-md p-2 bg-white">
       <div className="flex justify-between items-start flex-wrap gap-2">
-        <div className="flex-1 min-w-0">
+        <div className="flex-1">
           <div className="text-base font-semibold text-gray-900 break-words">
             {allergy.code.display}
           </div>
@@ -127,7 +127,7 @@ const AllergyCard = ({
           <div className="font-semibold text-gray-800">{t("note")}:</div>
 
           <Button
-            variant={null}
+            variant="link"
             className="absolute top-2 right-4 flex items-center gap-1 p-0 text-sm"
             onClick={() => setShowNote(false)}
           >

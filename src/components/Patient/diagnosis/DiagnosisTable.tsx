@@ -39,7 +39,7 @@ const DiagnosisCard = ({
   const { t } = useTranslation();
   return (
     <div className="border shadow rounded-md p-2 bg-white">
-      <div className="flex justify-between items-center flex-wrap gap-3">
+      <div className="flex justify-between items-start flex-wrap gap-3">
         <div className="flex-1 font-semibold text-gray-900 break-words">
           {diagnosis.code.display}
         </div>
@@ -133,7 +133,7 @@ const DiagnosisCard = ({
           <div className="font-semibold text-gray-800">{t("note")}:</div>
 
           <Button
-            variant={null}
+            variant="link"
             className="absolute top-2 right-4 flex items-center gap-1 p-0 text-sm"
             onClick={() => setShowNote(false)}
           >

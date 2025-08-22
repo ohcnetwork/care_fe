@@ -114,7 +114,7 @@ export default function ClinicalInformationRow({
           <div className="font-semibold text-gray-800">{t("note")}:</div>
 
           <Button
-            variant={null}
+            variant="link"
             className="absolute top-2 right-4 flex items-center gap-1 p-0 text-sm"
             onClick={() => setShowNote(false)}
           >
