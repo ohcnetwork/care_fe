@@ -2117,8 +2117,6 @@
   "header": "Header",
   "header_description": "Configure header elements and layout",
   "header_error": "There are errors in the Header tab. Please fix the errors before saving.",
-  "health-profile": "Health Profile",
-  "health_profile": "Health Profile",
   "healthcare_service_created_successfully": "Healthcare service created successfully",
   "healthcare_service_details": "Healthcare Service Details",
   "healthcare_service_not_found": "Healthcare service not found",

@@ -1,5 +1,4 @@
 import EncounterHistory from "@/components/Patient/PatientDetailsTab//EncounterHistory";
-import { HealthProfileSummary } from "@/components/Patient/PatientDetailsTab//HealthProfileSummary";
 import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
 
 import { HasPermissionFn, getPermissions } from "@/common/Permissions";
@@ -42,10 +41,6 @@ export const BASE_PATIENT_TABS: Tab[] = [
   {
     route: "encounters",
     component: EncounterHistory,
-  },
-  {
-    route: "health-profile",
-    component: HealthProfileSummary,
   },
   {
     route: "updates",
@@ -92,8 +87,6 @@ export function getTabs(
         return { ...tab, visible: canViewAppointments };
       case "encounters":
         return { ...tab, visible: canListEncounters || canViewPatients };
-      case "health-profile":
-        return { ...tab, visible: canViewClinicalData };
       case "files":
         return { ...tab, visible: canViewEncounter || canViewClinicalData };
       case "updates":
