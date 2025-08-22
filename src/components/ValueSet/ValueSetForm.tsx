@@ -402,15 +402,12 @@ export function ValueSetForm({
               <Button
                 variant="outline_primary"
                 onClickCapture={(e) => {
-                  const name = form.getValues("name").trim();
-                  const slug = form.getValues("slug").trim();
-                  if (
-                    !name ||
-                    !slug ||
-                    slug.length < 5 ||
-                    slug.length > 25 ||
-                    !/^[-\w]+$/.test(slug)
-                  ) {
+                  const name = form.getValues("name");
+                  const slug = form.getValues("slug");
+                  const parsed = valuesetFormSchema
+                    .pick({ name: true, slug: true })
+                    .safeParse({ name, slug });
+                  if (!parsed.success) {
                     e.preventDefault();
                     e.stopPropagation();
                     e.nativeEvent.stopImmediatePropagation();
