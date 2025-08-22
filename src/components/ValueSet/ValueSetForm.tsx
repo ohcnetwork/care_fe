@@ -381,6 +381,16 @@ export function ValueSetForm({
       },
     },
   });
+  async function validateAndFocus() {
+    const isValid = await form.trigger(["name", "slug"]);
+    if (!isValid) {
+      if (form.formState.errors.name) {
+        form.setFocus("name");
+      } else if (form.formState.errors.slug) {
+        form.setFocus("slug");
+      }
+    }
+  }
 
   return (
     <Form {...form}>
@@ -391,14 +401,25 @@ export function ValueSetForm({
             trigger={
               <Button
                 variant="outline_primary"
-                onClickCapture={async (e) => {
-                  if (!e.isTrusted) {
+                onClickCapture={(e) => {
+                  const name = form.getValues("name").trim();
+                  const slug = form.getValues("slug").trim();
+                  if (
+                    !name ||
+                    !slug ||
+                    slug.length < 5 ||
+                    slug.length > 25 ||
+                    !/^[-\w]+$/.test(slug)
+                  ) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.nativeEvent.stopImmediatePropagation();
+                    void validateAndFocus();
                     return;
                   }
-                  const isValid = await form.trigger();
-                  if (!isValid) {
-                    e.preventDefault();
-                  }
+                }}
+                onClick={async () => {
+                  await validateAndFocus();
                 }}
               >
                 <CareIcon icon={"l-eye"} className="h-4 w-4" />
