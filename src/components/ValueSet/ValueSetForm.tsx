@@ -399,7 +399,8 @@ export function ValueSetForm({
                     .safeParse({ name, slug });
                   if (!parsed.success) {
                     e.preventDefault();
-                    void form.trigger(["name", "slug"]);
+                    e.stopPropagation();
+                    void form.trigger(["name", "slug"], { shouldFocus: true });
                     return;
                   }
                 }}
