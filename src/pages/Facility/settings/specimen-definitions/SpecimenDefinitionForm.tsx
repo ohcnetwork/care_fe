@@ -3,8 +3,9 @@ import { t } from "i18next";
 import { PlusCircle, XCircle } from "lucide-react";
 import { navigate } from "raviger";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -146,6 +147,11 @@ export function SpecimenDefinitionForm({
     },
   });
 
+  const { fields, append, remove, update } = useFieldArray({
+    control: form.control,
+    name: "patient_preparation",
+  });
+
   React.useEffect(() => {
     if (initialData) return;
 
@@ -169,27 +175,6 @@ export function SpecimenDefinitionForm({
 
   const handleCapTypeSelect = (code: Code) => {
     form.setValue("type_tested.container.cap", code);
-  };
-
-  const handlePatientPreparationSelect = (code: Code, index: number) => {
-    const currentPreparations = form.getValues("patient_preparation");
-    const newPreparations = [...currentPreparations];
-    newPreparations[index] = code;
-    form.setValue("patient_preparation", newPreparations);
-  };
-
-  const addPatientPreparation = () => {
-    const currentPreparations = form.getValues("patient_preparation");
-    form.setValue("patient_preparation", [
-      ...currentPreparations,
-      { code: "", system: "", display: "" },
-    ]);
-  };
-
-  const removePatientPreparation = (index: number) => {
-    const currentPreparations = form.getValues("patient_preparation");
-    const newPreparations = currentPreparations.filter((_, i) => i !== index);
-    form.setValue("patient_preparation", newPreparations);
   };
 
   const cleanContainerData = (container: ContainerSpec | null | undefined) => {
@@ -217,7 +202,7 @@ export function SpecimenDefinitionForm({
     return cleanedContainer;
   };
 
-  const handleSubmit = (data: SpecimenDefinitionCreate) => {
+  const handleSubmit = (data: FormValues) => {
     onSubmit({
       ...data,
       patient_preparation:
@@ -411,42 +396,55 @@ export function SpecimenDefinitionForm({
               <FormField
                 control={form.control}
                 name="patient_preparation"
-                render={({ field }) => (
+                render={() => (
                   <FormItem className="flex flex-col">
                     <FormLabel>{t("patient_preparation")}</FormLabel>
                     <div className="space-y-2">
-                      {field.value.map(
-                        (preparation: Code | null, index: number) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <FormControl>
-                              <ValueSetSelect
-                                system="system-prepare_patient_prior_specimen_code"
-                                placeholder={t("select_patient_preparation")}
-                                onSelect={(code) =>
-                                  handlePatientPreparationSelect(code, index)
+                      {fields.map((field, index) => (
+                        <div key={field.id} className="flex items-center gap-2">
+                          <FormControl>
+                            <ValueSetSelect
+                              system="system-prepare_patient_prior_specimen_code"
+                              placeholder={t("select_patient_preparation")}
+                              value={field}
+                              onSelect={(code) => {
+                                const current = form.getValues(
+                                  "patient_preparation",
+                                );
+                                const isDuplicate = current.some(
+                                  (prep, i) =>
+                                    prep?.code === code.code && i !== index,
+                                );
+                                if (!isDuplicate) {
+                                  update(index, code);
+                                } else {
+                                  toast.error(
+                                    t("duplicate_patient_preparation"),
+                                  );
                                 }
-                                value={preparation}
-                                disabled={isLoading}
-                              />
-                            </FormControl>
-                            {field.value.length > 1 && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => removePatientPreparation(index)}
-                                className="h-10 w-10"
-                              >
-                                <XCircle className="h-5 w-5" />
-                              </Button>
-                            )}
-                          </div>
-                        ),
-                      )}
+                              }}
+                              disabled={isLoading}
+                            />
+                          </FormControl>
+                          {fields.length > 0 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => remove(index)}
+                              className="size-10"
+                            >
+                              <XCircle className="size-5" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={addPatientPreparation}
+                        onClick={() =>
+                          append({ code: "", display: "", system: "" })
+                        }
                         className="w-full"
                       >
                         <PlusCircle className="mr-2 h-4 w-4" />
