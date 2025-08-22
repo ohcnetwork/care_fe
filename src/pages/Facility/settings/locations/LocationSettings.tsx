@@ -98,7 +98,7 @@ export default function LocationSettings({
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
-        limit: 100,
+        limit: 1000,
         ordering: "sort_index",
       },
     }),
