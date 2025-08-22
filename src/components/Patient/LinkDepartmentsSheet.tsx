@@ -407,9 +407,9 @@ export default function LinkDepartmentsSheet({
             </div>
           )}
           <div className="mt-8 space-y-0.5">
-            <div className="border-t-1 border-dotted border-gray-500"></div>
-            <div className="border-t-1 border-dotted border-gray-500"></div>
-            <div className="border-t-1 border-dotted border-gray-500"></div>
+            <div className="border-t border-dotted border-gray-500"></div>
+            <div className="border-t border-dotted border-gray-500"></div>
+            <div className="border-t border-dotted border-gray-500"></div>
           </div>
           <div className="h-full flex flex-col mt-4">
             <div className="mt-4">
