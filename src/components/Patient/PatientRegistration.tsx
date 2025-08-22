@@ -49,8 +49,7 @@ import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import { BLOOD_GROUP_CHOICES, GENDER_TYPES } from "@/common/constants";
-import { GENDERS } from "@/common/constants";
+import { BLOOD_GROUP_CHOICES, GENDER_TYPES, GENDERS } from "@/common/constants";
 import countryList from "@/common/static/countries.json";
 
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -68,6 +67,7 @@ import {
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { Organization } from "@/types/organization/organization";
 
 interface PatientRegistrationPageProps {
@@ -82,7 +82,12 @@ export const BLOOD_GROUPS = BLOOD_GROUP_CHOICES.map((bg) => bg.id) as [
 export default function PatientRegistration(
   props: PatientRegistrationPageProps,
 ) {
-  const { enableMinimalPatientRegistration } = careConfig;
+  const {
+    patientRegistration: {
+      minGeoOrganizationLevelsRequired,
+      minimalPatientRegistration,
+    },
+  } = careConfig;
   const [{ phone_number }] = useQueryParams();
   const { patientId, facilityId } = props;
   const { t } = useTranslation();
@@ -92,7 +97,6 @@ export default function PatientRegistration(
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
-  const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
 
   const formSchema = useMemo(
     () =>
@@ -124,20 +128,22 @@ export default function PatientRegistration(
             .min(1, t("age_must_be_positive"))
             .max(120, t("age_must_be_below_120"))
             .optional(),
-          address: enableMinimalPatientRegistration
+          address: minimalPatientRegistration
             ? z.string().trim().optional()
             : z.string().trim().nonempty(t("address_is_required")),
           same_address: z.boolean(),
-          permanent_address: enableMinimalPatientRegistration
+          permanent_address: minimalPatientRegistration
             ? z.string().trim().optional()
             : z.string().trim().nonempty(t("field_required")),
-          pincode: enableMinimalPatientRegistration
+          pincode: minimalPatientRegistration
             ? validators().pincode.optional()
             : validators().pincode,
           nationality: z.string().nonempty(t("nationality_is_required")),
           geo_organization: z.string().uuid({
-            message: enableMinimalPatientRegistration
-              ? t("minimal_patient_registration_geo_organization_required")
+            message: minGeoOrganizationLevelsRequired
+              ? t("govt_organization_required_depth_validation", {
+                  depth: minGeoOrganizationLevelsRequired,
+                })
               : t("geo_organization_is_required"),
           }),
           _selected_levels: z.array(z.custom<Organization>()),
@@ -148,6 +154,7 @@ export default function PatientRegistration(
               value: z.string().optional(),
             }),
           ),
+          tags: z.array(z.string()),
         })
         .superRefine((data, ctx) => {
           if (data.age_or_dob === "dob" && !data.date_of_birth) {
@@ -172,9 +179,9 @@ export default function PatientRegistration(
               path: ["geo_organization"],
             });
           }
-          if (data.deceased_datetime) {
+          if (data._is_deceased) {
             const deathDate = dayjs(data.deceased_datetime);
-            if (!deathDate.isValid()) {
+            if (!deathDate?.isValid()) {
               ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: t("invalid_date_format", {
@@ -229,15 +236,23 @@ export default function PatientRegistration(
       nationality: defaultCountry,
       phone_number: phone_number || "",
       emergency_phone_number: "",
+      deceased_datetime: null,
       age_or_dob: "dob",
       date_of_birth: "",
       same_phone_number: false,
       same_address: true,
       _selected_levels: [],
       _is_deceased: false,
+      tags: [],
     },
     mode: "onSubmit",
   });
+
+  const tagIds = form.watch("tags");
+  const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
+  const selectedTags = tagQueries
+    .map((query) => query.data)
+    .filter(Boolean) as TagConfig[];
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
     mutationKey: ["create_patient"],
@@ -310,7 +325,7 @@ export default function PatientRegistration(
           : values.permanent_address,
         facility: facilityId,
         pincode: values.pincode || undefined,
-        tags: selectedTags.map((tag) => tag.id),
+        tags: values.tags,
         identifiers: editableIdentifiers,
       });
     }
@@ -391,6 +406,7 @@ export default function PatientRegistration(
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
         deceased_datetime: null,
+        tags: [], // This is only used for create patient
         identifiers: facility.patient_instance_identifier_configs.map(
           (identifierConfig) => {
             const identifier = patientQuery.data.instance_identifiers?.find(
@@ -504,42 +520,38 @@ export default function PatientRegistration(
                         data-cy="patient-phone-input"
                       />
                     </FormControl>
-                    <FormDescription>
-                      <FormField
-                        control={form.control}
-                        name="same_phone_number"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center gap-2">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={(v) => {
-                                  field.onChange(v);
-                                  if (v) {
-                                    form.setValue(
-                                      "emergency_phone_number",
-                                      form.watch("phone_number"),
-                                      { shouldValidate: true },
-                                    );
-                                  } else {
-                                    form.setValue(
-                                      "emergency_phone_number",
-                                      "",
-                                      { shouldValidate: true },
-                                    );
-                                  }
-                                }}
-                                data-cy="same-phone-number-checkbox"
-                                className="mt-2"
-                              />
-                            </FormControl>
-                            <FormLabel>
-                              {t("use_phone_number_for_emergency")}
-                            </FormLabel>
-                          </FormItem>
-                        )}
-                      />
-                    </FormDescription>
+                    <FormField
+                      control={form.control}
+                      name="same_phone_number"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center gap-2">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={(v) => {
+                                field.onChange(v);
+                                if (v) {
+                                  form.setValue(
+                                    "emergency_phone_number",
+                                    form.watch("phone_number"),
+                                    { shouldValidate: true },
+                                  );
+                                } else {
+                                  form.setValue("emergency_phone_number", "", {
+                                    shouldValidate: true,
+                                  });
+                                }
+                              }}
+                              data-cy="same-phone-number-checkbox"
+                              className="mt-2"
+                            />
+                          </FormControl>
+                          <FormLabel>
+                            {t("use_phone_number_for_emergency")}
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -623,14 +635,25 @@ export default function PatientRegistration(
 
               {/* Tag Selector (only for create) */}
               {!patientId && (
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">{t("tags")}</h3>
-                  <TagSelectorPopover
-                    selected={selectedTags}
-                    onChange={setSelectedTags}
-                    resource={TagResource.PATIENT}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("tags")}</FormLabel>
+                      <FormControl>
+                        <TagSelectorPopover
+                          selected={selectedTags}
+                          onChange={(tags) => {
+                            field.onChange(tags.map((tag) => tag.id));
+                          }}
+                          resource={TagResource.PATIENT}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
 
               <Tabs
@@ -755,7 +778,7 @@ export default function PatientRegistration(
                         form.setValue("_is_deceased", checked as boolean);
                         form.setValue(
                           "deceased_datetime",
-                          checked ? form.getValues("deceased_datetime") : "",
+                          checked ? form.getValues("deceased_datetime") : null,
                         );
                       }}
                       data-cy="is-deceased-checkbox"
@@ -810,9 +833,7 @@ export default function PatientRegistration(
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel
-                      aria-required={!enableMinimalPatientRegistration}
-                    >
+                    <FormLabel aria-required={!minimalPatientRegistration}>
                       {t("current_address")}
                     </FormLabel>
                     <FormControl>
@@ -830,35 +851,31 @@ export default function PatientRegistration(
                         data-cy="current-address-input"
                       />
                     </FormControl>
-                    <FormDescription>
-                      <FormField
-                        control={form.control}
-                        name="same_address"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center gap-2">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={(v) => {
-                                  field.onChange(v);
-                                  if (v) {
-                                    form.setValue(
-                                      "permanent_address",
-                                      form.getValues("address"),
-                                      { shouldValidate: true },
-                                    );
-                                  }
-                                }}
-                                data-cy="same-address-checkbox"
-                              />
-                            </FormControl>
-                            <FormLabel>
-                              {t("use_address_as_permanent")}
-                            </FormLabel>
-                          </FormItem>
-                        )}
-                      />
-                    </FormDescription>
+                    <FormField
+                      control={form.control}
+                      name="same_address"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center gap-2">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={(v) => {
+                                field.onChange(v);
+                                if (v) {
+                                  form.setValue(
+                                    "permanent_address",
+                                    form.getValues("address"),
+                                    { shouldValidate: true },
+                                  );
+                                }
+                              }}
+                              data-cy="same-address-checkbox"
+                            />
+                          </FormControl>
+                          <FormLabel>{t("use_address_as_permanent")}</FormLabel>
+                        </FormItem>
+                      )}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -870,9 +887,7 @@ export default function PatientRegistration(
                 disabled={form.watch("same_address")}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel
-                      aria-required={!enableMinimalPatientRegistration}
-                    >
+                    <FormLabel aria-required={!minimalPatientRegistration}>
                       {t("permanent_address")}
                     </FormLabel>
                     <FormControl>
@@ -888,9 +903,7 @@ export default function PatientRegistration(
                 name="pincode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel
-                      aria-required={!enableMinimalPatientRegistration}
-                    >
+                    <FormLabel aria-required={!minimalPatientRegistration}>
                       {t("pincode")}
                     </FormLabel>
                     <FormControl>
@@ -952,7 +965,8 @@ export default function PatientRegistration(
                         <FormControl>
                           <GovtOrganizationSelector
                             {...field}
-                            required={!enableMinimalPatientRegistration}
+                            required={minGeoOrganizationLevelsRequired == null}
+                            requiredDepth={minGeoOrganizationLevelsRequired}
                             selected={form.watch("_selected_levels")}
                             value={form.watch("geo_organization")}
                             onChange={(value) =>

@@ -1,164 +1,153 @@
 import dayjs from "dayjs";
-import { ChevronDown, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
+import { useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { CommandShortcut } from "@/components/ui/command";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-import EncounterActions from "@/components/Encounter/EncounterActions";
+import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
+
+import { useEncounterShortcutDisplays } from "@/hooks/useEncounterShortcuts";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import { formatDateTime, formatPatientAge } from "@/Utils/utils";
-import EncounterProperties from "@/pages/Encounters/EncounterProperties";
-import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
+import { formatPatientAge } from "@/Utils/utils";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
-export function EncounterHeader() {
+export function EncounterHeader({
+  encounter,
+  canWriteSelectedEncounter,
+}: {
+  encounter?: EncounterRead;
+  canWriteSelectedEncounter: boolean;
+}) {
   const { t } = useTranslation();
-  const {
-    currentEncounter: encounter,
-    selectedEncounterId,
-    currentEncounterId,
-  } = useEncounter();
+  const [actionsOpen, setActionsOpen] = useState(false);
+  const getShortcutDisplay = useEncounterShortcutDisplays();
+  const readOnly = !canWriteSelectedEncounter;
 
   if (!encounter) {
     return <CardListSkeleton count={1} />;
   }
 
-  const readOnly = selectedEncounterId !== currentEncounterId;
-
   const { patient, facility } = encounter;
-  const tags = [...patient.instance_tags, ...patient.facility_tags];
 
   return (
-    <Card className="p-2 md:p-4 flex flex-col md:flex-row md:justify-between gap-6">
-      <div className="flex flex-col md:flex-row gap-4 md:gap-8 md:items-end">
-        <div className="flex gap-3 items-center">
-          <div className="size-12">
-            <Avatar name={patient.name} />
-          </div>
-          <Link
-            href={`/facility/${facility.id}/patient/${patient.id}`}
-            className="flex flex-col"
-          >
-            <div className="flex gap-2 items-center">
-              <h5 className="text-lg font-semibold">{patient.name}</h5>
-              <ExternalLink className="size-4" />
+    <>
+      <Card className="p-2 rounded-sm shadow-sm border-none md:p-4 flex flex-col md:flex-row md:justify-between gap-6">
+        <div className="flex flex-col md:flex-row gap-4 xl:gap-8 xl:items-end">
+          <div className="flex gap-3 items-center">
+            <div className="size-12">
+              <Avatar name={patient.name} />
             </div>
-            <span className="text-gray-700">
-              {formatPatientAge(patient, true)},{" "}
-              {t(`GENDER__${patient.gender}`)}
-            </span>
-          </Link>
-        </div>
-        <div className="flex flex-col md:flex-row gap-1 md:gap-8 items-start">
-          <div className="md:hidden flex md:flex-col gap-0.5 items-center md:items-start">
-            <span className="text-xs text-gray-600 w-32 md:w-auto">
-              {t("start_date")}:{" "}
-            </span>
-            <span className="text-sm font-semibold">
-              {encounter.period.start
-                ? formatDateTime(encounter.period.start)
-                : "--"}
-            </span>
-          </div>
-          <div className="md:hidden flex md:flex-col gap-0.5 items-center md:items-start">
-            <span className="text-xs text-gray-600 w-32 md:w-auto">
-              {t("end_date")}:{" "}
-            </span>
-            <span className="text-sm font-semibold">
-              {encounter.period.end
-                ? formatDateTime(encounter.period.end)
-                : t("ongoing")}
-            </span>
-          </div>
-          {patient.instance_identifiers?.map((identifier) => (
-            <div
-              key={identifier.config.id}
-              className="flex md:flex-col gap-0.5 items-center md:items-start"
+            <Link
+              href={`/facility/${facility.id}/patient/${patient.id}`}
+              className="flex flex-col"
             >
-              <span className="text-xs text-gray-600 w-32 md:w-auto">
-                {identifier.config.config.display}:{" "}
-              </span>
-              <span className="text-sm font-semibold">{identifier.value}</span>
-            </div>
-          ))}
-          <div className="flex md:flex-col gap-0.5 items-center md:items-start">
-            <span className="text-xs text-gray-600 w-32 md:w-auto">
-              {t("patient_tags")}:{" "}
-            </span>
-            {tags.length ? (
-              <div className="flex flex-wrap gap-1">
-                {tags.map((tag) => (
-                  <Badge
-                    key={tag.id}
-                    variant="secondary"
-                    size="sm"
-                    className="text-xs"
-                  >
-                    {getTagHierarchyDisplay(tag)}
-                  </Badge>
-                ))}
+              <div className="flex gap-2 items-center">
+                <h5 className="text-lg font-semibold">{patient.name}</h5>
+                <ExternalLink className="size-4" />
               </div>
-            ) : (
-              <span className="text-sm font-semibold">--</span>
-            )}
+              <span className="text-gray-700">
+                {formatPatientAge(patient, true)},{" "}
+                {t(`GENDER__${patient.gender}`)}
+              </span>
+            </Link>
+          </div>
+          <div className="flex flex-wrap xl:gap-8 gap-2">
+            {patient.instance_identifiers?.map((identifier) => (
+              <div
+                key={identifier.config.id}
+                className="flex flex-col gap-1 items-start md:hidden xl:flex"
+              >
+                <span className="text-xs text-gray-700 md:w-auto">
+                  {identifier.config.config.display}:{" "}
+                </span>
+                <span className="text-sm font-semibold">
+                  {identifier.value}
+                </span>
+              </div>
+            ))}
+            <div className="flex flex-col gap-1 items-start">
+              <span className="text-xs text-gray-700">
+                {t("encounter_tags")}:
+              </span>
+              <div className="flex flex-wrap gap-2 text-sm">
+                {encounter.tags.length > 0 ? (
+                  <>
+                    {encounter.tags.map((tag) => (
+                      <Badge
+                        key={tag.id}
+                        variant="secondary"
+                        className="capitalize"
+                        title={tag.description}
+                      >
+                        {getTagHierarchyDisplay(tag)}
+                      </Badge>
+                    ))}
+                  </>
+                ) : (
+                  <p className="text-sm text-gray-500">{t("no_tags")}</p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-        <div className="md:hidden">
-          <EncounterProperties encounter={encounter} canEdit={false} />
-        </div>
-        {patient.deceased_datetime && (
-          <Badge variant="destructive" className="w-fit sm:self-center">
-            <h3 className="text-sm font-normal">
-              {t("time_of_death")}
-              {": "}
-              {dayjs(patient.deceased_datetime).format("DD MMM YYYY, hh:mm A")}
-            </h3>
-          </Badge>
-        )}
-      </div>
 
-      {!readOnly && (
-        <div className="flex flex-col items-end justify-center gap-4">
-          <PLUGIN_Component
-            __name="PatientInfoCardQuickActions"
-            encounter={encounter}
-            className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
-          />
+        {!readOnly && (
+          <div className="flex flex-col items-end justify-center gap-4">
+            <PLUGIN_Component
+              __name="PatientInfoCardQuickActions"
+              encounter={encounter}
+              className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
+            />
 
-          {!inactiveEncounterStatus.includes(encounter.status) && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="primary_gradient">
-                  {t("update")}
-                  <ChevronDown className="ml-2 size-4" />
+            <EncounterCommandDialog
+              open={actionsOpen}
+              onOpenChange={setActionsOpen}
+              trigger={
+                <Button
+                  variant="primary_gradient"
+                  onClick={() => setActionsOpen(true)}
+                  className="text-base font-semibold rounded-md"
+                >
+                  {t("encounter_actions")}
+                  <CommandShortcut className="text-white hidden md:inline">
+                    {getShortcutDisplay("open-command-dialog")}
+                  </CommandShortcut>
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-(--radix-dropdown-menu-trigger-width) sm:w-auto"
-              >
-                <EncounterActions encounter={encounter} layout="dropdown" />
-                <PLUGIN_Component
-                  __name="PatientInfoCardActions"
-                  encounter={encounter}
-                />
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+              }
+            />
+          </div>
+        )}
+      </Card>
+
+      {patient.deceased_datetime && (
+        <div className="mt-2">
+          <Card className="p-2 items-center rounded-sm shadow-sm border-red-400 bg-red-100 md:p-4 flex flex-wrap justify-center gap-4">
+            <Badge variant="danger" className="rounded-sm items-center px-1.5">
+              {t("deceased")}
+            </Badge>
+            <div className="text-sm font-semibold text-red-950">
+              <Trans
+                i18nKey="passed_away_on"
+                values={{
+                  date: dayjs(patient.deceased_datetime).format(
+                    "MMMM DD, YYYY",
+                  ),
+                  time: dayjs(patient.deceased_datetime).format("hh:mm A"),
+                }}
+              ></Trans>
+            </div>
+          </Card>
         </div>
       )}
-    </Card>
+    </>
   );
 }

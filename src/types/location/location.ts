@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { Code } from "@/types/base/code/code";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 
 export type AvailabilityStatus = "available" | "unavailable";
 
@@ -39,7 +39,7 @@ export interface LocationBase {
 
 export interface LocationDetail extends LocationBase {
   id: string;
-  organizations: FacilityOrganization[];
+  organizations: FacilityOrganizationRead[];
   sort_index: number;
 }
 
