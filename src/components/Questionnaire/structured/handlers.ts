@@ -216,18 +216,13 @@ export const structuredHandlers: {
     },
   },
   charge_item: {
-    getRequests: async (chargeItems, { facilityId, encounterId }) => {
-      if (!encounterId) return [];
+    getRequests: async (chargeItems, { facilityId }) => {
       return [
         {
           url: `/api/v1/facility/${facilityId}/charge_item/apply_charge_item_defs/`,
           method: "POST",
           body: {
-            requests: chargeItems.map((chargeItem) => ({
-              charge_item_definition: chargeItem.charge_item_definition,
-              quantity: chargeItem.quantity,
-              encounter: encounterId,
-            })),
+            requests: chargeItems,
           },
           reference_id: "charge_item",
         },

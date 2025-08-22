@@ -172,6 +172,14 @@ export default function ProductKnowledgeView({
               <p className="text-sm text-gray-500">{t("slug")}</p>
               <p className="text-gray-700">{product.slug}</p>
             </div>
+            <div>
+              <p className="text-sm text-gray-500">
+                {t("product_knowledge_alternate_identifier")}
+              </p>
+              <p className="text-gray-700">
+                {product.alternate_identifier || "-"}
+              </p>
+            </div>
           </CardContent>
         </Card>
 
@@ -246,14 +254,16 @@ export default function ProductKnowledgeView({
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid gap-6">
-                <div>
-                  <p className="mb-2 text-sm text-gray-500">
-                    {t("dosage_form")}
-                  </p>
-                  <div className="rounded-lg border bg-gray-50/50 p-3">
-                    <CodeDisplay code={product.definitional.dosage_form} />
+                {product.definitional.dosage_form && (
+                  <div>
+                    <p className="mb-2 text-sm text-gray-500">
+                      {t("dosage_form")}
+                    </p>
+                    <div className="rounded-lg border bg-gray-50/50 p-3">
+                      <CodeDisplay code={product.definitional.dosage_form} />
+                    </div>
                   </div>
-                </div>
+                )}
                 {product.definitional.intended_routes &&
                   product.definitional.intended_routes.length > 0 && (
                     <div>
