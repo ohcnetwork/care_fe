@@ -1,4 +1,4 @@
-import { ChevronRight } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ function FilterHeader({
         onClick={onBack}
         className="h-6 w-6 p-0"
       >
-        <ChevronRight className="h-4 w-4 rotate-180" />
+        <ChevronLeft className="h-4 w-4" />
       </Button>
       <span className="text-sm font-medium">{t(label)}</span>
     </div>
