@@ -20,9 +20,9 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 
 const EncounterHistory = (props: PatientProps) => {
   const { patientData, facilityId } = props;
@@ -40,7 +40,7 @@ const EncounterHistory = (props: PatientProps) => {
 
   const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounterHistory", patientId, qParams],
-    queryFn: query(routes.encounter.list, {
+    queryFn: query(encounterApi.list, {
       queryParams: {
         patient: patientId,
         limit: 5,

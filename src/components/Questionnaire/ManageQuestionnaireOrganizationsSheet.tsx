@@ -33,6 +33,7 @@ import {
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
@@ -151,7 +152,9 @@ export default function ManageQuestionnaireOrganizationsSheet({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedOrganizations, setSelectedOrganizations] = useState<
+    Organization[]
+  >([]);
 
   const { data: organizations, isLoading } = useQuery({
     queryKey: ["questionnaire", questionnaireId, "organizations"],
@@ -185,35 +188,43 @@ export default function ManageQuestionnaireOrganizationsSheet({
       setOpen(false);
     },
   });
-
-  // Initialize selected IDs when organizations are loaded
   useEffect(() => {
     if (organizations?.results) {
-      setSelectedIds(organizations.results.map((org) => org.id));
+      setSelectedOrganizations(organizations.results);
     }
   }, [organizations?.results]);
 
   const handleToggleOrganization = (orgId: string) => {
-    setSelectedIds((current) =>
-      current.includes(orgId)
-        ? current.filter((id) => id !== orgId)
-        : [...current, orgId],
-    );
+    setSelectedOrganizations((current) => {
+      const isSelected = current.some((org) => org.id === orgId);
+
+      if (isSelected) {
+        return current.filter((org) => org.id !== orgId);
+      } else {
+        const allOrgs = [
+          ...(organizations?.results ?? []),
+          ...(availableOrganizations?.results ?? []),
+        ];
+        const orgToAdd = allOrgs.find((org) => org.id === orgId);
+        if (orgToAdd) {
+          return [...current, orgToAdd];
+        }
+        return current;
+      }
+    });
   };
 
   const handleSave = () => {
+    const selectedIds = selectedOrganizations.map((org) => org.id);
     setOrganizations({ organizations: selectedIds });
   };
-
-  const selectedOrganizations = organizations?.results.filter((org) =>
-    selectedIds.includes(org.id),
-  );
-
   const hasChanges = !organizations?.results
     ? false
     : new Set(organizations.results.map((org) => org.id)).size !==
-        new Set(selectedIds).size ||
-      !organizations.results.every((org) => selectedIds.includes(org.id));
+        new Set(selectedOrganizations.map((org) => org.id)).size ||
+      !organizations.results.every((org) =>
+        selectedOrganizations.some((selected) => selected.id === org.id),
+      );
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -240,7 +251,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
               {t("selected_organizations")}
             </h3>
             <div className="flex flex-wrap gap-2">
-              {selectedOrganizations?.map((org) => (
+              {selectedOrganizations.map((org) => (
                 <Badge
                   key={org.id}
                   variant="secondary"
@@ -258,13 +269,11 @@ export default function ManageQuestionnaireOrganizationsSheet({
                   </Button>
                 </Badge>
               ))}
-              {!isLoading &&
-                (!selectedOrganizations ||
-                  selectedOrganizations.length === 0) && (
-                  <p className="text-sm text-gray-500">
-                    {t("no_organizations_selected")}
-                  </p>
-                )}
+              {!isLoading && selectedOrganizations.length === 0 && (
+                <p className="text-sm text-gray-500">
+                  {t("no_organizations_selected")}
+                </p>
+              )}
             </div>
           </div>
 
@@ -274,7 +283,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
               {t("add_organization", { count: 0 })}
             </h3>
             <OrgSelectorPopover
-              selected={selectedIds}
+              selected={selectedOrganizations.map((org) => org.id)}
               onToggle={handleToggleOrganization}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
@@ -291,7 +300,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
               variant="outline"
               onClick={() => {
                 if (organizations?.results) {
-                  setSelectedIds(organizations.results.map((org) => org.id));
+                  setSelectedOrganizations(organizations.results);
                 }
                 setOpen(false);
               }}

@@ -1,149 +1,97 @@
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
-import { Avatar } from "@/components/Common/Avatar";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 
 import query from "@/Utils/request/query";
-import { formatDateTime, formatName } from "@/Utils/utils";
+import { PaginatedResponse } from "@/Utils/request/types";
 import {
-  MEDICATION_STATEMENT_STATUS_STYLES,
+  MEDICATION_STATEMENT_STATUS,
   MedicationStatementRead,
+  MedicationStatementStatus,
 } from "@/types/emr/medicationStatement";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
+
+import { MedicationStatementTable } from "./MedicationStatementTable";
 
 interface MedicationStatementListProps {
   patientId: string;
   canAccess: boolean;
   className?: string;
+  showTimeLine?: boolean;
+  encounterId?: string;
+  status?: MedicationStatementStatus[];
 }
 
-interface MedicationRowProps {
-  statement: MedicationStatementRead;
-  isEnteredInError?: boolean;
-}
-
-function MedicationRow({ statement, isEnteredInError }: MedicationRowProps) {
-  const { t } = useTranslation();
-
-  return (
-    <TableRow
-      className={`rounded-md overflow-hidden bg-gray-50 ${
-        isEnteredInError ? "opacity-50" : ""
-      }`}
-    >
-      <TableCell className="font-medium first:rounded-l-md">
-        {statement.medication.display ?? statement.medication.code}
-      </TableCell>
-      <TableCell>{statement.dosage_text}</TableCell>
-      <TableCell>
-        <Badge
-          variant={MEDICATION_STATEMENT_STATUS_STYLES[statement.status]}
-          className="whitespace-nowrap capitalize"
-        >
-          {t(`medication_status__${statement.status}`)}
-        </Badge>
-      </TableCell>
-      <TableCell>
-        {[statement.effective_period?.start, statement.effective_period?.end]
-          .map((date, ind) =>
-            date ? formatDateTime(date) : ind === 1 ? t("ongoing") : "",
-          )
-          .join(" - ")}
-      </TableCell>
-      <TableCell>{statement.reason}</TableCell>
-      <TableCell className="max-w-[200px]">
-        {statement.note ? (
-          <div className="flex items-center gap-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs shrink-0"
-                >
-                  {t("see_note")}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-4">
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                  {statement.note}
-                </p>
-              </PopoverContent>
-            </Popover>
-          </div>
-        ) : (
-          "-"
-        )}
-      </TableCell>
-      <TableCell className="last:rounded-r-md">
-        <div className="flex items-center gap-2">
-          <Avatar
-            name={formatName(statement.created_by, true)}
-            className="size-4"
-            imageUrl={statement.created_by.read_profile_picture_url}
-          />
-          <span className="text-sm">{formatName(statement.created_by)}</span>
-        </div>
-      </TableCell>
-    </TableRow>
-  );
+interface GroupedMedications {
+  [year: string]: {
+    [date: string]: MedicationStatementRead[];
+  };
 }
 
 export function MedicationStatementList({
   patientId,
   canAccess,
   className = "",
+  showTimeLine = false,
+  encounterId,
+  status = MEDICATION_STATEMENT_STATUS.filter(
+    (status) => status !== "entered_in_error",
+  ),
 }: MedicationStatementListProps) {
   const { t } = useTranslation();
-  const [showEnteredInError, setShowEnteredInError] = useState(false);
 
-  const { data: medications, isLoading } = useQuery({
-    queryKey: ["medication_statements", patientId],
-    queryFn: query(medicationStatementApi.list, {
-      pathParams: { patientId },
-    }),
-    enabled: canAccess,
-  });
+  const LIMIT = showTimeLine ? 30 : 14;
+
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["infinite-medication_statements", patientId, encounterId],
+      queryFn: async ({ pageParam = 0, signal }) => {
+        const response = await query(medicationStatementApi.list, {
+          pathParams: { patientId },
+          queryParams: {
+            limit: LIMIT,
+            ordering: "-created_date",
+            offset: String(pageParam),
+            status: status.join(","),
+          },
+        })({ signal });
+        return response as PaginatedResponse<MedicationStatementRead>;
+      },
+      enabled: canAccess,
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) => {
+        const currentOffset = allPages.length * 100;
+        return currentOffset < lastPage.count ? currentOffset : null;
+      },
+    });
+
+  const medications = data?.pages.flatMap((page) => page.results) ?? [];
 
   if (isLoading) {
     return (
       <MedicationStatementListLayout className={className}>
-        <Skeleton className="h-[100px] w-full" />
+        <TableSkeleton count={5} />
       </MedicationStatementListLayout>
     );
   }
 
-  const filteredMedications = medications?.results?.filter(
-    (medication) =>
-      showEnteredInError || medication.status !== "entered_in_error",
-  );
-
-  const hasEnteredInErrorRecords = medications?.results?.some(
-    (medication) => medication.status === "entered_in_error",
-  );
-
-  if (!filteredMedications?.length) {
+  if (!medications?.length) {
+    if (showTimeLine) {
+      return (
+        <EmptyState
+          message={t("no_medication_statements")}
+          description={t("no_medication_statements_recorded_description")}
+        />
+      );
+    }
     return (
       <MedicationStatementListLayout className={className}>
         <p className="text-gray-500">{t("no_medication_statements")}</p>
@@ -151,73 +99,69 @@ export function MedicationStatementList({
     );
   }
 
+  if (showTimeLine) {
+    const groupedByYear = medications.reduce((acc, medication) => {
+      const dateStr = format(medication.created_date, "dd MMMM, yyyy");
+      const year = format(medication.created_date, "yyyy");
+      acc[year] ??= {};
+      acc[year][dateStr] ??= [];
+      acc[year][dateStr].push(medication);
+      return acc;
+    }, {} as GroupedMedications);
+
+    return (
+      <div className="space-y-8">
+        {Object.entries(groupedByYear).map(([year, groupedByDate]) => {
+          return (
+            <div key={year}>
+              <h2 className="text-sm font-medium text-indigo-700 border-y border-gray-300 py-2 w-fit pr-10">
+                {year}
+              </h2>
+              <div className="border-l border-gray-300 pt-5 ml-4">
+                {Object.entries(groupedByDate).map(([date, medications]) => {
+                  return (
+                    <div key={date} className="pb-6">
+                      <div className="flex items-start gap-4">
+                        <div className="flex flex-col items-center h-full">
+                          <div className="size-3 bg-cyan-300 ring-1 ring-cyan-700 rounded-full flex-shrink-0 -ml-1.5 mt-1"></div>
+                        </div>
+
+                        <div className="space-y-3 overflow-auto w-full">
+                          <h3 className="text-sm font-medium text-indigo-700">
+                            {format(date, "dd MMMM, yyyy")}
+                          </h3>
+                          <MedicationStatementTable statements={medications} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <MedicationStatementListLayout
-      medicationsCount={filteredMedications.length}
+      medicationsCount={medications.length}
       className={className}
     >
-      <>
-        <Table className="border-separate border-gray-200 border-spacing-y-0.5">
-          <TableHeader>
-            <TableRow className="rounded-md overflow-hidden bg-gray-100">
-              <TableHead className="first:rounded-l-md h-auto py-1 px-2 text-gray-600">
-                {t("medication")}
-              </TableHead>
-              <TableHead className="h-auto py-1 px-2 text-gray-600">
-                {t("dosage")}
-              </TableHead>
-              <TableHead className="h-auto py-1 px-2 text-gray-600">
-                {t("status")}
-              </TableHead>
-              <TableHead className="h-auto py-1 px-2 text-gray-600">
-                {t("medication_taken_between")}
-              </TableHead>
-              <TableHead className="h-auto py-1 px-2 text-gray-600">
-                {t("reason")}
-              </TableHead>
-              <TableHead className="h-auto py-1 px-2 text-gray-600">
-                {t("notes")}
-              </TableHead>
-              <TableHead className="last:rounded-r-md h-auto py-1 px-2 text-gray-600">
-                {t("logged_by")}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[
-              ...filteredMedications.filter(
-                (medication) => medication.status !== "entered_in_error",
-              ),
-              ...(showEnteredInError
-                ? filteredMedications.filter(
-                    (medication) => medication.status === "entered_in_error",
-                  )
-                : []),
-            ].map((statement) => (
-              <MedicationRow
-                key={statement.id}
-                statement={statement}
-                isEnteredInError={statement.status === "entered_in_error"}
-              />
-            ))}
-          </TableBody>
-        </Table>
-        {hasEnteredInErrorRecords && !showEnteredInError && (
-          <>
-            <div className="border-b border-dashed border-gray-200 my-2" />
-            <div className="flex justify-center">
-              <Button
-                variant="ghost"
-                size="xs"
-                onClick={() => setShowEnteredInError(true)}
-                className="text-xs underline text-gray-500"
-              >
-                {t("view_all")}
-              </Button>
-            </div>
-          </>
-        )}
-      </>
+      <MedicationStatementTable statements={medications} />
+      {hasNextPage && (
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {t("load_more")}
+          </Button>
+        </div>
+      )}
     </MedicationStatementListLayout>
   );
 }

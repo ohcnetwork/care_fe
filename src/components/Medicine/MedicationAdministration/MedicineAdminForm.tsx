@@ -1,4 +1,4 @@
-import { format, formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow, startOfMinute } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import RadioInput from "@/components/ui/RadioInput";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -25,7 +26,6 @@ import {
 
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
-import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import { formatName } from "@/Utils/utils";
 import {
@@ -33,7 +33,7 @@ import {
   MedicationAdministrationRequest,
   MedicationAdministrationStatus,
 } from "@/types/emr/medicationAdministration/medicationAdministration";
-import { MedicationRequestRead } from "@/types/emr/medicationRequest";
+import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
 
 interface MedicineAdminFormProps {
   medication: MedicationRequestRead;
@@ -64,9 +64,12 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   const [endTimeError, setEndTimeError] = useState("");
 
   const validateDateTime = (date: Date, isStartTime: boolean): string => {
-    const now = new Date();
-    const authoredOn = new Date(medication.authored_on);
-    const startTime = new Date(administrationRequest.occurrence_period_start);
+    const now = startOfMinute(new Date());
+    const authoredOn = startOfMinute(new Date(medication.authored_on));
+    const startTime = startOfMinute(
+      new Date(administrationRequest.occurrence_period_start),
+    );
+    date = startOfMinute(date);
 
     if (date > now) {
       return t(

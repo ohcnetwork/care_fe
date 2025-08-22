@@ -3,6 +3,8 @@ import dayjs from "dayjs";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -18,11 +20,16 @@ import {
 import { getPermissions } from "@/common/Permissions";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import { Patient } from "@/types/emr/patient";
+import patientApi from "@/types/emr/patient/patientApi";
+import {
+  TagConfig,
+  getTagHierarchyDisplay,
+} from "@/types/emr/tagConfig/tagConfig";
+
+import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
 
 export const PatientHome = (props: {
   facilityId?: string;
@@ -34,9 +41,9 @@ export const PatientHome = (props: {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
 
-  const { data: patientData, isLoading } = useQuery<Patient>({
+  const { data: patientData, isLoading } = useQuery({
     queryKey: ["patient", id],
-    queryFn: query(routes.patient.getPatient, {
+    queryFn: query(patientApi.getPatient, {
       pathParams: {
         id,
       },
@@ -66,6 +73,8 @@ export const PatientHome = (props: {
     return <div>{t("patient_not_found")}</div>;
   }
 
+  const tags = [...patientData.instance_tags, ...patientData.facility_tags];
+
   return (
     <Page
       title={t("patient_details")}
@@ -89,7 +98,7 @@ export const PatientHome = (props: {
             <div>
               <div className="flex flex-col justify-between gap-4 gap-y-2 md:flex-row">
                 <div className="flex flex-col gap-4 md:flex-row">
-                  <div className="flex flex-row gap-x-4">
+                  <div className="flex flex-row gap-x-4 items-center">
                     <div className="size-10 shrink-0 md:size-14">
                       <Avatar
                         className="size-10 font-semibold text-secondary-800 md:size-auto"
@@ -97,7 +106,7 @@ export const PatientHome = (props: {
                       />
                     </div>
 
-                    <div className="space-y-1">
+                    <div className="space-y-1 md:mr-8">
                       <div className="flex flex-col md:flex-row gap-x-4">
                         <h1
                           id="patient-name"
@@ -121,12 +130,16 @@ export const PatientHome = (props: {
                         )}
                       </div>
 
-                      <h3 className="text-sm font-medium text-gray-600 capitalize">
+                      <h3 className="text-sm font-medium text-gray-600 capitalize whitespace-nowrap">
                         {formatPatientAge(patientData, true)},{"  "}
                         {t(`GENDER__${patientData.gender}`)}, {"  "}
                         {patientData.blood_group?.replace("_", " ")}
                       </h3>
+
+                      <PatientTags tags={tags} className="md:hidden" />
                     </div>
+
+                    <PatientTags tags={tags} className="hidden md:flex" />
                   </div>
                 </div>
               </div>
@@ -174,71 +187,107 @@ export const PatientHome = (props: {
               />
             )}
           </div>
-          <div className="sticky top-20 mt-8 mx-4 md:mx-0 h-full lg:basis-1/6">
-            <section className="mb-4 space-y-2 md:flex">
-              <div className="w-full lg:mx-0">
-                <div className="font-semibold text-secondary-900">
-                  {t("actions")}
-                </div>
-                <div className="mt-2 h-full space-y-2">
-                  <div className="space-y-3 text-left text-lg font-semibold text-secondary-900">
-                    <div className="space-y-2">
-                      <PLUGIN_Component
-                        __name="PatientHomeActions"
-                        patient={patientData}
-                        facilityId={facilityId}
-                        className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
-                      />
+          {Tab !== PatientNotesTab && (
+            <div className="sticky top-20 mt-8 mx-4 md:mx-0 h-full lg:basis-1/6">
+              <section className="mb-4 space-y-2 md:flex">
+                <div className="w-full lg:mx-0">
+                  <div className="font-semibold text-secondary-900">
+                    {t("actions")}
+                  </div>
+                  <div className="mt-2 h-full space-y-2">
+                    <div className="space-y-3 text-left text-lg font-semibold text-secondary-900">
+                      <div className="space-y-2">
+                        <PLUGIN_Component
+                          __name="PatientHomeActions"
+                          patient={patientData}
+                          facilityId={facilityId}
+                          className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </section>
-            <hr className="border-gray-200" />
-            <div
-              id="actions"
-              className="my-2 flex h-full flex-col justify-between space-y-2"
-            >
-              <div className="my-1 rounded-sm py-2">
-                <div>
-                  <div className="text-xs font-normal leading-5 text-gray-600">
-                    {t("last_updated_by")}
-                    <div className="font-semibold text-gray-900">
-                      {patientData.updated_by?.first_name}{" "}
-                      {patientData.updated_by?.last_name}
+              </section>
+              <hr className="border-gray-200" />
+              <div
+                id="actions"
+                className="my-2 flex h-full flex-col justify-between space-y-2"
+              >
+                <div className="my-1 rounded-sm py-2">
+                  <div>
+                    <div className="text-xs font-normal leading-5 text-gray-600">
+                      {t("last_updated_by")}
+                      <div className="font-semibold text-gray-900">
+                        {patientData.updated_by?.first_name}{" "}
+                        {patientData.updated_by?.last_name}
+                      </div>
+                    </div>
+
+                    <div className="whitespace-normal text-xs font-normal text-gray-900">
+                      {patientData.modified_date ? (
+                        <RelativeDateTooltip date={patientData.modified_date} />
+                      ) : (
+                        "--:--"
+                      )}
                     </div>
                   </div>
 
-                  <div className="whitespace-normal text-xs font-normal text-gray-900">
-                    {patientData.modified_date ? (
-                      <RelativeDateTooltip date={patientData.modified_date} />
-                    ) : (
-                      "--:--"
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <div className="text-xs font-normal leading-5 text-gray-600">
-                    {t("patient_profile_created_by")}
-                    <div className="font-semibold text-gray-900">
-                      {patientData.created_by?.first_name}{" "}
-                      {patientData.created_by?.last_name}
+                  <div className="mt-4">
+                    <div className="text-xs font-normal leading-5 text-gray-600">
+                      {t("patient_profile_created_by")}
+                      <div className="font-semibold text-gray-900">
+                        {patientData.created_by?.first_name}{" "}
+                        {patientData.created_by?.last_name}
+                      </div>
                     </div>
-                  </div>
-                  <div className="whitespace-normal text-xs font-normal text-gray-900">
-                    {patientData.created_date ? (
-                      <RelativeDateTooltip date={patientData.created_date} />
-                    ) : (
-                      "--:--"
-                    )}
+                    <div className="whitespace-normal text-xs font-normal text-gray-900">
+                      {patientData.created_date ? (
+                        <RelativeDateTooltip date={patientData.created_date} />
+                      ) : (
+                        "--:--"
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </Page>
+  );
+};
+
+const PatientTags = ({
+  tags,
+  className,
+}: {
+  tags: TagConfig[];
+  className: string;
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className={cn("flex flex-col gap-0.5 items-start", className)}>
+      <span className="text-xs text-gray-600 w-32 md:w-auto">
+        {t("tags")}:{" "}
+      </span>
+      {tags.length ? (
+        <div className="flex flex-wrap gap-1">
+          {tags.map((tag) => (
+            <Badge
+              key={tag.id}
+              variant="secondary"
+              size="sm"
+              className="text-xs"
+            >
+              {getTagHierarchyDisplay(tag)}
+            </Badge>
+          ))}
+        </div>
+      ) : (
+        <span className="text-sm font-semibold">--</span>
+      )}
+    </div>
   );
 };

@@ -9,6 +9,7 @@ import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import RadioInput from "@/components/ui/RadioInput";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
@@ -36,22 +37,27 @@ import { Textarea } from "@/components/ui/textarea";
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 import UserSelector from "@/components/Common/UserSelector";
-import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
-import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
+import {
+  RESOURCE_CATEGORY_CHOICES,
+  RESOURCE_STATUS_CHOICES,
+} from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
 import validators from "@/Utils/validators";
-import facilityApi from "@/types/facility/facilityApi";
-import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
-import { UserBase } from "@/types/user/user";
+import patientApi from "@/types/emr/patient/patientApi";
+import publicFacilityApi from "@/types/facility/publicFacilityApi";
+import {
+  RESOURCE_REQUEST_STATUSES,
+  ResourceRequest,
+} from "@/types/resourceRequest/resourceRequest";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface ResourceProps {
   facilityId: number;
@@ -63,11 +69,11 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const { goBack } = useAppHistory();
   const { t } = useTranslation();
   const [{ related_patient }] = useQueryParams();
-  const [assignedToUser, setAssignedToUser] = useState<UserBase>();
+  const [assignedToUser, setAssignedToUser] = useState<UserReadMinimal>();
   const authUser = useAuthUser();
 
   const resourceFormSchema = z.object({
-    status: z.string().min(1, { message: t("field_required") }),
+    status: z.enum(RESOURCE_REQUEST_STATUSES),
     category: z.string().min(1, { message: t("field_required") }),
     assigned_facility: z.object({
       id: z.string(),
@@ -75,7 +81,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     }),
     emergency: z.enum(["true", "false"]),
     title: z.string().min(1, { message: t("field_required") }),
-    reason: z.string().min(1, { message: t("field_required") }),
+    reason: z
+      .string()
+      .trim()
+      .min(1, { message: t("field_required") }),
     referring_facility_contact_name: z
       .string()
       .min(1, { message: t("field_required") }),
@@ -88,7 +97,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
   const { data: patientData } = useQuery({
     queryKey: ["patient", related_patient],
-    queryFn: query(routes.patient.getPatient, {
+    queryFn: query(patientApi.getPatient, {
       pathParams: { id: String(related_patient) },
     }),
     enabled: !!related_patient,
@@ -185,7 +194,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   };
   const { data: facilities } = useQuery({
     queryKey: ["facilities", facilitySearch],
-    queryFn: query.debounced(facilityApi.getAllFacilities, {
+    queryFn: query.debounced(publicFacilityApi.getAll, {
       queryParams: {
         search_text: facilitySearch ? facilitySearch : undefined,
         limit: 50,
@@ -198,7 +207,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     value: facility.id,
   }));
 
-  const handleUserChange = (user: UserBase) => {
+  const handleUserChange = (user: UserReadMinimal) => {
     form.setValue("assigned_to", user.id, { shouldDirty: true });
     setAssignedToUser(user);
   };

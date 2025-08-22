@@ -28,7 +28,6 @@ import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 import { LocalStorageKeys } from "@/common/constants";
 
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { TokenData } from "@/types/auth/otp";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
@@ -50,9 +49,7 @@ export function LandingPage() {
     tokenData.token &&
     Object.keys(tokenData).length > 0 &&
     dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"));
-  const { data: organizationsResponse } = useQuery<
-    PaginatedResponse<Organization>
-  >({
+  const { data: organizationsResponse } = useQuery({
     queryKey: ["organizations", "level", "1"],
     queryFn: query(organizationApi.getPublicOrganizations, {
       queryParams: { level_cache: 1 },

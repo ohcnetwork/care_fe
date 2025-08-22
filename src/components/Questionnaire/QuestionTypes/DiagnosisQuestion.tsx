@@ -53,6 +53,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
 import { dateQueryString, formatName } from "@/Utils/utils";
+import { Code } from "@/types/base/code/code";
 import {
   DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_VERIFICATION_STATUS,
@@ -62,7 +63,6 @@ import {
   Onset,
 } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
-import { Code } from "@/types/questionnaire/code";
 import {
   QuestionnaireResponse,
   ResponseValue,
@@ -88,28 +88,6 @@ const DIAGNOSIS_INITIAL_VALUE: Omit<DiagnosisRequest, "encounter"> = {
   onset: { onset_datetime: new Date().toISOString().split("T")[0] },
   dirty: true,
 };
-
-function DiagnosisDatePicker({
-  onsetDatetime,
-  onChange,
-  disabled,
-  hasId,
-}: {
-  onsetDatetime?: string;
-  onChange: (date: Date | undefined) => void;
-  disabled?: boolean;
-  hasId: boolean;
-}) {
-  return (
-    <CombinedDatePicker
-      value={onsetDatetime ? new Date(onsetDatetime) : undefined}
-      onChange={onChange}
-      dateFormat="P"
-      disabled={disabled || hasId}
-      buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
-    />
-  );
-}
 
 function ClinicalStatusSelect({
   status,
@@ -216,15 +194,19 @@ function DiagnosisDetailsForm({
     <div className="flex flex-col gap-4">
       <div className="space-y-2">
         <Label className="text-sm">{t("date")}</Label>
-        <DiagnosisDatePicker
-          onsetDatetime={diagnosis.onset?.onset_datetime}
+        <CombinedDatePicker
+          value={
+            diagnosis.onset?.onset_datetime
+              ? new Date(diagnosis.onset.onset_datetime)
+              : undefined
+          }
           onChange={(date) =>
             onUpdate({
               onset: { onset_datetime: dateQueryString(date) },
             })
           }
-          disabled={disabled}
-          hasId={!!diagnosis.id}
+          disabled={disabled || !!diagnosis.id}
+          buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
         />
       </div>
       <div className="space-y-2">
@@ -694,13 +676,19 @@ const DiagnosisTableRow = ({
           </div>
         </TableCell>
         <TableCell className="py-1">
-          <DiagnosisDatePicker
-            onsetDatetime={diagnosis.onset?.onset_datetime}
-            onChange={(date) =>
-              onUpdate?.({ onset: { onset_datetime: dateQueryString(date) } })
+          <CombinedDatePicker
+            value={
+              diagnosis.onset?.onset_datetime
+                ? new Date(diagnosis.onset.onset_datetime)
+                : undefined
             }
-            disabled={disabled}
-            hasId={!!diagnosis.id}
+            onChange={(date) =>
+              onUpdate?.({
+                onset: { onset_datetime: dateQueryString(date) },
+              })
+            }
+            disabled={disabled || !!diagnosis.id}
+            buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </TableCell>
         <TableCell className="py-1">

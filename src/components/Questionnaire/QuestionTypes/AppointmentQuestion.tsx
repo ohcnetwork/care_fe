@@ -15,8 +15,12 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
+
 import { AppointmentSlotPicker } from "@/pages/Appointments/components/AppointmentSlotPicker";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
@@ -32,7 +36,7 @@ import {
   CreateAppointmentQuestion,
   TokenSlot,
 } from "@/types/scheduling/schedule";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface AppointmentQuestionProps {
   question: Question;
@@ -49,11 +53,15 @@ interface AppointmentQuestionProps {
 
 const APPOINTMENT_FIELDS: FieldDefinitions = {
   REASON: {
-    key: "reason_for_visit",
+    key: "note",
     required: true,
   },
   SLOT: {
     key: "slot_id",
+    required: true,
+  },
+  TAGS: {
+    key: "tags",
     required: true,
   },
 } as const;
@@ -70,7 +78,11 @@ export function validateAppointmentQuestion(
     },
     SLOT: {
       ...APPOINTMENT_FIELDS.SLOT,
-      required: required || value?.reason_for_visit !== undefined,
+      required: required || value?.note !== undefined,
+    },
+    TAGS: {
+      ...APPOINTMENT_FIELDS.TAGS,
+      required: required,
     },
   });
 }
@@ -84,18 +96,22 @@ export function AppointmentQuestion({
   facilityId,
 }: AppointmentQuestionProps) {
   const { t } = useTranslation();
-  const [resource, setResource] = useState<UserBase>();
+  const [resource, setResource] = useState<UserReadMinimal>();
   const [open, setOpen] = useState(false);
   const { hasError } = useFieldError(question.id, errors);
 
   const values =
     (questionnaireResponse.values?.[0]?.value as CreateAppointmentQuestion[]) ||
     [];
-  const value = values[0] ?? {};
+  const value = values[0] ?? { tags: [] };
 
   const handleUpdate = (updates: Partial<CreateAppointmentQuestion>) => {
     const updatedValue = { ...value, ...updates };
-    if (!updatedValue.reason_for_visit?.trim() && !updatedValue.slot_id) {
+    if (
+      !updatedValue.note?.trim() &&
+      !updatedValue.slot_id &&
+      !updatedValue.tags?.length
+    ) {
       updateQuestionnaireResponseCB(
         [],
         questionnaireResponse.question_id,
@@ -122,19 +138,37 @@ export function AppointmentQuestion({
     }
   };
 
+  const tagQueries = useTagConfigs({ ids: value.tags, facilityId });
+  const selectedTags = tagQueries
+    .map((query) => query.data)
+    .filter(Boolean) as TagConfig[];
+
   return (
     <div className="space-y-4">
       <div>
+        <div className="mb-4 mt-2">
+          <Label className="mb-2">{t("tags")}</Label>
+          <TagSelectorPopover
+            selected={selectedTags}
+            onChange={(tags) => {
+              handleUpdate({ tags: tags.map((tag) => tag.id) });
+            }}
+            resource={TagResource.APPOINTMENT}
+            className={cn(
+              hasError(APPOINTMENT_FIELDS.TAGS.key) && "ring-1 ring-red-500",
+            )}
+          />
+        </div>
         <Label className="mb-2">
-          {t("reason_for_visit")}
+          {t("note")}
           {question.required && <span className="text-red-500 ml-0.5">*</span>}
         </Label>
         <Textarea
-          placeholder={t("reason_for_visit_placeholder")}
-          value={value.reason_for_visit || ""}
+          placeholder={t("appointment_note")}
+          value={value.note || ""}
           onChange={(e) =>
             handleUpdate({
-              reason_for_visit: e.target.value || undefined,
+              note: e.target.value || undefined,
             })
           }
           disabled={disabled}
@@ -167,7 +201,7 @@ export function AppointmentQuestion({
                 setSelectedSlot(undefined);
               }
             }}
-            clearSelection={t("show_all")}
+            clearSelection
           />
         </div>
       </div>

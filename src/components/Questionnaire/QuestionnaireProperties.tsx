@@ -13,8 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import {
+  QuestionnaireDetail,
   QuestionStatus,
   SubjectType,
 } from "@/types/questionnaire/questionnaire";
@@ -22,10 +22,12 @@ import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 
 import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
 import CreateQuestionnaireTagSheet from "./CreateQuestionnaireTagSheet";
-import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
-import { OrgSelectorPopover } from "./ManageQuestionnaireOrganizationsSheet";
-import ManageQuestionnaireTagsSheet from "./ManageQuestionnaireTagsSheet";
-import { TagSelectorPopover } from "./ManageQuestionnaireTagsSheet";
+import ManageQuestionnaireOrganizationsSheet, {
+  OrgSelectorPopover,
+} from "./ManageQuestionnaireOrganizationsSheet";
+import ManageQuestionnaireTagsSheet, {
+  QuestionnaireTagSelectorPopover,
+} from "./ManageQuestionnaireTagsSheet";
 
 interface Organization {
   id: string;
@@ -192,7 +194,7 @@ function OrganizationSelector({
               data-cy="manage-organisation-questionnaire"
             >
               <Building className="mr-2 size-4" />
-              {t("manage_organization_one")}
+              {t("manage_organization_other")}
             </Button>
           }
         />
@@ -315,7 +317,7 @@ function TagSelector({
         )}
       </div>
 
-      <TagSelectorPopover
+      <QuestionnaireTagSelectorPopover
         title={t("select_tags")}
         selected={selection.selectedTags}
         onToggle={selection.onToggle}

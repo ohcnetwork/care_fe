@@ -427,7 +427,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                             <TableRow className="divide-x">
                               <TableHead className="w-fit"></TableHead>
                               {activeTypeConfig?.displayFields.map((field) => (
-                                <TableHead key={String(field.key)}>
+                                <TableHead key={String(field.label)}>
                                   {field.label}
                                 </TableHead>
                               ))}

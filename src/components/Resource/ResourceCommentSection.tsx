@@ -99,7 +99,7 @@ const CommentSection = ({ id }: { id: string }) => {
               ) : (
                 <ul>
                   {resourceComments?.results
-                    ? [...resourceComments.results].reverse().map((comment) => (
+                    ? resourceComments.results.map((comment) => (
                         <li key={comment.id} className="w-full">
                           <Comment {...comment} />
                         </li>
@@ -149,6 +149,7 @@ export const Comment = ({
         <div className="flex">
           <Avatar
             name={`${created_by.first_name} ${created_by.last_name}`}
+            imageUrl={created_by?.profile_picture_url}
             className="size-8 rounded-full object-cover"
           />
         </div>

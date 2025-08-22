@@ -2,8 +2,8 @@ import { Badge } from "@/components/ui/badge";
 
 import { UserBareMinimum } from "@/components/Users/models";
 
+import { Code } from "@/types/base/code/code";
 import { Period } from "@/types/questionnaire/base";
-import { Code } from "@/types/questionnaire/code";
 
 export enum MedicationStatementInformationSourceType {
   PATIENT = "patient",

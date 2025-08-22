@@ -8,6 +8,7 @@ import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -21,27 +22,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { PhoneInput } from "@/components/ui/phone-input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
 import LocationPicker from "@/components/Common/GeoLocationPicker";
-import { FacilityModel } from "@/components/Facility/models";
 
-import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
-import { validatePincode } from "@/common/validation";
-
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
-import { BaseFacility } from "@/types/facility/facility";
+import {
+  FACILITY_FEATURE_TYPES,
+  FACILITY_TYPES,
+  FacilityRead,
+} from "@/types/facility/facility";
+import facilityApi from "@/types/facility/facilityApi";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -64,14 +58,18 @@ export default function FacilityForm({
   const facilityFormSchema = z.object({
     facility_type: z.string().min(1, t("facility_type_required")),
     name: z.string().min(1, t("name_is_required")),
-    description: z.string().optional(),
+    description: z.string().trim().default(""),
     features: z.array(z.number()).default([]),
-    pincode: z.string().refine(validatePincode, t("invalid_pincode")),
+    pincode: validators().pincode,
     geo_organization: z.string().min(1, t("field_required")),
     address: z.string().min(1, t("address_is_required")),
     phone_number: validators().phoneNumber.required,
-    latitude: validators().coordinates.latitude.optional(),
-    longitude: validators().coordinates.longitude.optional(),
+    latitude: validators()
+      .coordinates.latitude.transform((val) => (val ? Number(val) : undefined))
+      .optional(),
+    longitude: validators()
+      .coordinates.longitude.transform((val) => (val ? Number(val) : undefined))
+      .optional(),
     is_public: z.boolean().default(false),
   });
 
@@ -84,7 +82,7 @@ export default function FacilityForm({
       name: "",
       description: "",
       features: [],
-      pincode: "",
+      pincode: undefined,
       geo_organization: organizationId || "",
       address: "",
       phone_number: "",
@@ -109,8 +107,8 @@ export default function FacilityForm({
   }, [org, organizationId]);
 
   const { mutate: createFacility, isPending } = useMutation({
-    mutationFn: mutate(routes.facility.create),
-    onSuccess: (_data: BaseFacility) => {
+    mutationFn: mutate(facilityApi.create),
+    onSuccess: (_data: FacilityRead) => {
       toast.success(t("facility_added_successfully"));
       queryClient.invalidateQueries({ queryKey: ["organizationFacilities"] });
       form.reset();
@@ -118,10 +116,10 @@ export default function FacilityForm({
     },
   });
   const { mutate: updateFacility, isPending: isUpdatePending } = useMutation({
-    mutationFn: mutate(routes.updateFacility, {
-      pathParams: { id: facilityId || "" },
+    mutationFn: mutate(facilityApi.update, {
+      pathParams: { facilityId: facilityId || "" },
     }),
-    onSuccess: (_data: FacilityModel) => {
+    onSuccess: (_data: FacilityRead) => {
       toast.success(t("facility_updated_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["organizationFacilities"],
@@ -139,8 +137,8 @@ export default function FacilityForm({
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(routes.getPermittedFacility, {
-      pathParams: { id: facilityId || "" },
+    queryFn: query(facilityApi.get, {
+      pathParams: { facilityId: facilityId || "" },
     }),
     enabled: !!facilityId,
   });
@@ -151,11 +149,15 @@ export default function FacilityForm({
     if (facilityId) {
       updateFacility({
         ...data,
-        latitude: data.latitude ?? 0,
-        longitude: data.longitude ?? 0,
+        latitude: data.latitude ? String(data.latitude) : undefined,
+        longitude: data.longitude ? String(data.longitude) : undefined,
       });
     } else {
-      createFacility(data);
+      createFacility({
+        ...data,
+        latitude: data.latitude ? String(data.latitude) : undefined,
+        longitude: data.longitude ? String(data.longitude) : undefined,
+      });
     }
   };
 
@@ -192,18 +194,14 @@ export default function FacilityForm({
   // Update form when facility data is loaded
   useEffect(() => {
     if (facilityData) {
-      setSelectedLevels([
-        facilityData.geo_organization as unknown as Organization,
-      ]);
+      setSelectedLevels([facilityData.geo_organization]);
       form.reset({
         facility_type: facilityData.facility_type,
         name: facilityData.name,
         description: facilityData.description || "",
         features: facilityData.features || [],
-        pincode: facilityData.pincode?.toString() || "",
-        geo_organization: (
-          facilityData.geo_organization as unknown as Organization
-        )?.id,
+        pincode: facilityData.pincode || undefined,
+        geo_organization: facilityData.geo_organization.id,
         address: facilityData.address,
         phone_number: facilityData.phone_number,
         latitude: facilityData.latitude
@@ -230,28 +228,19 @@ export default function FacilityForm({
               render={({ field }) => (
                 <FormItem className="max-w-full">
                   <FormLabel aria-required>{t("facility_type")}</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger
-                        data-cy="facility-type"
-                        className="max-w-full truncate"
-                        ref={field.ref}
-                      >
-                        <SelectValue placeholder={t("select_facility_type")} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {FACILITY_TYPES.map((type) => (
-                        <SelectItem
-                          key={type.text}
-                          value={type.text}
-                          data-cy="facility-type-option"
-                        >
-                          {type.text}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Autocomplete
+                    {...field}
+                    options={FACILITY_TYPES.map((type) => ({
+                      label: type.text,
+                      value: type.text,
+                    }))}
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    noOptionsMessage={t("no_facilities_found")}
+                    placeholder={t("select_facility_type")}
+                    inputPlaceholder={t("search_facility_type")}
+                    className="min-w-0"
+                  />
                   <FormMessage />
                 </FormItem>
               )}
@@ -351,8 +340,17 @@ export default function FacilityForm({
                     <Input
                       data-cy="facility-pincode"
                       placeholder={t("enter_pincode")}
+                      type="number"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       maxLength={6}
                       {...field}
+                      onChange={(e) => {
+                        const value = e.target.value
+                          ? Number(e.target.value)
+                          : undefined;
+                        field.onChange(value);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

@@ -20,17 +20,17 @@ export class Questionnaire {
   }
 
   clickRetiredStatus() {
-    cy.get("#status-retired").click();
+    cy.get("#status-retired").click({ force: true });
     return this;
   }
 
   clickDraftStatus() {
-    cy.get("#status-draft").click();
+    cy.get("#status-draft").click({ force: true });
     return this;
   }
 
   clickActiveStatus() {
-    cy.get("#status-active").click();
+    cy.get("#status-active").click({ force: true });
     return this;
   }
 

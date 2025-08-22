@@ -40,8 +40,10 @@ import {
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
-import { QUESTIONNAIRE_STATUS_COLORS } from "@/types/questionnaire/questionnaire";
-import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
+import {
+  QUESTIONNAIRE_STATUS_COLORS,
+  QuestionnaireDetail,
+} from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 function EmptyState() {
@@ -131,7 +133,7 @@ const RenderCard = ({
                     className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
                   >
                     <EyeIcon className="size-4 mr-1" />
-                    {t("View")}
+                    {t("view")}
                   </Button>
                 </div>
               </CardContent>

@@ -19,7 +19,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
-import { Code } from "@/types/questionnaire/code";
+import { Code } from "@/types/base/code/code";
 
 interface InstructionsPopoverProps {
   currentInstructions: Code[];

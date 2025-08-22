@@ -1,100 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
-import { useCallback, useState } from "react";
 import React from "react";
+
+import { useLocationState } from "@/hooks/useLocationState";
 
 import query from "@/Utils/request/query";
 import LocationContent from "@/pages/Facility/locations/LocationContent";
 import LocationNavbar from "@/pages/Facility/locations/LocationNavbar";
 import { LocationList as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
-
-// Types
-interface LocationState {
-  selectedLocationId: string | null;
-  selectedLocation: LocationListType | null;
-  expandedLocations: Set<string>;
-  searchQuery: string;
-  currentPage: number;
-}
-
-// Hook for location data management
-function useLocationState(
-  initialLocationId?: string,
-  facilityId?: string,
-): LocationState & {
-  handleLocationSelect: (location: LocationListType) => void;
-  handleToggleExpand: (locationId: string) => void;
-  handleSearchChange: (value: string) => void;
-  handlePageChange: (page: number) => void;
-} {
-  const [state, setState] = useState<LocationState>({
-    selectedLocationId: initialLocationId || null,
-    selectedLocation: null,
-    expandedLocations: new Set(),
-    searchQuery: "",
-    currentPage: 1,
-  });
-
-  const handleLocationSelect = useCallback(
-    (location: LocationListType) => {
-      if (!location.id) {
-        // Navigate to the base locations URL when deselecting
-        navigate(`/facility/${facilityId}/encounters/locations`);
-        setState((prev) => ({
-          ...prev,
-          selectedLocationId: null,
-          selectedLocation: null,
-          searchQuery: "",
-        }));
-        return;
-      }
-
-      // Navigate to the selected location URL
-      navigate(`/facility/${facilityId}/encounters/locations/${location.id}`);
-
-      setState((prev) => ({
-        ...prev,
-        selectedLocationId: location.id,
-        selectedLocation: location,
-        searchQuery: "",
-      }));
-    },
-    [facilityId],
-  );
-
-  const handleToggleExpand = useCallback((locationId: string) => {
-    setState((prev) => {
-      const next = new Set(prev.expandedLocations);
-      if (next.has(locationId)) {
-        next.delete(locationId);
-      } else {
-        next.add(locationId);
-      }
-      return { ...prev, expandedLocations: next };
-    });
-  }, []);
-
-  const handleSearchChange = useCallback((value: string) => {
-    setState((prev) => ({
-      ...prev,
-      searchQuery: value,
-      currentPage: 1, // Reset to first page when search changes
-    }));
-  }, []);
-
-  const handlePageChange = useCallback((page: number) => {
-    setState((prev) => ({ ...prev, currentPage: page }));
-  }, []);
-
-  return {
-    ...state,
-    handleLocationSelect,
-    handleToggleExpand,
-    handleSearchChange,
-    handlePageChange,
-  };
-}
 
 export default function LocationList({
   facilityId,
@@ -113,7 +26,11 @@ export default function LocationList({
     handleToggleExpand,
     handleSearchChange,
     handlePageChange,
-  } = useLocationState(locationId, facilityId);
+  } = useLocationState(
+    `/facility/${facilityId}/encounters/locations`,
+    "encounters",
+    locationId,
+  );
 
   // Fetch location details if locationId is provided
   const { data: locationDetail } = useQuery({

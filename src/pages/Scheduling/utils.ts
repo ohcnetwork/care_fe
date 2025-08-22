@@ -164,8 +164,8 @@ export const getFakeTokenNumber = (appointment: Appointment) => {
 };
 
 export const calculateSlotDuration = (
-  startTime: string,
-  endTime: string,
+  startTime: Time,
+  endTime: Time,
   numOfSlots: number = 1,
 ) => {
   const start = parse(startTime, "HH:mm", new Date());

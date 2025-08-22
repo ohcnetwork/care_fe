@@ -43,12 +43,14 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
       type: "text" as const,
       placeholder: t("search_by_username"),
       value: qParams.name || "",
+      display: t("username"),
     },
     {
       key: "phone_number",
       type: "phone" as const,
       placeholder: t("search_by_phone_number"),
       value: qParams.phone_number || "",
+      display: t("phone_number"),
     },
   ];
 

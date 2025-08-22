@@ -11,13 +11,13 @@ import { Markdown } from "@/components/ui/markdown";
 import { Avatar } from "@/components/Common/Avatar";
 import { LoginHeader } from "@/components/Common/LoginHeader";
 import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
-import { FacilityModel } from "@/components/Facility/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import publicFacilityApi from "@/types/facility/publicFacilityApi";
 
 import { FeatureBadge } from "./Utils";
 import { UserCard } from "./components/UserCard";
@@ -29,9 +29,9 @@ interface Props {
 export function FacilityDetailsPage({ id }: Props) {
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
-  const { data: facilityResponse, isLoading } = useQuery<FacilityModel>({
+  const { data: facilityResponse, isLoading } = useQuery({
     queryKey: ["facility", id],
-    queryFn: query(routes.getAnyFacility, {
+    queryFn: query(publicFacilityApi.getAny, {
       pathParams: { id },
     }),
   });
@@ -114,16 +114,16 @@ export function FacilityDetailsPage({ id }: Props) {
                 {[facility.address].filter(Boolean).join(", ")}
                 {facility.latitude && facility.longitude && (
                   <FacilityMapsLink
-                    latitude={facility.latitude.toString()}
-                    longitude={facility.longitude.toString()}
+                    latitude={facility.latitude}
+                    longitude={facility.longitude}
                   />
                 )}
               </p>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {facility.features?.map((featureId) => (
-                <FeatureBadge key={featureId} featureId={featureId as number} />
+              {facility.features?.map((featureId: number) => (
+                <FeatureBadge key={featureId} featureId={featureId} />
               ))}
             </div>
 
@@ -143,7 +143,7 @@ export function FacilityDetailsPage({ id }: Props) {
                 <UserCard key={user.username} user={user} facilityId={id} />
               ))}
             </div>
-            <Pagination totalCount={users.length ?? 0} />
+            <Pagination totalCount={docResponse?.count ?? 0} />
           </>
         )}
         {users.length === 0 && (

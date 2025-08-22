@@ -17,7 +17,6 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
-import { Patient } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -43,12 +42,14 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
       type: "text" as const,
       placeholder: t("search_by_patient_name"),
       value: qParams.name || "",
+      display: t("name"),
     },
     {
       key: "phone_number",
       type: "phone" as const,
       placeholder: t("search_by_phone_number"),
       value: qParams.phone_number || "",
+      display: t("phone_number"),
     },
   ];
 
@@ -128,7 +129,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
                   </CardContent>
                 </Card>
               ) : (
-                patients?.results?.map((patient: Patient) => (
+                patients?.results?.map((patient) => (
                   <Link
                     key={patient.id}
                     href={`/patient/${patient.id}`}

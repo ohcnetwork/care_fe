@@ -38,7 +38,9 @@ export function RecordItem<T>({
       {displayFields.map((field, index) => {
         const value = record[field.key as keyof T];
         const displayValue = field.render
-          ? field.render(value)
+          ? field.key == ""
+            ? field.render(record)
+            : field.render(value)
           : value?.toString() || "-";
 
         return (

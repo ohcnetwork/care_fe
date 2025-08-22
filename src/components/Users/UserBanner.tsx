@@ -3,11 +3,15 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 import { Avatar } from "@/components/Common/Avatar";
 
 import { formatName } from "@/Utils/utils";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 import { UserStatusIndicator } from "./UserListAndCard";
 
-export default function UserBanner({ userData }: { userData: UserBase }) {
+export default function UserBanner({
+  userData,
+}: {
+  userData: UserReadMinimal;
+}) {
   if (!userData) {
     return;
   }

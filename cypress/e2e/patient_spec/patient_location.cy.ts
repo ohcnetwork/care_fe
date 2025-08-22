@@ -1,5 +1,7 @@
-import { PatientLocation } from "@/pageObject/Patients/PatientLocation";
-import { LocationData } from "@/pageObject/Patients/PatientLocation";
+import {
+  LocationData,
+  PatientLocation,
+} from "@/pageObject/Patients/PatientLocation";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
 import { viewPort } from "@/utils/viewPort";
 
@@ -7,8 +9,6 @@ const facilityCreation = new FacilityCreation();
 const patientLocation = new PatientLocation();
 
 describe("Manage locations association to an encounter", () => {
-  const PARENT_LOCATION = "Ward";
-
   beforeEach(() => {
     cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
     cy.loginByApi("superadmin");
@@ -24,7 +24,7 @@ describe("Manage locations association to an encounter", () => {
     patientLocation
       .navigateToSettings()
       .clickLocationTab()
-      .openFirstExistingLocation(PARENT_LOCATION)
+      .openFirstExistingLocation()
       .clickChildAddLocation()
       .fillLocationData(roomData)
       .interceptLocationCreationRequest()
@@ -49,7 +49,7 @@ describe("Manage locations association to an encounter", () => {
     patientLocation
       .navigateToSettings()
       .clickLocationTab()
-      .openFirstExistingLocation(PARENT_LOCATION)
+      .openFirstExistingLocation()
       .clickChildAddLocation()
       .fillLocationData(houseData)
       .interceptLocationCreationRequest()
@@ -75,7 +75,7 @@ describe("Manage locations association to an encounter", () => {
     patientLocation
       .navigateToSettings()
       .clickLocationTab()
-      .openFirstExistingLocation(PARENT_LOCATION)
+      .openFirstExistingLocation()
       .clickChildAddLocation()
       .fillLocationData(bedData)
       .submitLocationForm()

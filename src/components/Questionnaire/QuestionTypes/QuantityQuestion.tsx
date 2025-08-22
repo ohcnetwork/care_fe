@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import { Code } from "@/types/questionnaire/code";
+import { Code } from "@/types/base/code/code";
 import type {
   QuestionnaireResponse,
   ResponseValue,

@@ -1,0 +1,29 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Project Structure
+
+This React TypeScript application follows a modular architecture with clear separation of concerns.
+
+## Main Entry Points
+- [src/index.tsx](mdc:src/index.tsx) - Application bootstrap
+- [src/App.tsx](mdc:src/App.tsx) - Root component
+- [src/vite.config.mts](mdc:vite.config.mts) - Vite configuration
+
+## Key Directories
+- `src/components/` - Reusable UI components
+- `src/components/ui/` - ShadCN UI components
+- `src/pages/` - Page components and routes
+- `src/Utils/` - Utility functions and helpers
+- `src/hooks/` - Custom React hooks
+- `src/context/` - React context providers
+- `src/types/` - TypeScript type definitions and typed API definitions
+- `src/Locale/` - Internationalization files
+- `src/CAREUI/` - Custom UI component library
+
+## Configuration Files
+- [tailwind.config.js](mdc:tailwind.config.js) - Tailwind CSS configuration
+- [tsconfig.json](mdc:tsconfig.json) - TypeScript configuration
+- [components.json](mdc:components.json) - Shadcn UI configuration

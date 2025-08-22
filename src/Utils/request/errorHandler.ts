@@ -85,7 +85,21 @@ function isStructuredError(err: HTTPError["cause"]): err is StructuredError {
 function handleStructuredErrors(cause: StructuredError) {
   for (const value of Object.values(cause)) {
     if (Array.isArray(value)) {
-      value.forEach((err) => toast.error(err));
+      value.forEach((err: any) => {
+        if (typeof err === "string") {
+          toast.error(err);
+        } else if (err && typeof err === "object") {
+          // Handle object errors - extract meaningful error messages
+          const errorFields = ["detail", "msg", "error", "message"] as const;
+          const errorMessage = errorFields.find(
+            (field) => err[field] && typeof err[field] === "string",
+          );
+
+          toast.error(
+            errorMessage ? err[errorMessage] : t("something_went_wrong"),
+          );
+        }
+      });
       return;
     }
     if (typeof value === "string") {

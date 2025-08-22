@@ -28,16 +28,16 @@ import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordio
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, properCase } from "@/Utils/utils";
-import { Encounter } from "@/types/emr/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
+import patientApi from "@/types/emr/patient/patientApi";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 
 interface Props {
-  encounter?: Encounter;
+  encounter?: EncounterRead;
   patientId: string;
   isPrintPreview?: boolean;
   onlyUnstructured?: boolean;
@@ -66,8 +66,6 @@ export function formatValue(
         : formatDateTime(value.toString(), "hh:mm A; DD/MM/YYYY");
     case "date":
       return formatDateTime(value.toString());
-    case "choice":
-      return properCase(value.toString());
     case "decimal":
     case "integer":
       return typeof value === "number" ? value.toString() : value.toString();
@@ -224,7 +222,7 @@ function QuestionGroup({
       >
         {leftQuestions.length > 0 && (
           <div className="w-full">
-            <Table className="table-fixed w-full">
+            <Table className="w-full">
               <TableBody>{leftQuestions.map(renderQuestionRow)}</TableBody>
             </Table>
           </div>
@@ -232,7 +230,7 @@ function QuestionGroup({
 
         {shouldUseTwoColumns && rightQuestions.length > 0 && (
           <div className="w-full">
-            <Table className="table-fixed w-full">
+            <Table className="w-full">
               <TableBody>{rightQuestions.map(renderQuestionRow)}</TableBody>
             </Table>
           </div>
@@ -263,9 +261,8 @@ function PrintButton({ item }: { item: QuestionnaireResponse }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="xs" className="[&_svg]:size-3">
+        <Button variant="link" size="xs">
           <Printer className="size-4" />
-          {t("print")}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -496,7 +493,7 @@ export default function QuestionnaireResponsesList({
 
   const { data: questionnarieResponses, isLoading } = useQuery({
     queryKey: ["questionnaireResponses", patientId, qParams],
-    queryFn: query.paginated(routes.getQuestionnaireResponses, {
+    queryFn: query.paginated(patientApi.getQuestionnaireResponses, {
       pathParams: { patientId },
       queryParams: {
         ...(!isPrintPreview && {
@@ -536,7 +533,7 @@ export default function QuestionnaireResponsesList({
               <ul className="grid gap-4">
                 {questionnarieResponses?.results?.map(
                   (item: QuestionnaireResponse) => (
-                    <li key={item.id} className="w-full">
+                    <li key={item.id}>
                       <ResponseCard
                         key={item.id}
                         item={item}

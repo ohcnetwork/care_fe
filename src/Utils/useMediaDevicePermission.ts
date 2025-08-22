@@ -2,11 +2,6 @@ import { useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-interface MediaPermissionOptions {
-  video?: boolean | { facingMode: string };
-  audio?: boolean | MediaTrackConstraints;
-}
-
 interface MediaPermissionResult {
   hasPermission: boolean;
   mediaStream: MediaStream | null;
@@ -18,7 +13,7 @@ export const useMediaDevicePermission = () => {
 
   const requestPermission = useCallback(
     async (
-      options: MediaPermissionOptions = { video: true },
+      options: MediaStreamConstraints = { video: true },
     ): Promise<MediaPermissionResult> => {
       try {
         toastShownRef.current = false;

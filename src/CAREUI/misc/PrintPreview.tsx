@@ -18,6 +18,7 @@ type Props = {
   disabled?: boolean;
   className?: string;
   title: string;
+  showBackButton?: boolean;
 };
 
 export default function PrintPreview(props: Props) {
@@ -31,10 +32,12 @@ export default function PrintPreview(props: Props) {
         title={props.title}
         options={
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => goBack()}>
-              <CareIcon icon="l-arrow-left" className="text-lg" />
-              {t("back")}
-            </Button>
+            {props.showBackButton !== false && (
+              <Button variant="outline" onClick={() => goBack()}>
+                <CareIcon icon="l-arrow-left" className="text-lg" />
+                {t("back")}
+              </Button>
+            )}
             <Button variant="primary" disabled={props.disabled} onClick={print}>
               <CareIcon icon="l-print" className="text-lg" />
               {t("print")}
@@ -44,7 +47,7 @@ export default function PrintPreview(props: Props) {
       >
         <div className="mx-auto my-4 max-w-[95vw] print:max-w-none sm:my-8">
           <ZoomProvider initialScale={initialScale}>
-            <ZoomTransform className="origin-top-left bg-white p-10 text-sm shadow-2xl transition-all duration-200 ease-in-out print:transform-none w-[50rem]">
+            <ZoomTransform className="origin-top-left bg-white p-10 text-sm shadow-2xl transition-all duration-200 ease-in-out print:transform-none max-w-[calc(100vw-1rem)]">
               <div
                 id="section-to-print"
                 className={cn("w-full print:py-10", props.className)}
