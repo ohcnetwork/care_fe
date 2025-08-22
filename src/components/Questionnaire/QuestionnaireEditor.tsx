@@ -347,7 +347,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   });
 
   const { data: availableTags, isLoading: isLoadingAvailableTags } = useQuery({
-    queryKey: ["tags", tagSearchQuery],
+    queryKey: ["questionnaireTags", tagSearchQuery],
     queryFn: query(questionnaireApi.tags.list, {
       queryParams: {
         name: tagSearchQuery || undefined,
