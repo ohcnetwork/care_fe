@@ -60,13 +60,13 @@ const SymptomCard = ({
                 <BadgeInfo size={16} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="mx-1">
+            <DropdownMenuContent className="mx-1 w-28 text-xs p-1" align="end">
               {symptom.note && (
                 <DropdownMenuItem
                   onClick={() => setShowNote(!showNote)}
-                  className="flex items-center gap-2 px-3 py-2 font-semibold"
+                  className="flex items-center gap-1.5 px-2 py-1.5 font-medium text-xs"
                 >
-                  <File className="size-4" />
+                  <File className="size-3.5" />
                   <span>{showNote ? t("hide_note") : t("see_note")}</span>
                 </DropdownMenuItem>
               )}
@@ -74,26 +74,26 @@ const SymptomCard = ({
               {!!onViewEncounter && (
                 <DropdownMenuItem
                   onClick={onViewEncounter}
-                  className="flex items-center gap-2 px-3 py-2 font-semibold"
+                  className="flex items-center gap-1.5 px-2 py-1.5 font-medium text-xs"
                 >
-                  <ExternalLink className="size-4" />
+                  <ExternalLink className="size-3.5" />
                   <span>{t("go_to_encounter")}</span>
                 </DropdownMenuItem>
               )}
 
               {(!!onViewEncounter || symptom.note) && (
-                <div className="my-2 border-t border-dashed border-gray-300" />
+                <div className="my-1 border-t border-dashed border-gray-300" />
               )}
 
-              <div className="p-1 text-sm">
+              <div className="p-1 text-xs">
                 <div className="text-gray-500">{t("reported_by")}:</div>
-                <div className="mt-1 flex items-center gap-2">
+                <div className="mt-1 flex items-center gap-1.5">
                   <Avatar
                     name={formatName(symptom.created_by)}
-                    className="size-6"
+                    className="size-5"
                     imageUrl={symptom.created_by.profile_picture_url}
                   />
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-medium text-gray-900 truncate">
                     {formatName(symptom.created_by)}
                   </span>
                 </div>
