@@ -1,4 +1,3 @@
-import { FileUploadModel } from "@/components/Patient/models";
 import { AuthUserModel, UpdatePasswordForm } from "@/components/Users/models";
 
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -9,8 +8,8 @@ import { Code } from "@/types/base/code/code";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { PlugConfig } from "@/types/plugConfig";
 import { BatchSubmissionResult } from "@/types/questionnaire/batch";
-import { CommentModel } from "@/types/resourceRequest/resourceRequest";
 import {
+  CommentModel,
   CreateResourceRequest,
   ResourceRequest,
   UpdateResourceRequest,
@@ -148,29 +147,6 @@ const routes = {
   getScheduleAbleFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/",
     TRes: Type<PaginatedResponse<UserReadMinimal>>(),
-  },
-
-  viewUpload: {
-    path: "/api/v1/files/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<FileUploadModel>>(),
-  },
-  retrieveUpload: {
-    path: "/api/v1/files/{id}/",
-    method: "GET",
-    TRes: Type<FileUploadModel>(),
-  },
-  editUpload: {
-    path: "/api/v1/files/{id}/",
-    method: "PUT",
-    TBody: Type<Partial<FileUploadModel>>(),
-    TRes: Type<FileUploadModel>(),
-  },
-  archiveUpload: {
-    path: "/api/v1/files/{id}/archive/",
-    method: "POST",
-    TRes: Type<FileUploadModel>(),
-    TBody: Type<{ archive_reason: string }>(),
   },
 
   // Request

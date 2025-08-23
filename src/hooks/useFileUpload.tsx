@@ -13,23 +13,23 @@ import { toast } from "sonner";
 
 import AudioCaptureDialog from "@/components/Files/AudioCaptureDialog";
 import CameraCaptureDialog from "@/components/Files/CameraCaptureDialog";
-import {
-  CreateFileResponse,
-  FileCategory,
-  FileUploadModel,
-} from "@/components/Patient/models";
-
-import { DEFAULT_ALLOWED_EXTENSIONS } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
 import { uploadMultipleFiles } from "@/Utils/request/uploadFile";
-import filesApi from "@/types/files/filesApi";
+import {
+  DEFAULT_ALLOWED_EXTENSIONS,
+  FILE_EXTENSIONS,
+  FileCategory,
+  FileReadMinimal,
+  FileType,
+} from "@/types/files/file";
+import fileApi from "@/types/files/fileApi";
 
 export type FileUploadOptions = {
   multiple?: boolean;
-  type: string;
+  type: FileType;
   category?: FileCategory;
-  onUpload?: (file: FileUploadModel) => void;
+  onUpload?: (file: FileReadMinimal) => void;
   // if allowed, will fallback to the name of the file if a seperate filename is not defined.
   allowNameFallback?: boolean;
   compress?: boolean;
@@ -70,25 +70,13 @@ export type FileUploadReturn = {
   previewing?: boolean;
 };
 
-// Array of image extensions
-const ExtImage: string[] = [
-  "jpeg",
-  "jpg",
-  "png",
-  "gif",
-  "svg",
-  "bmp",
-  "webp",
-  "jfif",
-];
-
 export default function useFileUpload(
   options: FileUploadOptions,
 ): FileUploadReturn {
   const {
     type: fileType,
     onUpload,
-    category = "unspecified",
+    category = FileCategory.UNSPECIFIED,
     multiple,
     allowNameFallback = true,
   } = options;
@@ -142,8 +130,8 @@ export default function useFileUpload(
     setFiles((prev) => [...prev, ...selectedFiles]);
     if (options.compress) {
       selectedFiles.forEach((file) => {
-        const ext: string = file.name.split(".")[1];
-        if (ExtImage.includes(ext)) {
+        const ext = file.name.split(".").pop()?.toLowerCase();
+        if (ext && (FILE_EXTENSIONS.IMAGE as readonly string[]).includes(ext)) {
           const options = {
             initialQuality: 0.6,
             alwaysKeepResolution: true,
@@ -199,18 +187,13 @@ export default function useFileUpload(
   };
   const { mutateAsync: markUploadComplete, error: markUploadCompleteError } =
     useMutation({
-      mutationFn: (body: {
-        data: CreateFileResponse;
-        associating_id: string;
-      }) =>
-        mutate(filesApi.markUploadCompleted, {
-          pathParams: {
-            id: body.data.id,
-          },
-        })(body),
-      onSuccess: (_, { data, associating_id }) => {
+      mutationFn: (fileId: string) =>
+        mutate(fileApi.markUploadCompleted, {
+          pathParams: { fileId },
+        })(undefined),
+      onSuccess: (data) => {
         queryClient.invalidateQueries({
-          queryKey: ["files", fileType, associating_id],
+          queryKey: ["files", fileType, data.associating_id],
         });
         toast.success(t("file_uploaded"));
         setError(null);
@@ -219,24 +202,7 @@ export default function useFileUpload(
     });
 
   const { mutateAsync: createUpload } = useMutation({
-    mutationFn: (body: {
-      original_name: string;
-      file_type: string;
-      name: string;
-      associating_id: string;
-      file_category: FileCategory;
-      mime_type: string;
-    }) =>
-      mutate(filesApi.createUpload, {
-        body: {
-          original_name: body.original_name,
-          file_type: body.file_type,
-          name: body.name,
-          associating_id: body.associating_id,
-          file_category: body.file_category,
-          mime_type: body.mime_type,
-        },
-      })(body),
+    mutationFn: mutate(fileApi.create),
   });
 
   const handleUpload = async (
@@ -280,12 +246,12 @@ export default function useFileUpload(
 
     setUploading(true);
 
-    const { errors } = await uploadMultipleFiles(
+    const { errors: uploadResultErrors } = await uploadMultipleFiles(
       filesToUpload,
       async (file, index) =>
         await createUpload({
           original_name: file.name ?? "",
-          file_type: fileType,
+          file_type: fileType as FileType,
           name:
             allowNameFallback && uploadFileNames[index] === "" && file
               ? file.name
@@ -294,8 +260,8 @@ export default function useFileUpload(
           file_category: category,
           mime_type: file.type ?? "",
         }),
-      async ({ data, associating_id }) => {
-        await markUploadComplete({ data, associating_id });
+      async ({ data, associating_id: _associating_id }) => {
+        await markUploadComplete(data.id);
         if (markUploadCompleteError) {
           toast.error(t("file_error__mark_complete_failed"));
         }
@@ -308,9 +274,9 @@ export default function useFileUpload(
     );
 
     setUploading(false);
-    setFiles(errors);
-    setUploadFileNames(errors?.map((f) => f.name) ?? []);
-    if (errors.length > 0) setError(t("file_error__network"));
+    setFiles(uploadResultErrors);
+    setUploadFileNames(uploadResultErrors?.map((f: File) => f.name) ?? []);
+    if (uploadResultErrors.length > 0) setError(t("file_error__network"));
     setCameraModalOpen(false);
   };
 
