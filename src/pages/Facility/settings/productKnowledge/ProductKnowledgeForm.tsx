@@ -172,7 +172,7 @@ function ProductKnowledgeFormContent({
         slug: existingData.slug,
         product_type: existingData.product_type,
         status: existingData.status,
-        alternate_identifier: existingData.alternate_identifier,
+        alternate_identifier: existingData.alternate_identifier || "",
         code: existingData.code?.code ? existingData.code : null,
         names: existingData.names || [],
         storage_guidelines: existingData.storage_guidelines || [],
