@@ -184,7 +184,7 @@ export const DiagnosisTable = ({
       ))}
     </div>
   ) : (
-    <div className="max-w-6xl mx-auto overflow-x-auto">
+    <div className="overflow-x-auto">
       <div className="min-w-xl pb-2">
         <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-y-2">
           <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm">
