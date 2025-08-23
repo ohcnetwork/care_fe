@@ -117,7 +117,6 @@ export function SpecimenDefinitionForm({
   isLoading,
 }: SpecimenDefinitionFormProps) {
   const { t } = useTranslation();
-  const [hasUserInteracted, setHasUserInteracted] = React.useState(false);
   const { facilityId } = useCurrentFacility();
 
   const form = useForm<FormValues>({
@@ -131,20 +130,43 @@ export function SpecimenDefinitionForm({
       type_collected: initialData?.type_collected,
       patient_preparation: initialData?.patient_preparation ?? [],
       collection: initialData?.collection ?? undefined,
-      type_tested: initialData?.type_tested ?? {
-        is_derived: false,
-        preference: Preference.preferred,
-        container: {
-          description: initialData?.type_tested?.container?.description,
-          capacity: initialData?.type_tested?.container?.capacity,
-          minimum_volume: initialData?.type_tested?.container?.minimum_volume,
-          cap: initialData?.type_tested?.container?.cap,
-          preparation: initialData?.type_tested?.container?.preparation,
-        },
-        requirement: initialData?.type_tested?.requirement,
-        retention_time: initialData?.type_tested?.retention_time,
-        single_use: false,
-      },
+      type_tested: initialData?.type_tested
+        ? {
+            is_derived: initialData.type_tested.is_derived ?? false,
+            preference:
+              initialData.type_tested.preference ?? Preference.preferred,
+            container: {
+              description: initialData.type_tested.container?.description ?? "",
+              capacity: initialData.type_tested.container?.capacity ?? null,
+              minimum_volume: initialData.type_tested.container
+                ?.minimum_volume ?? {
+                quantity: null,
+                string: "",
+              },
+              cap: initialData.type_tested.container?.cap ?? undefined,
+              preparation: initialData.type_tested.container?.preparation ?? "",
+            },
+            requirement: initialData.type_tested.requirement ?? "",
+            retention_time: initialData.type_tested.retention_time ?? null,
+            single_use: initialData.type_tested.single_use ?? false,
+          }
+        : {
+            is_derived: false,
+            preference: Preference.preferred,
+            container: {
+              description: "",
+              capacity: null,
+              minimum_volume: {
+                quantity: null,
+                string: "",
+              },
+              cap: undefined,
+              preparation: "",
+            },
+            requirement: "",
+            retention_time: null,
+            single_use: false,
+          },
     },
   });
 
@@ -164,18 +186,6 @@ export function SpecimenDefinitionForm({
       }
     });
     return () => subscription.unsubscribe();
-  }, [form, initialData]);
-
-  React.useEffect(() => {
-    if (initialData) {
-      // Reset interaction state when loading edit data
-      setHasUserInteracted(false);
-
-      const subscription = form.watch(() => {
-        setHasUserInteracted(true);
-      });
-      return () => subscription.unsubscribe();
-    }
   }, [form, initialData]);
 
   const handleTypeCollectedSelect = (code: Code) => {
@@ -229,12 +239,6 @@ export function SpecimenDefinitionForm({
         : undefined,
     });
   };
-
-  const isFormDisabled = initialData
-    ? !hasUserInteracted // Edit mode: disabled until user actually changes something
-    : !form.watch("title")?.trim() ||
-      !form.watch("description")?.trim() ||
-      !form.watch("type_collected"); // Create mode
 
   return (
     <Form {...form}>
@@ -778,7 +782,7 @@ export function SpecimenDefinitionForm({
           >
             {t("cancel")}
           </Button>
-          <Button type="submit" disabled={isLoading || isFormDisabled}>
+          <Button type="submit" disabled={isLoading || !form.formState.isDirty}>
             {t("save")}
           </Button>
         </div>

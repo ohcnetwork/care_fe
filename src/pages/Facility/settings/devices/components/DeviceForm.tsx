@@ -123,8 +123,15 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
     availability_status: "available",
     manufacturer: undefined,
     manufacture_date: undefined,
+    expiration_date: undefined,
+    lot_number: undefined,
+    serial_number: undefined,
     registered_name: "",
+    user_friendly_name: undefined,
+    model_number: undefined,
+    part_number: undefined,
     contact: [],
+    metadata: undefined,
   };
 
   const form = useForm({
@@ -613,10 +620,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
           </Button>
           <Button
             type="submit"
-            disabled={
-              isPending ||
-              (device ? !form.formState.isDirty : !form.formState.isValid)
-            }
+            disabled={isPending || !form.formState.isDirty}
             data-cy="save-device-button"
           >
             {isPending ? t("saving") : t("save")}
