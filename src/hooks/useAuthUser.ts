@@ -3,7 +3,7 @@ import { createContext, useContext } from "react";
 import {
   LoginRequest,
   LoginResponse,
-  MFALoginRequest,
+  MfaLoginRequest,
 } from "@/types/auth/auth";
 import { TokenData } from "@/types/otp/otp";
 import { CurrentUserRead } from "@/types/user/user";
@@ -11,7 +11,7 @@ import { CurrentUserRead } from "@/types/user/user";
 interface AuthContextType {
   user: CurrentUserRead | undefined;
   signIn: (creds: LoginRequest) => Promise<LoginResponse>;
-  verifyMFA: (data: MFALoginRequest) => Promise<LoginResponse>;
+  verifyMFA: (data: MfaLoginRequest) => Promise<LoginResponse>;
   isAuthenticating: boolean;
   isVerifyingMFA: boolean;
   signOut: () => Promise<void>;

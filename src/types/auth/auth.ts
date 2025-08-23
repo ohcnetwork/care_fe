@@ -14,7 +14,7 @@ export interface LoginRequest {
   password: string;
 }
 
-export type LoginResponse = JwtTokenObtainPair | MFAAuthenticationToken;
+export type LoginResponse = JwtTokenObtainPair | MfaAuthenticationToken;
 
 export interface ForgotPasswordRequest {
   username: string;
@@ -42,10 +42,10 @@ export interface UpdatePasswordRequest {
 
 /** MFA related types */
 
-export type MFAMethod = "totp" | "backup";
+export type MfaMethod = "totp" | "backup";
 
-export interface MFAOption {
-  id: MFAMethod;
+export interface MfaOption {
+  id: MfaMethod;
   label: string;
 }
 
@@ -53,25 +53,25 @@ export interface PasswordRequest {
   password: string;
 }
 
-export interface TOTPSetupResponse {
+export interface TotpSetupResponse {
   uri: string;
   secret_key: string;
 }
 
-export interface TOTPVerifyRequest {
+export interface TotpVerifyRequest {
   code: string;
 }
 
-export interface BackupCodesRespone {
+export interface BackupCodesResponse {
   backup_codes: string[];
 }
 
-export interface MFALoginRequest {
-  method: MFAMethod;
+export interface MfaLoginRequest {
+  method: MfaMethod;
   code: string;
   temp_token: string;
 }
 
-export interface MFAAuthenticationToken {
+export interface MfaAuthenticationToken {
   temp_token: string;
 }

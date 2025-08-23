@@ -3,8 +3,8 @@ import { BatchRequestBody } from "@/types/base/batch/batch";
 import { Code } from "@/types/base/code/code";
 import { PlugConfig } from "@/types/plugConfig";
 import { BatchSubmissionResult } from "@/types/questionnaire/batch";
-import { CommentModel } from "@/types/resourceRequest/resourceRequest";
 import {
+  CommentModel,
   CreateResourceRequest,
   ResourceRequest,
   UpdateResourceRequest,
