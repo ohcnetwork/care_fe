@@ -1,17 +1,17 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import {
-  BackupCodesRespone,
+  BackupCodesResponse,
   CheckResetTokenRequest,
   ForgotPasswordRequest,
   JwtTokenObtainPair,
   LoginRequest,
   LoginResponse,
-  MFALoginRequest,
+  MfaLoginRequest,
   PasswordRequest,
   PasswordResetResponse,
   ResetPasswordRequest,
-  TOTPSetupResponse,
-  TOTPVerifyRequest,
+  TotpSetupResponse,
+  TotpVerifyRequest,
   UpdatePasswordRequest,
 } from "@/types/auth/auth";
 
@@ -77,19 +77,19 @@ export default {
       path: "/api/v1/mfa/totp/setup/",
       method: HttpMethod.POST,
       TBody: Type<PasswordRequest>(),
-      TRes: Type<TOTPSetupResponse>(),
+      TRes: Type<TotpSetupResponse>(),
     },
     verify: {
       path: "/api/v1/mfa/totp/verify/",
       method: HttpMethod.POST,
-      TBody: Type<TOTPVerifyRequest>(),
-      TRes: Type<BackupCodesRespone>(),
+      TBody: Type<TotpVerifyRequest>(),
+      TRes: Type<BackupCodesResponse>(),
     },
     regenerateBackupCodes: {
       path: "/api/v1/mfa/totp/regenerate_backup_codes/",
       method: HttpMethod.POST,
       TBody: Type<PasswordRequest>(),
-      TRes: Type<BackupCodesRespone>(),
+      TRes: Type<BackupCodesResponse>(),
     },
     disable: {
       path: "/api/v1/mfa/totp/disable/",
@@ -106,7 +106,7 @@ export default {
     login: {
       path: "/api/v1/mfa/login/",
       method: HttpMethod.POST,
-      TBody: Type<MFALoginRequest>(),
+      TBody: Type<MfaLoginRequest>(),
       TRes: Type<JwtTokenObtainPair>(),
     },
   },

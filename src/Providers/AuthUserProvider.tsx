@@ -16,7 +16,7 @@ import { userAtom } from "@/atoms/user-atom";
 import {
   JwtTokenObtainPair,
   LoginResponse,
-  MFAAuthenticationToken,
+  MfaAuthenticationToken,
 } from "@/types/auth/auth";
 import authApi from "@/types/auth/authApi";
 import { TokenData } from "@/types/auth/otp";
@@ -28,7 +28,7 @@ interface Props {
   otpAuthorized: React.ReactNode;
 }
 
-const isMFAResponse = (data: LoginResponse): data is MFAAuthenticationToken => {
+const isMFAResponse = (data: LoginResponse): data is MfaAuthenticationToken => {
   return "temp_token" in data;
 };
 
