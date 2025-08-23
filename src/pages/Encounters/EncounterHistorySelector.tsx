@@ -226,7 +226,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             {t("chosen_encounter")}
           </h2>
           <div className="space-y-2">
-            <HoverCard>
+            <HoverCard openDelay={150}>
               <HoverCardTrigger>
                 <EncounterCard
                   encounter={primaryEncounter}
@@ -234,7 +234,10 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
                   onSelect={() => handleSelect(null)}
                 />
               </HoverCardTrigger>
-              <HoverCardContent className="flex flex-col gap-2 p-4 border border-gray-200 rounded-md max-w-90">
+              <HoverCardContent
+                className="flex flex-col gap-2 p-4 border border-gray-200 rounded-md max-w-90 shadow-lg"
+                align="start"
+              >
                 <EncounterHoverCard encounter={primaryEncounter} />
               </HoverCardContent>
             </HoverCard>
@@ -330,7 +333,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
                 }
 
                 acc.push(
-                  <HoverCard>
+                  <HoverCard openDelay={150}>
                     <HoverCardTrigger>
                       <EncounterCard
                         key={encounter.id}
@@ -339,7 +342,10 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
                         onSelect={handleSelect}
                       />
                     </HoverCardTrigger>
-                    <HoverCardContent className="flex flex-col gap-2 p-4 border border-gray-200 rounded-md max-w-90">
+                    <HoverCardContent
+                      className="flex flex-col gap-2 p-4 border border-gray-200 rounded-md shadow-lg"
+                      align="start"
+                    >
                       <EncounterHoverCard encounter={encounter} />
                     </HoverCardContent>
                   </HoverCard>,
