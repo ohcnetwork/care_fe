@@ -17,17 +17,17 @@ export interface ChargeItemDefinitionBase {
   status: ChargeItemDefinitionStatus;
   title: string;
   slug: string;
-  derived_from_uri: string | null;
-  description: string | null;
-  purpose: string | null;
+  derived_from_uri?: string;
+  description?: string;
+  purpose?: string;
   price_components: MonetaryComponent[];
 }
 
 export interface ChargeItemDefinitionRead extends ChargeItemDefinitionBase {
-  version?: number | null;
+  version?: number;
 }
 
 export interface ChargeItemDefinitionCreate
   extends Omit<ChargeItemDefinitionBase, "id"> {
-  version?: number | null;
+  version?: number;
 }

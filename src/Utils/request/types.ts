@@ -62,12 +62,6 @@ export class HTTPError extends Error {
   }
 }
 
-declare module "@tanstack/react-query" {
-  interface Register {
-    defaultError: HTTPError;
-  }
-}
-
 export interface PaginatedResponse<TItem> {
   count: number;
   results: TItem[];

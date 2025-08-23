@@ -32,8 +32,11 @@ import {
 
 import query from "@/Utils/request/query";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { getPartialId } from "@/types/emr/patient/patient";
-import { PartialPatientModel, Patient } from "@/types/emr/patient/patient";
+import {
+  getPartialId,
+  PartialPatientModel,
+  PatientRead,
+} from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 
 interface PatientIdentifierFilterProps {
@@ -53,10 +56,10 @@ export default function PatientIdentifierFilter({
   const { facility, facilityId } = useCurrentFacility();
   const [open, setOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<
-    Patient | PartialPatientModel | null
+    PatientRead | PartialPatientModel | null
   >(null);
   const [pendingPatient, setPendingPatient] = useState<
-    Patient | PartialPatientModel | null
+    PatientRead | PartialPatientModel | null
   >(null);
   const [searchType, setSearchType] = useState(
     facility?.patient_instance_identifier_configs?.[0]?.id ?? "",
@@ -68,7 +71,7 @@ export default function PatientIdentifierFilter({
   // Set initial patient ID if provided
   useEffect(() => {
     if (patientId && !selectedPatient) {
-      setSelectedPatient({ id: patientId } as Patient);
+      setSelectedPatient({ id: patientId } as PatientRead);
     } else if (!patientId) {
       setSelectedPatient(null);
     }
@@ -127,7 +130,7 @@ export default function PatientIdentifierFilter({
   }, [verifiedPatient]);
 
   const handleSelectPatient = useCallback(
-    (patient: Patient | PartialPatientModel) => {
+    (patient: PatientRead | PartialPatientModel) => {
       setSelectedPatient(patient);
       setOpen(false);
       setSearchTerm("");
@@ -136,7 +139,7 @@ export default function PatientIdentifierFilter({
     [onSelect],
   );
 
-  const handlePatientSelect = (patient: Patient | PartialPatientModel) => {
+  const handlePatientSelect = (patient: PatientRead | PartialPatientModel) => {
     if (patientList?.partial) {
       setPendingPatient(patient);
       setVerificationOpen(true);
@@ -156,19 +159,19 @@ export default function PatientIdentifierFilter({
 
   return (
     <>
-      <div className={cn("flex overflow-hidden rounded-lg border", className)}>
+      <div
+        className={cn(
+          "flex overflow-hidden border-gray-400 rounded-lg border",
+          className,
+        )}
+      >
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
               role="combobox"
               aria-expanded={open}
-              className={cn(
-                "flex-1 justify-between bg-white",
-                selectedPatient && !verificationOpen
-                  ? "border-primary-500"
-                  : "border-gray-200",
-              )}
+              className="flex-1 justify-between bg-white border-none rounded-none font-normal"
             >
               {selectedPatient && !verificationOpen ? (
                 <span className="text-primary-500 text-sm">
@@ -272,7 +275,7 @@ export default function PatientIdentifierFilter({
               setSearchTerm("");
               onSelect(undefined);
             }}
-            className="h-auto border-l px-2 hover:bg-transparent"
+            className="h-auto border-l px-2 hover:bg-transparent w-8 mr-3 pr-px rounded-none border-gray-400 text-gray-950"
           >
             <X className="size-4" />
           </Button>

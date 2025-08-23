@@ -375,15 +375,15 @@ export function AccountShow({
               <div className="flex items-end">
                 <p
                   className={cn("text-3xl font-bold", {
-                    "text-red-500": account.total_balance > 0,
-                    "text-green-700": account.total_balance <= 0,
+                    "text-red-500": Number(account.total_balance) > 0,
+                    "text-green-700": Number(account.total_balance) <= 0,
                   })}
                 >
                   <MonetaryDisplay amount={account.total_balance} />
                 </p>
               </div>
               <p className="text-xs text-gray-500">
-                {account.total_balance >= 0
+                {Number(account.total_balance) >= 0
                   ? t("pending_from_patient")
                   : t("overpaid_amount")}
               </p>
@@ -538,7 +538,7 @@ export function AccountShow({
               ))}
             </SelectContent>
           </Select>
-          <ClosedCallout balance={account.total_balance} />
+          <ClosedCallout balance={Number(account.total_balance)} />
           {hasBillableItems && (
             <span className="text-red-500 bg-red-50 text-xs p-2 rounded block -mt-3">
               {t("cannot_close_account_with_pending_items")}

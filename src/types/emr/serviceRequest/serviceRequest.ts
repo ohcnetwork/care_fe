@@ -4,11 +4,11 @@ import {
   Category,
 } from "@/types/emr/activityDefinition/activityDefinition";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { ObservationRead } from "@/types/emr/observation/observation";
 import { SpecimenRead } from "@/types/emr/specimen/specimen";
 import { LocationList } from "@/types/location/location";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum Status {
   draft = "draft",
@@ -90,13 +90,13 @@ export interface ServiceRequestUpdateSpec extends BaseServiceRequestSpec {
 export interface ServiceRequestReadSpec extends BaseServiceRequestSpec {
   version?: number;
   locations: LocationList[];
-  encounter: Encounter;
+  encounter: EncounterRead;
   activity_definition: ActivityDefinitionReadSpec;
   specimens: SpecimenRead[];
   observations?: ObservationRead[];
   diagnostic_reports: DiagnosticReportRead[];
-  created_by: UserBase;
-  updated_by: UserBase;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
   created_date: string;
   updated_at: string;
 }

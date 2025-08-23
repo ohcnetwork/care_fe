@@ -40,7 +40,7 @@ export const PrintMedicationAdministration = (props: {
 
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId],
-    queryFn: query(encounterApi.getEncounter, {
+    queryFn: query(encounterApi.get, {
       pathParams: { id: encounterId },
       queryParams: { facility: facilityId },
     }),

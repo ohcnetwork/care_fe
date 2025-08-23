@@ -6,16 +6,16 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { formatName } from "@/Utils/utils";
 import { DeviceEncounterHistory } from "@/types/device/device";
-import { Encounter } from "@/types/emr/encounter/encounter";
-import { UserBase } from "@/types/user/user";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface EncounterCardProps {
   encounterData: DeviceEncounterHistory;
 }
 
 interface EncounterNodeProps {
-  encounter: Encounter;
-  created_by?: UserBase;
+  encounter: EncounterRead;
+  created_by?: UserReadMinimal;
   start: string;
   end: string;
   children?: React.ReactNode;

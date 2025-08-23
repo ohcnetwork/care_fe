@@ -15,8 +15,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -51,7 +50,7 @@ export function DiscountCodeSettings() {
   const { facility, facilityId } = useCurrentFacility();
 
   const { mutate: deleteCode, isPending } = useMutation({
-    mutationFn: mutate(facilityApi.updateMonetaryComponents, {
+    mutationFn: mutate(facilityApi.setMonetaryComponents, {
       pathParams: { facilityId },
     }),
     onSuccess: () => {
@@ -103,12 +102,12 @@ export function DiscountCodeSettings() {
       <Page
         title={t("discount_codes")}
         options={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col lg:flex-row items-center gap-2 ">
             <Input
               placeholder={t("search")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-[300px]"
+              className="w-full lg:w-[300px]"
             />
             <CreateDiscountCodeSheet />
           </div>

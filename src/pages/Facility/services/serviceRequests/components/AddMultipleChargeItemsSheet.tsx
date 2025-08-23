@@ -27,7 +27,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
 
 import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPriceDisplay";
 
@@ -35,11 +34,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import {
-  ChargeItemStatus,
-  ChargeItemUpsert,
-} from "@/types/billing/chargeItem/chargeItem";
+import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 
@@ -52,6 +49,11 @@ interface AddMultipleChargeItemsSheetProps {
   disabled?: boolean;
 }
 
+interface ApplyChargeItemDefinitionRequestWithObject
+  extends ApplyChargeItemDefinitionRequest {
+  charge_item_definition_object: ChargeItemDefinitionRead;
+}
+
 export default function AddMultipleChargeItemsSheet({
   open,
   onOpenChange,
@@ -62,14 +64,16 @@ export default function AddMultipleChargeItemsSheet({
 }: AddMultipleChargeItemsSheetProps) {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
-  const [selectedItems, setSelectedItems] = useState<ChargeItemUpsert[]>([]);
+  const [selectedItems, setSelectedItems] = useState<
+    ApplyChargeItemDefinitionRequestWithObject[]
+  >([]);
   const [search, setSearch] = useState("");
   const [selectedDefinitionId, setSelectedDefinitionId] = useState<
     string | null
   >(null);
 
   const { data: chargeItemDefinitions, isLoading } = useQuery({
-    queryKey: ["charge_item_definitions", search],
+    queryKey: ["chargeItemDefinitions", search],
     queryFn: query.debounced(chargeItemDefinitionApi.listChargeItemDefinition, {
       pathParams: { facilityId },
       queryParams: { limit: 100, status: "active", title: search },
@@ -88,8 +92,8 @@ export default function AddMultipleChargeItemsSheet({
     enabled: open,
   });
 
-  const { mutate: upsertChargeItems, isPending } = useMutation({
-    mutationFn: mutate(chargeItemApi.upsertChargeItem, {
+  const { mutate: applyChargeItems, isPending } = useMutation({
+    mutationFn: mutate(chargeItemApi.applyChargeItemDefinitions, {
       pathParams: { facilityId },
     }),
     onSuccess: () => {
@@ -115,12 +119,10 @@ export default function AddMultipleChargeItemsSheet({
       setSelectedItems([
         ...selectedItems,
         {
-          title: selectedCID.title,
-          status: ChargeItemStatus.billable,
-          quantity: 1,
-          unit_price_components: selectedCID.price_components,
-          note: "",
+          quantity: "1",
           encounter: request.encounter.id,
+          charge_item_definition: selectedCID.id,
+          charge_item_definition_object: selectedCID,
           service_resource: "service_request",
           service_resource_id: serviceRequestId,
         },
@@ -133,17 +135,11 @@ export default function AddMultipleChargeItemsSheet({
     setSelectedItems(selectedItems.filter((_, i) => i !== index));
   };
 
-  const handleUpdateQuantity = (index: number, quantity: number) => {
+  const handleUpdateQuantity = (index: number, quantity: string) => {
     setSelectedItems(
       selectedItems.map((item, i) =>
         i === index ? { ...item, quantity } : item,
       ),
-    );
-  };
-
-  const handleUpdateNote = (index: number, note: string) => {
-    setSelectedItems(
-      selectedItems.map((item, i) => (i === index ? { ...item, note } : item)),
     );
   };
 
@@ -153,7 +149,12 @@ export default function AddMultipleChargeItemsSheet({
       return;
     }
 
-    upsertChargeItems({ datapoints: selectedItems });
+    applyChargeItems({
+      requests: selectedItems.map(
+        ({ charge_item_definition_object: _discard, ...charge_item }) =>
+          charge_item,
+      ),
+    });
   };
 
   return (
@@ -195,7 +196,7 @@ export default function AddMultipleChargeItemsSheet({
                         {/* Title and Remove Button */}
                         <div className="flex items-start justify-between gap-2">
                           <h4 className="font-medium text-base flex-1">
-                            {item.title}
+                            {item.charge_item_definition_object.title}
                           </h4>
                           <Button
                             size="sm"
@@ -218,10 +219,7 @@ export default function AddMultipleChargeItemsSheet({
                               min={1}
                               value={item.quantity}
                               onChange={(e) =>
-                                handleUpdateQuantity(
-                                  index,
-                                  parseInt(e.target.value, 10),
-                                )
+                                handleUpdateQuantity(index, e.target.value)
                               }
                               className="w-24"
                             />
@@ -233,11 +231,13 @@ export default function AddMultipleChargeItemsSheet({
                             </label>
                             <div className="flex items-center gap-1">
                               <span>
-                                {item.unit_price_components?.[0]?.amount || 0}{" "}
-                                {item.unit_price_components?.[0]?.code?.code ||
-                                  "INR"}
+                                {item.charge_item_definition_object
+                                  .price_components?.[0]?.amount || 0}{" "}
+                                {item.charge_item_definition_object
+                                  .price_components?.[0]?.code?.code || "INR"}
                               </span>
-                              {item.unit_price_components?.length > 0 && (
+                              {item.charge_item_definition_object
+                                .price_components?.length > 0 && (
                                 <Popover>
                                   <PopoverTrigger>
                                     <InfoIcon className="h-4 w-4 text-gray-700 cursor-pointer" />
@@ -249,7 +249,8 @@ export default function AddMultipleChargeItemsSheet({
                                   >
                                     <ChargeItemPriceDisplay
                                       priceComponents={
-                                        item.unit_price_components
+                                        item.charge_item_definition_object
+                                          .price_components
                                       }
                                     />
                                   </PopoverContent>
@@ -257,21 +258,6 @@ export default function AddMultipleChargeItemsSheet({
                               )}
                             </div>
                           </div>
-                        </div>
-
-                        {/* Notes */}
-                        <div className="space-y-1">
-                          <label className="text-sm text-gray-500">
-                            {t("note")}
-                          </label>
-                          <Textarea
-                            value={item.note}
-                            onChange={(e) =>
-                              handleUpdateNote(index, e.target.value)
-                            }
-                            placeholder={t("add_notes")}
-                            className="min-h-[60px] resize-none"
-                          />
                         </div>
                       </div>
                     ))}
@@ -283,7 +269,6 @@ export default function AddMultipleChargeItemsSheet({
                         <TableHead>{t("name")}</TableHead>
                         <TableHead>{t("quantity")}</TableHead>
                         <TableHead>{t("price")}</TableHead>
-                        <TableHead>{t("note")}</TableHead>
                         <TableHead className="w-[100px]"></TableHead>
                       </TableRow>
                     </TableHeader>
@@ -291,7 +276,7 @@ export default function AddMultipleChargeItemsSheet({
                       {selectedItems.map((item, index) => (
                         <TableRow key={index}>
                           <TableCell className="whitespace-pre-wrap">
-                            {item.title}
+                            {item.charge_item_definition_object.title}
                           </TableCell>
                           <TableCell>
                             <Input
@@ -299,10 +284,7 @@ export default function AddMultipleChargeItemsSheet({
                               min={1}
                               value={item.quantity}
                               onChange={(e) =>
-                                handleUpdateQuantity(
-                                  index,
-                                  parseInt(e.target.value, 10),
-                                )
+                                handleUpdateQuantity(index, e.target.value)
                               }
                               className="w-20"
                             />
@@ -310,11 +292,13 @@ export default function AddMultipleChargeItemsSheet({
                           <TableCell>
                             <div className="flex items-center gap-1">
                               <span>
-                                {item.unit_price_components?.[0]?.amount || 0}{" "}
-                                {item.unit_price_components?.[0]?.code?.code ||
-                                  "INR"}
+                                {item.charge_item_definition_object
+                                  .price_components?.[0]?.amount || 0}{" "}
+                                {item.charge_item_definition_object
+                                  .price_components?.[0]?.code?.code || "INR"}
                               </span>
-                              {item.unit_price_components?.length > 0 && (
+                              {item.charge_item_definition_object
+                                .price_components?.length > 0 && (
                                 <Popover>
                                   <PopoverTrigger>
                                     <InfoIcon className="size-4 text-gray-700 cursor-pointer" />
@@ -322,23 +306,14 @@ export default function AddMultipleChargeItemsSheet({
                                   <PopoverContent side="right" className="p-0">
                                     <ChargeItemPriceDisplay
                                       priceComponents={
-                                        item.unit_price_components
+                                        item.charge_item_definition_object
+                                          .price_components
                                       }
                                     />
                                   </PopoverContent>
                                 </Popover>
                               )}
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <Textarea
-                              value={item.note}
-                              onChange={(e) =>
-                                handleUpdateNote(index, e.target.value)
-                              }
-                              placeholder={t("add_notes")}
-                              className="min-h-[60px] resize-none"
-                            />
                           </TableCell>
                           <TableCell>
                             <Button

@@ -34,27 +34,28 @@ import Loading from "@/components/Common/Loading";
 import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
 import AudioPlayerDialog from "@/components/Files/AudioPlayerDialog";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
-import { FileUploadModel } from "@/components/Patient/models";
 
 import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
 import useFilters from "@/hooks/useFilters";
 
-import {
-  BACKEND_ALLOWED_EXTENSIONS,
-  FILE_EXTENSIONS,
-} from "@/common/constants";
-
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
+import {
+  BACKEND_ALLOWED_EXTENSIONS,
+  FILE_EXTENSIONS,
+  FileReadMinimal,
+  FileType,
+} from "@/types/files/file";
+import fileApi from "@/types/files/fileApi";
 
 interface DischargeTabProps {
-  type: "encounter" | "patient";
+  type: FileType.ENCOUNTER | FileType.PATIENT;
   // facilityId: string;
-  encounter: Encounter;
+  encounter: EncounterRead;
   canEdit: boolean | undefined;
 }
 
@@ -66,9 +67,9 @@ export const DischargeTab = ({
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [openArchivedFileDialog, setOpenArchivedFileDialog] = useState(false);
   const [selectedArchivedFile, setSelectedArchivedFile] =
-    useState<FileUploadModel | null>(null);
+    useState<FileReadMinimal | null>(null);
   const [selectedAudioFile, setSelectedAudioFile] =
-    useState<FileUploadModel | null>(null);
+    useState<FileReadMinimal | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination } = useFilters({
@@ -78,7 +79,7 @@ export const DischargeTab = ({
 
   const { mutate: generateDischargeSummary, isPending: isGenerating } =
     useMutation<{ detail: string }>({
-      mutationFn: mutate(routes.encounter.generateDischargeSummary, {
+      mutationFn: mutate(encounterApi.generateDischargeSummary, {
         pathParams: { encounterId: encounter.id },
       }),
       onSuccess: (response) => {
@@ -93,7 +94,7 @@ export const DischargeTab = ({
     refetch,
   } = useQuery({
     queryKey: ["discharge_files", encounter.id, qParams],
-    queryFn: query.debounced(routes.viewUpload, {
+    queryFn: query.debounced(fileApi.list, {
       queryParams: {
         file_type: type,
         associating_id: encounter.id,
@@ -152,7 +153,7 @@ export const DischargeTab = ({
     }
   }, [openUploadDialog]);
 
-  const getFileType = (file: FileUploadModel) => {
+  const getFileType = (file: FileReadMinimal) => {
     return fileManager.getFileType(file);
   };
 
@@ -165,7 +166,7 @@ export const DischargeTab = ({
     DOCUMENT: "l-file-medical",
   };
 
-  const getArchivedMessage = (file: FileUploadModel) => {
+  const getArchivedMessage = (file: FileReadMinimal) => {
     return (
       <div className="flex flex-row gap-2 justify-end">
         <span className="text-gray-200/90 self-center uppercase font-bold">
@@ -187,7 +188,7 @@ export const DischargeTab = ({
     );
   };
 
-  const DetailButtons = ({ file }: { file: FileUploadModel }) => {
+  const DetailButtons = ({ file }: { file: FileReadMinimal }) => {
     const filetype = getFileType(file);
     return (
       <>
@@ -347,37 +348,32 @@ export const DischargeTab = ({
             onSelect={(e) => {
               e.preventDefault();
             }}
+            aria-label={t("choose_file")}
           >
             <Label
               htmlFor={`file_upload_${type}`}
-              className="py-1 flex flex-row items-center cursor-pointer text-primary-900  w-full"
+              className="flex items-center w-full text-primary-900 hover:text-black py-1 font-medium"
             >
-              <CareIcon icon="l-file-upload-alt" className="mr-1" />
+              <CareIcon icon="l-file-upload-alt" />
               <span>{t("choose_file")}</span>
             </Label>
             {fileUpload.Input({ className: "hidden" })}
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => fileUpload.handleCameraCapture()}
-              className="flex flex-row justify-stretch items-center w-full text-primary-900"
-            >
-              <CareIcon icon="l-camera" />
-              <span>{t("open_camera")}</span>
-            </Button>
+          <DropdownMenuItem
+            onSelect={() => fileUpload.handleCameraCapture()}
+            className="flex items-center text-primary-900 font-medium"
+            aria-label={t("open_camera")}
+          >
+            <CareIcon icon="l-camera" />
+            <span>{t("open_camera")}</span>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => fileUpload.handleAudioCapture()}
-              className="flex flex-row justify-stretch items-center w-full text-primary-900"
-            >
-              <CareIcon icon="l-microphone" />
-              <span>{t("record")}</span>
-            </Button>
+          <DropdownMenuItem
+            onSelect={() => fileUpload.handleAudioCapture()}
+            className="flex items-center text-primary-900 font-medium"
+            aria-label={t("record")}
+          >
+            <CareIcon icon="l-microphone" />
+            <span>{t("record")}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

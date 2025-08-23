@@ -1,11 +1,11 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 
 import {
   Organization,
   OrganizationCreate,
-  OrganizationEdit,
+  OrganizationUpdate,
   OrganizationUserRole,
 } from "./organization";
 
@@ -30,7 +30,7 @@ export default {
     path: "/api/v1/organization/{id}/",
     method: HttpMethod.PUT,
     TRes: Type<Organization>(),
-    TBody: Type<OrganizationEdit>(),
+    TBody: Type<OrganizationUpdate>(),
   },
   delete: {
     path: "/api/v1/organization/{id}/",
@@ -67,7 +67,7 @@ export default {
   listPatients: {
     path: "/api/v1/patient/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<Patient>>(),
+    TRes: Type<PaginatedResponse<PatientRead>>(),
   },
   getPublicOrganizations: {
     path: "/api/v1/govt/organization/",

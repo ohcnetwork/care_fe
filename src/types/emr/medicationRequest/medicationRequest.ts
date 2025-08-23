@@ -1,7 +1,7 @@
 import { UserBareMinimum } from "@/components/Users/models";
 
 import { Code } from "@/types/base/code/code";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 
@@ -254,7 +254,7 @@ export interface MedicationRequestRead {
 }
 
 export interface MedicationRequestSummary {
-  encounter: Encounter;
+  encounter: EncounterRead;
   priority: MedicationPriority;
   count: number;
 }

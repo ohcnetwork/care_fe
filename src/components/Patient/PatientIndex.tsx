@@ -38,22 +38,22 @@ import SearchInput from "@/components/Common/SearchInput";
 import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   PartialPatientModel,
-  Patient,
+  PatientRead,
   getPartialId,
 } from "@/types/emr/patient/patient";
+import patientApi from "@/types/emr/patient/patientApi";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const [{ phone_number: phoneNumber = "" }, setPhoneNumberQuery] =
     useQueryParams();
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<
-    PartialPatientModel | Patient | null
+    PartialPatientModel | PatientRead | null
   >(null);
   const [verificationOpen, setVerificationOpen] = useState(false);
   const { t } = useTranslation();
@@ -143,7 +143,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 
   const { data: patientList, isFetching } = useQuery({
     queryKey: ["patient-search", facilityId, phoneNumber, identifierSearch],
-    queryFn: query.debounced(routes.searchPatient, {
+    queryFn: query.debounced(patientApi.searchPatient, {
       body: phoneNumber
         ? { phone_number: phoneNumber }
         : identifierSearch.config && identifierSearch.value
@@ -164,12 +164,12 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       setSelectedPatient(patient);
       setVerificationOpen(true);
       setYearOfBirth("");
-    } else {
+    } else if ("year_of_birth" in patient) {
       navigate(`/facility/${facilityId}/patients/verify`, {
         query: {
           phone_number: patient.phone_number,
-          year_of_birth: (patient as Patient).year_of_birth.toString(),
-          partial_id: (patient as Patient).id.slice(0, 5),
+          year_of_birth: patient.year_of_birth.toString(),
+          partial_id: patient.id.slice(0, 5),
         },
       });
     }

@@ -42,7 +42,7 @@ export function ChargeItemDefinitionDetail({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { data: chargeItemDefinition, isLoading } = useQuery({
-    queryKey: ["charge_item_definition", chargeItemDefinitionId],
+    queryKey: ["chargeItemDefinitions", chargeItemDefinitionId],
     queryFn: query(chargeItemDefinitionApi.retrieveChargeItemDefinition, {
       pathParams: { facilityId, chargeItemDefinitionId },
     }),
@@ -55,10 +55,7 @@ export function ChargeItemDefinitionDetail({
       }),
       onSuccess: () => {
         toast.success(t("definition_deleted_successfully"));
-        queryClient.invalidateQueries({ queryKey: ["charge_item_definition"] });
-        queryClient.invalidateQueries({
-          queryKey: ["charge_item_definition", chargeItemDefinitionId],
-        });
+        queryClient.invalidateQueries({ queryKey: ["chargeItemDefinitions"] });
         navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
       },
     });
@@ -91,9 +88,9 @@ export function ChargeItemDefinitionDetail({
         </div>
         <div className="text-right">
           {component.amount ? (
-            <p className="font-medium">₹{component.amount.toFixed(2)}</p>
+            <p className="font-medium">₹{component.amount}</p>
           ) : component.factor ? (
-            <p className="font-medium">{component.factor.toFixed(1)}%</p>
+            <p className="font-medium">{component.factor}%</p>
           ) : (
             <p className="text-sm text-gray-500">{t("not_specified")}</p>
           )}

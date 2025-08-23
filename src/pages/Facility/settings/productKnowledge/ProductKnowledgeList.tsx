@@ -21,8 +21,10 @@ import {
 } from "@/components/ui/table";
 
 import Page from "@/components/Common/Page";
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import {
+  CardGridSkeleton,
+  TableSkeleton,
+} from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -63,6 +65,12 @@ function ProductKnowledgeCard({
             {product.code?.code && (
               <p className="mt-1 text-sm text-gray-500">
                 {product.code.system} | {product.code.code}
+              </p>
+            )}
+            {product.alternate_identifier && (
+              <p className="mt-1 text-sm text-gray-500">
+                {t("product_knowledge_alternate_identifier")}:{" "}
+                {product.alternate_identifier}
               </p>
             )}
           </div>
@@ -126,7 +134,7 @@ export default function ProductKnowledgeList({
           <h1 className="text-2xl font-bold text-gray-700">
             {t("product_knowledge")}
           </h1>
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex sm:flex-row sm:items-center sm:justify-between flex-col gap-4">
             <div>
               <p className="text-gray-600 text-sm">
                 {t("manage_product_knowledge")}
@@ -219,6 +227,9 @@ export default function ProductKnowledgeList({
                   <TableHeader className="bg-gray-100">
                     <TableRow>
                       <TableHead>{t("name")}</TableHead>
+                      <TableHead>
+                        {t("product_knowledge_alternate_identifier")}
+                      </TableHead>
                       <TableHead>{t("product_type")}</TableHead>
                       <TableHead>{t("status")}</TableHead>
                       <TableHead>{t("actions")}</TableHead>
@@ -229,6 +240,9 @@ export default function ProductKnowledgeList({
                       <TableRow key={product.id} className="divide-x">
                         <TableCell className="font-medium">
                           {product.name}
+                        </TableCell>
+                        <TableCell>
+                          {product.alternate_identifier || "-"}
                         </TableCell>
                         <TableCell>
                           <Badge

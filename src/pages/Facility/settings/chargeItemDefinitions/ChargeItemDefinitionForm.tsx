@@ -1,9 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckIcon, Loader2 } from "lucide-react";
 import { navigate } from "raviger";
-import { useMemo } from "react";
-import React from "react";
+import { useEffect } from "react";
 import { FieldErrors, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
@@ -23,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import {
   MonetaryAmountInput,
   MonetaryDisplay,
+  mapPriceComponent,
 } from "@/components/ui/monetary-display";
 import {
   Select,
@@ -51,8 +51,6 @@ import {
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import facilityApi from "@/types/facility/facilityApi";
 
-import { summarizeMonetaryComponents } from "./utils";
-
 // Schema for a single price component
 const priceComponentSchema = z.object({
   monetary_component_type: z.nativeEnum(MonetaryComponentType),
@@ -62,10 +60,14 @@ const priceComponentSchema = z.object({
       system: z.string(),
       display: z.string(),
     })
-    .nullable()
     .optional(),
-  factor: z.number().gt(0).max(100).nullable().optional(),
-  amount: z.number().gt(0).nullable().optional(),
+  factor: z.number().gt(0).max(100).optional(),
+  amount: z
+    .string()
+    .refine((val) => !val || Number(val) > 0, {
+      message: "Amount must be greater than 0",
+    })
+    .optional(),
 });
 
 interface ChargeItemDefinitionFormProps {
@@ -93,7 +95,6 @@ function MonetaryComponentSelectionSection({
   selectedComponents,
   onComponentToggle,
   onValueChange,
-  summary,
   type,
   errors,
 }: {
@@ -103,7 +104,6 @@ function MonetaryComponentSelectionSection({
   selectedComponents: MonetaryComponent[];
   onComponentToggle: (component: MonetaryComponent, selected: boolean) => void;
   onValueChange: (component: MonetaryComponent, value: number) => void;
-  summary: number;
   type: MonetaryComponentType;
   errors: FieldErrors<z.infer<typeof priceComponentSchema>>[];
 }) {
@@ -213,23 +213,6 @@ function MonetaryComponentSelectionSection({
           className="border-gray-200"
         />
       </div>
-
-      {/* Summary */}
-      {selectedComponents.length > 0 && (
-        <div className="mt-4 p-3 bg-white rounded-lg border">
-          <div className="flex justify-between items-center py-2">
-            <span className="text-gray-600">
-              {type === MonetaryComponentType.tax
-                ? t("total_taxes")
-                : t("total_discounts")}
-            </span>
-            <MonetaryDisplay
-              className="font-medium text-gray-900"
-              amount={summary}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -246,12 +229,13 @@ export function ChargeItemDefinitionForm({
   },
 }: ChargeItemDefinitionFormProps) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   // Fetch facility data for available components
   const { data: facilityData, isLoading } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(facilityApi.getFacility, {
-      pathParams: { id: facilityId },
+    queryFn: query(facilityApi.get, {
+      pathParams: { facilityId },
     }),
   });
 
@@ -265,9 +249,9 @@ export function ChargeItemDefinitionForm({
         message: t("slug_format_message"),
       }),
     status: z.nativeEnum(ChargeItemDefinitionStatus),
-    description: z.string().nullable(),
-    purpose: z.string().nullable(),
-    derived_from_uri: z.string().url().nullable(),
+    description: z.string().optional(),
+    purpose: z.string().optional(),
+    derived_from_uri: z.string().url().optional(),
     price_components: z.array(priceComponentSchema).refine(
       (components) => {
         // Ensure there is exactly one base price component and it's the first one
@@ -280,7 +264,7 @@ export function ChargeItemDefinitionForm({
           ).length === 1 &&
           components[0].amount !== undefined &&
           components[0].amount !== null &&
-          components[0].amount !== 0
+          components[0].amount !== "0"
         );
       },
       {
@@ -298,24 +282,28 @@ export function ChargeItemDefinitionForm({
       title: initialData?.title || "",
       slug: initialData?.slug || "",
       status: initialData?.status || ChargeItemDefinitionStatus.active,
-      description: initialData?.description || null,
-      purpose: initialData?.purpose || null,
-      derived_from_uri: initialData?.derived_from_uri || null,
-      price_components: initialData?.price_components || [
+      description: initialData?.description,
+      purpose: initialData?.purpose,
+      derived_from_uri: initialData?.derived_from_uri,
+      price_components: initialData?.price_components.map(
+        mapPriceComponent,
+      ) || [
         {
           monetary_component_type: MonetaryComponentType.base,
-          amount: 0,
+          amount: "0",
         },
       ],
     },
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isUpdate) return;
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug", generateSlug(value.title || ""));
+        form.setValue("slug", generateSlug(value.title || ""), {
+          shouldValidate: true,
+        });
       }
     });
 
@@ -324,13 +312,7 @@ export function ChargeItemDefinitionForm({
 
   // Get current form values
   const priceComponents = form.watch("price_components");
-  const basePrice = form.watch("price_components.0.amount");
-
-  // Calculate price summary
-  const priceSummary = useMemo(() => {
-    return summarizeMonetaryComponents(priceComponents);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [priceComponents, basePrice]);
+  const basePrice = form.watch("price_components.0.amount")?.toString() || "0";
 
   // // Get MRP component if it exists
   // const mrpComponent = form
@@ -349,6 +331,7 @@ export function ChargeItemDefinitionForm({
           pathParams: { facilityId },
         }),
     onSuccess: (chargeItemDefinition: ChargeItemDefinitionRead) => {
+      queryClient.invalidateQueries({ queryKey: ["chargeItemDefinitions"] });
       onSuccess?.(chargeItemDefinition);
     },
   });
@@ -397,7 +380,13 @@ export function ChargeItemDefinitionForm({
     if (selected) {
       newComponents = [
         ...currentComponents,
-        { ...component, monetary_component_type: type },
+        {
+          ...component,
+          monetary_component_type: type,
+          factor: component.factor != null ? component.factor : undefined,
+          amount:
+            component.factor != null ? undefined : String(component.amount),
+        },
       ];
     } else {
       newComponents = currentComponents.filter(
@@ -424,7 +413,8 @@ export function ChargeItemDefinitionForm({
     const newComponents = [...currentComponents];
     newComponents[componentIndex] = {
       ...component,
-      [component.factor != null ? "factor" : "amount"]: value,
+      factor: component.factor != null ? value : undefined,
+      amount: component.factor != null ? undefined : String(value),
     };
 
     form.setValue("price_components", newComponents, { shouldValidate: true });
@@ -509,7 +499,7 @@ export function ChargeItemDefinitionForm({
                           // Only allow lowercase letters, numbers, and hyphens
                           const sanitizedValue = e.target.value
                             .toLowerCase()
-                            .replace(/[^a-z0-9-]/g, "");
+                            .replace(/[^a-z0-9_-]/g, "");
                           field.onChange(sanitizedValue);
                         }}
                       />
@@ -573,7 +563,7 @@ export function ChargeItemDefinitionForm({
                     <Textarea
                       {...field}
                       value={field.value || ""}
-                      onChange={(e) => field.onChange(e.target.value || null)}
+                      onChange={(e) => field.onChange(e.target.value)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -591,7 +581,7 @@ export function ChargeItemDefinitionForm({
                     <Textarea
                       {...field}
                       value={field.value || ""}
-                      onChange={(e) => field.onChange(e.target.value || null)}
+                      onChange={(e) => field.onChange(e.target.value)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -609,7 +599,7 @@ export function ChargeItemDefinitionForm({
                     <Input
                       {...field}
                       value={field.value || ""}
-                      onChange={(e) => field.onChange(e.target.value || null)}
+                      onChange={(e) => field.onChange(e.target.value)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -626,10 +616,10 @@ export function ChargeItemDefinitionForm({
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Base Price and MRP */}
-            <div className="p-4 bg-gray-50 rounded-lg border">
+            {/* <div className="p-4 bg-gray-50 rounded-lg border">
               <div className="space-y-4">
                 {/* MRP */}
-                {/* <div className="flex items-center justify-between">
+            {/* <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-medium text-gray-900">{t("mrp")}</h4>
                     <p className="text-sm text-gray-600">
@@ -644,40 +634,40 @@ export function ChargeItemDefinitionForm({
                     />
                   </div>
                 </div> */}
-
-                {/* Base Price */}
-                <FormField
-                  control={form.control}
-                  name="price_components.0.amount"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center justify-between gap-2">
-                      <FormLabel className="font-medium text-gray-900 text-xl">
-                        {t("base_price")}
-                      </FormLabel>
-                      <div className="flex flex-col items-end gap-2">
-                        <FormControl className="w-48">
-                          <MonetaryAmountInput
-                            {...field}
-                            value={field.value ?? 0}
-                            onChange={(e) =>
-                              field.onChange(e.target.valueAsNumber)
-                            }
-                            placeholder="0.00"
-                          />
-                        </FormControl>
-                        <FormMessage>
-                          {
-                            form.formState.errors.price_components?.[0]?.amount
-                              ?.message
-                          }
-                        </FormMessage>
-                      </div>
-                    </FormItem>
-                  )}
-                />
+            {/* Base Price */}
+            <div className="rounded-lg border p-4 bg-gray-50 space-y-2">
+              <div>
+                <h4 className="text-lg font-medium text-gray-900">
+                  {t("base_price")}
+                </h4>
+                <p className="text-sm text-gray-600">
+                  {t("base_price_explanation")}
+                </p>
               </div>
-            </div>
 
+              <FormField
+                control={form.control}
+                name="price_components.0.amount"
+                render={({ field }) => (
+                  <FormItem className="w-full space-y-1">
+                    <FormControl>
+                      <MonetaryAmountInput
+                        {...field}
+                        value={field.value ?? 0}
+                        onChange={(e) => field.onChange(String(e.target.value))}
+                        placeholder="0.00"
+                      />
+                    </FormControl>
+                    <FormMessage>
+                      {
+                        form.formState.errors.price_components?.[0]?.amount
+                          ?.message
+                      }
+                    </FormMessage>
+                  </FormItem>
+                )}
+              />
+            </div>
             {/* Discounts */}
             <MonetaryComponentSelectionSection
               title={t("discounts")}
@@ -694,7 +684,6 @@ export function ChargeItemDefinitionForm({
                 )
               }
               onValueChange={handleComponentValueChange}
-              summary={priceSummary.netAmount - priceSummary.taxableAmount}
               type={MonetaryComponentType.discount}
               errors={getSelectedComponentError(MonetaryComponentType.discount)}
             />
@@ -715,7 +704,6 @@ export function ChargeItemDefinitionForm({
                 )
               }
               onValueChange={handleComponentValueChange}
-              summary={priceSummary.totalAmount - priceSummary.taxableAmount}
               type={MonetaryComponentType.tax}
               errors={getSelectedComponentError(MonetaryComponentType.tax)}
             />
@@ -730,32 +718,7 @@ export function ChargeItemDefinitionForm({
                   <span className="text-gray-600">{t("base_price")}</span>
                   <MonetaryDisplay
                     className="font-medium text-gray-900"
-                    amount={priceSummary.baseAmount}
-                  />
-                </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-gray-600">{t("total_discounts")}</span>
-                  <MonetaryDisplay
-                    className="font-medium text-gray-900 data-[coloring=positive]:text-green-600 data-[coloring=negative]:text-red-600"
-                    amount={priceSummary.netAmount - priceSummary.taxableAmount}
-                  />
-                </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-gray-600">{t("total_taxes")}</span>
-                  <MonetaryDisplay
-                    className="font-medium text-gray-900 data-[coloring=positive]:text-green-600 data-[coloring=negative]:text-red-600"
-                    amount={
-                      priceSummary.totalAmount - priceSummary.taxableAmount
-                    }
-                  />
-                </div>
-                <div className="flex justify-between items-center py-2 pt-3">
-                  <span className="text-gray-600 text-lg font-bold">
-                    {t("final_price")}
-                  </span>
-                  <MonetaryDisplay
-                    className="font-bold text-green-600 text-lg"
-                    amount={priceSummary.totalAmount}
+                    amount={basePrice}
                   />
                 </div>
               </div>

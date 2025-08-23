@@ -51,25 +51,17 @@ export const HealthProfileSummary = ({
             </div>
           </div>
 
-          <div className="mt-2 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 md:gap-y-8">
-            <div className="md:col-span-2">
-              <MedicationStatementList
-                patientId={patientId}
-                canAccess={canViewClinicalData}
-              />
-            </div>
+          <div className="mt-2 space-y-2 md:space-y-8">
+            <MedicationStatementList
+              patientId={patientId}
+              canAccess={canViewClinicalData}
+            />
 
-            <div className="md:col-span-2">
-              <AllergyList patientId={patientId} readOnly={true} />
-            </div>
+            <AllergyList patientId={patientId} readOnly={true} />
 
-            <div className="md:col-span-2">
-              <SymptomsList patientId={patientId} readOnly={true} />
-            </div>
+            <SymptomsList patientId={patientId} readOnly={true} />
 
-            <div className="md:col-span-2">
-              <DiagnosisList patientId={patientId} readOnly={true} />
-            </div>
+            <DiagnosisList patientId={patientId} readOnly={true} />
           </div>
         </div>
       </div>

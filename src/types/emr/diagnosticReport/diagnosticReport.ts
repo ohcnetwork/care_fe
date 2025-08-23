@@ -1,7 +1,7 @@
 import { Code } from "@/types/base/code/code";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { ObservationRead } from "@/types/emr/observation/observation";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum DiagnosticReportStatus {
   registered = "registered",
@@ -40,10 +40,10 @@ export interface DiagnosticReportUpdate
 
 export interface DiagnosticReportRead extends Omit<DiagnosticReportBase, "id"> {
   id: string;
-  encounter: Encounter;
+  encounter: EncounterRead;
   observations: ObservationRead[];
-  created_by: UserBase;
+  created_by: UserReadMinimal;
   created_date: string;
   modified_date: string;
-  updated_by: UserBase;
+  updated_by: UserReadMinimal;
 }

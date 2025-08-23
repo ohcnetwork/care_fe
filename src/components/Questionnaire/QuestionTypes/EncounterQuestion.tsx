@@ -6,17 +6,6 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -36,7 +25,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
-import routes from "@/Utils/request/api";
+import DischargeConfirmationDialog from "@/components/Patient/DischargeConfirmationDialog";
+
 import query from "@/Utils/request/query";
 import {
   ENCOUNTER_ADMIT_SOURCE,
@@ -49,11 +39,12 @@ import {
   type EncounterClass,
   type EncounterDietPreference,
   type EncounterDischargeDisposition,
-  type EncounterEditRequest,
+  type EncounterEdit,
   type EncounterPriority,
+  type EncounterRead,
   type EncounterStatus,
-  Hospitalization,
 } from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 import type {
   QuestionnaireResponse,
   ResponseValue,
@@ -81,7 +72,6 @@ export function EncounterQuestion({
   updateQuestionnaireResponseCB,
   disabled,
   clearError,
-  organizations = [],
   encounterId,
   patientId = "",
   facilityId,
@@ -89,7 +79,7 @@ export function EncounterQuestion({
   // Fetch encounter data
   const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounter", encounterId],
-    queryFn: query(routes.encounter.get, {
+    queryFn: query(encounterApi.get, {
       pathParams: { id: encounterId },
       queryParams: { facility: facilityId },
     }),
@@ -97,24 +87,23 @@ export function EncounterQuestion({
   });
   const { t } = useTranslation();
 
-  const [encounter, setEncounter] = useState<EncounterEditRequest>({
-    status: "unknown" as EncounterStatus,
-    encounter_class: "amb" as EncounterClass,
+  const [encounter, setEncounter] = useState<EncounterEdit>({
+    status: "unknown",
+    encounter_class: "amb",
     period: {
       start: new Date().toISOString(),
       end: undefined,
     },
-    priority: "routine" as EncounterPriority,
+    priority: "routine",
     external_identifier: "",
     hospitalization: {
       re_admission: false,
-      admit_source: "other" as EncounterAdmitSources,
-      discharge_disposition: "home" as EncounterDischargeDisposition,
-      diet_preference: "none" as EncounterDietPreference,
+      admit_source: "other",
+      discharge_disposition: "home",
+      diet_preference: "none",
     },
     facility: "",
     patient: "",
-    organizations: [],
   });
 
   useEffect(() => {
@@ -143,10 +132,25 @@ export function EncounterQuestion({
     }
   }, [encounter.status]);
 
+  // Transform EncounterRead to EncounterEdit format
+  const transformEncounterForUpdate = (
+    read: EncounterRead,
+  ): Partial<Omit<EncounterEdit, "organizations" | "patient">> => {
+    return {
+      status: read.status,
+      encounter_class: read.encounter_class,
+      period: read.period,
+      priority: read.priority,
+      hospitalization: read.hospitalization,
+      external_identifier: read.external_identifier,
+      discharge_summary_advice: read.discharge_summary_advice,
+    };
+  };
+
   // Update encounter state when data is loaded
   useEffect(() => {
     if (encounterData) {
-      handleUpdateEncounter(encounterData as unknown as EncounterEditRequest);
+      handleUpdateEncounter(transformEncounterForUpdate(encounterData));
     }
   }, [encounterData]);
 
@@ -160,18 +164,17 @@ export function EncounterQuestion({
   }, [questionnaireResponse]);
 
   const handleUpdateEncounter = (
-    updates: Partial<Omit<EncounterEditRequest, "organizations" | "patient">>,
+    updates: Partial<Omit<EncounterEdit, "patient">>,
   ) => {
     clearError();
     const newEncounter = { ...encounter, ...updates };
     if (["amb", "vr", "hh"].includes(newEncounter.encounter_class)) {
-      newEncounter.hospitalization = {} as Hospitalization;
+      newEncounter.hospitalization = {};
     }
 
     // Create the full encounter request object
-    const encounterRequest: EncounterEditRequest = {
+    const encounterRequest: EncounterEdit = {
       ...newEncounter,
-      organizations,
       patient: patientId,
     };
 
@@ -199,9 +202,9 @@ export function EncounterQuestion({
           <Label>{t("encounter_status")}</Label>
           <Select
             value={encounter.status}
-            onValueChange={(value) =>
+            onValueChange={(value: EncounterStatus) =>
               handleUpdateEncounter({
-                status: value as EncounterStatus,
+                status: value,
               })
             }
             disabled={disabled}
@@ -223,9 +226,9 @@ export function EncounterQuestion({
           <Label>{t("encounter_class")}</Label>
           <Select
             value={encounter.encounter_class}
-            onValueChange={(value) =>
+            onValueChange={(value: EncounterClass) =>
               handleUpdateEncounter({
-                encounter_class: value as EncounterClass,
+                encounter_class: value,
               })
             }
             disabled={disabled}
@@ -247,9 +250,9 @@ export function EncounterQuestion({
           <Label>{t("priority")}</Label>
           <Select
             value={encounter.priority}
-            onValueChange={(value) =>
+            onValueChange={(value: EncounterPriority) =>
               handleUpdateEncounter({
-                priority: value as EncounterPriority,
+                priority: value,
               })
             }
             disabled={disabled}
@@ -287,44 +290,11 @@ export function EncounterQuestion({
             <div className="space-y-1">
               <h3 className="text-sm font-medium">{t("discharge_patient")}</h3>
             </div>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="default" size="sm" disabled={disabled}>
-                  {t("mark_for_discharge")}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="w-full sm:max-w-xl">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>{t("confirm_discharge")}</AlertDialogTitle>
-                  <AlertDialogDescription className="space-y-2 text-left">
-                    <p>{t("discharge_confirmation_message")}</p>
-                    <ul className="list-disc list-inside space-y-1">
-                      <li>{t("discharge_confirmation_status_change")}</li>
-                      <li>{t("discharge_confirmation_summary_required")}</li>
-                      <li>{t("discharge_confirmation_date")}</li>
-                    </ul>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                  <AlertDialogCancel className="mt-0">
-                    {t("cancel")}
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => {
-                      handleUpdateEncounter({
-                        status: "discharged" as EncounterStatus,
-                        period: {
-                          ...encounter.period,
-                          end: new Date().toISOString(),
-                        },
-                      });
-                    }}
-                  >
-                    {t("proceed")}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <DischargeConfirmationDialog
+              encounter={encounter}
+              onConfirm={handleUpdateEncounter}
+              disabled={disabled}
+            />
           </div>
         </div>
       )}
@@ -377,12 +347,12 @@ export function EncounterQuestion({
               <Label>{t("admit_source")}</Label>
               <Select
                 value={encounter.hospitalization?.admit_source}
-                onValueChange={(value) => {
+                onValueChange={(value: EncounterAdmitSources) => {
                   if (!encounter.hospitalization) return;
                   handleUpdateEncounter({
                     hospitalization: {
                       ...encounter.hospitalization,
-                      admit_source: value as EncounterAdmitSources,
+                      admit_source: value,
                     },
                   });
                 }}
@@ -409,13 +379,12 @@ export function EncounterQuestion({
                   <Label>{t("discharge_disposition")}</Label>
                   <Select
                     value={encounter.hospitalization?.discharge_disposition}
-                    onValueChange={(value) => {
+                    onValueChange={(value: EncounterDischargeDisposition) => {
                       if (!encounter.hospitalization) return;
                       handleUpdateEncounter({
                         hospitalization: {
                           ...encounter.hospitalization,
-                          discharge_disposition:
-                            value as EncounterDischargeDisposition,
+                          discharge_disposition: value,
                         },
                       });
                     }}
@@ -542,12 +511,12 @@ export function EncounterQuestion({
               <Label>{t("diet_preference")}</Label>
               <Select
                 value={encounter.hospitalization?.diet_preference}
-                onValueChange={(value) => {
+                onValueChange={(value: EncounterDietPreference) => {
                   if (!encounter.hospitalization) return;
                   handleUpdateEncounter({
                     hospitalization: {
                       ...encounter.hospitalization,
-                      diet_preference: value as EncounterDietPreference,
+                      diet_preference: value,
                     },
                   });
                 }}

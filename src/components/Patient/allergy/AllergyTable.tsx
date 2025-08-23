@@ -133,7 +133,7 @@ export function AllergyTable({ allergies }: AllergyTableProps) {
             <TableCell className="last:rounded-r-md">
               <div className="flex items-center gap-2">
                 <Avatar
-                  name={allergy.created_by.username}
+                  name={formatName(allergy.created_by)}
                   className="size-4"
                   imageUrl={allergy.created_by.profile_picture_url}
                 />

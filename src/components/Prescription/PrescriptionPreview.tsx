@@ -11,12 +11,12 @@ import { formatDosage, formatSig } from "@/components/Medicine/utils";
 
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import {
   MedicationRequestRead,
   displayMedicationName,
 } from "@/types/emr/medicationRequest/medicationRequest";
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 
 interface DetailRowProps {
   label: string;
@@ -37,9 +37,9 @@ const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
 };
 
 interface PrescriptionPreviewProps {
-  encounter?: Encounter;
+  encounter?: EncounterRead;
   medications: MedicationRequestRead[];
-  patient: Patient;
+  patient: PatientRead;
 }
 
 export const PrescriptionPreview = ({

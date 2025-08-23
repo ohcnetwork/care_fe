@@ -5,7 +5,12 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { NavMain, NavigationLink } from "@/components/ui/sidebar/nav-main";
 
-function generateAdminLinks(t: TFunction) {
+import { useCareApps } from "@/hooks/useCareApps";
+
+function generateAdminLinks(
+  t: TFunction,
+  pluginNavItems: NavigationLink[],
+): NavigationLink[] {
   const baseUrl = "/admin";
   const links: NavigationLink[] = [
     {
@@ -62,6 +67,7 @@ function generateAdminLinks(t: TFunction) {
         },
       ],
     },
+    ...pluginNavItems,
   ];
 
   return links;
@@ -69,5 +75,11 @@ function generateAdminLinks(t: TFunction) {
 
 export function AdminNav() {
   const { t } = useTranslation();
-  return <NavMain links={generateAdminLinks(t)} />;
+
+  const careApps = useCareApps();
+  const pluginNavItems = careApps
+    .filter((c) => !!c.adminNavItems)
+    .flatMap((c) => c.adminNavItems) as NavigationLink[];
+
+  return <NavMain links={generateAdminLinks(t, pluginNavItems)} />;
 }

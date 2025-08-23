@@ -8,10 +8,10 @@ import { PatientSwitcher } from "@/components/ui/sidebar/patient-switcher";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
-import { Patient } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 
 function generatePatientLinks(
-  selectedUser: Patient | null,
+  selectedUser: PatientRead | null,
   t: TFunction,
 ): NavigationLink[] {
   if (!selectedUser) return [];

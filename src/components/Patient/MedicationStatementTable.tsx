@@ -117,7 +117,7 @@ export const MedicationStatementTable = ({
                 <Avatar
                   name={formatName(statement.created_by, true)}
                   className="size-4"
-                  imageUrl={statement.created_by.read_profile_picture_url}
+                  imageUrl={statement.created_by.profile_picture_url}
                 />
                 <span className="text-sm">
                   {formatName(statement.created_by)}

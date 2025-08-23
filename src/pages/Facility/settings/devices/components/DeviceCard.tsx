@@ -15,11 +15,11 @@ import {
   DEVICE_AVAILABILITY_STATUS_COLORS,
   DeviceList,
 } from "@/types/device/device";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 
 interface Props {
   device: DeviceList;
-  encounter?: Encounter;
+  encounter?: EncounterRead;
 }
 
 export default function DeviceCard({ device, encounter }: Props) {

@@ -1,17 +1,17 @@
 import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
 
 import {
-  ChargeItemCreate,
-  ChargeItemUpsert,
+  ApplyChargeItemDefinitionRequest,
+  ApplyMultipleChargeItemDefinitionRequest,
 } from "@/types/billing/chargeItem/chargeItem";
 import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
-import { EncounterEditRequest } from "@/types/emr/encounter/encounter";
+import { EncounterEdit } from "@/types/emr/encounter/encounter";
 import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { ServiceRequestApplyActivityDefinitionSpec } from "@/types/emr/serviceRequest/serviceRequest";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
-import { FileUploadQuestion } from "@/types/files/files";
+import { FileUploadQuestion } from "@/types/files/file";
 import {
   AppointmentCreateRequest,
   CreateAppointmentQuestion,
@@ -24,12 +24,12 @@ export interface StructuredDataMap {
   symptom: SymptomRequest;
   diagnosis: DiagnosisRequest;
   medication_statement: MedicationStatementRequest;
-  encounter: EncounterEditRequest;
+  encounter: EncounterEdit;
   appointment: CreateAppointmentQuestion;
   files: FileUploadQuestion;
   time_of_death: string;
   service_request: ServiceRequestApplyActivityDefinitionSpec;
-  charge_item: ChargeItemUpsert;
+  charge_item: ApplyChargeItemDefinitionRequest;
 }
 
 // Map structured types to their request types
@@ -39,14 +39,14 @@ export interface StructuredRequestMap {
   symptom: { datapoints: SymptomRequest[] };
   diagnosis: { datapoints: DiagnosisRequest[] };
   medication_statement: { datapoints: MedicationStatementRequest[] };
-  encounter: EncounterEditRequest;
+  encounter: EncounterEdit;
   appointment: AppointmentCreateRequest;
   service_request: ServiceRequestApplyActivityDefinitionSpec;
   files: FileUploadQuestion;
   time_of_death: {
     deceased_datetime: string;
   };
-  charge_item: { datapoints: ChargeItemCreate[] };
+  charge_item: ApplyMultipleChargeItemDefinitionRequest;
 }
 
 export type RequestTypeFor<T extends StructuredQuestionType> =

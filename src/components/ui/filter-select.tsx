@@ -1,6 +1,8 @@
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
@@ -17,6 +19,8 @@ export interface FilterSelectProps {
   options: string[];
   label: string;
   onClear: () => void;
+  icon?: React.ReactNode;
+  className?: string;
 }
 
 export function FilterSelect({
@@ -25,22 +29,31 @@ export function FilterSelect({
   options,
   label,
   onClear,
+  icon,
+  className,
 }: FilterSelectProps) {
   const { t } = useTranslation();
   return (
-    <div className="flex overflow-hidden rounded-lg border border-gray-400">
+    <div
+      className={cn(
+        "flex items-center overflow-hidden rounded-lg border border-gray-400",
+        className,
+      )}
+    >
       <Select
         value={value}
         onValueChange={(newValue) => onValueChange(newValue || undefined)}
       >
-        <SelectTrigger className="border-0 hover:bg-transparent focus:ring-0 focus:ring-offset-0">
-          <div className="flex items-center gap-2">
-            <CareIcon icon="l-filter" className="size-4" />
+        <SelectTrigger className="border-0 hover:bg-transparent rounded-none focus:ring-0 focus:ring-offset-0">
+          <div className="flex w-full items-center gap-2">
+            {icon || <CareIcon icon="l-filter" className="size-4" />}
             {value ? (
               <>
-                <span>{t(label)}</span>
-                <span className="text-gray-500">is</span>
-                <span>{t(value)}</span>
+                <span className="text-gray-950">{t(label)}</span>
+                <span className="text-gray-600 underline lowercase">
+                  {t("is")}
+                </span>
+                <span className="text-gray-950 underline">{t(value)}</span>
               </>
             ) : (
               <span className="text-gray-500">{t(label)}</span>
@@ -60,7 +73,7 @@ export function FilterSelect({
           variant="ghost"
           size="sm"
           onClick={onClear}
-          className="h-auto border-l px-2 hover:bg-transparent"
+          className="h-8 border-l px-2 hover:bg-transparent w-9 mr-3 pr-px rounded-none text-gray-950 border-gray-400"
         >
           <X className="size-4" />
         </Button>

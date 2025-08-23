@@ -189,7 +189,7 @@ export default function InvoicesData({
                     <TableCell>
                       <MonetaryDisplay
                         className="font-medium"
-                        amount={invoice.total_gross}
+                        amount={String(invoice.total_gross)}
                       />
                     </TableCell>
                     <TableCell>

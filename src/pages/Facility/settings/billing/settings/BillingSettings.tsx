@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -28,8 +27,8 @@ export function BillingSettings() {
     isError,
     reset,
   } = useMutation({
-    mutationFn: mutate(facilityApi.patchInvoiceNumberExpression, {
-      pathParams: { id: facilityId },
+    mutationFn: mutate(facilityApi.setInvoiceExpression, {
+      pathParams: { facilityId },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["facility", facilityId] });

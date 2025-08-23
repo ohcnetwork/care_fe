@@ -59,26 +59,14 @@ import EditChargeItemSheet from "./EditChargeItemSheet";
 interface PriceComponentRowProps {
   label: string;
   components: MonetaryComponent[];
-  baseAmount: number;
-  quantity: number;
 }
 
-function PriceComponentRow({
-  label,
-  components,
-  baseAmount,
-  quantity,
-}: PriceComponentRowProps) {
+function PriceComponentRow({ label, components }: PriceComponentRowProps) {
   if (!components.length) return null;
 
   return (
     <>
       {components.map((component, index) => {
-        const value =
-          component.amount !== undefined && component.amount !== null
-            ? component.amount * quantity
-            : (((component.factor || 0) * baseAmount) / 100) * quantity;
-
         return (
           <TableRow key={`${label}-${index}`} className="text-xs text-gray-500">
             <TableCell></TableCell>
@@ -90,16 +78,7 @@ function PriceComponentRow({
               <MonetaryDisplay {...component} />
             </TableCell>
             <TableCell></TableCell>
-            <TableCell>
-              <MonetaryDisplay
-                amount={
-                  component.monetary_component_type ===
-                  MonetaryComponentType.discount
-                    ? -value
-                    : value
-                }
-              />
-            </TableCell>
+            <TableCell></TableCell>
             <TableCell></TableCell>
           </TableRow>
         );
@@ -253,7 +232,7 @@ export function ChargeItemsTable({
                 chargeItems.results.flatMap((item) => {
                   const isExpanded = expandedItems[item.id] || false;
                   const baseComponent = getBaseComponent(item);
-                  const baseAmount = baseComponent?.amount || 0;
+                  const baseAmount = String(baseComponent?.amount || "0");
 
                   const mainRow = (
                     <TableRow
@@ -376,8 +355,6 @@ export function ChargeItemsTable({
                         item,
                         MonetaryComponentType.discount,
                       )}
-                      baseAmount={baseAmount}
-                      quantity={item.quantity}
                     />,
                     <PriceComponentRow
                       key={`${item.id}-taxes`}
@@ -386,8 +363,6 @@ export function ChargeItemsTable({
                         item,
                         MonetaryComponentType.tax,
                       )}
-                      baseAmount={baseAmount}
-                      quantity={item.quantity}
                     />,
                   ];
 

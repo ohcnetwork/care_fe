@@ -9,7 +9,6 @@ import {
   ResponseCard,
 } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireQuestionnaireResponses";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
@@ -31,7 +30,7 @@ export function PrintQuestionnaireResponse({
 
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId, facilityId],
-    queryFn: query(encounterApi.getEncounter, {
+    queryFn: query(encounterApi.get, {
       pathParams: { id: encounterId! },
       queryParams: { facility: facilityId },
     }),
@@ -55,7 +54,7 @@ export function PrintQuestionnaireResponse({
       encounterId,
       patientId,
     ],
-    queryFn: query(routes.getQuestionnaireResponse, {
+    queryFn: query(patientApi.getQuestionnaireResponse, {
       pathParams: { patientId, responseId: questionnaireResponseId },
     }),
   });

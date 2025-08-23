@@ -10,9 +10,9 @@ export enum MonetaryComponentType {
 
 export interface MonetaryComponent {
   monetary_component_type: MonetaryComponentType;
-  code?: Code | null;
-  factor?: number | null;
-  amount?: number | null;
+  code?: Code;
+  factor?: number;
+  amount?: string;
 }
 
 export interface MonetaryComponentRead extends MonetaryComponent {

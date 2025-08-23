@@ -21,8 +21,10 @@ import {
 } from "@/components/ui/table";
 
 import Page from "@/components/Common/Page";
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import {
+  CardGridSkeleton,
+  TableSkeleton,
+} from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -98,7 +100,7 @@ export function SpecimenDefinitionsList({
   }, []);
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["specimen_definitions", facilityId, qParams],
+    queryKey: ["specimenDefinitions", facilityId, qParams],
     queryFn: query.debounced(specimenDefinitionApi.listSpecimenDefinitions, {
       pathParams: { facilityId },
       queryParams: {
@@ -120,7 +122,7 @@ export function SpecimenDefinitionsList({
           <h1 className="text-2xl font-bold text-gray-700">
             {t("specimen_definitions")}
           </h1>
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex sm:items-center sm:justify-between sm:flex-row flex-col gap-4">
             <div>
               <p className="text-gray-600 text-sm">
                 {t("manage_specimen_definitions")}

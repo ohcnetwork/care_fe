@@ -1,7 +1,14 @@
 import {
   Ambulance,
+  Ban,
   BedDouble,
+  Calendar,
+  Check,
+  CirclePause,
+  CircleX,
+  FileQuestion,
   Home,
+  LoaderCircle,
   LucideIcon,
   MonitorSmartphone,
   Siren,
@@ -13,10 +20,10 @@ import { Badge } from "@/components/ui/badge";
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
-import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationAssociationStatus } from "@/types/location/association";
 import { LocationList } from "@/types/location/location";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export const ENCOUNTER_ADMIT_SOURCE = [
   "hosp_trans",
@@ -137,12 +144,16 @@ export const ENCOUNTER_CLASS_ICONS = {
 } as const satisfies Record<EncounterClass, LucideIcon>;
 
 export const ENCOUNTER_STATUS_ICONS = {
-  planned: "l-calender",
-  in_progress: "l-spinner",
-  discharged: "l-home",
-  completed: "l-check",
-  cancelled: "l-x",
-} as const satisfies Partial<Record<EncounterStatus, string>>;
+  planned: Calendar,
+  in_progress: LoaderCircle,
+  discharged: Home,
+  completed: Check,
+  cancelled: CircleX,
+  on_hold: CirclePause,
+  discontinued: CircleX,
+  entered_in_error: Ban,
+  unknown: FileQuestion,
+} as const satisfies Record<EncounterStatus, LucideIcon>;
 
 export const ENCOUNTER_CLASSES_COLORS = {
   imp: "indigo", // Inpatient
@@ -173,8 +184,8 @@ export type Period = {
 };
 
 export type Hospitalization = {
-  re_admission: boolean;
-  admit_source: EncounterAdmitSources;
+  re_admission?: boolean;
+  admit_source?: EncounterAdmitSources;
   discharge_disposition?: EncounterDischargeDisposition;
   diet_preference?: EncounterDietPreference;
 };
@@ -200,59 +211,47 @@ export type LocationHistory = {
   end_datetime?: string;
 };
 
-export interface Encounter {
+export interface EncounterBase {
   id: string;
+  patient: string;
+  facility: string;
+  status: EncounterStatus;
+  encounter_class: EncounterClass;
+  period: Period;
+  hospitalization?: Hospitalization | null;
+  priority: EncounterPriority;
+  external_identifier?: string;
+  discharge_summary_advice?: string | null;
+}
+
+export interface EncounterRead
+  extends Omit<EncounterBase, "patient" | "facility"> {
   patient: PatientRead;
   facility: {
     id: string;
     name: string;
   };
-  status: EncounterStatus;
-  encounter_class: EncounterClass;
-  period: Period;
-  hospitalization?: Hospitalization;
-  priority: EncounterPriority;
-  external_identifier?: string;
-  created_by: UserBase;
-  updated_by: UserBase;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
   created_date: string;
   modified_date: string;
   encounter_class_history: EncounterClassHistory;
   status_history: StatusHistory;
-  organizations: FacilityOrganization[];
+  organizations: FacilityOrganizationRead[];
   current_location: LocationList;
   location_history: LocationHistory[];
   permissions: string[];
   care_team: CareTeamResponse[];
-  discharge_summary_advice?: string;
   tags: TagConfig[];
 }
 
-export interface EncounterEditRequest {
+export interface EncounterCreate extends Omit<EncounterBase, "id"> {
   organizations: string[];
-  patient: string;
-  status: EncounterStatus;
-  encounter_class: EncounterClass;
-  period: Period;
-  hospitalization?: Hospitalization;
-  priority: EncounterPriority;
-  external_identifier?: string;
-  facility: string;
-  discharge_summary_advice?: string | null;
+  tags?: string[];
+  appointment?: string;
 }
 
-export interface EncounterRequest {
-  organizations: string[];
-  patient: string;
-  status: EncounterStatus;
-  encounter_class: EncounterClass;
-  period: Period;
-  hospitalization?: Hospitalization;
-  priority: EncounterPriority;
-  external_identifier?: string;
-  facility: string;
-  discharge_summary_advice?: string;
-}
+export type EncounterEdit = Omit<EncounterBase, "id">;
 
 export const completedEncounterStatus = ["completed"];
 export const inactiveEncounterStatus = [

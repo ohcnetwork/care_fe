@@ -8,11 +8,11 @@ import { Card } from "@/components/ui/card";
 
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { Observation } from "@/types/emr/observation";
+import patientApi from "@/types/emr/patient/patientApi";
 
 interface GroupedObservations {
   [key: string]: Observation[];
@@ -72,7 +72,7 @@ export const EncounterObservationsTab = () => {
   const {
     selectedEncounterId: encounterId,
     patientId,
-    selectedEncounterPermissions: { canViewEncounter, canViewClinicalData },
+    canReadClinicalData,
   } = useEncounter();
   const { ref, inView } = useInView();
 
@@ -80,7 +80,7 @@ export const EncounterObservationsTab = () => {
     useInfiniteQuery<PaginatedResponse<Observation>, HTTPError>({
       queryKey: ["infinite-observations", patientId, encounterId],
       queryFn: async ({ pageParam = 0 }) => {
-        const response = await query(routes.listObservations, {
+        const response = await query(patientApi.listObservations, {
           pathParams: { patientId },
           queryParams: {
             encounter: encounterId,
@@ -96,7 +96,7 @@ export const EncounterObservationsTab = () => {
         const currentOffset = allPages.length * 20;
         return currentOffset < lastPage.count ? currentOffset : null;
       },
-      enabled: canViewClinicalData || canViewEncounter,
+      enabled: canReadClinicalData,
     });
 
   useEffect(() => {

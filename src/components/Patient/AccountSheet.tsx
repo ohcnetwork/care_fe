@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   Sheet,
   SheetContent,
@@ -20,10 +21,10 @@ import {
   AccountStatus,
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
-import { Encounter } from "@/types/emr/encounter/encounter";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 
 interface AccountSheetButtonProps {
-  encounter: Encounter;
+  encounter: EncounterRead;
   trigger: React.ReactNode;
   canWrite: boolean;
 }
@@ -97,33 +98,35 @@ export function AccountSheetButton({
           <SheetHeader className="mb-6">
             <SheetTitle className="text-xl flex items-center justify-start gap-2">
               {t("account")}
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex items-center gap-1"
-                  onClick={(e) => handleViewAccount(accounts[0], e)}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  {t("more_details")}
-                </Button>
-                {canWrite && (
+              {!!accounts.length && (
+                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     className="flex items-center gap-1"
-                    onClick={(e) => handleEditAccount(accounts[0], e)}
+                    onClick={(e) => handleViewAccount(accounts[0], e)}
                   >
-                    <Edit className="h-4 w-4" />
-                    {t("edit")}
+                    <ExternalLink className="size-4" />
+                    {t("more_details")}
                   </Button>
-                )}
-              </div>
+                  {canWrite && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-1"
+                      onClick={(e) => handleEditAccount(accounts[0], e)}
+                    >
+                      <Edit className="size-4" />
+                      {t("edit")}
+                    </Button>
+                  )}
+                </div>
+              )}
             </SheetTitle>
           </SheetHeader>
           {isLoading ? (
             <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <div className="animate-spin rounded-full size-8 border-b-2 border-primary"></div>
             </div>
           ) : (
             <div className="space-y-5 pr-2 max-h-[calc(100vh-120px)] overflow-y-auto">
@@ -216,13 +219,9 @@ export function AccountSheetButton({
                             {t("total_balance")}
                           </span>
                           <span className="text-lg font-semibold text-red-600">
-                            {accounts[0].total_balance.toLocaleString(
-                              undefined,
-                              {
-                                style: "currency",
-                                currency: "INR",
-                              },
-                            )}
+                            <MonetaryDisplay
+                              amount={accounts[0].total_balance}
+                            />
                           </span>
                         </div>
 
@@ -231,10 +230,7 @@ export function AccountSheetButton({
                             {t("total_gross")}
                           </span>
                           <span className="font-medium">
-                            {accounts[0].total_gross.toLocaleString(undefined, {
-                              style: "currency",
-                              currency: "INR",
-                            })}
+                            <MonetaryDisplay amount={accounts[0].total_gross} />
                           </span>
                         </div>
 
@@ -243,10 +239,7 @@ export function AccountSheetButton({
                             {t("total_net")}
                           </span>
                           <span className="font-medium">
-                            {accounts[0].total_net.toLocaleString(undefined, {
-                              style: "currency",
-                              currency: "INR",
-                            })}
+                            <MonetaryDisplay amount={accounts[0].total_net} />
                           </span>
                         </div>
 
@@ -255,10 +248,7 @@ export function AccountSheetButton({
                             {t("total_paid")}
                           </span>
                           <span className="font-medium text-green-600">
-                            {accounts[0].total_paid.toLocaleString(undefined, {
-                              style: "currency",
-                              currency: "INR",
-                            })}
+                            <MonetaryDisplay amount={accounts[0].total_paid} />
                           </span>
                         </div>
                       </div>

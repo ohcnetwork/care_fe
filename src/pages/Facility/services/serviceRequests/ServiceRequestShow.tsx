@@ -31,10 +31,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
+import batchApi from "@/types/base/batch/batchApi";
 import {
   AccountBillingStatus,
   AccountStatus,
@@ -47,8 +47,10 @@ import {
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
-import { Status } from "@/types/emr/serviceRequest/serviceRequest";
-import { toServiceRequestUpdateSpec } from "@/types/emr/serviceRequest/serviceRequest";
+import {
+  Status,
+  toServiceRequestUpdateSpec,
+} from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import {
   SpecimenRead,
@@ -148,7 +150,7 @@ export default function ServiceRequestShow({
   });
 
   const { mutate: executeBatch } = useMutation({
-    mutationFn: mutate(routes.batchRequest, { silent: true }),
+    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["serviceRequest", facilityId, serviceRequestId],
@@ -315,6 +317,7 @@ export default function ServiceRequestShow({
                 method: requirement.collection,
                 body_site: null,
                 collector: null,
+                collector_object: null,
                 collected_date_time: null,
                 quantity: null,
                 procedure: null,
@@ -415,7 +418,7 @@ export default function ServiceRequestShow({
             request={request}
             activityDefinition={activityDefinition}
           />
-          <div className="space-y-4">
+          <div className="space-y-3 pt-5">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">{t("charge_items")}</h2>
               <div className="flex items-center gap-2">
@@ -488,7 +491,7 @@ export default function ServiceRequestShow({
           />
 
           {specimenRequirements.length > 0 && !selectedSpecimenDefinition && (
-            <div className="space-y-6">
+            <div className="space-y-3 pt-5">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">{t("specimens")}</h2>
                 <div className="flex items-center gap-2">
@@ -607,7 +610,7 @@ export default function ServiceRequestShow({
           )}
 
           {observationRequirements.length > 0 && (
-            <div className="space-y-4">
+            <div className="space-y-3 pt-5">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">{t("test_results")}</h2>
                 <DropdownMenu>

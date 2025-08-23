@@ -47,7 +47,7 @@ export function ChargeItemCard({
               {chargeItem.title}
             </span>
             <div className="flex items-center gap-2">
-              {chargeItem.quantity > 1 && (
+              {Number(chargeItem.quantity) > 1 && (
                 <span className="text-sm text-gray-950 whitespace-nowrap">
                   {t("x")} {chargeItem.quantity}
                 </span>

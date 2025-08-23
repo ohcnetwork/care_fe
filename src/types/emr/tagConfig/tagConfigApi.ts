@@ -16,7 +16,6 @@ export default {
     path: "/api/v1/tag_config/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<TagConfig>>(),
-    TQueryParams: Type<TagConfigFilters>(),
   },
 
   create: {
