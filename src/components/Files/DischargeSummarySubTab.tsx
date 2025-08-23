@@ -47,8 +47,9 @@ import encounterApi from "@/types/emr/encounter/encounterApi";
 import {
   BACKEND_ALLOWED_EXTENSIONS,
   FILE_EXTENSIONS,
+  FileReadMinimal,
+  FileType,
 } from "@/types/files/file";
-import { FileReadMinimal, FileType } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 
 interface DischargeTabProps {
