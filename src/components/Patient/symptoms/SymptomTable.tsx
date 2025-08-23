@@ -18,8 +18,6 @@ import { Avatar } from "@/components/Common/Avatar";
 import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 import ClinicalInformationRow from "@/components/Patient/Common/ClinicalInformationRow";
 
-import { useIsMobile } from "@/hooks/use-mobile";
-
 import { formatName } from "@/Utils/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
@@ -164,123 +162,133 @@ export const SymptomTable = ({
 }) => {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
-  const isMobile = useIsMobile();
   const baseHeaderClasses =
     "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700 text-sm";
-  return isMobile ? (
-    <div className="space-y-3">
-      {symptoms.map((symptom) => (
-        <SymptomCard
-          key={symptom.id}
-          symptom={symptom}
-          onViewEncounter={
-            showViewEncounter
-              ? () =>
-                  navigate(
-                    facilityId
-                      ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
-                      : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
-                  )
-              : undefined
-          }
-        />
-      ))}
-    </div>
-  ) : (
-    <div className="overflow-x-auto">
-      <div className="min-w-2xl pb-2">
-        <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-y-2">
-          <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm">
-            {t("symptom")}
-          </div>
+  return (
+    <>
+      {/* Mobile: Card layout */}
+      <div className="space-y-3 block sm:hidden">
+        {symptoms.map((symptom) => (
+          <SymptomCard
+            key={symptom.id}
+            symptom={symptom}
+            onViewEncounter={
+              showViewEncounter
+                ? () =>
+                    navigate(
+                      facilityId
+                        ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
+                        : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
+                    )
+                : undefined
+            }
+          />
+        ))}
+      </div>
+      {/* Desktop: Table layout */}
+      <div className="overflow-x-auto hidden sm:block">
+        <div className="min-w-2xl pb-2">
+          <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-y-2">
+            <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm">
+              {t("symptom")}
+            </div>
 
-          <div className={cn(baseHeaderClasses)}>{t("severity")}</div>
+            <div className={cn(baseHeaderClasses)}>{t("severity")}</div>
 
-          <div className={cn(baseHeaderClasses, "border-x")}>{t("status")}</div>
+            <div className={cn(baseHeaderClasses, "border-x")}>
+              {t("status")}
+            </div>
 
-          <div className={cn(baseHeaderClasses)}>{t("verification")}</div>
+            <div className={cn(baseHeaderClasses)}>{t("verification")}</div>
 
-          <div className={cn(baseHeaderClasses, "border-l")}>{t("onset")}</div>
+            <div className={cn(baseHeaderClasses, "border-l")}>
+              {t("onset")}
+            </div>
 
-          <div
-            className={cn(
-              "text-center border border-l-0 border-gray-200 rounded-tr-lg bg-gray-50",
-            )}
-          ></div>
+            <div
+              className={cn(
+                "text-center border border-l-0 border-gray-200 rounded-tr-lg bg-gray-50",
+              )}
+            ></div>
 
-          {symptoms.map((symptom) => (
-            <ClinicalInformationRow
-              key={symptom.id}
-              note={symptom.note}
-              createdBy={symptom.created_by}
-              onViewEncounter={
-                showViewEncounter
-                  ? () =>
-                      navigate(
-                        facilityId
-                          ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
-                          : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
-                      )
-                  : undefined
-              }
-              columns={[
-                {
-                  key: "display",
-                  className:
-                    "bg-gray-100 break-words whitespace-normal text-base font-semibold text-gray-900 rounded-l",
-                  render: () => symptom.code.display,
-                },
-                {
-                  key: "severity",
-                  render: () => (
-                    <Badge variant={SYMPTOM_SEVERITY_COLORS[symptom.severity]}>
-                      {t(symptom.severity)}
-                    </Badge>
-                  ),
-                },
-                {
-                  key: "status",
-                  render: () => (
-                    <Badge
-                      variant={
-                        SYMPTOM_CLINICAL_STATUS_COLORS[symptom.clinical_status]
-                      }
-                    >
-                      {t(symptom.clinical_status)}
-                    </Badge>
-                  ),
-                },
-                {
-                  key: "verification",
-                  render: () => (
-                    <Badge
-                      variant={
-                        SYMPTOM_VERIFICATION_STATUS_COLORS[
-                          symptom.verification_status
-                        ]
-                      }
-                    >
-                      {t(symptom.verification_status)}
-                    </Badge>
-                  ),
-                },
-                {
-                  key: "onset",
-                  className: "bg-gray-100",
-                  render: () =>
-                    symptom.onset?.onset_datetime ? (
-                      <RelativeDateTooltip
-                        date={symptom.onset.onset_datetime}
-                      />
-                    ) : (
-                      "-"
+            {symptoms.map((symptom) => (
+              <ClinicalInformationRow
+                key={symptom.id}
+                note={symptom.note}
+                createdBy={symptom.created_by}
+                onViewEncounter={
+                  showViewEncounter
+                    ? () =>
+                        navigate(
+                          facilityId
+                            ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
+                            : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
+                        )
+                    : undefined
+                }
+                columns={[
+                  {
+                    key: "display",
+                    className:
+                      "bg-gray-100 break-words whitespace-normal text-base font-semibold text-gray-900 rounded-l",
+                    render: () => symptom.code.display,
+                  },
+                  {
+                    key: "severity",
+                    render: () => (
+                      <Badge
+                        variant={SYMPTOM_SEVERITY_COLORS[symptom.severity]}
+                      >
+                        {t(symptom.severity)}
+                      </Badge>
                     ),
-                },
-              ]}
-            />
-          ))}
+                  },
+                  {
+                    key: "status",
+                    render: () => (
+                      <Badge
+                        variant={
+                          SYMPTOM_CLINICAL_STATUS_COLORS[
+                            symptom.clinical_status
+                          ]
+                        }
+                      >
+                        {t(symptom.clinical_status)}
+                      </Badge>
+                    ),
+                  },
+                  {
+                    key: "verification",
+                    render: () => (
+                      <Badge
+                        variant={
+                          SYMPTOM_VERIFICATION_STATUS_COLORS[
+                            symptom.verification_status
+                          ]
+                        }
+                      >
+                        {t(symptom.verification_status)}
+                      </Badge>
+                    ),
+                  },
+                  {
+                    key: "onset",
+                    className: "bg-gray-100",
+                    render: () =>
+                      symptom.onset?.onset_datetime ? (
+                        <RelativeDateTooltip
+                          date={symptom.onset.onset_datetime}
+                        />
+                      ) : (
+                        "-"
+                      ),
+                  },
+                ]}
+              />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };

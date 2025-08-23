@@ -17,8 +17,6 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import ClinicalInformationRow from "@/components/Patient/Common/ClinicalInformationRow";
 
-import { useIsMobile } from "@/hooks/use-mobile";
-
 import { formatName } from "@/Utils/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
@@ -154,55 +152,18 @@ export const AllergyTable = ({
 }) => {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
-  const isMobile = useIsMobile();
   const baseHeaderClasses =
     "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700 text-sm";
 
-  return isMobile ? (
-    <div className="space-y-3">
-      {allergies.map((allergy) => {
-        return (
-          <AllergyCard
-            key={allergy.id}
-            allergy={allergy}
-            onViewEncounter={
-              showViewEncounter
-                ? () =>
-                    navigate(
-                      facilityId
-                        ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
-                        : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
-                    )
-                : undefined
-            }
-          />
-        );
-      })}
-    </div>
-  ) : (
-    <div className="overflow-x-auto">
-      <div className="min-w-xl pb-2">
-        <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-y-2">
-          <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm">
-            {t("allergen")}
-          </div>
-
-          <div className={cn(baseHeaderClasses)}>{t("status")}</div>
-
-          <div className={cn(baseHeaderClasses, "border-x")}>
-            {t("criticality")}
-          </div>
-
-          <div className={cn(baseHeaderClasses)}>{t("verification")}</div>
-
-          <div
-            className={cn(
-              "text-center border border-l-0 border-gray-200 rounded-tr-lg bg-gray-50",
-            )}
-          ></div>
-          {allergies.map((allergy) => (
-            <ClinicalInformationRow
+  return (
+    <>
+      {/* Mobile: Card layout */}
+      <div className="space-y-3 block sm:hidden">
+        {allergies.map((allergy) => {
+          return (
+            <AllergyCard
               key={allergy.id}
+              allergy={allergy}
               onViewEncounter={
                 showViewEncounter
                   ? () =>
@@ -213,56 +174,99 @@ export const AllergyTable = ({
                       )
                   : undefined
               }
-              note={allergy.note}
-              createdBy={allergy.created_by}
-              columns={[
-                {
-                  key: "display",
-                  className:
-                    "bg-gray-100 break-words whitespace-normal text-base font-semibold text-gray-900 rounded-l",
-                  render: () => allergy.code.display,
-                },
-                {
-                  key: "status",
-                  render: () => (
-                    <Badge
-                      variant={
-                        ALLERGY_CLINICAL_STATUS_COLORS[allergy.clinical_status]
-                      }
-                    >
-                      {t(allergy.clinical_status)}
-                    </Badge>
-                  ),
-                },
-                {
-                  key: "criticality",
-                  render: () => (
-                    <Badge
-                      variant={ALLERGY_CRITICALITY_COLORS[allergy.criticality]}
-                    >
-                      {t(allergy.criticality)}
-                    </Badge>
-                  ),
-                },
-                {
-                  key: "verification",
-                  render: () => (
-                    <Badge
-                      variant={
-                        ALLERGY_VERIFICATION_STATUS_COLORS[
-                          allergy.verification_status
-                        ]
-                      }
-                    >
-                      {t(allergy.verification_status)}
-                    </Badge>
-                  ),
-                },
-              ]}
             />
-          ))}
+          );
+        })}
+      </div>
+      {/* Desktop: Table layout */}
+      <div className="overflow-x-auto hidden sm:block">
+        <div className="min-w-xl pb-2">
+          <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-y-2">
+            <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm">
+              {t("allergen")}
+            </div>
+
+            <div className={cn(baseHeaderClasses)}>{t("status")}</div>
+
+            <div className={cn(baseHeaderClasses, "border-x")}>
+              {t("criticality")}
+            </div>
+
+            <div className={cn(baseHeaderClasses)}>{t("verification")}</div>
+
+            <div
+              className={cn(
+                "text-center border border-l-0 border-gray-200 rounded-tr-lg bg-gray-50",
+              )}
+            ></div>
+            {allergies.map((allergy) => (
+              <ClinicalInformationRow
+                key={allergy.id}
+                onViewEncounter={
+                  showViewEncounter
+                    ? () =>
+                        navigate(
+                          facilityId
+                            ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
+                            : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
+                        )
+                    : undefined
+                }
+                note={allergy.note}
+                createdBy={allergy.created_by}
+                columns={[
+                  {
+                    key: "display",
+                    className:
+                      "bg-gray-100 break-words whitespace-normal text-base font-semibold text-gray-900 rounded-l",
+                    render: () => allergy.code.display,
+                  },
+                  {
+                    key: "status",
+                    render: () => (
+                      <Badge
+                        variant={
+                          ALLERGY_CLINICAL_STATUS_COLORS[
+                            allergy.clinical_status
+                          ]
+                        }
+                      >
+                        {t(allergy.clinical_status)}
+                      </Badge>
+                    ),
+                  },
+                  {
+                    key: "criticality",
+                    render: () => (
+                      <Badge
+                        variant={
+                          ALLERGY_CRITICALITY_COLORS[allergy.criticality]
+                        }
+                      >
+                        {t(allergy.criticality)}
+                      </Badge>
+                    ),
+                  },
+                  {
+                    key: "verification",
+                    render: () => (
+                      <Badge
+                        variant={
+                          ALLERGY_VERIFICATION_STATUS_COLORS[
+                            allergy.verification_status
+                          ]
+                        }
+                      >
+                        {t(allergy.verification_status)}
+                      </Badge>
+                    ),
+                  },
+                ]}
+              />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
