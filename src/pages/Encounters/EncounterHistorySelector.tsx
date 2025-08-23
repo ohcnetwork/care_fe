@@ -30,15 +30,24 @@ import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { dateTimeQueryString } from "@/Utils/utils";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
+  completedEncounterStatus,
   ENCOUNTER_STATUS,
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
-  completedEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
-import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import {
+  getTagHierarchyDisplay,
+  TagConfig,
+  TagResource,
+} from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 
 interface EncounterCardProps {
@@ -217,11 +226,18 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             {t("chosen_encounter")}
           </h2>
           <div className="space-y-2">
-            <EncounterCard
-              encounter={primaryEncounter}
-              isSelected={primaryEncounterId === selectedEncounterId}
-              onSelect={() => handleSelect(null)}
-            />
+            <HoverCard>
+              <HoverCardTrigger>
+                <EncounterCard
+                  encounter={primaryEncounter}
+                  isSelected={primaryEncounterId === selectedEncounterId}
+                  onSelect={() => handleSelect(null)}
+                />
+              </HoverCardTrigger>
+              <HoverCardContent className="flex flex-col gap-2 p-4 border border-gray-200 rounded-md max-w-90">
+                <EncounterHoverCard encounter={primaryEncounter} />
+              </HoverCardContent>
+            </HoverCard>
           </div>
         </div>
       )}
@@ -314,12 +330,19 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
                 }
 
                 acc.push(
-                  <EncounterCard
-                    key={encounter.id}
-                    encounter={encounter}
-                    isSelected={encounter.id === selectedEncounterId}
-                    onSelect={handleSelect}
-                  />,
+                  <HoverCard>
+                    <HoverCardTrigger>
+                      <EncounterCard
+                        key={encounter.id}
+                        encounter={encounter}
+                        isSelected={encounter.id === selectedEncounterId}
+                        onSelect={handleSelect}
+                      />
+                    </HoverCardTrigger>
+                    <HoverCardContent className="flex flex-col gap-2 p-4 border border-gray-200 rounded-md max-w-90">
+                      <EncounterHoverCard encounter={encounter} />
+                    </HoverCardContent>
+                  </HoverCard>,
                 );
                 return acc;
               },
@@ -430,5 +453,44 @@ const EncounterSheetTrigger = () => {
         </div>
       </CardContent>
     </Card>
+  );
+};
+
+const EncounterHoverCard = ({ encounter }: { encounter: EncounterRead }) => {
+  const { t } = useTranslation();
+  return (
+    <>
+      <div className="flex flex-col">
+        <span className="font-semibold text-gray-950">
+          {t(`encounter_class__${encounter.encounter_class}`)}
+        </span>
+        <span className="text-sm text-gray-700 font-medium">
+          {encounter.facility.name}
+        </span>
+      </div>
+      <div className="flex flex-col gap-1">
+        <span className="text-sm text-gray-700 font-medium">
+          {t("encounter_tags")}:
+        </span>
+        <div className="flex flex-wrap gap-2">
+          {encounter.tags.length > 0 ? (
+            <>
+              {encounter.tags.map((tag) => (
+                <Badge
+                  key={tag.id}
+                  variant="secondary"
+                  className="capitalize"
+                  title={tag.description}
+                >
+                  {getTagHierarchyDisplay(tag)}
+                </Badge>
+              ))}
+            </>
+          ) : (
+            <span className="text-sm text-gray-500">{t("no_tags")}</span>
+          )}
+        </div>
+      </div>
+    </>
   );
 };
