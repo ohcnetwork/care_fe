@@ -53,6 +53,7 @@ import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 import {
   handleOfflineRecordSuccess,
   isOfflineId,
+  toFacilityRead,
 } from "@/OfflineSupport/offlineWriteHelpers";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -60,7 +61,7 @@ import query from "@/Utils/request/query";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import patientApi from "@/types/emr/patient/patientApi";
-import { FacilityPublicRead, FacilityRead } from "@/types/facility/facility";
+import { FacilityRead } from "@/types/facility/facility";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import {
   RESOURCE_REQUEST_STATUSES,
@@ -180,7 +181,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
   useEffect(() => {
     const loadResourcerequest = async () => {
-      const dataToUse = offlineEntryId
+      const dataToUse = offlineEntry
         ? offlineEntry?.normalizedData
         : resourceData;
 
@@ -215,36 +216,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       toast.success(t("resource_updated_successfully"));
       navigate(`/facility/${facilityId}/resource/${data.id}`);
     },
-  });
-
-  const toFacilityRead = (facility: FacilityPublicRead): FacilityRead => ({
-    id: facility.id,
-    name: facility.name,
-    description: facility.description,
-    address: facility.address,
-    phone_number: facility.phone_number,
-    facility_type: facility.facility_type,
-    is_public: facility.is_public,
-    latitude: facility.latitude,
-    longitude: facility.longitude,
-    middleware_address: facility.middleware_address,
-    pincode: facility.pincode,
-    read_cover_image_url: facility.cover_image_url,
-    geo_organization: facility.geo_organization,
-    features: facility.features,
-    instance_discount_codes: [],
-    instance_discount_monetary_components: [],
-    instance_informational_codes: [],
-    instance_tax_codes: [],
-    instance_tax_monetary_components: [],
-    invoice_number_expression: "",
-    discount_codes: [],
-    discount_monetary_components: [],
-    patient_instance_identifier_configs: [],
-    patient_facility_identifier_configs: [],
-    permissions: [],
-    root_org_permissions: [],
-    child_org_permissions: [],
   });
 
   const onSubmit = (data: ResourceFormValues) => {

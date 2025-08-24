@@ -22,7 +22,7 @@ import {
 } from "@/types/emr/patient/patient";
 import { Symptom } from "@/types/emr/symptom/symptom";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
-import { FacilityRead } from "@/types/facility/facility";
+import { FacilityPublicRead, FacilityRead } from "@/types/facility/facility";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { Organization } from "@/types/organization/organization";
@@ -563,6 +563,36 @@ export function normalizeUserBase(authUser: AuthUserModel): UserBase {
     prefix: authUser?.prefix,
   };
 }
+
+export const toFacilityRead = (facility: FacilityPublicRead): FacilityRead => ({
+  id: facility.id,
+  name: facility.name,
+  description: facility.description,
+  address: facility.address,
+  phone_number: facility.phone_number,
+  facility_type: facility.facility_type,
+  is_public: facility.is_public,
+  latitude: facility.latitude,
+  longitude: facility.longitude,
+  middleware_address: facility.middleware_address,
+  pincode: facility.pincode,
+  read_cover_image_url: facility.cover_image_url,
+  geo_organization: facility.geo_organization,
+  features: facility.features,
+  instance_discount_codes: [],
+  instance_discount_monetary_components: [],
+  instance_informational_codes: [],
+  instance_tax_codes: [],
+  instance_tax_monetary_components: [],
+  invoice_number_expression: "",
+  discount_codes: [],
+  discount_monetary_components: [],
+  patient_instance_identifier_configs: [],
+  patient_facility_identifier_configs: [],
+  permissions: [],
+  root_org_permissions: [],
+  child_org_permissions: [],
+});
 
 export const updateActiveEncounterList = ({
   queryClient,

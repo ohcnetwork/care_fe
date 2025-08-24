@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { onlineManager } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -67,6 +68,12 @@ interface SyncResult {
   failedCount: number;
   conflictCount: number;
   blockedCount: number;
+  errors: string[];
+}
+
+interface CleanupResult {
+  deletedCount: number;
+  preservedCount: number;
   errors: string[];
 }
 
@@ -149,8 +156,6 @@ export class SyncManager {
           totalWrites,
         );
       }
-
-      await this.cleanup();
     } catch (error) {
       result.success = false;
       result.errors.push(
@@ -161,6 +166,7 @@ export class SyncManager {
       this.isRunning = false;
       this.abortController = null;
       this.options.onSyncComplete?.();
+      await this.cleanupSyncedRecords(careConfig.cleanupSucessOfflineRecords);
     }
 
     return result;
@@ -311,31 +317,96 @@ export class SyncManager {
     return false;
   }
 
-  private async cleanup(): Promise<void> {
+  /**
+   * Cleanup successfully synced records while preserving hierarchical integrity
+   * Only deletes records if their entire dependency chain is synced
+   * Configure through care config: cleanupSucessOfflineRecords
+   */
+  public async cleanupSyncedRecords(
+    olderThanMs: number,
+  ): Promise<CleanupResult> {
+    const db = new AppCacheDB();
+    const result: CleanupResult = {
+      deletedCount: 0,
+      preservedCount: 0,
+      errors: [],
+    };
+
     try {
-      const db = new AppCacheDB();
-      const now = Date.now();
-      const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
-
       let query = db.OfflineWrites.where("userId").equals(this.options.userId);
-
       if (this.options.facilityId) {
         query = query.and((w) => w.facilityId === this.options.facilityId);
       }
 
-      const oldSuccessfulWrites = await query
-        .and(
-          (w) =>
-            w.syncStatus === "success" && w.clientTimestamp < thirtyDaysAgo,
-        )
-        .toArray();
+      const allRecords = await query.toArray();
 
-      for (const write of oldSuccessfulWrites) {
-        await db.OfflineWrites.delete(write.id);
+      const now = Date.now();
+      const cutoffTime = now - olderThanMs;
+
+      const eligibleRecords = allRecords.filter(
+        (record) => record.clientTimestamp < cutoffTime,
+      );
+
+      if (eligibleRecords.length === 0) {
+        result.preservedCount = allRecords.length;
+        return result;
       }
+
+      // Topological sort: [parent, ..., child]
+      const sortedRecords = topologicalSort(eligibleRecords);
+
+      // Start from last index, traverse backwards
+      let i = sortedRecords.length - 1;
+
+      while (i >= 0) {
+        const record = sortedRecords[i];
+
+        if (record.syncStatus === "success") {
+          // Count family size by going backwards until no parent
+          let familySize = 1;
+          let j = i - 1;
+
+          while (j >= 0 && sortedRecords[j].parentMutationId) {
+            familySize++;
+            j--;
+          }
+
+          // Delete entire family
+          for (let k = 0; k < familySize; k++) {
+            const recordToDelete = sortedRecords[i - k];
+            try {
+              await db.OfflineWrites.delete(recordToDelete.id);
+              result.deletedCount++;
+            } catch (error) {
+              result.errors.push(
+                `Failed to delete ${recordToDelete.id}: ${error}`,
+              );
+            }
+          }
+
+          // Jump to previous family
+          i -= familySize;
+        } else {
+          // Count family size and skip
+          let familySize = 1;
+          let j = i - 1;
+
+          while (j >= 0 && sortedRecords[j].parentMutationId) {
+            familySize++;
+            j--;
+          }
+
+          // Skip entire family
+          i -= familySize;
+        }
+      }
+
+      result.preservedCount = allRecords.length - result.deletedCount;
     } catch (error) {
-      console.error("Cleanup failed:", error);
+      result.errors.push(`Cleanup failed: ${error}`);
     }
+
+    return result;
   }
 
   stop(): void {

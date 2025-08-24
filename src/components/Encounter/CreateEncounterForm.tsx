@@ -106,7 +106,7 @@ export default function CreateEncounterForm({
   const user = useAuthUser();
   const { t } = useTranslation();
 
-  const [currentSelectedOrganizations, setCurrentSelectedOrganizations] =
+  const [offlineSelectedOrganizations, setOfflineSelectedOrganizations] =
     useState<FacilityOrganizationRead[]>([]);
 
   const encounterFormSchema = z.object({
@@ -197,6 +197,9 @@ export default function CreateEncounterForm({
           tags: normalizedData.tags?.map((tag) => tag.id) || [],
         };
 
+        console.log("NormalizedData", normalizedData.organizations);
+        setOfflineSelectedOrganizations(normalizedData.organizations || []);
+
         form.reset(formData);
       }
     } catch (error) {
@@ -233,7 +236,7 @@ export default function CreateEncounterForm({
         queryClient: queryClient,
         authUser: user,
         selectedTags: selectedTags,
-        currentSelectedOrganizations: currentSelectedOrganizations,
+        offlineSelectedOrganizations: offlineSelectedOrganizations,
         appointmentId: appointment,
         onSuccess: (encounterId) => {
           toast.success(t("encounter_created_offline"));
@@ -488,8 +491,11 @@ export default function CreateEncounterForm({
                     <FacilityOrganizationSelector
                       facilityId={facilityId}
                       value={field.value}
-                      setCurrentSelectedOrganizations={
-                        setCurrentSelectedOrganizations
+                      setOfflineSelectedOrganizations={
+                        setOfflineSelectedOrganizations
+                      }
+                      offlineSelectedOrganizations={
+                        offlineSelectedOrganizations
                       }
                       onChange={(value) => {
                         if (value === null) {

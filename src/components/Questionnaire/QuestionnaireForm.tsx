@@ -473,9 +473,9 @@ export function QuestionnaireForm({
 
   const { mutate: submitBatch, isPending } = useMutation({
     mutationFn: mutate(batchApi.batchRequest, { silent: true }),
-    onSuccess: (response: { results: BatchSubmissionResult[] }) => {
+    onSuccess: async (response: { results: BatchSubmissionResult[] }) => {
       if (editMode && offlineEntry) {
-        handleOfflineRecordSuccess(offlineEntry.id, response);
+        await handleOfflineRecordSuccess(offlineEntry.id, response);
       }
       setServerErrors(undefined);
       toast.success(t("questionnaire_submitted_successfully"));

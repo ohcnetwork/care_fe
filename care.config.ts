@@ -155,6 +155,10 @@ const careConfig = {
   queryGcTime,
   queryPersistMaxAge,
 
+  cleanupSucessOfflineRecords: env.REACT_OFFLINE_CLEANUP_AFTER_SECONDS
+    ? parseInt(env.REACT_OFFLINE_CLEANUP_AFTER_SECONDS, 10)
+    : 1000 * 60 * 60 * 24 * 7, // 7 days in seconds
+
   patientRegistration: {
     /**
      * Minimum number of geo-organization levels the user must select

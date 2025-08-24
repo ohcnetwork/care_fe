@@ -38,9 +38,10 @@ interface FacilityOrganizationSelectorProps {
 
   currentOrganizations?: FacilityOrganizationRead[];
 
-  setCurrentSelectedOrganizations?: (
+  setOfflineSelectedOrganizations?: (
     organizations: FacilityOrganizationRead[],
   ) => void;
+  offlineSelectedOrganizations?: FacilityOrganizationRead[];
 
   singleSelection?: boolean;
 }
@@ -53,7 +54,8 @@ export default function FacilityOrganizationSelector(
     onChange,
     facilityId,
     currentOrganizations,
-    setCurrentSelectedOrganizations,
+    setOfflineSelectedOrganizations,
+    offlineSelectedOrganizations,
     singleSelection = false,
   } = props;
 
@@ -94,11 +96,23 @@ export default function FacilityOrganizationSelector(
     networkMode: "online",
   });
 
+  // help in offline func
   useEffect(() => {
-    if (setCurrentSelectedOrganizations) {
-      setCurrentSelectedOrganizations(selectedOrganizations);
+    if (setOfflineSelectedOrganizations) {
+      setOfflineSelectedOrganizations(selectedOrganizations);
     }
-  }, [setCurrentSelectedOrganizations, selectedOrganizations]);
+  }, [setOfflineSelectedOrganizations, selectedOrganizations]);
+
+  console.log("OfflineSelectedOrganizations", offlineSelectedOrganizations);
+
+  useEffect(() => {
+    if (
+      offlineSelectedOrganizations &&
+      offlineSelectedOrganizations.length > 0
+    ) {
+      setSelectedOrganizations(offlineSelectedOrganizations);
+    }
+  }, [offlineSelectedOrganizations]);
 
   const organizationQueries = useQueries({
     queries: navigationLevels.map((level) => ({

@@ -87,7 +87,7 @@ export function AddUserSheet({
   const [selectedUser, setSelectedUser] = useState<UserReadMinimal>();
   const [selectedRole, setSelectedRole] = useState<RoleBase>();
 
-  // Set form values when offline entry data is available
+  // populate form values when offline entry data is available
   useEffect(() => {
     if (offlineEntry?.normalizedData) {
       const normalizedData = offlineEntry.normalizedData as {

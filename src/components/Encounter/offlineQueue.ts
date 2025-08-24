@@ -32,7 +32,7 @@ interface QueueNewEncounterOfflineParams {
   queryClient: QueryClient;
   authUser: any;
   selectedTags: any[];
-  currentSelectedOrganizations: any[];
+  offlineSelectedOrganizations: any[];
   appointmentId?: string;
   onSuccess?: (encounterId: string, normalizedEncounter: EncounterRead) => void;
   onError?: (error: Error) => void;
@@ -55,7 +55,7 @@ interface NormalizeAndSetQueryDataParams {
   authUser: any;
   selectedTags: any[];
   permissions: string[] | undefined;
-  currentSelectedOrganizations: any[];
+  offlineSelectedOrganizations: any[];
   patientId: string;
   appointmentId?: string;
 }
@@ -67,7 +67,7 @@ const normalizeAndSetQueryData = async ({
   authUser,
   selectedTags,
   permissions,
-  currentSelectedOrganizations,
+  offlineSelectedOrganizations,
   patientId,
   appointmentId,
 }: NormalizeAndSetQueryDataParams): Promise<EncounterRead> => {
@@ -78,7 +78,7 @@ const normalizeAndSetQueryData = async ({
     authUser,
     selectedTags,
     permissions,
-    currentSelectedOrganizations || [],
+    offlineSelectedOrganizations || [],
   );
 
   const db = new AppCacheDB();
@@ -229,7 +229,7 @@ export const queueNewEncounterOffline = async ({
   queryClient,
   authUser,
   selectedTags,
-  currentSelectedOrganizations,
+  offlineSelectedOrganizations,
   appointmentId,
   onSuccess,
   onError,
@@ -281,7 +281,7 @@ export const queueNewEncounterOffline = async ({
       authUser,
       selectedTags,
       permissions,
-      currentSelectedOrganizations,
+      offlineSelectedOrganizations,
       patientId,
       appointmentId,
     });

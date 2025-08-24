@@ -577,14 +577,7 @@ export default function PatientRegistration(
         ),
       );
     }
-  }, [
-    patientQuery.data,
-    facility,
-    offlineEntry,
-    offlineEntryId,
-    defaultCountry,
-    form,
-  ]);
+  }, [patientQuery.data, facility, offlineEntry, defaultCountry, form]);
 
   const showDuplicate =
     onlineManager.isOnline() &&
