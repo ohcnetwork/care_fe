@@ -318,6 +318,7 @@ export function MedicationRequestQuestion({
         return {
           ...parseMedicationStringToRequest(statement.medication),
           authored_on: new Date().toISOString(),
+
           note: statement.note,
         } as MedicationRequest;
       }
@@ -565,7 +566,7 @@ export function MedicationRequestQuestion({
               )}
             >
               {/* Header - Only show on desktop */}
-              <div className="hidden lg:grid grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_220px_180px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
+              <div className="hidden lg:grid grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_260px_180px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("medicine")}
                 </div>
@@ -826,6 +827,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
 }) => {
   const { t } = useTranslation();
   const [showDosageDialog, setShowDosageDialog] = useState(false);
+
   const desktopLayout = useBreakpoints({ lg: true, default: false });
   const dosageInstruction = medication.dosage_instruction[0] || {};
   const isReadOnly = !!medication.id;
@@ -982,7 +984,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 lg:grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_220px_180px_48px] border-b border-gray-200 hover:bg-gray-50/50 space-y-3 lg:space-y-0",
+        "grid grid-cols-1 lg:grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_260px_180px_48px] border-b border-gray-200 hover:bg-gray-50/50 space-y-3 lg:space-y-0",
         {
           "opacity-40 pointer-events-none": disabled,
         },
@@ -1376,20 +1378,27 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         </Select>
       </div>
       {/* Authored On */}
-      <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden ">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("authored_on")}
         </Label>
-        <CombinedDatePicker
-          value={
-            medication.authored_on
-              ? new Date(medication.authored_on)
-              : undefined
-          }
-          onChange={(value: any) => onUpdate?.({ authored_on: value })}
-          disabled={disabled || isReadOnly}
-          blockDate={(date) => date > new Date()}
-        />
+        <div className="flex gap-6">
+          <div className="flex-1 min-w-[120px]">
+            <CombinedDatePicker
+              value={
+                medication.authored_on
+                  ? new Date(medication.authored_on)
+                  : undefined
+              }
+              onChange={(value: any) => onUpdate?.({ authored_on: value })}
+              disabled={disabled || isReadOnly}
+              blockDate={(date) => date > new Date()}
+            />
+          </div>
+          <div className="flex-1 min-w-[60px]">
+            <Input className="w-full border-gray-300 ml-6" type="time" />
+          </div>
+        </div>
       </div>
       {/* Notes */}
       <div

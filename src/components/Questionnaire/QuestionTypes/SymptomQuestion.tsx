@@ -105,7 +105,6 @@ function DatePickerField({
     <CombinedDatePicker
       value={onsetDatetime ? new Date(onsetDatetime) : undefined}
       onChange={onChange}
-      blockDate={(date) => date > new Date()}
       disabled={disabled || (!isSymptomInSheet && hasId)}
       dateFormat="P"
       buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
@@ -588,6 +587,7 @@ const SymptomRow = React.memo(function SymptomRow({
             }
             onChange={handleDateChange}
             disabled={disabled || (!isSymptomInSheet && !!symptom.id)}
+            blockDate={(date) => date > new Date()}
             buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </TableCell>
