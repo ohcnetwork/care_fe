@@ -2073,7 +2073,7 @@
   "fulfill_request_title": "Complete the Supply Request?",
   "fulfilled": "Fulfilled",
   "full_day_unavailable": "Full Day Unavailable",
-  "You_are_online": "You are online",
+  "welcome_back_you_are_online": "Welcome back! You are online",
   "you_are_offline": "You are offline",
   "encounter_created_offline": "Encounter created while offline",
   "offline_encounter_create_error": "Error while creating encounter while offline",
