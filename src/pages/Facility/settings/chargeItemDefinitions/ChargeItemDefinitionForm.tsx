@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckIcon, Loader2 } from "lucide-react";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FieldErrors, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
@@ -296,8 +296,6 @@ export function ChargeItemDefinitionForm({
     },
   });
 
-  const [hasUserInteracted, setHasUserInteracted] = useState(false);
-
   useEffect(() => {
     if (isUpdate) return;
 
@@ -310,18 +308,6 @@ export function ChargeItemDefinitionForm({
     });
 
     return () => subscription.unsubscribe();
-  }, [form, isUpdate]);
-
-  useEffect(() => {
-    if (isUpdate) {
-      // Reset interaction state when loading edit data
-      setHasUserInteracted(false);
-
-      const subscription = form.watch(() => {
-        setHasUserInteracted(true);
-      });
-      return () => subscription.unsubscribe();
-    }
   }, [form, isUpdate]);
 
   // Get current form values
@@ -363,12 +349,6 @@ export function ChargeItemDefinitionForm({
   if (isLoading || !facilityData) {
     return <Loading />;
   }
-
-  const isFormDisabled = isUpdate
-    ? !hasUserInteracted // Edit mode: disabled until user actually changes something
-    : !form.watch("title")?.trim() ||
-      !form.watch("price_components.0.amount") ||
-      Number(form.watch("price_components.0.amount")) <= 0; // Create mode: check required fields
 
   // Get all available components
   const availableDiscounts = [
@@ -759,7 +739,7 @@ export function ChargeItemDefinitionForm({
           >
             {t("cancel")}
           </Button>
-          <Button disabled={isPending || isFormDisabled}>
+          <Button disabled={isPending || !form.formState.isDirty}>
             {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

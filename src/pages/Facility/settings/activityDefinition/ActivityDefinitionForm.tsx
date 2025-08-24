@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash2Icon } from "lucide-react";
 import { navigate } from "raviger";
 import * as React from "react";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -366,6 +365,12 @@ function ActivityDefinitionFormContent({
             locations: existingData.locations?.map((l) => l.id) || [],
           }
         : {
+            title: "",
+            slug: "",
+            description: "",
+            usage: "",
+            category: undefined,
+            code: undefined,
             status: Status.active,
             kind: Kind.service_request,
             specimen_requirements: [],
@@ -374,10 +379,9 @@ function ActivityDefinitionFormContent({
             derived_from_uri: null,
             body_site: null,
             diagnostic_report_codes: [],
+            charge_item_definitions: [],
           },
   });
-
-  const [hasUserInteracted, setHasUserInteracted] = useState(false);
 
   // Watch title changes and update slug only when creating new activity definition
   React.useEffect(() => {
@@ -391,18 +395,6 @@ function ActivityDefinitionFormContent({
       }
     });
     return () => subscription.unsubscribe();
-  }, [form, isEditMode]);
-
-  React.useEffect(() => {
-    if (isEditMode) {
-      // Reset interaction state when loading edit data
-      setHasUserInteracted(false);
-
-      const subscription = form.watch(() => {
-        setHasUserInteracted(true);
-      });
-      return () => subscription.unsubscribe();
-    }
   }, [form, isEditMode]);
 
   const { mutate: createActivityDefinition, isPending: isCreating } =
@@ -470,14 +462,6 @@ function ActivityDefinitionFormContent({
       );
     }
   }
-
-  const isFormDisabled = isEditMode
-    ? !hasUserInteracted // Edit mode: disabled until user actually changes something
-    : !form.watch("title")?.trim() ||
-      !form.watch("description")?.trim() ||
-      !form.watch("usage")?.trim() ||
-      !form.watch("category") ||
-      !form.watch("code")?.code; // Create mode: check required fields
 
   return (
     <Page
@@ -1109,7 +1093,10 @@ function ActivityDefinitionFormContent({
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={isPending || isFormDisabled}>
+              <Button
+                type="submit"
+                disabled={isPending || !form.formState.isDirty}
+              >
                 {isPending
                   ? isEditMode
                     ? t("saving")
