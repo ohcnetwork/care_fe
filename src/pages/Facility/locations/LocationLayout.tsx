@@ -2,6 +2,7 @@ import { Redirect, useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
+import { ScheduleHome } from "@/components/Schedule/ScheduleHome";
 import BedsList from "@/pages/Facility/locations/BedsList";
 import { InventoryList } from "@/pages/Facility/services/inventory/InventoryList";
 import { ReceiveStock } from "@/pages/Facility/services/inventory/ReceiveStock";
@@ -25,6 +26,7 @@ import { PrintPharmacyPrescription } from "@/pages/Facility/services/pharmacy/Pr
 import ServiceRequestList from "@/pages/Facility/services/serviceRequests/ServiceRequestList";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
 import { MedicationDispenseStatus } from "@/types/emr/medicationDispense/medicationDispense";
+import { SchedulableResourceType } from "@/types/scheduling/schedule";
 
 interface LocationLayoutProps {
   facilityId: string;
@@ -232,6 +234,15 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   }: {
     patientId: string;
   }) => <MedicationBillForm patientId={patientId} />,
+
+  // Schedule
+  "/schedule": () => (
+    <ScheduleHome
+      facilityId={facilityId}
+      resourceType={SchedulableResourceType.Location}
+      resourceId={locationId}
+    />
+  ),
 
   "*": () => <ErrorPage />,
 });
