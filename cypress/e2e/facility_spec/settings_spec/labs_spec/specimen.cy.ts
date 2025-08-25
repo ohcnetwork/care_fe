@@ -66,7 +66,7 @@ describe("Facility Specimen Management", () => {
 
     // Attempt to save empty form and verify error messages
     cy.get("button").contains("Add Definition").click();
-    cy.get("button").contains("Save").click();
+    cy.get("button").contains("Save").should("be.disabled");
 
     cy.verifyErrorMessages([
       { message: "Required", label: "Title" },
