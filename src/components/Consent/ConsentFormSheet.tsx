@@ -41,12 +41,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import { DateTimeInput } from "@/components/Common/DateTimeInput";
-
 import useFileUpload from "@/hooks/useFileUpload";
 
 import mutate from "@/Utils/request/mutate";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { DateTimePicker } from "@/src/components/Common/DateTimePicker";
 import {
   CONSENT_CATEGORIES,
   CONSENT_DECISIONS,
@@ -329,10 +328,10 @@ export default function ConsentFormSheet({
                       <FormLabel aria-required>
                         {t("consent_given_on")}
                       </FormLabel>
-                      <DateTimeInput
+                      <DateTimePicker
                         {...field}
                         value={field.value}
-                        onDateChange={(val) => field.onChange(val)}
+                        onChange={(val) => field.onChange(val)}
                       />
                       <FormMessage />
                     </FormItem>
@@ -346,10 +345,10 @@ export default function ConsentFormSheet({
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("consent_valid_from")}</FormLabel>
-                        <DateTimeInput
+                        <DateTimePicker
                           {...field}
                           value={field.value ?? ""}
-                          onDateChange={(val) => {
+                          onChange={(val) => {
                             field.onChange(val ?? null);
                           }}
                         />
@@ -364,10 +363,10 @@ export default function ConsentFormSheet({
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("consent_valid_until")}</FormLabel>
-                        <DateTimeInput
+                        <DateTimePicker
                           {...field}
                           value={field.value ?? ""}
-                          onDateChange={(val) => {
+                          onChange={(val) => {
                             field.onChange(val ?? null);
                           }}
                         />

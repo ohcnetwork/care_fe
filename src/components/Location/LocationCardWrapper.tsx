@@ -6,11 +6,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
-import { DateTimeInput } from "@/components/Common/DateTimeInput";
-
 import { LocationHistory } from "@/types/emr/encounter/encounter";
 import { LocationAssociationStatus } from "@/types/location/association";
 
+import { DateTimePicker } from "@/src/components/Common/DateTimePicker";
 import { LocationCard } from "./LocationCard";
 
 interface EditingState {
@@ -109,12 +108,12 @@ export function LocationCardWrapper({
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>{t("end_time")}</Label>
-                  <DateTimeInput
+                  <DateTimePicker
                     value={
                       editingState.timeConfig.end?.toISOString() ??
                       new Date().toISOString()
                     }
-                    onDateChange={(newISO) =>
+                    onChange={(newISO) =>
                       setEditingState((prev) => ({
                         ...prev,
                         timeConfig: {
@@ -130,14 +129,14 @@ export function LocationCardWrapper({
               <>
                 <div className="space-y-2">
                   <Label>{t("start_time")}</Label>
-                  <DateTimeInput
+                  <DateTimePicker
                     value={editingState.timeConfig.start?.toISOString()}
-                    onDateChange={(newISO) =>
+                    onChange={(newISO) =>
                       setEditingState((prev) => ({
                         ...prev,
                         timeConfig: {
                           ...prev.timeConfig,
-                          start: new Date(newISO),
+                          start: new Date(newISO ?? new Date().toISOString()), // always a Date
                         },
                       }))
                     }
@@ -147,9 +146,9 @@ export function LocationCardWrapper({
                   editingState.timeConfig.status !== "active" && (
                     <div className="space-y-2">
                       <Label>{t("end_time")}</Label>
-                      <DateTimeInput
+                      <DateTimePicker
                         value={editingState.timeConfig.end?.toISOString()}
-                        onDateChange={(newISO) =>
+                        onChange={(newISO) =>
                           setEditingState((prev) => ({
                             ...prev,
                             timeConfig: {

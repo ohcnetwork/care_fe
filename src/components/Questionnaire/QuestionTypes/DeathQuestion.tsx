@@ -1,7 +1,6 @@
 import { format } from "date-fns";
 
-import { DateTimeInput } from "@/components/Common/DateTimeInput";
-
+import { DateTimePicker } from "@/components/Common/DateTimePicker";
 import {
   QuestionnaireResponse,
   ResponseValue,
@@ -24,23 +23,18 @@ export function TimeOfDeathQuestion(props: TimeOfDeathQuestionProps) {
 
   const values = (questionnaireResponse.values?.[0]?.value as string[]) || [];
 
-  const handleUpdate = (updates: string) => {
+  const handleUpdate = (updates: string | null) => {
     updateQuestionnaireResponseCB(
-      [
-        {
-          type: "time_of_death",
-          value: [updates],
-        },
-      ],
+      updates ? [{ type: "time_of_death", value: [updates] }] : [],
       questionnaireResponse.question_id,
       questionnaireResponse.note,
     );
   };
 
   return (
-    <DateTimeInput
+    <DateTimePicker
       value={values[0]}
-      onDateChange={(val) => handleUpdate(val)}
+      onChange={(val) => handleUpdate(val)}
       max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
       disabled={props.disabled}
     />

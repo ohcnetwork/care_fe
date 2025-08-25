@@ -42,7 +42,6 @@ import {
 } from "@/components/ui/select";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
-import { DateTimeInput } from "@/components/Common/DateTimeInput";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
@@ -56,6 +55,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import { DateTimePicker } from "@/components/Common/DateTimePicker";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
 import {
@@ -1379,9 +1379,9 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("authored_on")}
         </Label>
-        <DateTimeInput
+        <DateTimePicker
           value={medication.authored_on}
-          onDateChange={(val) => onUpdate?.({ authored_on: val })}
+          onChange={(val) => onUpdate?.({ authored_on: val })}
           disabled={disabled || isReadOnly}
         />
       </div>

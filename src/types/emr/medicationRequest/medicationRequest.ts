@@ -210,7 +210,7 @@ export interface MedicationRequest {
   encounter?: string; // UUID
   dosage_instruction: MedicationRequestDosageInstruction[];
   note?: string;
-  authored_on: string;
+  authored_on: string | null;
   created_by?: UserBareMinimum;
   requested_product?: string;
   requested_product_internal?: ProductKnowledgeBase;
