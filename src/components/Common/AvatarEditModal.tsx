@@ -489,7 +489,9 @@ export default function AvatarEditModal({
                   setZoom(1);
                 }}
                 onResetCapture={() => {
-                  setSelectedFile(undefined);
+                  if (showCameraPreview) {
+                    setSelectedFile(undefined);
+                  }
                   setShowCameraPreview(false);
                 }}
                 setPreview={(isPreview) => {
