@@ -49,8 +49,7 @@ import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import { BLOOD_GROUP_CHOICES, GENDER_TYPES } from "@/common/constants";
-import { GENDERS } from "@/common/constants";
+import { BLOOD_GROUP_CHOICES, GENDER_TYPES, GENDERS } from "@/common/constants";
 import countryList from "@/common/static/countries.json";
 
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -514,7 +513,7 @@ export default function PatientRegistration(
                             form.setValue(
                               "emergency_phone_number",
                               value || "",
-                              { shouldDirty: true },
+                              { shouldDirty: true, shouldValidate: true },
                             );
                           }
                         }}
