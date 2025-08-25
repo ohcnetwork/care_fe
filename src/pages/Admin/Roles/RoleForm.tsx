@@ -102,9 +102,13 @@ export default function RoleForm({
       form.setValue(
         "permissions",
         current.filter((s) => s !== slug),
+        { shouldValidate: true, shouldDirty: true },
       );
     } else {
-      form.setValue("permissions", [...current, slug]);
+      form.setValue("permissions", [...current, slug], {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     }
   };
 
@@ -112,11 +116,15 @@ export default function RoleForm({
     form.setValue(
       "permissions",
       permissions.map((p) => p.slug),
+      { shouldValidate: true, shouldDirty: true },
     );
   };
 
   const handleClearAll = () => {
-    form.setValue("permissions", []);
+    form.setValue("permissions", [], {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
   };
 
   return (
