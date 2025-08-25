@@ -31,7 +31,7 @@ type DateTimePickerProps = {
 export function DateTimePicker({
   value,
   onChange,
-  placeholder = "Pick a date and time",
+  placeholder = "dd-mm-yyyy --:--",
   className,
   min,
   max,
