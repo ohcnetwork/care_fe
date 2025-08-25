@@ -488,8 +488,8 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                         // If the system is changing from a phone type to a non-phone type, clear the value
                         if (isPhone(value) !== isPhone(field.value)) {
                           form.setValue(`contact.${index}.value`, "");
-                          form.clearErrors(`contact.${index}.value`);
                         }
+                        form.clearErrors(`contact.${index}.value`);
 
                         field.onChange(value);
                       }}
