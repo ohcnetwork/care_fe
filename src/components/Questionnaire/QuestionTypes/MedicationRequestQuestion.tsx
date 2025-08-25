@@ -760,6 +760,7 @@ export function MedicationRequestQuestion({
                                   index={index}
                                   questionId={questionnaireResponse.question_id}
                                   errors={errors}
+                                  facilityId={facilityId}
                                 />
                               </CardContent>
                             </CollapsibleContent>
@@ -776,6 +777,7 @@ export function MedicationRequestQuestion({
                           index={index}
                           questionId={questionnaireResponse.question_id}
                           errors={errors}
+                          facilityId={facilityId}
                         />
                       )}
                     </React.Fragment>
