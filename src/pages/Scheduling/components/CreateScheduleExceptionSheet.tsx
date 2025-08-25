@@ -155,8 +155,9 @@ export default function CreateScheduleExceptionSheet({
       form.reset();
       queryClient.invalidateQueries({
         queryKey: [
-          "user-schedule-exceptions",
-          { facilityId, resourceType, resourceId },
+          "scheduleExceptions",
+          facilityId,
+          { resourceType, resourceId },
         ],
       });
     },

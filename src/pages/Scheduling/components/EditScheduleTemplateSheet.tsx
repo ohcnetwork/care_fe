@@ -62,6 +62,7 @@ import {
 } from "@/pages/Scheduling/utils";
 import {
   AvailabilityDateTime,
+  SchedulableResourceType,
   ScheduleAvailability,
   ScheduleAvailabilityCreateRequest,
   ScheduleTemplate,
@@ -71,6 +72,7 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 export default function EditScheduleTemplateSheet({
   template,
   facilityId,
+  resourceType,
   resourceId,
   trigger,
   open,
@@ -78,6 +80,7 @@ export default function EditScheduleTemplateSheet({
 }: {
   template: ScheduleTemplate;
   facilityId: string;
+  resourceType: SchedulableResourceType;
   resourceId: string;
   trigger?: React.ReactNode;
   open?: boolean;
@@ -101,6 +104,7 @@ export default function EditScheduleTemplateSheet({
           <ScheduleTemplateEditor
             template={template}
             facilityId={facilityId}
+            resourceType={resourceType}
             resourceId={resourceId}
           />
 
@@ -122,6 +126,7 @@ export default function EditScheduleTemplateSheet({
               availability={availability}
               scheduleId={template.id}
               facilityId={facilityId}
+              resourceType={resourceType}
               resourceId={resourceId}
             />
           ))}
@@ -129,6 +134,7 @@ export default function EditScheduleTemplateSheet({
           <NewAvailabilityCard
             scheduleId={template.id}
             facilityId={facilityId}
+            resourceType={resourceType}
             resourceId={resourceId}
           />
         </div>
@@ -141,10 +147,12 @@ const ScheduleTemplateEditor = ({
   template,
   facilityId,
   resourceId,
+  resourceType,
 }: {
   template: ScheduleTemplate;
   facilityId: string;
   resourceId: string;
+  resourceType: SchedulableResourceType;
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -184,7 +192,7 @@ const ScheduleTemplateEditor = ({
     onSuccess: () => {
       toast.success("Schedule template updated successfully");
       queryClient.invalidateQueries({
-        queryKey: ["user-schedule-templates", { facilityId, resourceId }],
+        queryKey: ["schedule", facilityId, { resourceType, resourceId }],
       });
     },
   });
@@ -196,7 +204,7 @@ const ScheduleTemplateEditor = ({
     onSuccess: () => {
       toast.success(t("template_deleted"));
       queryClient.invalidateQueries({
-        queryKey: ["user-schedule-templates", { facilityId, resourceId }],
+        queryKey: ["schedule", facilityId, { resourceType, resourceId }],
       });
     },
   });
@@ -338,11 +346,13 @@ const AvailabilityEditor = ({
   availability,
   scheduleId,
   facilityId,
+  resourceType,
   resourceId,
 }: {
   availability: ScheduleAvailability;
   scheduleId: string;
   facilityId: string;
+  resourceType: SchedulableResourceType;
   resourceId: string;
 }) => {
   const { t } = useTranslation();
@@ -356,7 +366,7 @@ const AvailabilityEditor = ({
     onSuccess: () => {
       toast.success(t("schedule_availability_deleted_successfully"));
       queryClient.invalidateQueries({
-        queryKey: ["user-schedule-templates", { facilityId, resourceId }],
+        queryKey: ["schedule", facilityId, { resourceType, resourceId }],
       });
     },
   });
@@ -543,10 +553,12 @@ const AvailabilityEditor = ({
 const NewAvailabilityCard = ({
   scheduleId,
   facilityId,
+  resourceType,
   resourceId,
 }: {
   scheduleId: string;
   facilityId: string;
+  resourceType: SchedulableResourceType;
   resourceId: string;
 }) => {
   const { t } = useTranslation();
@@ -609,7 +621,7 @@ const NewAvailabilityCard = ({
     onSuccess: () => {
       toast.success(t("schedule_availability_created_successfully"));
       queryClient.invalidateQueries({
-        queryKey: ["user-schedule-templates", { facilityId, resourceId }],
+        queryKey: ["schedule", facilityId, { resourceType, resourceId }],
       });
       form.reset();
       setIsExpanded(false);

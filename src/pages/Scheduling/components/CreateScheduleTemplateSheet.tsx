@@ -192,10 +192,7 @@ export default function CreateScheduleTemplateSheet({
       setQParams({ sheet: null });
       form.reset();
       queryClient.invalidateQueries({
-        queryKey: [
-          "user-schedule-templates",
-          { facilityId, resourceType, resourceId },
-        ],
+        queryKey: ["schedule", facilityId, { resourceType, resourceId }],
       });
     },
   });

@@ -67,10 +67,7 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
   const [month, setMonth] = useState(new Date());
 
   const templatesQuery = useQuery({
-    queryKey: [
-      "user-schedule-templates",
-      { facilityId, resourceType, resourceId, month },
-    ],
+    queryKey: ["schedule", facilityId, { resourceType, resourceId, month }],
     queryFn: query(scheduleApi.templates.list, {
       pathParams: { facilityId },
       queryParams: {
@@ -84,8 +81,9 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
 
   const exceptionsQuery = useQuery({
     queryKey: [
-      "user-schedule-exceptions",
-      { facilityId, resourceType, resourceId, month },
+      "scheduleExceptions",
+      facilityId,
+      { resourceType, resourceId, month },
     ],
     queryFn: query(scheduleApi.exceptions.list, {
       pathParams: { facilityId },
@@ -244,6 +242,7 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
             {view === "schedule" && (
               <ScheduleTemplates
                 facilityId={facilityId}
+                resourceType={resourceType}
                 resourceId={resourceId}
                 items={
                   templatesQuery.isLoading
@@ -261,6 +260,7 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
                     : exceptionsQuery.data?.results
                 }
                 facilityId={facilityId}
+                resourceType={resourceType}
                 resourceId={resourceId}
               />
             )}

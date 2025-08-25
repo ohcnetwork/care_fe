@@ -29,18 +29,23 @@ import Loading from "@/components/Common/Loading";
 import mutate from "@/Utils/request/mutate";
 import { formatTimeShort } from "@/Utils/utils";
 import { useIsUserSchedulableResource } from "@/pages/Scheduling/useIsUserSchedulableResource";
-import { ScheduleException } from "@/types/scheduling/schedule";
+import {
+  SchedulableResourceType,
+  ScheduleException,
+} from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface Props {
   items?: ScheduleException[];
   facilityId: string;
+  resourceType: SchedulableResourceType;
   resourceId: string;
 }
 
 export default function ScheduleExceptions({
   items,
   facilityId,
+  resourceType,
   resourceId,
 }: Props) {
   const { t } = useTranslation();
@@ -79,6 +84,7 @@ export default function ScheduleExceptions({
           <ScheduleExceptionItem
             {...exception}
             facilityId={facilityId}
+            resourceType={resourceType}
             resourceId={resourceId}
           />
         </li>
@@ -88,7 +94,11 @@ export default function ScheduleExceptions({
 }
 
 const ScheduleExceptionItem = (
-  props: ScheduleException & { facilityId: string; resourceId: string },
+  props: ScheduleException & {
+    facilityId: string;
+    resourceId: string;
+    resourceType: SchedulableResourceType;
+  },
 ) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -105,8 +115,9 @@ const ScheduleExceptionItem = (
       toast.success(t("exception_deleted"));
       queryClient.invalidateQueries({
         queryKey: [
-          "user-schedule-exceptions",
-          { facilityId: props.facilityId, resourceId: props.resourceId },
+          "scheduleExceptions",
+          props.facilityId,
+          { resourceType: props.resourceType, resourceId: props.resourceId },
         ],
       });
     },

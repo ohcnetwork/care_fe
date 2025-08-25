@@ -16,17 +16,22 @@ import {
   getDaysOfWeekFromAvailabilities,
   getSlotsPerSession,
 } from "@/pages/Scheduling/utils";
-import { ScheduleTemplate } from "@/types/scheduling/schedule";
+import {
+  SchedulableResourceType,
+  ScheduleTemplate,
+} from "@/types/scheduling/schedule";
 
 interface Props {
   items?: ScheduleTemplate[];
   facilityId: string;
+  resourceType: SchedulableResourceType;
   resourceId: string;
 }
 
 export default function ScheduleTemplates({
   items,
   facilityId,
+  resourceType,
   resourceId,
 }: Props) {
   const { t } = useTranslation();
@@ -50,6 +55,7 @@ export default function ScheduleTemplates({
           <ScheduleTemplateItem
             template={template}
             facilityId={facilityId}
+            resourceType={resourceType}
             resourceId={resourceId}
           />
         </li>
@@ -61,10 +67,12 @@ export default function ScheduleTemplates({
 const ScheduleTemplateItem = ({
   template,
   facilityId,
+  resourceType,
   resourceId,
 }: {
   template: ScheduleTemplate;
   facilityId: string;
+  resourceType: SchedulableResourceType;
   resourceId: string;
 }) => {
   const { t } = useTranslation();
@@ -97,6 +105,7 @@ const ScheduleTemplateItem = ({
             template={template}
             facilityId={facilityId}
             resourceId={resourceId}
+            resourceType={resourceType}
             open={qParams.edit === template.id}
             onOpenChange={(open) =>
               setQParams({ ...qParams, edit: open ? template.id : null })
