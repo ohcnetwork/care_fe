@@ -15,9 +15,10 @@ import {
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
+import { FileType } from "@/types/files/file";
 
 interface FilesTabsProps {
-  type: "encounter" | "patient";
+  type: FileType.ENCOUNTER | FileType.PATIENT;
   encounter?: EncounterRead;
   patient?: PatientRead;
   readOnly?: boolean;
@@ -59,7 +60,7 @@ export const FilesTab = ({
 
   const canEdit =
     !readOnly &&
-    (type === "encounter" ? canWriteCurrentEncounter : canWritePatient);
+    (type === FileType.ENCOUNTER ? canWriteCurrentEncounter : canWritePatient);
 
   const associatingId =
     {
@@ -123,7 +124,7 @@ export const FilesTab = ({
           <div>
             <DrawingPage
               type={type}
-              {...(type === "patient"
+              {...(type === FileType.PATIENT
                 ? { patientId: patient?.id }
                 : { encounter: encounter })}
               readOnly={readOnly}

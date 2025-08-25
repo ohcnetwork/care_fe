@@ -71,7 +71,6 @@ export default function LocationForm({
     numberOfBeds: z.string().optional(),
     customizeNames: z.boolean().default(false),
     organizations: z.array(z.string()).default([]),
-    availability_status: z.enum(["available", "unavailable"] as const),
     bedNames: z
       .array(
         z.object({
@@ -94,7 +93,6 @@ export default function LocationForm({
     numberOfBeds: "2",
     customizeNames: false,
     organizations: [],
-    availability_status: "available",
     bedNames: [],
   };
 
@@ -180,7 +178,6 @@ export default function LocationForm({
         form: location.form,
         parent: parentId || null,
         organizations: [],
-        availability_status: location.availability_status || "available",
         customizeNames: false,
         bedNames: [],
       });
