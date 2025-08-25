@@ -120,8 +120,8 @@ describe("Observation basic workflow", () => {
     // Use the new command to navigate to specimen definitions
     cy.getFacilityIdAndNavigate("settings/observation_definitions");
 
+    cy.get("button").contains("Add Definition").click();
     cy.get("button").contains("Create").should("be.disabled");
-    cy.get("button").contains("Create").click();
 
     cy.verifyErrorMessages([
       {
