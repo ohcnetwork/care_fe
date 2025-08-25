@@ -38,6 +38,7 @@ export default function RoleForm({
 }: RoleFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const isEditMode = !!role?.id;
 
   const roleSchema = z.object({
     name: z.string().trim().min(1, t("name_is_required")),
@@ -58,7 +59,10 @@ export default function RoleForm({
     },
   });
 
+  const { isDirty } = form.formState;
   const watchedPermissions = form.watch("permissions");
+  const hasPermissionSelected =
+    watchedPermissions && watchedPermissions.length > 0;
 
   const createRoleMutation = useMutation({
     mutationFn: mutate(roleApi.createRole),
@@ -86,7 +90,7 @@ export default function RoleForm({
       is_archived: data.is_archived,
     };
 
-    if (role?.id) {
+    if (isEditMode) {
       updateRoleMutation.mutate(payload);
     } else {
       createRoleMutation.mutate(payload);
@@ -125,6 +129,11 @@ export default function RoleForm({
       shouldValidate: true,
       shouldDirty: true,
     });
+  };
+
+  const handleCancel = () => {
+    form.reset();
+    onSuccess();
   };
 
   return (
@@ -169,7 +178,7 @@ export default function RoleForm({
           )}
         />
 
-        {role?.id && (
+        {isEditMode && (
           <FormField
             control={form.control}
             name="is_archived"
@@ -278,15 +287,18 @@ export default function RoleForm({
           <Button
             type="button"
             variant="outline"
-            onClick={onSuccess}
+            onClick={handleCancel}
             disabled={isLoading}
           >
             {t("cancel")}
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button
+            type="submit"
+            disabled={!isDirty || isLoading || !hasPermissionSelected}
+          >
             {isLoading
               ? t("saving")
-              : role?.id
+              : isEditMode
                 ? t("update_role")
                 : t("create_role")}
           </Button>
