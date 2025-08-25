@@ -1,5 +1,3 @@
-"use client";
-
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import * as React from "react";
@@ -96,7 +94,7 @@ export function DateTimePicker({
           variant="outline"
           disabled={disabled}
           className={cn(
-            "w-[210px] justify-start text-left font-normal",
+            "w-full justify-start text-left font-normal",
             !date && "text-muted-foreground",
             className,
           )}

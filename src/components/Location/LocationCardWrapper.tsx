@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { LocationHistory } from "@/types/emr/encounter/encounter";
 import { LocationAssociationStatus } from "@/types/location/association";
 
-import { DateTimePicker } from "@/src/components/Common/DateTimePicker";
+import { DateTimePicker } from "@/components/Common/DateTimePicker";
 import { LocationCard } from "./LocationCard";
 
 interface EditingState {
