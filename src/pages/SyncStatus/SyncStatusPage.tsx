@@ -1,3 +1,4 @@
+import { onlineManager } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -238,6 +239,7 @@ const SyncStatusHeader: React.FC<{
   const { open: isSidebarOpen } = useSidebar();
   const { t } = useTranslation();
   const [showCompletionState, setShowCompletionState] = useState(false);
+  const isOnline = onlineManager.isOnline();
 
   // Show completion state briefly when sync finishes
   useEffect(() => {
@@ -293,14 +295,21 @@ const SyncStatusHeader: React.FC<{
             <CareIcon icon="l-clock" className="w-4 h-4" />
             <span>{t("last_sync", { time: syncData.lastSync })}</span>
           </div>
-          <Button
-            variant="primary"
-            size="md"
-            onClick={handleSyncNow}
-            disabled={isSyncing}
-          >
-            {isSyncing ? t("syncing") : t("sync_now")}
-          </Button>
+          <div className="flex flex-col items-end gap-2">
+            <Button
+              variant="primary"
+              size="md"
+              onClick={handleSyncNow}
+              disabled={isSyncing || !isOnline}
+            >
+              {isSyncing ? t("syncing") : t("sync_now")}
+            </Button>
+            {!isOnline && (
+              <p className="text-xs text-gray-500 text-right">
+                {t("sync_requires_internet_connection")}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
@@ -474,9 +483,9 @@ const PendingWritesTable: React.FC<{
   onEdit: (entry: OfflineWritesEntry) => void;
   onRetry: (entry: OfflineWritesEntry) => void;
   onDelete: (entry: OfflineWritesEntry) => void;
-
   refreshTrigger: number;
-}> = ({ facilityId, onEdit, onRetry, onDelete, refreshTrigger }) => {
+  isOnline: boolean;
+}> = ({ facilityId, onEdit, onRetry, onDelete, refreshTrigger, isOnline }) => {
   const { t } = useTranslation();
   const [pendingWrites, setPendingWrites] = useState<OfflineWritesEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -518,6 +527,17 @@ const PendingWritesTable: React.FC<{
           className="w-8 h-8 mx-auto mb-2 text-gray-400 animate-spin"
         />
         <p>{t("loading_pending_writes")}</p>
+      </div>
+    );
+  }
+  if (!isOnline) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <CareIcon
+          icon="l-wifi"
+          className="w-8 h-8 mx-auto mb-2 text-gray-400"
+        />
+        <p>{t("offline_records_not_available")}</p>
       </div>
     );
   }
@@ -600,16 +620,9 @@ const FailedWritesTable: React.FC<{
   onEdit: (entry: OfflineWritesEntry) => void;
   onRetry: (entry: OfflineWritesEntry) => void;
   onDelete: (entry: OfflineWritesEntry) => void;
-
   refreshTrigger: number;
-}> = ({
-  facilityId,
-  onEdit,
-  onRetry,
-  onDelete,
-
-  refreshTrigger,
-}) => {
+  isOnline: boolean;
+}> = ({ facilityId, onEdit, onRetry, onDelete, refreshTrigger, isOnline }) => {
   const { t } = useTranslation();
   const [failedWrites, setFailedWrites] = useState<OfflineWritesEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -654,7 +667,17 @@ const FailedWritesTable: React.FC<{
       </div>
     );
   }
-
+  if (!isOnline) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <CareIcon
+          icon="l-wifi"
+          className="w-8 h-8 mx-auto mb-2 text-gray-400"
+        />
+        <p>{t("offline_records_not_available")}</p>
+      </div>
+    );
+  }
   if (failedWrites.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
@@ -744,6 +767,7 @@ const ConflictedWritesTable: React.FC<{
     React.SetStateAction<OfflineWritesEntry | null>
   >;
   refreshTrigger: number;
+  isOnline: boolean;
 }> = ({
   facilityId,
   onRetry,
@@ -751,6 +775,7 @@ const ConflictedWritesTable: React.FC<{
   setIsEditDialogOpen,
   setEditConfirmEntry,
   refreshTrigger,
+  isOnline,
 }) => {
   const { t } = useTranslation();
   const [conflictedWrites, setConflictedWrites] = useState<
@@ -792,6 +817,18 @@ const ConflictedWritesTable: React.FC<{
     return (
       <div className="flex items-center justify-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!isOnline) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <CareIcon
+          icon="l-wifi"
+          className="w-8 h-8 mx-auto mb-2 text-gray-400"
+        />
+        <p>{t("offline_records_not_available")}</p>
       </div>
     );
   }
@@ -877,7 +914,8 @@ const BlockedWritesTable: React.FC<{
   facilityId?: string;
   onDelete: (entry: OfflineWritesEntry) => void;
   refreshTrigger: number;
-}> = ({ facilityId, onDelete, refreshTrigger }) => {
+  isOnline: boolean;
+}> = ({ facilityId, onDelete, refreshTrigger, isOnline }) => {
   const { t } = useTranslation();
   const [blockedWrites, setBlockedWrites] = useState<OfflineWritesEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -912,6 +950,17 @@ const BlockedWritesTable: React.FC<{
   }
 
   if (blockedWrites.length === 0) {
+    if (!isOnline) {
+      return (
+        <div className="text-center py-8 text-gray-500">
+          <CareIcon
+            icon="l-wifi"
+            className="w-8 h-8 mx-auto mb-2 text-gray-400"
+          />
+          <p>{t("offline_records_not_available")}</p>
+        </div>
+      );
+    }
     return (
       <div className="text-center py-8">
         <div className="text-gray-500">{t("no_blocked_writes_found")}</div>
@@ -992,6 +1041,7 @@ const SyncStatusTabs: React.FC<{
 }) => {
   const [activeTab, setActiveTab] = useState("pending");
   const { syncData } = useSyncData(facilityId, refreshTrigger);
+  const isOnline = onlineManager.isOnline();
 
   const tabs = [
     { value: "pending", label: "Pending", count: syncData.statistics.pending },
@@ -1052,6 +1102,7 @@ const SyncStatusTabs: React.FC<{
             onRetry={onRetry}
             onDelete={onDelete}
             refreshTrigger={refreshTrigger}
+            isOnline={isOnline}
           />
         )}
         {activeTab === "failed" && (
@@ -1061,6 +1112,7 @@ const SyncStatusTabs: React.FC<{
             onRetry={onRetry}
             onDelete={onDelete}
             refreshTrigger={refreshTrigger}
+            isOnline={isOnline}
           />
         )}
         {activeTab === "conflicted" && (
@@ -1071,6 +1123,7 @@ const SyncStatusTabs: React.FC<{
             refreshTrigger={refreshTrigger}
             setIsEditDialogOpen={setIsEditDialogOpen}
             setEditConfirmEntry={setEditConfirmEntry}
+            isOnline={isOnline}
           />
         )}
         {activeTab === "blocked" && (
@@ -1078,6 +1131,7 @@ const SyncStatusTabs: React.FC<{
             facilityId={facilityId}
             onDelete={onDelete}
             refreshTrigger={refreshTrigger}
+            isOnline={isOnline}
           />
         )}
       </div>

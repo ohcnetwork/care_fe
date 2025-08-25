@@ -5077,5 +5077,7 @@
   "unknown_error_occurred": "Unknown error occurred",
   "an_unexpected_error_occurred": "An unexpected error occurred",
   "invalid_entry_type_structured_questionnaire": "Invalid entry type for structured questionnaire editing",
-  "no_datapoint_found_offline": "No datapoint found in offline entry"
+  "no_datapoint_found_offline": "No datapoint found in offline entry",
+  "offline_records_not_available": "Offline created records are not available when offline",
+  "sync_requires_internet_connection": "Sync requires internet connection"
 }

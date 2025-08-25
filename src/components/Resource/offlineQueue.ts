@@ -65,7 +65,7 @@ const updatePaginatedResourceCache = <T extends { id: string }>(
   queryClient: QueryClient,
   queryKey: unknown[],
   updatedResource: T,
-  isCreate: boolean = false,
+  isCreate: boolean | undefined,
 ) => {
   const prevList = queryClient.getQueryData<PaginatedResponse<T>>(queryKey);
 
@@ -107,7 +107,7 @@ const normalizeAndSetQueryData = async ({
   assignedToUser,
   resourceId,
   relatedPatient,
-  isCreate = false,
+  isCreate,
 }: NormalizeAndSetQueryDataParams): Promise<ResourceRequest> => {
   const normalizedResource = normaliZedResourcerequestRecord(
     entry,
@@ -185,6 +185,7 @@ export const queueNewResourceRequest = async ({
       assignedToUser,
       resourceId: generatedId,
       relatedPatient,
+      isCreate: true,
     });
 
     // Call success callback with the generated ID and normalized resource
@@ -267,7 +268,7 @@ export const queueUpdatedResourceRequest = async ({
         assignedToUser,
         resourceId,
         relatedPatient: resourceData?.related_patient?.id,
-        isCreate: false, // This is an update operation
+        isCreate: false,
       });
 
       // Call success callback with the resource ID and normalized resource
@@ -307,7 +308,7 @@ export const queueUpdatedResourceRequest = async ({
         assignedToUser,
         resourceId,
         relatedPatient: resourceData?.related_patient?.id,
-        isCreate: false, // This is an update operation
+        isCreate: false,
       });
 
       // Call success callback with the resource ID and normalized resource
