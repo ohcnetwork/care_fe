@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-import BackButton from "@/components/Common/BackButton";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -139,7 +138,16 @@ export function ChargeItemDefinitionDetail({
   return (
     <Page title={chargeItemDefinition.title} hideTitleOnPage={true}>
       <div className="container mx-auto">
-        <BackButton />
+        <Button
+          variant="outline"
+          size="xs"
+          onClick={() =>
+            navigate(`/facility/${facilityId}/settings/charge_item_definitions`)
+          }
+        >
+          <CareIcon icon="l-arrow-left" className="size-4" />
+          {t("back")}
+        </Button>
 
         <div className="mb-4">
           <div className="mb-6 flex items-center justify-between">
