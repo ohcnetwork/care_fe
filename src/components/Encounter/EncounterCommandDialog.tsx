@@ -29,6 +29,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { PLUGIN_Component } from "@/PluginEngine";
+import { useCareApps } from "@/hooks/useCareApps";
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { useTranslation } from "react-i18next";
@@ -379,13 +380,17 @@ export function EncounterCommandDialog({
               <CommandSeparator />
             </div>
           ))}
-          <CommandGroup heading={t("plugin_actions")} className="px-2">
-            <PLUGIN_Component
-              __name="PatientInfoCardActions"
-              encounter={encounter}
-              className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100 w-full py-2"
-            />
-          </CommandGroup>
+          {useCareApps().some(
+            (plugin) => plugin.components?.PatientInfoCardActions,
+          ) && (
+            <CommandGroup heading={t("plugin_actions")} className="px-2">
+              <PLUGIN_Component
+                __name="PatientInfoCardActions"
+                encounter={encounter}
+                className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100 w-full py-2"
+              />
+            </CommandGroup>
+          )}
         </CommandList>
       </CommandDialog>
     </>
