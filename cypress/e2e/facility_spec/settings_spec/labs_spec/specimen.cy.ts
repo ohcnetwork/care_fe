@@ -72,9 +72,8 @@ describe("Facility Specimen Management", () => {
     cy.get('input[name="title"]').focus().blur();
     cy.get('input[name="slug"]').focus().blur();
     cy.get('textarea[name="description"]').focus().blur();
-    cy.contains("label", "Category").click();
-    cy.contains("label", "Data Type").click();
-    cy.contains("label", "LOINC Code").click();
+    cy.contains("label", "Type Collected").click();
+    cy.get("body").click(0, 0);
 
     cy.verifyErrorMessages([
       { message: "Required", label: "Title" },
