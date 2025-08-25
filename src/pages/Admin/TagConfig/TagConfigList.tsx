@@ -56,7 +56,7 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
       queryParams: {
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        search: qParams.search,
+        display: qParams.display,
         status: qParams.status,
         category: qParams.category,
         resource: qParams.resource,
@@ -128,9 +128,9 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
                 </span>
                 <Input
                   placeholder={t("search_tag_configs")}
-                  value={qParams.search || ""}
+                  value={qParams.display || ""}
                   onChange={(e) =>
-                    updateQuery({ search: e.target.value || undefined })
+                    updateQuery({ display: e.target.value || undefined })
                   }
                   className="w-full md:w-[300px] pl-10"
                 />
