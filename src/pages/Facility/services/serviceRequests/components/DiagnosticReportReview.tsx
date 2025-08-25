@@ -37,9 +37,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { FileListTable } from "@/components/Files/FileListTable";
-import { FileUploadModel } from "@/components/Patient/models";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -51,6 +49,8 @@ import {
 } from "@/types/emr/diagnosticReport/diagnosticReport";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import { ObservationStatus } from "@/types/emr/observation/observation";
+import { FileReadMinimal } from "@/types/files/file";
+import fileApi from "@/types/files/fileApi";
 
 interface DiagnosticReportReviewProps {
   facilityId: string;
@@ -89,9 +89,9 @@ export function DiagnosticReportReview({
   }, [fullReport]);
 
   const { data: files = { results: [], count: 0 }, refetch: refetchFiles } =
-    useQuery<PaginatedResponse<FileUploadModel>>({
+    useQuery<PaginatedResponse<FileReadMinimal>>({
       queryKey: ["files", "diagnostic_report", fullReport?.id],
-      queryFn: query(routes.viewUpload, {
+      queryFn: query(fileApi.list, {
         queryParams: {
           file_type: "diagnostic_report",
           associating_id: fullReport?.id,

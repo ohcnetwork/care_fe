@@ -21,39 +21,39 @@ import { Textarea } from "@/components/ui/textarea";
 import FilePreviewDialog, {
   StateInterface,
 } from "@/components/Common/FilePreviewDialog";
-import { FileUploadModel } from "@/components/Patient/models";
 
-import {
-  FILE_EXTENSIONS,
-  PREVIEWABLE_FILE_EXTENSIONS,
-} from "@/common/constants";
-
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import {
+  FILE_EXTENSIONS,
+  FileReadMinimal,
+  FileUpdate,
+  PREVIEWABLE_FILE_EXTENSIONS,
+} from "@/types/files/file";
+import fileApi from "@/types/files/fileApi";
 
 export interface FileManagerOptions {
   type: string;
   onArchive?: () => void;
   onEdit?: () => void;
-  uploadedFiles?: FileUploadModel[];
+  uploadedFiles?: FileReadMinimal[];
 }
 export interface FileManagerResult {
-  viewFile: (file: FileUploadModel, associating_id: string) => void;
+  viewFile: (file: FileReadMinimal, associating_id: string) => void;
   archiveFile: (
-    file: FileUploadModel,
+    file: FileReadMinimal,
     associating_id: string,
     skipPrompt?: { reason: string },
   ) => void;
-  editFile: (file: FileUploadModel, associating_id: string) => void;
+  editFile: (file: FileReadMinimal, associating_id: string) => void;
   Dialogues: React.ReactNode;
-  isPreviewable: (file: FileUploadModel) => boolean;
+  isPreviewable: (file: FileReadMinimal) => boolean;
   getFileType: (
-    file: FileUploadModel,
+    file: FileReadMinimal,
   ) => keyof typeof FILE_EXTENSIONS | "UNKNOWN";
   downloadFile: (
-    file: FileUploadModel,
+    file: FileReadMinimal,
     associating_id: string,
   ) => Promise<void>;
   type: string;
@@ -76,14 +76,14 @@ export default function useFileManager(
   const [fileUrl, setFileUrl] = useState<string>("");
   const [downloadURL, setDownloadURL] = useState<string>("");
   const [archiveDialogueOpen, setArchiveDialogueOpen] = useState<
-    (FileUploadModel & { associating_id: string }) | null
+    (FileReadMinimal & { associating_id: string }) | null
   >(null);
   const [archiveReason, setArchiveReason] = useState("");
   const [archiveReasonError, setArchiveReasonError] = useState("");
   const [archiving, setArchiving] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editDialogueOpen, setEditDialogueOpen] =
-    useState<FileUploadModel | null>(null);
+    useState<FileReadMinimal | null>(null);
   const [editError, setEditError] = useState("");
   const [currentIndex, setCurrentIndex] = useState<number>(-1);
   const queryClient = useQueryClient();
@@ -95,23 +95,23 @@ export default function useFileManager(
   };
 
   const retrieveUpload = async (
-    file: FileUploadModel,
+    file: FileReadMinimal,
     associating_id: string,
   ) => {
     return queryClient.fetchQuery({
       queryKey: ["file", fileType, associating_id, file.id],
       queryFn: () =>
-        query(routes.retrieveUpload, {
+        query(fileApi.get, {
           queryParams: {
             file_type: fileType,
             associating_id,
           },
-          pathParams: { id: file.id || "" },
+          pathParams: { fileId: file.id || "" },
         })({} as any),
     });
   };
 
-  const viewFile = async (file: FileUploadModel, associating_id: string) => {
+  const viewFile = async (file: FileReadMinimal, associating_id: string) => {
     const index = uploadedFiles?.findIndex((f) => f.id === file.id) ?? -1;
     setCurrentIndex(index);
     setFileUrl("");
@@ -149,9 +149,9 @@ export default function useFileManager(
 
   const { mutateAsync: archiveUpload } = useMutation({
     mutationFn: (body: { id: string; archive_reason: string }) =>
-      query(routes.archiveUpload, {
+      query(fileApi.archive, {
         body: { archive_reason: body.archive_reason },
-        pathParams: { id: body.id },
+        pathParams: { fileId: body.id },
       })({} as any),
     onSuccess: () => {
       toast.success(t("file_archived_successfully"));
@@ -179,7 +179,7 @@ export default function useFileManager(
   };
 
   const archiveFile = (
-    file: FileUploadModel,
+    file: FileReadMinimal,
     associating_id: string,
     skipPrompt?: { reason: string },
   ) => {
@@ -215,23 +215,26 @@ export default function useFileManager(
     }
   };
 
-  const { mutateAsync: editUpload } = useMutation({
-    mutationFn: (body: { id: string; name: string; associating_id: string }) =>
-      mutate(routes.editUpload, {
-        body: { name: body.name },
-        pathParams: { id: body.id },
-      })(body),
-    onSuccess: (_, { associating_id }) => {
+  const { mutateAsync: editUpload } = useMutation<
+    FileReadMinimal,
+    Error,
+    FileUpdate
+  >({
+    mutationFn: (data) =>
+      mutate(fileApi.update, {
+        pathParams: { fileId: data.id },
+      })(data),
+    onSuccess: (data) => {
       toast.success(t("file_name_changed_successfully"));
       setEditDialogueOpen(null);
       onEdit?.();
       queryClient.invalidateQueries({
-        queryKey: ["files", fileType, associating_id],
+        queryKey: ["files", fileType, data.associating_id],
       });
     },
   });
 
-  const partialupdateFileName = async (file: FileUploadModel) => {
+  const partialupdateFileName = async (file: FileReadMinimal) => {
     if (!validateEditFileName(file.name || "")) {
       setEditing(false);
       return;
@@ -240,13 +243,12 @@ export default function useFileManager(
     await editUpload({
       id: file.id || "",
       name: file.name || "",
-      associating_id: file.associating_id || "",
     });
 
     setEditing(false);
   };
 
-  const editFile = (file: FileUploadModel, associating_id: string) => {
+  const editFile = (file: FileReadMinimal, associating_id: string) => {
     setEditDialogueOpen({ ...file, associating_id });
   };
 
@@ -458,10 +460,12 @@ export default function useFileManager(
                 id="edit-file-name"
                 value={editDialogueOpen?.name}
                 onChange={(e) => {
-                  setEditDialogueOpen({
-                    ...editDialogueOpen,
-                    name: e.target.value,
-                  });
+                  if (editDialogueOpen) {
+                    setEditDialogueOpen({
+                      ...editDialogueOpen,
+                      name: e.target.value,
+                    });
+                  }
                 }}
                 data-cy="edit-filename-input"
               />
@@ -493,15 +497,15 @@ export default function useFileManager(
     </>
   );
 
-  const isPreviewable = (file: FileUploadModel) =>
+  const isPreviewable = (file: FileReadMinimal) =>
     !!file.extension &&
     PREVIEWABLE_FILE_EXTENSIONS.includes(
       file.extension.slice(1) as (typeof PREVIEWABLE_FILE_EXTENSIONS)[number],
     );
 
   const getFileType: (
-    f: FileUploadModel,
-  ) => keyof typeof FILE_EXTENSIONS | "UNKNOWN" = (file: FileUploadModel) => {
+    f: FileReadMinimal,
+  ) => keyof typeof FILE_EXTENSIONS | "UNKNOWN" = (file: FileReadMinimal) => {
     if (!file.extension) return "UNKNOWN";
     const ftype = (
       Object.keys(FILE_EXTENSIONS) as (keyof typeof FILE_EXTENSIONS)[]
@@ -512,7 +516,7 @@ export default function useFileManager(
   };
 
   const downloadFile = async (
-    file: FileUploadModel,
+    file: FileReadMinimal,
     associating_id: string,
   ) => {
     try {
