@@ -1,4 +1,4 @@
-import { faker } from "@faker-js/faker";
+import { cy, faker } from "@faker-js/faker";
 
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
 
@@ -66,7 +66,15 @@ describe("Facility Specimen Management", () => {
 
     // Attempt to save empty form and verify error messages
     cy.get("button").contains("Add Definition").click();
-    cy.get("button").contains("Save").should("be.disabled");
+    cy.get("button").contains("Create").should("be.disabled");
+
+    // Touch required fields to trigger form-level validations
+    cy.get('input[name="title"]').focus().blur();
+    cy.get('input[name="slug"]').focus().blur();
+    cy.get('textarea[name="description"]').focus().blur();
+    cy.contains("label", "Category").click();
+    cy.contains("label", "Data Type").click();
+    cy.contains("label", "LOINC Code").click();
 
     cy.verifyErrorMessages([
       { message: "Required", label: "Title" },
