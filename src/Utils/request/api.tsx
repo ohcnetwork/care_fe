@@ -3,7 +3,6 @@ import { BatchRequestBody } from "@/types/base/batch/batch";
 import { Code } from "@/types/base/code/code";
 import { PlugConfig } from "@/types/plugConfig";
 import { BatchSubmissionResult } from "@/types/questionnaire/batch";
-import { CommentModel } from "@/types/resourceRequest/resourceRequest";
 import { UserReadMinimal } from "@/types/user/user";
 
 /**
@@ -46,18 +45,6 @@ const routes = {
   getScheduleAbleFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/",
     TRes: Type<PaginatedResponse<UserReadMinimal>>(),
-  },
-
-  getResourceComments: {
-    path: "/api/v1/resource/{id}/comment/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<CommentModel>>(),
-  },
-  addResourceComments: {
-    path: "/api/v1/resource/{id}/comment/",
-    method: "POST",
-    TRes: Type<CommentModel>(),
-    TBody: Type<Partial<CommentModel>>(),
   },
 
   valueset: {

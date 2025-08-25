@@ -5,6 +5,7 @@ import {
   ResourceRequestListRead,
   ResourceRequestRead,
 } from "@/types/resourceRequest/resourceRequest";
+import { CommentCreate, CommentRead } from "./resourceRequest";
 
 export default {
   get: {
@@ -29,4 +30,18 @@ export default {
     TBody: Type<ResourceRequestCreate>(),
     TRes: Type<ResourceRequestRead>(),
   },
-};
+} as const;
+
+export const resourceRequestCommentApi = {
+  list: {
+    path: "/api/v1/resource/{resourceRequestId}/comment/",
+    method: HttpMethod.GET,
+    TRes: Type<PaginatedResponse<CommentRead>>(),
+  },
+  create: {
+    path: "/api/v1/resource/{resourceRequestId}/comment/",
+    method: HttpMethod.POST,
+    TBody: Type<CommentCreate>(),
+    TRes: Type<CommentRead>(),
+  },
+} as const;

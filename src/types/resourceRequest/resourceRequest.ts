@@ -96,7 +96,11 @@ export interface ResourceRequestUpdate extends ResourceRequestCreate {
   id: string;
 }
 
-export interface CommentModel {
+export interface CommentCreate {
+  comment: string;
+}
+
+export interface CommentRead {
   id: string;
   created_by: UserReadMinimal;
   created_date: string;
