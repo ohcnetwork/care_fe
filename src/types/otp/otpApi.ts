@@ -19,4 +19,4 @@ export default {
     TBody: Type<LoginByOtpRequest>(),
     TRes: Type<LoginByOtpResponse>(),
   },
-};
+} as const;
