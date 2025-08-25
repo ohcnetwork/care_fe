@@ -3,12 +3,7 @@ import { BatchRequestBody } from "@/types/base/batch/batch";
 import { Code } from "@/types/base/code/code";
 import { PlugConfig } from "@/types/plugConfig";
 import { BatchSubmissionResult } from "@/types/questionnaire/batch";
-import {
-  CommentModel,
-  CreateResourceRequest,
-  ResourceRequest,
-  UpdateResourceRequest,
-} from "@/types/resourceRequest/resourceRequest";
+import { CommentModel } from "@/types/resourceRequest/resourceRequest";
 import { UserReadMinimal } from "@/types/user/user";
 
 /**
@@ -53,29 +48,6 @@ const routes = {
     TRes: Type<PaginatedResponse<UserReadMinimal>>(),
   },
 
-  // Request
-  createResource: {
-    path: "/api/v1/resource/",
-    method: "POST",
-    TRes: Type<ResourceRequest>(),
-    TBody: Type<CreateResourceRequest>(),
-  },
-  updateResource: {
-    path: "/api/v1/resource/{id}/",
-    method: "PUT",
-    TRes: Type<ResourceRequest>(),
-    TBody: Type<UpdateResourceRequest>(),
-  },
-  listResourceRequests: {
-    path: "/api/v1/resource/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<ResourceRequest>>(),
-  },
-  getResourceDetails: {
-    path: "/api/v1/resource/{id}/",
-    method: "GET",
-    TRes: Type<ResourceRequest>(),
-  },
   getResourceComments: {
     path: "/api/v1/resource/{id}/comment/",
     method: "GET",

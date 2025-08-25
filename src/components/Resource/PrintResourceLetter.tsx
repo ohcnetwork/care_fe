@@ -5,19 +5,18 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import Loading from "@/components/Common/Loading";
 
-import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
-
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import { getResourceRequestCategoryText } from "@/types/resourceRequest/resourceRequest";
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 
 export default function PrintResourceLetter({ id }: { id: string }) {
   const { t } = useTranslation();
 
   const { data, isLoading } = useQuery({
     queryKey: ["resource_request_letter", id],
-    queryFn: query(routes.getResourceDetails, {
-      pathParams: { id: id },
+    queryFn: query(resourceRequestApi.get, {
+      pathParams: { resourceRequestId: id },
     }),
   });
 
@@ -70,13 +69,7 @@ export default function PrintResourceLetter({ id }: { id: string }) {
               </div>
               <div>
                 <span className="font-semibold">{t("category")}:</span>{" "}
-                {RESOURCE_CATEGORY_CHOICES.find(
-                  (item) => item.id === data.category,
-                )?.text || "--"}
-              </div>
-              <div>
-                <span className="font-semibold">{t("quantity_required")}:</span>{" "}
-                {data.requested_quantity}
+                {t(getResourceRequestCategoryText(data.category))}
               </div>
               <div className="mt-2">
                 <span className="font-semibold">
@@ -90,7 +83,7 @@ export default function PrintResourceLetter({ id }: { id: string }) {
             <div className="mb-4">
               <span className="font-semibold">{t("current_status")}: </span>
               <span className="rounded bg-gray-100 px-2 py-1">
-                {t(`resource_status__${data.status}`)}
+                {t(`resource_request_status__${data.status}`)}
               </span>
             </div>
           </div>
@@ -100,7 +93,7 @@ export default function PrintResourceLetter({ id }: { id: string }) {
             <div>
               <div className="mb-20">
                 <div className="font-semibold">{t("requested_by")}:</div>
-                <div>{formatName(data.created_by)}</div>
+                <div>{data.created_by && formatName(data.created_by)}</div>
                 <div className="text-sm text-gray-600">
                   {formatDateTime(data.created_date)}
                 </div>
@@ -111,9 +104,9 @@ export default function PrintResourceLetter({ id }: { id: string }) {
               <div>
                 <div className="mb-20">
                   <div className="font-semibold">
-                    {t(`resource_status__${data.status}`)} {t("by")}:
+                    {t(`resource_request_status__${data.status}`)} {t("by")}:
                   </div>
-                  <div>{formatName(data.updated_by)}</div>
+                  <div>{data.updated_by && formatName(data.updated_by)}</div>
                   <div className="text-sm text-gray-600">
                     {formatDateTime(data.modified_date)}
                   </div>

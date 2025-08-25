@@ -1,5 +1,4 @@
-import { HttpMethod } from "@/Utils/request/api";
-import { Type } from "@/Utils/request/api";
+import { HttpMethod, Type } from "@/Utils/request/api";
 import {
   LoginByOtpRequest,
   LoginByOtpResponse,

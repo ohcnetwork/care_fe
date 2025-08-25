@@ -15,12 +15,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
-
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
-import { RESOURCE_REQUEST_STATUS_COLORS } from "@/types/resourceRequest/resourceRequest";
+import {
+  getResourceRequestCategoryText,
+  RESOURCE_REQUEST_STATUS_COLORS,
+} from "@/types/resourceRequest/resourceRequest";
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 
 import { PatientProps } from ".";
 
@@ -31,7 +32,7 @@ export const ResourceRequests = (props: PatientProps) => {
 
   const { data: resourceRequests, isLoading: loading } = useQuery({
     queryKey: ["resourceRequests", patientId],
-    queryFn: query(routes.listResourceRequests, {
+    queryFn: query(resourceRequestApi.list, {
       queryParams: {
         related_patient: patientId,
       },
@@ -84,9 +85,7 @@ export const ResourceRequests = (props: PatientProps) => {
               resourceRequests.results.map((request, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">
-                    {RESOURCE_CATEGORY_CHOICES.find(
-                      (item) => item.id === request.category,
-                    )?.text || "--"}
+                    {t(getResourceRequestCategoryText(request.category))}
                   </TableCell>
                   <TableCell>{request.title}</TableCell>
                   <TableCell>
@@ -97,7 +96,7 @@ export const ResourceRequests = (props: PatientProps) => {
                         ]
                       }
                     >
-                      {t(`resource_status__${request.status}`)}
+                      {t(`resource_request_status__${request.status}`)}
                     </Badge>
                   </TableCell>
                   <TableCell>{formatDateTime(request.created_date)}</TableCell>
