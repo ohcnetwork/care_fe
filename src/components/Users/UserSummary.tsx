@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import LanguageSelector from "@/components/Common/LanguageSelector";
-import UserColumns from "@/components/Common/UserColumns";
-import { userChildProps } from "@/components/Common/UserColumns";
+import UserColumns, { userChildProps } from "@/components/Common/UserColumns";
 import { TwoFactorAuth } from "@/components/Users/TwoFactorAuth";
 import UserAvatar from "@/components/Users/UserAvatar";
 import UserDeleteDialog from "@/components/Users/UserDeleteDialog";

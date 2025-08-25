@@ -55,7 +55,7 @@ import {
   CreateConsentRequest,
 } from "@/types/consent/consent";
 import consentApi from "@/types/consent/consentApi";
-import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
+import { FileCategory, FileType } from "@/types/files/file";
 
 interface FileEntry {
   file: File;
@@ -122,20 +122,17 @@ export default function ConsentFormSheet({
   const isEdit = !!existingConsent;
   const {
     selectedEncounterId: encounterId,
-    selectedEncounter: encounter,
+    canWriteSelectedEncounter,
     patientId,
   } = useEncounter();
-
-  const readOnly =
-    encounter && inactiveEncounterStatus.includes(encounter.status);
 
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fileUpload = useFileUpload({
-    type: "consent",
-    category: "consent_attachment",
+    type: FileType.CONSENT,
+    category: FileCategory.CONSENT_ATTACHMENT,
     multiple: true,
     allowedExtensions: ["jpg", "jpeg", "png", "pdf"],
     allowNameFallback: false,
@@ -144,7 +141,6 @@ export default function ConsentFormSheet({
 
   const form = useForm({
     resolver: zodResolver(consentFormSchema(isEdit)),
-    mode: "onChange",
     defaultValues: {
       decision: "permit",
       category: "treatment",
@@ -165,7 +161,8 @@ export default function ConsentFormSheet({
       name: fileUpload.fileNames[index] || "",
     }));
     form.setValue("fileEntries", fileEntries, {
-      shouldValidate: fileEntries.length > 0,
+      shouldValidate: false,
+      shouldDirty: true,
     });
   }, [fileUpload.files, fileUpload.fileNames, form]);
 
@@ -287,9 +284,11 @@ export default function ConsentFormSheet({
       createConsent(consentData);
     }
   };
-  if (readOnly) {
+
+  if (!canWriteSelectedEncounter) {
     return null;
   }
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
