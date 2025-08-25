@@ -70,6 +70,8 @@ interface CreateInvoicePageProps {
   onSuccess?: () => void;
   showHeader?: boolean;
   sourceUrl?: string;
+  locationId?: string;
+  patientId?: string;
 }
 
 interface PriceComponentRowProps {
@@ -121,6 +123,8 @@ export function CreateInvoicePage({
   onSuccess,
   showHeader = true,
   sourceUrl,
+  locationId,
+  patientId,
 }: CreateInvoicePageProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -520,6 +524,17 @@ export function CreateInvoicePage({
               disabled={createMutation.isPending}
             >
               {t("cancel")}
+            </Button>
+            <Button
+              type="button"
+              variant="outline_primary"
+              onClick={() =>
+                navigate(
+                  `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation`,
+                )
+              }
+            >
+              {t("dispense_now")}
             </Button>
             <Button
               type="submit"

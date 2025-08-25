@@ -23,6 +23,8 @@ interface CreateInvoiceSheetProps {
   redirectInNewTab?: boolean;
   onSuccess?: () => void;
   sourceUrl?: string;
+  locationId?: string;
+  patientId?: string;
 }
 
 export function CreateInvoiceSheet({
@@ -35,6 +37,8 @@ export function CreateInvoiceSheet({
   redirectInNewTab = true,
   onSuccess,
   sourceUrl,
+  locationId,
+  patientId,
 }: CreateInvoiceSheetProps) {
   const { t } = useTranslation();
 
@@ -55,6 +59,8 @@ export function CreateInvoiceSheet({
             onSuccess={onSuccess}
             showHeader={false}
             sourceUrl={sourceUrl}
+            locationId={locationId}
+            patientId={patientId}
           />
         </ScrollArea>
       </SheetContent>

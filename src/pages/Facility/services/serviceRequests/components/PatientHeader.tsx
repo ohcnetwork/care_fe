@@ -1,4 +1,4 @@
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
@@ -24,12 +24,18 @@ interface PatientHeaderProps {
   patient: PatientRead;
   facilityId: string;
   encounterId?: string;
+  locationId?: string;
+  showViewPrescriptionsButton?: boolean;
+  showViewDispenseButton?: boolean;
 }
 
 export function PatientHeader({
   patient,
   facilityId,
   encounterId,
+  locationId,
+  showViewPrescriptionsButton = false,
+  showViewDispenseButton = false,
 }: PatientHeaderProps) {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
@@ -118,6 +124,34 @@ export function PatientHeader({
                   </div>
                 </div>
               </div>
+              {locationId && (
+                <div className="flex flex-row items-center gap-2">
+                  {showViewPrescriptionsButton && (
+                    <Button variant="outline" size="sm" asChild>
+                      <Link
+                        href={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${patient.id}/pending`}
+                        basePath="/"
+                      >
+                        <div className="text-gray-500 text-xs flex items-center gap-1">
+                          {t("view_prescriptions")}
+                        </div>
+                      </Link>
+                    </Button>
+                  )}
+                  {showViewDispenseButton && (
+                    <Button variant="outline" size="sm" asChild>
+                      <Link
+                        href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patient.id}/preparation`}
+                        basePath="/"
+                      >
+                        <div className="text-gray-500 text-xs flex items-center gap-1">
+                          {t("view_dispenses")}
+                        </div>
+                      </Link>
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
             <DialogFooter>
               <DialogClose asChild>
@@ -178,6 +212,34 @@ export function PatientHeader({
               formatPhoneNumberIntl(patient.phone_number)}
           </div>
         </div>
+        {locationId && (
+          <div className="flex flex-row items-center gap-2">
+            {showViewPrescriptionsButton && (
+              <Button variant="outline" size="sm" asChild>
+                <Link
+                  href={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${patient.id}/pending`}
+                  basePath="/"
+                >
+                  <div className="text-gray-500 text-xs flex items-center gap-1">
+                    {t("view_prescriptions")}
+                  </div>
+                </Link>
+              </Button>
+            )}
+            {showViewDispenseButton && (
+              <Button variant="outline" size="sm" asChild>
+                <Link
+                  href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patient.id}/preparation`}
+                  basePath="/"
+                >
+                  <div className="text-gray-500 text-xs flex items-center gap-1">
+                    {t("view_dispenses")}
+                  </div>
+                </Link>
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

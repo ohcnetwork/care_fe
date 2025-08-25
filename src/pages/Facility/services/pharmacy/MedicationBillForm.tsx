@@ -828,6 +828,7 @@ export default function MedicationBillForm({ patientId }: Props) {
             limit: 100,
             product_knowledge: productKnowledgeId,
             net_content_gt: 0,
+            include_children: true,
           },
         })({ signal: new AbortController().signal });
 
@@ -1269,7 +1270,13 @@ export default function MedicationBillForm({ patientId }: Props) {
 
         {patient && (
           <div className="mb-4 p-4 rounded-none shadow-none bg-gray-100">
-            <PatientHeader patient={patient} facilityId={facilityId} />
+            <PatientHeader
+              patient={patient}
+              facilityId={facilityId}
+              locationId={locationId}
+              showViewPrescriptionsButton={true}
+              showViewDispenseButton={true}
+            />
           </div>
         )}
 
@@ -1779,6 +1786,16 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                           }{" "}
                                                           {t("units")}
                                                         </Badge>
+                                                        {selectedInventory
+                                                          ?.location.id !==
+                                                          locationId && (
+                                                          <Badge variant="secondary">
+                                                            {
+                                                              selectedInventory
+                                                                ?.location.name
+                                                            }
+                                                          </Badge>
+                                                        )}
                                                       </div>
                                                     );
                                                   },
@@ -1856,7 +1873,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                       checked={isSelected}
                                                       className="mr-2"
                                                     />
-                                                    <div className="flex-1 flex items-center justify-between">
+                                                    <div className="flex-1 flex items-center justify-between gap-1">
                                                       <span>
                                                         {"Lot #" +
                                                           inv.product.batch
@@ -1875,6 +1892,12 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                         {inv.net_content}{" "}
                                                         {t("units")}
                                                       </Badge>
+                                                      {inv?.location.id !==
+                                                        locationId && (
+                                                        <Badge variant="secondary">
+                                                          {inv?.location.name}
+                                                        </Badge>
+                                                      )}
                                                     </div>
                                                   </div>
                                                 );
@@ -2280,6 +2303,8 @@ export default function MedicationBillForm({ patientId }: Props) {
             }}
             sourceUrl={`/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation`}
             redirectInNewTab={false}
+            locationId={locationId}
+            patientId={patientId}
           />
         )}
 

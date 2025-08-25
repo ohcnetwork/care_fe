@@ -121,6 +121,9 @@ function MedicationTable({
             <TableHead className="text-gray-700">{t("dosage")}</TableHead>
             <TableHead className="text-gray-700">{t("frequency")}</TableHead>
             <TableHead className="text-gray-700">{t("quantity")}</TableHead>
+            <TableHead className="text-gray-700">
+              {t("item_location")}
+            </TableHead>
             <TableHead className="text-gray-700">{t("status")}</TableHead>
             <TableHead className="text-gray-700">
               {t("prepared_date")}
@@ -177,6 +180,9 @@ function MedicationTable({
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
                   {medication.charge_item.quantity || "-"}
+                </TableCell>
+                <TableCell className="text-gray-950 font-medium">
+                  {medication.item.location.name || "-"}
                 </TableCell>
                 <TableCell className={"text-gray-950"}>
                   {editableStatuses.includes(medication.status) ? (
