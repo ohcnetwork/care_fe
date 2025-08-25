@@ -1,4 +1,4 @@
-import { cy, faker } from "@faker-js/faker";
+import { faker } from "@faker-js/faker";
 
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
 
