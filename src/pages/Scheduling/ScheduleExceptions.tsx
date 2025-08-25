@@ -35,19 +35,19 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 interface Props {
   items?: ScheduleException[];
   facilityId: string;
-  userId: string;
+  resourceId: string;
 }
 
 export default function ScheduleExceptions({
   items,
   facilityId,
-  userId,
+  resourceId,
 }: Props) {
   const { t } = useTranslation();
 
   const { data: isSchedulableResource } = useIsUserSchedulableResource(
     facilityId,
-    userId,
+    resourceId,
   );
 
   if (items == null) {
@@ -79,7 +79,7 @@ export default function ScheduleExceptions({
           <ScheduleExceptionItem
             {...exception}
             facilityId={facilityId}
-            userId={userId}
+            resourceId={resourceId}
           />
         </li>
       ))}
@@ -88,7 +88,7 @@ export default function ScheduleExceptions({
 }
 
 const ScheduleExceptionItem = (
-  props: ScheduleException & { facilityId: string; userId: string },
+  props: ScheduleException & { facilityId: string; resourceId: string },
 ) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -106,7 +106,7 @@ const ScheduleExceptionItem = (
       queryClient.invalidateQueries({
         queryKey: [
           "user-schedule-exceptions",
-          { facilityId: props.facilityId, userId: props.userId },
+          { facilityId: props.facilityId, resourceId: props.resourceId },
         ],
       });
     },

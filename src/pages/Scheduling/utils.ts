@@ -7,12 +7,14 @@ import {
   parse,
 } from "date-fns";
 
-import { Time } from "@/Utils/types";
 import {
+  AvailabilityDateTime,
   AvailabilitySlotType,
   ScheduleAvailability,
   ScheduleException,
 } from "@/types/scheduling/schedule";
+import { Time } from "@/Utils/types";
+import { formatTimeShort } from "@/Utils/utils";
 
 export const isDateInRange = (
   date: Date,
@@ -160,4 +162,13 @@ export const calculateSlotDuration = (
   const end = parse(endTime, "HH:mm", new Date());
   const result = differenceInMinutes(end, start) / numOfSlots;
   return +result.toFixed(2);
+};
+
+// TODO: remove this in favour of supporting flexible day of week availability
+export const formatAvailabilityTime = (
+  availability: AvailabilityDateTime[],
+) => {
+  const startTime = availability[0].start_time;
+  const endTime = availability[0].end_time;
+  return `${formatTimeShort(startTime)} - ${formatTimeShort(endTime)}`;
 };

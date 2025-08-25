@@ -9,10 +9,10 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
-import { formatAvailabilityTime } from "@/components/Users/UserAvailabilityTab";
 
 import EditScheduleTemplateSheet from "@/pages/Scheduling/components/EditScheduleTemplateSheet";
 import {
+  formatAvailabilityTime,
   getDaysOfWeekFromAvailabilities,
   getSlotsPerSession,
 } from "@/pages/Scheduling/utils";
@@ -21,13 +21,13 @@ import { ScheduleTemplate } from "@/types/scheduling/schedule";
 interface Props {
   items?: ScheduleTemplate[];
   facilityId: string;
-  userId: string;
+  resourceId: string;
 }
 
 export default function ScheduleTemplates({
   items,
   facilityId,
-  userId,
+  resourceId,
 }: Props) {
   const { t } = useTranslation();
   if (items == null) {
@@ -50,7 +50,7 @@ export default function ScheduleTemplates({
           <ScheduleTemplateItem
             template={template}
             facilityId={facilityId}
-            userId={userId}
+            resourceId={resourceId}
           />
         </li>
       ))}
@@ -61,11 +61,11 @@ export default function ScheduleTemplates({
 const ScheduleTemplateItem = ({
   template,
   facilityId,
-  userId,
+  resourceId,
 }: {
   template: ScheduleTemplate;
   facilityId: string;
-  userId: string;
+  resourceId: string;
 }) => {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams<{ edit: string | null }>();
@@ -96,7 +96,7 @@ const ScheduleTemplateItem = ({
           <EditScheduleTemplateSheet
             template={template}
             facilityId={facilityId}
-            userId={userId}
+            resourceId={resourceId}
             open={qParams.edit === template.id}
             onOpenChange={(open) =>
               setQParams({ ...qParams, edit: open ? template.id : null })

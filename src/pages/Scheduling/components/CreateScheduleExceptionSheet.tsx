@@ -40,7 +40,8 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface Props {
   facilityId: string;
-  userId: string;
+  resourceType: SchedulableResourceType;
+  resourceId: string;
   trigger?: React.ReactNode;
 }
 
@@ -52,7 +53,8 @@ type QueryParams = {
 
 export default function CreateScheduleExceptionSheet({
   facilityId,
-  userId,
+  resourceType,
+  resourceId,
   trigger,
 }: Props) {
   const { t } = useTranslation();
@@ -152,14 +154,17 @@ export default function CreateScheduleExceptionSheet({
       setQParams({ sheet: null, valid_from: null, valid_to: null });
       form.reset();
       queryClient.invalidateQueries({
-        queryKey: ["user-schedule-exceptions", { facilityId, userId }],
+        queryKey: [
+          "user-schedule-exceptions",
+          { facilityId, resourceType, resourceId },
+        ],
       });
     },
   });
 
   const { data: isSchedulableResource } = useIsUserSchedulableResource(
     facilityId,
-    userId,
+    resourceId,
   );
 
   const unavailableAllDay = form.watch("unavailable_all_day");
@@ -182,8 +187,8 @@ export default function CreateScheduleExceptionSheet({
       valid_to: dateQueryString(data.valid_to),
       start_time: data.start_time,
       end_time: data.end_time,
-      resource_type: SchedulableResourceType.Practitioner,
-      resource_id: userId,
+      resource_type: resourceType,
+      resource_id: resourceId,
     });
   }
 
