@@ -17,7 +17,7 @@ import {
   ServiceRequestApplyActivityDefinitionSpec,
 } from "@/types/emr/serviceRequest/serviceRequest";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
-import { FileUploadQuestion } from "@/types/files/files";
+import { FileUploadQuestion } from "@/types/files/file";
 import {
   AppointmentCreateRequest,
   CreateAppointmentQuestion,
