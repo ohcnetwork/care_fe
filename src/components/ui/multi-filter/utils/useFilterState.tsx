@@ -146,15 +146,22 @@ export default function useFilterState(
   };
 
   const handleClearAll = () => {
-    setSelectedFilters((prev) => {
-      const newState = { ...prev };
-      Object.keys(newState).forEach((key) => {
-        newState[key].selected = [];
-        newState[key].operation.selectedOperation = null;
-        newState[key].operation.availableOperations = [];
-      });
-      return newState;
+    const newState = { ...selectedFilters };
+    Object.keys(newState).forEach((key) => {
+      newState[key].selected = [];
+      newState[key].operation.selectedOperation = null;
+      newState[key].operation.availableOperations = [];
     });
+    setSelectedFilters(newState);
+    onFilterUpdate?.(
+      Object.keys(newState).reduce(
+        (acc, key) => {
+          acc[key] = undefined;
+          return acc;
+        },
+        {} as Record<string, unknown>,
+      ),
+    );
   };
 
   const handleClearFilter = (filterKey: string) => {

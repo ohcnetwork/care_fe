@@ -1,11 +1,14 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
-export default function useFilterSearch<T extends { value: string }>(
-  items: T[],
-) {
+export default function useFilterSearch<
+  T extends { value: string; label: string },
+>(items: T[]) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
+
   const filteredItems = items.filter((item) =>
-    item.value.toLowerCase().includes(search.toLowerCase()),
+    t(item.label).toLowerCase().includes(search.toLowerCase()),
   );
 
   return {

@@ -95,7 +95,7 @@ function TreeViewItem({
           )}
           <div
             className={cn(
-              "h-3 w-3 rounded-full flex-shrink-0",
+              "h-3 w-3 rounded-full flex-shrink-0 border",
               getColorForTag(tag.id, 0),
             )}
           />
@@ -257,7 +257,7 @@ function TagFilterDropdown({
                     )}
                     <div
                       className={cn(
-                        "h-3 w-3 rounded-full flex-shrink-0",
+                        "h-3 w-3 rounded-full flex-shrink-0 border",
                         getColorForTag(tag.id, index),
                       )}
                     />
@@ -325,7 +325,7 @@ function TagFilterDropdown({
                 <div className="flex items-center gap-2 flex-1">
                   <div
                     className={cn(
-                      "h-3 w-3 rounded-full flex-shrink-0",
+                      "h-3 w-3 rounded-full flex-shrink-0 border",
                       getColorForTag(tag.id, index),
                     )}
                   />
@@ -445,7 +445,7 @@ function GroupSubmenu({
                 <div className="flex items-center gap-2 flex-1">
                   <div
                     className={cn(
-                      "h-3 w-3 rounded-full flex-shrink-0",
+                      "h-3 w-3 rounded-full flex-shrink-0 border",
                       getColorForTag(childTag.id, index),
                     )}
                   />
@@ -497,28 +497,33 @@ export const SelectedTagBadge = ({ selected }: { selected: TagConfig[] }) => {
   const firstColor = COLOR_PALETTE[0];
   const secondColor = COLOR_PALETTE[1];
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
       {selected.length === 1 ? (
-        <span className={cn(firstColor, "rounded-full w-2 h-2")}></span>
+        <span
+          className={cn(
+            firstColor,
+            "rounded-full w-2 h-2 border flex-shrink-0",
+          )}
+        ></span>
       ) : (
-        <div className="relative w-4 h-2">
+        <div className="relative w-4 h-2 flex-shrink-0">
           <span
             className={cn(
               firstColor,
-              "rounded-full w-2 h-2 absolute left-0 opacity-75",
+              "rounded-full w-2 h-2 absolute left-0 opacity-75 border",
             )}
           />
           <span
             className={cn(
               secondColor,
-              "rounded-full w-2 h-2 absolute left-1 opacity-75",
+              "rounded-full w-2 h-2 absolute left-1 opacity-75 border",
             )}
           />
         </div>
       )}
       <Tooltip>
         <TooltipTrigger>
-          <span className="text-sm">
+          <span className="text-sm whitespace-nowrap">
             {selected.length} {t("tags", { count: selected.length })}
           </span>
         </TooltipTrigger>

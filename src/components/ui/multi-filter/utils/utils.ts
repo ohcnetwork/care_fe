@@ -4,18 +4,18 @@ import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 
 // Generic color palette for cycling through options
 export const COLOR_PALETTE = [
-  "bg-blue-100",
-  "bg-green-100",
-  "bg-yellow-100",
-  "bg-orange-100",
-  "bg-red-100",
-  "bg-purple-100",
-  "bg-pink-100",
-  "bg-indigo-100",
-  "bg-teal-100",
-  "bg-cyan-100",
-  "bg-emerald-100",
-  "bg-violet-100",
+  "bg-blue-100 border-blue-300",
+  "bg-green-100 border-green-300",
+  "bg-yellow-100 border-yellow-300",
+  "bg-orange-100 border-orange-300",
+  "bg-red-100 border-red-300",
+  "bg-purple-100 border-purple-300",
+  "bg-pink-100 border-pink-300",
+  "bg-indigo-100 border-indigo-300",
+  "bg-teal-100 border-teal-300",
+  "bg-cyan-100 border-cyan-300",
+  "bg-emerald-100 border-emerald-300",
+  "bg-violet-100 border-violet-300",
 ] as const;
 
 export const ENCOUNTER_STATUS_FILTER_COLORS = {
@@ -113,6 +113,7 @@ export function createFilterConfig(
   renderSelected?: (selected: FilterValues) => React.ReactNode,
   getOperations?: (selected: FilterValues) => string[],
   mode: FilterMode = "single",
+  icon?: React.ReactNode,
 ): FilterConfig {
   return {
     key,
@@ -123,5 +124,6 @@ export function createFilterConfig(
     renderSelected,
     getOperations,
     mode,
+    icon,
   };
 }

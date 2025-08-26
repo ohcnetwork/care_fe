@@ -172,7 +172,7 @@ function FilterOptionsList({
           {showColorIndicators && (
             <div
               className={cn(
-                "h-3 w-3 rounded-full flex-shrink-0",
+                "h-3 w-3 rounded-full flex-shrink-0 border",
                 option.color || getColorForOption(index),
               )}
             />
@@ -197,12 +197,15 @@ export const GenericSelectedBadge = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div className="flex items-center gap-1">
-      <Badge variant="outline" className={cn("text-xs", className)}>
+    <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
+      <Badge
+        variant="outline"
+        className={cn("text-xs whitespace-nowrap", className)}
+      >
         {t(selectedValue)}
       </Badge>
       {selectedLength > 1 && (
-        <span className="text-xs bg-gray-100 text-gray-500 px-1 rounded-md">
+        <span className="text-xs bg-gray-100 text-gray-500 px-1 rounded-md whitespace-nowrap">
           +{selectedLength - 1}
         </span>
       )}

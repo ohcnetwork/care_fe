@@ -1,4 +1,4 @@
-import { ChevronRight, ListFilter } from "lucide-react";
+import { ChevronRight, ListFilter, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useKeyboardShortcut from "use-keyboard-shortcut";
@@ -29,6 +29,7 @@ interface MultiFilterProps {
   className?: string;
 
   triggerButtonClassName?: string;
+  clearAllButtonClassName?: string;
   disabled?: boolean;
 }
 export default function MultiFilter({
@@ -40,11 +41,13 @@ export default function MultiFilter({
   placeholder = "Filter",
   className,
   triggerButtonClassName,
+  clearAllButtonClassName,
   disabled = false,
 }: MultiFilterProps) {
   const [open, setOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
+  const { t } = useTranslation();
 
   const totalSelectedCount = Object.values(selectedFilters).reduce(
     (sum, filterState) => {
@@ -72,7 +75,7 @@ export default function MultiFilter({
     setActiveFilter(null);
   };
 
-  const _handleClearAll = () => {
+  const handleClearAll = () => {
     onClearAll();
     setOpen(false);
   };
@@ -102,7 +105,7 @@ export default function MultiFilter({
           <Button
             variant="outline"
             className={cn(
-              "justify-between",
+              "justify-between h-10",
               hasAnyFilters && "border-blue-300 bg-blue-50",
               triggerButtonClassName,
             )}
@@ -160,6 +163,19 @@ export default function MultiFilter({
           />
         );
       })}
+      {hasAnyFilters && (
+        <Button
+          variant="link"
+          onClick={handleClearAll}
+          className={cn(
+            "text-sm text-gray-500 flex items-center gap-1 w-auto self-start",
+            clearAllButtonClassName,
+          )}
+        >
+          <X className="h-2 w-2" />
+          {t("clear_all")}
+        </Button>
+      )}
     </div>
   );
 }

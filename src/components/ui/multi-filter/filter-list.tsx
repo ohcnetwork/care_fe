@@ -7,6 +7,7 @@ import {
   EncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import { CalendarFold, CircleDashed, Tag } from "lucide-react";
 
 import { SelectedDateBadge, getDateOperations } from "./date-filter";
 import { GenericSelectedBadge } from "./generic-filter";
@@ -53,6 +54,7 @@ export const encounterStatusFilter = (
     },
     () => customOperations || ["is"], // ["is", "is_not"],
     mode,
+    <CircleDashed className="w-4 h-4" />,
   );
 export const encounterClassFilter = (
   key: string = "encounter_class",
@@ -138,6 +140,8 @@ export const startedDateFilter = (
       return <SelectedDateBadge selected={selected as FilterDateRange} />;
     },
     (selected: FilterValues) => getDateOperations(selected as FilterDateRange),
+    "single",
+    <CalendarFold className="w-4 h-4" />,
   );
 export const completedDateFilter = (
   key: string = "completed_date",
@@ -153,6 +157,8 @@ export const completedDateFilter = (
       return <SelectedDateBadge selected={selected as FilterDateRange} />;
     },
     (selected: FilterValues) => getDateOperations(selected as FilterDateRange),
+    "single",
+    <CalendarFold className="w-4 h-4" />,
   );
 export const tagFilter = (
   key: string = "tags",
@@ -175,4 +181,5 @@ export const tagFilter = (
       return ["has_all_of"]; // ["has_all_of", "has_any_of", "exclude_if_any", "exclude_if_all"];
     },
     mode,
+    <Tag className="w-4 h-4" />,
   );

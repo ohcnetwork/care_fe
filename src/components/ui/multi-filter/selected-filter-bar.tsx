@@ -29,7 +29,7 @@ function SubMenuFilter({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <div className="flex items-center gap-2 px-3 py-2 border-r border-gray-200 underline cursor-pointer text-xs">
+        <div className="flex items-center gap-2 px-3 py-2 border-r border-gray-200 underline cursor-pointer text-xs whitespace-nowrap">
           {t(selectedOption ?? "")}
         </div>
       </DropdownMenuTrigger>
@@ -78,10 +78,10 @@ export function SelectedFilterBar({
       open={openState || false}
       onOpenChange={(isOpen) => setOpenState(isOpen)}
     >
-      <div className="flex items-center bg-white rounded-md border border-gray-200 w-fit">
+      <div className="flex items-center bg-white rounded-md border border-gray-200 h-10 w-fit">
         <DropdownMenuTrigger asChild>
           <div
-            className="flex items-center gap-2 px-3 py-2 border-r border-gray-200 text-sm max-w-20"
+            className="flex items-center gap-2 px-3 py-2 border-r border-gray-200 text-sm"
             onClick={onClick}
           >
             {filter?.icon}
