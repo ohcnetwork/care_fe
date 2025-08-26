@@ -125,15 +125,10 @@ function OrganizationCard({
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         title={t("delete_organization")}
-        description={
-          canDelete
-            ? t("are_you_sure_want_to_delete", { name: org.name })
-            : t("cannot_delete_organization_with_children")
-        }
+        description={t("are_you_sure_want_to_delete", { name: org.name })}
         onConfirm={() => deleteOrganization({})}
         confirmText={t("delete")}
         variant="destructive"
-        disabled={!canDelete}
       />
     </Card>
   );
