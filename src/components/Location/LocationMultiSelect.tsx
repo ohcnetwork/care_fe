@@ -2,7 +2,7 @@
 // This doesn't account for nested locations.
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight, Plus, Search, X } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -62,7 +62,7 @@ function BaseLocationTreeNode({
   });
 
   // Add children to the global map when they are fetched
-  useMemo(() => {
+  useEffect(() => {
     if (children?.results) {
       addLocationsToMap(children.results);
     }
@@ -373,18 +373,13 @@ export default function LocationMultiSelect({
   });
 
   // Update allFetchedLocations when new data comes in
-  useMemo(() => {
-    const newMap = new Map(allFetchedLocations);
-
-    topLevelLocations?.results?.forEach((loc) => {
-      newMap.set(loc.id, loc);
+  useEffect(() => {
+    setAllFetchedLocations((prev) => {
+      const newMap = new Map(prev);
+      topLevelLocations?.results?.forEach((loc) => newMap.set(loc.id, loc));
+      searchResultsData?.results?.forEach((loc) => newMap.set(loc.id, loc));
+      return newMap;
     });
-
-    searchResultsData?.results?.forEach((loc) => {
-      newMap.set(loc.id, loc);
-    });
-
-    setAllFetchedLocations(newMap);
   }, [topLevelLocations?.results, searchResultsData?.results]);
 
   // Function to add locations to the global map (used by LocationTreeNode)
