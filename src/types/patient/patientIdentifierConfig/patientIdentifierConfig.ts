@@ -11,14 +11,12 @@ export enum PatientIdentifierConfigStatus {
   draft = "draft",
   active = "active",
   inactive = "inactive",
-  entered_in_error = "entered_in_error",
 }
 
 export const PATIENT_IDENTIFIER_CONFIG_STATUS_COLORS = {
   draft: "secondary",
   active: "green",
   inactive: "destructive",
-  entered_in_error: "destructive",
 } as const satisfies Record<PatientIdentifierConfigStatus, string>;
 
 export interface RetrieveConfig {
