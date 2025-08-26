@@ -126,7 +126,7 @@ function OrganizationCard({
         onOpenChange={setShowDeleteDialog}
         title={t("delete_organization")}
         description={t("are_you_sure_want_to_delete", { name: org.name })}
-        onConfirm={() => deleteOrganization({})}
+        onConfirm={() => deleteOrganization()}
         confirmText={t("delete")}
         variant="destructive"
       />
