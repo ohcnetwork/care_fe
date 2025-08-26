@@ -786,6 +786,7 @@ export function MedicationRequestQuestion({
           onConfirm={handleConfirmMedicationInSheet}
           placeholder={addMedicationPlaceholder}
           onProductEntitySelected={handleAddProductMedication}
+          enableProduct
         >
           {newMedicationSheetContent}
         </EntitySelectionSheet>

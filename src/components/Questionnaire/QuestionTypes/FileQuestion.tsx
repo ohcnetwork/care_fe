@@ -16,9 +16,12 @@ import { Label } from "@/components/ui/label";
 
 import useFileUpload from "@/hooks/useFileUpload";
 
-import { BACKEND_ALLOWED_EXTENSIONS } from "@/common/constants";
-
-import { FileUploadQuestion } from "@/types/files/files";
+import {
+  BACKEND_ALLOWED_EXTENSIONS,
+  FileCategory,
+  FileType,
+  FileUploadQuestion,
+} from "@/types/files/file";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
@@ -124,7 +127,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
   };
 
   const fileUpload = useFileUpload({
-    type: "encounter",
+    type: FileType.ENCOUNTER,
     allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
     multiple: true,
     allowNameFallback: false,
@@ -144,8 +147,8 @@ export function FilesQuestion(props: FilesQuestionProps) {
               name: values[i]?.name || "",
               file_data: file,
               original_name: file.name,
-              file_type: "encounter",
-              file_category: "unspecified",
+              file_type: FileType.ENCOUNTER,
+              file_category: FileCategory.UNSPECIFIED,
               associating_id: encounterId,
             })),
           },
