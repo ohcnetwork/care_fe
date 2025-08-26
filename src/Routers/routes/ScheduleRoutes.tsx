@@ -6,7 +6,9 @@ import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 
 const ScheduleRoutes: AppRoutes = {
-  "/facility/:facilityId/appointments": () => <AppointmentsPage />,
+  "/facility/:facilityId/appointments": () => (
+    <AppointmentsPage resourceType={SchedulableResourceType.Practitioner} />
+  ),
 
   "/facility/:facilityId/patient/:patientId/book-appointment": ({
     patientId,
