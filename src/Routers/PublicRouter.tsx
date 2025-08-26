@@ -1,4 +1,5 @@
-import { useRoutes } from "raviger";
+import careConfig from "@careConfig";
+import { Redirect, useRoutes } from "raviger";
 
 import { Authenticate } from "@/components/Auth/Authenticate";
 import Login from "@/components/Auth/Login";
@@ -14,7 +15,8 @@ import { LicensesPage } from "@/pages/Licenses/Licenses";
 import PatientLogin from "@/pages/PublicAppointments/auth/PatientLogin";
 
 export const routes = {
-  "/": () => <LandingPage />,
+  "/": () =>
+    careConfig.disablePatientLogin ? <Redirect to="/login" /> : <LandingPage />,
   "/facilities": () => <FacilitiesPage />,
   "/facility/:id": ({ id }: { id: string }) => <FacilityDetailsPage id={id} />,
   "/facility/:facilityId/appointments/:staffId/otp/:page": ({
@@ -38,10 +40,12 @@ export const routes = {
 };
 
 export default function PublicRouter() {
+  const routeResult = useRoutes(routes);
+
   return (
     <>
       <BrowserWarning />
-      {useRoutes(routes) || <Login />}
+      {routeResult || <Login />}
     </>
   );
 }

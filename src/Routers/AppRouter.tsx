@@ -23,6 +23,7 @@ import ResourceRoutes from "@/Routers/routes/ResourceRoutes";
 import ScheduleRoutes from "@/Routers/routes/ScheduleRoutes";
 import UserRoutes from "@/Routers/routes/UserRoutes";
 import AdminRoutes from "@/Routers/routes/adminRoutes";
+import Login from "@/components/Auth/Login";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
@@ -60,7 +61,12 @@ export type AppRoutes = {
 };
 
 const Routes: AppRoutes = {
-  "/": () => <UserDashboard />,
+  "/": () =>
+    careConfig.disablePatientLogin ? (
+      <Redirect to="/login" />
+    ) : (
+      <UserDashboard />
+    ),
   ...ConsultationRoutes,
   ...FacilityRoutes,
   ...PatientRoutes,
@@ -78,7 +84,7 @@ const Routes: AppRoutes = {
 
   "/apps": () => <PlugConfigList />,
   "/apps/plug-configs/:slug": ({ slug }) => <PlugConfigEdit slug={slug} />,
-  "/login": () => <Redirect to="/" />,
+  "/login": () => <Login />, // <-- Fix here
 };
 
 const AdminRouter: AppRoutes = {
