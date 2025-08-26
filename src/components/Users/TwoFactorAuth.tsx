@@ -253,7 +253,10 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
           open={showSetupDialog}
           onOpenChange={(open) => {
             closeSetupDialog();
-            if (!open) setVerificationError("");
+            if (!open) {
+              setVerificationError("");
+              setSetupData(null);
+            }
           }}
           setupData={setupData}
           onVerify={(code) => verifyTOTP({ code })}
