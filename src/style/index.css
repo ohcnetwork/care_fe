@@ -405,7 +405,7 @@
   /* Styling for command input */
   [data-slot="command-input-wrapper"] {
     @apply border-b-0;
-  } 
+  }
 
   /* Styling for command dialog */
   [data-slot="dialog-overlay"] {
