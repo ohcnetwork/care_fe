@@ -3273,6 +3273,7 @@
   "phone_number_validation_error": "Entered phone number is not valid",
   "phone_number_verified": "Phone Number Verified",
   "pick_a_date": "Pick a date",
+  "pick_date_time": "dd-mm-yyyy --:--",
   "pincode": "Pincode",
   "pincode_autofill": "State and District auto-filled from Pincode",
   "pincode_district_auto_fill_error": "Failed to auto-fill district information",

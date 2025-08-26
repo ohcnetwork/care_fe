@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { endOfDay, format, startOfDay } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type DateTimePickerProps = {
   value?: string | null;
@@ -31,14 +32,14 @@ type DateTimePickerProps = {
 export function DateTimePicker({
   value,
   onChange,
-  placeholder = "dd-mm-yyyy --:--",
+  placeholder,
   className,
   min,
   max,
   disabled,
 }: DateTimePickerProps) {
   const [open, setOpen] = useState(false);
-
+  const { t } = useTranslation();
   const parsedDate = value ? new Date(value) : undefined;
 
   const [date, setDate] = useState<Date | undefined>(parsedDate);
@@ -104,7 +105,7 @@ export function DateTimePicker({
               {format(date, "dd-MM-yyyy")} {hour}:{minute}
             </>
           ) : (
-            <span>{placeholder}</span>
+            <span>{placeholder || t("pick_date_time")}</span>
           )}
         </Button>
       </PopoverTrigger>
@@ -114,9 +115,8 @@ export function DateTimePicker({
           selected={date}
           onSelect={(d) => setDate(d)}
           disabled={(d) => {
-            const minDate = min ? new Date(min) : undefined;
-            const maxDate = max ? new Date(max) : undefined;
-
+            const minDate = min ? startOfDay(new Date(min)) : undefined;
+            const maxDate = max ? endOfDay(new Date(max)) : undefined;
             if (minDate && d < minDate) return true;
             if (maxDate && d > maxDate) return true;
             return false;
