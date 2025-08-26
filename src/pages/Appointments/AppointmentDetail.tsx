@@ -85,6 +85,7 @@ import {
 import { PendingSyncBadge } from "@/OfflineSupport/pendingSyncbadge";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { HTTPError } from "@/Utils/request/types";
 import {
   formatName,
   getReadableDuration,
@@ -185,12 +186,13 @@ export default function AppointmentDetail(props: Props) {
 
   const { mutate: updateAppointment, isPending: isUpdating } = useMutation<
     Appointment,
-    unknown,
+    HTTPError,
     AppointmentUpdateRequest
   >({
     mutationFn: mutate(scheduleApis.appointments.update, {
       pathParams: { facilityId, id: props.appointmentId },
     }),
+    networkMode: "always",
 
     onSuccess: async (data) => {
       if (offlineEntryId) {
@@ -199,6 +201,37 @@ export default function AppointmentDetail(props: Props) {
       queryClient.invalidateQueries({
         queryKey: ["appointment", props.appointmentId],
       });
+    },
+
+    onError: async (error, variables) => {
+      // If network error, mark offline and push to offline queue
+      if (error.message === "Network Error" && variables) {
+        onlineManager.setOnline(false);
+        if (!variables.status || !appointment) {
+          return;
+        }
+        await queueUpdateAppointmentRecordOffline({
+          updateAppointmentData: variables,
+          appointment,
+          authUser,
+          status: variables.status,
+          facilityId,
+          queryClient,
+          t,
+          db,
+          onSuccess: (_appointmentId, _normalizedAppointment) => {
+            toast.success(t("appointment_updated_successfully"));
+            if (variables.status === "in_consultation") {
+              redirectToPatientPage();
+            }
+          },
+          onError: (error) => {
+            console.error("Failed to queue status update:", error);
+            toast.error(t("unexpected_error_updating_appointment_status"));
+          },
+        });
+        return;
+      }
     },
   });
 
@@ -209,31 +242,8 @@ export default function AppointmentDetail(props: Props) {
       return;
     }
 
-    if (!onlineManager.isOnline()) {
-      queueUpdateAppointmentRecordOffline({
-        updateAppointmentData: appointmentUpdateData,
-        appointment,
-        authUser,
-        status: appointmentUpdateData.status,
-        facilityId,
-        queryClient,
-        t,
-        db,
-        onSuccess: (_appointmentId, _normalizedAppointment) => {
-          toast.success(t("appointment_updated_successfully"));
-          if (appointmentUpdateData.status === "in_consultation") {
-            redirectToPatientPage();
-          }
-        },
-        onError: (error) => {
-          console.error("Failed to queue status update:", error);
-          toast.error(t("unexpected_error_updating_appointment_status"));
-        },
-      });
-      return;
-    }
-
     updateAppointment(appointmentUpdateData);
+    return;
   };
 
   if (!facility || !appointment) {
@@ -771,10 +781,15 @@ const AppointmentActions = ({
     }
   }, [offlineEntry]);
 
-  const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
+  const { mutate: cancelAppointment, isPending: isCancelling } = useMutation<
+    Appointment,
+    HTTPError,
+    AppointmentCancelRequest
+  >({
     mutationFn: mutate(scheduleApis.appointments.cancel, {
       pathParams: { facilityId, id: appointment.id },
     }),
+    networkMode: "always",
     onSuccess: async (data) => {
       if (offlineEntryId) {
         await handleOfflineRecordSuccess(offlineEntryId, data);
@@ -783,6 +798,30 @@ const AppointmentActions = ({
       queryClient.invalidateQueries({
         queryKey: ["appointment", appointment.id],
       });
+    },
+    onError: async (error, variables) => {
+      // If network error, mark offline and push to offline queue
+      if (error.message === "Network Error" && variables) {
+        onlineManager.setOnline(false);
+        await queueCancelAppointmentRecord({
+          cancelAppointmentData: variables,
+          appointment,
+          authUser,
+          status: variables.reason,
+          facilityId,
+          queryClient,
+          t,
+          db,
+          onSuccess: (_appointmentId, _normalizedAppointment) => {
+            toast.success(t("unsynced_appointment_cancelled"));
+          },
+          onError: (error) => {
+            console.error("Error while cancelling appointment : ", error);
+            toast.error(t("unexpected_error_while_cancelling_appointment"));
+          },
+        });
+        return;
+      }
     },
   });
 
@@ -794,35 +833,16 @@ const AppointmentActions = ({
       return;
     }
 
-    if (!onlineManager.isOnline()) {
-      queueCancelAppointmentRecord({
-        cancelAppointmentData: { reason: reason, note: note },
-        appointment,
-        authUser,
-        status: reason,
-        facilityId,
-        queryClient,
-        t,
-        db,
-        onSuccess: (_appointmentId, _normalizedAppointment) => {
-          toast.success(t("unsynced_appointment_cancelled"));
-        },
-        onError: (error) => {
-          console.error("Error while cancelling appointment : ", error);
-          toast.error(t("unexpected_error_while_cancelling_appointment"));
-        },
-      });
-      return;
-    }
-
     cancelAppointment({ reason: reason, note: note });
+    return;
   };
 
   const { mutate: rescheduleAppointment, isPending: isRescheduling } =
-    useMutation({
+    useMutation<Appointment, HTTPError, AppointmentRescheduleRequest>({
       mutationFn: mutate(scheduleApis.appointments.reschedule, {
         pathParams: { facilityId, id: appointment.id },
       }),
+      networkMode: "always",
       onSuccess: async (newAppointment: Appointment) => {
         if (offlineEntryId) {
           await handleOfflineRecordSuccess(offlineEntryId, newAppointment);
@@ -838,6 +858,39 @@ const AppointmentActions = ({
           `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${newAppointment.id}`,
         );
       },
+      onError: async (error, variables) => {
+        // If network error, mark offline and push to offline queue
+        if (error.message === "Network Error" && variables) {
+          onlineManager.setOnline(false);
+          await queueRescheduleOfflineRecord({
+            rescheduleAppointmentData: variables,
+            selectedSlot: OfflineSelectedSlot,
+            selectedPracticioner: selectedPractitioner,
+            authUser,
+            appointment,
+            db,
+            facilityId,
+            queryClient,
+            t,
+            selectedDateOffline,
+            selectedMonthOffline,
+            onSuccess: (_appointmentId, _normalizedAppointment) => {
+              toast.success(t("appointment_rescheduled"));
+              setIsRescheduleOpen(false);
+              setSelectedSlotId(undefined);
+              setOfflineSelectedSlot(undefined);
+              navigate(
+                `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`,
+              );
+            },
+            onError: (error) => {
+              console.error("Error while Rescheduling Appointment", error);
+              toast.error(t("unexpected_error_while_rescheduling_appointment"));
+            },
+          });
+          return;
+        }
+      },
     });
 
   const handleRescheduleSubmit = async (
@@ -848,36 +901,8 @@ const AppointmentActions = ({
       return;
     }
 
-    if (!onlineManager.isOnline()) {
-      await queueRescheduleOfflineRecord({
-        rescheduleAppointmentData,
-        selectedSlot: OfflineSelectedSlot,
-        selectedPracticioner: selectedPractitioner,
-        authUser,
-        appointment,
-        db,
-        facilityId,
-        queryClient,
-        t,
-        selectedDateOffline,
-        selectedMonthOffline,
-        onSuccess: (_appointmentId, _normalizedAppointment) => {
-          toast.success(t("appointment_rescheduled"));
-          setIsRescheduleOpen(false);
-          setSelectedSlotId(undefined);
-          setOfflineSelectedSlot(undefined);
-          navigate(
-            `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`,
-          );
-        },
-        onError: (error) => {
-          console.error("Error while Rescheduling Appointment", error);
-          toast.error(t("unexpected_error_while_rescheduling_appointment"));
-        },
-      });
-      return;
-    }
     rescheduleAppointment(rescheduleAppointmentData);
+    return;
   };
 
   if (AppointmentFinalStatuses.includes(currentStatus)) {

@@ -58,6 +58,7 @@ import {
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { HTTPError } from "@/Utils/request/types";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import patientApi from "@/types/emr/patient/patientApi";
@@ -66,7 +67,9 @@ import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import {
   RESOURCE_REQUEST_STATUSES,
   ResourceRequest,
+  UpdateResourceRequest,
 } from "@/types/resourceRequest/resourceRequest";
+import { CreateResourceRequest } from "@/types/resourceRequest/resourceRequest";
 import { UserReadMinimal } from "@/types/user/user";
 
 import {
@@ -194,8 +197,13 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     loadResourcerequest();
   }, [resourceData, offlineEntry, form]);
 
-  const { mutate: createResource, isPending } = useMutation({
+  const { mutate: createResource, isPending } = useMutation<
+    ResourceRequest,
+    HTTPError,
+    CreateResourceRequest
+  >({
     mutationFn: mutate(routes.createResource),
+    networkMode: "always",
     onSuccess: async (data: ResourceRequest) => {
       if (offlineEntryId) {
         await handleOfflineRecordSuccess(offlineEntryId, data);
@@ -203,18 +211,76 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       toast.success(t("resource_created_successfully"));
       navigate(`/facility/${facilityId}/resource/${data.id}`);
     },
+    onError: async (error, variables) => {
+      // If network error, mark offline and push to offline queue
+      if (error.message === "Network Error" && variables) {
+        onlineManager.setOnline(false);
+        await queueNewResourceRequest({
+          resourcePayload: variables,
+          userId: authUser.id,
+          facilityId: String(facilityId),
+          relatedPatient: related_patient,
+          queryClient,
+          authUser,
+          patientData,
+          assignFacility,
+          assignedToUser,
+          onSuccess: (resourceId, _normalizedResource) => {
+            toast.success(t("resource_created_successfully"));
+            navigate(`/facility/${facilityId}/resource/${resourceId}`);
+          },
+          onError: (error) => {
+            console.error("Error while queuing resource request:", error);
+            toast.error(t("unexpected_error_while_creating_resource"));
+          },
+        });
+        return;
+      }
+    },
   });
 
-  const { mutate: updateResource, isPending: isUpdatePending } = useMutation({
+  const { mutate: updateResource, isPending: isUpdatePending } = useMutation<
+    ResourceRequest,
+    HTTPError,
+    UpdateResourceRequest
+  >({
     mutationFn: mutate(routes.updateResource, {
       pathParams: { id: String(id) },
     }),
+    networkMode: "always",
     onSuccess: async (data: ResourceRequest) => {
       if (offlineEntryId) {
         await handleOfflineRecordSuccess(offlineEntryId, data);
       }
       toast.success(t("resource_updated_successfully"));
       navigate(`/facility/${facilityId}/resource/${data.id}`);
+    },
+    onError: async (error, variables) => {
+      // If network error, mark offline and push to offline queue
+      if (error.message === "Network Error" && variables) {
+        onlineManager.setOnline(false);
+        await queueUpdatedResourceRequest({
+          resourcePayload: variables,
+          resourceId: id!,
+          userId: authUser.id,
+          facilityId: String(facilityId),
+          queryClient,
+          authUser,
+          patientData,
+          assignFacility,
+          assignedToUser,
+          resourceData,
+          onSuccess: (resourceId, _normalizedResource) => {
+            toast.success(t("resource_updated_successfully"));
+            navigate(`/facility/${facilityId}/resource/${resourceId}`);
+          },
+          onError: (error) => {
+            console.error("Error while queuing resource update:", error);
+            toast.error(t("unexpected_error_while_updating_resource"));
+          },
+        });
+        return;
+      }
     },
   });
 
@@ -236,52 +302,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     };
 
     if (id) {
-      if (!onlineManager.isOnline()) {
-        queueUpdatedResourceRequest({
-          resourcePayload: { ...resourcePayload, id },
-          resourceId: id,
-          userId: authUser.id,
-          facilityId: String(facilityId),
-          queryClient,
-          authUser,
-          patientData,
-          assignFacility,
-          assignedToUser,
-          resourceData,
-          onSuccess: (resourceId, _normalizedResource) => {
-            toast.success(t("resource_updated_successfully"));
-            navigate(`/facility/${facilityId}/resource/${resourceId}`);
-          },
-          onError: (error) => {
-            console.error("Error while queuing resource update:", error);
-            toast.error(t("unexpected_error_while_updating_resource"));
-          },
-        });
-        return;
-      } else updateResource({ ...resourcePayload, id });
+      updateResource({ ...resourcePayload, id });
+      return;
     } else {
-      if (!onlineManager.isOnline()) {
-        queueNewResourceRequest({
-          resourcePayload,
-          userId: authUser.id,
-          facilityId: String(facilityId),
-          relatedPatient: related_patient,
-          queryClient,
-          authUser,
-          patientData,
-          assignFacility,
-          assignedToUser,
-          onSuccess: (resourceId, _normalizedResource) => {
-            toast.success(t("resource_created_successfully"));
-            navigate(`/facility/${facilityId}/resource/${resourceId}`);
-          },
-          onError: (error) => {
-            console.error("Error while queuing resource request:", error);
-            toast.error(t("unexpected_error_while_creating_resource"));
-          },
-        });
-        return;
-      } else createResource(resourcePayload);
+      createResource(resourcePayload);
     }
   };
 

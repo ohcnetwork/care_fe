@@ -27,6 +27,7 @@ import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import { handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { HTTPError } from "@/Utils/request/types";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
@@ -120,38 +121,28 @@ export default function BookAppointment({ patientId }: Props) {
     }
   }, [offlineEntry, offlineEntryId]);
 
-  const { mutateAsync: createAppointment } = useMutation({
+  const { mutateAsync: createAppointment } = useMutation<
+    Appointment,
+    HTTPError,
+    AppointmentCreateRequest
+  >({
     mutationFn: mutate(scheduleApis.slots.createAppointment, {
       pathParams: { facilityId, slotId: selectedSlotId ?? "" },
     }),
+    networkMode: "always",
     onSuccess: async (resp: Appointment) => {
       if (offlineEntryId) {
         await handleOfflineRecordSuccess(offlineEntryId, resp);
       }
     },
-  });
 
-  const handleSubmit = async () => {
-    if (!resourceId) {
-      toast.error(t("practicioner_is_not_selected"));
-      return;
-    }
-    if (!selectedSlotId) {
-      toast.error(t("slot_is_not_selected"));
-      return;
-    }
-
-    try {
-      const createAppointmentData: AppointmentCreateRequest = {
-        patient: patientId,
-        note: reason,
-        tags: selectedTags.map((tag) => tag.id),
-      };
-
-      if (!onlineManager.isOnline()) {
+    onError: async (error, variables) => {
+      // If network error, mark offline and push to offline queue
+      if (error.message === "Network Error" && variables) {
+        onlineManager.setOnline(false);
         const status = "booked";
         await queueNewAppointmentOffline({
-          createAppointmentData,
+          createAppointmentData: variables,
           selectedSlot: OfflineSelectedSlot,
           selectedPracticioner,
           authUser,
@@ -179,6 +170,25 @@ export default function BookAppointment({ patientId }: Props) {
 
         return;
       }
+    },
+  });
+
+  const handleSubmit = async () => {
+    if (!resourceId) {
+      toast.error(t("practicioner_is_not_selected"));
+      return;
+    }
+    if (!selectedSlotId) {
+      toast.error(t("slot_is_not_selected"));
+      return;
+    }
+
+    try {
+      const createAppointmentData: AppointmentCreateRequest = {
+        patient: patientId,
+        note: reason,
+        tags: selectedTags.map((tag) => tag.id),
+      };
 
       const data = await createAppointment(createAppointmentData);
 

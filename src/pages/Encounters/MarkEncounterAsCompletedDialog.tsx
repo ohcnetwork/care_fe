@@ -28,7 +28,11 @@ import { handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers
 import { PLUGIN_Component } from "@/PluginEngine";
 import mutate from "@/Utils/request/mutate";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { EncounterStatus } from "@/types/emr/encounter/encounter";
+import {
+  EncounterEdit,
+  EncounterRead,
+  EncounterStatus,
+} from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 
 export function MarkEncounterAsCompletedDialog(
@@ -40,16 +44,45 @@ export function MarkEncounterAsCompletedDialog(
   const { offlineEntryId } = useOfflineEntry();
   const user = useAuthUser();
 
-  const { mutate: updateEncounter } = useMutation({
+  const { mutate: updateEncounter } = useMutation<
+    EncounterRead,
+    Error,
+    EncounterEdit
+  >({
     mutationFn: mutate(encounterApi.update, {
       pathParams: { id: encounter?.id || "" },
     }),
+    networkMode: "always",
     onSuccess: (data) => {
       if (offlineEntryId) {
         handleOfflineRecordSuccess(offlineEntryId, data);
       }
       toast.success(t("encounter_marked_as_complete"));
       queryClient.invalidateQueries({ queryKey: ["encounter", encounter?.id] });
+    },
+    onError: async (error, variables) => {
+      if (error.message === "Network Error" && variables) {
+        onlineManager.setOnline(false);
+        if (!encounter) return;
+
+        await queueMarkAscompleteRecord({
+          encounter,
+          encounterUpdatedData: variables,
+          userId: user.id,
+          queryClient,
+          user,
+          onSuccess: () => {
+            toast.success(t("encounter_marked_as_complete"));
+          },
+          onError: (error) => {
+            console.error(
+              "Error while Marking Encounter as Complete : ",
+              error,
+            );
+            toast.error(t("error_updating_encounter"));
+          },
+        });
+      }
     },
   });
   const handleMarkAsComplete = async () => {
@@ -75,22 +108,7 @@ export function MarkEncounterAsCompletedDialog(
       discharge_summary_advice: encounter.discharge_summary_advice,
     };
 
-    if (!onlineManager.isOnline()) {
-      await queueMarkAscompleteRecord({
-        encounter,
-        encounterUpdatedData,
-        userId: user.id,
-        queryClient,
-        user,
-        onSuccess: () => {
-          toast.success(t("encounter_marked_as_complete"));
-        },
-        onError: (error) => {
-          console.error("Error while Marking Encounter as Complete : ", error);
-          toast.error(t("error_updating_encounter"));
-        },
-      });
-    } else updateEncounter(encounterUpdatedData);
+    updateEncounter(encounterUpdatedData);
   };
 
   if (!encounter) return null;

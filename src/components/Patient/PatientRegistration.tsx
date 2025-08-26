@@ -67,6 +67,7 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import dayjs from "@/Utils/dayjs";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { HTTPError } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -294,9 +295,28 @@ export default function PatientRegistration(
     .map((query) => query.data)
     .filter(Boolean) as TagConfig[];
 
-  const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
+  const createFullIdentifiers = (
+    identifiers: PatientIdentifierCreate[],
+  ): PatientIdentifier[] => {
+    return identifiers
+      .map((identifier) => {
+        const config = facility?.patient_instance_identifier_configs.find(
+          (c) => c.id === identifier.config,
+        );
+        if (!config) return null;
+        return { config, value: identifier.value };
+      })
+      .filter((i): i is PatientIdentifier => i !== null);
+  };
+
+  const { mutate: createPatient, isPending: isCreatingPatient } = useMutation<
+    PatientRead,
+    HTTPError,
+    PatientCreate
+  >({
     mutationKey: ["create_patient"],
     mutationFn: mutate(patientApi.addPatient),
+    networkMode: "always",
     onSuccess: async (resp: PatientRead) => {
       if (offlineEntryId) {
         try {
@@ -317,7 +337,47 @@ export default function PatientRegistration(
         },
       });
     },
-    onError: () => {
+    onError: async (error, variables) => {
+      // If network error, mark offline and push to offline queue
+      if (error.message === "Network Error" && variables) {
+        onlineManager.setOnline(false);
+
+        // Create fullIdentifiers from variables
+        const fullIdentifiers = createFullIdentifiers(variables.identifiers);
+
+        await queueNewPatientOffline({
+          createPatientData: variables,
+          identifiers: fullIdentifiers,
+          userId: user.id,
+          facilityId: facilityId!,
+          queryClient,
+          authUser: user,
+          selectedOrganization,
+          selectedTags,
+          onSuccess: (patientId, _normalizedPatient) => {
+            const yob = getYearOfBirth(variables.date_of_birth, variables.age);
+
+            setNavTarget({
+              to: `/facility/${facilityId}/patients/verify`,
+              options: {
+                query: {
+                  phone_number: variables.phone_number,
+                  year_of_birth: yob,
+                  partial_id: patientId,
+                },
+              },
+            });
+            toast.success(t("patient_update_success"));
+          },
+          onError: (error) => {
+            console.error("Error saving offline patient:", error);
+            toast.error(t("patient_update_error"));
+          },
+        });
+
+        return;
+      }
+
       toast.error(t("patient_registration_error"));
     },
   });
@@ -326,10 +386,11 @@ export default function PatientRegistration(
     mutate: updatePatient,
     isPending: isUpdatingPatient,
     isSuccess: isUpdateSuccess,
-  } = useMutation({
+  } = useMutation<PatientRead, HTTPError, PatientUpdate>({
     mutationFn: mutate(patientApi.updatePatient, {
       pathParams: { id: patientId || "" },
     }),
+    networkMode: "always",
     onSuccess: async (resp: PatientRead) => {
       if (offlineEntryId) {
         try {
@@ -342,52 +403,16 @@ export default function PatientRegistration(
       toast.success(t("patient_update_success"));
       goBack();
     },
-    onError: () => {
-      toast.error(t("patient_update_error"));
-    },
-  });
+    onError: async (error, variables) => {
+      // If network error, mark offline and push to offline queue
+      if (error.message === "Network Error" && variables) {
+        onlineManager.setOnline(false);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const editableIdentifiers = values.identifiers.filter((identifier) => {
-      const config = facility?.patient_instance_identifier_configs.find(
-        (c) => c.id === identifier.config,
-      );
-      return !config?.config.default_value && !!identifier.value;
-    }) as PatientIdentifierCreate[];
+        // Create fullIdentifiers from variables
+        const fullIdentifiers = createFullIdentifiers(variables.identifiers);
 
-    const fullIdentifiers: PatientIdentifier[] = editableIdentifiers
-      .map((identifier) => {
-        const config = facility?.patient_instance_identifier_configs.find(
-          (c) => c.id === identifier.config,
-        );
-        if (!config) return null;
-
-        return {
-          config: config,
-          value: identifier.value,
-        };
-      })
-      .filter((i): i is PatientIdentifier => i !== null);
-
-    if (patientId) {
-      const updatePatientData: PatientUpdate = {
-        ...values,
-        age: values.age_or_dob === "age" ? values.age : undefined,
-        date_of_birth:
-          values.age_or_dob === "dob" ? values.date_of_birth : undefined,
-        emergency_phone_number: values.same_phone_number
-          ? values.phone_number
-          : values.emergency_phone_number,
-        permanent_address: values.same_address
-          ? values.address
-          : values.permanent_address,
-        pincode: values.pincode || undefined,
-        identifiers: editableIdentifiers,
-      };
-
-      if (!onlineManager.isOnline()) {
         await queuePatientUpdateOffline({
-          updatePatientData,
+          updatePatientData: variables,
           identifiers: fullIdentifiers,
           patientId: patientId!,
           userId: user.id,
@@ -409,7 +434,37 @@ export default function PatientRegistration(
           },
         });
         return;
-      } else updatePatient(updatePatientData);
+      }
+
+      toast.error(t("patient_update_error"));
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const editableIdentifiers = values.identifiers.filter((identifier) => {
+      const config = facility?.patient_instance_identifier_configs.find(
+        (c) => c.id === identifier.config,
+      );
+      return !config?.config.default_value && !!identifier.value;
+    }) as PatientIdentifierCreate[];
+
+    if (patientId) {
+      const updatePatientData: PatientUpdate = {
+        ...values,
+        age: values.age_or_dob === "age" ? values.age : undefined,
+        date_of_birth:
+          values.age_or_dob === "dob" ? values.date_of_birth : undefined,
+        emergency_phone_number: values.same_phone_number
+          ? values.phone_number
+          : values.emergency_phone_number,
+        permanent_address: values.same_address
+          ? values.address
+          : values.permanent_address,
+        pincode: values.pincode || undefined,
+        identifiers: editableIdentifiers,
+      };
+
+      updatePatient(updatePatientData);
       return;
     } else if (facilityId) {
       const createPatientData: PatientCreate = {
@@ -425,44 +480,9 @@ export default function PatientRegistration(
         tags: values.tags,
         identifiers: editableIdentifiers,
       };
-      if (!onlineManager.isOnline()) {
-        await queueNewPatientOffline({
-          createPatientData,
-          identifiers: fullIdentifiers,
-          userId: user.id,
-          facilityId: facilityId!,
-          queryClient,
-          authUser: user,
-          selectedOrganization,
-          selectedTags,
-          onSuccess: (patientId, _normalizedPatient) => {
-            const yob = getYearOfBirth(
-              createPatientData.date_of_birth,
-              createPatientData.age,
-            );
 
-            setNavTarget({
-              to: `/facility/${facilityId}/patients/verify`,
-              options: {
-                query: {
-                  phone_number: createPatientData.phone_number,
-                  year_of_birth: yob,
-                  partial_id: patientId,
-                },
-              },
-            });
-            toast.success(t("patient_update_success"));
-          },
-          onError: (error) => {
-            console.error("Error saving offline patient:", error);
-            toast.error(t("patient_update_error"));
-          },
-        });
-        return;
-      } else {
-        createPatient(createPatientData);
-        return;
-      }
+      createPatient(createPatientData);
+      return;
     }
   }
   const sidebarItems = [

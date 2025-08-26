@@ -28,6 +28,7 @@ import { handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers
 import { PLUGIN_Component } from "@/PluginEngine";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { HTTPError } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import batchApi from "@/types/base/batch/batchApi";
@@ -471,8 +472,13 @@ export function QuestionnaireForm({
     enabled: !!questionnaireSlug && !FIXED_QUESTIONNAIRES[questionnaireSlug],
   });
 
-  const { mutate: submitBatch, isPending } = useMutation({
+  const { mutate: submitBatch, isPending } = useMutation<
+    { results: BatchSubmissionResult[] },
+    HTTPError,
+    BatchRequestBody
+  >({
     mutationFn: mutate(batchApi.batchRequest, { silent: true }),
+    networkMode: "always",
     onSuccess: async (response: { results: BatchSubmissionResult[] }) => {
       if (editMode && offlineEntry) {
         await handleOfflineRecordSuccess(offlineEntry.id, response);
@@ -481,7 +487,41 @@ export function QuestionnaireForm({
       toast.success(t("questionnaire_submitted_successfully"));
       onSubmit?.();
     },
-    onError: (error) => {
+    onError: async (error, variables) => {
+      if (error.message === "Network Error" && variables) {
+        onlineManager.setOnline(false);
+        if (!facilityId) {
+          toast.error(t("facility_id_required_for_offline_submission"));
+          return;
+        }
+
+        await queueQuestionnairBatchrequest({
+          questionnairPaylod: variables,
+          queryClient,
+          authUser,
+          patientId,
+          encounterId,
+          facilityId,
+          t,
+          db,
+          onSuccess: () => {
+            setServerErrors(undefined);
+            toast.success(t("questionnaire_submitted_successfully"));
+            onSubmit?.();
+          },
+          onError: (error) => {
+            console.error("Error while submit Questionnaire", error);
+            toast.error(
+              t("unexpected_error_while_saving_offline", {
+                item: "questionnair",
+              }),
+            );
+          },
+        });
+
+        return;
+      }
+
       const errorData = error.cause as {
         results: Array<{
           reference_id: string;
@@ -959,39 +999,6 @@ export function QuestionnaireForm({
         });
       }
     });
-
-    if (!onlineManager.isOnline()) {
-      if (!facilityId) {
-        toast.error(t("facility_id_required_for_offline_submission"));
-        return;
-      }
-
-      const questionnairPaylod = { requests };
-      await queueQuestionnairBatchrequest(
-        questionnairPaylod,
-        queryClient,
-        authUser,
-        patientId,
-        encounterId,
-        facilityId,
-        t,
-        db,
-        () => {
-          setServerErrors(undefined);
-          toast.success(t("questionnaire_submitted_successfully"));
-          onSubmit?.();
-        },
-        (error) => {
-          console.error("Error while submit Questionnaire", error);
-          toast.error(
-            t("unexpected_error_while_saving_offline", {
-              item: "questionnair",
-            }),
-          );
-        },
-      );
-      return;
-    }
 
     submitBatch({ requests });
   };

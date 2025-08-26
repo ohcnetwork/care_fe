@@ -11,46 +11,47 @@ import { toast } from "sonner";
 
 import { createUserPersister } from "@/OfflineSupport/createUserPersister";
 
-const WS_URL = "wss://echo-websocket.fly.dev/";
+/**
+ * Ping backend to confirm reachability.
+ * Updates onlineManager state automatically.
+ */
+export async function checkBackendReachable(): Promise<boolean> {
+  try {
+    const res = await fetch("/ping", { method: "GET" });
+    const ok = res.ok;
+    onlineManager.setOnline(ok);
+    return ok;
+  } catch {
+    onlineManager.setOnline(false);
+    return false;
+  }
+}
 
-// CONFIG: tune based on tolerance
-const PING_INTERVAL = 5000; // send ping every 5s
-const OFFLINE_THRESHOLD = 2; // declare offline after 2 missed pings (~10s)
+const TRANSITION_DELAY = 1500;
+const OFFLINE_POLL_INTERVAL = 5000; // Poll every 5s when offline
 
 export default function useNetworkStatus() {
   const [isChecked, setIsChecked] = useState(false);
-  const isRestoring = useIsRestoring();
   const queryClient = useQueryClient();
   const persistor = createUserPersister();
+  const isRestoring = useIsRestoring();
   const { t } = useTranslation();
 
-  const wsRef = useRef<WebSocket | null>(null);
-  const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const currentState = useRef<boolean | null>(null);
+  const transitionTimeout = useRef<number | null>(null);
+  const offlinePollInterval = useRef<number | null>(null);
 
-  // Track missed heartbeats
-  const missedPings = useRef(0);
-
+  // --- Restore persisted cache ---
   const restorePersistedCache = async () => {
     if (!persistor) return;
     const restored = await persistor.restoreClient();
-
     if (restored?.clientState) {
       queryClient.clear();
       hydrate(queryClient, restored.clientState as DehydratedState);
     }
   };
 
-  const goOffline = async () => {
-    if (onlineManager.isOnline()) {
-      onlineManager.setOnline(false);
-      toast.warning(t("you_are_offline"));
-      await restorePersistedCache();
-      queryClient.invalidateQueries({
-        queryKey: ["refresh-token"],
-      });
-    }
-  };
-
+  // --- Transition ONLINE ---
   const goOnline = async () => {
     if (!onlineManager.isOnline()) {
       onlineManager.setOnline(true);
@@ -58,90 +59,64 @@ export default function useNetworkStatus() {
       toast.success(t("welcome_back_you_are_online"));
     }
     setIsChecked(true);
-  };
 
-  const connectWebSocket = () => {
-    if (wsRef.current) {
-      wsRef.current.close();
-    }
-
-    if (pingIntervalRef.current) {
-      clearInterval(pingIntervalRef.current);
-    }
-
-    try {
-      const ws = new WebSocket(WS_URL);
-      wsRef.current = ws;
-
-      ws.onopen = async () => {
-        missedPings.current = 0;
-        goOnline();
-
-        // Start heartbeat
-        pingIntervalRef.current = setInterval(() => {
-          if (ws.readyState === WebSocket.OPEN) {
-            try {
-              ws.send("ping");
-              missedPings.current += 1;
-
-              // if too many missed → offline
-              if (missedPings.current >= OFFLINE_THRESHOLD) {
-                goOffline();
-              }
-            } catch {
-              goOffline();
-            }
-          }
-        }, PING_INTERVAL);
-      };
-
-      ws.onmessage = () => {
-        // reset missed count when we get any response
-        missedPings.current = 0;
-        goOnline();
-      };
-
-      ws.onclose = () => {
-        clearInterval(pingIntervalRef.current!);
-        pingIntervalRef.current = null;
-        goOffline();
-
-        // retry connect after backoff
-        setTimeout(() => {
-          if (!isRestoring) connectWebSocket();
-        }, 5000);
-      };
-
-      ws.onerror = () => {
-        goOffline();
-      };
-    } catch {
-      setIsChecked(true);
+    // Stop offline polling
+    if (offlinePollInterval.current) {
+      clearInterval(offlinePollInterval.current);
+      offlinePollInterval.current = null;
     }
   };
 
-  // Visibility handling (browser throttling fix)
-  useEffect(() => {
-    const handleVisibility = () => {
-      if (!document.hidden && wsRef.current?.readyState !== WebSocket.OPEN) {
-        connectWebSocket();
+  // --- Transition OFFLINE ---
+  const goOffline = async () => {
+    if (onlineManager.isOnline()) {
+      onlineManager.setOnline(false);
+      toast.warning(t("you_are_offline"));
+      await restorePersistedCache();
+      queryClient.invalidateQueries({ queryKey: ["refresh-token"] });
+    }
+
+    // Start offline polling
+    if (!offlinePollInterval.current) {
+      offlinePollInterval.current = window.setInterval(async () => {
+        const reachable = await checkBackendReachable();
+        if (reachable) goOnline();
+      }, OFFLINE_POLL_INTERVAL);
+    }
+  };
+
+  // --- Debounced setter ---
+  const setOnlineState = (online: boolean) => {
+    if (currentState.current === online) return;
+
+    if (transitionTimeout.current) clearTimeout(transitionTimeout.current);
+
+    transitionTimeout.current = window.setTimeout(() => {
+      if (currentState.current !== online) {
+        currentState.current = online;
+        if (online) goOnline();
+        else goOffline();
       }
-    };
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibility);
-    };
-  }, []);
+    }, TRANSITION_DELAY);
+  };
+
+  // --- Check on mount & on focus ---
+  const updateStatus = async () => {
+    const reachable = await checkBackendReachable();
+    setOnlineState(reachable);
+  };
 
   useEffect(() => {
-    if (!isRestoring) {
-      connectWebSocket();
-    }
+    if (!isRestoring) updateStatus();
+
+    // window.addEventListener("focus", updateStatus);
     return () => {
-      wsRef.current?.close();
-      if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
+      ///  window.removeEventListener("focus", updateStatus);
+      if (transitionTimeout.current) clearTimeout(transitionTimeout.current);
+      if (offlinePollInterval.current)
+        clearInterval(offlinePollInterval.current);
     };
   }, [isRestoring]);
 
-  return { isChecked };
+  return { isChecked, isOnline: onlineManager.isOnline() };
 }

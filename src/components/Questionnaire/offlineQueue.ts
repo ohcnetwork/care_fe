@@ -24,6 +24,18 @@ import {
   StructuredQuestionType,
 } from "./data/StructuredFormData";
 
+interface QueueQuestionnaireBatchRequestParams {
+  questionnairPaylod: BatchRequestBody;
+  queryClient: QueryClient;
+  authUser: AuthUserModel;
+  patientId: string;
+  encounterId: string | undefined;
+  facilityId: string;
+  t: (key: string, params?: any) => string;
+  db: AppCacheDB;
+  onSuccess?: () => void;
+  onError?: (error: any) => void;
+}
 // Utility functions
 export const assertNever = (x: never): never => {
   throw new Error(`Unhandled structured questionnaire: ${x}`);
@@ -400,18 +412,18 @@ export const generateEncounterBatchAndQueue = async (
   }
 };
 
-export const queueQuestionnairBatchrequest = async (
-  questionnairPaylod: BatchRequestBody,
-  queryClient: QueryClient,
-  authUser: AuthUserModel,
-  patientId: string,
-  encounterId: string | undefined,
-  facilityId: string,
-  t: (key: string, params?: any) => string,
-  db: AppCacheDB,
-  onSuccess?: () => void,
-  onError?: (error: any) => void,
-) => {
+export const queueQuestionnairBatchrequest = async ({
+  questionnairPaylod,
+  queryClient,
+  authUser,
+  patientId,
+  encounterId,
+  facilityId,
+  t,
+  db,
+  onSuccess,
+  onError,
+}: QueueQuestionnaireBatchRequestParams) => {
   const parentID = encounterId ? encounterId : patientId;
 
   try {

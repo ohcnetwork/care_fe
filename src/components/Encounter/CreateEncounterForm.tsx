@@ -55,8 +55,12 @@ import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
-import { handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers";
+import {
+  handleOfflineRecordSuccess,
+  isOfflineId,
+} from "@/OfflineSupport/offlineWriteHelpers";
 import mutate from "@/Utils/request/mutate";
+import { HTTPError } from "@/Utils/request/types";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
   ENCOUNTER_CLASS,
@@ -139,8 +143,13 @@ export default function CreateEncounterForm({
     .map((query) => query.data)
     .filter(Boolean) as TagConfig[];
 
-  const { mutate: createEncounter, isPending } = useMutation({
+  const { mutate: createEncounter, isPending } = useMutation<
+    EncounterRead,
+    HTTPError,
+    EncounterCreate
+  >({
     mutationFn: mutate(encounterApi.create),
+    networkMode: "always",
     onSuccess: async (data: EncounterRead) => {
       if (offlineEntryId) {
         try {
@@ -165,6 +174,37 @@ export default function CreateEncounterForm({
         navigate(
           `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates`,
         );
+      }
+    },
+    onError: async (error, variables) => {
+      // If network error, mark offline and push to offline queue
+      if (error.message === "Network Error" && variables) {
+        onlineManager.setOnline(false);
+
+        // Immediately store offline
+        await queueNewEncounterOffline({
+          encounterRequestData: variables,
+          userId: user.id,
+          facilityId,
+          patientId,
+          queryClient,
+          authUser: user,
+          selectedTags,
+          offlineSelectedOrganizations,
+          appointmentId: appointment,
+          onSuccess: (encounterId) => {
+            toast.success(t("encounter_created_offline"));
+            setIsOpen(false);
+            form.reset();
+            navigate(
+              `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+            );
+          },
+          onError: (queueError) => {
+            console.error("Error saving offline encounter:", queueError);
+            toast.error(t("offline_encounter_create_error"));
+          },
+        });
       }
     },
   });
@@ -216,6 +256,10 @@ export default function CreateEncounterForm({
   }, [offlineEntryId, form]);
 
   async function onSubmit(data: z.infer<typeof encounterFormSchema>) {
+    if (isOfflineId(patientId) && onlineManager.isOnline()) {
+      toast.error(t("please_sync_patient_first"));
+      return;
+    }
     const encounterRequest: EncounterCreate = {
       ...data,
       patient: patientId,
@@ -226,32 +270,7 @@ export default function CreateEncounterForm({
       tags: data.tags,
       appointment: appointment,
     };
-
-    if (!onlineManager.isOnline()) {
-      await queueNewEncounterOffline({
-        encounterRequestData: encounterRequest,
-        userId: user.id,
-        facilityId: facilityId,
-        patientId: patientId,
-        queryClient: queryClient,
-        authUser: user,
-        selectedTags: selectedTags,
-        offlineSelectedOrganizations: offlineSelectedOrganizations,
-        appointmentId: appointment,
-        onSuccess: (encounterId) => {
-          toast.success(t("encounter_created_offline"));
-          setIsOpen(false);
-          form.reset();
-          navigate(
-            `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
-          );
-        },
-        onError: (error) => {
-          console.error("Error saving offline encounter:", error);
-          toast.error(t("offline_encounter_create_error"));
-        },
-      });
-    } else createEncounter(encounterRequest);
+    createEncounter(encounterRequest);
   }
 
   return (

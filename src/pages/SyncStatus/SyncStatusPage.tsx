@@ -1216,6 +1216,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
       case "remove_user_from_patient":
         await handleRemoveUserFromPatientEdit(targetEntry);
         break;
+      case "create_appointment":
       case "reschedule_appointment":
       case "update_appointment_status":
       case "cancel_appointment":

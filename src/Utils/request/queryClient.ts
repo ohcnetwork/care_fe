@@ -1,6 +1,14 @@
 import careConfig from "@careConfig";
-import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
+import {
+  MutationCache,
+  QueryCache,
+  QueryClient,
+  hydrate,
+  onlineManager,
+} from "@tanstack/react-query";
+import { toast } from "sonner";
 
+import { createUserPersister } from "@/OfflineSupport/createUserPersister";
 import { handleHttpError } from "@/Utils/request/errorHandler";
 import { HTTPError } from "@/Utils/request/types";
 
@@ -15,6 +23,22 @@ declare module "@tanstack/react-query" {
   }
 }
 
+// Cache restoration function
+const restorePersistedCache = async (queryClient: QueryClient) => {
+  const persistor = createUserPersister();
+  if (!persistor) return;
+
+  try {
+    const restored = await persistor.restoreClient();
+    if (restored?.clientState) {
+      queryClient.clear();
+      hydrate(queryClient, restored.clientState);
+    }
+  } catch (error) {
+    console.error("Failed to restore cache:", error);
+  }
+};
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -24,6 +48,11 @@ const queryClient = new QueryClient({
           error.message === "Network Error" ||
           (error instanceof HTTPError && [502, 503, 504].includes(error.status))
         ) {
+          // Note: Translation will be handled by the component using this query client
+          if (onlineManager.isOnline()) {
+            toast.warning("You are offline");
+          }
+          onlineManager.setOnline(false);
           return failureCount < 3;
         }
         return false;
@@ -34,10 +63,39 @@ const queryClient = new QueryClient({
     },
   },
   queryCache: new QueryCache({
-    onError: handleHttpError,
+    onError: async (error) => {
+      if (error.message !== "Network Error") {
+        handleHttpError(error);
+        return;
+      }
+      if (onlineManager.isOnline()) {
+        toast.warning("You are offline");
+      }
+      onlineManager.setOnline(false);
+      await restorePersistedCache(queryClient);
+    },
   }),
   mutationCache: new MutationCache({
-    onError: handleHttpError,
+    onError: async (error) => {
+      if (error.message !== "Network Error") {
+        handleHttpError(error);
+        return;
+      }
+
+      if (onlineManager.isOnline()) {
+        toast.warning("You are offline");
+      }
+      onlineManager.setOnline(false);
+      await restorePersistedCache(queryClient);
+    },
+    onSuccess: async () => {
+      if (!onlineManager.isOnline()) {
+        toast.success("You are online");
+        // Restore cache when coming back online
+      }
+      onlineManager.setOnline(true);
+      await restorePersistedCache(queryClient);
+    },
   }),
 });
 
