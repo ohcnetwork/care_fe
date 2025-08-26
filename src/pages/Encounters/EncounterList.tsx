@@ -33,6 +33,7 @@ import {
   ENCOUNTER_CLASS,
   ENCOUNTER_PRIORITY,
   ENCOUNTER_STATUS_ICONS,
+  EncounterClass,
   EncounterPriority,
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
@@ -43,7 +44,7 @@ import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 interface EncounterListProps {
   encounters?: EncounterRead[];
   facilityId: string;
-  encounterClass?: string;
+  encounterClass?: EncounterClass;
 }
 
 const buildQueryParams = (
@@ -214,7 +215,9 @@ export function EncounterList({
   return (
     <Page
       title={t("encounter_class_encounters", {
-        encounterClassName: t(`encounter_class__${encounterClass}`),
+        encounterClassName: encounterClass
+          ? t(`encounter_class__${encounterClass}`)
+          : t("all"),
       })}
       componentRight={
         <Badge className="bg-purple-50 text-purple-700 ml-2 rounded-xl px-3 py-0.5 m-3 w-max border-gray-200">

@@ -99,41 +99,43 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <SidebarMenuSub className="border-l border-gray-300">
-                          {link.children.map((subItem) => (
-                            <>
-                              {subItem.header && (
-                                <div className="flex items-center gap-2 mt-2">
-                                  {subItem.headerIcon}
-                                  <span className="text-gray-400 uppercase text-xs font-bold">
-                                    {subItem.header}
-                                  </span>
-                                </div>
-                              )}
-                              <SidebarMenuSubItem key={subItem.name}>
-                                <SidebarMenuSubButton
-                                  asChild
-                                  data-cy={`nav-${subItem.name.toLowerCase().replace(/\s+/g, "-")}`}
-                                  className={
-                                    "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
-                                  }
-                                >
-                                  <ActiveLink
-                                    href={subItem.url}
-                                    className="w-full"
-                                    activeClass={cn(
-                                      subItem.url
-                                        .split("/")
-                                        .every((part) => fullPathMap[part]) &&
-                                        "bg-white text-green-700 shadow",
-                                    )}
-                                    exactActiveClass="bg-white text-green-700 shadow"
+                          {link.children
+                            ?.filter((link) => link.visibility !== false)
+                            .map((subItem) => (
+                              <>
+                                {subItem.header && (
+                                  <div className="flex items-center gap-2 mt-2">
+                                    {subItem.headerIcon}
+                                    <span className="text-gray-400 uppercase text-xs font-bold">
+                                      {subItem.header}
+                                    </span>
+                                  </div>
+                                )}
+                                <SidebarMenuSubItem key={subItem.name}>
+                                  <SidebarMenuSubButton
+                                    asChild
+                                    data-cy={`nav-${subItem.name.toLowerCase().replace(/\s+/g, "-")}`}
+                                    className={
+                                      "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
+                                    }
                                   >
-                                    {subItem.name}
-                                  </ActiveLink>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            </>
-                          ))}
+                                    <ActiveLink
+                                      href={subItem.url}
+                                      className="w-full"
+                                      activeClass={cn(
+                                        subItem.url
+                                          .split("/")
+                                          .every((part) => fullPathMap[part]) &&
+                                          "bg-white text-green-700 shadow",
+                                      )}
+                                      exactActiveClass="bg-white text-green-700 shadow"
+                                    >
+                                      {subItem.name}
+                                    </ActiveLink>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              </>
+                            ))}
                         </SidebarMenuSub>
                       </CollapsibleContent>
                     </SidebarMenuItem>

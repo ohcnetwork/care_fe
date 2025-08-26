@@ -5,22 +5,21 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { NavigationLink, NavMain } from "@/components/ui/sidebar/nav-main";
 
-import { UserFacilityModel } from "@/components/Users/models";
-
 import { useCareApps } from "@/hooks/useCareApps";
 
 import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { FacilityBareMinimum } from "@/types/facility/facility";
 import careConfig from "@careConfig";
 
 interface FacilityNavProps {
-  selectedFacility: UserFacilityModel | null;
+  selectedFacility: FacilityBareMinimum | null;
 }
 
 function generateFacilityLinks(
-  selectedFacility: UserFacilityModel | null,
+  selectedFacility: FacilityBareMinimum | null,
   t: TFunction,
   permissions: {
     canViewAppointments: boolean;
@@ -33,9 +32,13 @@ function generateFacilityLinks(
 ) {
   if (!selectedFacility) return [];
 
-  const encounterClassOrder = careConfig.encounterClassOrder;
+  const encounterClassOrder = careConfig.encounterClasses;
 
   const baseUrl = `/facility/${selectedFacility.id}`;
+  const isMultipleEncounterClasses = encounterClassOrder.length > 1;
+
+  console.log("isMultipleEncounterClasses", isMultipleEncounterClasses);
+
   const links: NavigationLink[] = [
     {
       name: t("overview"),
@@ -60,6 +63,11 @@ function generateFacilityLinks(
         {
           name: t("search_patients"),
           url: `${baseUrl}/patients`,
+        },
+        {
+          name: t("all_encounters"),
+          url: `${baseUrl}/encounters/patients/all`,
+          visibility: isMultipleEncounterClasses,
         },
         ...encounterClassOrder.map((encounterClass) => ({
           name: t(`encounter_class_encounters`, {

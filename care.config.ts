@@ -54,7 +54,7 @@ const careConfig = {
   availableLocales: (env.REACT_ALLOWED_LOCALES || "")
     .split(",")
     .map((l) => l.trim()),
-  encounterClassOrder: (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",") ??
+  encounterClasses: (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",") ??
     ENCOUNTER_CLASS) as [EncounterClass, ...EncounterClass[]],
 
   defaultEncounterType: (env.REACT_DEFAULT_ENCOUNTER_TYPE ||

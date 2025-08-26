@@ -84,7 +84,7 @@ export default function CreateEncounterForm({
 
   const encounterFormSchema = z.object({
     status: z.enum(["planned", "in_progress", "on_hold"] as const),
-    encounter_class: z.enum(careConfig.encounterClassOrder),
+    encounter_class: z.enum(careConfig.encounterClasses),
     priority: z.enum(ENCOUNTER_PRIORITY),
     organizations: z.array(z.string()).min(1, {
       message: t("at_least_one_department_is_required"),
@@ -246,7 +246,7 @@ export default function CreateEncounterForm({
                   <FormItem>
                     <FormLabel>{t("type_of_encounter")}</FormLabel>
                     <div className="grid grid-cols-2 gap-3">
-                      {careConfig.encounterClassOrder.map((value) => {
+                      {careConfig.encounterClasses.map((value) => {
                         const Icon = ENCOUNTER_CLASS_ICONS[value];
                         return (
                           <Button

@@ -5,12 +5,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { EncounterList } from "@/pages/Encounters/EncounterList";
 import LocationList from "@/pages/Facility/locations/LocationList";
+import { EncounterClass } from "@/types/emr/encounter/encounter";
 
 interface EncountersOverviewProps {
   facilityId: string;
   tab?: string;
   locationId?: string;
-  encounterClass?: string;
+  encounterClass?: EncounterClass;
 }
 
 export default function EncountersOverview({

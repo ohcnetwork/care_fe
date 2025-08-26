@@ -30,7 +30,6 @@ import DischargeConfirmationDialog from "@/components/Patient/DischargeConfirmat
 import query from "@/Utils/request/query";
 import {
   ENCOUNTER_ADMIT_SOURCE,
-  ENCOUNTER_CLASS,
   ENCOUNTER_DIET_PREFERENCE,
   ENCOUNTER_DISCHARGE_DISPOSITION,
   ENCOUNTER_PRIORITY,
@@ -50,6 +49,7 @@ import type {
   ResponseValue,
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
+import careConfig from "@careConfig";
 
 interface EncounterQuestionProps {
   question: Question;
@@ -89,7 +89,7 @@ export function EncounterQuestion({
 
   const [encounter, setEncounter] = useState<EncounterEdit>({
     status: "unknown",
-    encounter_class: "amb",
+    encounter_class: careConfig.defaultEncounterType,
     period: {
       start: new Date().toISOString(),
       end: undefined,
@@ -237,7 +237,7 @@ export function EncounterQuestion({
               <SelectValue placeholder={t("select_class")} />
             </SelectTrigger>
             <SelectContent>
-              {ENCOUNTER_CLASS.map((encounterClass) => (
+              {careConfig.encounterClasses.map((encounterClass) => (
                 <SelectItem key={encounterClass} value={encounterClass}>
                   {t(`encounter_class__${encounterClass}`)}
                 </SelectItem>
