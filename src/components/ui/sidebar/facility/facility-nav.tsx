@@ -13,6 +13,7 @@ import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import careConfig from "@careConfig";
 
 interface FacilityNavProps {
   selectedFacility: UserFacilityModel | null;
@@ -31,6 +32,8 @@ function generateFacilityLinks(
   pluginLinks: NavigationLink[],
 ) {
   if (!selectedFacility) return [];
+
+  const encounterClassOrder = careConfig.encounterClassOrder;
 
   const baseUrl = `/facility/${selectedFacility.id}`;
   const links: NavigationLink[] = [
@@ -58,10 +61,12 @@ function generateFacilityLinks(
           name: t("search_patients"),
           url: `${baseUrl}/patients`,
         },
-        {
-          name: t("encounters"),
-          url: `${baseUrl}/encounters/patients`,
-        },
+        ...encounterClassOrder.map((encounterClass) => ({
+          name: t(`encounter_class_encounters`, {
+            encounterClassName: t(`encounter_class__${encounterClass}`),
+          }),
+          url: `${baseUrl}/encounters/patients/${encounterClass}`,
+        })),
         {
           name: t("locations"),
           url: `${baseUrl}/encounters/locations`,

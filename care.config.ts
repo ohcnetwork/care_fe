@@ -1,6 +1,9 @@
 import { CountryCode } from "libphonenumber-js/types.cjs";
 
-import { EncounterClass } from "@/types/emr/encounter/encounter";
+import {
+  ENCOUNTER_CLASS,
+  EncounterClass,
+} from "@/types/emr/encounter/encounter";
 
 const env = import.meta.env;
 
@@ -51,6 +54,9 @@ const careConfig = {
   availableLocales: (env.REACT_ALLOWED_LOCALES || "")
     .split(",")
     .map((l) => l.trim()),
+  encounterClassOrder: (
+    env.REACT_ENCOUNTER_CLASS_ORDER?.split(",") ?? ENCOUNTER_CLASS
+  ).map((l) => l as EncounterClass),
 
   defaultEncounterType: (env.REACT_DEFAULT_ENCOUNTER_TYPE ||
     "hh") as EncounterClass,

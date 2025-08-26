@@ -25,6 +25,18 @@ const PatientRoutes: AppRoutes = {
   "/facility/:facilityId/encounters": ({ facilityId }) => (
     <Redirect to={`/facility/${facilityId}/encounters/patients`} />
   ),
+  "/facility/:facilityId/encounters/patients/:encounterClass": ({
+    facilityId,
+    encounterClass,
+  }) => (
+    <EncountersOverview
+      facilityId={facilityId}
+      encounterClass={encounterClass}
+    />
+  ),
+  "/facility/:facilityId/encounters/patients": ({ facilityId }) => (
+    <EncountersOverview facilityId={facilityId} />
+  ),
   "/facility/:facilityId/encounters/:tab": ({ facilityId, tab }) => (
     <EncountersOverview facilityId={facilityId} tab={tab} />
   ),

@@ -10,12 +10,14 @@ interface EncountersOverviewProps {
   facilityId: string;
   tab?: string;
   locationId?: string;
+  encounterClass?: string;
 }
 
 export default function EncountersOverview({
   facilityId,
   tab = "patients",
   locationId,
+  encounterClass,
 }: EncountersOverviewProps) {
   const { t } = useTranslation();
 
@@ -46,7 +48,10 @@ export default function EncountersOverview({
         </div>
 
         <TabsContent value="patients" className="mt-4">
-          <EncounterList facilityId={facilityId} />
+          <EncounterList
+            facilityId={facilityId}
+            encounterClass={encounterClass}
+          />
         </TabsContent>
 
         <TabsContent value="locations" className="mt-4">
