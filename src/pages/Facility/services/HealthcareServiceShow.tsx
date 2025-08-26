@@ -27,12 +27,17 @@ function LocationCard({
 
   return (
     <Card
-      onClick={() =>
-        service_type === InternalType.lab &&
-        navigate(
-          `/facility/${facilityId}/locations/${location.id}/service_requests/`,
-        )
-      }
+      onClick={() => {
+        if (service_type === InternalType.lab) {
+          navigate(
+            `/facility/${facilityId}/locations/${location.id}/service_requests/`,
+          );
+        } else if (service_type === InternalType.pharmacy) {
+          navigate(
+            `/facility/${facilityId}/locations/${location.id}/medication_requests/`,
+          );
+        }
+      }}
       className="cursor-pointer transition-all duration-200 hover:border-primary/50 hover:shadow-sm rounded-md"
     >
       <CardContent className="flex items-start gap-3 py-3 px-4">
