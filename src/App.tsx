@@ -15,6 +15,7 @@ import Routers from "@/Routers";
 import { displayCareConsoleArt } from "@/Utils/consoleArt";
 import queryClient from "@/Utils/request/queryClient";
 
+import careConfig from "@careConfig";
 import { navigate } from "raviger";
 import { PubSubProvider } from "./Utils/pubsubContext";
 
@@ -29,10 +30,7 @@ const ScrollToTop = () => {
 const App = () => {
   useEffect(() => {
     displayCareConsoleArt();
-    if (
-      import.meta.env.REACT_DISABLE_PATIENT_LOGIN === "true" &&
-      window.location.pathname === "/"
-    ) {
+    if (careConfig.disablePatientLogin && window.location.pathname === "/") {
       navigate("/login", { replace: true });
     }
   }, []);

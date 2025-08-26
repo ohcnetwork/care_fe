@@ -83,6 +83,7 @@ const Login = (props: LoginProps) => {
     customLogo,
     customLogoAlt,
     resendOtpTimeout,
+    disablePatientLogin,
   } = careConfig;
   const initForm: any = {
     username: "",
@@ -104,7 +105,6 @@ const Login = (props: LoginProps) => {
   const [otpValidationError, setOtpValidationError] = useState<string>("");
   const [resendOtpCountdown, setResendOtpCountdown] =
     useState(resendOtpTimeout);
-  const disablePatientLogin = import.meta.env.REACT_DISABLE_PATIENT_LOGIN;
 
   // Timer Function for resend OTP
   useEffect(() => {
@@ -365,7 +365,7 @@ const Login = (props: LoginProps) => {
               <CardContent>
                 <Tabs
                   defaultValue="staff"
-                  value={disablePatientLogin === "true" ? "staff" : mode}
+                  value={disablePatientLogin ? "staff" : mode}
                   onValueChange={(value) => {
                     setQueryParams({ mode: value as LoginMode });
                     if (value === "staff") {
@@ -379,7 +379,7 @@ const Login = (props: LoginProps) => {
                     <TabsTrigger className="flex-1" value="staff">
                       {t("staff_login")}
                     </TabsTrigger>
-                    {disablePatientLogin != "true" && (
+                    {!disablePatientLogin && (
                       <TabsTrigger className="flex-1" value="patient">
                         {t("patient_login")}
                       </TabsTrigger>
