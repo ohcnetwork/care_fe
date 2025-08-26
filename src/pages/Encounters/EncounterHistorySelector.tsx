@@ -226,7 +226,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             {t("chosen_encounter")}
           </h2>
           <div className="space-y-2">
-            <HoverCard key={primaryEncounter.id} openDelay={150}>
+            <HoverCard openDelay={150}>
               <HoverCardTrigger>
                 <EncounterCard
                   encounter={primaryEncounter}
