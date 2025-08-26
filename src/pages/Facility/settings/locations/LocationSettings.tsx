@@ -142,7 +142,7 @@ export default function LocationSettings({
   return (
     <Page title={t("locations")} hideTitleOnPage className="p-0">
       <div className="container mx-auto">
-        <div className="flex flex-col sm:flex-row items-start justify-between mb-2 sm:mb-4">
+        <div className="flex items-start justify-between mb-2 sm:mb-4">
           <h3>{t("locations")}</h3>
           <Tabs
             value={activeTab}
@@ -172,7 +172,7 @@ export default function LocationSettings({
 
         <div className="flex">
           {activeTab !== "map" && (
-            <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block flex-shrink-0">
+            <div className="w-64 shadow-lg bg-white rounded-lg hidden lg:block flex-shrink-0">
               <ScrollArea className="h-[calc(100vh-14rem)]">
                 <div className="p-4">
                   {parentLocations?.results?.length ? (
@@ -200,7 +200,7 @@ export default function LocationSettings({
           <div
             className={cn(
               "flex-1 space-y-3 sm:space-y-4 rounded-lg  md:shadow-lg overflow-hidden",
-              activeTab !== "map" && "ml-0 md:ml-4 md:bg-white md:p-4 ",
+              activeTab !== "map" && "ml-0 lg:ml-4 md:bg-white md:p-4 ",
             )}
           >
             {activeTab === "map" ? (
@@ -235,7 +235,7 @@ export default function LocationSettings({
                           onChange={(e) => setSearchQuery(e.target.value)}
                           className="w-full lg:w-72"
                         />
-                        <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+                        <div className="w-full sm:w-auto flex justify-center sm:justify-start">
                           <Button
                             data-cy="add-main-location-button"
                             variant="primary"
@@ -250,8 +250,8 @@ export default function LocationSettings({
                     </div>
 
                     <div className="space-y-4 overflow-hidden">
-                      {/* Desktop table view */}
-                      <div className="hidden lg:block md:px-4">
+                      {/* Desktop and tablet table view */}
+                      <div className="hidden md:block md:px-4">
                         {isLoading ? (
                           <TableSkeleton count={5} />
                         ) : currentPageItems?.length ? (
@@ -276,9 +276,9 @@ export default function LocationSettings({
                         )}
                       </div>
 
-                      {/* Mobile and tablet card view */}
+                      {/* Mobile card view */}
                       <div
-                        className="lg:hidden flex flex-col gap-4 sm:px-4"
+                        className="md:hidden flex flex-col gap-4 sm:px-4"
                         data-cy="location-card-container"
                       >
                         {isLoading ? (
