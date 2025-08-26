@@ -353,6 +353,8 @@ export default function ReceiveItem({
       <div className="text-lg font-bold mt-1">
         {delivery.supplied_item_quantity}{" "}
         {delivery.supplied_item?.product_knowledge.base_unit.display ||
+          delivery.supplied_inventory_item?.product.product_knowledge.base_unit
+            .display ||
           t("units")}
       </div>
 

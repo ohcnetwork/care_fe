@@ -1774,7 +1774,12 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                           {
                                                             selectedInventory?.net_content
                                                           }{" "}
-                                                          {t("units")}
+                                                          {
+                                                            selectedInventory
+                                                              ?.product
+                                                              .product_knowledge
+                                                              .base_unit.display
+                                                          }
                                                         </Badge>
                                                       </div>
                                                     );
@@ -1870,7 +1875,11 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                         className="ml-2"
                                                       >
                                                         {inv.net_content}{" "}
-                                                        {t("units")}
+                                                        {
+                                                          inv.product
+                                                            ?.product_knowledge
+                                                            .base_unit.display
+                                                        }
                                                       </Badge>
                                                     </div>
                                                   </div>
