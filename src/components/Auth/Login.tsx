@@ -525,7 +525,6 @@ const Login = (props: LoginProps) => {
                   </TabsContent>
 
                   {/* Patient Login */}
-                  {disablePatientLogin != "true" && (
                     <TabsContent value="patient">
                       <form onSubmit={handlePatientLogin} className="space-y-4">
                         <div className="space-y-2">
@@ -647,7 +646,6 @@ const Login = (props: LoginProps) => {
                         )}
                       </form>
                     </TabsContent>
-                  )}
                 </Tabs>
               </CardContent>
             </Card>
