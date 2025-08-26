@@ -1,5 +1,7 @@
 import { GENDER_TYPES } from "@/common/constants";
 
+import { Permissions } from "@/types/emr/permission/permission";
+import { FacilityBareMinimum } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
 
 export type UserType =
@@ -8,6 +10,7 @@ export type UserType =
   | "staff"
   | "volunteer"
   | "administrator";
+
 export interface UserBase {
   id: string;
   first_name: string;
@@ -32,6 +35,17 @@ export interface UserRead extends UserReadMinimal {
   created_by: UserReadMinimal;
   email: string;
   flags: string[];
+}
+
+export interface CurrentUserRead extends UserBase, Permissions {
+  alt_phone_number?: string;
+  date_of_birth?: string;
+  is_superuser: boolean;
+  verified?: boolean;
+  facilities: FacilityBareMinimum[];
+  organizations: Organization[];
+  profile_picture_url: string;
+  last_login: string;
 }
 
 // Todo: Once backend adds a proper public user read spec, add it here and update the usages where applicable
