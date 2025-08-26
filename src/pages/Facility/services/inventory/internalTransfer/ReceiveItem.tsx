@@ -813,7 +813,10 @@ export default function ReceiveItem({
                 <div className="font-semibold text-gray-950 text-normal">
                   {delivery.supply_request.quantity}{" "}
                   {delivery.supplied_item?.product_knowledge.base_unit
-                    .display || t("units")}
+                    .display ||
+                    delivery.supplied_inventory_item?.product.product_knowledge
+                      .base_unit.display ||
+                    t("units")}
                 </div>
               </div>
               <div>
