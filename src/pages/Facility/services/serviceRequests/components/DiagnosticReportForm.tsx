@@ -43,10 +43,9 @@ import FileUploadDialog from "@/components/Files/FileUploadDialog";
 
 import useFileUpload from "@/hooks/useFileUpload";
 
-import { BACKEND_ALLOWED_EXTENSIONS } from "@/common/constants";
-
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
 import {
   DIAGNOSTIC_REPORT_STATUS_COLORS,
@@ -67,7 +66,11 @@ import {
 } from "@/types/emr/observationDefinition/observationDefinition";
 import { SpecimenRead, SpecimenStatus } from "@/types/emr/specimen/specimen";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
-import filesApi from "@/types/files/filesApi";
+import {
+  BACKEND_ALLOWED_EXTENSIONS,
+  FileReadMinimal,
+} from "@/types/files/file";
+import fileApi from "@/types/files/fileApi";
 
 interface DiagnosticReportFormProps {
   patientId: string;
@@ -156,9 +159,9 @@ export function DiagnosticReportForm({
 
   // Query to fetch files for the diagnostic report
   const { data: files = { results: [], count: 0 }, refetch: refetchFiles } =
-    useQuery({
+    useQuery<PaginatedResponse<FileReadMinimal>>({
       queryKey: ["files", "diagnostic_report", fullReport?.id],
-      queryFn: query(filesApi.viewUpload, {
+      queryFn: query(fileApi.list, {
         queryParams: {
           file_type: "diagnostic_report",
           associating_id: fullReport?.id,

@@ -22,9 +22,12 @@ import {
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 import CircularProgress from "@/components/Common/CircularProgress";
-import { FileUploadModel } from "@/components/Patient/models";
 
-import { FILE_EXTENSIONS, getVideoMimeType } from "@/common/constants";
+import {
+  FILE_EXTENSIONS,
+  FileReadMinimal,
+  getVideoMimeType,
+} from "@/types/files/file";
 
 const PDFViewer = lazy(() => import("@/components/Common/PDFViewer"));
 export interface StateInterface {
@@ -48,8 +51,8 @@ type FilePreviewProps = {
   className?: string;
   titleAction?: ReactNode;
   fixedWidth?: boolean;
-  uploadedFiles?: FileUploadModel[];
-  loadFile?: (file: FileUploadModel, associating_id: string) => void;
+  uploadedFiles?: FileReadMinimal[];
+  loadFile?: (file: FileReadMinimal, associating_id: string) => void;
   currentIndex: number;
 };
 const previewExtensions = [

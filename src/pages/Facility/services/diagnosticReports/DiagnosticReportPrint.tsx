@@ -8,13 +8,12 @@ import { Document, Page, pdfjs } from "react-pdf";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
-import { FileUploadModel } from "@/components/Patient/models";
-
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
+import { FileReadMinimal } from "@/types/files/file";
+import fileApi from "@/types/files/fileApi";
 
 import { DiagnosticReportResultsTable } from "./components/DiagnosticReportResultsTable";
 
@@ -67,10 +66,10 @@ export default function DiagnosticReportPrint({
 
   // Query to fetch files for the diagnostic report
   const { data: files = { results: [], count: 0 } } = useQuery<
-    PaginatedResponse<FileUploadModel>
+    PaginatedResponse<FileReadMinimal>
   >({
     queryKey: ["files", "diagnostic_report", report?.id],
-    queryFn: query(routes.viewUpload, {
+    queryFn: query(fileApi.list, {
       queryParams: {
         file_type: "diagnostic_report",
         associating_id: report?.id,
@@ -82,16 +81,16 @@ export default function DiagnosticReportPrint({
   });
 
   // Function to get signed URL for a file
-  const getFileUrl = async (file: FileUploadModel) => {
+  const getFileUrl = async (file: FileReadMinimal) => {
     if (!file.id || !report?.id) return null;
 
     try {
-      const data = await query(routes.retrieveUpload, {
+      const data = await query(fileApi.get, {
         queryParams: {
           file_type: "diagnostic_report",
           associating_id: report.id,
         },
-        pathParams: { id: file.id },
+        pathParams: { fileId: file.id },
       })({} as any);
 
       return data?.read_signed_url as string;
