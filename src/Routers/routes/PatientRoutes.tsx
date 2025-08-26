@@ -34,9 +34,6 @@ const PatientRoutes: AppRoutes = {
       encounterClass={encounterClass}
     />
   ),
-  "/facility/:facilityId/encounters/patients": ({ facilityId }) => (
-    <EncountersOverview facilityId={facilityId} />
-  ),
   "/facility/:facilityId/encounters/:tab": ({ facilityId, tab }) => (
     <EncountersOverview facilityId={facilityId} tab={tab} />
   ),

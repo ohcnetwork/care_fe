@@ -52,7 +52,6 @@ import FacilityOrganizationSelector from "@/pages/Facility/settings/organization
 import {
   ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_PRIORITY,
-  EncounterClass,
   EncounterCreate,
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
@@ -85,9 +84,7 @@ export default function CreateEncounterForm({
 
   const encounterFormSchema = z.object({
     status: z.enum(["planned", "in_progress", "on_hold"] as const),
-    encounter_class: z.enum(
-      careConfig.encounterClassOrder as [EncounterClass, ...EncounterClass[]],
-    ),
+    encounter_class: z.enum(careConfig.encounterClassOrder),
     priority: z.enum(ENCOUNTER_PRIORITY),
     organizations: z.array(z.string()).min(1, {
       message: t("at_least_one_department_is_required"),
