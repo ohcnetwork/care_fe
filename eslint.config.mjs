@@ -168,7 +168,7 @@ const config = [
         dynamicRules({
           error: isPreCommit,
           warn: DEFAULT,
-        },
+        }),
         {
           mode: "jsx-only",
           "jsx-attributes": {
