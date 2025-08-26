@@ -2,7 +2,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import { Button } from "@/components/ui/button";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { formatPatientAge } from "@/Utils/utils";
-import { MapPin, Phone } from "lucide-react";
+import { ExternalLink, Phone } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -14,6 +14,11 @@ export const PatientInfoHoverCard = ({
   facilityId: string;
 }) => {
   const { t } = useTranslation();
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const links = patient.address?.match(urlRegex);
+
+  const addressText = patient.address?.replace(urlRegex, "");
+
   return (
     <>
       <div className="flex justify-between">
@@ -43,12 +48,18 @@ export const PatientInfoHoverCard = ({
         </Button>
       </div>
       <div className="flex flex-col gap-4">
-        <div className="flex justify-between border-t border-gray-200 pt-4">
-          <div className="flex flex-col gap-1 text-sm font-medium">
-            <span className="text-gray-700">{t("hospital_identifier")}</span>
-            <span className="text-gray-950">--</span>
-            {/* TODO: Add hospital identifier */}
-          </div>
+        <div className="grid grid-cols-2 gap-3 border-t border-gray-200 pt-4">
+          {patient.instance_identifiers?.map((identifier) => (
+            <div
+              key={identifier.config.id}
+              className="flex flex-col gap-1 text-sm"
+            >
+              <span className="font-medium text-gray-700">
+                {identifier.config.config.display}:{" "}
+              </span>
+              <span className="font-semibold -mt-0.5">{identifier.value}</span>
+            </div>
+          ))}
           <div className="flex flex-col gap-1 text-sm font-medium">
             <span className="text-gray-700">{t("emergency_contact")}</span>
             <div className="flex flex-row gap-2 items-center">
@@ -62,11 +73,20 @@ export const PatientInfoHoverCard = ({
         <div className="flex items-start border-t border-gray-200 pt-2">
           <div className="flex flex-col gap-1 text-sm font-medium">
             <span className="text-gray-700">{t("location")}</span>
-            <div className="flex flex-row gap-1 items-center justify-items-center bg-indigo-50 text-blue-700 rounded-sm py-1 px-2 underline text-sm font-medium">
-              <div>
-                <MapPin size={14} />
+            <div className="flex justify-between gap-2">
+              {addressText && (
+                <span className="text-gray-950">{addressText}</span>
+              )}
+              <div className="flex flex-col justify-end items-end">
+                {links?.map((link) => (
+                  <Button key={link} variant="link" size="sm" asChild>
+                    <Link href={link} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink size={14} />
+                      {t("view_on_map")}
+                    </Link>
+                  </Button>
+                ))}
               </div>
-              <span>{patient.address || patient.permanent_address}</span>
             </div>
           </div>
         </div>
