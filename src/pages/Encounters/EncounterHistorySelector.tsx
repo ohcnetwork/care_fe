@@ -13,8 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  dateFilter,
   encounterStatusFilter,
-  startedDateFilter,
   tagFilter,
 } from "@/components/ui/multi-filter/filter-list";
 import MultiFilter from "@/components/ui/multi-filter/multi-filter";
@@ -219,7 +219,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
   const filters = [
     encounterStatusFilter("status"),
     tagFilter("tags", TagResource.ENCOUNTER),
-    startedDateFilter("created_date"),
+    dateFilter("created_date"),
   ];
   const {
     selectedFilters,

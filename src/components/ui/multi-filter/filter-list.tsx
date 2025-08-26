@@ -13,6 +13,7 @@ import { SelectedDateBadge, getDateOperations } from "./date-filter";
 import { GenericSelectedBadge } from "./generic-filter";
 import { SelectedTagBadge } from "./tag-filter";
 import {
+  DateRangeOption,
   ENCOUNTER_CLASS_FILTER_COLORS,
   ENCOUNTER_PRIORITY_FILTER_COLORS,
   ENCOUNTER_STATUS_FILTER_COLORS,
@@ -126,9 +127,10 @@ export const encounterPriorityFilter = (
     mode,
   );
 
-export const startedDateFilter = (
+export const dateFilter = (
   key: string = "started_date",
   label?: string,
+  dateRangeOptions?: DateRangeOption[],
 ) =>
   createFilterConfig(
     key,
@@ -142,24 +144,9 @@ export const startedDateFilter = (
     (selected: FilterValues) => getDateOperations(selected as FilterDateRange),
     "single",
     <CalendarFold className="w-4 h-4" />,
+    dateRangeOptions,
   );
-export const completedDateFilter = (
-  key: string = "completed_date",
-  label?: string,
-) =>
-  createFilterConfig(
-    key,
-    label || "completed_date",
-    "date",
-    [],
-    undefined,
-    (selected: FilterValues) => {
-      return <SelectedDateBadge selected={selected as FilterDateRange} />;
-    },
-    (selected: FilterValues) => getDateOperations(selected as FilterDateRange),
-    "single",
-    <CalendarFold className="w-4 h-4" />,
-  );
+
 export const tagFilter = (
   key: string = "tags",
   resource: TagResource = TagResource.ENCOUNTER,

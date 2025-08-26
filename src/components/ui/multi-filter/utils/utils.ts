@@ -1,6 +1,7 @@
 import React from "react";
 
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import { addDays, subDays, subMonths, subWeeks, subYears } from "date-fns";
 
 // Generic color palette for cycling through options
 export const COLOR_PALETTE = [
@@ -70,18 +71,43 @@ export type FilterValues = string[] | TagConfig[] | FilterDateRange;
 
 export type FilterMode = "single" | "multi";
 
-export interface FilterConfig {
+export type DateFilterMeta = {
+  presetOptions?: DateRangeOption[];
+};
+export type TagFilterMeta = {
+  resource: TagResource;
+};
+
+export interface BaseFilterConfig {
   key: string;
   label: string;
   options: FilterOption[];
   placeholder?: string;
-  type?: "command" | "tag" | "date";
-  resource?: TagResource;
   icon?: React.ReactNode;
   renderSelected?: (selected: FilterValues) => React.ReactNode;
   getOperations?: (selected: FilterValues) => string[];
   mode?: FilterMode;
 }
+
+export interface CommandFilterConfig extends BaseFilterConfig {
+  type: "command";
+  meta?: undefined;
+}
+
+export interface TagFilterConfig extends BaseFilterConfig {
+  type: "tag";
+  meta: TagFilterMeta;
+}
+
+export interface DateFilterConfig extends BaseFilterConfig {
+  type: "date";
+  meta: DateFilterMeta;
+}
+
+export type FilterConfig =
+  | CommandFilterConfig
+  | TagFilterConfig
+  | DateFilterConfig;
 
 export interface OperationConfig {
   selectedOperation: string | null;
@@ -102,6 +128,7 @@ export interface FilterDateRange {
 export interface DateRangeOption {
   label: string;
   getDateRange: () => { from: Date; to: Date };
+  count?: number;
 }
 
 export function createFilterConfig(
@@ -114,16 +141,131 @@ export function createFilterConfig(
   getOperations?: (selected: FilterValues) => string[],
   mode: FilterMode = "single",
   icon?: React.ReactNode,
+  dateRangeOptions?: DateRangeOption[],
 ): FilterConfig {
-  return {
+  const baseConfig: BaseFilterConfig = {
     key,
     label,
-    type,
     options,
-    resource,
     renderSelected,
     getOperations,
     mode,
     icon,
   };
+  switch (type) {
+    case "date":
+      return {
+        ...baseConfig,
+        type: "date",
+        meta: { presetOptions: dateRangeOptions },
+      } as DateFilterConfig;
+    case "tag":
+      if (!resource) {
+        throw new Error("Resource is required for tag filters");
+      }
+      return {
+        ...baseConfig,
+        type: "tag",
+        meta: { resource },
+      } as TagFilterConfig;
+    case "command":
+      return {
+        ...baseConfig,
+        type: "command",
+      } as CommandFilterConfig;
+  }
 }
+
+export const longDateRangeOptions: DateRangeOption[] = [
+  {
+    label: "last_count_days",
+    getDateRange: () => ({
+      from: subDays(new Date(), 7),
+      to: new Date(),
+    }),
+    count: 7,
+  },
+  {
+    label: "last_count_weeks",
+    getDateRange: () => ({
+      from: subWeeks(new Date(), 3),
+      to: new Date(),
+    }),
+    count: 3,
+  },
+  {
+    label: "last_month",
+    getDateRange: () => ({
+      from: subMonths(new Date(), 1),
+      to: new Date(),
+    }),
+  },
+  {
+    label: "last_count_months",
+    getDateRange: () => ({
+      from: subMonths(new Date(), 3),
+      to: new Date(),
+    }),
+    count: 3,
+  },
+  {
+    label: "last_count_months",
+    getDateRange: () => ({
+      from: subMonths(new Date(), 6),
+      to: new Date(),
+    }),
+    count: 6,
+  },
+  {
+    label: "last_year",
+    getDateRange: () => ({
+      from: subYears(new Date(), 1),
+      to: new Date(),
+    }),
+  },
+];
+
+export const shortDateRangeOptions: DateRangeOption[] = [
+  {
+    label: "last_week",
+    getDateRange: () => ({
+      from: subDays(new Date(), 7),
+      to: new Date(),
+    }),
+  },
+  {
+    label: "yesterday",
+    getDateRange: () => ({
+      from: subDays(new Date(), 1),
+      to: subDays(new Date(), 1),
+    }),
+  },
+  {
+    label: "today",
+    getDateRange: () => ({
+      from: new Date(),
+      to: new Date(),
+    }),
+  },
+  {
+    label: "tomorrow",
+    getDateRange: () => ({
+      from: addDays(new Date(), 1),
+      to: addDays(new Date(), 1),
+    }),
+  },
+  {
+    label: "next_week",
+    getDateRange: () => ({
+      from: new Date(),
+      to: addDays(new Date(), 7),
+    }),
+  },
+  {
+    label: "next_month",
+    getDateRange: () => ({
+      from: new Date(),
+      to: addDays(new Date(), 30),
+    }),
+  },
+];

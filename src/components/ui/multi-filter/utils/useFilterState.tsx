@@ -25,6 +25,8 @@ export default function useFilterState(
           initialValues[filter.key] = queryValue;
         } else if (typeof queryValue === "string") {
           initialValues[filter.key] = [queryValue];
+        } else if (typeof queryValue === "object") {
+          initialValues[filter.key] = queryValue as FilterValues;
         } else if (queryValue !== null && queryValue !== undefined) {
           initialValues[filter.key] = [String(queryValue)];
         }

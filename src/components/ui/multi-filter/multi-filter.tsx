@@ -27,9 +27,9 @@ interface MultiFilterProps {
   onClearFilter: (filterKey: string) => void;
   placeholder?: string;
   className?: string;
-
   triggerButtonClassName?: string;
   clearAllButtonClassName?: string;
+  selectedBarClassName?: string;
   disabled?: boolean;
 }
 export default function MultiFilter({
@@ -42,6 +42,7 @@ export default function MultiFilter({
   className,
   triggerButtonClassName,
   clearAllButtonClassName,
+  selectedBarClassName,
   disabled = false,
 }: MultiFilterProps) {
   const [open, setOpen] = useState(false);
@@ -160,6 +161,7 @@ export default function MultiFilter({
             }
             onFilterChange={onFilterChange}
             onOperationChange={onOperationChange}
+            selectedBarClassName={selectedBarClassName}
           />
         );
       })}

@@ -197,15 +197,12 @@ export const GenericSelectedBadge = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
-      <Badge
-        variant="outline"
-        className={cn("text-xs whitespace-nowrap", className)}
-      >
+    <div className="flex items-center gap-1">
+      <Badge variant="outline" className={cn("text-xs", className)}>
         {t(selectedValue)}
       </Badge>
       {selectedLength > 1 && (
-        <span className="text-xs bg-gray-100 text-gray-500 px-1 rounded-md whitespace-nowrap">
+        <span className="text-xs bg-gray-100 text-gray-500 px-1 rounded-md">
           +{selectedLength - 1}
         </span>
       )}

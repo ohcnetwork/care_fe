@@ -1,14 +1,4 @@
-import {
-  format,
-  formatDate,
-  isBefore,
-  isSameDay,
-  isValid,
-  subDays,
-  subMonths,
-  subWeeks,
-  subYears,
-} from "date-fns";
+import { format, formatDate, isBefore, isSameDay, isValid } from "date-fns";
 import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -24,10 +14,12 @@ import FilterHeader from "./filter-header";
 import NavigationHelper from "./utils/navigation-helper";
 import useNavigationShortcuts from "./utils/useNavigationShortcuts";
 import {
+  DateFilterMeta,
   DateRangeOption,
   FilterConfig,
   FilterDateRange,
   FilterValues,
+  longDateRangeOptions,
 } from "./utils/utils";
 
 export function RenderDateFilter({
@@ -45,51 +37,8 @@ export function RenderDateFilter({
   const [dateFrom, setDateFrom] = useState<Date | undefined>(selected.from);
   const [dateTo, setDateTo] = useState<Date | undefined>(selected.to);
   const [isCustomDateRange, setIsCustomDateRange] = useState(false);
-
-  const dateRangeOptions: DateRangeOption[] = [
-    {
-      label: t("last_count_days", { count: 7 }),
-      getDateRange: () => ({
-        from: subDays(new Date(), 7),
-        to: new Date(),
-      }),
-    },
-    {
-      label: t("last_count_weeks", { count: 3 }),
-      getDateRange: () => ({
-        from: subWeeks(new Date(), 3),
-        to: new Date(),
-      }),
-    },
-    {
-      label: t("last_month"),
-      getDateRange: () => ({
-        from: subMonths(new Date(), 1),
-        to: new Date(),
-      }),
-    },
-    {
-      label: t("last_count_months", { count: 3 }),
-      getDateRange: () => ({
-        from: subMonths(new Date(), 3),
-        to: new Date(),
-      }),
-    },
-    {
-      label: t("last_count_months", { count: 6 }),
-      getDateRange: () => ({
-        from: subMonths(new Date(), 6),
-        to: new Date(),
-      }),
-    },
-    {
-      label: t("last_year"),
-      getDateRange: () => ({
-        from: subYears(new Date(), 1),
-        to: new Date(),
-      }),
-    },
-  ];
+  const dateRangeOptions =
+    (filter.meta as DateFilterMeta)?.presetOptions || longDateRangeOptions;
 
   const handleDateRangeSelect = (option: DateRangeOption) => {
     const { from, to } = option.getDateRange();
@@ -234,7 +183,9 @@ export function RenderDateFilter({
                       "bg-gray-100 border-green-500 border",
                   )}
                 >
-                  {option.label}
+                  {option.count
+                    ? t(option.label, { count: option.count })
+                    : t(option.label)}
                 </Button>
               ))}
               <Button

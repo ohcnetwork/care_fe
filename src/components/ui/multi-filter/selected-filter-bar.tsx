@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { cn } from "@/lib/utils";
 import Filter from "./filter";
 import useFilter from "./utils/useFilter";
 import { FilterState, FilterValues } from "./utils/utils";
@@ -59,6 +60,7 @@ export function SelectedFilterBar({
   setOpenState,
   onFilterChange,
   onOperationChange,
+  selectedBarClassName,
 }: {
   selectedFilterKey: string;
   selectedFilters: Record<string, FilterState>;
@@ -68,6 +70,7 @@ export function SelectedFilterBar({
   setOpenState: (open: boolean) => void;
   onFilterChange: (filterKey: string, values: FilterValues) => void;
   onOperationChange: (filterKey: string, operation: string) => void;
+  selectedBarClassName?: string;
 }) {
   const { t } = useTranslation();
   const { filter, selected, selectedOperation, availableOperations } =
@@ -78,7 +81,12 @@ export function SelectedFilterBar({
       open={openState || false}
       onOpenChange={(isOpen) => setOpenState(isOpen)}
     >
-      <div className="flex items-center bg-white rounded-md border border-gray-200 h-10 w-fit">
+      <div
+        className={cn(
+          "flex items-center bg-white rounded-md border border-gray-200 h-10 w-fit",
+          selectedBarClassName,
+        )}
+      >
         <DropdownMenuTrigger asChild>
           <div
             className="flex items-center gap-2 px-3 py-2 border-r border-gray-200 text-sm"
@@ -95,7 +103,7 @@ export function SelectedFilterBar({
           }
           availableOptions={availableOperations ?? []}
         />
-        <div className="flex items-center gap-2 px-3 py-2 border-r border-gray-200">
+        <div className="flex items-center gap-2 px-3 py-2 border-r border-gray-200 whitespace-nowrap">
           {filter.renderSelected?.(selected)}
         </div>
         <Button

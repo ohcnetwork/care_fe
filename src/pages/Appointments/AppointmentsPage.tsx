@@ -74,7 +74,6 @@ import {
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
 import PatientEncounterOrIdentifierFilter from "@/components/Patient/PatientEncounterOrIdentifierFilter";
-import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -109,6 +108,13 @@ import {
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserReadMinimal } from "@/types/user/user";
 
+import {
+  dateFilter,
+  tagFilter,
+} from "@/components/ui/multi-filter/filter-list";
+import MultiFilter from "@/components/ui/multi-filter/multi-filter";
+import useFilterState from "@/components/ui/multi-filter/utils/useFilterState";
+import { shortDateRangeOptions } from "@/components/ui/multi-filter/utils/utils";
 import { MultiPractitionerSelector } from "./components/MultiPractitionerSelect";
 
 interface DateRangeDisplayProps {
@@ -409,6 +415,50 @@ export default function AppointmentsPage() {
   const slots = slotsQuery.data?.results?.filter((s) => s.allocated > 0);
   const slot = slots?.find((s) => s.id === qParams.slot);
 
+  const filters = [
+    tagFilter("tags", TagResource.ENCOUNTER, "multi", t("tags", { count: 2 })),
+    dateFilter("date", t("date"), shortDateRangeOptions),
+  ];
+
+  const onFilterUpdate = (query: Record<string, unknown>) => {
+    const [key, value] = Object.entries(query)[0];
+    const filterValue = value as TagConfig[] | { from: Date; to: Date };
+    switch (key) {
+      case "tags":
+        query.tags = (filterValue as TagConfig[])
+          .map((tag) => tag.id)
+          .join(",");
+        break;
+      case "date":
+        if (
+          typeof filterValue === "object" &&
+          "from" in filterValue &&
+          "to" in filterValue
+        ) {
+          query.date_from = dateQueryString(filterValue.from as Date);
+          query.date_to = dateQueryString(filterValue.to as Date);
+          query.date = undefined;
+        }
+        break;
+    }
+    updateQuery(query);
+  };
+
+  const {
+    selectedFilters,
+    handleFilterChange,
+    handleOperationChange,
+    handleClearAll,
+    handleClearFilter,
+  } = useFilterState(filters, onFilterUpdate, {
+    ...qParams,
+    tags: selectedTags,
+    date: {
+      from: qParams.date_from ? new Date(qParams.date_from) : undefined,
+      to: qParams.date_to ? new Date(qParams.date_to) : undefined,
+    },
+  });
+
   useEffect(() => {
     if (!isFacilityLoading && !canViewAppointments && !facility) {
       toast.error(t("no_permission_to_view_page"));
@@ -471,15 +521,16 @@ export default function AppointmentsPage() {
           {/* Tags Filter */}
           <div>
             <Label className="mt-1 text-black">{t("filter_by_tags")}</Label>
-            <TagSelectorPopover
-              asFilter
-              selected={selectedTags}
-              onChange={(tags) => {
-                updateQuery({
-                  tags: tags.map((tag) => tag.id).join(","),
-                });
-              }}
-              resource={TagResource.APPOINTMENT}
+            <MultiFilter
+              selectedFilters={selectedFilters}
+              onFilterChange={handleFilterChange}
+              onOperationChange={handleOperationChange}
+              onClearAll={handleClearAll}
+              onClearFilter={handleClearFilter}
+              className="flex flex-row mt-2"
+              triggerButtonClassName="self-start sm:self-center h-9"
+              clearAllButtonClassName="self-center"
+              selectedBarClassName="h-9"
             />
           </div>
           <div>

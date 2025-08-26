@@ -33,7 +33,12 @@ import {
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
 import FilterHeader from "./filter-header";
-import { COLOR_PALETTE, FilterConfig, FilterDateRange } from "./utils/utils";
+import {
+  COLOR_PALETTE,
+  FilterConfig,
+  FilterDateRange,
+  TagFilterMeta,
+} from "./utils/utils";
 
 function TreeViewItem({
   tag,
@@ -484,7 +489,7 @@ export function RenderTagFilter({
         onTagsChange={(tags) => {
           onFilterChange(filter.key, tags);
         }}
-        resource={filter.resource!}
+        resource={(filter.meta as TagFilterMeta).resource}
         placeholder={filter.placeholder}
         handleBack={handleBack}
       />
@@ -497,16 +502,11 @@ export const SelectedTagBadge = ({ selected }: { selected: TagConfig[] }) => {
   const firstColor = COLOR_PALETTE[0];
   const secondColor = COLOR_PALETTE[1];
   return (
-    <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+    <div className="flex items-center gap-2">
       {selected.length === 1 ? (
-        <span
-          className={cn(
-            firstColor,
-            "rounded-full w-2 h-2 border flex-shrink-0",
-          )}
-        ></span>
+        <span className={cn(firstColor, "rounded-full w-2 h-2 border")}></span>
       ) : (
-        <div className="relative w-4 h-2 flex-shrink-0">
+        <div className="relative w-4 h-2">
           <span
             className={cn(
               firstColor,
