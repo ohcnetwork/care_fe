@@ -1381,8 +1381,12 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           {t("authored_on")}
         </Label>
         <DateTimePicker
-          value={medication.authored_on}
-          onChange={(val) => onUpdate?.({ authored_on: val })}
+          value={medication.authored_on ?? new Date().toISOString()}
+          onChange={(val) => {
+            if (val) {
+              onUpdate?.({ authored_on: val });
+            }
+          }}
           disabled={disabled || isReadOnly}
         />
       </div>
