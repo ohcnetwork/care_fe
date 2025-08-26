@@ -525,127 +525,125 @@ const Login = (props: LoginProps) => {
                   </TabsContent>
 
                   {/* Patient Login */}
-                    <TabsContent value="patient">
-                      <form onSubmit={handlePatientLogin} className="space-y-4">
+                  <TabsContent value="patient">
+                    <form onSubmit={handlePatientLogin} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">{t("phone_number")}</Label>
+                        <PhoneInput
+                          id="phone"
+                          name="phone"
+                          value={phone}
+                          onChange={(value) => {
+                            setPhone(value ?? "");
+                            setOtpError("");
+                            setOtpValidationError("");
+                          }}
+                          disabled={isOtpSent}
+                          placeholder={t("enter_phone_number")}
+                        />
+                        {otpError && (
+                          <p className="text-sm text-red-500">{t(otpError)}</p>
+                        )}
+                      </div>
+
+                      {isOtpSent && (
                         <div className="space-y-2">
-                          <Label htmlFor="phone">{t("phone_number")}</Label>
-                          <PhoneInput
-                            id="phone"
-                            name="phone"
-                            value={phone}
-                            onChange={(value) => {
-                              setPhone(value ?? "");
-                              setOtpError("");
-                              setOtpValidationError("");
-                            }}
-                            disabled={isOtpSent}
-                            placeholder={t("enter_phone_number")}
-                          />
-                          {otpError && (
-                            <p className="text-sm text-red-500">
-                              {t(otpError)}
+                          <Label htmlFor="otp" className="mb-4">
+                            {t("enter_otp")}
+                          </Label>
+                          <div className="flex justify-center">
+                            <InputOTP
+                              value={otp}
+                              maxLength={5}
+                              pattern={REGEXP_ONLY_DIGITS}
+                              autoComplete="one-time-code"
+                              autoFocus
+                              onChange={(value) => {
+                                setOtp(value);
+                                setOtpValidationError("");
+                              }}
+                            >
+                              <InputOTPGroup>
+                                {[...Array(5)].map((_, index) => (
+                                  <InputOTPSlot
+                                    key={index}
+                                    index={index}
+                                    className={cn(
+                                      "size-10",
+                                      otpValidationError &&
+                                        "border-red-500 focus-visible:ring-red-500",
+                                    )}
+                                  />
+                                ))}
+                              </InputOTPGroup>
+                            </InputOTP>
+                          </div>
+                          {otpValidationError && (
+                            <p className="text-sm text-red-500 text-center">
+                              {t(otpValidationError)}
                             </p>
                           )}
                         </div>
+                      )}
 
-                        {isOtpSent && (
-                          <div className="space-y-2">
-                            <Label htmlFor="otp" className="mb-4">
-                              {t("enter_otp")}
-                            </Label>
-                            <div className="flex justify-center">
-                              <InputOTP
-                                value={otp}
-                                maxLength={5}
-                                pattern={REGEXP_ONLY_DIGITS}
-                                autoComplete="one-time-code"
-                                autoFocus
-                                onChange={(value) => {
-                                  setOtp(value);
-                                  setOtpValidationError("");
-                                }}
-                              >
-                                <InputOTPGroup>
-                                  {[...Array(5)].map((_, index) => (
-                                    <InputOTPSlot
-                                      key={index}
-                                      index={index}
-                                      className={cn(
-                                        "size-10",
-                                        otpValidationError &&
-                                          "border-red-500 focus-visible:ring-red-500",
-                                      )}
-                                    />
-                                  ))}
-                                </InputOTPGroup>
-                              </InputOTP>
-                            </div>
-                            {otpValidationError && (
-                              <p className="text-sm text-red-500 text-center">
-                                {t(otpValidationError)}
-                              </p>
-                            )}
-                          </div>
+                      <Button
+                        type="submit"
+                        className="w-full"
+                        variant="primary"
+                        disabled={
+                          isLoading ||
+                          !isValidPhoneNumber(phone) ||
+                          (isOtpSent && otp.length !== 5)
+                        }
+                      >
+                        {isLoading ? (
+                          <CircularProgress className="text-white" />
+                        ) : isOtpSent ? (
+                          t("verify_otp")
+                        ) : (
+                          t("send_otp")
                         )}
-
-                        <Button
-                          type="submit"
-                          className="w-full"
-                          variant="primary"
-                          disabled={
-                            isLoading ||
-                            !isValidPhoneNumber(phone) ||
-                            (isOtpSent && otp.length !== 5)
-                          }
-                        >
-                          {isLoading ? (
-                            <CircularProgress className="text-white" />
-                          ) : isOtpSent ? (
-                            t("verify_otp")
+                      </Button>
+                      {isOtpSent && (
+                        <div className="flex flex-col items-center gap-2 text-center">
+                          {resendOtpCountdown <= 0 ? (
+                            <Button
+                              variant="link"
+                              type="button"
+                              className="h-auto p-0"
+                              onClick={() => {
+                                sendOtp({ phone_number: phone });
+                                setResendOtpCountdown(resendOtpTimeout);
+                              }}
+                            >
+                              {t("resend_otp")}
+                            </Button>
                           ) : (
-                            t("send_otp")
+                            <p className="text-sm text-gray-500">
+                              {t("resend_otp_timer", {
+                                time: resendOtpCountdown,
+                              })}
+                            </p>
                           )}
-                        </Button>
-                        {isOtpSent && (
-                          <div className="flex flex-col items-center gap-2 text-center">
-                            {resendOtpCountdown <= 0 ? (
-                              <Button
-                                variant="link"
-                                type="button"
-                                className="h-auto p-0"
-                                onClick={() => {
-                                  sendOtp({ phone_number: phone });
-                                  setResendOtpCountdown(resendOtpTimeout);
-                                }}
-                              >
-                                {t("resend_otp")}
-                              </Button>
-                            ) : (
-                              <p className="text-sm text-gray-500">
-                                {t("resend_otp_timer", {
-                                  time: resendOtpCountdown,
-                                })}
-                              </p>
-                            )}
-                            <div className="flex items-center text-sm">
-                              <Button
-                                variant="link"
-                                type="button"
-                                className="h-auto p-0 text-primary-600"
-                                onClick={() => {
-                                  setIsOtpSent(false);
-                                  setOtp("");
-                                  setOtpError("");
-                                  setOtpValidationError("");
-                                }}
-                              >
-                                {t("change_phone_number")}
-                              </Button>
-                            </div>
+                          <div className="flex items-center text-sm">
+                            <Button
+                              variant="link"
+                              type="button"
+                              className="h-auto p-0 text-primary-600"
+                              onClick={() => {
+                                setIsOtpSent(false);
+                                setOtp("");
+                                setOtpError("");
+                                setOtpValidationError("");
+                              }}
+                            >
+                              {t("change_phone_number")}
+                            </Button>
                           </div>
-                        )}
-                      </form>
-                    </TabsContent>
+                        </div>
+                      )}
+                    </form>
+                  </TabsContent>
                 </Tabs>
               </CardContent>
             </Card>
