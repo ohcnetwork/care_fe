@@ -109,6 +109,7 @@ export function EncounterHeader({
             />
 
             <EncounterCommandDialog
+              encounter={encounter}
               open={actionsOpen}
               onOpenChange={setActionsOpen}
               trigger={
