@@ -530,7 +530,7 @@ export function CreateInvoicePage({
               variant="outline_primary"
               onClick={() =>
                 navigate(
-                  `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation`,
+                  `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation?payment_status=unpaid`,
                 )
               }
             >

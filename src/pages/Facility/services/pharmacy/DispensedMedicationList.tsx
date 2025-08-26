@@ -285,11 +285,11 @@ export default function DispensedMedicationList({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedMedications, setSelectedMedications] = useState<string[]>([]);
-  const [paymentFilter, setPaymentFilter] = useState<"paid" | "unpaid">("paid");
-  const { qParams, Pagination, resultsPerPage } = useFilters({
+  const { qParams, Pagination, resultsPerPage, updateQuery } = useFilters({
     limit: 100,
     disableCache: true,
   });
+  const paymentFilter = (qParams.payment_status as "paid" | "unpaid") || "paid";
   const [billableChargeItems, setBillableChargeItems] = useState<
     ChargeItemRead[]
   >([]);
@@ -440,9 +440,7 @@ export default function DispensedMedicationList({
       <div className="mb-4">
         <Tabs
           value={paymentFilter}
-          onValueChange={(value) =>
-            setPaymentFilter(value as typeof paymentFilter)
-          }
+          onValueChange={(value) => updateQuery({ payment_status: value })}
           className="w-full"
         >
           <TabsList>

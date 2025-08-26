@@ -17,6 +17,7 @@ import Loading from "@/components/Common/Loading";
 import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 
 import query from "@/Utils/request/query";
+import { formatDateTime } from "@/Utils/utils";
 import {
   MEDICATION_DISPENSE_STATUS_COLORS,
   MedicationDispenseRead,
@@ -75,14 +76,9 @@ export function DispenseHistory({
             <TableHead className="text-gray-700">{t("dosage")}</TableHead>
             <TableHead className="text-gray-700">{t("frequency")}</TableHead>
             <TableHead className="text-gray-700">{t("quantity")}</TableHead>
-            <TableHead className="text-gray-700">
-              {t("dispense_location")}
-            </TableHead>
-            <TableHead className="text-gray-700">
-              {t("item_location")}
-            </TableHead>
+            <TableHead className="text-gray-700">{t("location")}</TableHead>
             <TableHead className="text-gray-700">{t("status")}</TableHead>
-            <TableHead className="text-gray-700">{t("bill_date")}</TableHead>
+            <TableHead className="text-gray-700">{t("bill_time")}</TableHead>
             <TableHead className="text-gray-700">{t("actions")}</TableHead>
           </TableRow>
         </TableHeader>
@@ -116,10 +112,9 @@ export function DispenseHistory({
                   {medication.charge_item.quantity || "-"}
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
-                  {medication.location.name || "-"}
-                </TableCell>
-                <TableCell className="text-gray-950 font-medium">
-                  {medication.item.location.name || "-"}
+                  {medication.location.name}
+                  {medication.location.id !== medication.item.location.id &&
+                    ` (${medication.item.location.name})`}
                 </TableCell>
                 <TableCell className="text-gray-950">
                   <Badge
@@ -131,7 +126,10 @@ export function DispenseHistory({
                   </Badge>
                 </TableCell>
                 <TableCell className="text-gray-950">
-                  {new Date(medication.when_prepared).toLocaleDateString()}
+                  {formatDateTime(
+                    medication.when_prepared.toString(),
+                    "hh:mm A, DD/MM/YYYY",
+                  )}
                 </TableCell>
                 <TableCell>
                   {medication.status !== MedicationDispenseStatus.completed && (
