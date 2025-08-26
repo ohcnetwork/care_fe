@@ -52,12 +52,12 @@ export const PatientInfoHoverCard = ({
           {patient.instance_identifiers?.map((identifier) => (
             <div
               key={identifier.config.id}
-              className="flex flex-col gap-1 text-sm"
+              className="flex flex-col gap-0.5 text-sm"
             >
               <span className="font-medium text-gray-700">
                 {identifier.config.config.display}:{" "}
               </span>
-              <span className="font-semibold -mt-0.5">{identifier.value}</span>
+              <span className="font-semibold">{identifier.value}</span>
             </div>
           ))}
           <div className="flex flex-col gap-1 text-sm font-medium">
@@ -77,16 +77,22 @@ export const PatientInfoHoverCard = ({
               {addressText && (
                 <span className="text-gray-950">{addressText}</span>
               )}
-              <div className="flex flex-col justify-end items-end">
-                {links?.map((link) => (
-                  <Button key={link} variant="link" size="sm" asChild>
-                    <Link href={link} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink size={14} />
-                      {t("view_on_map")}
-                    </Link>
-                  </Button>
-                ))}
-              </div>
+              {links && links.length > 0 && (
+                <div className="flex flex-col justify-end items-end">
+                  {links.map((link) => (
+                    <Button key={link} variant="link" size="sm" asChild>
+                      <Link
+                        href={link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <ExternalLink size={14} />
+                        {t("view_on_map")}
+                      </Link>
+                    </Button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
