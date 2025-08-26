@@ -873,13 +873,25 @@ export default function PatientRegistration(
                                   form.setValue(
                                     "permanent_address",
                                     form.getValues("address") || "",
-                                    { shouldValidate: false },
+                                    {
+                                      shouldDirty: true,
+                                      shouldValidate:
+                                        form.formState.isSubmitted,
+                                    },
                                   );
+                                  form.clearErrors("permanent_address");
                                   form.trigger("address");
                                 } else {
-                                  form.setValue("permanent_address", "", {
-                                    shouldValidate: false,
-                                  });
+                                  form.setValue(
+                                    "permanent_address",
+                                    form.getValues("permanent_address") || "",
+                                    {
+                                      shouldDirty: true,
+                                      shouldValidate:
+                                        form.formState.isSubmitted,
+                                    },
+                                  );
+                                  form.trigger("permanent_address");
                                 }
                               }}
                               data-cy="same-address-checkbox"
