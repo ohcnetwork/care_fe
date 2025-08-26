@@ -3,6 +3,7 @@ import { Redirect, useRoutes } from "raviger";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
 import { ScheduleHome } from "@/components/Schedule/ScheduleHome";
+import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
 import BedsList from "@/pages/Facility/locations/BedsList";
 import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
 import { InventoryList } from "@/pages/Facility/services/inventory/InventoryList";
@@ -240,6 +241,14 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   "/schedule": () => (
     <ScheduleHome
       facilityId={facilityId}
+      resourceType={SchedulableResourceType.Location}
+      resourceId={locationId}
+    />
+  ),
+
+  // Appointments
+  "/appointments": () => (
+    <AppointmentsPage
       resourceType={SchedulableResourceType.Location}
       resourceId={locationId}
     />
