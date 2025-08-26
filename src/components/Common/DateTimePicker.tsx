@@ -1,6 +1,5 @@
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -17,14 +16,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 type DateTimePickerProps = {
-  value?: string | null; // ISO string
+  value?: string | null;
   onChange?: (val: string | null) => void;
   placeholder?: string;
   className?: string;
-  min?: string; // ISO string
-  max?: string; // ISO string
+  min?: string;
+  max?: string;
   disabled?: boolean;
 };
 
@@ -37,20 +37,19 @@ export function DateTimePicker({
   max,
   disabled,
 }: DateTimePickerProps) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   const parsedDate = value ? new Date(value) : undefined;
 
-  const [date, setDate] = React.useState<Date | undefined>(parsedDate);
-  const [hour, setHour] = React.useState<string>(
+  const [date, setDate] = useState<Date | undefined>(parsedDate);
+  const [hour, setHour] = useState<string>(
     parsedDate ? format(parsedDate, "HH") : "12",
   );
-  const [minute, setMinute] = React.useState<string>(
+  const [minute, setMinute] = useState<string>(
     parsedDate ? format(parsedDate, "mm") : "00",
   );
 
-  // Update internal state when `value` prop changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (value) {
       const d = new Date(value);
       if (!isNaN(d.getTime())) {
@@ -72,7 +71,7 @@ export function DateTimePicker({
   );
 
   // Sync changes → return ISO string
-  React.useEffect(() => {
+  useEffect(() => {
     if (date) {
       const updated = new Date(date);
       updated.setHours(Number(hour), Number(minute), 0, 0);
