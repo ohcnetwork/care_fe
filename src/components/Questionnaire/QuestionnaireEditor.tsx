@@ -804,14 +804,17 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       ...form.getValues(),
       ...mappedData,
     } as QuestionnaireDetail);
-    
+
     // Update form values and mark as dirty to enable the save button
     updateQuestionnaireField("title", mappedData.title || "");
     updateQuestionnaireField("slug", mappedData.slug || "");
     updateQuestionnaireField("description", mappedData.description || "");
     updateQuestionnaireField("status", mappedData.status || "draft");
     updateQuestionnaireField("version", mappedData.version || "1.0");
-    updateQuestionnaireField("subject_type", mappedData.subject_type || "encounter");
+    updateQuestionnaireField(
+      "subject_type",
+      mappedData.subject_type || "encounter",
+    );
     updateQuestions(mappedData.questions || []);
 
     form.trigger();
