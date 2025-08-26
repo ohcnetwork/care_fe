@@ -235,7 +235,7 @@ export default function LocationSettings({
                           onChange={(e) => setSearchQuery(e.target.value)}
                           className="w-full lg:w-72"
                         />
-                        <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+                        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
                           <Button
                             data-cy="add-main-location-button"
                             variant="primary"
