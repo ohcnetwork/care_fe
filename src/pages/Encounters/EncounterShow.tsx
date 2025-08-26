@@ -198,6 +198,7 @@ export const EncounterShow = (props: Props) => {
                   />
 
                   <EncounterCommandDialog
+                    encounter={selectedEncounter}
                     open={actionsOpen}
                     onOpenChange={setActionsOpen}
                     trigger={
