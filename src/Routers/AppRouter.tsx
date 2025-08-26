@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
+import { usePath, useRedirect, useRoutes } from "raviger";
 
 import IconIndex from "@/CAREUI/icons/Index";
 
@@ -23,7 +23,6 @@ import ResourceRoutes from "@/Routers/routes/ResourceRoutes";
 import ScheduleRoutes from "@/Routers/routes/ScheduleRoutes";
 import UserRoutes from "@/Routers/routes/UserRoutes";
 import AdminRoutes from "@/Routers/routes/adminRoutes";
-import Login from "@/components/Auth/Login";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
@@ -33,6 +32,7 @@ import UserDashboard from "@/pages/UserDashboard";
 const PATHS_WITHOUT_SIDEBAR = [
   // Exact matches
   "/",
+  "/login",
   "/session-expired",
   // Pattern matches (using regex)
   /^\/facility\/[^/]+\/services_requests\/[^/]+$/,
@@ -61,12 +61,7 @@ export type AppRoutes = {
 };
 
 const Routes: AppRoutes = {
-  "/": () =>
-    careConfig.disablePatientLogin ? (
-      <Redirect to="/login" />
-    ) : (
-      <UserDashboard />
-    ),
+  "/": () => <UserDashboard />,
   ...ConsultationRoutes,
   ...FacilityRoutes,
   ...PatientRoutes,
@@ -84,7 +79,6 @@ const Routes: AppRoutes = {
 
   "/apps": () => <PlugConfigList />,
   "/apps/plug-configs/:slug": ({ slug }) => <PlugConfigEdit slug={slug} />,
-  "/login": () => <Login />, // <-- Fix here
 };
 
 const AdminRouter: AppRoutes = {
