@@ -28,10 +28,9 @@ function LocationCard({
   return (
     <Card
       onClick={() =>
+        service_type === InternalType.lab &&
         navigate(
-          service_type === InternalType.pharmacy
-            ? `/facility/${facilityId}/locations/${location.id}/medication_requests/`
-            : `/facility/${facilityId}/locations/${location.id}/service_requests/`,
+          `/facility/${facilityId}/locations/${location.id}/service_requests/`,
         )
       }
       className="cursor-pointer transition-all duration-200 hover:border-primary/50 hover:shadow-sm rounded-md"
