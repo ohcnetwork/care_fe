@@ -133,7 +133,18 @@ export default function PatientRegistration(
             ? z.string().trim().optional()
             : z.string().trim().nonempty(t("address_is_required")),
           same_address: z.boolean(),
-          permanent_address: z.string().trim().optional(),
+          permanent_address: z.string().superRefine((val, ctx) => {
+            if (
+              !ctx.path.includes("same_address") &&
+              !form.getValues("same_address") &&
+              (!val || val.trim() === "")
+            ) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: t("field_required"),
+              });
+            }
+          }),
           pincode: minimalPatientRegistration
             ? validators().pincode.optional()
             : validators().pincode,
@@ -202,18 +213,6 @@ export default function PatientRegistration(
                   path: ["deceased_datetime"],
                 });
               }
-            }
-          }
-          if (!minimalPatientRegistration && !data.same_address) {
-            if (
-              !data.permanent_address ||
-              data.permanent_address.trim() === ""
-            ) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: t("field_required"),
-                path: ["permanent_address"],
-              });
             }
           }
           const identifierConfigs =
@@ -874,10 +873,14 @@ export default function PatientRegistration(
                                 if (v) {
                                   form.setValue(
                                     "permanent_address",
-                                    form.getValues("address"),
-                                    { shouldValidate: true },
+                                    form.getValues("address") || "",
+                                    { shouldValidate: false },
                                   );
                                   form.trigger("address");
+                                } else {
+                                  form.setValue("permanent_address", "", {
+                                    shouldValidate: false,
+                                  });
                                 }
                               }}
                               data-cy="same-address-checkbox"
@@ -902,7 +905,11 @@ export default function PatientRegistration(
                       {t("permanent_address")}
                     </FormLabel>
                     <FormControl>
-                      <Textarea {...field} data-cy="permanent-address-input" />
+                      <Textarea
+                        {...field}
+                        data-cy="permanent-address-input"
+                        disabled={form.watch("same_address")}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
