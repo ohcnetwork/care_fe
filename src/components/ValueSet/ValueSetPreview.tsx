@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Autocomplete from "@/components/ui/autocomplete";
@@ -46,34 +46,21 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
     enabled: open,
   });
 
-  const rawResults = useMemo(() => searchQuery?.results || [], [searchQuery]);
+  const rawResults = searchQuery?.results || [];
 
-  const defaultConcepts = useMemo(
-    () =>
-      valueset.compose?.include?.flatMap((include) => include.concept || []) ??
-      [],
-    [valueset.compose],
-  );
+  const defaultConcepts =
+    valueset.compose?.include?.flatMap((include) => include.concept || []) ||
+    [];
 
-  const matched = useMemo(
-    () => (selected ? rawResults.filter((o) => o.code === selected) : []),
-    [selected, rawResults],
-  );
-  const detailsToShow = useMemo(() => {
-    if (matched.length) {
-      return matched;
-    }
-
-    if (!selected) {
-      return rawResults.length ? rawResults : defaultConcepts;
-    }
-
-    if (selected && isFetching) {
-      return defaultConcepts;
-    }
-
-    return [];
-  }, [matched, selected, rawResults, defaultConcepts, isFetching]);
+  const matched = selected ? rawResults.filter((o) => o.code === selected) : [];
+  let detailsToShow: any[] = [];
+  if (matched.length) {
+    detailsToShow = matched;
+  } else if (!selected) {
+    detailsToShow = rawResults.length ? rawResults : defaultConcepts;
+  } else if (selected && isFetching) {
+    detailsToShow = defaultConcepts;
+  }
 
   useEffect(() => {
     if (open) {
