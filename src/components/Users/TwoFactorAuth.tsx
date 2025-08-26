@@ -236,7 +236,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
         open={showPasswordDialog}
         onOpenChange={(open) => {
           closePasswordDialog();
-          if (!open) setSetupPasswordError(""); // Clear error on close
+          if (!open) setSetupPasswordError("");
         }}
         onSubmit={(password) => setupTOTP({ password })}
         title={t("confirm_password")}
@@ -253,7 +253,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
           open={showSetupDialog}
           onOpenChange={(open) => {
             closeSetupDialog();
-            if (!open) setVerificationError(""); // Clear error on close
+            if (!open) setVerificationError("");
           }}
           setupData={setupData}
           onVerify={(code) => verifyTOTP({ code })}
@@ -280,7 +280,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
         open={showDisableDialog}
         onOpenChange={(open) => {
           closeDisableDialog();
-          if (!open) setDisableError(""); // Clear error on close
+          if (!open) setDisableError("");
         }}
         onSubmit={(password) => disableTOTP({ password })}
         title={t("disable_two_factor_authentication")}
@@ -302,7 +302,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
         open={showRegenerateConfirm}
         onOpenChange={(open) => {
           closeRegenerateConfirm();
-          if (!open) setRegeneratePasswordError(""); // Clear error on close
+          if (!open) setRegeneratePasswordError("");
         }}
         onSubmit={(password) => regenerateBackupCodes({ password })}
         title={t("regenerate_backup_codes")}
