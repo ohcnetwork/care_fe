@@ -178,7 +178,7 @@ const config = [
           callees: {
             exclude: [".*"],
           },
-        },
+        })
       ],
       "i18next-no-undefined-translation-keys/no-undefined-translation-keys": [
         dynamicRules({
