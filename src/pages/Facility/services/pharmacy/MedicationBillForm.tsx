@@ -2557,6 +2557,7 @@ export default function MedicationBillForm({ patientId }: Props) {
             setMedicationToRemove(null);
           }}
           confirmText={t("remove_medication")}
+          variant="destructive"
         />
       </div>
     </Page>

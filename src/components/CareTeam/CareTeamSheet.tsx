@@ -374,6 +374,7 @@ export function CareTeamSheet({
           })}
           onConfirm={handleRemoveMember}
           confirmText={t("remove")}
+          variant="destructive"
         />
       </SheetContent>
     </Sheet>
