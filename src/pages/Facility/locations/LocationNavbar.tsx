@@ -46,6 +46,7 @@ export function LocationTreeNode({
         parent: location.id,
         mode: "kind",
         ordering: "sort_index",
+        limit: 100,
       },
     }),
     enabled: true,
@@ -93,7 +94,7 @@ export function LocationTreeNode({
             onToggleExpand(location.id);
           }}
         >
-          <Icon className="size-4" />
+          <Icon className="size-4 shrink-0" />
           <span className="truncate">{location.name}</span>
         </div>
       </div>
