@@ -32,12 +32,9 @@ function generateFacilityLinks(
 ) {
   if (!selectedFacility) return [];
 
-  const encounterClassOrder = careConfig.encounterClasses;
+  const encounterClasses = careConfig.encounterClasses;
 
   const baseUrl = `/facility/${selectedFacility.id}`;
-  const isMultipleEncounterClasses = encounterClassOrder.length > 1;
-
-  console.log("isMultipleEncounterClasses", isMultipleEncounterClasses);
 
   const links: NavigationLink[] = [
     {
@@ -67,9 +64,9 @@ function generateFacilityLinks(
         {
           name: t("all_encounters"),
           url: `${baseUrl}/encounters/patients/all`,
-          visibility: isMultipleEncounterClasses,
+          visibility: encounterClasses.length > 1,
         },
-        ...encounterClassOrder.map((encounterClass) => ({
+        ...encounterClasses.map((encounterClass) => ({
           name: t(`encounter_class_encounters`, {
             encounterClassName: t(`encounter_class__${encounterClass}`),
           }),

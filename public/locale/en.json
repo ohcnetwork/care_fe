@@ -564,6 +564,7 @@
   "all_categories": "All Categories",
   "all_changes_have_been_saved": "All changes have been saved",
   "all_details": "All Details",
+  "all_encounters": "All Encounters",
   "all_existing_data_will_be_replaced": "All existing data will be replaced",
   "all_given": "All Given",
   "all_items_dispatched_successfully": "All items dispatched successfully",
@@ -4947,6 +4948,5 @@
   "you_have_unsaved_changes_what_would_you_like_to_do": "You have unsaved changes. What would you like to do?",
   "you_need_at_least_a_location_to_create_an_assest": "You need at least a location to create an assest.",
   "zoom_in": "Zoom In",
-  "zoom_out": "Zoom Out",
-  "all_encounters": "All Encounters"
+  "zoom_out": "Zoom Out"
 }
