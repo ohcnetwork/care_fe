@@ -108,7 +108,7 @@ export function DiscountComponentSettings() {
       <Page
         title={t("discount_monetary_components")}
         options={
-          <div className="flex flex-col lg:flex-row items-center gap-2 ">
+          <div className="flex flex-col lg:flex-row items-center gap-2">
             <Input
               placeholder={t("search")}
               value={search}
