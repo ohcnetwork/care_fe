@@ -17,7 +17,6 @@ import {
 
 import { getPermissions } from "@/common/Permissions";
 
-import { PendingSyncBadge } from "@/OfflineSupport/pendingSyncbadge";
 import { PLUGIN_Component } from "@/PluginEngine";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
