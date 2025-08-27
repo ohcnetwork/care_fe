@@ -17,7 +17,7 @@ export const PatientInfoHoverCard = ({
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const links = patient.address?.match(urlRegex);
 
-  const addressText = patient.address?.replace(urlRegex, "");
+  const addressText = patient.address?.replace(urlRegex, "").trim();
 
   return (
     <>
