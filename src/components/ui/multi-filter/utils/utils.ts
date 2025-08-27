@@ -84,7 +84,11 @@ export interface BaseFilterConfig {
   options: FilterOption[];
   placeholder?: string;
   icon?: React.ReactNode;
-  renderSelected?: (selected: FilterValues) => React.ReactNode;
+  renderSelected?: (
+    selected: FilterValues,
+    filter?: FilterConfig,
+    onFilterChange?: (filterKey: string, values: FilterValues) => void,
+  ) => React.ReactNode;
   getOperations?: (selected: FilterValues) => string[];
   mode?: FilterMode;
 }
@@ -121,8 +125,8 @@ export interface FilterState {
 }
 
 export interface FilterDateRange {
-  from: Date;
-  to: Date;
+  from?: Date;
+  to?: Date;
 }
 
 export interface DateRangeOption {
@@ -137,7 +141,11 @@ export function createFilterConfig(
   type: "command" | "tag" | "date",
   options: FilterOption[],
   resource?: TagResource,
-  renderSelected?: (selected: FilterValues) => React.ReactNode,
+  renderSelected?: (
+    selected: FilterValues,
+    filter?: FilterConfig,
+    onFilterChange?: (filterKey: string, values: FilterValues) => void,
+  ) => React.ReactNode,
   getOperations?: (selected: FilterValues) => string[],
   mode: FilterMode = "single",
   icon?: React.ReactNode,

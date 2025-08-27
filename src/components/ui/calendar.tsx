@@ -168,9 +168,6 @@ function Calendar({
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn("p-3", className)}
-      style={{
-        width: 248.8 * (columnsDisplayed ?? 1) + "px",
-      }}
       classNames={{
         months: _monthsClassName,
         month_caption: _monthCaptionClassName,

@@ -189,30 +189,31 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
   }, [inView, hasNextPage, fetchNextPage]);
 
   const onFilterUpdate = (query: Record<string, unknown>) => {
-    const [key, value] = Object.entries(query)[0];
-    const filterValue = value as
-      | string
-      | TagConfig[]
-      | { from: Date; to: Date };
-    switch (key) {
-      case "status":
-        setStatus(filterValue as string);
-        break;
-      case "tags":
-        setSelectedTagIds(
-          (filterValue as TagConfig[])?.map((tag) => tag.id) ?? [],
-        );
-        break;
-      case "created_date":
-        if (
-          typeof filterValue === "object" &&
-          "from" in filterValue &&
-          "to" in filterValue
-        ) {
-          setDateFrom(filterValue.from as Date);
-          setDateTo(filterValue.to as Date);
-        }
-        break;
+    for (const [key, value] of Object.entries(query)) {
+      const filterValue = value as
+        | string
+        | TagConfig[]
+        | { from: Date; to: Date };
+      switch (key) {
+        case "status":
+          setStatus(filterValue as string);
+          break;
+        case "tags":
+          setSelectedTagIds(
+            (filterValue as TagConfig[])?.map((tag) => tag.id) ?? [],
+          );
+          break;
+        case "created_date":
+          if (
+            typeof filterValue === "object" &&
+            "from" in filterValue &&
+            "to" in filterValue
+          ) {
+            setDateFrom(filterValue.from as Date);
+            setDateTo(filterValue.to as Date);
+          }
+          break;
+      }
     }
   };
 

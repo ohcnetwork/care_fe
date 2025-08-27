@@ -17,6 +17,7 @@ import {
   ENCOUNTER_CLASS_FILTER_COLORS,
   ENCOUNTER_PRIORITY_FILTER_COLORS,
   ENCOUNTER_STATUS_FILTER_COLORS,
+  FilterConfig,
   FilterDateRange,
   FilterMode,
   FilterValues,
@@ -138,8 +139,18 @@ export const dateFilter = (
     "date",
     [],
     undefined,
-    (selected: FilterValues) => {
-      return <SelectedDateBadge selected={selected as FilterDateRange} />;
+    (
+      selected: FilterValues,
+      filter?: FilterConfig,
+      onFilterChange?: (filterKey: string, values: FilterValues) => void,
+    ) => {
+      return (
+        <SelectedDateBadge
+          selected={selected as FilterDateRange}
+          filter={filter!}
+          onFilterChange={onFilterChange!}
+        />
+      );
     },
     (selected: FilterValues) => getDateOperations(selected as FilterDateRange),
     "single",

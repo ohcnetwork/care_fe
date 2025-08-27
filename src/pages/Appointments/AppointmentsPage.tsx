@@ -114,7 +114,10 @@ import {
 } from "@/components/ui/multi-filter/filter-list";
 import MultiFilter from "@/components/ui/multi-filter/multi-filter";
 import useFilterState from "@/components/ui/multi-filter/utils/useFilterState";
-import { shortDateRangeOptions } from "@/components/ui/multi-filter/utils/utils";
+import {
+  FilterDateRange,
+  shortDateRangeOptions,
+} from "@/components/ui/multi-filter/utils/utils";
 import { MultiPractitionerSelector } from "./components/MultiPractitionerSelect";
 
 interface DateRangeDisplayProps {
@@ -421,25 +424,27 @@ export default function AppointmentsPage() {
   ];
 
   const onFilterUpdate = (query: Record<string, unknown>) => {
-    const [key, value] = Object.entries(query)[0];
-    const filterValue = value as TagConfig[] | { from: Date; to: Date };
-    switch (key) {
-      case "tags":
-        query.tags = (filterValue as TagConfig[])
-          .map((tag) => tag.id)
-          .join(",");
-        break;
-      case "date":
-        if (
-          typeof filterValue === "object" &&
-          "from" in filterValue &&
-          "to" in filterValue
-        ) {
-          query.date_from = dateQueryString(filterValue.from as Date);
-          query.date_to = dateQueryString(filterValue.to as Date);
-          query.date = undefined;
-        }
-        break;
+    for (const [key, value] of Object.entries(query)) {
+      switch (key) {
+        case "tags":
+          query.tags = (value as TagConfig[])?.map((tag) => tag.id).join(",");
+          break;
+        case "date":
+          {
+            const dateRange = value as FilterDateRange;
+            query = {
+              ...query,
+              date: undefined,
+              date_from: dateRange?.from
+                ? dateQueryString(dateRange?.from as Date)
+                : undefined,
+              date_to: dateRange?.to
+                ? dateQueryString(dateRange?.to as Date)
+                : undefined,
+            };
+          }
+          break;
+      }
     }
     updateQuery(query);
   };
@@ -453,10 +458,13 @@ export default function AppointmentsPage() {
   } = useFilterState(filters, onFilterUpdate, {
     ...qParams,
     tags: selectedTags,
-    date: {
-      from: qParams.date_from ? new Date(qParams.date_from) : undefined,
-      to: qParams.date_to ? new Date(qParams.date_to) : undefined,
-    },
+    date:
+      qParams.date_from || qParams.date_to
+        ? {
+            from: qParams.date_from ? new Date(qParams.date_from) : undefined,
+            to: qParams.date_to ? new Date(qParams.date_to) : undefined,
+          }
+        : undefined,
   });
 
   useEffect(() => {
