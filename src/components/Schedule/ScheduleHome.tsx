@@ -19,7 +19,6 @@ import CreateScheduleExceptionSheet from "@/pages/Scheduling/components/CreateSc
 import CreateScheduleTemplateSheet from "@/pages/Scheduling/components/CreateScheduleTemplateSheet";
 import ScheduleExceptions from "@/pages/Scheduling/ScheduleExceptions";
 import ScheduleTemplates from "@/pages/Scheduling/ScheduleTemplates";
-import { useIsUserSchedulableResource } from "@/pages/Scheduling/useIsUserSchedulableResource";
 import {
   computeAppointmentSlots,
   filterAvailabilitiesByDayOfWeek,
@@ -96,11 +95,6 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
     }),
   });
 
-  const { data: isSchedulableResource } = useIsUserSchedulableResource(
-    facilityId,
-    resourceId,
-  );
-
   if (!templatesQuery.data || !exceptionsQuery.data) {
     return <Loading />;
   }
@@ -143,7 +137,6 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
                     "grid h-full cursor-pointer grid-rows-[1fr_auto_1fr] rounded-lg transition-all bg-gray-100 hover:bg-white data-[state=open]:bg-white",
                     templatesQuery.isLoading &&
                       "opacity-50 pointer-events-none",
-                    !isSchedulableResource && "pointer-events-none",
                     "transition-all duration-200 ease-in-out",
                     "relative overflow-hidden",
                   )}
@@ -182,16 +175,14 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
                   <div />
                 </div>
               </PopoverTrigger>
-              {isSchedulableResource && (
-                <DayDetailsPopover
-                  date={date}
-                  templates={templates}
-                  unavailableExceptions={unavailableExceptions}
-                  setQParams={setQParams}
-                  resourceId={resourceId}
-                  facilityId={facilityId}
-                />
-              )}
+              <DayDetailsPopover
+                date={date}
+                templates={templates}
+                unavailableExceptions={unavailableExceptions}
+                setQParams={setQParams}
+                resourceId={resourceId}
+                facilityId={facilityId}
+              />
             </Popover>
           );
         }}
