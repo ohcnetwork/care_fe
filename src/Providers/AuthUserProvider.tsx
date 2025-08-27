@@ -215,6 +215,9 @@ export default function AuthUserProvider({
   }, [signOut]);
   const isRestoring = useIsRestoring();
 
+  console.log("isLoading", isLoading);
+  console.log("isRestoring", isRestoring);
+  console.log("isChecked", isChecked);
   if (isLoading || isRestoring || !isChecked) {
     return <Loading />;
   }
