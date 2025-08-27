@@ -356,47 +356,52 @@ export default function ServiceRequestShow({
             </Button>
 
             <div className="flex items-end gap-2">
-              {request?.diagnostic_reports?.[0]?.status ===
-                DiagnosticReportStatus.final && (
+              {(request?.diagnostic_reports.length == 0 ||
+                request?.diagnostic_reports?.[0]?.status ===
+                  DiagnosticReportStatus.final) && (
                 <div className="flex items-center gap-2">
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        disabled={request.status === Status.completed}
-                        className="font-semibold border border-gray-400"
-                      >
-                        {t("mark_as_complete")}
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          {t("confirm_completion")}
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          {t("service_request_completion_confirmation")}
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => markAsComplete()}>
-                          {t("confirm")}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                  <Button
-                    variant="primary"
-                    className="font-semibold"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/patient/${request.encounter.patient.id}/diagnostic_reports/${request.diagnostic_reports[0].id}`,
-                      )
-                    }
-                  >
-                    {t("view_report")}
-                  </Button>
+                  {request.status === Status.active && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="font-semibold border border-gray-400"
+                        >
+                          {t("mark_as_complete")}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            {t("confirm_completion")}
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {t("service_request_completion_confirmation")}
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => markAsComplete()}>
+                            {t("confirm")}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                  {request?.diagnostic_reports?.[0]?.status ===
+                    DiagnosticReportStatus.final && (
+                    <Button
+                      variant="primary"
+                      className="font-semibold"
+                      onClick={() =>
+                        navigate(
+                          `/facility/${facilityId}/patient/${request.encounter.patient.id}/diagnostic_reports/${request.diagnostic_reports[0].id}`,
+                        )
+                      }
+                    >
+                      {t("view_report")}
+                    </Button>
+                  )}
                 </div>
               )}
 
