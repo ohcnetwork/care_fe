@@ -10,21 +10,19 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { Permission } from "@/types/emr/permission/permission";
+import permissionApi from "@/types/emr/permission/permissionApi";
 import { RoleRead } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
+import { useQuery } from "@tanstack/react-query";
 
 interface RoleFormProps {
   role: RoleRead | null;
-  permissions: Permission[];
   onSuccess: () => void;
 }
 
-export default function RoleForm({
-  role,
-  permissions,
-  onSuccess,
-}: RoleFormProps) {
+export default function RoleForm({ role, onSuccess }: RoleFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [formData, setFormData] = React.useState({
@@ -32,6 +30,18 @@ export default function RoleForm({
     description: role?.description || "",
     permissions: role?.permissions.map((p: Permission) => p.slug) || [],
   });
+
+  const { data: permissionsResponse, isLoading: permissionsLoading } = useQuery(
+    {
+      queryKey: ["permissions"],
+      queryFn: query(permissionApi.listPermissions, {
+        queryParams: {
+          limit: 1000, // Get all permissions for the form
+        },
+      }),
+    },
+  );
+  const permissions = permissionsResponse?.results || [];
 
   const createRoleMutation = useMutation({
     mutationFn: mutate(roleApi.createRole),
@@ -144,33 +154,39 @@ export default function RoleForm({
         </CardHeader>
         <CardContent>
           <div className="space-y-3 max-h-60 overflow-y-auto">
-            {permissions.map((permission) => (
-              <div
-                key={permission.slug}
-                className="flex items-center space-x-2"
-              >
-                <Checkbox
-                  id={permission.slug}
-                  checked={formData.permissions.includes(permission.slug)}
-                  onCheckedChange={() =>
-                    handlePermissionToggle(permission.slug)
-                  }
-                />
-                <Label
-                  htmlFor={permission.slug}
-                  className="flex-1 cursor-pointer"
+            {permissionsLoading ? (
+              <span className="w-full h-30 flex justify-center items-center">
+                {t("loading")}
+              </span>
+            ) : (
+              permissions.map((permission) => (
+                <div
+                  key={permission.slug}
+                  className="flex items-center space-x-2"
                 >
-                  <div>
-                    <div className="font-medium">{permission.name}</div>
-                    {permission.description && (
-                      <div className="text-sm text-gray-500">
-                        {permission.description}
-                      </div>
-                    )}
-                  </div>
-                </Label>
-              </div>
-            ))}
+                  <Checkbox
+                    id={permission.slug}
+                    checked={formData.permissions.includes(permission.slug)}
+                    onCheckedChange={() =>
+                      handlePermissionToggle(permission.slug)
+                    }
+                  />
+                  <Label
+                    htmlFor={permission.slug}
+                    className="flex-1 cursor-pointer"
+                  >
+                    <div>
+                      <div className="font-medium">{permission.name}</div>
+                      {permission.description && (
+                        <div className="text-sm text-gray-500">
+                          {permission.description}
+                        </div>
+                      )}
+                    </div>
+                  </Label>
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>
