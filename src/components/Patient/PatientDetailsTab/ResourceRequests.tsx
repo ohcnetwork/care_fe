@@ -82,8 +82,8 @@ export const ResourceRequests = (props: PatientProps) => {
                   {t("loading")}
                 </TableCell>
               </TableRow>
-            ) : resourceRequests?.results.length ? (
-              resourceRequests?.results?.map((request, index) => (
+            ) : resourceRequests?.results?.length ? (
+              resourceRequests.results.map((request, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">
                     {RESOURCE_CATEGORY_CHOICES.find(

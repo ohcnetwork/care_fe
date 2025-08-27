@@ -12,7 +12,7 @@ import { NavigationRoute, registerRoute } from "workbox-routing";
 declare const self: ServiceWorkerGlobalScope;
 
 const precacheFiles = self.__WB_MANIFEST || [];
-console.log("Service Worker: Precache files:", precacheFiles);
+
 precacheAndRoute(precacheFiles);
 clientsClaim();
 

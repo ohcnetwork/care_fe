@@ -103,8 +103,6 @@ export default function FacilityOrganizationSelector(
     }
   }, [setOfflineSelectedOrganizations, selectedOrganizations]);
 
-  console.log("OfflineSelectedOrganizations", offlineSelectedOrganizations);
-
   useEffect(() => {
     if (
       offlineSelectedOrganizations &&

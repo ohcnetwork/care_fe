@@ -99,6 +99,7 @@ export function AppointmentQuestion({
   const [resource, setResource] = useState<UserReadMinimal>();
   const [open, setOpen] = useState(false);
   const { hasError } = useFieldError(question.id, errors);
+
   const values =
     (questionnaireResponse.values?.[0]?.value as CreateAppointmentQuestion[]) ||
     [];

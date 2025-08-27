@@ -118,6 +118,7 @@ export function LandingPage() {
       setIsOpen(false);
     }
   };
+
   return (
     <div className="min-h-screen flex flex-col p-5">
       {/* Main Content  */}

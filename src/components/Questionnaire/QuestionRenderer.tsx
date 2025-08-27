@@ -32,7 +32,7 @@ interface QuestionRendererProps {
   patientId: string;
   editMode?: boolean;
   offlineEntryId?: string;
-  offlineEntry?: any; // Add offlineEntry prop
+  offlineEntry?: any;
 }
 
 export function QuestionRenderer({
