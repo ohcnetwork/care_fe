@@ -187,6 +187,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
       })({ signal });
       return response as PaginatedResponse<EncounterRead>;
     },
+    meta: { persist: true },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
       const currentOffset = allPages.length * 14;
