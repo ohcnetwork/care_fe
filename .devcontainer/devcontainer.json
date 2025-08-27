@@ -85,7 +85,7 @@
   },
   "hostRequirements": {
     "cpus": 4,
-    "memory": "8gb",
+    "memory": "16gb",
     "storage": "32gb"
   },
   "containerEnv": {
@@ -97,12 +97,12 @@
   "remoteEnv": {
     "REACT_CARE_API_URL": "https://careapi.ohc.network"
   },
-  "waitFor": "onCreateCommand",
-  "onCreateCommand": {
-    "install": "npm install --ignore-scripts",
-    "postinstall": "npm run postinstall",
-    "setup": "npm run setup"
-  },
+    "waitFor": "onCreateCommand",
+    "onCreateCommand": "set -euo pipefail; \
+  npm install --no-audit --no-fund; \
+  npm exec -y tsx -- --version >/dev/null 2>&1 || true; \
+  npm run postinstall; \
+  npm run setup",
   "postCreateCommand": "echo 'CARE Frontend development environment is ready! Run npm run dev to start the development server.'",
   "postAttachCommand": {
     "server": "npm run dev"
@@ -121,6 +121,10 @@
       "onAutoForward": "silent"
     }
   },
-  "forwardPorts": [4000, 4001, 9000],
+  "forwardPorts": [
+    4000,
+    4001,
+    9000
+  ],
   "shutdownAction": "stopCompose"
 }
