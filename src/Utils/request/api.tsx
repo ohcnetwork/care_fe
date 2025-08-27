@@ -1,5 +1,4 @@
-import { FileUploadModel } from "@/components/Patient/models";
-import { AuthUserModel, UpdatePasswordForm } from "@/components/Users/models";
+import { UpdatePasswordForm } from "@/components/Users/models";
 
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
@@ -120,25 +119,6 @@ const routes = {
     TRes: Type<{ message: string }>(),
     TBody: Type<UpdatePasswordForm>(),
   },
-  // User Endpoints
-  currentUser: {
-    path: "/api/v1/users/getcurrentuser/",
-    TRes: Type<AuthUserModel>(),
-  },
-
-  deleteProfilePicture: {
-    path: "/api/v1/users/{username}/profile_picture/",
-    method: "DELETE",
-    TRes: Type<AuthUserModel>(),
-    TBody: Type<void>(),
-  },
-
-  deleteUser: {
-    path: "/api/v1/users/{username}/",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<void>(),
-  },
 
   getScheduleAbleFacilityUser: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
@@ -148,29 +128,6 @@ const routes = {
   getScheduleAbleFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/",
     TRes: Type<PaginatedResponse<UserReadMinimal>>(),
-  },
-
-  viewUpload: {
-    path: "/api/v1/files/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<FileUploadModel>>(),
-  },
-  retrieveUpload: {
-    path: "/api/v1/files/{id}/",
-    method: "GET",
-    TRes: Type<FileUploadModel>(),
-  },
-  editUpload: {
-    path: "/api/v1/files/{id}/",
-    method: "PUT",
-    TBody: Type<Partial<FileUploadModel>>(),
-    TRes: Type<FileUploadModel>(),
-  },
-  archiveUpload: {
-    path: "/api/v1/files/{id}/archive/",
-    method: "POST",
-    TRes: Type<FileUploadModel>(),
-    TBody: Type<{ archive_reason: string }>(),
   },
 
   // Request
