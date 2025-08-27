@@ -47,8 +47,10 @@ import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 import { useOfflineEntry } from "@/hooks/useOfflineEntry";
 
-import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
-import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
+import {
+  RESOURCE_CATEGORY_CHOICES,
+  RESOURCE_STATUS_CHOICES,
+} from "@/common/constants";
 
 import {
   handleOfflineRecordSuccess,

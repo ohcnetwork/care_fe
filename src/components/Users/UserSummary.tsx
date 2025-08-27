@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import LanguageSelector from "@/components/Common/LanguageSelector";
-import UserColumns from "@/components/Common/UserColumns";
-import { userChildProps } from "@/components/Common/UserColumns";
+import UserColumns, { userChildProps } from "@/components/Common/UserColumns";
 import { TwoFactorAuth } from "@/components/Users/TwoFactorAuth";
 import UserAvatar from "@/components/Users/UserAvatar";
 import UserDeleteDialog from "@/components/Users/UserDeleteDialog";
@@ -170,13 +169,13 @@ export default function UserSummaryTab({
         )}
         {canEditUser && (
           <Card className="border-red-500">
-            <CardHeader>
+            <CardHeader className="px-4 sm:px-6">
               <CardTitle className="text-destructive">
                 {t("danger_zone")}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-md border p-4">
+            <CardContent className="gap-4 px-4 sm:px-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-md border p-3 sm:p-4">
                 <div className="space-y-1">
                   <h3 className="text-sm font-medium">{t("delete_account")}</h3>
                   <p className="text-sm text-gray-700">

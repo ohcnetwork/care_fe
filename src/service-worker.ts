@@ -13,6 +13,7 @@ declare const self: ServiceWorkerGlobalScope;
 
 const precacheFiles = self.__WB_MANIFEST || [];
 
+
 precacheAndRoute(precacheFiles);
 clientsClaim();
 

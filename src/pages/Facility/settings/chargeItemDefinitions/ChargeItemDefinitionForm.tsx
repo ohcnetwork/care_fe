@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckIcon, Loader2 } from "lucide-react";
 import { navigate } from "raviger";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { FieldErrors, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
@@ -229,6 +229,7 @@ export function ChargeItemDefinitionForm({
   },
 }: ChargeItemDefinitionFormProps) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   // Fetch facility data for available components
   const { data: facilityData, isLoading } = useQuery({
@@ -300,7 +301,9 @@ export function ChargeItemDefinitionForm({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug", generateSlug(value.title || ""));
+        form.setValue("slug", generateSlug(value.title || ""), {
+          shouldValidate: true,
+        });
       }
     });
 
@@ -328,6 +331,7 @@ export function ChargeItemDefinitionForm({
           pathParams: { facilityId },
         }),
     onSuccess: (chargeItemDefinition: ChargeItemDefinitionRead) => {
+      queryClient.invalidateQueries({ queryKey: ["chargeItemDefinitions"] });
       onSuccess?.(chargeItemDefinition);
     },
   });
