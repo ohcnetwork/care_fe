@@ -87,7 +87,7 @@ export const PatientInfoHoverCard = ({
                       key={link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex gap-1 items-center"
+                      className="flex gap-1 items-center whitespace-nowrap"
                     >
                       <ExternalLink size={14} />
                       {t("view_on_map")}
