@@ -117,9 +117,53 @@ export default function BookAppointment({ patientId }: Props) {
       if (normalizedData.token_slot) {
         setOfflineSelectedSlot(normalizedData.token_slot);
         setSelectedSlotId(normalizedData.token_slot.id);
+
+        // Extract date from slot's start_datetime
+        const slotDate = new Date(normalizedData.token_slot.start_datetime);
+        setSelectedDateOffline(slotDate);
+
+        // Set month to the month containing the slot date
+        const slotMonth = new Date(
+          slotDate.getFullYear(),
+          slotDate.getMonth(),
+          1,
+        );
+        setSelectedMonthOffline(slotMonth);
       }
     }
   }, [offlineEntry, offlineEntryId]);
+
+  const handleOfflineQueue = async (
+    appointmentRequestData: AppointmentCreateRequest,
+  ) => {
+    const status = "booked";
+    await queueNewAppointmentOffline({
+      createAppointmentData: appointmentRequestData,
+      selectedSlot: OfflineSelectedSlot,
+      selectedPracticioner,
+      authUser,
+      status,
+      facilityId,
+      patientId,
+      selectedSlotId,
+      selectedTags,
+      selectedDateOffline,
+      selectedMonthOffline,
+      queryClient,
+      db,
+      t,
+      onSuccess: (appointmentId, _normalizedAppointment) => {
+        toast.success(t("appointment_booking_success"));
+        navigate(
+          `/facility/${facilityId}/patient/${patientId}/appointments/${appointmentId}`,
+        );
+      },
+      onError: (error) => {
+        console.error("Error while scheduling appointment", error);
+        toast.error(t("unexpected_error_while_booking_appointment"));
+      },
+    });
+  };
 
   const { mutateAsync: createAppointment } = useMutation<
     Appointment,
@@ -140,34 +184,7 @@ export default function BookAppointment({ patientId }: Props) {
       // If network error, mark offline and push to offline queue
       if (error.message === "Network Error" && variables) {
         onlineManager.setOnline(false);
-        const status = "booked";
-        await queueNewAppointmentOffline({
-          createAppointmentData: variables,
-          selectedSlot: OfflineSelectedSlot,
-          selectedPracticioner,
-          authUser,
-          status,
-          facilityId,
-          patientId,
-          selectedSlotId,
-          selectedTags,
-          selectedDateOffline,
-          selectedMonthOffline,
-          queryClient,
-          db,
-          t,
-          onSuccess: (appointmentId, _normalizedAppointment) => {
-            toast.success(t("appointment_booking_success"));
-            navigate(
-              `/facility/${facilityId}/patient/${patientId}/appointments/${appointmentId}`,
-            );
-          },
-          onError: (error) => {
-            console.error("Error while scheduling appointment", error);
-            toast.error(t("unexpected_error_while_booking_appointment"));
-          },
-        });
-
+        await handleOfflineQueue(variables);
         return;
       }
     },
@@ -189,6 +206,11 @@ export default function BookAppointment({ patientId }: Props) {
         note: reason,
         tags: selectedTags.map((tag) => tag.id),
       };
+
+      if (!onlineManager.isOnline()) {
+        await handleOfflineQueue(createAppointmentData);
+        return;
+      }
 
       const data = await createAppointment(createAppointmentData);
 
@@ -257,6 +279,8 @@ export default function BookAppointment({ patientId }: Props) {
               setOfflineSelectedSlot={setOfflineSelectedSlot}
               setSelectedMonthOffline={setSelectedMonthOffline}
               setSelectedDateOffline={setSelectedDateOffline}
+              selectedDateOffline={selectedDateOffline}
+              selectedMonthOffline={selectedMonthOffline}
             />
           </div>
 

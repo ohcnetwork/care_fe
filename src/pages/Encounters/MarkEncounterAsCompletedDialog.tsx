@@ -44,6 +44,25 @@ export function MarkEncounterAsCompletedDialog(
   const { offlineEntryId } = useOfflineEntry();
   const user = useAuthUser();
 
+  const handleOfflineQueue = async (encounterUpdatedData: EncounterEdit) => {
+    if (!encounter) return;
+
+    await queueMarkAscompleteRecord({
+      encounter,
+      encounterUpdatedData,
+      userId: user.id,
+      queryClient,
+      user,
+      onSuccess: () => {
+        toast.success(t("encounter_marked_as_complete"));
+      },
+      onError: (error) => {
+        console.error("Error while Marking Encounter as Complete : ", error);
+        toast.error(t("error_updating_encounter"));
+      },
+    });
+  };
+
   const { mutate: updateEncounter } = useMutation<
     EncounterRead,
     Error,
@@ -63,25 +82,7 @@ export function MarkEncounterAsCompletedDialog(
     onError: async (error, variables) => {
       if (error.message === "Network Error" && variables) {
         onlineManager.setOnline(false);
-        if (!encounter) return;
-
-        await queueMarkAscompleteRecord({
-          encounter,
-          encounterUpdatedData: variables,
-          userId: user.id,
-          queryClient,
-          user,
-          onSuccess: () => {
-            toast.success(t("encounter_marked_as_complete"));
-          },
-          onError: (error) => {
-            console.error(
-              "Error while Marking Encounter as Complete : ",
-              error,
-            );
-            toast.error(t("error_updating_encounter"));
-          },
-        });
+        await handleOfflineQueue(variables);
       }
     },
   });
@@ -108,6 +109,10 @@ export function MarkEncounterAsCompletedDialog(
       discharge_summary_advice: encounter.discharge_summary_advice,
     };
 
+    if (!onlineManager.isOnline()) {
+      handleOfflineQueue(encounterUpdatedData);
+      return;
+    }
     updateEncounter(encounterUpdatedData);
   };
 

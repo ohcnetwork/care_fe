@@ -215,25 +215,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       // If network error, mark offline and push to offline queue
       if (error.message === "Network Error" && variables) {
         onlineManager.setOnline(false);
-        await queueNewResourceRequest({
-          resourcePayload: variables,
-          userId: authUser.id,
-          facilityId: String(facilityId),
-          relatedPatient: related_patient,
-          queryClient,
-          authUser,
-          patientData,
-          assignFacility,
-          assignedToUser,
-          onSuccess: (resourceId, _normalizedResource) => {
-            toast.success(t("resource_created_successfully"));
-            navigate(`/facility/${facilityId}/resource/${resourceId}`);
-          },
-          onError: (error) => {
-            console.error("Error while queuing resource request:", error);
-            toast.error(t("unexpected_error_while_creating_resource"));
-          },
-        });
+        await handleOfflineQueue(variables, true);
         return;
       }
     },
@@ -259,30 +241,61 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       // If network error, mark offline and push to offline queue
       if (error.message === "Network Error" && variables) {
         onlineManager.setOnline(false);
-        await queueUpdatedResourceRequest({
-          resourcePayload: variables,
-          resourceId: id!,
-          userId: authUser.id,
-          facilityId: String(facilityId),
-          queryClient,
-          authUser,
-          patientData,
-          assignFacility,
-          assignedToUser,
-          resourceData,
-          onSuccess: (resourceId, _normalizedResource) => {
-            toast.success(t("resource_updated_successfully"));
-            navigate(`/facility/${facilityId}/resource/${resourceId}`);
-          },
-          onError: (error) => {
-            console.error("Error while queuing resource update:", error);
-            toast.error(t("unexpected_error_while_updating_resource"));
-          },
-        });
+        await handleOfflineQueue(variables, false);
         return;
       }
     },
   });
+
+  const handleOfflineQueue = async (
+    resourcePayload: CreateResourceRequest | UpdateResourceRequest,
+    isCreate: boolean,
+  ) => {
+    if (isCreate) {
+      // Handle resource creation offline
+      await queueNewResourceRequest({
+        resourcePayload: resourcePayload as CreateResourceRequest,
+        userId: authUser.id,
+        facilityId: String(facilityId),
+        relatedPatient: related_patient,
+        queryClient,
+        authUser,
+        patientData,
+        assignFacility,
+        assignedToUser,
+        onSuccess: (resourceId, _normalizedResource) => {
+          toast.success(t("resource_created_successfully"));
+          navigate(`/facility/${facilityId}/resource/${resourceId}`);
+        },
+        onError: (error) => {
+          console.error("Error while queuing resource request:", error);
+          toast.error(t("unexpected_error_while_creating_resource"));
+        },
+      });
+    } else {
+      // Handle resource update offline
+      await queueUpdatedResourceRequest({
+        resourcePayload: resourcePayload as UpdateResourceRequest,
+        resourceId: id!,
+        userId: authUser.id,
+        facilityId: String(facilityId),
+        queryClient,
+        authUser,
+        patientData,
+        assignFacility,
+        assignedToUser,
+        resourceData,
+        onSuccess: (resourceId, _normalizedResource) => {
+          toast.success(t("resource_updated_successfully"));
+          navigate(`/facility/${facilityId}/resource/${resourceId}`);
+        },
+        onError: (error) => {
+          console.error("Error while queuing resource update:", error);
+          toast.error(t("unexpected_error_while_updating_resource"));
+        },
+      });
+    }
+  };
 
   const onSubmit = (data: ResourceFormValues) => {
     const resourcePayload = {
@@ -302,9 +315,17 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     };
 
     if (id) {
+      if (!onlineManager.isOnline()) {
+        handleOfflineQueue({ ...resourcePayload, id }, false);
+        return;
+      }
       updateResource({ ...resourcePayload, id });
       return;
     } else {
+      if (!onlineManager.isOnline()) {
+        handleOfflineQueue(resourcePayload, true);
+        return;
+      }
       createResource(resourcePayload);
     }
   };

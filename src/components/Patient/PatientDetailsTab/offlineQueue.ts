@@ -13,11 +13,13 @@ import {
 import { PaginatedResponse } from "@/Utils/request/types";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
+import { RoleBase } from "@/types/emr/role/role";
 import { UserReadMinimal } from "@/types/user/user";
 
 interface QueueAssignUserToPatientParams {
   assignUserData: { user: string; role: string };
   selectedUser: UserReadMinimal;
+  selectedRole: RoleBase;
   users: PaginatedResponse<UserReadMinimal> | undefined;
   patientId: string;
   facilityId: string;
@@ -43,6 +45,7 @@ interface QueueRemoveUserFromPatientParams {
 export const queueAssignUserToPatient = async ({
   assignUserData,
   selectedUser,
+  selectedRole,
   users,
   patientId,
   facilityId,
@@ -90,7 +93,7 @@ export const queueAssignUserToPatient = async ({
 
     const normalizedData = {
       user: selectedUser,
-      role: assignUserData.role,
+      role: selectedRole,
       patientName: patientData?.name || "Unknown Patient",
     };
     await db.OfflineWrites.update(saveResult.entry.id, {

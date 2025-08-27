@@ -172,10 +172,9 @@ export const handleAssignUserToPatientEdit = async (
   }
 
   // Navigate to the patient users page with offlineEntryId in query params
-  navigate(`/facility/${entry.facilityId}/patient/${patientId}`, {
+  navigate(`/facility/${entry.facilityId}/patient/${patientId}/users`, {
     query: {
       offlineEntryId: entry.id,
-      tab: "users",
     },
   });
 };

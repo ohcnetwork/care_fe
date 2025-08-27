@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import {
   DehydratedState,
   hydrate,
@@ -17,17 +18,23 @@ import { createUserPersister } from "@/OfflineSupport/createUserPersister";
  */
 export async function checkBackendReachable(): Promise<boolean> {
   try {
-    const res = await fetch("/ping", { method: "GET" });
-    const ok = res.ok;
-    onlineManager.setOnline(ok);
-    return ok;
+    const res = await fetch(careConfig.pingUrl, {
+      method: "GET",
+    });
+
+    if (!res.ok) {
+      return false;
+    }
+
+    const data = await res.json();
+    const isOnline = data.status === "OK";
+    return isOnline;
   } catch {
-    onlineManager.setOnline(false);
     return false;
   }
 }
 
-const TRANSITION_DELAY = 1500;
+const TRANSITION_DELAY = 1000;
 const OFFLINE_POLL_INTERVAL = 5000; // Poll every 5s when offline
 
 export default function useNetworkStatus() {
@@ -41,7 +48,23 @@ export default function useNetworkStatus() {
   const transitionTimeout = useRef<number | null>(null);
   const offlinePollInterval = useRef<number | null>(null);
 
-  // --- Restore persisted cache ---
+  const startOfflinePolling = () => {
+    if (!offlinePollInterval.current) {
+      offlinePollInterval.current = window.setInterval(async () => {
+        const reachable = await checkBackendReachable();
+        if (reachable) goOnline();
+      }, OFFLINE_POLL_INTERVAL);
+    }
+  };
+
+  const stopOfflinePolling = () => {
+    if (offlinePollInterval.current) {
+      clearInterval(offlinePollInterval.current);
+      offlinePollInterval.current = null;
+    }
+  };
+
+  // Restore persisted cache
   const restorePersistedCache = async () => {
     if (!persistor) return;
     const restored = await persistor.restoreClient();
@@ -51,7 +74,7 @@ export default function useNetworkStatus() {
     }
   };
 
-  // --- Transition ONLINE ---
+  // Transition ONLINE
   const goOnline = async () => {
     if (!onlineManager.isOnline()) {
       onlineManager.setOnline(true);
@@ -61,13 +84,10 @@ export default function useNetworkStatus() {
     setIsChecked(true);
 
     // Stop offline polling
-    if (offlinePollInterval.current) {
-      clearInterval(offlinePollInterval.current);
-      offlinePollInterval.current = null;
-    }
+    stopOfflinePolling();
   };
 
-  // --- Transition OFFLINE ---
+  // Transition OFFLINE
   const goOffline = async () => {
     if (onlineManager.isOnline()) {
       onlineManager.setOnline(false);
@@ -76,16 +96,9 @@ export default function useNetworkStatus() {
       queryClient.invalidateQueries({ queryKey: ["refresh-token"] });
     }
 
-    // Start offline polling
-    if (!offlinePollInterval.current) {
-      offlinePollInterval.current = window.setInterval(async () => {
-        const reachable = await checkBackendReachable();
-        if (reachable) goOnline();
-      }, OFFLINE_POLL_INTERVAL);
-    }
+    startOfflinePolling();
   };
 
-  // --- Debounced setter ---
   const setOnlineState = (online: boolean) => {
     if (currentState.current === online) return;
 
@@ -100,7 +113,7 @@ export default function useNetworkStatus() {
     }, TRANSITION_DELAY);
   };
 
-  // --- Check on mount & on focus ---
+  //  Check on mount & on focus
   const updateStatus = async () => {
     const reachable = await checkBackendReachable();
     setOnlineState(reachable);
@@ -109,14 +122,30 @@ export default function useNetworkStatus() {
   useEffect(() => {
     if (!isRestoring) updateStatus();
 
-    // window.addEventListener("focus", updateStatus);
+    // Listen to onlineManager status changes
+    const unsubscribe = onlineManager.subscribe((online) => {
+      if (!online && !offlinePollInterval.current) {
+        startOfflinePolling();
+      } else if (online) {
+        stopOfflinePolling();
+      }
+    });
+
+    window.addEventListener("focus", updateStatus);
     return () => {
-      ///  window.removeEventListener("focus", updateStatus);
+      window.removeEventListener("focus", updateStatus);
       if (transitionTimeout.current) clearTimeout(transitionTimeout.current);
-      if (offlinePollInterval.current)
-        clearInterval(offlinePollInterval.current);
+      stopOfflinePolling();
+      unsubscribe();
     };
   }, [isRestoring]);
+
+  // Check if we're already offline and start polling if needed
+  useEffect(() => {
+    if (!onlineManager.isOnline() && !offlinePollInterval.current) {
+      startOfflinePolling();
+    }
+  }, []);
 
   return { isChecked, isOnline: onlineManager.isOnline() };
 }

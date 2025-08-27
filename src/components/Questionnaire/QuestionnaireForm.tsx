@@ -472,6 +472,39 @@ export function QuestionnaireForm({
     enabled: !!questionnaireSlug && !FIXED_QUESTIONNAIRES[questionnaireSlug],
   });
 
+  const handleOfflineQueue = async (BatchRequestBodyData: BatchRequestBody) => {
+    if (!facilityId) {
+      toast.error(t("facility_id_required_for_offline_submission"));
+      return;
+    }
+
+    await queueQuestionnairBatchrequest({
+      questionnairPaylod: BatchRequestBodyData,
+      queryClient,
+      authUser,
+      patientId,
+      encounterId,
+      facilityId,
+      t,
+      db,
+      onSuccess: () => {
+        setServerErrors(undefined);
+        toast.success(t("questionnaire_submitted_successfully"));
+        onSubmit?.();
+      },
+      onError: (error) => {
+        console.error("Error while submit Questionnaire", error);
+        toast.error(
+          t("unexpected_error_while_saving_offline", {
+            item: "questionnair",
+          }),
+        );
+      },
+    });
+
+    return;
+  };
+
   const { mutate: submitBatch, isPending } = useMutation<
     { results: BatchSubmissionResult[] },
     HTTPError,
@@ -490,36 +523,7 @@ export function QuestionnaireForm({
     onError: async (error, variables) => {
       if (error.message === "Network Error" && variables) {
         onlineManager.setOnline(false);
-        if (!facilityId) {
-          toast.error(t("facility_id_required_for_offline_submission"));
-          return;
-        }
-
-        await queueQuestionnairBatchrequest({
-          questionnairPaylod: variables,
-          queryClient,
-          authUser,
-          patientId,
-          encounterId,
-          facilityId,
-          t,
-          db,
-          onSuccess: () => {
-            setServerErrors(undefined);
-            toast.success(t("questionnaire_submitted_successfully"));
-            onSubmit?.();
-          },
-          onError: (error) => {
-            console.error("Error while submit Questionnaire", error);
-            toast.error(
-              t("unexpected_error_while_saving_offline", {
-                item: "questionnair",
-              }),
-            );
-          },
-        });
-
-        return;
+        await handleOfflineQueue(variables);
       }
 
       const errorData = error.cause as {
@@ -999,6 +1003,11 @@ export function QuestionnaireForm({
         });
       }
     });
+
+    if (!onlineManager.isOnline()) {
+      await handleOfflineQueue({ requests });
+      return;
+    }
 
     submitBatch({ requests });
   };

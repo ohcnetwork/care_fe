@@ -8,7 +8,7 @@ import {
   isWithinInterval,
   startOfToday,
 } from "date-fns";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+
+import { useOfflineEntry } from "@/hooks/useOfflineEntry";
 
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
@@ -40,6 +42,8 @@ interface AppointmentSlotPickerProps {
   setOfflineSelectedSlot?: (slot: TokenSlot | undefined) => void;
   setSelectedMonthOffline?: (month: Date) => void;
   setSelectedDateOffline?: (month: Date) => void;
+  selectedDateOffline?: Date;
+  selectedMonthOffline?: Date;
   selectedSlotId?: string;
   onSlotDetailsChange?: (slot: TokenSlot) => void;
   currentAppointment?: Appointment;
@@ -54,6 +58,8 @@ export function AppointmentSlotPicker({
   onSlotDetailsChange,
   setSelectedMonthOffline,
   setSelectedDateOffline,
+  selectedDateOffline,
+  selectedMonthOffline,
   currentAppointment,
 }: AppointmentSlotPickerProps) {
   const { t } = useTranslation();
@@ -65,6 +71,19 @@ export function AppointmentSlotPicker({
     userId: resourceId,
     month: selectedMonth,
   });
+  const { offlineEntryId } = useOfflineEntry();
+
+  useEffect(() => {
+    if (selectedDateOffline && offlineEntryId) {
+      setSelectedDate(selectedDateOffline);
+    }
+  }, [selectedDateOffline, offlineEntryId]);
+
+  useEffect(() => {
+    if (selectedMonthOffline && offlineEntryId) {
+      setSelectedMonth(selectedMonthOffline);
+    }
+  }, [selectedMonthOffline, offlineEntryId]);
 
   const slotsQuery = useQuery({
     queryKey: ["slots", facilityId, resourceId, dateQueryString(selectedDate)],

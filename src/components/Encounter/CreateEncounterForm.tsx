@@ -180,34 +180,36 @@ export default function CreateEncounterForm({
       // If network error, mark offline and push to offline queue
       if (error.message === "Network Error" && variables) {
         onlineManager.setOnline(false);
-
-        // Immediately store offline
-        await queueNewEncounterOffline({
-          encounterRequestData: variables,
-          userId: user.id,
-          facilityId,
-          patientId,
-          queryClient,
-          authUser: user,
-          selectedTags,
-          offlineSelectedOrganizations,
-          appointmentId: appointment,
-          onSuccess: (encounterId) => {
-            toast.success(t("encounter_created_offline"));
-            setIsOpen(false);
-            form.reset();
-            navigate(
-              `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
-            );
-          },
-          onError: (queueError) => {
-            console.error("Error saving offline encounter:", queueError);
-            toast.error(t("offline_encounter_create_error"));
-          },
-        });
+        await handleOfflineQueue(variables);
       }
     },
   });
+
+  const handleOfflineQueue = async (encounterRequestData: EncounterCreate) => {
+    await queueNewEncounterOffline({
+      encounterRequestData,
+      userId: user.id,
+      facilityId,
+      patientId,
+      queryClient,
+      authUser: user,
+      selectedTags,
+      offlineSelectedOrganizations,
+      appointmentId: appointment,
+      onSuccess: (encounterId) => {
+        toast.success(t("encounter_created_offline"));
+        setIsOpen(false);
+        form.reset();
+        navigate(
+          `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+        );
+      },
+      onError: (queueError) => {
+        console.error("Error saving offline encounter:", queueError);
+        toast.error(t("offline_encounter_create_error"));
+      },
+    });
+  };
 
   useEffect(() => {
     if (offlineEntryId) {
@@ -270,6 +272,10 @@ export default function CreateEncounterForm({
       tags: data.tags,
       appointment: appointment,
     };
+    if (!onlineManager.isOnline()) {
+      await handleOfflineQueue(encounterRequest);
+      return;
+    }
     createEncounter(encounterRequest);
   }
 

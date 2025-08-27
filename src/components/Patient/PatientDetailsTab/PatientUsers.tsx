@@ -94,7 +94,6 @@ export function AddUserSheet({
         user: UserReadMinimal;
         role: RoleBase;
       };
-
       if (normalizedData.user && !selectedUser) {
         setSelectedUser(normalizedData.user);
       }
@@ -134,31 +133,7 @@ export function AddUserSheet({
       // If network error, mark offline and push to offline queue
       if (error.message === "Network Error") {
         onlineManager.setOnline(false);
-        if (!selectedUser || !selectedRole) {
-          toast.error(t("please_select_both_user_and_role"));
-          return;
-        }
-        await queueAssignUserToPatient({
-          assignUserData: variables,
-          selectedUser,
-          users,
-          patientId,
-          facilityId,
-          authUser,
-          queryClient,
-          patientData,
-          t,
-          onSuccess: () => {
-            toast.success(t("user_added_to_patient_successfully"));
-            setOpen(false);
-            setSelectedUser(undefined);
-            setSelectedRole(undefined);
-          },
-          onError: (error) => {
-            console.error("Error while queueing assign user offline:", error);
-            toast.error(t("error_while_queueing_assign_user_offline"));
-          },
-        });
+        await handleAddUserOfflineQueue(variables);
         return;
       }
 
@@ -168,6 +143,38 @@ export function AddUserSheet({
       });
     },
   });
+
+  const handleAddUserOfflineQueue = async (assignUserData: {
+    user: string;
+    role: string;
+  }) => {
+    if (!selectedUser || !selectedRole) {
+      toast.error(t("please_select_both_user_and_role"));
+      return;
+    }
+    await queueAssignUserToPatient({
+      assignUserData: assignUserData,
+      selectedUser,
+      selectedRole,
+      users,
+      patientId,
+      facilityId,
+      authUser,
+      queryClient,
+      patientData,
+      t,
+      onSuccess: () => {
+        toast.success(t("user_added_to_patient_successfully"));
+        setOpen(false);
+        setSelectedUser(undefined);
+        setSelectedRole(undefined);
+      },
+      onError: (error) => {
+        console.error("Error while queueing assign user offline:", error);
+        toast.error(t("error_while_queueing_assign_user_offline"));
+      },
+    });
+  };
 
   const handleAddUser = async () => {
     if (!selectedUser || !selectedRole) {
@@ -179,6 +186,11 @@ export function AddUserSheet({
       user: selectedUser.id,
       role: selectedRole.id,
     };
+
+    if (!onlineManager.isOnline()) {
+      await handleAddUserOfflineQueue(assignUserData);
+      return;
+    }
 
     assignUser(assignUserData);
   };
@@ -341,28 +353,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
       // If network error, mark offline and push to offline queue
       if (error.message === "Network Error") {
         onlineManager.setOnline(false);
-        const userToRemove = users?.results?.find((u) => u.id === variables);
-        if (!userToRemove) {
-          toast.error(t("user_not_found"));
-          return;
-        }
-        await queueRemoveUserFromPatient({
-          removeUserId: variables,
-          userToRemove: userToRemove,
-          patientId,
-          facilityId,
-          authUser,
-          patientData,
-          queryClient,
-          t,
-          onSuccess: () => {
-            toast.success(t("user_removed_successfully"));
-          },
-          onError: (error) => {
-            console.error("Error queuing remove user offline:", error);
-            toast.error(t("error_while_remove_user_offline"));
-          },
-        });
+        await handleRemoveUserOfflineQueue(variables);
         return;
       }
       const errorData = error.cause as { errors: { msg: string }[] };
@@ -372,9 +363,39 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
     },
   });
 
+  const handleRemoveUserOfflineQueue = async (userId: string) => {
+    const userToRemove = users?.results?.find((u) => u.id === userId);
+    if (!userToRemove) {
+      toast.error(t("user_not_found"));
+      return;
+    }
+    await queueRemoveUserFromPatient({
+      removeUserId: userId,
+      userToRemove: userToRemove,
+      patientId,
+      facilityId,
+      authUser,
+      patientData,
+      queryClient,
+      t,
+      onSuccess: () => {
+        toast.success(t("user_removed_successfully"));
+      },
+      onError: (error) => {
+        console.error("Error queuing remove user offline:", error);
+        toast.error(t("error_while_remove_user_offline"));
+      },
+    });
+  };
+
   const handleRemoveUser = async (userId: string) => {
     if (!userId) {
       toast.error(t("user_id_missing"));
+      return;
+    }
+
+    if (!onlineManager.isOnline()) {
+      await handleRemoveUserOfflineQueue(userId);
       return;
     }
 

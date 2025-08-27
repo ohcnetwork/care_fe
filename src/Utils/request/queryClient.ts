@@ -6,6 +6,7 @@ import {
   hydrate,
   onlineManager,
 } from "@tanstack/react-query";
+import i18next from "i18next";
 import { toast } from "sonner";
 
 import { createUserPersister } from "@/OfflineSupport/createUserPersister";
@@ -48,9 +49,8 @@ const queryClient = new QueryClient({
           error.message === "Network Error" ||
           (error instanceof HTTPError && [502, 503, 504].includes(error.status))
         ) {
-          // Note: Translation will be handled by the component using this query client
           if (onlineManager.isOnline()) {
-            toast.warning("You are offline");
+            toast.warning(i18next.t("you_are_offline"));
           }
           onlineManager.setOnline(false);
           return failureCount < 3;
@@ -69,7 +69,7 @@ const queryClient = new QueryClient({
         return;
       }
       if (onlineManager.isOnline()) {
-        toast.warning("You are offline");
+        toast.warning(i18next.t("you_are_offline"));
       }
       onlineManager.setOnline(false);
       await restorePersistedCache(queryClient);
@@ -83,15 +83,14 @@ const queryClient = new QueryClient({
       }
 
       if (onlineManager.isOnline()) {
-        toast.warning("You are offline");
+        toast.warning(i18next.t("you_are_offline"));
       }
       onlineManager.setOnline(false);
       await restorePersistedCache(queryClient);
     },
     onSuccess: async () => {
       if (!onlineManager.isOnline()) {
-        toast.success("You are online");
-        // Restore cache when coming back online
+        toast.success(i18next.t("welcome_back_you_are_online"));
       }
       onlineManager.setOnline(true);
       await restorePersistedCache(queryClient);

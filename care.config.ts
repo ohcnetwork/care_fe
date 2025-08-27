@@ -154,6 +154,7 @@ const careConfig = {
 
   queryGcTime,
   queryPersistMaxAge,
+  pingUrl: env.REACT_PING_URL || "https://care-api.do.ohc.network/ping",
 
   cleanupSucessOfflineRecords: env.REACT_OFFLINE_CLEANUP_AFTER_SECONDS
     ? parseInt(env.REACT_OFFLINE_CLEANUP_AFTER_SECONDS, 10)

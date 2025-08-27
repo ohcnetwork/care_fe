@@ -17,7 +17,8 @@ export function useOfflineEntry() {
         setIsLoadingOfflineEntry(true);
         try {
           const entry = await db.OfflineWrites.get(offlineEntryId);
-          if (entry && entry.normalizedData) {
+
+          if (entry) {
             setOfflineEntry(entry);
           }
         } catch (error) {
