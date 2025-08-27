@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building, FolderOpen, PenLine, Trash } from "lucide-react";
+import { Building, FolderOpen, Trash } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -79,7 +79,9 @@ function DeleteOrgDialog({
     },
   });
 
-  const canDelete = parentId ? true : !org.has_children;
+  const canDelete = parentId
+    ? true
+    : !org.has_children && org.org_type !== "govt";
 
   return (
     <AlertDialog>
@@ -174,26 +176,18 @@ function OrganizationCard({
             organizationType={organizationType}
             parentId={parentId}
             org={org}
-            trigger={
-              <Button
-                data-cy="edit-organization"
-                variant="white"
-                size="sm"
-                className="font-semibold"
-              >
-                {t("edit")}
-              </Button>
-            }
           />
 
-          <Button variant="white" size="sm" className="font-semibold" asChild>
-            <Link
-              href={`/admin/organizations/${organizationType}/${org.id}`}
-              data-cy="view-organization"
-            >
-              {t("see_details")}
-            </Link>
-          </Button>
+          {org.org_type !== "role" && org.org_type !== "product_supplier" && (
+            <Button variant="white" size="sm" className="font-semibold" asChild>
+              <Link
+                href={`/admin/organizations/${organizationType}/${org.id}`}
+                data-cy="view-organization"
+              >
+                {t("see_details")}
+              </Link>
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -252,12 +246,6 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
           <AdminOrganizationFormSheet
             organizationType={organizationType}
             parentId={id}
-            trigger={
-              <Button className="w-full" data-cy="add-organization-button">
-                <CareIcon icon="l-plus" className="mr-2 size-4" />
-                {t("add_organization")}
-              </Button>
-            }
           />
         </div>
       </div>
@@ -287,12 +275,20 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
                     {children.results.map((org) => (
                       <TableRow
                         key={org.id}
-                        onClick={() =>
-                          navigate(
-                            `/admin/organizations/${organizationType}/${org.id}`,
-                          )
+                        onClick={
+                          org.org_type === "govt"
+                            ? () =>
+                                navigate(
+                                  `/admin/organizations/${organizationType}/${org.id}`,
+                                )
+                            : undefined
                         }
-                        className="hover:cursor-pointer group"
+                        className={
+                          org.org_type !== "role" &&
+                          org.org_type !== "product_supplier"
+                            ? "hover:cursor-pointer group"
+                            : ""
+                        }
                       >
                         <TableCell>
                           <div className="font-medium flex items-center gap-2 py-2">
@@ -326,25 +322,11 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div className="flex items-center justify-end gap-1">
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <AdminOrganizationFormSheet
-                                  organizationType={organizationType}
-                                  parentId={id}
-                                  org={org}
-                                  trigger={
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      data-cy="edit-organization-button"
-                                    >
-                                      <PenLine className="size-4" />
-                                    </Button>
-                                  }
-                                />
-                              </TooltipTrigger>
-                              <TooltipContent>{t("edit")}</TooltipContent>
-                            </Tooltip>
+                            <AdminOrganizationFormSheet
+                              organizationType={organizationType}
+                              parentId={id}
+                              org={org}
+                            />
 
                             <DeleteOrgDialog
                               org={org}

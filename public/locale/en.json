@@ -298,6 +298,7 @@
   "SYSTEM__govt_org_type__ward": "Ward",
   "SYSTEM__org_type__default": "Organization",
   "SYSTEM__org_type__govt": "Government",
+  "SYSTEM__org_type__product_supplier": "Product Supplier",
   "SYSTEM__org_type__role": "Role",
   "SYSTEM__org_type__team": "Team",
   "Select the locations where this service is available": "Select the locations where this service is available",
