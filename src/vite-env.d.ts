@@ -26,6 +26,7 @@ interface ImportMetaEnv {
   readonly REACT_ENABLED_APPS?: string;
   readonly REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB?: string;
   readonly REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION?: string;
+  readonly REACT_PING_URL?: string;
 
   // Plugins related envs...
   readonly REACT_SENTRY_DSN?: string;
