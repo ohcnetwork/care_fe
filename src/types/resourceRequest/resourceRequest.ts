@@ -1,5 +1,3 @@
-import { UserBareMinimum } from "@/components/Users/models";
-
 import { PatientRead } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
 import { UserReadMinimal } from "@/types/user/user";
@@ -83,7 +81,7 @@ export interface UpdateResourceRequest {
 
 export interface CommentModel {
   id: string;
-  created_by: UserBareMinimum;
+  created_by: UserReadMinimal;
   created_date: string;
   comment: string;
 }
