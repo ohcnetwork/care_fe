@@ -232,9 +232,8 @@ export default function AppointmentDetail(props: Props) {
     },
 
     onError: async (error, variables) => {
-      // If network error, mark offline and push to offline queue
+      // If network error, push to offline queue
       if (error.message === "Network Error" && variables) {
-        onlineManager.setOnline(false);
         await handleAppointmentUpdateOfflineQueue(variables);
         return;
       }
@@ -833,9 +832,8 @@ const AppointmentActions = ({
       });
     },
     onError: async (error, variables) => {
-      // If network error, mark offline and push to offline queue
+      // If network error, push to offline queue
       if (error.message === "Network Error" && variables) {
-        onlineManager.setOnline(false);
         await handleAppointmentCancelOfflineQueue(variables);
         return;
       }
@@ -912,9 +910,8 @@ const AppointmentActions = ({
         );
       },
       onError: async (error, variables) => {
-        // If network error, mark offline and push to offline queue
+        // If network error, push to offline queue
         if (error.message === "Network Error" && variables) {
-          onlineManager.setOnline(false);
           await handleAppointmentRescheduleOfflineQueue(variables);
           return;
         }

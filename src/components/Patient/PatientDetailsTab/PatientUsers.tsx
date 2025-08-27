@@ -130,9 +130,8 @@ export function AddUserSheet({
       setSelectedRole(undefined);
     },
     onError: async (error, variables) => {
-      // If network error, mark offline and push to offline queue
+      // If network error, push to offline queue
       if (error.message === "Network Error") {
-        onlineManager.setOnline(false);
         await handleAddUserOfflineQueue(variables);
         return;
       }
@@ -350,9 +349,8 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
       toast.success(t("user_removed_successfully"));
     },
     onError: async (error, variables) => {
-      // If network error, mark offline and push to offline queue
+      // If network error, push to offline queue
       if (error.message === "Network Error") {
-        onlineManager.setOnline(false);
         await handleRemoveUserOfflineQueue(variables);
         return;
       }

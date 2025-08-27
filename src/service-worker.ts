@@ -12,6 +12,7 @@ import { NavigationRoute, registerRoute } from "workbox-routing";
 declare const self: ServiceWorkerGlobalScope;
 
 const precacheFiles = self.__WB_MANIFEST || [];
+console.log("Service Worker: Precache files:", precacheFiles);
 precacheAndRoute(precacheFiles);
 clientsClaim();
 
@@ -64,20 +65,23 @@ self.addEventListener("notificationclick", (e) => {
     }),
   );
 });
+
 registerRoute(
   new NavigationRoute(async ({ request }) => {
-    const cachedResponse = await caches.match("/index.html");
+    // For SPA, always try to serve index.html first (handles all routes)
+    const cachedResponse = await caches.match("/index.html", {
+      ignoreSearch: true,
+    });
+
     if (cachedResponse) {
       return cachedResponse;
     }
 
     try {
-      return await fetch(request);
-    } catch {
-      //TODO: Handle offline case
-      // If the fetch fails,  return a custom offline page or message.
-      // For now, we return a simple text response.
+      const networkResponse = await fetch(request);
 
+      return networkResponse;
+    } catch (_error) {
       return new Response("Offline and no cached version available.", {
         status: 503,
         headers: { "Content-Type": "text/html" },

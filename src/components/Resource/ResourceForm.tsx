@@ -212,9 +212,8 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       navigate(`/facility/${facilityId}/resource/${data.id}`);
     },
     onError: async (error, variables) => {
-      // If network error, mark offline and push to offline queue
+      // If network error, push to offline queue
       if (error.message === "Network Error" && variables) {
-        onlineManager.setOnline(false);
         await handleOfflineQueue(variables, true);
         return;
       }
@@ -238,9 +237,8 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       navigate(`/facility/${facilityId}/resource/${data.id}`);
     },
     onError: async (error, variables) => {
-      // If network error, mark offline and push to offline queue
+      // If network error, push to offline queue
       if (error.message === "Network Error" && variables) {
-        onlineManager.setOnline(false);
         await handleOfflineQueue(variables, false);
         return;
       }

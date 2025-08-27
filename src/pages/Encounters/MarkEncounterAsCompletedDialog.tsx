@@ -81,7 +81,6 @@ export function MarkEncounterAsCompletedDialog(
     },
     onError: async (error, variables) => {
       if (error.message === "Network Error" && variables) {
-        onlineManager.setOnline(false);
         await handleOfflineQueue(variables);
       }
     },
