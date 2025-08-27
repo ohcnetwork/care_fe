@@ -140,7 +140,7 @@ export default function SupplyRequestForm({
     queryFn: query.debounced(productKnowledgeApi.listProductKnowledge, {
       queryParams: {
         facility: facilityId,
-        search: searchItem,
+        name: searchItem,
         status: "active",
       },
     }),
