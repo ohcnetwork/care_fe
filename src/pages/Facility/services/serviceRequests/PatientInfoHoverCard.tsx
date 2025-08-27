@@ -71,25 +71,27 @@ export const PatientInfoHoverCard = ({
           </div>
         </div>
         <div className="flex items-start border-t border-gray-200 pt-2">
-          <div className="flex flex-col gap-1 text-sm font-medium">
+          <div className="flex flex-col gap-1 text-sm font-medium w-full">
             <span className="text-gray-700">{t("location")}</span>
-            <div className="flex justify-between gap-2">
+            <div className="flex items-end justify-between gap-2 w-full">
               {addressText && (
-                <span className="text-gray-950">{addressText}</span>
+                <span className="text-gray-950 my-auto whitespace-break-spaces">
+                  {addressText}
+                </span>
               )}
               {links && links.length > 0 && (
-                <div className="flex flex-col justify-end items-end">
+                <div className="flex flex-col">
                   {links.map((link) => (
-                    <Button key={link} variant="link" size="sm" asChild>
-                      <Link
-                        href={link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <ExternalLink size={14} />
-                        {t("view_on_map")}
-                      </Link>
-                    </Button>
+                    <Link
+                      href={link}
+                      key={link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex gap-1 items-center"
+                    >
+                      <ExternalLink size={14} />
+                      {t("view_on_map")}
+                    </Link>
                   ))}
                 </div>
               )}
