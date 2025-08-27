@@ -527,13 +527,12 @@ export default function PatientIdentifierConfigForm({
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("status")}</FormLabel>
                       <FormControl>
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="mt-2">
                             <SelectValue placeholder={t("select_status")} />
                           </SelectTrigger>
                           <SelectContent>
