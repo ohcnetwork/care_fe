@@ -1,4 +1,18 @@
 import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from "@/components/ui/command";
+import {
+  useEncounterShortcutDisplays,
+  useEncounterShortcuts,
+} from "@/hooks/useEncounterShortcuts";
+import {
   ArrowBigRight,
   Building2,
   CheckCircle2,
@@ -13,24 +27,12 @@ import {
   Users,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
 
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-  CommandShortcut,
-} from "@/components/ui/command";
-
-import {
-  useEncounterShortcutDisplays,
-  useEncounterShortcuts,
-} from "@/hooks/useEncounterShortcuts";
+import { PLUGIN_Component } from "@/PluginEngine";
+import { useCareApps } from "@/hooks/useCareApps";
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
+import { useTranslation } from "react-i18next";
 
 interface ActionItem {
   id: string;
@@ -46,12 +48,14 @@ interface ActionGroup {
 }
 
 interface EncounterCommandDialogProps {
+  encounter: EncounterRead;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   trigger?: React.ReactNode;
 }
 
 export function EncounterCommandDialog({
+  encounter,
   open,
   onOpenChange,
   trigger,
@@ -376,6 +380,17 @@ export function EncounterCommandDialog({
               <CommandSeparator />
             </div>
           ))}
+          {useCareApps().some(
+            (plugin) => plugin.components?.PatientInfoCardActions,
+          ) && (
+            <CommandGroup heading={t("plugin_actions")} className="px-2">
+              <PLUGIN_Component
+                __name="PatientInfoCardActions"
+                encounter={encounter}
+                className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100 w-full py-2"
+              />
+            </CommandGroup>
+          )}
         </CommandList>
       </CommandDialog>
     </>
