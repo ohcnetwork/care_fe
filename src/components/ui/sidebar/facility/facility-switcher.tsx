@@ -20,14 +20,14 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-import { UserFacilityModel } from "@/components/Users/models";
+import { FacilityBareMinimum } from "@/types/facility/facility";
 
 export function FacilitySwitcher({
   facilities,
   selectedFacility,
 }: {
-  facilities: UserFacilityModel[];
-  selectedFacility: UserFacilityModel | null;
+  facilities: FacilityBareMinimum[];
+  selectedFacility: FacilityBareMinimum | null;
 }) {
   const { isMobile } = useSidebar();
   const { t } = useTranslation();
