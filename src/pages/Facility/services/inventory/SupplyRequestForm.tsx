@@ -144,6 +144,7 @@ export default function SupplyRequestForm({
         status: "active",
       },
     }),
+    enabled: searchItem.trim().length >= 3,
   });
 
   const productOptions =
