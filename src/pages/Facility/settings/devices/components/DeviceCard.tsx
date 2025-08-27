@@ -1,5 +1,4 @@
 import { Link } from "raviger";
-import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -32,15 +31,6 @@ interface Props {
 export default function DeviceCard({ device, encounter }: Props) {
   const { t } = useTranslation();
 
-  const textRef = useRef<HTMLDivElement>(null);
-  const [isTruncated, setIsTruncated] = useState(false);
-
-  useEffect(() => {
-    if (textRef.current) {
-      setIsTruncated(textRef.current.scrollWidth > textRef.current.clientWidth);
-    }
-  }, [device.registered_name]);
-
   return (
     <Link
       href={`/devices/${device.id}`}
@@ -61,18 +51,13 @@ export default function DeviceCard({ device, encounter }: Props) {
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <CardTitle
-                        ref={textRef}
-                        className="text-lg font-semibold truncate"
-                      >
+                      <CardTitle className="text-lg font-semibold truncate">
                         {device.registered_name}
                       </CardTitle>
                     </TooltipTrigger>
-                    {isTruncated && (
-                      <TooltipContent className="max-w-sm sm:max-w-md break-words">
-                        <p>{device.registered_name}</p>
-                      </TooltipContent>
-                    )}
+                    <TooltipContent className="max-w-sm sm:max-w-md break-words">
+                      <p>{device.registered_name}</p>
+                    </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
 
