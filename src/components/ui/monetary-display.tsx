@@ -88,4 +88,4 @@ function MonetaryAmountInput(props: React.ComponentProps<typeof Input>) {
   );
 }
 
-export { MonetaryDisplay, MonetaryAmountInput };
+export { MonetaryAmountInput, MonetaryDisplay };
