@@ -305,6 +305,7 @@ export default function CreateScheduleExceptionSheet({
                           <Input
                             type="time"
                             {...field}
+                            value={field.value || ""}
                             disabled={unavailableAllDay}
                           />
                         </FormControl>
@@ -323,6 +324,7 @@ export default function CreateScheduleExceptionSheet({
                           <Input
                             type="time"
                             {...field}
+                            value={field.value || ""}
                             disabled={unavailableAllDay}
                           />
                         </FormControl>
