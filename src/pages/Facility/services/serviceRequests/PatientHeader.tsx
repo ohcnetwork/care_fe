@@ -92,10 +92,12 @@ export function PatientHeader({
               <span className="text-sm font-semibold">{identifier.value}</span>
             </div>
           ))}
-          <div className="flex flex-col gap-1 items-start">
-            <span className="text-xs text-gray-700">{t("patient_tags")}:</span>
-            <div className="flex flex-wrap gap-2 text-sm whitespace-nowrap">
-              {patient.instance_tags?.length > 0 ? (
+          {patient.instance_tags?.length > 0 && (
+            <div className="flex flex-col gap-1 items-start">
+              <span className="text-xs text-gray-700">
+                {t("patient_tags")}:
+              </span>
+              <div className="flex flex-wrap gap-2 text-sm whitespace-nowrap">
                 <>
                   {patient.instance_tags.map((tag) => (
                     <Badge
@@ -108,11 +110,9 @@ export function PatientHeader({
                     </Badge>
                   ))}
                 </>
-              ) : (
-                <p className="text-sm text-gray-500">{t("no_tags")}</p>
-              )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
       {actions}
