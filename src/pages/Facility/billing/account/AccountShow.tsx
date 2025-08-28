@@ -41,7 +41,6 @@ import query from "@/Utils/request/query";
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import InvoicesData from "@/pages/Facility/billing/invoice/InvoicesData";
 import PaymentsData from "@/pages/Facility/billing/paymentReconciliation/PaymentsData";
-import { PatientHeader } from "@/pages/Facility/services/serviceRequests/components/PatientHeader";
 import {
   ACCOUNT_STATUS_COLORS,
   AccountBillingStatus,
@@ -52,6 +51,7 @@ import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
+import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
 import AccountSheet from "./AccountSheet";
 import ChargeItemsTable from "./components/ChargeItemsTable";
 
@@ -208,82 +208,35 @@ export function AccountShow({
         <CareIcon icon="l-arrow-left" className="size-4" />
         {t("back")}
       </Button>
-      <div className="flex justify-between items-center gap-2">
-        <PatientHeader patient={account.patient} facilityId={facilityId} />
-        <div className="flex gap-2">
-          <div className="hidden sm:flex gap-2">
-            {account.status === AccountStatus.active &&
-              !isAccountBillingClosed && (
-                <Button
-                  variant="link"
-                  className="text-gray-950 underline gap-0"
-                  onClick={() =>
-                    setCloseAccountStatus({
-                      ...closeAccountStatus,
-                      sheetOpen: true,
-                    })
-                  }
-                >
-                  <CareIcon icon="l-check" className="size-5" />
-                  {t("settle_close")}
-                </Button>
-              )}
-            {account.status === AccountStatus.active &&
-              !isAccountBillingClosed && (
-                <>
+      <PatientHeader
+        patient={account.patient}
+        facilityId={facilityId}
+        className="md:p-0 p-0"
+        actions={
+          <div className="flex gap-2">
+            <div className="hidden lg:flex gap-2">
+              {account.status === AccountStatus.active &&
+                !isAccountBillingClosed && (
                   <Button
-                    variant="outline"
-                    className="border-gray-400 text-gray-950"
+                    variant="link"
+                    className="text-gray-950 underline gap-0"
                     onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
-                      )
+                      setCloseAccountStatus({
+                        ...closeAccountStatus,
+                        sheetOpen: true,
+                      })
                     }
                   >
-                    <CareIcon icon="l-plus" className="mr-2 size-4" />
-                    {t("create_invoice")}
+                    <CareIcon icon="l-check" className="size-5" />
+                    {t("settle_close")}
                   </Button>
-
-                  <Button
-                    variant="primary"
-                    onClick={() => setIsPaymentSheetOpen(true)}
-                  >
-                    <CareIcon icon="l-plus" className="size-4" />
-                    {t("record_payment")}
-                  </Button>
-                </>
-              )}
-          </div>
-
-          {account.status === AccountStatus.active &&
-            !isAccountBillingClosed && (
-              <div className="sm:hidden">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                )}
+              {account.status === AccountStatus.active &&
+                !isAccountBillingClosed && (
+                  <>
                     <Button
                       variant="outline"
                       className="border-gray-400 text-gray-950"
-                    >
-                      {t("actions")}
-                      <ChevronDown className="size-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {account.status === AccountStatus.active &&
-                      !isAccountBillingClosed && (
-                        <DropdownMenuItem
-                          onClick={() =>
-                            setCloseAccountStatus({
-                              ...closeAccountStatus,
-                              sheetOpen: true,
-                            })
-                          }
-                        >
-                          <CareIcon icon="l-check" className="mr-2 size-5" />
-                          {t("settle_close")}
-                        </DropdownMenuItem>
-                      )}
-                    <DropdownMenuItem
                       onClick={() =>
                         navigate(
                           `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
@@ -292,19 +245,70 @@ export function AccountShow({
                     >
                       <CareIcon icon="l-plus" className="mr-2 size-4" />
                       {t("create_invoice")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
+                    </Button>
+
+                    <Button
+                      variant="primary"
                       onClick={() => setIsPaymentSheetOpen(true)}
                     >
-                      <CareIcon icon="l-plus" className="mr-2 size-4" />
+                      <CareIcon icon="l-plus" className="size-4" />
                       {t("record_payment")}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
-        </div>
-      </div>
+                    </Button>
+                  </>
+                )}
+            </div>
+
+            {account.status === AccountStatus.active &&
+              !isAccountBillingClosed && (
+                <div className="lg:hidden w-full">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild className="w-full">
+                      <Button
+                        variant="outline"
+                        className=" border-gray-400 text-gray-950"
+                      >
+                        {t("actions")}
+                        <ChevronDown className="size-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {account.status === AccountStatus.active &&
+                        !isAccountBillingClosed && (
+                          <DropdownMenuItem
+                            onClick={() =>
+                              setCloseAccountStatus({
+                                ...closeAccountStatus,
+                                sheetOpen: true,
+                              })
+                            }
+                          >
+                            <CareIcon icon="l-check" className="mr-2 size-5" />
+                            {t("settle_close")}
+                          </DropdownMenuItem>
+                        )}
+                      <DropdownMenuItem
+                        onClick={() =>
+                          navigate(
+                            `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
+                          )
+                        }
+                      >
+                        <CareIcon icon="l-plus" className="mr-2 size-4" />
+                        {t("create_invoice")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setIsPaymentSheetOpen(true)}
+                      >
+                        <CareIcon icon="l-plus" className="mr-2 size-4" />
+                        {t("record_payment")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+          </div>
+        }
+      />
       <div className="bg-gray-100 p-3 space-y-4 rounded-lg">
         <div className="bg-gray-100 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex flex-col md:flex-row md:items-center gap-8">

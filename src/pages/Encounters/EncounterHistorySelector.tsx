@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { CircleDashed } from "lucide-react";
+import { ChevronDown, CircleDashed } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -38,11 +38,7 @@ import {
   completedEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
-import {
-  TagConfig,
-  TagResource,
-  getTagHierarchyDisplay,
-} from "@/types/emr/tagConfig/tagConfig";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 
 interface EncounterCardProps {
@@ -61,54 +57,45 @@ function EncounterCard({
   return (
     <Card
       className={cn(
-        "rounded-md relative cursor-pointer transition-colors mb-2 w-full lg:w-80",
+        "rounded-md relative cursor-pointer transition-colors w-full lg:w-80",
         isSelected
-          ? "bg-white border-emerald-600"
+          ? "bg-white border-primary-600 shadow-md"
           : "bg-gray-100 hover:bg-gray-100 shadow-none",
       )}
       onClick={() => onSelect(encounter.id)}
     >
       {isSelected && (
-        <div className="absolute right-0 inset-y-5 w-1 bg-emerald-600 rounded-l" />
+        <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
       )}
-      <CardContent className="px-4 py-3">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="text-sm font-semibold">
-                {t(`encounter_class__${encounter.encounter_class}`)}
-              </div>
-              <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]}>
-                {t(`encounter_status__${encounter.status}`)}
-              </Badge>
-            </div>
-            <div className="text-xs text-gray-500 flex flex-wrap text-end justify-end">
-              {encounter.period.start && (
-                <span className="whitespace-nowrap">
-                  {format(new Date(encounter.period.start!), "dd MMM")}
-                </span>
-              )}
-              {encounter.period.end && encounter.period.start && (
-                <span>{" - "}</span>
-              )}
-              {encounter.period.end ? (
-                <span>{format(new Date(encounter.period.end), "dd MMM")}</span>
-              ) : (
-                <span>
-                  {" - "}
-                  {t("ongoing")}
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="text-xs text-gray-500">{encounter.facility.name}</div>
-          <div className="flex flex-wrap gap-1 text-xs">
-            {encounter.tags.map((tag) => (
-              <Badge variant="outline" key={tag.id} className="text-xs">
-                {getTagHierarchyDisplay(tag)}
-              </Badge>
-            ))}
-          </div>
+      <CardContent className="flex justify-between items-center px-4 py-3">
+        <div className="flex flex-col">
+          <span className="text-base font-semibold">
+            {t(`encounter_class__${encounter.encounter_class}`)}
+          </span>
+          <span className="text-sm font-medium text-gray-700">
+            {encounter.facility.name}
+          </span>
+          <span className="text-sm text-gray-600">
+            {encounter.period.start && (
+              <span>{format(new Date(encounter.period.start!), "dd MMM")}</span>
+            )}
+            {encounter.period.end && encounter.period.start && (
+              <span>{" - "}</span>
+            )}
+            {encounter.period.end ? (
+              <span>{format(new Date(encounter.period.end), "dd MMM")}</span>
+            ) : (
+              <span>
+                {" - "}
+                {t("ongoing")}
+              </span>
+            )}
+          </span>
+        </div>
+        <div>
+          <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]} size="sm">
+            {t(`encounter_status__${encounter.status}`)}
+          </Badge>
         </div>
       </CardContent>
     </Card>
@@ -130,8 +117,8 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
   const [dateTo, setDateTo] = useState<Date>();
 
   const {
-    currentEncounter,
-    currentEncounterId,
+    primaryEncounter,
+    primaryEncounterId,
     selectedEncounterId,
     setSelectedEncounter,
     patientId,
@@ -169,6 +156,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isFetching,
   } = useInfiniteQuery({
     queryKey: [
       "infinite-encounters",
@@ -184,7 +172,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
         queryParams: {
           limit: 14,
           offset: String(pageParam),
-          ...(completedEncounterStatus.includes(currentEncounter?.status ?? "")
+          ...(completedEncounterStatus.includes(primaryEncounter?.status ?? "")
             ? { patient_filter: patientId, facility: facilityId }
             : { patient: patientId }),
           ...(status && { status }),
@@ -204,13 +192,13 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
       const currentOffset = allPages.length * 14;
       return currentOffset < lastPage.count ? currentOffset : null;
     },
-    enabled: !!currentEncounter,
+    enabled: !!primaryEncounter,
   });
 
   const past = encounters?.pages.flatMap((page) => page.results) ?? [];
 
   const pastEncounters = past.filter(
-    (encounter) => encounter.id !== currentEncounterId,
+    (encounter) => encounter.id !== primaryEncounterId,
   );
 
   useEffect(() => {
@@ -221,7 +209,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
 
   return (
     <div className="space-y-4 pt-2">
-      {!currentEncounter ? (
+      {!primaryEncounter ? (
         <CardListSkeleton count={1} />
       ) : (
         <div>
@@ -230,8 +218,8 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
           </h2>
           <div className="space-y-2">
             <EncounterCard
-              encounter={currentEncounter}
-              isSelected={currentEncounterId === selectedEncounterId}
+              encounter={primaryEncounter}
+              isSelected={primaryEncounterId === selectedEncounterId}
               onSelect={() => handleSelect(null)}
             />
           </div>
@@ -298,7 +286,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
           )}
         </div>
 
-        <div>
+        <div className="flex flex-col gap-2">
           {!encounters ? (
             <CardListSkeleton count={5} />
           ) : pastEncounters.length > 0 ? (
@@ -318,7 +306,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
                   acc.push(
                     <div
                       key={`year-${currentYear}`}
-                      className="mb-2 text-sm font-medium text-indigo-700"
+                      className="-mb-1 text-sm font-medium text-indigo-700"
                     >
                       {currentYear}
                     </div>,
@@ -344,7 +332,9 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
           )}
           <div ref={ref} />
           {isFetchingNextPage && <CardListSkeleton count={5} />}
-          {!hasNextPage && <div className="border-b border-gray-300 pb-2" />}
+          {!hasNextPage && !isFetching && (
+            <div className="border-b border-gray-300 pb-2" />
+          )}
         </div>
       </div>
     </div>
@@ -377,8 +367,8 @@ export default function EncounterHistorySelector() {
           </SheetContent>
         </Sheet>
       </div>
-      <div className="hidden lg:block">
-        <ScrollArea className="h-[calc(100vh-10rem)] pr-3">
+      <div className="hidden lg:block pr-3">
+        <ScrollArea className="h-[calc(100vh-9rem)] pr-3">
           <EncounterHistoryList />
         </ScrollArea>
       </div>
@@ -396,26 +386,17 @@ const EncounterSheetTrigger = () => {
   }
 
   return (
-    <Card className="rounded-md relative cursor-pointer mb-2 w-full lg:w-80 bg-white border-emerald-600">
-      <CardContent className="px-4 py-3">
-        <div className="flex justify-between items-center">
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="text-base font-semibold">
-                  {t(`encounter_class__${encounter.encounter_class}`)}
-                </div>
-                <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]}>
-                  {t(`encounter_status__${encounter.status}`)}
-                </Badge>
-              </div>
-            </div>
-            <div className="text-xs text-gray-500 text-start">
-              {encounter.facility.name}
-            </div>
-            <div className="text-xs text-gray-500 flex flex-wrap text-start">
+    <Card className="relative rounded-md cursor-pointer w-full lg:w-80 bg-white border-primary-600">
+      <CardContent className="px-3 py-1 flex justify-between items-center">
+        <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
+        <div className="flex flex-col sm:flex-row sm:gap-3 items-start sm:items-center">
+          <span className="text-base font-semibold">
+            {t(`encounter_class__${encounter.encounter_class}`)}
+          </span>
+          <div className="flex flex-col sm:flex-row sm:gap-3 items-start sm:items-center">
+            <span className="text-sm text-gray-700">
               {encounter.period.start && (
-                <span className="whitespace-nowrap">
+                <span>
                   {format(new Date(encounter.period.start!), "dd MMM")}
                 </span>
               )}
@@ -430,10 +411,21 @@ const EncounterSheetTrigger = () => {
                   {t("ongoing")}
                 </span>
               )}
-            </div>
+            </span>
+            <div className="w-px h-4 bg-gray-300 hidden sm:block" />
+            <span className="text-sm text-gray-700">
+              {encounter.facility.name}
+            </span>
           </div>
-          <div className={buttonVariants({ variant: "outline", size: "icon" })}>
-            <CareIcon icon="l-history" />
+        </div>
+        <div className="flex gap-3 items-center">
+          <div className="my-2">
+            <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]}>
+              {t(`encounter_status__${encounter.status}`)}
+            </Badge>
+          </div>
+          <div className={buttonVariants({ variant: "ghost", size: "icon" })}>
+            <ChevronDown />
           </div>
         </div>
       </CardContent>

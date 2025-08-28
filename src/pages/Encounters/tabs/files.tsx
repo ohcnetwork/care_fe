@@ -1,22 +1,21 @@
 import { FilesTab } from "@/components/Files/FilesTab";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { FileType } from "@/types/files/file";
 
 export const EncounterFilesTab = () => {
   const {
     selectedEncounter: encounter,
     patient,
-    currentEncounterId,
+    canWriteSelectedEncounter,
   } = useEncounter();
-
-  const readOnly = encounter?.id !== currentEncounterId;
 
   return (
     <FilesTab
-      type="encounter"
+      type={FileType.ENCOUNTER}
       encounter={encounter}
       patient={patient}
-      readOnly={readOnly}
+      readOnly={!canWriteSelectedEncounter}
     />
   );
 };
