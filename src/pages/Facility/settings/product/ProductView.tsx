@@ -117,19 +117,11 @@ export default function ProductView({ facilityId, productId }: Props) {
             <h1 className="text-xl font-bold sm:text-2xl">
               {product.product_knowledge.name}
             </h1>
-            <p className="mt-1 text-sm text-gray-600">
-              {t("id")}: {product.id}
-            </p>
             <div className="mt-2">
               <Badge variant={PRODUCT_STATUS_COLORS[product.status]}>
                 {t(product.status)}
               </Badge>
             </div>
-            {product.batch?.lot_number && (
-              <p className="mt-2 text-sm text-gray-600">
-                {t("lot_number")}: {product.batch.lot_number}
-              </p>
-            )}
           </div>
           <Button
             variant="outline"
