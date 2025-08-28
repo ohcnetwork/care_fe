@@ -69,6 +69,7 @@ export function LocationSwitcher() {
         setLocation={setLocation}
         open={openDialog}
         setOpen={setOpenDialog}
+        myLocations={true}
       />
       <div className="flex flex-col items-start gap-4">
         <Button variant="ghost" onClick={() => navigate(fallbackUrl)}>
@@ -315,8 +316,8 @@ export function LocationSelectorDialog({
               >
                 <span>{t("done")}</span>
                 <span className="flex text-xs items-center gap-1 p-1 shadow rounded-md bg-green-900">
-                  {"shift"}
-                  {"+"}
+                  {t("shift_key")}
+                  {t("+")}
                   <CareIcon icon="l-corner-down-left" />
                 </span>
               </Button>
