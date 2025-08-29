@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -134,15 +135,12 @@ const MedicationStatusBadge: React.FC<MedicationStatusBadgeProps> = ({
   const { t } = useTranslation();
 
   return (
-    <span
-      className={`text-xs px-2 py-0.5 rounded-md font-medium ${
-        status === "active"
-          ? "text-emerald-900 bg-emerald-100"
-          : "text-gray-900 bg-gray-100"
-      }`}
+    <Badge
+      variant={status === "active" ? "green" : "secondary"}
+      className="text-xs"
     >
       {t(status)}
-    </span>
+    </Badge>
   );
 };
 
@@ -151,13 +149,13 @@ const MedicationBadges: React.FC<MedicationBadgesProps> = ({ medication }) => {
 
   return (
     <div className="flex flex-wrap gap-2 mt-1">
-      <span className="text-xs text-blue-900 bg-blue-100 px-2 py-0.5 rounded-md font-medium">
+      <Badge variant="blue" className="text-xs">
         {medication.dosage_instruction[0]?.route?.display || "Oral"}
-      </span>
+      </Badge>
       {medication.dosage_instruction[0]?.as_needed_boolean && (
-        <span className="text-xs text-pink-900 bg-pink-100 px-2 py-0.5 rounded-md font-medium">
+        <Badge variant="pink" className="text-xs">
           {t("as_needed_prn")}
-        </span>
+        </Badge>
       )}
       <MedicationStatusBadge status={medication.status} />
     </div>
