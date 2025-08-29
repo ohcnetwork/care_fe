@@ -70,7 +70,7 @@ export interface ProductDefinition {
 export interface ProductKnowledgeBase {
   id: string;
   slug: string;
-  alternate_identifier?: string;
+  alternate_identifier: string | null;
   product_type: ProductKnowledgeType;
   status: ProductKnowledgeStatus;
   code?: Code;

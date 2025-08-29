@@ -59,7 +59,11 @@ const formSchema = z.object({
   slug: z.string().min(1, "Slug is required"),
   product_type: z.nativeEnum(ProductKnowledgeType),
   status: z.nativeEnum(ProductKnowledgeStatus),
-  alternate_identifier: z.string().optional(),
+  alternate_identifier: z
+    .string()
+    .trim()
+    .transform((val) => (val == "" ? null : val))
+    .nullable(),
   code: codeSchema.nullable(),
   names: z
     .array(
@@ -172,7 +176,7 @@ function ProductKnowledgeFormContent({
         slug: existingData.slug,
         product_type: existingData.product_type,
         status: existingData.status,
-        alternate_identifier: existingData.alternate_identifier || "",
+        alternate_identifier: existingData.alternate_identifier || null,
         code: existingData.code?.code ? existingData.code : null,
         names: existingData.names || [],
         storage_guidelines: existingData.storage_guidelines || [],
@@ -190,6 +194,7 @@ function ProductKnowledgeFormContent({
       storage_guidelines: [],
       code: null,
       definitional: null,
+      alternate_identifier: null,
       status: ProductKnowledgeStatus.active,
     };
   };
@@ -257,6 +262,8 @@ function ProductKnowledgeFormContent({
   );
 
   const isPending = isCreating || isUpdating;
+
+  console.log(form.watch("alternate_identifier"));
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     // Convert null to undefined where needed to match API types
@@ -464,7 +471,7 @@ function ProductKnowledgeFormContent({
                           {t("product_knowledge_alternate_identifier")}
                         </FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
