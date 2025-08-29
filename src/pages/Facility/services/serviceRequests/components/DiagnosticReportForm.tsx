@@ -158,19 +158,20 @@ export function DiagnosticReportForm({
   });
 
   // Query to fetch files for the diagnostic report
-  const { data: files = { results: [], count: 0 }, refetch: refetchFiles } =
-    useQuery<PaginatedResponse<FileReadMinimal>>({
-      queryKey: ["files", "diagnostic_report", fullReport?.id],
-      queryFn: query(fileApi.list, {
-        queryParams: {
-          file_type: "diagnostic_report",
-          associating_id: fullReport?.id,
-          limit: 100,
-          offset: 0,
-        },
-      }),
-      enabled: !!fullReport?.id,
-    });
+  const { data: files = { results: [], count: 0 } } = useQuery<
+    PaginatedResponse<FileReadMinimal>
+  >({
+    queryKey: ["files", "diagnostic_report", fullReport?.id],
+    queryFn: query(fileApi.list, {
+      queryParams: {
+        file_type: "diagnostic_report",
+        associating_id: fullReport?.id,
+        limit: 100,
+        offset: 0,
+      },
+    }),
+    enabled: !!fullReport?.id,
+  });
 
   // Creating a new diagnostic report
   const { mutate: createDiagnosticReport, isPending: isCreatingReport } =
@@ -1233,7 +1234,6 @@ export function DiagnosticReportForm({
                             associatingId={fullReport.id}
                             canEdit={true}
                             showHeader={false}
-                            onRefetch={refetchFiles}
                           />
                         </div>
                       )}

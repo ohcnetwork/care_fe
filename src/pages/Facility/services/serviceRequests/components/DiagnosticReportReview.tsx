@@ -88,19 +88,20 @@ export function DiagnosticReportReview({
     }
   }, [fullReport]);
 
-  const { data: files = { results: [], count: 0 }, refetch: refetchFiles } =
-    useQuery<PaginatedResponse<FileReadMinimal>>({
-      queryKey: ["files", "diagnostic_report", fullReport?.id],
-      queryFn: query(fileApi.list, {
-        queryParams: {
-          file_type: "diagnostic_report",
-          associating_id: fullReport?.id,
-          limit: 100,
-          offset: 0,
-        },
-      }),
-      enabled: !!fullReport?.id,
-    });
+  const { data: files = { results: [], count: 0 } } = useQuery<
+    PaginatedResponse<FileReadMinimal>
+  >({
+    queryKey: ["files", "diagnostic_report", fullReport?.id],
+    queryFn: query(fileApi.list, {
+      queryParams: {
+        file_type: "diagnostic_report",
+        associating_id: fullReport?.id,
+        limit: 100,
+        offset: 0,
+      },
+    }),
+    enabled: !!fullReport?.id,
+  });
 
   const { mutate: updateDiagnosticReport, isPending: isUpdatingReport } =
     useMutation({
@@ -293,7 +294,6 @@ export function DiagnosticReportReview({
                         associatingId={fullReport.id}
                         canEdit={true}
                         showHeader={false}
-                        onRefetch={refetchFiles}
                       />
                     </CardContent>
                   </Card>
@@ -326,21 +326,22 @@ export function DiagnosticReportReview({
                           className="gap-2"
                         >
                           <CheckCircle2 className="h-4 w-4" />
-                          Approve Results
+                          {t("approve_results")}
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Confirm Approval</AlertDialogTitle>
+                          <AlertDialogTitle>
+                            {t("confirm_approval")}
+                          </AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to approve these diagnostic
-                            results? This action cannot be undone.
+                            {t("approve_diagnostic_results_confirmation")}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                           <AlertDialogAction onClick={handleApprove}>
-                            Approve
+                            {t("approve")}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
