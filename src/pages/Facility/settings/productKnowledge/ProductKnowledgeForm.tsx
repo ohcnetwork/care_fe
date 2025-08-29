@@ -263,8 +263,6 @@ function ProductKnowledgeFormContent({
 
   const isPending = isCreating || isUpdating;
 
-  console.log(form.watch("alternate_identifier"));
-
   function onSubmit(data: z.infer<typeof formSchema>) {
     // Convert null to undefined where needed to match API types
     const formattedData = {
