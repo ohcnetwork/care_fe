@@ -13,8 +13,8 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import WeekdayCheckbox, {
   DayOfWeek,
 } from "@/CAREUI/interactive/WeekdayCheckbox";
-
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -370,9 +370,9 @@ const AvailabilityEditor = ({
         <div className="flex items-center gap-3">
           <CareIcon icon="l-clock" className="text-lg text-blue-600" />
           <span className="font-semibold">{availability.name}</span>
-          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+          <Badge variant="blue" className="rounded-full text-xs">
             {t(`SCHEDULE_AVAILABILITY_TYPE__${availability.slot_type}`)}
-          </span>
+          </Badge>
         </div>
         <Button
           variant="ghost"

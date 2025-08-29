@@ -51,13 +51,13 @@ import {
 import specimenApi from "@/types/emr/specimen/specimenApi";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
 
+import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
 import AddMultipleChargeItemsSheet from "./components/AddMultipleChargeItemsSheet";
 import { ChargeItemCard } from "./components/ChargeItemCard";
 import { DiagnosticReportForm } from "./components/DiagnosticReportForm";
 import { DiagnosticReportReview } from "./components/DiagnosticReportReview";
 import { MultiQRCodePrintSheet } from "./components/MultiQRCodePrintSheet";
 import { ObservationHistorySheet } from "./components/ObservationHistorySheet";
-import { PatientHeader } from "./components/PatientHeader";
 import { ServiceRequestDetails } from "./components/ServiceRequestDetails";
 import { SpecimenForm } from "./components/SpecimenForm";
 import { SpecimenHistorySheet } from "./components/SpecimenHistorySheet";
@@ -391,7 +391,6 @@ export default function ServiceRequestShow({
             <PatientHeader
               patient={request.encounter.patient}
               facilityId={facilityId}
-              encounterId={request.encounter.id}
             />
           </div>
 
