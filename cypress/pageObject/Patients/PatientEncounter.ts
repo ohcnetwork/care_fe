@@ -62,7 +62,10 @@ export class PatientEncounter {
   }
 
   clickPatientDetailsButton() {
-    cy.get("svg.lucide-external-link").filter(":visible").first().click();
+    cy.get("[data-slot='patient-info-hover-card-trigger']")
+      .filter(":visible")
+      .click();
+    cy.get("a").contains("View Profile").click();
     return this;
   }
 
