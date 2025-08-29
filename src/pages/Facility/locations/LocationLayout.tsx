@@ -2,6 +2,7 @@ import { Redirect, useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
+import { PLUGIN_Component } from "@/PluginEngine";
 import BedsList from "@/pages/Facility/locations/BedsList";
 import { InventoryList } from "@/pages/Facility/services/inventory/InventoryList";
 import { ReceiveStock } from "@/pages/Facility/services/inventory/ReceiveStock";
@@ -58,6 +59,23 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       facilityId={facilityId}
       locationId={locationId}
       serviceRequestId={serviceRequestId}
+    />
+  ),
+
+  // Food Service
+  "/services/canteen": () => (
+    <PLUGIN_Component
+      __name="LocationCanteenDashboard"
+      facilityId={facilityId}
+      locationId={locationId}
+    />
+  ),
+
+  "/nutrition_orders": () => (
+    <PLUGIN_Component
+      __name="LocationCanteenDashboard"
+      facilityId={facilityId}
+      locationId={locationId}
     />
   ),
 

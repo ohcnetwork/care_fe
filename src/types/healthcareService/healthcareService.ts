@@ -9,6 +9,7 @@ export interface StylingMetadata {
 export enum InternalType {
   pharmacy = "pharmacy",
   lab = "lab",
+  food = "food",
 }
 
 export interface BaseHealthcareServiceSpec {

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { AppointmentQuestion } from "@/components/Questionnaire/QuestionTypes/AppointmentQuestion";
 
+import { PLUGIN_Component } from "@/PluginEngine";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import type {
   QuestionnaireResponse,
@@ -138,6 +139,22 @@ export function QuestionInput({
 
       case "structured":
         switch (question.structured_type) {
+          case "nutrition_order":
+            if (encounterId && facilityId) {
+              // This renders your plugin's component using the OFFICIAL hook.
+              // The __name MUST match the key we added to pluginTypes.ts.
+              return (
+                <PLUGIN_Component
+                  __name="NutritionOrderQuestion"
+                  facilityId={facilityId}
+                  patientId={patientId}
+                  encounterId={encounterId}
+                  question={question}
+                  updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
+                />
+              );
+            }
+            return <span>{t("encounter_information_required")}</span>;
           case "medication_request":
             if (encounterId) {
               return (

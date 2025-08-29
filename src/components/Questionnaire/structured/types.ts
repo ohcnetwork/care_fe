@@ -17,6 +17,20 @@ import {
   CreateAppointmentQuestion,
 } from "@/types/scheduling/schedule";
 
+// Nutrition order type - define it here since it's plugin-specific
+type NutritionOrderRequest = {
+  patient: string;
+  encounter: string;
+  facility: string;
+  location: string;
+  products: string[];
+  datetime: string;
+  status: string;
+  schedule: Record<string, any>;
+  note: string | null;
+  service_type: string;
+};
+
 // Map structured types to their data types
 export interface StructuredDataMap {
   allergy_intolerance: AllergyIntoleranceRequest;
@@ -30,6 +44,7 @@ export interface StructuredDataMap {
   time_of_death: string;
   service_request: ServiceRequestApplyActivityDefinitionSpec;
   charge_item: ApplyChargeItemDefinitionRequest;
+  nutrition_order: NutritionOrderRequest;
 }
 
 // Map structured types to their request types
@@ -47,6 +62,7 @@ export interface StructuredRequestMap {
     deceased_datetime: string;
   };
   charge_item: ApplyMultipleChargeItemDefinitionRequest;
+  nutrition_order: { datapoints: NutritionOrderRequest[] };
 }
 
 export type RequestTypeFor<T extends StructuredQuestionType> =

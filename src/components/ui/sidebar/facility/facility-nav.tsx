@@ -154,6 +154,12 @@ function generateFacilityLinks(
           name: t("product"),
           url: `${baseUrl}/settings/product`,
         },
+        ...pluginLinks
+          .filter((link) => link.url.startsWith("settings/"))
+          .map((link) => ({
+            name: link.name,
+            url: `${baseUrl}/${link.url}`,
+          })),
         // {
         //   name: t("patient_identifier_config"),
         //   url: `${baseUrl}/settings/patient_identifier_config`,
@@ -172,10 +178,12 @@ function generateFacilityLinks(
 
   return [
     ...links,
-    ...pluginLinks.map((l) => ({
-      ...l,
-      url: `${baseUrl}/${l.url}`,
-    })),
+    ...pluginLinks
+      .filter((link) => !link.url.startsWith("settings/"))
+      .map((l) => ({
+        ...l,
+        url: `${baseUrl}/${l.url}`,
+      })),
   ];
 }
 

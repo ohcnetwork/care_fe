@@ -152,7 +152,7 @@ function ValidationErrorDisplay({
             icon="l-exclamation-circle"
             className="size-5 text-red-500"
           />
-          <h3 className="font-medium text-red-700">Validation Errors</h3>
+          <h3 className="font-medium text-red-700">{t("validation_errors")}</h3>
         </div>
 
         {/* Server-level errors */}
@@ -314,6 +314,25 @@ const STRUCTURED_TYPE_VALIDATORS = {
   files: (response: ResponseValue | undefined, quesitonId: string) => {
     const files = (response?.value as FileUploadQuestion[]) || [];
     return validateFileUploadQuestion(files, quesitonId);
+  },
+  nutrition_order: (
+    response: ResponseValue | undefined,
+    questionId: string,
+    required?: boolean,
+  ) => {
+    // Basic validation for nutrition order data
+    const nutritionOrderData = response?.value;
+    if (required && !nutritionOrderData) {
+      return [
+        {
+          question_id: questionId,
+          error: "Nutrition order data is required",
+          type: "validation_error",
+        },
+      ];
+    }
+    // If data exists, assume it's valid since the component handles validation
+    return [];
   },
 } as const;
 
@@ -953,7 +972,7 @@ export function QuestionnaireForm({
 
         <DebugPreview
           data={questionnaireForms}
-          title="QuestionnaireForm"
+          title={t("questionnaire_form")}
           className="p-4 space-y-6 max-w-4xl m-2"
         />
       </div>

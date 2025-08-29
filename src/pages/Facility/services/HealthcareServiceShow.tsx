@@ -75,6 +75,21 @@ function LocationCard({
               <CareIcon icon="l-arrow-right" className="size-3 ml-1" />
             </Button>
           )}
+          {service_type === InternalType.food && (
+            <Button
+              onClick={() =>
+                navigate(
+                  `/facility/${facilityId}/locations/${location.id}/nutrition_orders/`,
+                )
+              }
+              variant="outline"
+              size="sm"
+              className="shrink-0 w-full sm:w-auto px-3 text-xs"
+            >
+              {t("view_canteen")}
+              <CareIcon icon="l-arrow-right" className="size-3 ml-1" />
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

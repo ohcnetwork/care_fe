@@ -1,5 +1,25 @@
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 
+const nutrition_order_questionnaire: QuestionnaireDetail = {
+  id: "nutrition_order",
+  slug: "nutrition_order",
+  version: "0.0.1",
+  title: "Nutrition Order",
+  status: "active",
+  subject_type: "encounter",
+  questions: [
+    {
+      id: "nutrition_order",
+      text: "Nutrition Order",
+      type: "structured",
+      structured_type: "nutrition_order", // This must match the case in QuestionInput.tsx
+      link_id: "1.1",
+      required: true,
+    },
+  ],
+  tags: [],
+};
+
 const encounterQuestionnaire: QuestionnaireDetail = {
   id: "encounter",
   slug: "encounter",
@@ -201,6 +221,11 @@ const charge_item_questionnaire: QuestionnaireDetail = {
 };
 
 export const STRUCTURED_QUESTIONS = [
+  {
+    value: "nutrition_order",
+    label: "Nutrition Order",
+    questionnaire: nutrition_order_questionnaire,
+  },
   {
     value: "allergy_intolerance",
     label: "Allergy Intolerance",

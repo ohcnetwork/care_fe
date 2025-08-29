@@ -33,6 +33,25 @@ const sanitizeNote = (note?: string | null): string | undefined => {
 export const structuredHandlers: {
   [K in StructuredQuestionType]: StructuredHandler<K>;
 } = {
+  nutrition_order: {
+    getRequests: async (nutritionOrders, { patientId, encounterId }) => {
+      if (!encounterId) return [];
+      return [
+        {
+          url: `/api/care_diet/nutrition-orders/upsert/`,
+          method: "POST",
+          body: {
+            datapoints: nutritionOrders.map((nutritionOrder) => ({
+              ...nutritionOrder,
+              encounter: encounterId,
+              patient: patientId,
+            })),
+          },
+          reference_id: "nutrition_order",
+        },
+      ];
+    },
+  },
   allergy_intolerance: {
     getRequests: async (allergies, { patientId, encounterId }) => {
       if (!encounterId) {

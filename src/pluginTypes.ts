@@ -14,6 +14,19 @@ import { QuestionnaireFormState } from "./components/Questionnaire/Questionnaire
 import { pluginMap } from "./pluginMap";
 import { FacilityRead } from "./types/facility/facility";
 
+export type NutritionOrderQuestionProps = {
+  facilityId: string;
+  patientId: string;
+  encounterId: string;
+  question: { id: string };
+  updateQuestionnaireResponseCB: (values: any[], questionId: string) => void;
+};
+
+export type LocationCanteenDashboardProps = {
+  facilityId: string;
+  locationId: string;
+};
+
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserReadMinimal;
 }>;
@@ -62,6 +75,8 @@ export type PatientDetailsTabDemographyGeneralInfoComponentType = React.FC<{
 
 // Define supported plugin components
 export type SupportedPluginComponents = {
+  NutritionOrderQuestion: React.FC<NutritionOrderQuestionProps>;
+  LocationCanteenDashboard: React.FC<LocationCanteenDashboardProps>;
   DoctorConnectButtons: DoctorConnectButtonComponentType;
   Scribe: ScribeComponentType;
   PatientHomeActions: PatientHomeActionsComponentType;
