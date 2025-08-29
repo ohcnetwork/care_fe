@@ -1,6 +1,4 @@
-
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import dayjs from "dayjs";
 import { Link } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -104,7 +102,6 @@ export const PatientHome = (props: {
       }
     >
       <div className="mt-3 overflow-y-auto" data-testid="patient-dashboard">
-
         <div className="flex flex-col gap-2">
           <PatientHeader
             patient={patientData}

@@ -38,7 +38,6 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 import { Avatar } from "@/components/Common/Avatar";
 import { RoleSelect } from "@/components/Common/RoleSelect";
 import UserSelector from "@/components/Common/UserSelector";
-import { AuthUserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import { useOfflineEntry } from "@/hooks/useOfflineEntry";
@@ -55,7 +54,7 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { RoleBase } from "@/types/emr/role/role";
-import { UserReadMinimal } from "@/types/user/user";
+import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 
 import { PatientProps } from ".";
 import {
@@ -66,7 +65,7 @@ import {
 interface AddUserSheetProps {
   patientId: string;
   users: PaginatedResponse<UserReadMinimal> | undefined;
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   patientData?: PatientRead;
   onClose?: () => void;
 }

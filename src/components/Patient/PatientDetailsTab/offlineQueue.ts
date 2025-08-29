@@ -1,8 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { AuthUserModel } from "@/components/Users/models";
-
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
@@ -14,7 +12,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { RoleBase } from "@/types/emr/role/role";
-import { UserReadMinimal } from "@/types/user/user";
+import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 
 interface QueueAssignUserToPatientParams {
   assignUserData: { user: string; role: string };
@@ -23,7 +21,7 @@ interface QueueAssignUserToPatientParams {
   users: PaginatedResponse<UserReadMinimal> | undefined;
   patientId: string;
   facilityId: string;
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   queryClient: QueryClient;
   patientData?: PatientRead;
   onSuccess?: () => void;
@@ -35,7 +33,7 @@ interface QueueRemoveUserFromPatientParams {
   userToRemove: UserReadMinimal;
   patientId: string;
   facilityId: string;
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   patientData: PatientRead;
   queryClient: QueryClient;
   onSuccess?: () => void;

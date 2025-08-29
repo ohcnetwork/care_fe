@@ -121,7 +121,6 @@ export const EncounterShow = (props: Props) => {
     primaryEncounter?.permissions ?? [],
   );
 
-
   useEncounterShortcuts();
 
   const { canViewClinicalData } = getPermissions(

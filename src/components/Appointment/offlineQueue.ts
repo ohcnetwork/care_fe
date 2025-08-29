@@ -1,8 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { AuthUserModel } from "@/components/Users/models";
-
 import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
@@ -29,13 +27,13 @@ import {
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { UserReadMinimal } from "@/types/user/user";
+import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 
 interface NormalizeAndSetQueryDataParams {
   entry: any;
   patientData: PatientRead;
   queryClient: QueryClient;
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   selectedSlot: TokenSlot | undefined;
   selectedPracticioner: UserReadMinimal | null;
   status: AppointmentNonCancelledStatus;
@@ -48,7 +46,7 @@ interface QueueAppointmentRecordOfflineParams {
   createAppointmentData: AppointmentCreateRequest;
   selectedSlot: TokenSlot | undefined;
   selectedPracticioner: UserReadMinimal | null;
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   status: AppointmentNonCancelledStatus;
   facilityId: string;
   patientId: string;
@@ -70,7 +68,7 @@ interface QueueRescheduleOfflineRecordParams {
   rescheduleAppointmentData: AppointmentRescheduleRequest;
   selectedSlot: TokenSlot | undefined;
   selectedPracticioner: UserReadMinimal;
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   appointment: Appointment;
   db: AppCacheDB;
   facilityId: string;
@@ -89,7 +87,7 @@ interface NormalizeAndSetQueryDataForRescheduleParams {
   entry: any;
   appointment: Appointment;
   queryClient: QueryClient;
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   selectedSlot: TokenSlot | undefined;
   selectedPracticioner: UserReadMinimal;
   rescheduleAppointmentData: AppointmentRescheduleRequest;
@@ -102,7 +100,7 @@ interface NormalizeAndSetQueryDataForRescheduleParams {
 interface QueueUpdateAppointmentRecordOfflineParams {
   updateAppointmentData: AppointmentUpdateRequest;
   appointment: Appointment;
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   status: AppointmentNonCancelledStatus;
   facilityId: string;
   queryClient: QueryClient;
@@ -118,7 +116,7 @@ interface QueueUpdateAppointmentRecordOfflineParams {
 interface QueueCancelAppointmentRecordParams {
   cancelAppointmentData: AppointmentCancelRequest;
   appointment: Appointment;
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   status: AppointmentCancelledStatus;
   facilityId: string;
   queryClient: QueryClient;
@@ -243,8 +241,8 @@ const normalizeAndSetQueryDataForReschedule = async ({
       ...normalizeUserBase(authUser),
       last_login: authUser?.last_login ?? "",
       profile_picture_url: authUser?.profile_picture_url ?? "",
-      mfa_enabled: authUser?.mfa_enabled ?? false,
-      deleted: authUser?.deleted ?? false,
+      mfa_enabled: false,
+      deleted: false,
     },
     is_updated_offline: true,
   };
@@ -305,7 +303,7 @@ const normalizeAndSetQueryDataForUpdate = async ({
   entry: any;
   appointment: Appointment;
   queryClient: QueryClient;
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   status: AppointmentNonCancelledStatus;
   facilityId: string;
   db: AppCacheDB;
@@ -361,7 +359,7 @@ const normalizeAndSetQueryDataForCancel = async ({
   entry: any;
   appointment: Appointment;
   queryClient: QueryClient;
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   status: AppointmentCancelledStatus;
   facilityId: string;
   db: AppCacheDB;

@@ -1,7 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
 
-import { AuthUserModel } from "@/components/Users/models";
-
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
@@ -18,7 +16,7 @@ import {
   ResourceRequest,
   UpdateResourceRequest,
 } from "@/types/resourceRequest/resourceRequest";
-import { UserReadMinimal } from "@/types/user/user";
+import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 
 interface QueueNewResourceRequestParams {
   resourcePayload: CreateResourceRequest;
@@ -26,7 +24,7 @@ interface QueueNewResourceRequestParams {
   facilityId: string;
   relatedPatient: string | undefined;
   queryClient: QueryClient;
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   patientData: PatientRead | undefined;
   assignFacility: FacilityRead | undefined;
   assignedToUser: UserReadMinimal | undefined;
@@ -40,7 +38,7 @@ interface QueueUpdatedResourceRequestParams {
   userId: string;
   facilityId: string;
   queryClient: QueryClient;
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   patientData: PatientRead | undefined;
   assignFacility: FacilityRead | undefined;
   assignedToUser: UserReadMinimal | undefined;
@@ -53,7 +51,7 @@ interface NormalizeAndSetQueryDataParams {
   entry: any;
   patientData: PatientRead | undefined;
   queryClient: QueryClient;
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   assignFacility: FacilityRead | undefined;
   assignedToUser: UserReadMinimal | undefined;
   resourceId: string;

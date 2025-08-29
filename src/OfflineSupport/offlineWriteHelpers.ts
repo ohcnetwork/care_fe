@@ -2,8 +2,6 @@ import { QueryClient } from "@tanstack/react-query";
 import { max, startOfToday } from "date-fns";
 import dayjs from "dayjs";
 
-import { AuthUserModel } from "@/components/Users/models";
-
 import { PaginatedResponse } from "@/Utils/request/types";
 import { dateQueryString, getMonthStartAndEnd } from "@/Utils/utils";
 import { BatchRequestBody } from "@/types/base/batch/batch";
@@ -22,8 +20,11 @@ import {
 } from "@/types/emr/patient/patient";
 import { Symptom } from "@/types/emr/symptom/symptom";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
-import { FacilityPublicRead, FacilityRead } from "@/types/facility/facility";
-import { FacilityBareMinimum } from "@/types/facility/facility";
+import {
+  FacilityBareMinimum,
+  FacilityPublicRead,
+  FacilityRead,
+} from "@/types/facility/facility";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { Organization } from "@/types/organization/organization";
 import { PatientIdentifier } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
@@ -41,10 +42,9 @@ import {
   AvailabilityHeatmapResponse,
   TokenSlot,
 } from "@/types/scheduling/schedule";
-import { UserBase, UserReadMinimal } from "@/types/user/user";
+import { CurrentUserRead, UserBase, UserReadMinimal } from "@/types/user/user";
 
-import { OfflineWritesEntry } from "./AppcacheDB";
-import { AppCacheDB } from "./AppcacheDB";
+import { AppCacheDB, OfflineWritesEntry } from "./AppcacheDB";
 import { OfflineKey } from "./offlineKeys";
 import { markWriteStatus, processDependentWrites } from "./writeQueue";
 
@@ -171,7 +171,7 @@ export const pickPatientCreateFields = (
 
 export const normalizeOfflinePatientRecord = (
   entry: OfflineWritesEntry,
-  user: AuthUserModel,
+  user: CurrentUserRead,
   selectedGeoLocation: Organization | null,
   selectedTags: TagConfig[],
   identifierforNormalize: PatientIdentifier[],
@@ -221,25 +221,30 @@ export const normalizeOfflinePatientRecord = (
       id: user.id,
       first_name: user.first_name,
       username: user.username,
-      email: user.email,
       last_name: user.last_name,
       user_type: user.user_type,
       last_login: user.last_login ?? "",
       profile_picture_url: user.profile_picture_url ?? "",
       suffix: user.suffix,
       prefix: user.prefix,
+      mfa_enabled: false,
+      deleted: false,
+      phone_number: user.phone_number,
+      gender: user.gender,
     },
 
     updated_by: {
       id: user.id,
       first_name: user.first_name,
       username: user.username,
-      email: user.email,
       last_name: user.last_name,
       user_type: user.user_type,
       last_login: user.last_login ?? "",
       profile_picture_url: user.profile_picture_url ?? "",
-
+      mfa_enabled: false,
+      deleted: false,
+      phone_number: user.phone_number,
+      gender: user.gender,
       suffix: user.suffix,
       prefix: user.prefix,
     },
@@ -253,7 +258,7 @@ export const normalizeOfflineEncounterRecord = (
   queryClient: QueryClient,
   entry: OfflineWritesEntry,
   patientData: PatientRead,
-  authUser: AuthUserModel,
+  authUser: CurrentUserRead,
   selectedTags: TagConfig[],
   permissions?: string[],
   currentOrganizations?: FacilityOrganizationRead[],
@@ -288,15 +293,19 @@ export const normalizeOfflineEncounterRecord = (
           ...normalizeUserBase(authUser),
           last_login: authUser.last_login ?? "",
           profile_picture_url: authUser.profile_picture_url ?? "",
-          mfa_enabled: authUser.mfa_enabled ?? false,
-          deleted: authUser.deleted ?? false,
+          mfa_enabled: false,
+          deleted: false,
+          phone_number: authUser.phone_number,
+          gender: authUser.gender,
         },
     updated_by: {
       ...normalizeUserBase(authUser),
       last_login: authUser.last_login ?? "",
       profile_picture_url: authUser.profile_picture_url ?? "",
-      mfa_enabled: authUser.mfa_enabled ?? false,
-      deleted: authUser.deleted ?? false,
+      mfa_enabled: false,
+      deleted: false,
+      phone_number: authUser.phone_number,
+      gender: authUser.gender,
     },
     created_date: created_date
       ? created_date
@@ -327,7 +336,7 @@ export const normaliZedResourcerequestRecord = (
   assigned_facility: FacilityRead | undefined,
   assignToUser: UserReadMinimal | undefined,
   queryClient: QueryClient,
-  user: AuthUserModel,
+  user: CurrentUserRead,
   created_date?: string,
   modified_date?: string,
   approving_facility?: FacilityRead,
@@ -367,15 +376,19 @@ export const normaliZedResourcerequestRecord = (
       ...normalizeUserBase(user),
       last_login: user.last_login ?? "",
       profile_picture_url: user.profile_picture_url ?? "",
-      mfa_enabled: user.mfa_enabled ?? false,
-      deleted: user.deleted ?? false,
+      mfa_enabled: false,
+      deleted: false,
+      phone_number: user.phone_number,
+      gender: user.gender,
     },
     updated_by: {
       ...normalizeUserBase(user),
       last_login: user.last_login ?? "",
       profile_picture_url: user.profile_picture_url ?? "",
-      mfa_enabled: user.mfa_enabled ?? false,
-      deleted: user.deleted ?? false,
+      mfa_enabled: false,
+      deleted: false,
+      phone_number: user.phone_number,
+      gender: user.gender,
     },
     created_date: created_date ? created_date : nowIso,
     modified_date: modified_date ? modified_date : nowIso,
@@ -388,7 +401,7 @@ export const normalizedAppointmentRecord = (
   entry: OfflineWritesEntry,
   selectedTokenSlot: TokenSlot,
   patientData: PatientRead,
-  bookedBy: AuthUserModel | null,
+  bookedBy: CurrentUserRead | null,
   status: AppointmentNonCancelledStatus,
   practitioner: UserReadMinimal,
   facility: FacilityBareMinimum,
@@ -406,8 +419,10 @@ export const normalizedAppointmentRecord = (
           ...normalizeUserBase(bookedBy),
           last_login: bookedBy.last_login ?? "",
           profile_picture_url: bookedBy.profile_picture_url ?? "",
-          mfa_enabled: bookedBy.mfa_enabled ?? false,
-          deleted: bookedBy.deleted ?? false,
+          mfa_enabled: false,
+          deleted: false,
+          phone_number: bookedBy.phone_number,
+          gender: bookedBy.gender,
         }
       : null,
     status: status,
@@ -421,8 +436,10 @@ export const normalizedAppointmentRecord = (
           ...normalizeUserBase(bookedBy),
           last_login: bookedBy.last_login ?? "",
           profile_picture_url: bookedBy.profile_picture_url ?? "",
-          mfa_enabled: bookedBy.mfa_enabled ?? false,
-          deleted: bookedBy.deleted ?? false,
+          mfa_enabled: false,
+          deleted: false,
+          phone_number: bookedBy.phone_number,
+          gender: bookedBy.gender,
         }
       : null,
     created_by: bookedBy
@@ -430,8 +447,10 @@ export const normalizedAppointmentRecord = (
           ...normalizeUserBase(bookedBy),
           last_login: bookedBy.last_login ?? "",
           profile_picture_url: bookedBy.profile_picture_url ?? "",
-          mfa_enabled: bookedBy.mfa_enabled ?? false,
-          deleted: bookedBy.deleted ?? false,
+          mfa_enabled: false,
+          deleted: false,
+          phone_number: bookedBy.phone_number,
+          gender: bookedBy.gender,
         }
       : null,
 
@@ -548,7 +567,7 @@ export const updateSlotCacheAfterOfflineAppointment = ({
   }
 };
 
-export function normalizeUserBase(authUser: AuthUserModel): UserBase {
+export function normalizeUserBase(authUser: CurrentUserRead): UserBase {
   return {
     id: authUser.id,
     first_name: authUser?.first_name,
@@ -660,7 +679,7 @@ export const updateActiveEncounterList = ({
 export const normalizedQuestionnairRequest = (
   questionnair: BatchRequestItem,
   allQuestionnairsList: QuestionnaireListResponse,
-  authUser: AuthUserModel,
+  authUser: CurrentUserRead,
   patientID: string,
   encounterID?: string,
 ): QuestionnaireResponse => {
@@ -694,8 +713,8 @@ export const normalizedQuestionnairRequest = (
       ...normalizeUserBase(authUser),
       last_login: authUser.last_login ?? "",
       profile_picture_url: authUser.profile_picture_url ?? "",
-      mfa_enabled: authUser.mfa_enabled ?? false,
-      deleted: authUser.deleted ?? false,
+      mfa_enabled: false,
+      deleted: false,
     },
     is_updated_offline: true,
   };
@@ -784,7 +803,7 @@ function replaceEncounterScopedInPaginatedCache<
 export const normalizeAndUpdateDiagnosis = (
   queryClient: QueryClient,
   q: BatchRequestItem,
-  authUser: AuthUserModel,
+  authUser: CurrentUserRead,
   patientID: string,
   encounterID?: string,
 ) => {
@@ -924,7 +943,7 @@ export const normalizeAndUpdateMedication_Request = (
 export const normalizeAndUpdateSymptom = async (
   queryClient: QueryClient,
   q: BatchRequestItem,
-  authUser: AuthUserModel,
+  authUser: CurrentUserRead,
   patientID: string,
   encounterID?: string,
 ) => {
@@ -1013,7 +1032,7 @@ export const normalizeAndUpdateSymptom = async (
 export const normalizeAndUpdateMedication_Statement = (
   queryClient: QueryClient,
   q: BatchRequestItem,
-  authUser: AuthUserModel,
+  authUser: CurrentUserRead,
   patientID: string,
   encounterID?: string,
 ) => {
@@ -1099,7 +1118,7 @@ export const normalizeAndUpdateMedication_Statement = (
 export const normalizeAndUpdateAllergy_Intolerance = (
   queryClient: QueryClient,
   q: BatchRequestItem,
-  authUser: AuthUserModel,
+  authUser: CurrentUserRead,
   patientID: string,
   encounterID?: string,
 ) => {
@@ -1218,7 +1237,7 @@ export const normalizeAndUpdateEncounter = (
 export const cacheNonStructuredQuestionnairResponse = (
   queryClient: QueryClient,
   questionnairpaylod: BatchRequestBody,
-  authUser: AuthUserModel,
+  authUser: CurrentUserRead,
   patientID: string,
   encounterID?: string,
   subjectType?: string,

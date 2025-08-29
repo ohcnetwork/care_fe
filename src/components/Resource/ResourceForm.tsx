@@ -67,11 +67,11 @@ import patientApi from "@/types/emr/patient/patientApi";
 import { FacilityRead } from "@/types/facility/facility";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import {
+  CreateResourceRequest,
   RESOURCE_REQUEST_STATUSES,
   ResourceRequest,
   UpdateResourceRequest,
 } from "@/types/resourceRequest/resourceRequest";
-import { CreateResourceRequest } from "@/types/resourceRequest/resourceRequest";
 import { UserReadMinimal } from "@/types/user/user";
 
 import {

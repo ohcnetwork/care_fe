@@ -1,8 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { AuthUserModel } from "@/components/Users/models";
-
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import { OfflineKeyMap } from "@/OfflineSupport/offlineKeys";
 import {
@@ -19,6 +17,7 @@ import {
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import { PatientRead } from "@/types/emr/patient/patient";
 
+import { CurrentUserRead } from "@/types/user/user";
 import {
   STRUCTURED_QUESTIONS,
   StructuredQuestionType,
@@ -27,7 +26,7 @@ import {
 interface QueueQuestionnaireBatchRequestParams {
   questionnairPaylod: BatchRequestBody;
   queryClient: QueryClient;
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   patientId: string;
   encounterId: string | undefined;
   facilityId: string;
@@ -56,7 +55,7 @@ export function cleanForCreate<T extends Record<string, any>>(entry: T): T {
 export const generateAppendOnlyBatchAndQueue = async (
   reference_id: string,
   queryClient: QueryClient,
-  authUser: AuthUserModel,
+  authUser: CurrentUserRead,
   originalPayload: BatchRequestBody,
   patientID: string,
   encounterId: string | undefined,
@@ -123,7 +122,7 @@ export const generateAppendOnlyBatchAndQueue = async (
 
 export const generateDiagnosisBatchAndQueue = async (
   queryClient: QueryClient,
-  authUser: AuthUserModel,
+  authUser: CurrentUserRead,
   originalPayload: BatchRequestBody,
   patientID: string,
   encounterId: string | undefined,
@@ -228,7 +227,7 @@ export const generateDiagnosisBatchAndQueue = async (
 export const generateFixedDatapointTypeBatchAndQueue = async (
   reference_id: string,
   queryClient: QueryClient,
-  authUser: AuthUserModel,
+  authUser: CurrentUserRead,
   originalPayload: BatchRequestBody,
   patientID: string,
   encounterId: string | undefined,
@@ -351,7 +350,7 @@ export const generateFixedDatapointTypeBatchAndQueue = async (
 
 export const generateEncounterBatchAndQueue = async (
   queryClient: QueryClient,
-  authUser: AuthUserModel,
+  authUser: CurrentUserRead,
   originalPayload: BatchRequestBody,
   patientID: string,
   encounterId: string | undefined,

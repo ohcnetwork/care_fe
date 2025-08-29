@@ -1,8 +1,7 @@
 import { navigate } from "raviger";
 import { toast } from "sonner";
 
-import { OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
-import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import { SyncManager } from "@/OfflineSupport/syncmanger";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 import { Appointment } from "@/types/scheduling/schedule";

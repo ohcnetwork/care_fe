@@ -1,7 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
 
-import { AuthUserModel } from "@/components/Users/models";
-
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import { OfflineKeyMap, PathParamsObject } from "@/OfflineSupport/offlineKeys";
 import {
@@ -19,6 +17,7 @@ import patientApi from "@/types/emr/patient/patientApi";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { Organization } from "@/types/organization/organization";
 import { PatientIdentifier } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import { CurrentUserRead } from "@/types/user/user";
 
 interface QueueNewPatientOfflineParams {
   createPatientData: PatientCreate;
@@ -26,7 +25,7 @@ interface QueueNewPatientOfflineParams {
   userId: string;
   facilityId: string;
   queryClient: QueryClient;
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   selectedOrganization: Organization | null;
   selectedTags: TagConfig[];
   onSuccess?: (patientId: string, normalizedPatient: PatientRead) => void;
@@ -40,7 +39,7 @@ interface QueuePatientUpdateOfflineParams {
   userId: string;
   facilityId: string;
   queryClient: QueryClient;
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   selectedOrganization: Organization | null;
   existingTags: TagConfig[];
   permissions: string[] | undefined;
@@ -54,7 +53,7 @@ interface NormalizeAndSetQueryDataParams {
   entry: any;
   patientData: PatientRead | undefined;
   queryClient: QueryClient;
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   selectedOrganization: Organization | null;
   existingTags: TagConfig[];
   identifiers: PatientIdentifier[];

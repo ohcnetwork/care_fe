@@ -69,7 +69,6 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
-import { AuthUserModel } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -114,7 +113,7 @@ import {
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { UserReadMinimal } from "@/types/user/user";
+import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
 
@@ -698,7 +697,7 @@ interface AppointmentActionsProps {
   canCreateAppointment: boolean;
   offlineEntryId?: string;
 
-  authUser: AuthUserModel;
+  authUser: CurrentUserRead;
   db: AppCacheDB;
 
   isUpdating: boolean;

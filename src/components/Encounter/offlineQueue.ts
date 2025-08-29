@@ -1,20 +1,18 @@
 import { QueryClient } from "@tanstack/react-query";
 
-import { AuthUserModel } from "@/components/Users/models";
-
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
-import { OfflineKeyMap } from "@/OfflineSupport/offlineKeys";
 import {
+  OfflineKeyMap,
   PathParamsObject,
   QueryParamsObject,
 } from "@/OfflineSupport/offlineKeys";
-import { normalizeOfflineEncounterRecord } from "@/OfflineSupport/offlineWriteHelpers";
-import { updateActiveEncounterList } from "@/OfflineSupport/offlineWriteHelpers";
 import {
+  normalizeOfflineEncounterRecord,
+  normalizeUserBase,
   saveOfflineWrite,
   saveOfflineWriteData,
+  updateActiveEncounterList,
 } from "@/OfflineSupport/offlineWriteHelpers";
-import { normalizeUserBase } from "@/OfflineSupport/offlineWriteHelpers";
 import { PaginatedResponse } from "@/Utils/request/types";
 import {
   EncounterCreate,
@@ -23,6 +21,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { PatientRead } from "@/types/emr/patient/patient";
+import { CurrentUserRead } from "@/types/user/user";
 
 interface QueueNewEncounterOfflineParams {
   encounterRequestData: EncounterCreate;
@@ -30,7 +29,7 @@ interface QueueNewEncounterOfflineParams {
   facilityId: string;
   patientId: string;
   queryClient: QueryClient;
-  authUser: any;
+  authUser: CurrentUserRead;
   selectedTags: any[];
   offlineSelectedOrganizations: any[];
   appointmentId?: string;
@@ -43,7 +42,7 @@ interface QueueMarkAsCompleteParams {
   encounterUpdatedData: EncounterEdit;
   userId: string;
   queryClient: QueryClient;
-  user: AuthUserModel;
+  user: CurrentUserRead;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }
@@ -52,7 +51,7 @@ interface NormalizeAndSetQueryDataParams {
   entry: any;
   patientData: PatientRead;
   queryClient: QueryClient;
-  authUser: any;
+  authUser: CurrentUserRead;
   selectedTags: any[];
   permissions: string[] | undefined;
   offlineSelectedOrganizations: any[];
@@ -192,8 +191,8 @@ export const queueMarkAscompleteRecord = async ({
         ...normalizeUserBase(user),
         last_login: user.last_login ?? "",
         profile_picture_url: user.profile_picture_url ?? "",
-        mfa_enabled: user.mfa_enabled ?? false,
-        deleted: user.deleted ?? false,
+        deleted: false,
+        mfa_enabled: false,
       },
       is_updated_offline: true,
     };
