@@ -56,7 +56,7 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
       queryParams: {
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        search: qParams.search,
+        display: qParams.display,
         status: qParams.status,
         category: qParams.category,
         resource: qParams.resource,
@@ -95,7 +95,7 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
           <h1 className="text-2xl font-bold text-gray-700">
             {t("tag_config")}
           </h1>
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-gray-600 text-sm">
                 {t("manage_tag_config_description")}
@@ -128,9 +128,9 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
                 </span>
                 <Input
                   placeholder={t("search_tag_configs")}
-                  value={qParams.search || ""}
+                  value={qParams.display || ""}
                   onChange={(e) =>
-                    updateQuery({ search: e.target.value || undefined })
+                    updateQuery({ display: e.target.value || undefined })
                   }
                   className="w-full md:w-[300px] pl-10"
                 />
