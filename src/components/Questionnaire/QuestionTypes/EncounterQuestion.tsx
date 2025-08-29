@@ -2,19 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -409,60 +399,36 @@ export function EncounterQuestion({
                   <div className="space-y-2">
                     <Label>{t("discharge_date_time")}</Label>
                     <div className="flex gap-1 flex-wrap">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "flex-1 justify-start text-sm text-left font-normal h-9",
-                              !encounter.period.end && "text-gray-500",
-                            )}
-                          >
-                            <CareIcon
-                              icon="l-calender"
-                              className="mr-2 size-4"
-                            />
-                            {encounter.period.end
-                              ? new Date(
-                                  encounter.period.end,
-                                ).toLocaleDateString()
-                              : t("select_date")}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={
-                              encounter.period.end
-                                ? new Date(encounter.period.end)
-                                : new Date()
-                            }
-                            onSelect={(newDate) => {
-                              if (!newDate) return;
-                              const currentDate = encounter.period.end
-                                ? new Date(encounter.period.end)
-                                : new Date();
-                              const updatedDate = new Date(newDate);
-                              updatedDate.setHours(currentDate.getHours());
-                              updatedDate.setMinutes(currentDate.getMinutes());
-                              handleUpdateEncounter({
-                                period: {
-                                  ...encounter.period,
-                                  end: updatedDate.toISOString(),
-                                },
-                              });
-                            }}
-                            disabled={(date) => {
-                              if (!encounter.period.start) return false;
-                              const startDate = new Date(
-                                encounter.period.start,
-                              );
-                              startDate.setHours(0, 0, 0, 0);
-                              return date < startDate;
-                            }}
-                          />
-                        </PopoverContent>
-                      </Popover>
+                      <DatePicker
+                        date={
+                          encounter.period.end
+                            ? new Date(encounter.period.end)
+                            : new Date()
+                        }
+                        onChange={(newDate) => {
+                          if (!newDate) return;
+                          const currentDate = encounter.period.end
+                            ? new Date(encounter.period.end)
+                            : new Date();
+                          const updatedDate = new Date(newDate);
+                          updatedDate.setHours(currentDate.getHours());
+                          updatedDate.setMinutes(currentDate.getMinutes());
+                          handleUpdateEncounter({
+                            period: {
+                              ...encounter.period,
+                              end: updatedDate.toISOString(),
+                            },
+                          });
+                        }}
+                        disabled={(date) => {
+                          if (!encounter.period.start) return false;
+                          const startDate = new Date(encounter.period.start);
+                          startDate.setHours(0, 0, 0, 0);
+                          return date < startDate;
+                        }}
+                        dateFormat="d/M/yyyy"
+                        className="flex-1"
+                      />
                       <Input
                         type="time"
                         className="flex-1 border-t-0 sm:border-t text-sm border-gray-200 h-9"
