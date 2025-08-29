@@ -66,12 +66,14 @@ function ProductKnowledgeCard({
             )}
           </div>
         </div>
-        <Link href={`/product_knowledge/${product.id}`}>
-          <Button variant="outline" size="sm" className="ml-auto block">
-            <CareIcon icon="l-edit" className="size-4" />
-            {t("see_details")}
+        <div className="flex justify-end">
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/product_knowledge/${product.id}`}>
+              <CareIcon icon="l-edit" className="size-4" />
+              {t("see_details")}
+            </Link>
           </Button>
-        </Link>
+        </div>
       </CardContent>
     </Card>
   );
@@ -244,12 +246,12 @@ export default function ProductKnowledgeList({
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Link href={`/product_knowledge/${product.id}`}>
-                            <Button variant="outline" size="sm">
+                          <Button asChild variant="outline" size="sm">
+                            <Link href={`/product_knowledge/${product.id}`}>
                               <CareIcon icon="l-edit" className="size-4" />
                               {t("see_details")}
-                            </Button>
-                          </Link>
+                            </Link>
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
