@@ -13,7 +13,7 @@ import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
-import { ValuesetBase } from "@/types/valueset/valueset";
+import { ValueSetRead } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
 interface CreateValueSetProps {
@@ -26,7 +26,7 @@ export function SelectOrCreateValueset({
   value,
 }: CreateValueSetProps) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [currentValueSet, setCurrentValueSet] = useState<ValuesetBase>();
+  const [currentValueSet, setCurrentValueSet] = useState<ValueSetRead>();
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleValueSetChange = (val: string) => {
@@ -41,7 +41,7 @@ export function SelectOrCreateValueset({
         status: "active",
       },
     }),
-    select: (data: PaginatedResponse<ValuesetBase>) => data.results,
+    select: (data: PaginatedResponse<ValueSetRead>) => data.results,
   });
 
   const { data: slugObj, isLoading: isLoadingSlug } = useQuery({

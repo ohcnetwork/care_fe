@@ -4,7 +4,7 @@ import { BatchSubmissionResult } from "@/types/questionnaire/batch";
 import { BatchRequestBody } from "./batch";
 
 const batchApi = {
-  batchRequest: {
+  request: {
     path: "/api/v1/batch_requests/",
     method: HttpMethod.POST,
     TRes: Type<{ results: BatchSubmissionResult[] }>(),

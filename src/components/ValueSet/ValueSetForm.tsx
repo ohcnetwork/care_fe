@@ -30,18 +30,18 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import {
   TERMINOLOGY_SYSTEMS,
-  UpdateValuesetModel,
-  ValuesetFormType,
+  ValueSetBase,
+  ValueSetRead,
+  ValueSetStatus,
 } from "@/types/valueset/valueset";
 
 import { CodingField } from "./CodingField";
 import { ValueSetPreview } from "./ValueSetPreview";
 
 // Create a schema for form validation
-
 interface ValueSetFormProps {
-  initialData?: UpdateValuesetModel;
-  onSubmit: (data: ValuesetFormType) => void;
+  initialData?: ValueSetRead;
+  onSubmit: (data: ValueSetBase) => void;
   isSubmitting?: boolean;
   isSystemDefined?: boolean;
 }
@@ -54,7 +54,7 @@ function ConceptFields({
 }: {
   nestIndex: number;
   type: "include" | "exclude";
-  parentForm: ReturnType<typeof useForm<ValuesetFormType>>;
+  parentForm: ReturnType<typeof useForm<ValueSetBase>>;
   disabled?: boolean;
 }) {
   const { t } = useTranslation(); // Add translation hook
@@ -110,7 +110,7 @@ function FilterFields({
   nestIndex: number;
   type: "include" | "exclude";
   disabled?: boolean;
-  parentForm: ReturnType<typeof useForm<ValuesetFormType>>;
+  parentForm: ReturnType<typeof useForm<ValueSetBase>>;
 }) {
   const { t } = useTranslation();
   const { fields, append, remove } = useFieldArray({
@@ -204,7 +204,7 @@ function RuleFields({
   disabled,
 }: {
   type: "include" | "exclude";
-  form: ReturnType<typeof useForm<ValuesetFormType>>;
+  form: ReturnType<typeof useForm<ValueSetBase>>;
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
@@ -315,7 +315,12 @@ export function ValueSetForm({
       .max(25, t("character_count_validation", { min: 5, max: 25 }))
       .regex(/^[-\w]+$/, { message: t("slug_format_message") }),
     description: z.string(),
-    status: z.enum(["active", "draft", "retired", "unknown"]),
+    status: z.enum([
+      ValueSetStatus.ACTIVE,
+      ValueSetStatus.DRAFT,
+      ValueSetStatus.RETIRED,
+      ValueSetStatus.UNKNOWN,
+    ]),
     is_system_defined: z.boolean(),
     compose: z.object({
       include: z.array(
@@ -373,7 +378,7 @@ export function ValueSetForm({
       name: initialData?.name || "",
       slug: initialData?.slug || "",
       description: initialData?.description || "",
-      status: initialData?.status || "active",
+      status: initialData?.status || ValueSetStatus.ACTIVE,
       is_system_defined: initialData?.is_system_defined || false,
       compose: {
         include: initialData?.compose?.include || [],

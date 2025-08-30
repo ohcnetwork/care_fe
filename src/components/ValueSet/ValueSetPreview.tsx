@@ -13,11 +13,11 @@ import {
 
 import query from "@/Utils/request/query";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
-import { ValuesetFormType } from "@/types/valueset/valueset";
+import { ValueSetBase } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
 interface ValueSetPreviewProps {
-  valueset: ValuesetFormType;
+  valueset: ValueSetBase;
   trigger: React.ReactNode;
 }
 

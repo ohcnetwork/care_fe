@@ -1,3 +1,17 @@
+export enum ValueSetStatus {
+  ACTIVE = "active",
+  DRAFT = "draft",
+  RETIRED = "retired",
+  UNKNOWN = "unknown",
+}
+
+export const VALUESET_STATUS_COLORS = {
+  active: "primary",
+  draft: "yellow",
+  retired: "destructive",
+  unknown: "secondary",
+} as const;
+
 export interface ValuesetFilter {
   op: string;
   value: string;
@@ -32,12 +46,26 @@ export interface ValuesetBase {
   updated_by: string | null;
 }
 
-export const VALUESET_STATUS_COLORS = {
-  active: "primary",
-  draft: "yellow",
-  retired: "destructive",
-  unknown: "secondary",
-} as const;
+export interface ValueSetBase {
+  slug: string;
+  name: string;
+  description: string;
+  compose: ValuesetCompose;
+  status: ValueSetStatus;
+  is_system_defined: boolean;
+}
+
+export interface ValueSetRead extends ValueSetBase {
+  id: string;
+  created_by: string | null;
+  updated_by: string | null;
+}
+
+export type ValueSetCreate = ValueSetBase;
+
+export interface ValueSetUpdate extends ValueSetBase {
+  id: string;
+}
 
 export type CreateValuesetModel = Omit<
   ValuesetBase,

@@ -743,7 +743,7 @@ export function LocationSheet({
   };
 
   const { mutate: executeBatch, isPending } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
+    mutationFn: mutate(batchApi.request, { silent: true }),
     onSuccess: () => {
       toast.success(t("bed_assigned_successfully"));
       resetStates();

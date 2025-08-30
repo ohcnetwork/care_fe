@@ -8,10 +8,10 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
-  CreateValuesetModel,
-  UpdateValuesetModel,
-  ValuesetBase,
-  ValuesetFormType,
+  ValueSetBase,
+  ValueSetCreate,
+  ValueSetRead,
+  ValueSetUpdate,
 } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
@@ -19,7 +19,7 @@ import { ValueSetForm } from "./ValueSetForm";
 
 interface ValueSetEditorProps {
   slug?: string; // If provided, we're editing an existing valueset
-  onSuccess?: (data: ValuesetBase) => void;
+  onSuccess?: (data: ValueSetRead) => void;
 }
 
 export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
@@ -37,7 +37,7 @@ export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
   // Create mutation
   const createMutation = useMutation({
     mutationFn: mutate(valuesetApi.create),
-    onSuccess: (data: ValuesetBase) => {
+    onSuccess: (data: ValueSetRead) => {
       toast.success(t("valueset_created"));
       queryClient.invalidateQueries({ queryKey: ["valuesets"] });
       onSuccess?.(data);
@@ -49,7 +49,7 @@ export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
     mutationFn: mutate(valuesetApi.update, {
       pathParams: { slug: slug! },
     }),
-    onSuccess: (data: ValuesetBase) => {
+    onSuccess: (data: ValueSetRead) => {
       toast.success(t("valueset_updated"));
       queryClient.removeQueries({ queryKey: ["valueset", slug] });
       onSuccess?.(data);
@@ -57,15 +57,15 @@ export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
     },
   });
 
-  const handleSubmit = (data: ValuesetFormType) => {
+  const handleSubmit = (data: ValueSetBase) => {
     if (slug && existingValueset) {
-      const updateData: UpdateValuesetModel = {
+      const updateData: ValueSetUpdate = {
         ...data,
         id: existingValueset.id,
       };
       updateMutation.mutate(updateData);
     } else {
-      const createData: CreateValuesetModel = data;
+      const createData: ValueSetCreate = data;
       createMutation.mutate(createData);
     }
   };

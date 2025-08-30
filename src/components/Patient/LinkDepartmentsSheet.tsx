@@ -207,7 +207,7 @@ export default function LinkDepartmentsSheet({
   };
 
   const { mutate: submitBatch, isPending: isAdding } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
+    mutationFn: mutate(batchApi.request, { silent: true }),
     onSuccess: () => {
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
       queryClient.invalidateQueries({ queryKey: invalidateQueries });

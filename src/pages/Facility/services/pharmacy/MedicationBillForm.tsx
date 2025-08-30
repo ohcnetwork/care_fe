@@ -969,7 +969,7 @@ export default function MedicationBillForm({ patientId }: Props) {
   }
 
   const { mutate: dispense, isPending } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest),
+    mutationFn: mutate(batchApi.request),
     onSuccess: (response) => {
       toast.success(t("medications_billed_successfully"));
       queryClient.invalidateQueries({

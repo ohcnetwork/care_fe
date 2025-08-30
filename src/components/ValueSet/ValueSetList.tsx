@@ -49,7 +49,7 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import {
   VALUESET_STATUS_COLORS,
-  ValuesetBase,
+  ValueSetRead,
 } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
@@ -72,7 +72,7 @@ const RenderCard = ({
   valuesets,
   isLoading,
 }: {
-  valuesets: ValuesetBase[];
+  valuesets: ValueSetRead[];
   isLoading: boolean;
 }) => {
   const { t } = useTranslation();
@@ -195,7 +195,7 @@ const RenderTable = ({
   valuesets,
   isLoading,
 }: {
-  valuesets: ValuesetBase[];
+  valuesets: ValueSetRead[];
   isLoading: boolean;
 }) => {
   const { t } = useTranslation();

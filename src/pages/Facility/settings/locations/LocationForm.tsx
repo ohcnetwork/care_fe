@@ -200,7 +200,7 @@ export default function LocationForm({
   });
 
   const { mutate: submitBatch } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest),
+    mutationFn: mutate(batchApi.request),
     onSuccess: (data: { results: BatchSubmissionResult[] }) => {
       toast.success(
         t("bed_created_notification", { count: data.results.length }),

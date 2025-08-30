@@ -3,35 +3,36 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
 
 import {
-  CreateValuesetModel,
-  UpdateValuesetModel,
-  ValuesetBase,
+  ValueSetBase,
+  ValueSetCreate,
   ValuesetLookupRequest,
   ValuesetLookupResponse,
+  ValueSetRead,
+  ValueSetUpdate,
 } from "./valueset";
 
 export default {
   list: {
     path: "/api/v1/valueset/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<ValuesetBase>>(),
+    TRes: Type<PaginatedResponse<ValueSetRead>>(),
   },
   create: {
     path: "/api/v1/valueset/",
     method: HttpMethod.POST,
-    TRes: Type<ValuesetBase>(),
-    TBody: Type<CreateValuesetModel>(),
+    TRes: Type<ValueSetRead>(),
+    TBody: Type<ValueSetCreate>(),
   },
   get: {
     path: "/api/v1/valueset/{slug}/",
     method: HttpMethod.GET,
-    TRes: Type<ValuesetBase>(),
+    TRes: Type<ValueSetRead>(),
   },
   update: {
     path: "/api/v1/valueset/{slug}/",
     method: HttpMethod.PUT,
-    TRes: Type<ValuesetBase>(),
-    TBody: Type<UpdateValuesetModel>(),
+    TRes: Type<ValueSetRead>(),
+    TBody: Type<ValueSetUpdate>(),
   },
   lookup: {
     path: "/api/v1/valueset/lookup_code/",
@@ -42,7 +43,7 @@ export default {
   expand: {
     path: "/api/v1/valueset/expand/",
     method: HttpMethod.POST,
-    TRes: Type<ValuesetBase>(),
+    TRes: Type<ValueSetRead>(),
     TBody: Type<{
       search: string;
     }>(),
@@ -51,7 +52,7 @@ export default {
     path: "/api/v1/valueset/preview_search/",
     method: HttpMethod.POST,
     TRes: Type<{ results: Code[] }>(),
-    TBody: Type<CreateValuesetModel>(),
+    TBody: Type<ValueSetBase>(),
   },
   favourites: {
     path: "/api/v1/valueset/{slug}/favourites/",
