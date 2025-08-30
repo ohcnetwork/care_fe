@@ -58,7 +58,7 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
       className="border border-gray-200 rounded-lg overflow-hidden"
       data-cy="medications-table"
     >
-      <Table>
+      <Table className="min-w-3xl">
         <TableHeader>
           <TableRow className="divide-x bg-gray-100">
             <TableHead>{t("medicine")}</TableHead>

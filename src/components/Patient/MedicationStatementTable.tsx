@@ -31,7 +31,7 @@ export const MedicationStatementTable = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <Table className="border-separate border-gray-200 border-spacing-y-0.5">
+    <Table className="border-separate border-gray-200 border-spacing-y-0.5 min-w-4xl">
       <TableHeader>
         <TableRow className="rounded-md overflow-hidden bg-gray-100">
           <TableHead className="first:rounded-l-md h-auto py-1 px-2 text-gray-600">
