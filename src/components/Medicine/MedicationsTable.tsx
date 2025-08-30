@@ -89,7 +89,7 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
                   isInactive && medication.status !== "ended" && "line-through",
                 )}
               >
-                <TableCell className="py-2 px-3">
+                <TableCell className="py-2 px-3 whitespace-normal break-words">
                   {displayMedicationName(medication)}
                 </TableCell>
                 <TableCell className="py-2 px-3">{dosage}</TableCell>
@@ -108,7 +108,7 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
                 <TableCell className="py-2 px-3">
                   {duration ? `${duration.value} ${duration.unit}` : "-"}
                 </TableCell>
-                <TableCell className="py-2 px-3">
+                <TableCell className="py-2 px-3 break-words whitespace-normal">
                   {remarks || "-"}
                   {notes ? ` (${t("note")}: ${notes})` : ""}
                 </TableCell>

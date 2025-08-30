@@ -65,10 +65,12 @@ export const MedicationStatementTable = ({
               statement.status === "entered_in_error" ? "opacity-50" : ""
             }`}
           >
-            <TableCell className="font-medium first:rounded-l-md">
+            <TableCell className="font-medium first:rounded-l-md whitespace-normal break-words">
               {statement.medication.display ?? statement.medication.code}
             </TableCell>
-            <TableCell>{statement.dosage_text}</TableCell>
+            <TableCell className="break-words whitespace-normal">
+              {statement.dosage_text}
+            </TableCell>
             <TableCell>
               <Badge
                 variant={MEDICATION_STATEMENT_STATUS_STYLES[statement.status]}
@@ -87,7 +89,9 @@ export const MedicationStatementTable = ({
                 )
                 .join(" - ")}
             </TableCell>
-            <TableCell>{statement.reason}</TableCell>
+            <TableCell className="break-words whitespace-normal">
+              {statement.reason}
+            </TableCell>
             <TableCell className="max-w-[200px]">
               {statement.note ? (
                 <div className="flex items-center gap-2">
