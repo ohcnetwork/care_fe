@@ -249,7 +249,7 @@ export default function Autocomplete({
             <span className="sr-only">{t("clear")}</span>
           </Button>
         ) : (
-          <CaretSortIcon className="absolute right-3 top-1/2 -translate-y-1/2 ml-2 size-4 shrink-0 opacity-50" />
+          <CaretSortIcon className="absolute right-3 top-1/2 ml-2 size-4 shrink-0 opacity-50" />
         )}
       </div>
     );
@@ -300,7 +300,7 @@ export default function Autocomplete({
           <span className="sr-only">{t("clear")}</span>
         </Button>
       ) : (
-        <CaretSortIcon className="absolute right-3 top-1/2 -translate-y-1/2 ml-2 size-4 shrink-0 opacity-50" />
+        <CaretSortIcon className="absolute right-3 top-1/2 ml-2 size-4 shrink-0 opacity-50" />
       )}
     </div>
   );
