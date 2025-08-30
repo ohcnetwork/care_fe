@@ -64,6 +64,9 @@ cypress/fixtures/token.json
 src/pluginMap.ts
 /apps_backup/*
 
+# Care Plugins
+/plugins/care_diet_fe
+
 # Federation Temp files
 /.__mf__temp
 public/sbom/*
