@@ -303,14 +303,14 @@ export function RenderDateFilter({
 export const getDateOperations = (selected: FilterDateRange) => {
   if (selected.from && selected.to) {
     if (isSameDay(selected.from, selected.to)) {
-      return ["is_on"];
+      return [{ label: "is_on" }];
     } else {
-      return ["b/w"];
+      return [{ label: "b/w" }];
     }
   } else if (selected.from) {
-    return ["after"];
+    return [{ label: "after" }];
   } else if (selected.to) {
-    return ["before"];
+    return [{ label: "before" }];
   }
   return [];
 };

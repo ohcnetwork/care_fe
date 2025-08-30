@@ -152,6 +152,7 @@ export function EncounterList({
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         tags: qParams.tags,
+        tags_behavior: qParams.tags_behavior,
         patient: patient_filter,
       },
     }),

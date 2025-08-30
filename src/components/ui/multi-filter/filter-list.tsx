@@ -21,13 +21,14 @@ import {
   FilterDateRange,
   FilterMode,
   FilterValues,
+  Operation,
   createFilterConfig,
 } from "./utils/utils";
 
 export const encounterStatusFilter = (
   key: string = "encounter_status",
   mode: FilterMode = "single",
-  customOperations?: string[],
+  customOperations?: Operation[],
 ) =>
   createFilterConfig(
     key,
@@ -54,14 +55,14 @@ export const encounterStatusFilter = (
       }
       return <></>;
     },
-    () => customOperations || ["is"], // ["is", "is_not"],
+    () => customOperations || [{ label: "is" }], // ["is", "is_not"],
     mode,
     <CircleDashed className="w-4 h-4" />,
   );
 export const encounterClassFilter = (
   key: string = "encounter_class",
   mode: FilterMode = "single",
-  customOperations?: string[],
+  customOperations?: Operation[],
 ) =>
   createFilterConfig(
     key,
@@ -88,14 +89,14 @@ export const encounterClassFilter = (
       }
       return <></>;
     },
-    () => customOperations || ["is"], // ["is", "is_not"],
+    () => customOperations || [{ label: "is" }], // ["is", "is_not"],
     mode,
   );
 
 export const encounterPriorityFilter = (
   key: string = "encounter_priority",
   mode: FilterMode = "single",
-  customOperations?: string[],
+  customOperations?: Operation[],
   label?: string,
 ) =>
   createFilterConfig(
@@ -124,7 +125,7 @@ export const encounterPriorityFilter = (
       }
       return <></>;
     },
-    () => customOperations || ["is"], // ["is", "is_not"],
+    () => customOperations || [{ label: "is" }], // ["is", "is_not"],
     mode,
   );
 
@@ -175,9 +176,15 @@ export const tagFilter = (
     },
     (selected: FilterValues) => {
       const selectedTags = selected as TagConfig[];
-      if (selectedTags.length === 1) return ["includes"]; // ["includes", "does_not_include"];
-      return ["has_all_of"]; // ["has_all_of", "has_any_of", "exclude_if_any", "exclude_if_all"];
+      if (selectedTags.length === 1)
+        return [{ label: "includes", value: "all" }]; // ["includes", "does_not_include"];
+      return [
+        { label: "has_all_of", value: "all" },
+        { label: "has_any_of", value: "any" },
+      ]; // ["has_all_of", "has_any_of", "exclude_if_any", "exclude_if_all"];
     },
     mode,
     <Tag className="w-4 h-4" />,
+    undefined,
+    "tags_behavior",
   );

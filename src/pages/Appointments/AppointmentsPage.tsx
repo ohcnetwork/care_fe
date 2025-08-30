@@ -419,7 +419,12 @@ export default function AppointmentsPage() {
   const slot = slots?.find((s) => s.id === qParams.slot);
 
   const filters = [
-    tagFilter("tags", TagResource.ENCOUNTER, "multi", t("tags", { count: 2 })),
+    tagFilter(
+      "tags",
+      TagResource.APPOINTMENT,
+      "multi",
+      t("tags", { count: 2 }),
+    ),
     dateFilter("date", t("date"), shortDateRangeOptions),
   ];
 
@@ -428,6 +433,9 @@ export default function AppointmentsPage() {
       switch (key) {
         case "tags":
           query.tags = (value as TagConfig[])?.map((tag) => tag.id).join(",");
+          break;
+        case "tags_behavior":
+          // tags_behavior is already handled by the filter system
           break;
         case "date":
           {
@@ -757,6 +765,7 @@ export default function AppointmentsPage() {
                 date_to={qParams.date_to}
                 canViewAppointments={canViewAppointments}
                 tags={selectedTags.map((tag) => tag.id)}
+                tags_behavior={qParams.tags_behavior}
                 patient={qParams.patient}
               />
             ))}
@@ -776,6 +785,7 @@ export default function AppointmentsPage() {
           status={qParams.status}
           Pagination={Pagination}
           tags={selectedTags.map((tag) => tag.id)}
+          tags_behavior={qParams.tags_behavior}
           patient={qParams.patient}
         />
       )}
@@ -788,6 +798,7 @@ function AppointmentColumn(props: {
   practitioners: string | null;
   slot?: string | null;
   tags?: string[];
+  tags_behavior?: string;
   date_from: string | null;
   date_to: string | null;
   canViewAppointments: boolean;
@@ -817,6 +828,7 @@ function AppointmentColumn(props: {
       props.date_from,
       props.date_to,
       props.tags,
+      props.tags_behavior,
       props.patient,
     ],
     queryFn: async ({ pageParam = 0, signal }) => {
@@ -829,6 +841,7 @@ function AppointmentColumn(props: {
               ? props.statusGroup.statuses.join(",")
               : selectedStatuses.join(","),
           tags: props.tags?.join(","),
+          tags_behavior: props.tags_behavior,
           limit: 10,
           slot: props.slot,
           user: props.practitioners ?? undefined,
@@ -1076,6 +1089,7 @@ function AppointmentRow(props: {
   date_to: string | null;
   canViewAppointments: boolean;
   tags?: string[];
+  tags_behavior?: string;
   patient?: string;
 }) {
   const { facilityId } = useCurrentFacility();
@@ -1092,6 +1106,7 @@ function AppointmentRow(props: {
       props.date_from,
       props.date_to,
       props.tags,
+      props.tags_behavior,
       props.patient,
     ],
     queryFn: query(scheduleApis.appointments.list, {
@@ -1103,6 +1118,7 @@ function AppointmentRow(props: {
         date_after: props.date_from,
         date_before: props.date_to,
         tags: props.tags,
+        tags_behavior: props.tags_behavior,
         limit: props.resultsPerPage,
         offset: ((props.page ?? 1) - 1) * props.resultsPerPage,
         ordering: "token_slot__start_datetime",

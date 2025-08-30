@@ -115,6 +115,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
 
   const [status, setStatus] = useState<string>();
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [tagsBehavior, setTagsBehavior] = useState<string>("any");
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
 
@@ -145,6 +146,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
       patientId,
       status,
       selectedTagIds,
+      tagsBehavior,
       dateFrom,
       dateTo,
     ],
@@ -157,7 +159,10 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             ? { patient_filter: patientId, facility: facilityId }
             : { patient: patientId }),
           ...(status && { status }),
-          ...(selectedTagIds.length > 0 && { tags: selectedTagIds.join(",") }),
+          ...(selectedTagIds.length > 0 && {
+            tags: selectedTagIds.join(","),
+            tags_behavior: tagsBehavior,
+          }),
           ...(dateFrom && {
             created_date_after: dateTimeQueryString(dateFrom),
           }),
@@ -202,6 +207,9 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
           setSelectedTagIds(
             (filterValue as TagConfig[])?.map((tag) => tag.id) ?? [],
           );
+          break;
+        case "tags_behavior":
+          setTagsBehavior(filterValue as string);
           break;
         case "created_date":
           if (

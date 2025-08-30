@@ -84,12 +84,13 @@ export interface BaseFilterConfig {
   options: FilterOption[];
   placeholder?: string;
   icon?: React.ReactNode;
+  operationKey?: string;
   renderSelected?: (
     selected: FilterValues,
     filter?: FilterConfig,
     onFilterChange?: (filterKey: string, values: FilterValues) => void,
   ) => React.ReactNode;
-  getOperations?: (selected: FilterValues) => string[];
+  getOperations?: (selected: FilterValues) => Operation[];
   mode?: FilterMode;
 }
 
@@ -114,8 +115,8 @@ export type FilterConfig =
   | DateFilterConfig;
 
 export interface OperationConfig {
-  selectedOperation: string | null;
-  availableOperations: string[];
+  selectedOperation: Operation | null;
+  availableOperations: Operation[];
 }
 
 export interface FilterState {
@@ -135,6 +136,11 @@ export interface DateRangeOption {
   count?: number;
 }
 
+export type Operation = {
+  value?: string;
+  label: string;
+};
+
 export function createFilterConfig(
   key: string,
   label: string,
@@ -146,10 +152,11 @@ export function createFilterConfig(
     filter?: FilterConfig,
     onFilterChange?: (filterKey: string, values: FilterValues) => void,
   ) => React.ReactNode,
-  getOperations?: (selected: FilterValues) => string[],
+  getOperations?: (selected: FilterValues) => Operation[],
   mode: FilterMode = "single",
   icon?: React.ReactNode,
   dateRangeOptions?: DateRangeOption[],
+  operationKey?: string,
 ): FilterConfig {
   const baseConfig: BaseFilterConfig = {
     key,
@@ -159,6 +166,7 @@ export function createFilterConfig(
     getOperations,
     mode,
     icon,
+    operationKey,
   };
   switch (type) {
     case "date":
