@@ -415,7 +415,7 @@ export function MedicationRequestQuestion({
     <div
       className={cn(
         "space-y-4",
-        medications.length > 0 ? "md:max-w-full" : "max-w-4xl",
+        medications.length > 0 ? "md:max-w-full lg:max-w-fit" : "max-w-4xl",
       )}
     >
       <AlertDialog
