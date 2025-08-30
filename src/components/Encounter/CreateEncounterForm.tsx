@@ -48,7 +48,7 @@ import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import {
   handleOfflineRecordSuccess,
   isOfflineId,
@@ -100,6 +100,8 @@ export default function CreateEncounterForm({
   disableRedirectOnSuccess = false,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
+  const [offlineEntryData, setOfflineEntryData] =
+    useState<OfflineWritesEntry>();
   const queryClient = useQueryClient();
   const user = useAuthUser();
   const { t } = useTranslation();
@@ -214,7 +216,7 @@ export default function CreateEncounterForm({
     try {
       const db = new AppCacheDB();
       const entry = await db.OfflineWrites.get(offlineEntryId!);
-
+      setOfflineEntryData(entry);
       if (entry && entry.normalizedData) {
         const normalizedData = entry.normalizedData as EncounterRead;
 
@@ -305,7 +307,11 @@ export default function CreateEncounterForm({
           </SheetTitle>
           <SheetDescription>
             {offlineEntryId ? (
-              t("edit_offline_encounter_description", { patientName })
+              t("edit_offline_encounter_description", {
+                phoneNumber:
+                  (offlineEntryData?.normalizedData as any)?.patient
+                    ?.phone_number || patientId,
+              })
             ) : (
               <Trans
                 i18nKey="begin_clinical_encounter"

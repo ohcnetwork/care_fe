@@ -5011,7 +5011,7 @@
   "you_have_unsaved_changes_what_would_you_like_to_do": "You have unsaved changes. What would you like to do?",
   "you_need_at_least_a_location_to_create_an_assest": "You need at least a location to create an assest.",
   "edit_offline_encounter": "Edit Offline Encounter",
-  "edit_offline_encounter_description": "Edit the offline encounter for {{patientName}}",
+  "edit_offline_encounter_description": "Edit offline encounter for patient with phone number: {phoneNumber}",
   "edit_offline_user_assignment": "Edit Offline User Assignment",
   "edit_offline_user_assignment_description": "Edit the offline user assignment for this patient",
   "sync_status": "Sync Status",
