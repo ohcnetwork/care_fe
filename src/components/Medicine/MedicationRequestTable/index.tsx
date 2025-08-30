@@ -220,32 +220,29 @@ export default function MedicationRequestTable() {
               ) : searchQuery && !displayedMedications.length ? (
                 <EmptyState searching searchQuery={searchQuery} />
               ) : (
-                <ScrollArea className="h-fit">
-                  <div className="min-w-[800px]">
-                    <div className="p-2">
-                      <MedicationsTable medications={displayedMedications} />
-                    </div>
-                    {!!stoppedMedications?.results?.length &&
-                      !searchQuery.trim() && (
-                        <div
-                          className="p-4 flex items-center gap-2 cursor-pointer hover:bg-gray-50"
-                          onClick={() => setShowStopped(!showStopped)}
-                          data-cy="toggle-stopped-medications"
-                        >
-                          <CareIcon
-                            icon={showStopped ? "l-eye-slash" : "l-eye"}
-                            className="size-4"
-                          />
-                          <span className="text-sm underline">
-                            {showStopped ? t("hide") : t("show")}{" "}
-                            {`${stoppedMedications?.results?.length} ${t("stopped")}`}{" "}
-                            {t("prescriptions")}
-                          </span>
-                        </div>
-                      )}
+                <>
+                  <div className="p-2">
+                    <MedicationsTable medications={displayedMedications} />
                   </div>
-                  <ScrollBar orientation="horizontal" />
-                </ScrollArea>
+                  {!!stoppedMedications?.results?.length &&
+                    !searchQuery.trim() && (
+                      <div
+                        className="p-4 flex items-center gap-2 cursor-pointer hover:bg-gray-50"
+                        onClick={() => setShowStopped(!showStopped)}
+                        data-cy="toggle-stopped-medications"
+                      >
+                        <CareIcon
+                          icon={showStopped ? "l-eye-slash" : "l-eye"}
+                          className="size-4"
+                        />
+                        <span className="text-sm underline">
+                          {showStopped ? t("hide") : t("show")}{" "}
+                          {`${stoppedMedications?.results?.length} ${t("stopped")}`}{" "}
+                          {t("prescriptions")}
+                        </span>
+                      </div>
+                    )}
+                </>
               )}
             </div>
           </TabsContent>
