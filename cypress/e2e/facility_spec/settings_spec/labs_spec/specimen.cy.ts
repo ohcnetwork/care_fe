@@ -66,14 +66,7 @@ describe("Facility Specimen Management", () => {
 
     // Attempt to save empty form and verify error messages
     cy.get("button").contains("Add Definition").click();
-    cy.get("button").contains("Save").should("be.disabled");
-
-    // Touch required fields to trigger form-level validations
-    cy.get('input[name="title"]').focus().blur();
-    cy.get('input[name="slug"]').focus().blur();
-    cy.get('textarea[name="description"]').focus().blur();
-    cy.contains("label", "Type Collected").click();
-    cy.get("body").click(0, 0);
+    cy.get("button").contains("Save").click();
 
     cy.verifyErrorMessages([
       { message: "Required", label: "Title" },
