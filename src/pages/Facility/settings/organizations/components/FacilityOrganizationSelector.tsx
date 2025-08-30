@@ -96,9 +96,8 @@ export default function FacilityOrganizationSelector(
     networkMode: "online",
   });
 
-  // help in offline func
   useEffect(() => {
-    if (setOfflineSelectedOrganizations) {
+    if (setOfflineSelectedOrganizations && !offlineSelectedOrganizations) {
       setOfflineSelectedOrganizations(selectedOrganizations);
     }
   }, [setOfflineSelectedOrganizations, selectedOrganizations]);

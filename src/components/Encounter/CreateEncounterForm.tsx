@@ -206,12 +206,6 @@ export default function CreateEncounterForm({
     });
   };
 
-  useEffect(() => {
-    if (offlineEntryId) {
-      setIsOpen(true);
-    }
-  }, [offlineEntryId]);
-
   const fetchAndPopulateForm = async () => {
     try {
       const db = new AppCacheDB();
@@ -243,12 +237,13 @@ export default function CreateEncounterForm({
     }
   };
 
-  // only when offlineEntryId is passed to populate offline create encounter form,
+  // Combined useEffect to handle offline entry initialization
   useEffect(() => {
     if (offlineEntryId) {
+      setIsOpen(true);
       fetchAndPopulateForm();
     }
-  }, [offlineEntryId, form]);
+  }, [offlineEntryId]);
 
   async function onSubmit(data: z.infer<typeof encounterFormSchema>) {
     if (isOfflineId(patientId) && onlineManager.isOnline()) {
@@ -496,9 +491,10 @@ export default function CreateEncounterForm({
                       setOfflineSelectedOrganizations={
                         setOfflineSelectedOrganizations
                       }
-                      offlineSelectedOrganizations={
-                        offlineSelectedOrganizations
-                      }
+                      {...(offlineEntryId && {
+                        offlineSelectedOrganizations:
+                          offlineSelectedOrganizations,
+                      })}
                       onChange={(value) => {
                         if (value === null) {
                           form.setValue("organizations", []);

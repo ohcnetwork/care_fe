@@ -1274,9 +1274,10 @@ export default function PatientRegistration(
                 type="submit"
                 variant="primary"
                 disabled={
-                  isCreatingPatient ||
-                  isUpdatingPatient ||
-                  !form.formState.isDirty
+                  !offlineEntry &&
+                  (isCreatingPatient ||
+                    isUpdatingPatient ||
+                    !form.formState.isDirty)
                 }
               >
                 {patientId ? t("save") : t("save_and_continue")}
