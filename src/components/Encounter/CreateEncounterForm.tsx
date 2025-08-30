@@ -217,31 +217,29 @@ export default function CreateEncounterForm({
       const db = new AppCacheDB();
       const entry = await db.OfflineWrites.get(offlineEntryId!);
       setOfflineEntryData(entry);
+
       if (entry && entry.normalizedData) {
         const normalizedData = entry.normalizedData as EncounterRead;
-
-        const formData = {
-          ...normalizedData,
-          status:
-            normalizedData.status === "planned" ||
-            normalizedData.status === "in_progress" ||
-            normalizedData.status === "on_hold"
-              ? normalizedData.status
-              : "planned",
-          organizations:
-            normalizedData.organizations?.map((org) => org.id) || [],
-          start_date: normalizedData.period?.start || new Date().toISOString(),
-          tags: normalizedData.tags?.map((tag) => tag.id) || [],
-        };
-
-        console.log("NormalizedData", normalizedData.organizations);
+        const safeStatus =
+          normalizedData.status === "planned" ||
+          normalizedData.status === "in_progress" ||
+          normalizedData.status === "on_hold"
+            ? normalizedData.status
+            : "planned";
         setOfflineSelectedOrganizations(normalizedData.organizations || []);
-
-        form.reset(formData);
+        form.reset({
+          status: safeStatus,
+          encounter_class: normalizedData.encounter_class,
+          priority: normalizedData.priority ?? "routine",
+          organizations:
+            normalizedData.organizations?.map((org) => org.id) ?? [],
+          start_date: normalizedData.period?.start ?? new Date().toISOString(),
+          tags: normalizedData.tags?.map((tag) => tag.id) ?? [],
+        });
       }
     } catch (error) {
       console.error("Error fetching offline entry:", error);
-      toast.error("Error loading offline encounter data");
+      toast.error(t("error_loading_offline_encounter_data"));
     }
   };
 
@@ -541,7 +539,8 @@ export default function CreateEncounterForm({
                 disabled={
                   isPending ||
                   !form.watch("organizations").length ||
-                  hasReachedEncounterLimitOffline === true
+                  (!onlineManager.isOnline() &&
+                    hasReachedEncounterLimitOffline === true)
                 }
               >
                 {isPending ? t("creating") : t("create_encounter")}

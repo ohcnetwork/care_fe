@@ -72,13 +72,14 @@ export function MarkEncounterAsCompletedDialog(
       pathParams: { id: encounter?.id || "" },
     }),
     networkMode: "always",
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (offlineEntryId) {
-        handleOfflineRecordSuccess(offlineEntryId, data);
+        await handleOfflineRecordSuccess(offlineEntryId, data);
       }
       toast.success(t("encounter_marked_as_complete"));
       queryClient.invalidateQueries({ queryKey: ["encounter", encounter?.id] });
     },
+
     onError: async (error, variables) => {
       if (error.message === "Network Error" && variables) {
         await handleOfflineQueue(variables);
@@ -88,18 +89,13 @@ export function MarkEncounterAsCompletedDialog(
   const handleMarkAsComplete = async () => {
     if (!encounter) return;
 
-    const encounterUpdatedData = {
-      ...encounter,
-
+    const encounterUpdatedData: EncounterEdit = {
       status: "completed" as EncounterStatus,
-
       patient: encounter.patient.id,
       encounter_class: encounter.encounter_class,
       period: {
         start: encounter.period.start,
-        end: encounter.period.end
-          ? encounter.period.end
-          : new Date().toISOString(),
+        end: encounter.period.end ?? new Date().toISOString(),
       },
       hospitalization: encounter.hospitalization,
       priority: encounter.priority,

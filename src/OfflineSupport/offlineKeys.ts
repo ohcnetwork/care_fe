@@ -26,7 +26,6 @@ export const OfflineKeyMap = {
   cancel_appointment: "cancel_appointment",
   non_structured_questionnaire: "non_structured_questionnaire",
   update_encounter_questionnaire: "update_encounter_questionnaire",
-  structured_questionnair: "structured_questionnair",
   allergy_intolerance: "allergy_intolerance",
   diagnosis: "diagnosis",
   medication_request: "medication_request",

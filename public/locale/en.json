@@ -1900,7 +1900,7 @@
   "error_validating_form": "An error occurred while validating the form",
   "error_verifying_otp": "Error while verifying OTP, Please request a new OTP",
   "error_while_deleting_record": "Error while deleting record",
-  "error_while_remove_user_offline": "Error while removing user",
+  "error_removing_user_offline": "Error while removing user",  
   "escape": "Escape",
   "estimated_contact_date": "Estimated contact date",
   "etc": "etc...",
@@ -5098,5 +5098,9 @@
   "invalid_entry_type_structured_questionnaire": "Invalid entry type for structured questionnaire editing",
   "no_datapoint_found_offline": "No datapoint found in offline entry",
   "offline_records_not_available": "Offline created records are not available when offline",
-  "sync_requires_internet_connection": "Sync requires internet connection"
+  "sync_requires_internet_connection": "Sync requires internet connection",
+  "edit_not_implemented_for_type": "Edit is not implemented for type: {{type}}",
+  "facility_context_required_offline": "Facility context is required for offline operations",
+  "remove_user_from_patient_instruction": "Remove {{userName}} from {{patientName}}",
+  "error_loading_offline_encounter_data": "Error loading offline encounter data"
 }

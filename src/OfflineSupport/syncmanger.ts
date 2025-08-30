@@ -37,7 +37,6 @@ export const mutationMap = {
   cancel_appointment: scheduleApis.appointments.cancel,
   non_structured_questionnaire: batchApi.batchRequest,
   update_encounter_questionnaire: batchApi.batchRequest,
-  structured_questionnair: batchApi.batchRequest,
   allergy_intolerance: batchApi.batchRequest,
   diagnosis: batchApi.batchRequest,
   medication_request: batchApi.batchRequest,
@@ -166,7 +165,7 @@ export class SyncManager {
       this.isRunning = false;
       this.abortController = null;
       this.options.onSyncComplete?.();
-      await this.cleanupSyncedRecords(careConfig.cleanupSucessOfflineRecords);
+      await this.cleanupSyncedRecords(careConfig.cleanupSuccessOfflineRecords);
     }
 
     return result;
@@ -352,52 +351,39 @@ export class SyncManager {
         return result;
       }
 
-      // Topological sort: [parent, ..., child]
-      const sortedRecords = topologicalSort(eligibleRecords);
+      // Build lookup by id
+      const byId = new Map(allRecords.map((r) => [r.id, r]));
 
-      // Start from last index, traverse backwards
-      let i = sortedRecords.length - 1;
+      // Group into families by root ancestor
+      const families = new Map<string, typeof eligibleRecords>();
 
-      while (i >= 0) {
-        const record = sortedRecords[i];
+      const findRoot = (r: any) => {
+        let cur = r;
+        while (cur?.parentMutationId && byId.get(cur.parentMutationId)) {
+          cur = byId.get(cur.parentMutationId);
+        }
+        return cur?.id ?? r.id;
+      };
 
-        if (record.syncStatus === "success") {
-          // Count family size by going backwards until no parent
-          let familySize = 1;
-          let j = i - 1;
+      for (const rec of eligibleRecords) {
+        const root = findRoot(rec);
+        const arr = families.get(root) ?? [];
+        arr.push(rec);
+        families.set(root, arr);
+      }
 
-          while (j >= 0 && sortedRecords[j].parentMutationId) {
-            familySize++;
-            j--;
+      // Delete families only if all members succeeded
+      for (const [, members] of families) {
+        const allSuccess = members.every((m) => m.syncStatus === "success");
+        if (!allSuccess) continue;
+
+        for (const m of members) {
+          try {
+            await db.OfflineWrites.delete(m.id);
+            result.deletedCount++;
+          } catch (error) {
+            result.errors.push(`Failed to delete ${m.id}: ${error}`);
           }
-
-          // Delete entire family
-          for (let k = 0; k < familySize; k++) {
-            const recordToDelete = sortedRecords[i - k];
-            try {
-              await db.OfflineWrites.delete(recordToDelete.id);
-              result.deletedCount++;
-            } catch (error) {
-              result.errors.push(
-                `Failed to delete ${recordToDelete.id}: ${error}`,
-              );
-            }
-          }
-
-          // Jump to previous family
-          i -= familySize;
-        } else {
-          // Count family size and skip
-          let familySize = 1;
-          let j = i - 1;
-
-          while (j >= 0 && sortedRecords[j].parentMutationId) {
-            familySize++;
-            j--;
-          }
-
-          // Skip entire family
-          i -= familySize;
         }
       }
 

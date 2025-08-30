@@ -457,7 +457,6 @@ const getResourceTypeDisplay = (entry: OfflineWritesEntry) => {
     reschedule_appointment: "Appointment Reschedule",
     non_structured_questionnaire: "Non-structured Questionnaire",
     update_encounter_questionnaire: "Update Encounter Questionnaire",
-    structured_questionnair: "Structured Questionnaire",
     allergy_intolerance: "Allergy Intolerance",
     diagnosis: "Diagnosis",
     medication_request: "Medication Request",
@@ -1214,7 +1213,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
         await handleAssignUserToPatientEdit(targetEntry, t);
         break;
       case "remove_user_from_patient":
-        await handleRemoveUserFromPatientEdit(targetEntry);
+        await handleRemoveUserFromPatientEdit(targetEntry, t);
         break;
       case "create_appointment":
       case "reschedule_appointment":
@@ -1247,7 +1246,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
         break;
       case "update_encounter_questionnaire":
       default:
-        handleUnsupportedTypeEdit(targetEntry);
+        handleUnsupportedTypeEdit(targetEntry, t);
         break;
     }
   };

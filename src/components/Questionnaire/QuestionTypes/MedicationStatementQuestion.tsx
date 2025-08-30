@@ -77,6 +77,7 @@ import {
   validateFields,
 } from "@/types/questionnaire/validation";
 
+import { OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import { FieldError } from "./FieldError";
 
 interface MedicationStatementQuestionProps {
@@ -92,7 +93,7 @@ interface MedicationStatementQuestionProps {
   disabled?: boolean;
   errors: QuestionValidationError[];
   editMode?: boolean;
-  offlineEntry?: any;
+  offlineEntry?: OfflineWritesEntry;
 }
 
 const MEDICATION_STATEMENT_INITIAL_VALUE: MedicationStatementRequest = {

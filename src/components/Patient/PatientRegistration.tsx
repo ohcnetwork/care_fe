@@ -319,6 +319,10 @@ export default function PatientRegistration(
   ) => {
     if (isCreate) {
       // Handle patient creation offline
+      if (!facility) {
+        toast.error(t("facility_context_required_offline"));
+        return;
+      }
       const fullIdentifiers = createFullIdentifiers(
         (patientRequestData as PatientCreate).identifiers,
       );
@@ -393,7 +397,6 @@ export default function PatientRegistration(
   >({
     mutationKey: ["create_patient"],
     mutationFn: mutate(patientApi.addPatient),
-    networkMode: "always",
     onSuccess: async (resp: PatientRead) => {
       if (offlineEntryId) {
         try {
@@ -433,7 +436,6 @@ export default function PatientRegistration(
     mutationFn: mutate(patientApi.updatePatient, {
       pathParams: { id: patientId || "" },
     }),
-    networkMode: "always",
     onSuccess: async (resp: PatientRead) => {
       if (offlineEntryId) {
         try {
@@ -592,7 +594,7 @@ export default function PatientRegistration(
           geo_organization: (
             patientData.geo_organization as unknown as Organization
           )?.id,
-          deceased_datetime: null,
+          deceased_datetime: patientData.deceased_datetime ?? null,
           tags:
             offlineEntry?.type === OfflineKeyMap.create_patient ||
             isOfflineId(patientId || "")

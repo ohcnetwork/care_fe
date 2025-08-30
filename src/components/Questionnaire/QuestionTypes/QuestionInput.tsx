@@ -16,6 +16,7 @@ import type {
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
+import { OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import { AllergyQuestion } from "./AllergyQuestion";
 import { BooleanQuestion } from "./BooleanQuestion";
 import { ChargeItemQuestion } from "./ChargeItemQuestion";
@@ -53,7 +54,7 @@ interface QuestionInputProps {
   isSubQuestion?: boolean;
   editMode?: boolean;
   offlineEntryId?: string;
-  offlineEntry?: any;
+  offlineEntry?: OfflineWritesEntry;
 }
 
 export function QuestionInput({

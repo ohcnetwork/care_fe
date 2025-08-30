@@ -11,6 +11,7 @@ import {
 } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 
+import { OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import { QuestionGroup } from "./QuestionTypes/QuestionGroup";
 
 // Questions that should be rendered full width
@@ -32,7 +33,7 @@ interface QuestionRendererProps {
   patientId: string;
   editMode?: boolean;
   offlineEntryId?: string;
-  offlineEntry?: any;
+  offlineEntry?: OfflineWritesEntry;
 }
 
 export function QuestionRenderer({

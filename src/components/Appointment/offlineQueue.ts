@@ -787,7 +787,7 @@ export const queueCancelAppointmentRecord = async ({
       : `offline-${appointment.id}-statusUpdate`;
 
     const rescheduleID = isOfflineId(appointment.id)
-      ? `${appointment.id}+reschedule`
+      ? `${appointment.id}-reschedule`
       : `offline-${appointment.id}-reschedule`;
 
     await Promise.allSettled([

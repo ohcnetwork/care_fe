@@ -71,19 +71,15 @@ export const generateAppendOnlyBatchAndQueue = async (
   );
   if (matchingRequests.length === 0) return;
 
-  const generatedId = `offline-${reference_id}-${crypto.randomUUID()}`;
-
   for (const req of matchingRequests) {
+    const generatedId = `offline-${reference_id}-${crypto.randomUUID()}`;
     const newOfflineEntry = {
       id: generatedId,
       userId: authUser.id,
       facilityId: facilityId,
       mutationSyncRouteKey:
-        OfflineKeyMap[reference_id as keyof typeof OfflineKeyMap] ||
-        OfflineKeyMap.structured_questionnair,
-      type:
-        OfflineKeyMap[reference_id as keyof typeof OfflineKeyMap] ||
-        OfflineKeyMap.structured_questionnair,
+        OfflineKeyMap[reference_id as keyof typeof OfflineKeyMap],
+      type: OfflineKeyMap[reference_id as keyof typeof OfflineKeyMap],
       resourceType: "Questionnaire",
       payload: {
         requests: [req],
@@ -281,11 +277,8 @@ export const generateFixedDatapointTypeBatchAndQueue = async (
       userId: authUser.id,
       facilityId: facilityId,
       mutationSyncRouteKey:
-        OfflineKeyMap[reference_id as keyof typeof OfflineKeyMap] ||
-        OfflineKeyMap.structured_questionnair,
-      type:
-        OfflineKeyMap[reference_id as keyof typeof OfflineKeyMap] ||
-        OfflineKeyMap.structured_questionnair,
+        OfflineKeyMap[reference_id as keyof typeof OfflineKeyMap],
+      type: OfflineKeyMap[reference_id as keyof typeof OfflineKeyMap],
       resourceType: "Questionnaire",
       payload: cleanedRequests,
       parentMutationId: isOfflineId(parentID) ? parentID : undefined,

@@ -1146,7 +1146,7 @@ export function QuestionnaireForm({
               patientId={patientId}
               editMode={editMode}
               offlineEntryId={offlineEntryId}
-              offlineEntry={offlineEntry}
+              offlineEntry={offlineEntry ?? undefined}
               clearError={(questionId: string) => {
                 setQuestionnaireForms((prev) =>
                   prev.map((f) =>

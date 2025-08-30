@@ -48,13 +48,17 @@ export async function detectAndMarkConflict(
       write.useQueryParams,
     );
 
-    if (serverData && serverData.modified_date !== write.serverTimestamp) {
+    if (
+      serverData &&
+      write.serverTimestamp &&
+      serverData.modified_date !== write.serverTimestamp
+    ) {
       await markWriteStatus(write.id, "conflict", {
         conflictData: serverData,
         lastError: "Data conflict detected - server data has been modified",
         lastErrorDetails: {
           serverModifiedDate: serverData.modified_date,
-          clientTimestamp: write.serverTimestamp,
+          clientServerTimestamp: write.serverTimestamp,
           conflictType: "data_modified",
         },
         lastAttemptAt: Date.now(),

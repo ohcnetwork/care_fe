@@ -74,20 +74,6 @@ export const dependencySchema: DependencySchema = {
       resourceType: "appointment",
     },
   ],
-
-  structured_questionnair: [
-    {
-      location: "payload",
-      path: ["requests", "*", "body", "datapoints", "*", "encounter"],
-      resourceType: "encounter",
-    },
-
-    {
-      location: "payload",
-      path: ["requests", "*", "body", "patient"],
-      resourceType: "patient",
-    },
-  ],
   non_structured_questionnaire: [
     {
       location: "payload",
@@ -103,6 +89,11 @@ export const dependencySchema: DependencySchema = {
       location: "payload",
       path: ["requests", "*", "body", "resource_id"],
       resourceType: "patient",
+    },
+    {
+      location: "payload",
+      path: ["requests", "*", "body", "resource_id"],
+      resourceType: "encounter",
     },
   ],
 

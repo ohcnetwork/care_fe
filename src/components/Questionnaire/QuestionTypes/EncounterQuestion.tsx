@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import DischargeConfirmationDialog from "@/components/Patient/DischargeConfirmationDialog";
 
+import { OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import query from "@/Utils/request/query";
 import {
   ENCOUNTER_ADMIT_SOURCE,
@@ -56,7 +57,7 @@ interface EncounterQuestionProps {
   patientId?: string;
   facilityId: string;
   editMode?: boolean;
-  offlineEntry?: any;
+  offlineEntry?: OfflineWritesEntry;
 }
 
 export function EncounterQuestion({

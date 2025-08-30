@@ -380,7 +380,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
       },
       onError: (error) => {
         console.error("Error queuing remove user offline:", error);
-        toast.error(t("error_while_remove_user_offline"));
+        toast.error(t("error_removing_user_offline"));
       },
     });
   };

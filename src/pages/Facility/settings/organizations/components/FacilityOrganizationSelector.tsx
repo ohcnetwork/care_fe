@@ -104,12 +104,8 @@ export default function FacilityOrganizationSelector(
   }, [setOfflineSelectedOrganizations, selectedOrganizations]);
 
   useEffect(() => {
-    if (
-      offlineSelectedOrganizations &&
-      offlineSelectedOrganizations.length > 0
-    ) {
-      setSelectedOrganizations(offlineSelectedOrganizations);
-    }
+    if (!offlineSelectedOrganizations) return;
+    setSelectedOrganizations(offlineSelectedOrganizations);
   }, [offlineSelectedOrganizations]);
 
   const organizationQueries = useQueries({

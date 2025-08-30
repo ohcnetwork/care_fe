@@ -180,6 +180,7 @@ export const handleAssignUserToPatientEdit = async (
 
 export const handleRemoveUserFromPatientEdit = async (
   entry: OfflineWritesEntry,
+  t: (key: string, options?: any) => string,
 ) => {
   const normalizedData = entry.normalizedData as {
     user: UserBase;
@@ -190,7 +191,7 @@ export const handleRemoveUserFromPatientEdit = async (
   const patientName = normalizedData?.patientName || "Unknown Patient";
 
   toast.info(
-    `To remove user "${userName}" from patient "${patientName}", please go to the patient's profile and delete this record from the Users tab.`,
+    t("remove_user_from_patient_instruction", { userName, patientName }),
   );
 };
 
@@ -257,7 +258,7 @@ export const handleAppointmentEdit = async (
     }
 
     default:
-      handleUnsupportedTypeEdit(entry);
+      handleUnsupportedTypeEdit(entry, t);
       break;
   }
 };
@@ -455,8 +456,11 @@ export const handleTimeOfDeathEdit = async (
   }
 };
 
-export const handleUnsupportedTypeEdit = (entry: OfflineWritesEntry) => {
-  toast.info(`Edit functionality for ${entry.type} is not implemented yet`);
+export const handleUnsupportedTypeEdit = (
+  entry: OfflineWritesEntry,
+  t: (key: string, opts?: any) => string,
+) => {
+  toast.info(t("edit_not_implemented_for_type", { type: entry.type }));
 };
 
 export const handleRetryRecord = async (

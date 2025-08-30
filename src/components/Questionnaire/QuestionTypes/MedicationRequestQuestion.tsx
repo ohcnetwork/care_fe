@@ -54,6 +54,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
+import { OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
@@ -106,7 +107,7 @@ interface MedicationRequestQuestionProps {
   encounterId: string;
   errors?: QuestionValidationError[];
   editMode?: boolean;
-  offlineEntry?: any;
+  offlineEntry?: OfflineWritesEntry;
 }
 
 const MEDICATION_REQUEST_FIELDS = {

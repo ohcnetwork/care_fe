@@ -51,6 +51,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
+import { OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import query from "@/Utils/request/query";
 import { dateQueryString, formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
@@ -79,7 +80,7 @@ interface DiagnosisQuestionProps {
   ) => void;
   disabled?: boolean;
   editMode?: boolean;
-  offlineEntry?: any;
+  offlineEntry?: OfflineWritesEntry;
 }
 
 const DIAGNOSIS_INITIAL_VALUE: Omit<DiagnosisRequest, "encounter"> = {

@@ -94,7 +94,7 @@ export default function useNetworkStatus() {
       toast.warning(t("you_are_offline"));
       await restorePersistedCache();
       setIsChecked(true);
-      queryClient.invalidateQueries({ queryKey: ["refresh-token"] });
+      queryClient.invalidateQueries({ queryKey: ["user-refresh-token"] });
     }
 
     startOfflinePolling();
@@ -148,5 +148,5 @@ export default function useNetworkStatus() {
     }
   }, []);
 
-  return { isChecked, isOnline: onlineManager.isOnline() };
+  return { isChecked };
 }

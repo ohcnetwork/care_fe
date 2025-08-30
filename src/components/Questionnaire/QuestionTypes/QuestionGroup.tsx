@@ -11,6 +11,7 @@ import type {
 } from "@/types/questionnaire/form";
 import type { EnableWhen, Question } from "@/types/questionnaire/question";
 
+import { OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import { QuestionInput } from "./QuestionInput";
 
 interface QuestionGroupProps {
@@ -31,7 +32,7 @@ interface QuestionGroupProps {
   isSubQuestion?: boolean;
   editMode?: boolean;
   offlineEntryId?: string;
-  offlineEntry?: any;
+  offlineEntry?: OfflineWritesEntry;
 }
 
 export function isQuestionEnabled(

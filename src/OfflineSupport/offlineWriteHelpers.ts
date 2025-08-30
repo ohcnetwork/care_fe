@@ -355,6 +355,13 @@ export const normaliZedResourcerequestRecord = (
       originFacilityId,
     ]);
   }
+
+  if (!originfacility) {
+    throw new Error(
+      `Failed to retrieve origin facility (ID: ${originFacilityId}) from cache`,
+    );
+  }
+
   return {
     approving_facility: approving_facility ?? null,
     assigned_facility: assigned_facility ?? undefined,

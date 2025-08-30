@@ -53,18 +53,23 @@ export async function processDependentWrites(
       );
 
       await db.OfflineWrites.update(dependent.id, processedWrite);
+
+      if (dependent.syncStatus === "blocked") {
+        await markWriteStatus(dependent.id, "pending", {
+          lastError: undefined,
+          lastErrorDetails: undefined,
+          lastAttemptAt: undefined,
+        });
+      }
     } catch (error) {
       console.error(
         `Failed to replace offline IDs in write ${dependent.id}:`,
         error,
       );
-    }
-
-    if (dependent.syncStatus === "blocked") {
-      await markWriteStatus(dependent.id, "pending", {
-        lastError: undefined,
-        lastErrorDetails: undefined,
-        lastAttemptAt: undefined,
+      await markWriteStatus(dependent.id, "blocked", {
+        lastError: "ID replacement failed",
+        lastErrorDetails: String(error),
+        lastAttemptAt: Date.now(),
       });
     }
   }

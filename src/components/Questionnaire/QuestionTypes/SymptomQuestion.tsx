@@ -50,6 +50,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
+import { OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import query from "@/Utils/request/query";
 import { dateQueryString, formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
@@ -78,7 +79,7 @@ interface SymptomQuestionProps {
   ) => void;
   disabled?: boolean;
   editMode?: boolean;
-  offlineEntry?: any;
+  offlineEntry?: OfflineWritesEntry;
 }
 
 const SYMPTOM_INITIAL_VALUE: Omit<SymptomRequest, "encounter"> = {
