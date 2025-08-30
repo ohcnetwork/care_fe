@@ -11,10 +11,8 @@ import * as z from "zod";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -24,11 +22,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -186,41 +179,21 @@ export default function CreateEncounterForm({
                   return (
                     <FormItem>
                       <FormLabel>{t("date_and_time")}</FormLabel>
-                      <div className="flex sm:gap-2 flex-wrap">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "flex-1 justify-start text-left font-normal h-8",
-                                !field.value && "text-gray-500",
-                              )}
-                            >
-                              <CareIcon
-                                icon="l-calender"
-                                className="mr-2 size-4"
-                              />
-                              {date.toLocaleDateString()}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={date}
-                              onSelect={(newDate) => {
-                                if (!newDate) return;
-                                const updatedDate = new Date(newDate);
-                                updatedDate.setHours(date.getHours());
-                                updatedDate.setMinutes(date.getMinutes());
-                                field.onChange(updatedDate.toISOString());
-                              }}
-                              autoFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
+                      <div className="flex gap-2">
+                        <DatePicker
+                          date={date}
+                          onChange={(newDate) => {
+                            if (!newDate) return;
+                            const updatedDate = new Date(newDate);
+                            updatedDate.setHours(date.getHours());
+                            updatedDate.setMinutes(date.getMinutes());
+                            field.onChange(updatedDate.toISOString());
+                          }}
+                          className="h-9"
+                        />
                         <Input
                           type="time"
-                          className="sm:w-[150px] border-t-0 sm:border-t text-sm py-px border-gray-400 shadow-sm h-8"
+                          className="border-gray-400 text-sm sm:py-px shadow-sm"
                           value={date.toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",

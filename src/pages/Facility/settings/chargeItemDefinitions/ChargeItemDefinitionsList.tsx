@@ -174,8 +174,8 @@ export function ChargeItemDefinitionsList({
         ) : chargeItemDefinitions.length === 0 ? (
           <EmptyState
             icon="l-folder-open"
-            title={t("no_charge_definitions_found")}
-            description={t("adjust_filters")}
+            title={t("no_charge_item_definitions_found")}
+            description={t("adjust_charge_item_definition_filters")}
           />
         ) : (
           <>
