@@ -58,7 +58,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import {
   BloodGroupChoices,
@@ -93,7 +93,7 @@ export default function PatientRegistration(
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const defaultCountry = careConfig.defaultCountry.name;
-  const { facility } = useCurrentFacility();
+  const { facility } = useCurrentFacilitySilently();
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
@@ -376,7 +376,7 @@ export default function PatientRegistration(
   });
 
   useEffect(() => {
-    if (patientQuery.data && facility) {
+    if (patientQuery.data) {
       form.reset({
         _selected_levels: [
           patientQuery.data.geo_organization as unknown as Organization,
@@ -407,17 +407,24 @@ export default function PatientRegistration(
         )?.id,
         deceased_datetime: null,
         tags: [], // This is only used for create patient
-        identifiers: facility.patient_instance_identifier_configs.map(
-          (identifierConfig) => {
-            const identifier = patientQuery.data.instance_identifiers?.find(
-              (i) => i.config.id === identifierConfig.id,
-            );
-            return {
-              config: identifierConfig.id,
-              value: identifier?.value,
-            };
-          },
-        ),
+        identifiers: facility
+          ? facility.patient_instance_identifier_configs.map(
+              (identifierConfig) => {
+                const identifier = patientQuery.data.instance_identifiers?.find(
+                  (i) => i.config.id === identifierConfig.id,
+                );
+                return {
+                  config: identifierConfig.id,
+                  value: identifier?.value,
+                };
+              },
+            )
+          : patientQuery.data.instance_identifiers.map((identifierConfig) => {
+              return {
+                config: identifierConfig.config.id,
+                value: identifierConfig.value,
+              };
+            }),
       } as unknown as z.infer<typeof formSchema>);
     } else if (facility) {
       form.setValue(
