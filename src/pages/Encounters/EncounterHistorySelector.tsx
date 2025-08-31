@@ -76,73 +76,77 @@ function EncounterCard({
       {isSelected && (
         <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
       )}
-      <CardContent className="flex justify-between items-center px-4 py-3 gap-1">
-        <div className="flex flex-col gap-1">
-          <span className="text-base font-semibold">
-            {t(`encounter_class__${encounter.encounter_class}`)}
-          </span>
-          <span className="text-sm font-medium text-gray-700">
-            {encounter.facility.name}
-          </span>
-          {encounter.tags.length > 0 && (
-            <HoverCard openDelay={150}>
-              <HoverCardTrigger className="hidden md:block">
-                <div className="flex items-center py-1 pr-1 gap-2">
-                  <Tags className="size-4 text-gray-700" />
-                  <span className="text-sm text-gray-700 font-medium">
-                    {encounter.tags.length} {t("encounter_tags")}
-                  </span>
-                </div>
-              </HoverCardTrigger>
-              <HoverCardContent
-                className="flex flex-col gap-2 p-4 border border-gray-200 rounded-md max-w-90 shadow-lg"
-                side="right"
-              >
-                <EncounterHoverCard encounter={encounter} />
-              </HoverCardContent>
-            </HoverCard>
-          )}
-          <div className="md:hidden flex flex-wrap gap-2">
+      <CardContent className="flex flex-col px-4 py-3 gap-1">
+        <div className="flex justify-between items-center">
+          <div className="flex flex-col gap-1">
+            <span className="text-base font-semibold">
+              {t(`encounter_class__${encounter.encounter_class}`)}
+            </span>
+            <span className="text-sm font-medium text-gray-700">
+              {encounter.facility.name}
+            </span>
             {encounter.tags.length > 0 && (
-              <>
-                {encounter.tags.map((tag) => (
-                  <Badge
-                    key={tag.id}
-                    variant="secondary"
-                    className="capitalize"
-                    title={tag.description}
-                  >
-                    {getTagHierarchyDisplay(tag)}
-                  </Badge>
-                ))}
-              </>
+              <HoverCard openDelay={150}>
+                <HoverCardTrigger className="hidden md:block">
+                  <div className="flex items-center py-1 pr-1 gap-2">
+                    <Tags className="size-4 text-gray-700" />
+                    <span className="text-sm text-gray-700 font-medium">
+                      {t("encounter_tags", { count: encounter.tags.length })}
+                    </span>
+                  </div>
+                </HoverCardTrigger>
+                <HoverCardContent
+                  className="flex flex-col gap-2 p-4 border border-gray-200 rounded-md max-w-90 shadow-lg"
+                  side="right"
+                >
+                  <EncounterHoverCard encounter={encounter} />
+                </HoverCardContent>
+              </HoverCard>
             )}
           </div>
+          <div className="flex flex-col gap-1 pt-0.5 items-end">
+            <span className="text-sm text-gray-600 whitespace-nowrap">
+              {encounter.period.start && (
+                <span>
+                  {format(new Date(encounter.period.start!), "dd MMM")}
+                </span>
+              )}
+              {encounter.period.end && encounter.period.start && (
+                <span>{" - "}</span>
+              )}
+              {encounter.period.end ? (
+                <span>{format(new Date(encounter.period.end), "dd MMM")}</span>
+              ) : (
+                <span>
+                  {" - "}
+                  {t("ongoing")}
+                </span>
+              )}
+            </span>
+            <Badge
+              variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
+              size="sm"
+              className=" whitespace-nowrap"
+            >
+              {t(`encounter_status__${encounter.status}`)}
+            </Badge>
+          </div>
         </div>
-        <div className="flex flex-col gap-1 pt-0.5 items-end">
-          <span className="text-sm text-gray-600 whitespace-nowrap">
-            {encounter.period.start && (
-              <span>{format(new Date(encounter.period.start!), "dd MMM")}</span>
-            )}
-            {encounter.period.end && encounter.period.start && (
-              <span>{" - "}</span>
-            )}
-            {encounter.period.end ? (
-              <span>{format(new Date(encounter.period.end), "dd MMM")}</span>
-            ) : (
-              <span>
-                {" - "}
-                {t("ongoing")}
-              </span>
-            )}
-          </span>
-          <Badge
-            variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
-            size="sm"
-            className=" whitespace-nowrap"
-          >
-            {t(`encounter_status__${encounter.status}`)}
-          </Badge>
+        <div className="md:hidden flex flex-wrap gap-2">
+          {encounter.tags.length > 0 && (
+            <>
+              {encounter.tags.map((tag) => (
+                <Badge
+                  key={tag.id}
+                  variant="secondary"
+                  className="capitalize"
+                  title={tag.description}
+                >
+                  {getTagHierarchyDisplay(tag)}
+                </Badge>
+              ))}
+            </>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -434,14 +438,18 @@ const EncounterSheetTrigger = () => {
 
   return (
     <Card className="relative rounded-md cursor-pointer w-full lg:w-80 bg-white border-primary-600">
-      <CardContent className="px-3 py-1 flex justify-between items-center">
-        <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
-        <div className="flex flex-col sm:flex-row sm:gap-3 items-start sm:items-center">
-          <span className="text-base font-semibold">
-            {t(`encounter_class__${encounter.encounter_class}`)}
-          </span>
-          <div className="flex flex-col sm:flex-row sm:gap-3 items-start sm:items-center">
-            <span className="text-sm text-gray-700">
+      <CardContent className="flex flex-col px-3 py-2 gap-1">
+        <div className="flex justify-between items-center">
+          <div className="flex flex-col gap-1 items-start">
+            <span className="text-base font-semibold">
+              {t(`encounter_class__${encounter.encounter_class}`)}
+            </span>
+            <span className="text-sm font-medium text-gray-700">
+              {encounter.facility.name}
+            </span>
+          </div>
+          <div className="flex flex-col gap-1 pt-0.5 items-start">
+            <span className="text-sm text-gray-600 whitespace-nowrap">
               {encounter.period.start && (
                 <span>
                   {format(new Date(encounter.period.start!), "dd MMM")}
@@ -459,21 +467,37 @@ const EncounterSheetTrigger = () => {
                 </span>
               )}
             </span>
-            <div className="w-px h-4 bg-gray-300 hidden sm:block" />
-            <span className="text-sm text-gray-700">
-              {encounter.facility.name}
-            </span>
+            <div className="flex gap-3 items-center">
+              <Badge
+                variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
+                size="sm"
+                className=" whitespace-nowrap"
+              >
+                {t(`encounter_status__${encounter.status}`)}
+              </Badge>
+              <div
+                className={buttonVariants({ variant: "ghost", size: "icon" })}
+              >
+                <ChevronDown />
+              </div>
+            </div>
           </div>
         </div>
-        <div className="flex gap-3 items-center">
-          <div className="my-2">
-            <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]}>
-              {t(`encounter_status__${encounter.status}`)}
-            </Badge>
-          </div>
-          <div className={buttonVariants({ variant: "ghost", size: "icon" })}>
-            <ChevronDown />
-          </div>
+        <div className="flex flex-wrap gap-2">
+          {encounter.tags.length > 0 && (
+            <>
+              {encounter.tags.map((tag) => (
+                <Badge
+                  key={tag.id}
+                  variant="secondary"
+                  className="capitalize"
+                  title={tag.description}
+                >
+                  {getTagHierarchyDisplay(tag)}
+                </Badge>
+              ))}
+            </>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -486,7 +510,7 @@ const EncounterHoverCard = ({ encounter }: { encounter: EncounterRead }) => {
     <>
       <div className="flex flex-col gap-1">
         <span className="text-sm text-gray-700 font-medium">
-          {t("encounter_tags")}:
+          {t("encounter_tag", { count: encounter.tags.length })}:
         </span>
         <div className="flex flex-wrap gap-2">
           {encounter.tags.length > 0 ? (
