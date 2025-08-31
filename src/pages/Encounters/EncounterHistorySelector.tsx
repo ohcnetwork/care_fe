@@ -134,18 +134,16 @@ function EncounterCard({
         </div>
         {encounter.tags.length > 0 && (
           <div className="md:hidden flex flex-wrap gap-2">
-            <>
-              {encounter.tags.map((tag) => (
-                <Badge
-                  key={tag.id}
-                  variant="secondary"
-                  className="capitalize"
-                  title={tag.description}
-                >
-                  {getTagHierarchyDisplay(tag)}
-                </Badge>
-              ))}
-            </>
+            {encounter.tags.map((tag) => (
+              <Badge
+                key={tag.id}
+                variant="secondary"
+                className="capitalize"
+                title={tag.description}
+              >
+                {getTagHierarchyDisplay(tag)}
+              </Badge>
+            ))}
           </div>
         )}
       </CardContent>
@@ -485,18 +483,16 @@ const EncounterSheetTrigger = () => {
         </div>
         {encounter.tags.length > 0 && (
           <div className="flex flex-wrap gap-2">
-            <>
-              {encounter.tags.map((tag) => (
-                <Badge
-                  key={tag.id}
-                  variant="secondary"
-                  className="capitalize"
-                  title={tag.description}
-                >
-                  {getTagHierarchyDisplay(tag)}
-                </Badge>
-              ))}
-            </>
+            {encounter.tags.map((tag) => (
+              <Badge
+                key={tag.id}
+                variant="secondary"
+                className="capitalize"
+                title={tag.description}
+              >
+                {getTagHierarchyDisplay(tag)}
+              </Badge>
+            ))}
           </div>
         )}
       </CardContent>
