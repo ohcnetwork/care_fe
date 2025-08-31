@@ -132,8 +132,8 @@ function EncounterCard({
             </Badge>
           </div>
         </div>
-        <div className="md:hidden flex flex-wrap gap-2">
-          {encounter.tags.length > 0 && (
+        {encounter.tags.length > 0 && (
+          <div className="md:hidden flex flex-wrap gap-2">
             <>
               {encounter.tags.map((tag) => (
                 <Badge
@@ -146,8 +146,8 @@ function EncounterCard({
                 </Badge>
               ))}
             </>
-          )}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -483,8 +483,8 @@ const EncounterSheetTrigger = () => {
             </div>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {encounter.tags.length > 0 && (
+        {encounter.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2">
             <>
               {encounter.tags.map((tag) => (
                 <Badge
@@ -497,8 +497,8 @@ const EncounterSheetTrigger = () => {
                 </Badge>
               ))}
             </>
-          )}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
