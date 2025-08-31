@@ -80,7 +80,7 @@ export const PatientInfoHoverCard = ({
                 </span>
               )}
               {links && links.length > 0 && (
-                <div className="flex flex-col">
+                <div className="flex flex-col ">
                   {links.map((link) => (
                     <Link
                       href={link}

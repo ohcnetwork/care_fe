@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { ChevronDown, CircleDashed } from "lucide-react";
+import { ChevronDown, CircleDashed, Tags } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -76,15 +76,51 @@ function EncounterCard({
       {isSelected && (
         <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
       )}
-      <CardContent className="flex justify-between items-center px-4 py-3">
-        <div className="flex flex-col">
+      <CardContent className="flex justify-between items-center px-4 py-3 gap-1">
+        <div className="flex flex-col gap-1">
           <span className="text-base font-semibold">
             {t(`encounter_class__${encounter.encounter_class}`)}
           </span>
           <span className="text-sm font-medium text-gray-700">
             {encounter.facility.name}
           </span>
-          <span className="text-sm text-gray-600">
+          {encounter.tags.length > 0 && (
+            <HoverCard openDelay={150}>
+              <HoverCardTrigger className="hidden md:block">
+                <div className="flex items-center py-1 pr-1 gap-2">
+                  <Tags className="size-4 text-gray-700" />
+                  <span className="text-sm text-gray-700 font-medium">
+                    {encounter.tags.length} {t("encounter_tags")}
+                  </span>
+                </div>
+              </HoverCardTrigger>
+              <HoverCardContent
+                className="flex flex-col gap-2 p-4 border border-gray-200 rounded-md max-w-90 shadow-lg"
+                side="right"
+              >
+                <EncounterHoverCard encounter={encounter} />
+              </HoverCardContent>
+            </HoverCard>
+          )}
+          <div className="md:hidden flex flex-wrap gap-2">
+            {encounter.tags.length > 0 && (
+              <>
+                {encounter.tags.map((tag) => (
+                  <Badge
+                    key={tag.id}
+                    variant="secondary"
+                    className="capitalize"
+                    title={tag.description}
+                  >
+                    {getTagHierarchyDisplay(tag)}
+                  </Badge>
+                ))}
+              </>
+            )}
+          </div>
+        </div>
+        <div className="flex flex-col gap-1 pt-0.5 items-end">
+          <span className="text-sm text-gray-600 whitespace-nowrap">
             {encounter.period.start && (
               <span>{format(new Date(encounter.period.start!), "dd MMM")}</span>
             )}
@@ -100,9 +136,11 @@ function EncounterCard({
               </span>
             )}
           </span>
-        </div>
-        <div>
-          <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]} size="sm">
+          <Badge
+            variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
+            size="sm"
+            className=" whitespace-nowrap"
+          >
             {t(`encounter_status__${encounter.status}`)}
           </Badge>
         </div>
@@ -226,21 +264,11 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             {t("chosen_encounter")}
           </h2>
           <div className="space-y-2">
-            <HoverCard openDelay={150}>
-              <HoverCardTrigger>
-                <EncounterCard
-                  encounter={primaryEncounter}
-                  isSelected={primaryEncounterId === selectedEncounterId}
-                  onSelect={() => handleSelect(null)}
-                />
-              </HoverCardTrigger>
-              <HoverCardContent
-                className="flex flex-col gap-2 p-4 border border-gray-200 rounded-md max-w-90 shadow-lg"
-                side="right"
-              >
-                <EncounterHoverCard encounter={primaryEncounter} />
-              </HoverCardContent>
-            </HoverCard>
+            <EncounterCard
+              encounter={primaryEncounter}
+              isSelected={primaryEncounterId === selectedEncounterId}
+              onSelect={() => handleSelect(null)}
+            />
           </div>
         </div>
       )}
@@ -333,22 +361,12 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
                 }
 
                 acc.push(
-                  <HoverCard key={encounter.id} openDelay={150}>
-                    <HoverCardTrigger>
-                      <EncounterCard
-                        key={encounter.id}
-                        encounter={encounter}
-                        isSelected={encounter.id === selectedEncounterId}
-                        onSelect={handleSelect}
-                      />
-                    </HoverCardTrigger>
-                    <HoverCardContent
-                      className="flex flex-col gap-2 p-4 border border-gray-200 rounded-md shadow-lg"
-                      side="right"
-                    >
-                      <EncounterHoverCard encounter={encounter} />
-                    </HoverCardContent>
-                  </HoverCard>,
+                  <EncounterCard
+                    key={encounter.id}
+                    encounter={encounter}
+                    isSelected={encounter.id === selectedEncounterId}
+                    onSelect={handleSelect}
+                  />,
                 );
                 return acc;
               },
@@ -466,14 +484,6 @@ const EncounterHoverCard = ({ encounter }: { encounter: EncounterRead }) => {
   const { t } = useTranslation();
   return (
     <>
-      <div className="flex flex-col">
-        <span className="font-semibold text-gray-950">
-          {t(`encounter_class__${encounter.encounter_class}`)}
-        </span>
-        <span className="text-sm text-gray-700 font-medium">
-          {encounter.facility.name}
-        </span>
-      </div>
       <div className="flex flex-col gap-1">
         <span className="text-sm text-gray-700 font-medium">
           {t("encounter_tags")}:
