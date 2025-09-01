@@ -32,7 +32,6 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import {
   PRODUCT_STATUS_COLORS,
-  ProductBase,
   ProductRead,
   ProductStatusOptions,
 } from "@/types/inventory/product/product";
@@ -42,7 +41,7 @@ function ProductCard({
   product,
   facilityId,
 }: {
-  product: ProductBase;
+  product: ProductRead;
   facilityId: string;
 }) {
   const { t } = useTranslation();
@@ -56,8 +55,8 @@ function ProductCard({
                 {t(product.status)}
               </Badge>
             </div>
-            <h3 className="font-medium text-gray-900">
-              Product ID: {product.id}
+            <h3 className="font-medium text-gray-900 break-normal">
+              {product.product_knowledge.name}
             </h3>
             {product.batch?.lot_number && (
               <p className="mt-1 text-sm text-gray-500">
@@ -187,7 +186,7 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
           <>
             {/* Mobile Card View */}
             <div className="grid gap-4 md:hidden">
-              {products.map((product: ProductBase) => (
+              {products.map((product: ProductRead) => (
                 <ProductCard
                   key={product.id}
                   product={product}
@@ -200,8 +199,8 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
               <div className="rounded-lg border">
                 <Table>
                   <TableHeader className="bg-gray-100">
-                    <TableRow>
-                      <TableHead>{t("id")}</TableHead>
+                    <TableRow className="divide-x">
+                      <TableHead>{t("name")}</TableHead>
                       <TableHead>{t("status")}</TableHead>
                       <TableHead>{t("lot_number")}</TableHead>
                       <TableHead>{t("expires")}</TableHead>

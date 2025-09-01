@@ -56,7 +56,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { formatDateTime, isTouchDevice } from "@/Utils/utils";
+import { formatDateTime, formatName, isTouchDevice } from "@/Utils/utils";
 import patientApi from "@/types/emr/patient/patientApi";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
@@ -149,7 +149,7 @@ function MessageItem({
           >
             <span className="flex pr-2">
               <Avatar
-                name={message.created_by?.username}
+                name={formatName(message.created_by)}
                 imageUrl={message.created_by?.profile_picture_url}
                 className="size-8 rounded-full object-cover ring-1 ring-transparent hover:ring-red-200 transition"
               />
@@ -166,7 +166,7 @@ function MessageItem({
         >
           <p className="text-xs space-x-2 mb-1">
             <span className="text-gray-700 font-medium">
-              {message.created_by.username}
+              {formatName(message.created_by)}
             </span>
             <time
               className="text-gray-500"
