@@ -91,7 +91,9 @@ function EncounterCard({
                   <div className="flex items-center py-1 pr-1 gap-2">
                     <Tags className="size-4 text-gray-700" />
                     <span className="text-sm text-gray-700 font-medium">
-                      {t("encounter_tags", { count: encounter.tags.length })}
+                      {t("encounter_tag_count", {
+                        count: encounter.tags.length,
+                      })}
                     </span>
                   </div>
                 </HoverCardTrigger>
@@ -99,7 +101,7 @@ function EncounterCard({
                   className="flex flex-col gap-2 p-4 border border-gray-200 rounded-md max-w-90 shadow-lg"
                   side="right"
                 >
-                  <EncounterHoverCard encounter={encounter} />
+                  <EncounterTagHoverCard encounter={encounter} />
                 </HoverCardContent>
               </HoverCard>
             )}
@@ -437,8 +439,8 @@ const EncounterSheetTrigger = () => {
   return (
     <Card className="relative rounded-md cursor-pointer w-full lg:w-80 bg-white border-primary-600">
       <CardContent className="flex flex-col px-3 py-2 gap-1">
-        <div className="flex justify-between items-center">
-          <div className="flex flex-col gap-1 items-start">
+        <div className="flex justify-between items-start">
+          <div className="flex flex-col items-start gap-1">
             <span className="text-base font-semibold">
               {t(`encounter_class__${encounter.encounter_class}`)}
             </span>
@@ -446,7 +448,7 @@ const EncounterSheetTrigger = () => {
               {encounter.facility.name}
             </span>
           </div>
-          <div className="flex flex-col gap-1 pt-0.5 items-start">
+          <div className="flex flex-col pt-0.5 items-start">
             <span className="text-sm text-gray-600 whitespace-nowrap">
               {encounter.period.start && (
                 <span>
@@ -481,8 +483,21 @@ const EncounterSheetTrigger = () => {
             </div>
           </div>
         </div>
-        {encounter.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+      </CardContent>
+    </Card>
+  );
+};
+
+const EncounterTagHoverCard = ({ encounter }: { encounter: EncounterRead }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-sm text-gray-700 font-medium">
+        {t("encounter_tag_label", { count: encounter.tags.length })}:
+      </span>
+      <div className="flex flex-wrap gap-2">
+        {encounter.tags.length > 0 ? (
+          <>
             {encounter.tags.map((tag) => (
               <Badge
                 key={tag.id}
@@ -493,40 +508,11 @@ const EncounterSheetTrigger = () => {
                 {getTagHierarchyDisplay(tag)}
               </Badge>
             ))}
-          </div>
+          </>
+        ) : (
+          <span className="text-sm text-gray-500">{t("no_tags")}</span>
         )}
-      </CardContent>
-    </Card>
-  );
-};
-
-const EncounterHoverCard = ({ encounter }: { encounter: EncounterRead }) => {
-  const { t } = useTranslation();
-  return (
-    <>
-      <div className="flex flex-col gap-1">
-        <span className="text-sm text-gray-700 font-medium">
-          {t("encounter_tag", { count: encounter.tags.length })}:
-        </span>
-        <div className="flex flex-wrap gap-2">
-          {encounter.tags.length > 0 ? (
-            <>
-              {encounter.tags.map((tag) => (
-                <Badge
-                  key={tag.id}
-                  variant="secondary"
-                  className="capitalize"
-                  title={tag.description}
-                >
-                  {getTagHierarchyDisplay(tag)}
-                </Badge>
-              ))}
-            </>
-          ) : (
-            <span className="text-sm text-gray-500">{t("no_tags")}</span>
-          )}
-        </div>
       </div>
-    </>
+    </div>
   );
 };
