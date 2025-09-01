@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { CircleDashed, Settings2 } from "lucide-react";
+import { CircleDashed } from "lucide-react";
 import React, { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -30,7 +30,6 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import {
-  ENCOUNTER_CLASS,
   ENCOUNTER_PRIORITY,
   ENCOUNTER_STATUS_ICONS,
   EncounterClass,
@@ -341,31 +340,6 @@ export function EncounterList({
                       updateQuery({
                         status: undefined,
                         encounter_class: encounterClass,
-                        priority,
-                      });
-                    }}
-                    className="h-9 shadow-sm rounded-md min-w-32"
-                  />
-                </div>
-
-                {/* Class Filter - Mobile */}
-                <div className="md:hidden sm:w-auto w-full">
-                  <FilterSelect
-                    label={t("type")}
-                    icon={<Settings2 className="size-4" />}
-                    value={encounterClass || ""}
-                    onValueChange={(value) => {
-                      updateQuery({
-                        encounter_class: value === "all" ? undefined : value,
-                      });
-                    }}
-                    options={ENCOUNTER_CLASS.map((value) =>
-                      t(`encounter_class__${value}`),
-                    )}
-                    onClear={() => {
-                      updateQuery({
-                        encounter_class: undefined,
-                        status,
                         priority,
                       });
                     }}
