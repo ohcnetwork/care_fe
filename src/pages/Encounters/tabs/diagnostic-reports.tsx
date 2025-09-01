@@ -85,7 +85,7 @@ export const EncounterDiagnosticReportsTab = () => {
                         >
                           <TableCell className="font-medium">
                             <Link
-                              href={`/facility/${facilityId}/diagnostic_reports/${report.id}`}
+                              href={`/facility/${facilityId}/patient/${patientId}/diagnostic_reports/${report.id}`}
                               className="group flex items-start gap-1"
                             >
                               <div>
