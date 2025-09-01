@@ -356,7 +356,7 @@ export default function ServiceRequestShow({
             </Button>
 
             <div className="flex items-end gap-2">
-              {(request?.diagnostic_reports.length == 0 ||
+              {(!request?.activity_definition?.diagnostic_report_codes ||
                 request?.diagnostic_reports?.[0]?.status ===
                   DiagnosticReportStatus.final) && (
                 <div className="flex items-center gap-2">
