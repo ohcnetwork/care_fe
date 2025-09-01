@@ -1238,6 +1238,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               }
                               expandPath={expandPath}
                               questionRefs={questionRefs}
+                              totalSiblings={rootQuestions.length}
                             />
                           </div>
                         ))}
@@ -1539,6 +1540,7 @@ interface QuestionEditorProps {
   handleEnableWhenDependentClick: (path: string[], targetId: string) => void;
   expandPath?: string[];
   questionRefs: React.RefObject<{ [key: string]: HTMLDivElement | null }>;
+  totalSiblings?: number;
 }
 
 function QuestionEditor({
@@ -1564,6 +1566,7 @@ function QuestionEditor({
   handleEnableWhenDependentClick,
   expandPath,
   questionRefs,
+  totalSiblings,
 }: QuestionEditorProps): React.ReactElement {
   const { t } = useTranslation();
   const {
@@ -1866,49 +1869,51 @@ function QuestionEditor({
             <ChevronsUpDown className="size-4 text-gray-500" />
           )}
         </CollapsibleTrigger>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="size-8">
-              <CareIcon icon="l-ellipsis-v" className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {!isFirst && (
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMoveUp?.();
-                }}
-              >
-                <ChevronUp className="mr-2 size-4" />
-                {t("move_up")}
-              </DropdownMenuItem>
-            )}
-            {!isLast && (
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMoveDown?.();
-                }}
-              >
-                <ChevronDown className="mr-2 size-4" />
-                {t("move_down")}
-              </DropdownMenuItem>
-            )}
+        {!(depth > 0 && totalSiblings === 1) && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="size-8">
+                <CareIcon icon="l-ellipsis-v" className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {!isFirst && (
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveUp?.();
+                  }}
+                >
+                  <ChevronUp className="mr-2 size-4" />
+                  {t("move_up")}
+                </DropdownMenuItem>
+              )}
+              {!isLast && (
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveDown?.();
+                  }}
+                >
+                  <ChevronDown className="mr-2 size-4" />
+                  {t("move_down")}
+                </DropdownMenuItem>
+              )}
 
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              className="text-destructive"
-            >
-              <CareIcon icon="l-trash-alt" className="mr-2 size-4" />
-              {t("delete")}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                className="text-destructive"
+              >
+                <CareIcon icon="l-trash-alt" className="mr-2 size-4" />
+                {t("delete")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       <CollapsibleContent>
@@ -2770,6 +2775,7 @@ function QuestionEditor({
                       isLast={idx === (questions?.length || 0) - 1}
                       expandPath={expandPath?.slice(1)}
                       questionRefs={questionRefs}
+                      totalSiblings={questions?.length || 0}
                     />
                   </div>
                 ))}
