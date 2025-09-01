@@ -24,8 +24,6 @@ import ScheduleRoutes from "@/Routers/routes/ScheduleRoutes";
 import UserRoutes from "@/Routers/routes/UserRoutes";
 import AdminRoutes from "@/Routers/routes/adminRoutes";
 import { PermissionProvider } from "@/context/PermissionContext";
-import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
-import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import UserDashboard from "@/pages/UserDashboard";
 
 // List of paths and patterns where the sidebar should be hidden
@@ -75,9 +73,6 @@ const Routes: AppRoutes = {
 
   // Only include the icon route in development environment
   ...(import.meta.env.PROD ? { "/icons": () => <IconIndex /> } : {}),
-
-  "/apps": () => <PlugConfigList />,
-  "/apps/plug-configs/:slug": ({ slug }) => <PlugConfigEdit slug={slug} />,
   "/login": () => <Redirect to="/" />,
 };
 

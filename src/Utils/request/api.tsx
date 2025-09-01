@@ -1,5 +1,4 @@
 import { PaginatedResponse } from "@/Utils/request/types";
-import { PlugConfig } from "@/types/plugConfig";
 import { UserReadMinimal } from "@/types/user/user";
 
 /**
@@ -42,37 +41,6 @@ const routes = {
   getScheduleAbleFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/",
     TRes: Type<PaginatedResponse<UserReadMinimal>>(),
-  },
-
-  plugConfig: {
-    listPlugConfigs: {
-      path: "/api/v1/plug_config/",
-      method: "GET",
-      TRes: Type<{ configs: PlugConfig[] }>(),
-    },
-    getPlugConfig: {
-      path: "/api/v1/plug_config/{slug}/",
-      method: "GET",
-      TRes: Type<PlugConfig>(),
-    },
-    createPlugConfig: {
-      path: "/api/v1/plug_config/",
-      method: "POST",
-      TReq: Type<PlugConfig>(),
-      TRes: Type<PlugConfig>(),
-    },
-    updatePlugConfig: {
-      path: "/api/v1/plug_config/{slug}/",
-      method: "PATCH",
-      TReq: Type<PlugConfig>(),
-      TRes: Type<PlugConfig>(),
-    },
-    deletePlugConfig: {
-      path: "/api/v1/plug_config/{slug}/",
-      method: "DELETE",
-      TRes: Type<Record<string, never>>(),
-      TBody: Type<void>(),
-    },
   },
 } as const;
 
