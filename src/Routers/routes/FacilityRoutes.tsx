@@ -3,6 +3,8 @@ import { Redirect } from "raviger";
 import FacilityUsers from "@/components/Facility/FacilityUsers";
 import ResourceCreate from "@/components/Resource/ResourceForm";
 
+import { FacilityLayout } from "@/pages/Facility/FacilityLayout";
+
 import { AppRoutes } from "@/Routers/AppRouter";
 import AccountList from "@/pages/Facility/billing/account/AccountList";
 import AccountShow from "@/pages/Facility/billing/account/AccountShow";
@@ -25,118 +27,182 @@ import { SettingsLayout } from "@/pages/Facility/settings/layout";
 const FacilityRoutes: AppRoutes = {
   "/facility": () => <Redirect to="/" />,
   "/facility/:facilityId/overview": ({ facilityId }) => (
-    <FacilityOverview facilityId={facilityId} />
+    <FacilityLayout>
+      <FacilityOverview facilityId={facilityId} />
+    </FacilityLayout>
   ),
   "/facility/:facilityId/users": ({ facilityId }) => (
-    <FacilityUsers facilityId={facilityId} />
+    <FacilityLayout>
+      <FacilityUsers facilityId={facilityId} />
+    </FacilityLayout>
   ),
   "/facility/:facilityId/resource/new": ({ facilityId }) => (
-    <ResourceCreate facilityId={facilityId} />
+    <FacilityLayout>
+      <ResourceCreate facilityId={facilityId} />
+    </FacilityLayout>
   ),
   "/facility/:facilityId/settings*": ({ facilityId }) => (
-    <SettingsLayout facilityId={facilityId} />
+    <FacilityLayout>
+      <SettingsLayout facilityId={facilityId} />
+    </FacilityLayout>
   ),
   "/facility/:facilityId/locations/:locationId*": ({
     facilityId,
     locationId,
-  }) => <LocationLayout facilityId={facilityId} locationId={locationId} />,
+  }) => (
+    <FacilityLayout>
+      <LocationLayout facilityId={facilityId} locationId={locationId} />
+    </FacilityLayout>
+  ),
   "/facility/:facilityId/services": ({ facilityId }) => (
-    <FacilityServices facilityId={facilityId} />
+    <FacilityLayout>
+      <FacilityServices facilityId={facilityId} />
+    </FacilityLayout>
   ),
   "/facility/:facilityId/services/:serviceId": ({ facilityId, serviceId }) => (
-    <HealthcareServiceShow facilityId={facilityId} serviceId={serviceId} />
+    <FacilityLayout>
+      <HealthcareServiceShow facilityId={facilityId} serviceId={serviceId} />
+    </FacilityLayout>
   ),
   "/facility/:facilityId/services_requests/:serviceRequestId": ({
     facilityId,
     serviceRequestId,
   }) => (
-    <ServiceRequestShow
-      facilityId={facilityId}
-      serviceRequestId={serviceRequestId}
-    />
+    <FacilityLayout>
+      <ServiceRequestShow
+        facilityId={facilityId}
+        serviceRequestId={serviceRequestId}
+      />
+    </FacilityLayout>
   ),
 
   "/facility/:facilityId/patient/:patientId/diagnostic_reports/:diagnosticReportId":
     ({ facilityId, patientId, diagnosticReportId }) => (
-      <DiagnosticReportView
-        patientId={patientId}
-        facilityId={facilityId}
-        diagnosticReportId={diagnosticReportId}
-      />
+      <FacilityLayout>
+        <DiagnosticReportView
+          patientId={patientId}
+          facilityId={facilityId}
+          diagnosticReportId={diagnosticReportId}
+        />
+      </FacilityLayout>
     ),
   "/facility/:facilityId/patient/:patientId/diagnostic_reports/:diagnosticReportId/print":
     ({ patientId, diagnosticReportId }) => (
-      <DiagnosticReportPrint
-        patientId={patientId}
-        diagnosticReportId={diagnosticReportId}
-      />
+      <FacilityLayout>
+        <DiagnosticReportPrint
+          patientId={patientId}
+          diagnosticReportId={diagnosticReportId}
+        />
+      </FacilityLayout>
     ),
   "/facility/:facilityId/billing/accounts": ({ facilityId }) => (
-    <AccountList facilityId={facilityId} />
+    <FacilityLayout>
+      <AccountList facilityId={facilityId} />
+    </FacilityLayout>
   ),
   "/facility/:facilityId/billing/account/:accountId": ({
     facilityId,
     accountId,
   }) => (
-    <AccountShow facilityId={facilityId} accountId={accountId} tab="invoices" />
+    <FacilityLayout>
+      <AccountShow
+        facilityId={facilityId}
+        accountId={accountId}
+        tab="invoices"
+      />
+    </FacilityLayout>
   ),
   "/facility/:facilityId/billing/account/:accountId/invoices": ({
     facilityId,
     accountId,
   }) => (
-    <AccountShow facilityId={facilityId} accountId={accountId} tab="invoices" />
+    <FacilityLayout>
+      <AccountShow
+        facilityId={facilityId}
+        accountId={accountId}
+        tab="invoices"
+      />
+    </FacilityLayout>
   ),
   "/facility/:facilityId/billing/account/:accountId/charge_items": ({
     facilityId,
     accountId,
   }) => (
-    <AccountShow
-      facilityId={facilityId}
-      accountId={accountId}
-      tab="charge_items"
-    />
+    <FacilityLayout>
+      <AccountShow
+        facilityId={facilityId}
+        accountId={accountId}
+        tab="charge_items"
+      />
+    </FacilityLayout>
   ),
   "/facility/:facilityId/billing/account/:accountId/payments": ({
     facilityId,
     accountId,
   }) => (
-    <AccountShow facilityId={facilityId} accountId={accountId} tab="payments" />
+    <FacilityLayout>
+      <AccountShow
+        facilityId={facilityId}
+        accountId={accountId}
+        tab="payments"
+      />
+    </FacilityLayout>
   ),
   "/facility/:facilityId/billing/account/:accountId/invoices/create": ({
     facilityId,
     accountId,
-  }) => <CreateInvoicePage facilityId={facilityId} accountId={accountId} />,
+  }) => (
+    <FacilityLayout>
+      <CreateInvoicePage facilityId={facilityId} accountId={accountId} />
+    </FacilityLayout>
+  ),
   "/facility/:facilityId/billing/invoices": ({ facilityId }) => (
-    <InvoiceList facilityId={facilityId} />
+    <FacilityLayout>
+      <InvoiceList facilityId={facilityId} />
+    </FacilityLayout>
   ),
   "/facility/:facilityId/billing/invoices/:invoiceId": ({
     facilityId,
     invoiceId,
-  }) => <InvoiceShow facilityId={facilityId} invoiceId={invoiceId} />,
+  }) => (
+    <FacilityLayout>
+      <InvoiceShow facilityId={facilityId} invoiceId={invoiceId} />
+    </FacilityLayout>
+  ),
   "/facility/:facilityId/billing/invoice/:invoiceId/print": ({
     facilityId,
     invoiceId,
-  }) => <PrintInvoice facilityId={facilityId} invoiceId={invoiceId} />,
+  }) => (
+    <FacilityLayout>
+      <PrintInvoice facilityId={facilityId} invoiceId={invoiceId} />
+    </FacilityLayout>
+  ),
   "/facility/:facilityId/billing/payments": ({ facilityId }) => (
-    <PaymentReconciliationList facilityId={facilityId} />
+    <FacilityLayout>
+      <PaymentReconciliationList facilityId={facilityId} />
+    </FacilityLayout>
   ),
   "/facility/:facilityId/billing/payments/:paymentReconciliationId": ({
     facilityId,
     paymentReconciliationId,
   }) => (
-    <PaymentReconciliationShow
-      facilityId={facilityId}
-      paymentReconciliationId={paymentReconciliationId}
-    />
+    <FacilityLayout>
+      <PaymentReconciliationShow
+        facilityId={facilityId}
+        paymentReconciliationId={paymentReconciliationId}
+      />
+    </FacilityLayout>
   ),
   "/facility/:facilityId/billing/payments/:paymentReconciliationId/print": ({
     facilityId,
     paymentReconciliationId,
   }) => (
-    <PrintPaymentReconciliation
-      facilityId={facilityId}
-      paymentReconciliationId={paymentReconciliationId}
-    />
+    <FacilityLayout>
+      <PrintPaymentReconciliation
+        facilityId={facilityId}
+        paymentReconciliationId={paymentReconciliationId}
+      />
+    </FacilityLayout>
   ),
 };
 

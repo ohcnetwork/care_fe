@@ -1,14 +1,12 @@
 {
-    "global": [
-      { "key": "escape",              "action": "close-dialog",
-                                      "description": "Close Dialog",
-                                      "when": "always" },
+    "global": [],
+
+    "facility": [
+      { "key": "shift+p",             "action": "register-patient",
+                                      "description": "Register New Patient",
+                                      "when": "canCreate" },
       
-      { "key": "ctrl+k",              "action": "command-palette",
-                                      "description": "Open Command Palette",
-                                      "when": "always" },
-                                      
-      { "key": "?",                   "action": "show-shortcuts",
+      { "key": "shift+?",             "action": "show-shortcuts",
                                       "description": "Show Keyboard Shortcuts",
                                       "when": "always" }
     ],
