@@ -226,7 +226,7 @@ export default function ValueSetSearchContent({
           autoFocus
         />
       </div>
-      <CommandList className="h-75 overflow-hidden">
+      <CommandList className="max-h-[30vh] md:max-h-[35vh] overflow-hidden">
         <CommandEmpty>
           {search.length < 3 ? (
             <p className="p-4 text-sm text-gray-500">
@@ -242,7 +242,7 @@ export default function ValueSetSearchContent({
           <div
             className={cn(
               activeTab === 0 ? "block" : "hidden",
-              "md:block flex-1 overflow-auto h-[300px]",
+              "md:block flex-1 overflow-auto max-h-[30vh] md:max-h-[35vh] ",
             )}
           >
             <CommandGroup>
