@@ -33,7 +33,8 @@ import {
   ValueSetBase,
   ValueSetRead,
   ValueSetStatus,
-} from "@/types/valueset/valueset";
+} from "@/types/valueSet/valueSet";
+import { valuesOf } from "@/Utils/utils";
 
 import { CodingField } from "./CodingField";
 import { ValueSetPreview } from "./ValueSetPreview";
@@ -465,10 +466,11 @@ export function ValueSetForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="active">{t("active")}</SelectItem>
-                  <SelectItem value="draft">{t("draft")}</SelectItem>
-                  <SelectItem value="retired">{t("retired")}</SelectItem>
-                  <SelectItem value="unknown">{t("unknown")}</SelectItem>
+                  {valuesOf(ValueSetStatus).map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {t(status)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />

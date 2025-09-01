@@ -1,5 +1,4 @@
 import { PaginatedResponse } from "@/Utils/request/types";
-import { Code } from "@/types/base/code/code";
 import { PlugConfig } from "@/types/plugConfig";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -43,15 +42,6 @@ const routes = {
   getScheduleAbleFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/",
     TRes: Type<PaginatedResponse<UserReadMinimal>>(),
-  },
-
-  valueset: {
-    expand: {
-      path: "/api/v1/valueset/{system}/expand/",
-      method: "POST",
-      TBody: Type<{ search: string; count: number }>(),
-      TRes: Type<{ results: Code[] }>(),
-    },
   },
 
   plugConfig: {

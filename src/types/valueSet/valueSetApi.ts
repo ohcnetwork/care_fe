@@ -3,13 +3,14 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
 
 import {
+  ExpandRequest,
   ValueSetBase,
   ValueSetCreate,
-  ValuesetLookupRequest,
-  ValuesetLookupResponse,
+  ValueSetLookupRequest,
+  ValueSetLookupResponse,
   ValueSetRead,
   ValueSetUpdate,
-} from "./valueset";
+} from "@/types/valueSet/valueSet";
 
 export default {
   list: {
@@ -37,18 +38,16 @@ export default {
   lookup: {
     path: "/api/v1/valueset/lookup_code/",
     method: HttpMethod.POST,
-    TRes: Type<ValuesetLookupResponse>(),
-    TBody: Type<ValuesetLookupRequest>(),
+    TRes: Type<ValueSetLookupResponse>(),
+    TBody: Type<ValueSetLookupRequest>(),
   },
   expand: {
-    path: "/api/v1/valueset/expand/",
+    path: "/api/v1/valueset/{slug}/expand/",
     method: HttpMethod.POST,
-    TRes: Type<ValueSetRead>(),
-    TBody: Type<{
-      search: string;
-    }>(),
+    TBody: Type<ExpandRequest>(),
+    TRes: Type<{ results: Code[] }>(),
   },
-  preview_search: {
+  previewSearch: {
     path: "/api/v1/valueset/preview_search/",
     method: HttpMethod.POST,
     TRes: Type<{ results: Code[] }>(),
@@ -62,20 +61,20 @@ export default {
   addFavourite: {
     path: "/api/v1/valueset/{slug}/add_favourite/",
     method: HttpMethod.POST,
+    TBody: Type<Code>(),
     TRes: Type<{ message: string }>(),
-    TBody: Type<{ code: string }>(),
   },
   removeFavourite: {
     path: "/api/v1/valueset/{slug}/remove_favourite/",
     method: HttpMethod.POST,
+    TBody: Type<Code>(),
     TRes: Type<{ message: string }>(),
-    TBody: Type<{ code: string }>(),
   },
   clearFavourites: {
     path: "/api/v1/valueset/{slug}/clear_favourites/",
     method: HttpMethod.POST,
-    TRes: Type<unknown>(),
-    TBody: Type<unknown>(),
+    TBody: Type<void>(),
+    TRes: Type<{ message: string }>(),
   },
   recentViews: {
     path: "/api/v1/valueset/{slug}/recent_views/",
@@ -85,19 +84,19 @@ export default {
   addRecentView: {
     path: "/api/v1/valueset/{slug}/add_recent_view/",
     method: HttpMethod.POST,
-    TRes: Type<{ message: string }>(),
     TBody: Type<Code>(),
+    TRes: Type<{ message: string }>(),
   },
   removeRecentView: {
     path: "/api/v1/valueset/{slug}/remove_recent_view/",
     method: HttpMethod.POST,
-    TRes: Type<{ message: string }>(),
     TBody: Type<Code>(),
+    TRes: Type<{ message: string }>(),
   },
   clearRecentViews: {
     path: "/api/v1/valueset/{slug}/clear_recent_views/",
     method: HttpMethod.POST,
-    TRes: Type<unknown>(),
-    TBody: Type<unknown>(),
+    TBody: Type<void>(),
+    TRes: Type<{ message: string }>(),
   },
 } as const;

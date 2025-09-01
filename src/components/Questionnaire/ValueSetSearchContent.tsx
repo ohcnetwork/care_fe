@@ -18,11 +18,10 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { Code } from "@/types/base/code/code";
-import valuesetRoutes from "@/types/valueset/valuesetApi";
+import { Code, DEFAULT_EXPAND_REQUEST_LANGUAGE } from "@/types/base/code/code";
+import valueSetApi from "@/types/valueSet/valueSetApi";
 
 interface Props {
   system: string;
@@ -71,7 +70,7 @@ const Item = ({
         }}
         className="hover:text-primary-500 transition-all text-secondary-900 cursor-pointer"
       >
-        {isFavourite ? <StarFilledIcon /> : <StarIcon className="" />}
+        {isFavourite ? <StarFilledIcon /> : <StarIcon />}
       </button>
     </div>
   </CommandItem>
@@ -97,19 +96,23 @@ export default function ValueSetSearchContent({
 
   const searchQuery = useQuery({
     queryKey: ["valueset", system, "expand", count, search],
-    queryFn: query.debounced(routes.valueset.expand, {
-      pathParams: { system },
-      body: { count, search: search + searchPostFix },
+    queryFn: query.debounced(valueSetApi.expand, {
+      pathParams: { slug: system },
+      body: {
+        count,
+        search: search + searchPostFix,
+        language: DEFAULT_EXPAND_REQUEST_LANGUAGE,
+      },
     }),
   });
 
   const favouritesQuery = useQuery({
     queryKey: ["valueset", system, "favourites"],
-    queryFn: query(valuesetRoutes.favourites, { pathParams: { slug: system } }),
+    queryFn: query(valueSetApi.favourites, { pathParams: { slug: system } }),
   });
 
   const addFavouriteMutation = useMutation({
-    mutationFn: mutate(valuesetRoutes.addFavourite, {
+    mutationFn: mutate(valueSetApi.addFavourite, {
       pathParams: { slug: system },
     }),
     onSuccess: () => {
@@ -120,7 +123,7 @@ export default function ValueSetSearchContent({
   });
 
   const removeFavouriteMutation = useMutation({
-    mutationFn: mutate(valuesetRoutes.removeFavourite, {
+    mutationFn: mutate(valueSetApi.removeFavourite, {
       pathParams: { slug: system },
     }),
     onSuccess: () => {
@@ -135,7 +138,7 @@ export default function ValueSetSearchContent({
   });
 
   const clearFavouritesMutation = useMutation({
-    mutationFn: mutate(valuesetRoutes.clearFavourites, {
+    mutationFn: mutate(valueSetApi.clearFavourites, {
       pathParams: { slug: system },
     }),
     onSuccess: () => {
@@ -151,13 +154,13 @@ export default function ValueSetSearchContent({
 
   const recentsQuery = useQuery({
     queryKey: ["valueset", system, "recents"],
-    queryFn: query(valuesetRoutes.recentViews, {
+    queryFn: query(valueSetApi.recentViews, {
       pathParams: { slug: system },
     }),
   });
 
   const addRecentMutation = useMutation({
-    mutationFn: mutate(valuesetRoutes.addRecentView, {
+    mutationFn: mutate(valueSetApi.addRecentView, {
       pathParams: { slug: system },
     }),
     onSuccess: () => {
@@ -387,7 +390,7 @@ export default function ValueSetSearchContent({
         variant="destructive"
         disabled={clearFavouritesMutation.isPending}
         onConfirm={() => {
-          clearFavouritesMutation.mutate({});
+          clearFavouritesMutation.mutate(undefined);
         }}
       />
     </Command>
