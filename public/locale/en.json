@@ -439,7 +439,6 @@
   "add_new_beds": "Add New Bed(s)",
   "add_new_facility": "Add New Facility",
   "add_new_location": "Add New Location",
-  "shift_key": "shift",
   "add_new_medications": "Add New Medications",
   "add_new_patient": "Add New Patient",
   "add_new_user": "Add New User",
@@ -1844,6 +1843,7 @@
   "enter_year_of_birth_to_verify": "Enter year of birth to verify",
   "enter_your_valid_email_address_to_receive_the_discharge_summary": "Enter your valid email address to receive the discharge summary",
   "entered": "Entered",
+  "entered_by": "Entered by",
   "entered_in_error": "Entered in Error",
   "entered_in_error_warning": "This action cannot be undone. The appointment will be marked as entered in error and removed from the system.",
   "entity_count_one": "{{count}} {{entity}}",
@@ -2759,6 +2759,7 @@
   "no_consultation_updates": "No consultation updates",
   "no_contact_points_added": "No contact points added",
   "no_country_found": "No country found",
+  "no_data_available": "No data available",
   "no_data_found": "No data found",
   "no_definitions_found": "No definitions found",
   "no_deleted_observations": "No Deleted Observation",
@@ -4220,6 +4221,7 @@
   "sgst": "SGST",
   "shared_by": "Shared By",
   "shift": "Shift Patient",
+  "shift_key": "shift",
   "shifting": "Shifting",
   "shifting_approval_facility": "Shifting approval facility",
   "shifting_approving_facility": "Shifting approving facility",
@@ -4956,7 +4958,5 @@
   "you_have_unsaved_changes_what_would_you_like_to_do": "You have unsaved changes. What would you like to do?",
   "you_need_at_least_a_location_to_create_an_assest": "You need at least a location to create an assest.",
   "zoom_in": "Zoom In",
-  "zoom_out": "Zoom Out",
-  "no_data_available": "No data available",
-  "entered_by": "Entered by"
+  "zoom_out": "Zoom Out"
 }
