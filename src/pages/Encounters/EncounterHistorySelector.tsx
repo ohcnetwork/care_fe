@@ -13,6 +13,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FilterSelect } from "@/components/ui/filter-select";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -30,23 +35,18 @@ import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { dateTimeQueryString } from "@/Utils/utils";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
-  completedEncounterStatus,
   ENCOUNTER_STATUS,
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
+  completedEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import {
-  getTagHierarchyDisplay,
   TagConfig,
   TagResource,
+  getTagHierarchyDisplay,
 } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 
@@ -76,7 +76,7 @@ function EncounterCard({
       {isSelected && (
         <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
       )}
-      <CardContent className="flex flex-col px-4 py-3 gap-1">
+      <CardContent className="flex flex-col px-4 py-3 gap-2">
         <div className="flex justify-between items-center">
           <div className="flex flex-col gap-1">
             <span className="text-base font-semibold">
@@ -439,6 +439,7 @@ const EncounterSheetTrigger = () => {
   return (
     <Card className="relative rounded-md cursor-pointer w-full lg:w-80 bg-white border-primary-600">
       <CardContent className="flex flex-col px-3 py-2 gap-1">
+        <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
         <div className="flex justify-between items-start">
           <div className="flex flex-col items-start gap-1">
             <span className="text-base font-semibold">
@@ -448,26 +449,28 @@ const EncounterSheetTrigger = () => {
               {encounter.facility.name}
             </span>
           </div>
-          <div className="flex flex-col pt-0.5 items-start">
-            <span className="text-sm text-gray-600 whitespace-nowrap">
-              {encounter.period.start && (
-                <span>
-                  {format(new Date(encounter.period.start!), "dd MMM")}
-                </span>
-              )}
-              {encounter.period.end && encounter.period.start && (
-                <span>{" - "}</span>
-              )}
-              {encounter.period.end ? (
-                <span>{format(new Date(encounter.period.end), "dd MMM")}</span>
-              ) : (
-                <span>
-                  {" - "}
-                  {t("ongoing")}
-                </span>
-              )}
-            </span>
-            <div className="flex gap-3 items-center">
+          <div className="flex gap-1 items-center justify-center">
+            <div className="flex flex-col gap-1 items-end ">
+              <span className="text-sm text-gray-600 whitespace-nowrap">
+                {encounter.period.start && (
+                  <span>
+                    {format(new Date(encounter.period.start!), "dd MMM")}
+                  </span>
+                )}
+                {encounter.period.end && encounter.period.start && (
+                  <span>{" - "}</span>
+                )}
+                {encounter.period.end ? (
+                  <span>
+                    {format(new Date(encounter.period.end), "dd MMM")}
+                  </span>
+                ) : (
+                  <span>
+                    {" - "}
+                    {t("ongoing")}
+                  </span>
+                )}
+              </span>
               <Badge
                 variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
                 size="sm"
@@ -475,11 +478,9 @@ const EncounterSheetTrigger = () => {
               >
                 {t(`encounter_status__${encounter.status}`)}
               </Badge>
-              <div
-                className={buttonVariants({ variant: "ghost", size: "icon" })}
-              >
-                <ChevronDown />
-              </div>
+            </div>
+            <div className={buttonVariants({ variant: "ghost", size: "icon" })}>
+              <ChevronDown />
             </div>
           </div>
         </div>
