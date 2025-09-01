@@ -34,15 +34,11 @@ export function useFacilityShortcuts() {
     actions.forEach((action) => {
       handlersMap[action.id] = () => {
         if (action.requiresFacility && !facility) {
-          console.warn(`No facility context found for ${action.id}`);
           return;
         }
 
         if (action.permission && facility) {
           if (!hasPermission(action.permission, facility.permissions)) {
-            console.warn(
-              `User does not have permission (${action.permission}) for ${action.id}`,
-            );
             return;
           }
         }
