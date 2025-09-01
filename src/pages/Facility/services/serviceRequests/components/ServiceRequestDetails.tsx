@@ -45,14 +45,13 @@ interface ServiceRequestDetailsProps {
 }
 
 export function ServiceRequestDetails({
-  facilityId,
+  facilityId: _facilityId,
   request,
   activityDefinition,
 }: ServiceRequestDetailsProps) {
   const specimenRequirements = activityDefinition?.specimen_requirements ?? [];
   const observationRequirements =
     activityDefinition?.observation_result_requirements ?? [];
-  console.log(facilityId);
 
   return (
     <div className="bg-gray-100 rounded-lg border border-gray-200">

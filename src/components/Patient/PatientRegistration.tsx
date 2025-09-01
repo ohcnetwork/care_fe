@@ -461,9 +461,7 @@ export default function PatientRegistration(
         <Form {...form}>
           <form
             className="md:w-[500px] space-y-10"
-            onSubmit={form.handleSubmit(onSubmit, (errors) => {
-              console.log("errors", errors);
-            })}
+            onSubmit={form.handleSubmit(onSubmit)}
           >
             <PLUGIN_Component
               __name="PatientRegistrationForm"
