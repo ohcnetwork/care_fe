@@ -1,5 +1,3 @@
-import { UserBareMinimum } from "@/components/Users/models";
-
 import { Code } from "@/types/base/code/code";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { InventoryRead } from "@/types/inventory/product/inventory";
@@ -212,7 +210,7 @@ export interface MedicationRequest {
   dosage_instruction: MedicationRequestDosageInstruction[];
   note?: string;
   authored_on: string;
-  created_by?: UserBareMinimum;
+  created_by?: UserReadMinimal;
   requested_product?: string;
   requested_product_internal?: ProductKnowledgeBase;
   dispense_status?: MedicationRequestDispenseStatus;
@@ -252,8 +250,8 @@ export interface MedicationRequestRead {
   note?: string;
   created_date: string;
   modified_date: string;
-  created_by: UserBareMinimum;
-  updated_by: UserBareMinimum;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
   authored_on: string;
   requested_product?: ProductKnowledgeBase;
   inventory_items_internal?: InventoryRead[];

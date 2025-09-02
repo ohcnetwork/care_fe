@@ -20,6 +20,7 @@ import query from "@/Utils/request/query";
 import { userAtom } from "@/atoms/user-atom";
 import authApi from "@/types/auth/authApi";
 import { MFAAuthenticationToken, TokenData } from "@/types/auth/otp";
+import userApi from "@/types/user/userApi";
 
 interface Props {
   children: React.ReactNode;
@@ -54,7 +55,7 @@ export default function AuthUserProvider({
 
   const { data: user, isLoading } = useQuery({
     queryKey: ["currentUser", accessToken],
-    queryFn: query(routes.currentUser, { silent: true }),
+    queryFn: query(userApi.currentUser, { silent: true }),
     retry: false,
     enabled: !!localStorage.getItem(LocalStorageKeys.accessToken),
   });
