@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
 
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
@@ -11,6 +12,7 @@ import SupplyDeliveryTable from "@/pages/Facility/services/inventory/internalTra
 import ToDispatchSupplyRequestTable from "@/pages/Facility/services/inventory/internalTransfer/ToDispatchSupplyRequestTable";
 import { SupplyDeliveryStatus } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import locationApi from "@/types/location/locationApi";
+import { PlusIcon } from "lucide-react";
 
 interface Props {
   facilityId: string;
@@ -53,21 +55,35 @@ export default function ToDispatch({ facilityId, locationId }: Props) {
             {location?.name} ({t("internal_transfers")})
           </p>
 
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">
-              {t("to_dispatch")}
-            </h2>
-            <p className="mt-1 text-sm text-gray-600">
-              <Trans
-                i18nKey="raise_dispatch_request"
-                values={{
-                  location: location?.name,
-                }}
-                components={{
-                  strong: <span className="font-medium text-gray-700" />,
-                }}
-              />
-            </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">
+                {t("to_dispatch")}
+              </h2>
+              <p className="mt-1 text-sm text-gray-600">
+                <Trans
+                  i18nKey="raise_dispatch_request"
+                  values={{
+                    location: location?.name,
+                  }}
+                  components={{
+                    strong: <span className="font-medium text-gray-700" />,
+                  }}
+                />
+              </p>
+            </div>
+
+            <Button
+              onClick={() => {
+                navigate(
+                  `/facility/${facilityId}/locations/${locationId}/internal_transfers/create_delivery`,
+                );
+              }}
+              className="whitespace-nowrap bg-primary-700 hover:bg-primary-800"
+            >
+              <PlusIcon className="size-4" />
+              {t("return_excess_stock")}
+            </Button>
           </div>
         </div>
 

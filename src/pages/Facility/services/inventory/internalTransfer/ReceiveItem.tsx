@@ -356,15 +356,16 @@ export default function ReceiveItem({
           .display || t("units")}
       </div>
 
-      {delivery.supplied_item_quantity !==
-        delivery.supply_request?.quantity && (
-        <div className="flex items-center gap-2 text-yellow-900 text-sm mt-2 bg-yellow-50 rounded-md p-1">
-          <AlertTriangleIcon className="w-4 h-4" />
-          <span>
-            {t("received_quantity_is_different_from_requested_quantity")}
-          </span>
-        </div>
-      )}
+      {delivery.supply_request &&
+        delivery.supplied_item_quantity !==
+          delivery.supply_request?.quantity && (
+          <div className="flex items-center gap-2 text-yellow-900 text-sm mt-2 bg-yellow-50 rounded-md p-1">
+            <AlertTriangleIcon className="w-4 h-4" />
+            <span>
+              {t("received_quantity_is_different_from_requested_quantity")}
+            </span>
+          </div>
+        )}
     </div>
   );
 
