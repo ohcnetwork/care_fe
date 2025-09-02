@@ -17,10 +17,11 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName, keysOf } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import facilityApi from "@/types/facility/facilityApi";
+import userApi from "@/types/user/userApi";
 
 export interface UserHomeProps {
   username?: string;
@@ -49,7 +50,7 @@ export default function UserHome(props: UserHomeProps) {
     isError,
   } = useQuery({
     queryKey: ["getUserDetails", username],
-    queryFn: query(routes.getUserDetails, {
+    queryFn: query(userApi.get, {
       pathParams: {
         username: username,
       },
@@ -58,8 +59,8 @@ export default function UserHome(props: UserHomeProps) {
 
   const { data: facilityData } = useQuery({
     queryKey: ["getFacilityDetails", props.facilityId],
-    queryFn: query(routes.getPermittedFacility, {
-      pathParams: { id: facilityId ?? "" },
+    queryFn: query(facilityApi.get, {
+      pathParams: { facilityId: facilityId ?? "" },
     }),
     enabled: !!facilityId,
   });

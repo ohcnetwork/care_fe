@@ -45,7 +45,7 @@ export function SpecimenDefinitionDetail({
   const queryClient = useQueryClient();
 
   const { data: specimenDefinition, isLoading } = useQuery({
-    queryKey: ["specimen_definitions", facilityId, specimenDefinitionId],
+    queryKey: ["specimenDefinitions", facilityId, specimenDefinitionId],
     queryFn: query(specimenDefinitionApi.retrieveSpecimenDefinition, {
       pathParams: { facilityId, specimenDefinitionId },
     }),
@@ -58,11 +58,7 @@ export function SpecimenDefinitionDetail({
       }),
       onSuccess: () => {
         toast.success(t("specimen_definition_retired_successfully"));
-        queryClient.invalidateQueries({ queryKey: ["specimen_definitions"] });
-        queryClient.invalidateQueries({
-          queryKey: ["specimen_definitions", facilityId, specimenDefinitionId],
-        });
-
+        queryClient.invalidateQueries({ queryKey: ["specimenDefinitions"] });
         navigate(`/facility/${facilityId}/settings/specimen_definitions`);
       },
       onError: () => {

@@ -26,6 +26,10 @@ type StructuredHandler<T extends StructuredQuestionType> = {
   >;
 };
 
+const sanitizeNote = (note?: string | null): string | undefined => {
+  return note?.trim() ?? undefined;
+};
+
 export const structuredHandlers: {
   [K in StructuredQuestionType]: StructuredHandler<K>;
 } = {
@@ -42,6 +46,7 @@ export const structuredHandlers: {
           body: {
             datapoints: allergies.map((allergy) => ({
               ...allergy,
+              note: sanitizeNote(allergy.note),
               encounter: encounterId,
             })),
           },
@@ -59,6 +64,7 @@ export const structuredHandlers: {
           body: {
             datapoints: medications.map((medication) => ({
               ...medication,
+              note: sanitizeNote(medication.note),
               encounter: encounterId,
               patient: patientId,
             })),
@@ -99,6 +105,7 @@ export const structuredHandlers: {
           body: {
             datapoints: symptoms.map((symptom) => ({
               ...symptom,
+              note: sanitizeNote(symptom.note),
               encounter: encounterId,
             })),
           },
@@ -122,6 +129,7 @@ export const structuredHandlers: {
               .filter((diagnosis) => diagnosis.dirty)
               .map((diagnosis) => ({
                 ...diagnosis,
+                note: sanitizeNote(diagnosis.note),
                 encounter: encounterId,
               })),
           },
@@ -208,18 +216,13 @@ export const structuredHandlers: {
     },
   },
   charge_item: {
-    getRequests: async (chargeItems, { facilityId, encounterId }) => {
-      if (!encounterId) return [];
+    getRequests: async (chargeItems, { facilityId }) => {
       return [
         {
           url: `/api/v1/facility/${facilityId}/charge_item/apply_charge_item_defs/`,
           method: "POST",
           body: {
-            requests: chargeItems.map((chargeItem) => ({
-              charge_item_definition: chargeItem.charge_item_definition,
-              quantity: chargeItem.quantity,
-              encounter: encounterId,
-            })),
+            requests: chargeItems,
           },
           reference_id: "charge_item",
         },

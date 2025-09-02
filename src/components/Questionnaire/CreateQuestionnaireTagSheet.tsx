@@ -40,7 +40,7 @@ export default function CreateQuestionnaireTagSheet({
     onSuccess: (data: unknown) => {
       const tagData = data as QuestionnaireTagModel;
       queryClient.invalidateQueries({
-        queryKey: ["questionnaire_tags"],
+        queryKey: ["questionnaireTags"],
       });
       setNewTagName("");
       setNewTagSlug("");

@@ -1,7 +1,9 @@
 import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
 
-import { ChargeItemUpsert } from "@/types/billing/chargeItem/chargeItem";
-import { ApplyMultipleChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
+import {
+  ApplyChargeItemDefinitionRequest,
+  ApplyMultipleChargeItemDefinitionRequest,
+} from "@/types/billing/chargeItem/chargeItem";
 import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import { EncounterEdit } from "@/types/emr/encounter/encounter";
@@ -9,7 +11,7 @@ import { MedicationRequest } from "@/types/emr/medicationRequest/medicationReque
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { ServiceRequestApplyActivityDefinitionSpec } from "@/types/emr/serviceRequest/serviceRequest";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
-import { FileUploadQuestion } from "@/types/files/files";
+import { FileUploadQuestion } from "@/types/files/file";
 import {
   AppointmentCreateRequest,
   CreateAppointmentQuestion,
@@ -27,7 +29,7 @@ export interface StructuredDataMap {
   files: FileUploadQuestion;
   time_of_death: string;
   service_request: ServiceRequestApplyActivityDefinitionSpec;
-  charge_item: ChargeItemUpsert;
+  charge_item: ApplyChargeItemDefinitionRequest;
 }
 
 // Map structured types to their request types

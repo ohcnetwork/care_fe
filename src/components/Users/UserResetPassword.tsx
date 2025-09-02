@@ -24,12 +24,12 @@ import { UpdatePasswordForm } from "@/components/Users/models";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export default function UserResetPassword({
   userData,
 }: {
-  userData: UserBase;
+  userData: UserReadMinimal;
 }) {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
@@ -91,9 +91,9 @@ export default function UserResetPassword({
   };
 
   return (
-    <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:px-6">
+    <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:px-6 sm:py-6">
       {!isEditing && (
-        <div className="mb-4 flex justify-start">
+        <div className="flex justify-center sm:justify-start">
           <Button
             onClick={() => setIsEditing(true)}
             type="button"
@@ -211,7 +211,7 @@ export default function UserResetPassword({
               </div>
             </div>
 
-            <div className="flex justify-end gap-4 mt-4">
+            <div className="flex justify-center sm:justify-start gap-3 mt-4">
               <Button
                 type="button"
                 disabled={isPending}
