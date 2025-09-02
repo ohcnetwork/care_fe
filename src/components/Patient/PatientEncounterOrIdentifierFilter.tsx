@@ -34,12 +34,12 @@ import {
 import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
+import { EncounterListRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import {
   getPartialId,
   PartialPatientModel,
-  PatientRead,
+  PatientListRead,
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 
@@ -60,24 +60,15 @@ export default function PatientEncounterOrIdentifierFilter({
   const { facility, facilityId } = useCurrentFacility();
   const [open, setOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<
-    PatientRead | PartialPatientModel | null
+    PatientListRead | PartialPatientModel | null
   >(null);
   const [pendingPatient, setPendingPatient] = useState<
-    PatientRead | PartialPatientModel | null
+    PatientListRead | PartialPatientModel | null
   >(null);
   const [searchType, setSearchType] = useState("encounter");
   const [searchTerm, setSearchTerm] = useState("");
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [verificationOpen, setVerificationOpen] = useState(false);
-
-  // Set initial patient ID if provided
-  useEffect(() => {
-    if (patientId && !selectedPatient) {
-      setSelectedPatient({ id: patientId } as PatientRead);
-    } else if (!patientId) {
-      setSelectedPatient(null);
-    }
-  }, [patientId]);
 
   // Fetch patient details when patientId is provided
   const { data: patientDetails } = useQuery({
@@ -147,7 +138,7 @@ export default function PatientEncounterOrIdentifierFilter({
   }, [verifiedPatient]);
 
   const handleSelectPatient = useCallback(
-    (patient: PatientRead | PartialPatientModel) => {
+    (patient: PatientListRead | PartialPatientModel) => {
       setSelectedPatient(patient);
       setOpen(false);
       setSearchTerm("");
@@ -156,7 +147,9 @@ export default function PatientEncounterOrIdentifierFilter({
     [onSelect],
   );
 
-  const handlePatientSelect = (patient: PatientRead | PartialPatientModel) => {
+  const handlePatientSelect = (
+    patient: PatientListRead | PartialPatientModel,
+  ) => {
     if (patientList?.partial) {
       setPendingPatient(patient);
       setVerificationOpen(true);
@@ -166,7 +159,7 @@ export default function PatientEncounterOrIdentifierFilter({
     }
   };
 
-  const handleEncounterSelect = (encounter: EncounterRead) => {
+  const handleEncounterSelect = (encounter: EncounterListRead) => {
     handleSelectPatient(encounter.patient);
   };
 

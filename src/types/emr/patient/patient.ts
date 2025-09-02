@@ -2,6 +2,7 @@ import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { Organization } from "@/types/organization/organization";
 import { PatientIdentifier } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { UserReadMinimal } from "@/types/user/user";
+import { Permissions } from "@/types/emr/permission/permission";
 
 export enum BloodGroupChoices {
   A_negative = "A_negative",
@@ -31,24 +32,25 @@ export interface PatientBase {
   address?: string;
   permanent_address?: string;
   pincode?: number;
-  date_of_birth?: string;
   deceased_datetime?: string | null;
   blood_group?: BloodGroupChoices;
-  geo_organization: string;
-  nationality?: string;
 }
 
-export interface PatientRead extends Omit<PatientBase, "geo_organization"> {
-  geo_organization: Organization;
-  year_of_birth: number;
+export interface PatientListRead extends PatientBase {
+  date_of_birth: string | null;
+  year_of_birth: number | null;
   created_date: string;
   modified_date: string;
-  created_by: UserReadMinimal | null;
-  updated_by: UserReadMinimal | null;
-  permissions: string[];
   instance_tags: TagConfig[];
   facility_tags: TagConfig[];
+}
+
+export interface PatientRead extends PatientListRead, Permissions {
+  geo_organization?: Organization;
+  created_by?: UserReadMinimal;
+  updated_by?: UserReadMinimal;
   instance_identifiers: PatientIdentifier[];
+  facility_identifiers: PatientIdentifier[];
 }
 
 export interface PatientCreate extends Omit<PatientBase, "id"> {
@@ -88,7 +90,7 @@ export interface PatientSearchRetrieveRequest {
   partial_id?: string;
 }
 
-export function getPartialId(patient: PartialPatientModel | PatientRead) {
+export function getPartialId(patient: PartialPatientModel | PatientListRead) {
   if ("partial_id" in patient) {
     return patient.partial_id;
   }
