@@ -43,7 +43,7 @@ import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
-import { UserReadMinimal } from "@/types/user/user";
+import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 
 // Extend the base type to use UserReadMinimal for requester
 interface ServiceRequestApplyActivityDefinitionSpec
@@ -461,7 +461,7 @@ export function ServiceRequestQuestion({
   errors,
 }: ServiceRequestQuestionProps) {
   const { t } = useTranslation();
-  const currentUser = useAuthUser() as UserReadMinimal;
+  const currentUser = useAuthUser() as CurrentUserRead;
   const [selectedActivityDefinition, setSelectedActivityDefinition] = useState<
     string | null
   >(null);

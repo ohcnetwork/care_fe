@@ -69,7 +69,7 @@ export interface BaseServiceRequestSpec {
 }
 
 export interface ServiceRequestCreateSpec
-  extends Omit<BaseServiceRequestSpec, "id"> {
+  extends Omit<BaseServiceRequestSpec, "id" | "requester"> {
   encounter: string;
   locations: string[];
   requester: string;
@@ -78,7 +78,7 @@ export interface ServiceRequestCreateSpec
 export interface ServiceRequestApplyActivityDefinitionSpec {
   encounter: string;
   activity_definition: string;
-  service_request: Omit<BaseServiceRequestSpec, "id"> & {
+  service_request: Omit<BaseServiceRequestSpec, "id" | "requester"> & {
     locations: string[];
     requester: string;
   };
