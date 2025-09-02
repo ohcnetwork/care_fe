@@ -59,7 +59,8 @@ export interface ChargeItemCreate
 export interface ApplyChargeItemDefinitionRequest {
   charge_item_definition: string;
   quantity: string;
-  encounter: string;
+  encounter?: string;
+  patient?: string;
   service_resource?: "service_request";
   service_resource_id?: string;
 }

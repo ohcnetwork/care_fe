@@ -39,7 +39,10 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import {
+  MonetaryComponent,
+  MonetaryComponentType,
+} from "@/types/base/monetaryComponent/monetaryComponent";
 import accountApi from "@/types/billing/account/accountApi";
 import {
   ChargeItemRead,
@@ -52,7 +55,6 @@ import {
   InvoiceStatus,
 } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
-import encounterApi from "@/types/emr/encounter/encounterApi";
 
 import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet";
 
@@ -79,8 +81,8 @@ interface CreateInvoicePageProps {
 
 interface PriceComponentRowProps {
   label: string;
-  components: any[];
-  totalPriceComponents: any[];
+  components: MonetaryComponent[];
+  totalPriceComponents: MonetaryComponent[];
 }
 
 function PriceComponentRow({
@@ -163,21 +165,6 @@ export function CreateInvoicePage({
     }),
     enabled: !!facilityId && !!accountId,
   });
-
-  // Get current encounter for the patient to use when creating charge items
-  const { data: encounters } = useQuery({
-    queryKey: ["encounters", account?.patient?.id],
-    queryFn: query(encounterApi.list, {
-      queryParams: {
-        patient: account?.patient?.id,
-        limit: 1,
-        ordering: "-modified_date",
-      },
-    }),
-    enabled: !!account?.patient?.id,
-  });
-
-  const currentEncounter = encounters?.results?.[0];
 
   const handleChargeItemsAdded = () => {
     queryClient.invalidateQueries({
@@ -269,25 +256,31 @@ export function CreateInvoicePage({
     }));
   };
 
-  const getUnitComponentsByType = (item: any, type: MonetaryComponentType) => {
+  const getUnitComponentsByType = (
+    item: ChargeItemRead,
+    type: MonetaryComponentType,
+  ) => {
     return (
       item.unit_price_components?.filter(
-        (c: any) => c.monetary_component_type === type,
+        (c) => c.monetary_component_type === type,
       ) || []
     );
   };
 
-  const getTotalComponentsByType = (item: any, type: MonetaryComponentType) => {
+  const getTotalComponentsByType = (
+    item: ChargeItemRead,
+    type: MonetaryComponentType,
+  ) => {
     return (
       item.total_price_components?.filter(
-        (c: any) => c.monetary_component_type === type,
+        (c) => c.monetary_component_type === type,
       ) || []
     );
   };
 
-  const getBaseComponent = (item: any) => {
+  const getBaseComponent = (item: ChargeItemRead) => {
     return item.unit_price_components?.find(
-      (c: any) => c.monetary_component_type === MonetaryComponentType.base,
+      (c) => c.monetary_component_type === MonetaryComponentType.base,
     );
   };
 
@@ -365,7 +358,6 @@ export function CreateInvoicePage({
                 type="button"
                 variant="outline"
                 onClick={() => setIsAddChargeItemsOpen(true)}
-                disabled={!currentEncounter}
               >
                 <PlusIcon className="size-4 mr-2" />
                 {t("add_charge_items")}
@@ -428,7 +420,7 @@ export function CreateInvoicePage({
                     {chargeItems.filter(Boolean).flatMap((item) => {
                       const isExpanded = expandedItems[item.id] || false;
                       const baseComponent = getBaseComponent(item);
-                      const baseAmount = baseComponent?.amount || 0;
+                      const baseAmount = baseComponent?.amount || "0";
 
                       const mainRow = (
                         <TableRow
@@ -588,12 +580,12 @@ export function CreateInvoicePage({
         </form>
       </Form>
 
-      {currentEncounter && (
+      {account?.patient && (
         <AddChargeItemsBillingSheet
           open={isAddChargeItemsOpen}
           onOpenChange={setIsAddChargeItemsOpen}
           facilityId={facilityId}
-          encounterId={currentEncounter.id}
+          patientId={account.patient.id}
           onChargeItemsAdded={handleChargeItemsAdded}
         />
       )}

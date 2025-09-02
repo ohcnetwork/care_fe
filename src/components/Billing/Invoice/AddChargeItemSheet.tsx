@@ -36,7 +36,6 @@ import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryCo
 import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
-import encounterApi from "@/types/emr/encounter/encounterApi";
 
 interface AddChargeItemSheetProps {
   facilityId: string;
@@ -71,21 +70,6 @@ export default function AddChargeItemSheet({
     }),
     enabled: !!facilityId && !!accountId && open,
   });
-
-  // Get current encounter for the patient to use when creating charge items
-  const { data: encounters } = useQuery({
-    queryKey: ["encounters", account?.patient?.id],
-    queryFn: query(encounterApi.list, {
-      queryParams: {
-        patient: account?.patient?.id,
-        limit: 1,
-        ordering: "-modified_date",
-      },
-    }),
-    enabled: !!account?.patient?.id && open,
-  });
-
-  const currentEncounter = encounters?.results?.[0];
 
   const handleChargeItemsAdded = () => {
     queryClient.invalidateQueries({
@@ -190,7 +174,6 @@ export default function AddChargeItemSheet({
               variant="outline"
               size="sm"
               onClick={() => setIsAddChargeItemsOpen(true)}
-              disabled={!currentEncounter}
             >
               <PlusIcon className="size-4 mr-2" />
               {t("add_charge_items")}
@@ -278,12 +261,12 @@ export default function AddChargeItemSheet({
         </SheetFooter>
       </SheetContent>
 
-      {currentEncounter && (
+      {account?.patient && (
         <AddChargeItemsBillingSheet
           open={isAddChargeItemsOpen}
           onOpenChange={setIsAddChargeItemsOpen}
           facilityId={facilityId}
-          encounterId={currentEncounter.id}
+          patientId={account.patient.id}
           onChargeItemsAdded={handleChargeItemsAdded}
         />
       )}

@@ -54,7 +54,6 @@ import {
   ChargeItemStatus,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
-import encounterApi from "@/types/emr/encounter/encounterApi";
 
 import AddChargeItemsBillingSheet from "./AddChargeItemsBillingSheet";
 import EditChargeItemSheet from "./EditChargeItemSheet";
@@ -128,21 +127,6 @@ export function ChargeItemsTable({
     data: { results: ChargeItemRead[]; count: number } | undefined;
     isLoading: boolean;
   };
-
-  // Get current encounter for the patient to use when creating charge items
-  const { data: encounters } = useQuery({
-    queryKey: ["encounters", patientId],
-    queryFn: query(encounterApi.list, {
-      queryParams: {
-        patient: patientId,
-        limit: 1,
-        ordering: "-modified_date",
-      },
-    }),
-    enabled: !!patientId,
-  });
-
-  const currentEncounter = encounters?.results?.[0];
 
   const handleChargeItemsAdded = () => {
     queryClient.invalidateQueries({
@@ -221,7 +205,6 @@ export function ChargeItemsTable({
         <Button
           variant="outline"
           onClick={() => setIsAddChargeItemsOpen(true)}
-          disabled={!currentEncounter}
           className="w-full sm:w-auto"
         >
           <PlusIcon className="size-4 mr-2" />
@@ -441,15 +424,13 @@ export function ChargeItemsTable({
       )}
       <Pagination totalCount={chargeItems?.count || 0} />
 
-      {currentEncounter && (
-        <AddChargeItemsBillingSheet
-          open={isAddChargeItemsOpen}
-          onOpenChange={setIsAddChargeItemsOpen}
-          facilityId={facilityId}
-          encounterId={currentEncounter.id}
-          onChargeItemsAdded={handleChargeItemsAdded}
-        />
-      )}
+      <AddChargeItemsBillingSheet
+        open={isAddChargeItemsOpen}
+        onOpenChange={setIsAddChargeItemsOpen}
+        facilityId={facilityId}
+        patientId={patientId}
+        onChargeItemsAdded={handleChargeItemsAdded}
+      />
     </div>
   );
 }

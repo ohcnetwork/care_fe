@@ -27,7 +27,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
 
 import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPriceDisplay";
 
@@ -35,40 +34,45 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import {
-  ChargeItemStatus,
-  ChargeItemUpsert,
-} from "@/types/billing/chargeItem/chargeItem";
+import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 
 interface AddChargeItemsBillingSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   facilityId: string;
-  encounterId: string;
+  patientId: string;
   onChargeItemsAdded: () => void;
   disabled?: boolean;
+}
+
+interface ApplyChargeItemDefinitionRequestWithObject
+  extends ApplyChargeItemDefinitionRequest {
+  charge_item_definition_object: ChargeItemDefinitionRead;
 }
 
 export default function AddChargeItemsBillingSheet({
   open,
   onOpenChange,
   facilityId,
-  encounterId,
+  patientId,
   onChargeItemsAdded,
   disabled,
 }: AddChargeItemsBillingSheetProps) {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
-  const [selectedItems, setSelectedItems] = useState<ChargeItemUpsert[]>([]);
+  const [selectedItems, setSelectedItems] = useState<
+    ApplyChargeItemDefinitionRequestWithObject[]
+  >([]);
   const [search, setSearch] = useState("");
   const [selectedDefinitionId, setSelectedDefinitionId] = useState<
     string | null
   >(null);
 
   const { data: chargeItemDefinitions, isLoading } = useQuery({
-    queryKey: ["charge_item_definitions", search],
+    queryKey: ["chargeItemDefinitions", search],
     queryFn: query.debounced(chargeItemDefinitionApi.listChargeItemDefinition, {
       pathParams: { facilityId },
       queryParams: { limit: 100, status: "active", title: search },
@@ -76,8 +80,8 @@ export default function AddChargeItemsBillingSheet({
     enabled: open,
   });
 
-  const { mutate: upsertChargeItems, isPending } = useMutation({
-    mutationFn: mutate(chargeItemApi.upsertChargeItem, {
+  const { mutate: applyChargeItems, isPending } = useMutation({
+    mutationFn: mutate(chargeItemApi.applyChargeItemDefinitions, {
       pathParams: { facilityId },
     }),
     onSuccess: () => {
@@ -103,19 +107,15 @@ export default function AddChargeItemsBillingSheet({
       setSelectedItems([
         ...selectedItems,
         {
-          title: selectedCID.title,
-          status: ChargeItemStatus.billable,
           quantity: "1",
-          unit_price_components: selectedCID.price_components,
-          note: "",
-          encounter: encounterId,
-          // No service_resource for billing-created items
           charge_item_definition: selectedCID.id,
+          charge_item_definition_object: selectedCID,
+          patient: patientId,
         },
       ]);
       setSelectedDefinitionId(null);
     }
-  }, [selectedDefinitionId, chargeItemDefinitions, encounterId, selectedItems]);
+  }, [selectedDefinitionId, chargeItemDefinitions, selectedItems, patientId]);
 
   const handleRemoveItem = (index: number) => {
     setSelectedItems(selectedItems.filter((_, i) => i !== index));
@@ -129,19 +129,18 @@ export default function AddChargeItemsBillingSheet({
     );
   };
 
-  const handleUpdateNote = (index: number, note: string) => {
-    setSelectedItems(
-      selectedItems.map((item, i) => (i === index ? { ...item, note } : item)),
-    );
-  };
-
   const handleSubmit = () => {
     if (selectedItems.length === 0) {
       toast.error(t("please_select_at_least_one_item"));
       return;
     }
 
-    upsertChargeItems({ datapoints: selectedItems });
+    applyChargeItems({
+      requests: selectedItems.map(
+        ({ charge_item_definition_object: _discard, ...charge_item }) =>
+          charge_item,
+      ),
+    });
   };
 
   return (
@@ -165,7 +164,7 @@ export default function AddChargeItemsBillingSheet({
                         {/* Title and Remove Button */}
                         <div className="flex items-start justify-between gap-2">
                           <h4 className="font-medium text-base flex-1">
-                            {item.title}
+                            {item.charge_item_definition_object.title}
                           </h4>
                           <Button
                             size="sm"
@@ -200,11 +199,13 @@ export default function AddChargeItemsBillingSheet({
                             </label>
                             <div className="flex items-center gap-1">
                               <span>
-                                {item.unit_price_components?.[0]?.amount || 0}{" "}
-                                {item.unit_price_components?.[0]?.code?.code ||
-                                  "INR"}
+                                {item.charge_item_definition_object
+                                  .price_components?.[0]?.amount || 0}{" "}
+                                {item.charge_item_definition_object
+                                  .price_components?.[0]?.code?.code || "INR"}
                               </span>
-                              {item.unit_price_components?.length > 0 && (
+                              {item.charge_item_definition_object
+                                .price_components?.length > 0 && (
                                 <Popover>
                                   <PopoverTrigger>
                                     <InfoIcon className="h-4 w-4 text-gray-700 cursor-pointer" />
@@ -216,7 +217,8 @@ export default function AddChargeItemsBillingSheet({
                                   >
                                     <ChargeItemPriceDisplay
                                       priceComponents={
-                                        item.unit_price_components
+                                        item.charge_item_definition_object
+                                          .price_components
                                       }
                                     />
                                   </PopoverContent>
@@ -224,21 +226,6 @@ export default function AddChargeItemsBillingSheet({
                               )}
                             </div>
                           </div>
-                        </div>
-
-                        {/* Notes */}
-                        <div className="space-y-1">
-                          <label className="text-sm text-gray-500">
-                            {t("note")}
-                          </label>
-                          <Textarea
-                            value={item.note}
-                            onChange={(e) =>
-                              handleUpdateNote(index, e.target.value)
-                            }
-                            placeholder={t("add_notes")}
-                            className="min-h-[60px] resize-none"
-                          />
                         </div>
                       </div>
                     ))}
@@ -250,7 +237,6 @@ export default function AddChargeItemsBillingSheet({
                         <TableHead>{t("name")}</TableHead>
                         <TableHead>{t("quantity")}</TableHead>
                         <TableHead>{t("price")}</TableHead>
-                        <TableHead>{t("note")}</TableHead>
                         <TableHead className="w-[100px]"></TableHead>
                       </TableRow>
                     </TableHeader>
@@ -258,7 +244,7 @@ export default function AddChargeItemsBillingSheet({
                       {selectedItems.map((item, index) => (
                         <TableRow key={index}>
                           <TableCell className="whitespace-pre-wrap">
-                            {item.title}
+                            {item.charge_item_definition_object.title}
                           </TableCell>
                           <TableCell>
                             <Input
@@ -274,11 +260,13 @@ export default function AddChargeItemsBillingSheet({
                           <TableCell>
                             <div className="flex items-center gap-1">
                               <span>
-                                {item.unit_price_components?.[0]?.amount || 0}{" "}
-                                {item.unit_price_components?.[0]?.code?.code ||
-                                  "INR"}
+                                {item.charge_item_definition_object
+                                  .price_components?.[0]?.amount || 0}{" "}
+                                {item.charge_item_definition_object
+                                  .price_components?.[0]?.code?.code || "INR"}
                               </span>
-                              {item.unit_price_components?.length > 0 && (
+                              {item.charge_item_definition_object
+                                .price_components?.length > 0 && (
                                 <Popover>
                                   <PopoverTrigger>
                                     <InfoIcon className="size-4 text-gray-700 cursor-pointer" />
@@ -286,23 +274,14 @@ export default function AddChargeItemsBillingSheet({
                                   <PopoverContent side="right" className="p-0">
                                     <ChargeItemPriceDisplay
                                       priceComponents={
-                                        item.unit_price_components
+                                        item.charge_item_definition_object
+                                          .price_components
                                       }
                                     />
                                   </PopoverContent>
                                 </Popover>
                               )}
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <Textarea
-                              value={item.note}
-                              onChange={(e) =>
-                                handleUpdateNote(index, e.target.value)
-                              }
-                              placeholder={t("add_notes")}
-                              className="min-h-[60px] resize-none"
-                            />
                           </TableCell>
                           <TableCell>
                             <Button
@@ -332,7 +311,7 @@ export default function AddChargeItemsBillingSheet({
                 value=""
                 onChange={handleSelectChargeItem}
                 onSearch={setSearch}
-                placeholder={t("add_charge_items")}
+                placeholder={t("select_charge_item_definition")}
                 isLoading={isLoading}
                 noOptionsMessage={t("no_charge_item_definitions_found")}
                 disabled={disabled}
