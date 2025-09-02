@@ -112,7 +112,6 @@ export const EncounterDiagnosticReportsTab = () => {
                               variant={
                                 DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]
                               }
-                              className="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
                             >
                               {t(report.status)}
                             </Badge>
