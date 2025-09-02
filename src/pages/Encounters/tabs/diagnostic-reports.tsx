@@ -28,6 +28,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import query from "@/Utils/request/query";
+import { Badge } from "@/components/ui/badge";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { DIAGNOSTIC_REPORT_STATUS_COLORS } from "@/types/emr/diagnosticReport/diagnosticReport";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
@@ -107,13 +108,14 @@ export const EncounterDiagnosticReportsTab = () => {
                             </Link>
                           </TableCell>
                           <TableCell>
-                            <span
-                              className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                            <Badge
+                              variant={
                                 DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]
-                              }`}
+                              }
+                              className="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
                             >
                               {t(report.status)}
-                            </span>
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             {report.category?.display || "-"}
