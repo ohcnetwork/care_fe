@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { CircleDashed, Settings2 } from "lucide-react";
+import { CircleDashed } from "lucide-react";
 import React, { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -30,10 +30,9 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import {
-  ENCOUNTER_CLASS,
-  ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_PRIORITY,
   ENCOUNTER_STATUS_ICONS,
+  EncounterClass,
   EncounterPriority,
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
@@ -44,12 +43,12 @@ import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 interface EncounterListProps {
   encounters?: EncounterRead[];
   facilityId: string;
+  encounterClass?: EncounterClass;
 }
 
 const buildQueryParams = (
   facilityId: string,
   status?: string,
-  encounterClass?: string,
   priority?: string,
 ) => {
   const params: Record<string, string | undefined> = {};
@@ -60,9 +59,6 @@ const buildQueryParams = (
     params.live = status === "live" ? "true" : undefined;
   } else if (status) {
     params.status = status;
-  }
-  if (encounterClass) {
-    params.encounter_class = encounterClass;
   }
   if (priority) {
     params.priority = priority;
@@ -88,6 +84,7 @@ function EmptyState() {
 export function EncounterList({
   encounters: propEncounters,
   facilityId,
+  encounterClass,
 }: EncounterListProps) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
@@ -102,7 +99,6 @@ export function EncounterList({
   const { t } = useTranslation();
   const {
     status,
-    encounter_class: encounterClass,
     priority,
     name,
     encounter_id,
@@ -145,12 +141,13 @@ export function EncounterList({
     ],
   );
 
-  const { data: queryEncounters, isLoading } = useQuery({
-    queryKey: ["encounters", facilityId, qParams],
+  const { data: queryEncounters, isFetching } = useQuery({
+    queryKey: ["encounters", facilityId, qParams, encounterClass],
     queryFn: query.debounced(encounterApi.list, {
       queryParams: {
-        ...buildQueryParams(facilityId, status, encounterClass, priority),
+        ...buildQueryParams(facilityId, status, priority),
         name,
+        encounter_class: encounterClass,
         external_identifier,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
@@ -216,10 +213,14 @@ export function EncounterList({
 
   return (
     <Page
-      title={t("encounters")}
+      title={t("encounter_class_encounters", {
+        encounterClassName: encounterClass
+          ? t(`encounter_class__${encounterClass}`)
+          : t("all"),
+      })}
       componentRight={
         <Badge className="bg-purple-50 text-purple-700 ml-2 rounded-xl px-3 py-0.5 m-3 w-max border-gray-200">
-          {isLoading
+          {isFetching
             ? t("loading")
             : t("entity_count", {
                 count: queryEncounters?.count ?? 0,
@@ -345,31 +346,6 @@ export function EncounterList({
                     className="h-9 shadow-sm rounded-md min-w-32"
                   />
                 </div>
-
-                {/* Class Filter - Mobile */}
-                <div className="md:hidden sm:w-auto w-full">
-                  <FilterSelect
-                    label={t("type")}
-                    icon={<Settings2 className="size-4" />}
-                    value={encounterClass || ""}
-                    onValueChange={(value) => {
-                      updateQuery({
-                        encounter_class: value === "all" ? undefined : value,
-                      });
-                    }}
-                    options={ENCOUNTER_CLASS.map((value) =>
-                      t(`encounter_class__${value}`),
-                    )}
-                    onClear={() => {
-                      updateQuery({
-                        encounter_class: undefined,
-                        status,
-                        priority,
-                      });
-                    }}
-                    className="h-9 shadow-sm rounded-md min-w-32"
-                  />
-                </div>
               </div>
 
               {/* Status Filter - Desktop */}
@@ -414,46 +390,6 @@ export function EncounterList({
             </div>
 
             <Separator className="hidden md:block" />
-
-            {/* Class Filter - Desktop */}
-            <div className="hidden md:block p-4 py-6 lg:py-4">
-              <Tabs value={encounterClass || "all"} className="w-full">
-                <TabsList className="bg-transparent p-0 h-8">
-                  <div className="flex flex-wrap">
-                    <TabsTrigger
-                      value="all"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() =>
-                        updateQuery({
-                          ...{ encounter_class: undefined, priority },
-                          status,
-                        })
-                      }
-                    >
-                      {t("all_status")}
-                    </TabsTrigger>
-                    {ENCOUNTER_CLASS.map((value) => (
-                      <TabsTrigger
-                        key={value}
-                        value={value}
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary px-1 lg:px-2"
-                        onClick={() =>
-                          updateQuery({
-                            ...{ encounter_class: value, priority },
-                            status,
-                          })
-                        }
-                      >
-                        {React.createElement(ENCOUNTER_CLASS_ICONS[value], {
-                          className: "size-4",
-                        })}
-                        {t(`encounter_class__${value}`)}
-                      </TabsTrigger>
-                    ))}
-                  </div>
-                </TabsList>
-              </Tabs>
-            </div>
           </div>
         </div>
 
@@ -461,7 +397,7 @@ export function EncounterList({
           className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
           data-cy="encounter-list-cards"
         >
-          {isLoading ? (
+          {isFetching ? (
             <CardGridSkeleton count={6} />
           ) : encounters.length === 0 ? (
             <div className="col-span-full">
