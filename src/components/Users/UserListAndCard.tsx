@@ -35,7 +35,7 @@ export const UserStatusIndicator = ({
   addPadding?: boolean;
 }) => {
   const authUser = useAuthUser();
-  const isAuthUser = user.id === authUser.external_id;
+  const isAuthUser = user.id === authUser.id;
   const { t } = useTranslation();
 
   return (

@@ -80,8 +80,10 @@ import {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
-import { useFieldError } from "@/types/questionnaire/validation";
-import { validateFields } from "@/types/questionnaire/validation";
+import {
+  useFieldError,
+  validateFields,
+} from "@/types/questionnaire/validation";
 
 function formatDoseRange(range?: DoseRange): string {
   if (!range?.high?.value) return "";

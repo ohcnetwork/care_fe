@@ -32,8 +32,11 @@ import {
 
 import query from "@/Utils/request/query";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { getPartialId } from "@/types/emr/patient/patient";
-import { PartialPatientModel, PatientRead } from "@/types/emr/patient/patient";
+import {
+  getPartialId,
+  PartialPatientModel,
+  PatientRead,
+} from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 
 interface PatientIdentifierFilterProps {
