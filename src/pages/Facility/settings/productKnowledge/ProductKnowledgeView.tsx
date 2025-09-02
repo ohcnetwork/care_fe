@@ -147,6 +147,7 @@ export default function ProductKnowledgeView({
             )}
           </div>
           <Button
+            className="mb-6"
             variant="outline"
             onClick={() =>
               navigate(

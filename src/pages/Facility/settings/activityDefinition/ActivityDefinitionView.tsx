@@ -171,7 +171,7 @@ export default function ActivityDefinitionView({
               {definition.code.system} | {definition.code.code}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 mb-6">
             {definition.status !== "retired" && (
               <Button
                 variant="outline"
