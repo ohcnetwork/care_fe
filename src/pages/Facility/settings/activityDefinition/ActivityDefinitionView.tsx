@@ -105,6 +105,16 @@ export default function ActivityDefinitionView({
     if (!definition) return;
     updateActivityDefinition({
       ...definition,
+      specimen_requirements:
+        definition.specimen_requirements.map((specimen) => specimen.id) || [],
+      observation_result_requirements:
+        definition.observation_result_requirements.map(
+          (observation) => observation.id,
+        ) || [],
+      charge_item_definitions:
+        definition.charge_item_definitions.map((chargeItem) => chargeItem.id) ||
+        [],
+      locations: definition.locations.map((location) => location.id) || [],
       status: "retired",
       diagnostic_report_codes: definition.diagnostic_report_codes || [],
     });

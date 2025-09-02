@@ -1,5 +1,5 @@
 import { CaretSortIcon } from "@radix-ui/react-icons";
-import { BadgeCheck, LogOut } from "lucide-react";
+import { BadgeCheck, LogOut, RefreshCw } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -22,6 +22,7 @@ import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { useAppUpdates } from "@/hooks/useAppUpdates";
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 import { useCareApps } from "@/hooks/useCareApps";
 import { usePatientSignOut } from "@/hooks/usePatientSignOut";
@@ -39,6 +40,7 @@ export function FacilityNavUser({
   const { isMobile, open } = useSidebar();
   const { signOut } = useAuthContext();
   const careApps = useCareApps();
+  const { newVersion, updateApp } = useAppUpdates(false, undefined, true);
   const pluginNavItems = careApps
     .filter((c) => !!c.userNavItems)
     .flatMap((c) => c.userNavItems) as NavigationLink[];
@@ -92,6 +94,18 @@ export function FacilityNavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
+            {newVersion && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  data-cy="user-menu-update"
+                  onClick={updateApp}
+                >
+                  <RefreshCw />
+                  {t("update_available")}
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem

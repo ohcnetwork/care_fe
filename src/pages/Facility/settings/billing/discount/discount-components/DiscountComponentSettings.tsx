@@ -51,7 +51,7 @@ export function DiscountComponentSettings() {
   const { facility, facilityId } = useCurrentFacility();
 
   const { mutate: deleteComponent, isPending } = useMutation({
-    mutationFn: mutate(facilityApi.updateMonetaryComponents, {
+    mutationFn: mutate(facilityApi.setMonetaryComponents, {
       pathParams: { facilityId },
     }),
     onSuccess: () => {

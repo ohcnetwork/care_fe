@@ -2,30 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -36,10 +15,11 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
+import DischargeConfirmationDialog from "@/components/Patient/DischargeConfirmationDialog";
+
 import query from "@/Utils/request/query";
 import {
   ENCOUNTER_ADMIT_SOURCE,
-  ENCOUNTER_CLASS,
   ENCOUNTER_DIET_PREFERENCE,
   ENCOUNTER_DISCHARGE_DISPOSITION,
   ENCOUNTER_PRIORITY,
@@ -59,6 +39,7 @@ import type {
   ResponseValue,
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
+import careConfig from "@careConfig";
 
 interface EncounterQuestionProps {
   question: Question;
@@ -98,7 +79,7 @@ export function EncounterQuestion({
 
   const [encounter, setEncounter] = useState<EncounterEdit>({
     status: "unknown",
-    encounter_class: "amb",
+    encounter_class: careConfig.defaultEncounterType,
     period: {
       start: new Date().toISOString(),
       end: undefined,
@@ -246,7 +227,7 @@ export function EncounterQuestion({
               <SelectValue placeholder={t("select_class")} />
             </SelectTrigger>
             <SelectContent>
-              {ENCOUNTER_CLASS.map((encounterClass) => (
+              {careConfig.encounterClasses.map((encounterClass) => (
                 <SelectItem key={encounterClass} value={encounterClass}>
                   {t(`encounter_class__${encounterClass}`)}
                 </SelectItem>
@@ -299,44 +280,11 @@ export function EncounterQuestion({
             <div className="space-y-1">
               <h3 className="text-sm font-medium">{t("discharge_patient")}</h3>
             </div>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="default" size="sm" disabled={disabled}>
-                  {t("mark_for_discharge")}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="w-full sm:max-w-xl">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>{t("confirm_discharge")}</AlertDialogTitle>
-                  <AlertDialogDescription className="space-y-2 text-left">
-                    <p>{t("discharge_confirmation_message")}</p>
-                    <ul className="list-disc list-inside space-y-1">
-                      <li>{t("discharge_confirmation_status_change")}</li>
-                      <li>{t("discharge_confirmation_summary_required")}</li>
-                      <li>{t("discharge_confirmation_date")}</li>
-                    </ul>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                  <AlertDialogCancel className="mt-0">
-                    {t("cancel")}
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => {
-                      handleUpdateEncounter({
-                        status: "discharged",
-                        period: {
-                          ...encounter.period,
-                          end: new Date().toISOString(),
-                        },
-                      });
-                    }}
-                  >
-                    {t("proceed")}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <DischargeConfirmationDialog
+              encounter={encounter}
+              onConfirm={handleUpdateEncounter}
+              disabled={disabled}
+            />
           </div>
         </div>
       )}
@@ -451,60 +399,36 @@ export function EncounterQuestion({
                   <div className="space-y-2">
                     <Label>{t("discharge_date_time")}</Label>
                     <div className="flex gap-1 flex-wrap">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "flex-1 justify-start text-sm text-left font-normal h-9",
-                              !encounter.period.end && "text-gray-500",
-                            )}
-                          >
-                            <CareIcon
-                              icon="l-calender"
-                              className="mr-2 size-4"
-                            />
-                            {encounter.period.end
-                              ? new Date(
-                                  encounter.period.end,
-                                ).toLocaleDateString()
-                              : t("select_date")}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={
-                              encounter.period.end
-                                ? new Date(encounter.period.end)
-                                : new Date()
-                            }
-                            onSelect={(newDate) => {
-                              if (!newDate) return;
-                              const currentDate = encounter.period.end
-                                ? new Date(encounter.period.end)
-                                : new Date();
-                              const updatedDate = new Date(newDate);
-                              updatedDate.setHours(currentDate.getHours());
-                              updatedDate.setMinutes(currentDate.getMinutes());
-                              handleUpdateEncounter({
-                                period: {
-                                  ...encounter.period,
-                                  end: updatedDate.toISOString(),
-                                },
-                              });
-                            }}
-                            disabled={(date) => {
-                              if (!encounter.period.start) return false;
-                              const startDate = new Date(
-                                encounter.period.start,
-                              );
-                              startDate.setHours(0, 0, 0, 0);
-                              return date < startDate;
-                            }}
-                          />
-                        </PopoverContent>
-                      </Popover>
+                      <DatePicker
+                        date={
+                          encounter.period.end
+                            ? new Date(encounter.period.end)
+                            : new Date()
+                        }
+                        onChange={(newDate) => {
+                          if (!newDate) return;
+                          const currentDate = encounter.period.end
+                            ? new Date(encounter.period.end)
+                            : new Date();
+                          const updatedDate = new Date(newDate);
+                          updatedDate.setHours(currentDate.getHours());
+                          updatedDate.setMinutes(currentDate.getMinutes());
+                          handleUpdateEncounter({
+                            period: {
+                              ...encounter.period,
+                              end: updatedDate.toISOString(),
+                            },
+                          });
+                        }}
+                        disabled={(date) => {
+                          if (!encounter.period.start) return false;
+                          const startDate = new Date(encounter.period.start);
+                          startDate.setHours(0, 0, 0, 0);
+                          return date < startDate;
+                        }}
+                        dateFormat="d/M/yyyy"
+                        className="flex-1"
+                      />
                       <Input
                         type="time"
                         className="flex-1 border-t-0 sm:border-t text-sm border-gray-200 h-9"

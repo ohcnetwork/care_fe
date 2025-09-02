@@ -15,12 +15,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { UserFacilityModel } from "@/components/Users/models";
 
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { formatName } from "@/Utils/utils";
+import { FacilityBareMinimum } from "@/types/facility/facility";
 import { Organization, getOrgLabel } from "@/types/organization/organization";
 
 enum DashboardTabs {
@@ -31,9 +31,9 @@ enum DashboardTabs {
 
 type TabContentProps = {
   tabId: string;
-  tabItems: UserFacilityModel[] | Organization[];
+  tabItems: FacilityBareMinimum[] | Organization[];
   description: string;
-  renderChild: (item: UserFacilityModel | Organization) => React.ReactNode;
+  renderChild: (item: FacilityBareMinimum | Organization) => React.ReactNode;
 };
 
 export default function UserDashboard() {
@@ -88,12 +88,12 @@ export default function UserDashboard() {
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 w-full sm:flex-row sm:items-center sm:w-auto">
           {user.is_superuser && (
             <Button
               variant="outline"
               size="sm"
-              className="w-full"
+              className="w-auto min-w-max"
               asChild
               data-cy="admin-dashboard-button"
             >
@@ -108,8 +108,13 @@ export default function UserDashboard() {
           )}
 
           {isMobile ? (
-            <>
-              <Button variant="outline" size="sm" className="gap-2" asChild>
+            <div className="flex gap-2 w-full">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 flex-1"
+                asChild
+              >
                 <Link href={`/users/${user.username}`}>
                   <SquarePen className="size-4" />
                   {t("edit_profile")}
@@ -118,14 +123,14 @@ export default function UserDashboard() {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2"
+                className="flex items-center gap-2 flex-1"
                 onClick={signOut}
                 data-cy="sign-out-button"
               >
                 <LogOut className="size-4" />
                 {t("sign_out")}
               </Button>
-            </>
+            </div>
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -133,13 +138,16 @@ export default function UserDashboard() {
                   data-cy="user-dashboard-menu-trigger"
                   variant="outline"
                   size="sm"
-                  className="px-2 w-full sm:w-auto"
+                  className="w-auto"
                 >
                   <CareIcon icon="l-ellipsis-v" className="text-inherit" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuItem className="cursor-pointer flex items-center gap-2 text-xs w-full">
+                <DropdownMenuItem
+                  asChild
+                  className="cursor-pointer flex items-center gap-2 text-xs w-full"
+                >
                   <Link
                     href={`/users/${user.username}`}
                     className="flex items-center gap-2 w-full text-inherit"
@@ -322,7 +330,7 @@ const TabContent = ({
         className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
         data-cy={`${tabId}-list`}
       >
-        {tabItems.map((item: UserFacilityModel | Organization) => {
+        {tabItems.map((item: FacilityBareMinimum | Organization) => {
           return renderChild(item);
         })}
       </div>
