@@ -12,6 +12,7 @@ import { getPermissions } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { FacilityBareMinimum } from "@/types/facility/facility";
+import careConfig from "@careConfig";
 
 interface FacilityNavProps {
   selectedFacility: FacilityBareMinimum | null;
@@ -31,7 +32,10 @@ function generateFacilityLinks(
 ) {
   if (!selectedFacility) return [];
 
+  const encounterClasses = careConfig.encounterClasses;
+
   const baseUrl = `/facility/${selectedFacility.id}`;
+
   const links: NavigationLink[] = [
     {
       name: t("overview"),
@@ -58,9 +62,16 @@ function generateFacilityLinks(
           url: `${baseUrl}/patients`,
         },
         {
-          name: t("encounters"),
-          url: `${baseUrl}/encounters/patients`,
+          name: t("all_encounters"),
+          url: `${baseUrl}/encounters/patients/all`,
+          visibility: encounterClasses.length > 1,
         },
+        ...encounterClasses.map((encounterClass) => ({
+          name: t(`encounter_class_encounters`, {
+            encounterClassName: t(`encounter_class__${encounterClass}`),
+          }),
+          url: `${baseUrl}/encounters/patients/${encounterClass}`,
+        })),
         {
           name: t("locations"),
           url: `${baseUrl}/encounters/locations`,
