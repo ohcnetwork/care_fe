@@ -79,7 +79,7 @@ function TagConfigCard({
       <CardContent className="p-6">
         <div className="mb-4 flex items-start justify-between gap-4">
           <div className="flex-1">
-            <div className="mb-2 flex items-center gap-2">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
               <Badge variant={TAG_STATUS_COLORS[config.status]}>
                 {t(config.status)}
               </Badge>
@@ -91,7 +91,9 @@ function TagConfigCard({
                 </Badge>
               )}
             </div>
-            <h3 className="font-medium text-gray-900">{config.display}</h3>
+            <h3 className="font-medium text-gray-900 text-lg">
+              {config.display}
+            </h3>
             <p className="mt-1 text-sm text-gray-500 capitalize">
               {t(config.resource)} | {t("priority")}: {config.priority}
             </p>
@@ -151,6 +153,7 @@ function TagConfigCard({
             )}
             <Button variant="outline" size="sm">
               <CareIcon icon="l-arrow-right" className="size-4" />
+              {t("view")}
             </Button>
           </div>
         </div>
