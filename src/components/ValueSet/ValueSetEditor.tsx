@@ -1,9 +1,9 @@
+import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-
-import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -25,6 +25,9 @@ interface ValueSetEditorProps {
 export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const [serverErrors, setServerErrors] = useState<Record<string, string[]>>(
+    {},
+  );
   // Fetch existing valueset if we're editing
   const { data: existingValueset, isLoading } = useQuery({
     queryKey: ["valueset", slug],
@@ -41,6 +44,11 @@ export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
       toast.success(t("valueset_created"));
       queryClient.invalidateQueries({ queryKey: ["valuesets"] });
       onSuccess?.(data);
+    },
+    onError: (error: { response?: { data?: Record<string, string[]> } }) => {
+      if (error.response?.data) {
+        setServerErrors(error.response.data);
+      }
     },
   });
 
@@ -88,6 +96,7 @@ export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
           onSubmit={handleSubmit}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
           isSystemDefined={existingValueset?.is_system_defined}
+          serverErrors={serverErrors}
         />
       )}
     </div>

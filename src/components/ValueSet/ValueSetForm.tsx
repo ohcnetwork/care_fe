@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
+import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
@@ -44,6 +45,7 @@ interface ValueSetFormProps {
   onSubmit: (data: ValuesetFormType) => void;
   isSubmitting?: boolean;
   isSystemDefined?: boolean;
+  serverErrors?: Record<string, string[]>;
 }
 
 function ConceptFields({
@@ -304,6 +306,7 @@ export function ValueSetForm({
   onSubmit,
   isSubmitting,
   isSystemDefined,
+  serverErrors,
 }: ValueSetFormProps) {
   const { t } = useTranslation();
   const valuesetFormSchema = z.object({
@@ -381,6 +384,17 @@ export function ValueSetForm({
       },
     },
   });
+
+  useEffect(() => {
+    if (serverErrors) {
+      Object.entries(serverErrors).forEach(([field, messages]) => {
+        form.setError(field as keyof ValuesetFormType, {
+          type: "server",
+          message: messages.join(", "),
+        });
+      });
+    }
+  }, [serverErrors, form]);
 
   return (
     <Form {...form}>
