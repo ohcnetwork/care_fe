@@ -127,3 +127,5 @@ export function toServiceRequestUpdateSpec(
     ...updates,
   };
 }
+
+export const EDITABLE_SERVICE_REQUEST_STATUSES = [Status.draft, Status.active];

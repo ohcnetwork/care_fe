@@ -83,6 +83,7 @@ interface DiagnosticReportFormProps {
     specimen_requirements?: SpecimenDefinitionRead[];
   };
   specimens: SpecimenRead[];
+  disableEdit: boolean;
 }
 
 // Interface for component values
@@ -114,6 +115,7 @@ export function DiagnosticReportForm({
   diagnosticReports,
   activityDefinition,
   specimens,
+  disableEdit,
 }: DiagnosticReportFormProps) {
   const { t } = useTranslation();
   const [observations, setObservations] = useState<ObservationsByDefinition>(
@@ -816,7 +818,7 @@ export function DiagnosticReportForm({
                   onValueChange={(unit) =>
                     handleUnitChange(definition.id, index, unit)
                   }
-                  disabled={isErrored}
+                  disabled={isErrored || disableEdit}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder={t("unit")} />
@@ -847,7 +849,7 @@ export function DiagnosticReportForm({
                     ? "number"
                     : "text"
                 }
-                disabled={isErrored}
+                disabled={isErrored || disableEdit}
               />
             </div>
 
@@ -862,7 +864,7 @@ export function DiagnosticReportForm({
                     !checked, // isNormal is the opposite of checked (isAbnormal)
                   )
                 }
-                disabled={isErrored}
+                disabled={isErrored || disableEdit}
               />
               <Label
                 htmlFor={`abnormal-checkbox-${definition.id}-${index}`}
@@ -926,7 +928,7 @@ export function DiagnosticReportForm({
                           unit,
                         )
                       }
-                      disabled={isErrored}
+                      disabled={isErrored || disableEdit}
                     >
                       <SelectTrigger className="w-full">
                         {componentData.unit ? (
@@ -973,7 +975,7 @@ export function DiagnosticReportForm({
                         ? "number"
                         : "text"
                     }
-                    disabled={isErrored}
+                    disabled={isErrored || disableEdit}
                   />
                 </div>
 
@@ -989,7 +991,7 @@ export function DiagnosticReportForm({
                         !checked, // isNormal is the opposite of checked (isAbnormal)
                       )
                     }
-                    disabled={isErrored}
+                    disabled={isErrored || disableEdit}
                   />
                   <Label
                     htmlFor={`abnormal-checkbox-${definition.id}-${component.code.code}-${index}`}
@@ -1159,6 +1161,7 @@ export function DiagnosticReportForm({
                                   };
                                 });
                               }}
+                              disabled={disableEdit}
                             >
                               <PlusCircle className="size-4 mr-2" />
                               {t("add_another_result")}
@@ -1185,6 +1188,7 @@ export function DiagnosticReportForm({
                         value={conclusion}
                         onChange={(e) => setConclusion(e.target.value)}
                         rows={3}
+                        disabled={disableEdit}
                       />
                     </CardContent>
                   </Card>
@@ -1197,7 +1201,7 @@ export function DiagnosticReportForm({
                       <Button
                         variant="primary"
                         onClick={handleSubmit}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || disableEdit}
                       >
                         <Save className="size-4 mr-2" />
                         {t("save_results")}
@@ -1216,7 +1220,7 @@ export function DiagnosticReportForm({
                             files={files.results}
                             type="diagnostic_report"
                             associatingId={fullReport.id}
-                            canEdit={true}
+                            canEdit={!disableEdit}
                             showHeader={false}
                             onRefetch={refetchFiles}
                           />
@@ -1305,7 +1309,7 @@ export function DiagnosticReportForm({
                               );
                             setSelectedReportCode(code || null);
                           }}
-                          disabled={!hasCollectedSpecimens}
+                          disabled={!hasCollectedSpecimens || disableEdit}
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue
@@ -1331,6 +1335,7 @@ export function DiagnosticReportForm({
                   <Button
                     onClick={handleCreateReport}
                     disabled={
+                      disableEdit ||
                       isCreatingReport ||
                       !hasCollectedSpecimens ||
                       (!!activityDefinition?.diagnostic_report_codes?.length &&

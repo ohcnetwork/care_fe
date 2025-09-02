@@ -48,8 +48,9 @@ import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
 import {
+  EDITABLE_SERVICE_REQUEST_STATUSES,
+  ServiceRequestUpdateSpec,
   Status,
-  toServiceRequestUpdateSpec,
 } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import {
@@ -164,20 +165,22 @@ export default function ServiceRequestShow({
     },
   });
 
-  const { mutate: markAsComplete } = useMutation({
-    mutationFn: () => {
-      if (!request) return Promise.reject("No request data");
-      return mutate(serviceRequestApi.updateServiceRequest, {
+  const { mutate: updateServiceRequest, isPending: isUpdatingServiceRequest } =
+    useMutation({
+      mutationFn: mutate(serviceRequestApi.updateServiceRequest, {
         pathParams: { facilityId, serviceRequestId },
-      })(toServiceRequestUpdateSpec(request, { status: Status.completed }));
-    },
-    onSuccess: () => {
-      toast.success(t("service_request_completed"));
-      queryClient.invalidateQueries({
-        queryKey: ["serviceRequest", facilityId, serviceRequestId],
-      });
-    },
-  });
+      }),
+      onSuccess: (data: ServiceRequestUpdateSpec) => {
+        if (data.status === Status.completed) {
+          toast.success(t("service_request_completed"));
+        } else {
+          toast.success(t("status_updated_successfully"));
+        }
+        queryClient.invalidateQueries({
+          queryKey: ["serviceRequest", facilityId, serviceRequestId],
+        });
+      },
+    });
 
   const createDraftSpecimen = (requirement: SpecimenDefinitionRead) => {
     const matchingSpecimens = request?.specimens.filter(
@@ -263,6 +266,10 @@ export default function ServiceRequestShow({
   if (!request || !activityDefinition) {
     return <div className="p-4">{t("error_loading_sq_or_ad")}</div>;
   }
+
+  const disableEdit = !EDITABLE_SERVICE_REQUEST_STATUSES.includes(
+    request?.status || Status.draft,
+  );
 
   function getExistingDraftSpecimen(
     specimenDefinitionId: string,
@@ -360,7 +367,7 @@ export default function ServiceRequestShow({
                 request?.diagnostic_reports?.[0]?.status ===
                   DiagnosticReportStatus.final) && (
                 <div className="flex items-center gap-2">
-                  {request.status === Status.active && (
+                  {!disableEdit && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button
@@ -381,7 +388,13 @@ export default function ServiceRequestShow({
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => markAsComplete()}>
+                          <AlertDialogAction
+                            onClick={() =>
+                              updateServiceRequest({
+                                status: Status.completed,
+                              })
+                            }
+                          >
                             {t("confirm")}
                           </AlertDialogAction>
                         </AlertDialogFooter>
@@ -403,6 +416,69 @@ export default function ServiceRequestShow({
                     </Button>
                   )}
                 </div>
+              )}
+              {request.status !== Status.completed && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      data-cy="invoice-actions-button"
+                      className="border-gray-400 px-2"
+                    >
+                      <CareIcon icon="l-ellipsis-v" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild className="text-primary-900">
+                      <Button
+                        variant="ghost"
+                        onClick={() =>
+                          updateServiceRequest({
+                            status: Status.entered_in_error,
+                          })
+                        }
+                        disabled={isUpdatingServiceRequest}
+                        className="w-full flex flex-row self-center"
+                      >
+                        <CareIcon
+                          icon="l-exclamation-circle"
+                          className="mr-1"
+                        />
+                        <span>{t("mark_as_entered_in_error")}</span>
+                      </Button>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="text-primary-900">
+                      <Button
+                        variant="ghost"
+                        onClick={() =>
+                          updateServiceRequest({
+                            status: Status.on_hold,
+                          })
+                        }
+                        className="w-full flex flex-row justify-stretch items-center"
+                        disabled={isUpdatingServiceRequest}
+                      >
+                        <CareIcon icon="l-pause" className="mr-1" />
+                        {t("mark_as_on_hold")}
+                      </Button>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="text-primary-900">
+                      <Button
+                        variant="ghost"
+                        onClick={() =>
+                          updateServiceRequest({
+                            status: Status.revoked,
+                          })
+                        }
+                        disabled={isUpdatingServiceRequest}
+                        className="w-full flex flex-row justify-stretch items-center"
+                      >
+                        <CareIcon icon="l-ban" className="mr-1" />
+                        {t("mark_as_revoked")}
+                      </Button>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
 
               {isMobile && (
@@ -437,6 +513,7 @@ export default function ServiceRequestShow({
                         chargeItems: billableChargeItems,
                       })
                     }
+                    disabled={disableEdit}
                   >
                     <PlusIcon className="size-4 mr-2" />
                     {t("create_invoice")}
@@ -446,6 +523,7 @@ export default function ServiceRequestShow({
                   variant="outline"
                   size="sm"
                   onClick={() => setIsMultiAddOpen(true)}
+                  disabled={disableEdit}
                 >
                   <PlusIcon className="size-4 mr-2" />
                   {t("add_charge_items")}
@@ -609,6 +687,7 @@ export default function ServiceRequestShow({
                     selectedSpecimenDefinition.id,
                   )}
                   serviceRequestId={serviceRequestId}
+                  disableEdit={disableEdit}
                 />
               </CardContent>
             </Card>
@@ -654,6 +733,7 @@ export default function ServiceRequestShow({
                   diagnosticReports={diagnosticReports}
                   activityDefinition={activityDefinition}
                   specimens={request.specimens || []}
+                  disableEdit={disableEdit}
                 />
               )}
             </div>
@@ -665,6 +745,7 @@ export default function ServiceRequestShow({
               patientId={request.encounter.patient.id}
               serviceRequestId={serviceRequestId}
               diagnosticReports={diagnosticReports}
+              disableEdit={disableEdit}
             />
           )}
         </div>
