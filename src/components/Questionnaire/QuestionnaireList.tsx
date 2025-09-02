@@ -75,7 +75,7 @@ const RenderCard = ({
   const navigate = useNavigate();
 
   return (
-    <div className="xl:hidden space-y-4">
+    <div className="md:hidden space-y-4">
       {isLoading ? (
         <CardGridSkeleton count={5} />
       ) : questionnaireList.length === 0 ? (
@@ -156,7 +156,7 @@ const RenderTable = ({
   const { t } = useTranslation();
 
   return (
-    <div className="hidden xl:block overflow-hidden rounded-lg bg-white shadow-sm overflow-x-auto">
+    <div className="hidden md:block overflow-hidden rounded-lg bg-white shadow-sm overflow-x-auto">
       {isLoading ? (
         <TableSkeleton count={5} />
       ) : questionnaireList.length === 0 ? (
