@@ -597,6 +597,7 @@
   "amount": "Amount",
   "amount_due": "Amount Due",
   "amount_given_by_customer": "Amount given by the customer",
+  "amount_must_be_greater_than_or_equal_to_0": "Amount must be greater than or equal to 0",
   "amount_tendered": "Amount Tendered",
   "and_the_status_of_request_is": "and the status of request is",
   "answer": "Answer",

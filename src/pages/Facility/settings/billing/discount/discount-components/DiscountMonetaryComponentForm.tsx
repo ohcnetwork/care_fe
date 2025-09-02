@@ -55,7 +55,7 @@ export function DiscountMonetaryComponentForm({
           amount: z
             .string()
             .refine((val) => !val || Number(val) >= 0, {
-              message: "Amount must be greater than or equal to 0",
+              message: t("amount_must_be_greater_than_or_equal_to_0"),
             })
             .optional(),
           title: z.string().min(1, { message: t("field_required") }),
