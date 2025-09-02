@@ -43,8 +43,7 @@ interface SearchInputProps
   enableOptionButtons?: boolean;
   onFieldChange?: (options: SearchOption) => void;
   autoFocus?: boolean;
-  invalidIdentifier?: boolean;
-  invalidPhone?: boolean;
+  isInvalid?: boolean;
 }
 
 const KeyboardShortcutHint = ({ open }: { open: boolean }) => {
@@ -86,7 +85,7 @@ const SearchInputFieldRenderer = ({
   autoFocus,
   isSingleOption,
   open,
-  invalidIdentifier,
+  isInvalid,
   ...prop
 }: {
   selectedOption: SearchOption;
@@ -97,8 +96,7 @@ const SearchInputFieldRenderer = ({
   autoFocus?: boolean;
   isSingleOption: boolean;
   open: boolean;
-  invalidIdentifier?: boolean;
-  invalidPhone?: boolean;
+  isInvalid?: boolean;
 }) => {
   const isMobile = useIsMobile();
 
@@ -111,7 +109,11 @@ const SearchInputFieldRenderer = ({
             placeholder={selectedOption.placeholder}
             value={searchValue}
             onChange={(value) => setSearchValue(value || "")}
-            className={inputClassName}
+            className={cn(
+              inputClassName,
+              isInvalid &&
+                "border-primary-700 focus:border-primary-700 focus:ring-primary-700",
+            )}
             autoFocus={autoFocus}
             ref={inputRef}
             {...prop}
@@ -131,7 +133,7 @@ const SearchInputFieldRenderer = ({
             className={cn(
               !isSingleOption && "grow shadow-none focus-visible:ring-1",
               inputClassName,
-              invalidIdentifier &&
+              isInvalid &&
                 "border border-primary-700 focus:border-primary-700 focus:ring-primary-700",
             )}
             autoFocus={autoFocus}
@@ -152,8 +154,7 @@ export default function SearchInput({
   onFieldChange,
   enableOptionButtons = true,
   autoFocus = false,
-  invalidIdentifier,
-  invalidPhone,
+  isInvalid,
   ...props
 }: SearchInputProps) {
   const initialOptionIndex = Math.max(
@@ -183,7 +184,7 @@ export default function SearchInput({
       onSearch(option.key, option.value);
       onFieldChange?.(options[index]);
     },
-    [onSearch, onFieldChange, options],
+    [onSearch],
   );
 
   const unselectedOptions = options.filter(
@@ -234,13 +235,13 @@ export default function SearchInput({
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [focusedIndex, open, handleOptionChange, options, unselectedOptions]);
+  }, [focusedIndex, open]);
 
   useEffect(() => {
     if (selectedOption.value !== searchValue) {
       onSearch(selectedOption.key, searchValue);
     }
-  }, [searchValue, selectedOption, onSearch]);
+  }, [searchValue, selectedOption.key, selectedOption.value]);
 
   useEffect(() => {
     if (autoFocus) {
@@ -361,8 +362,7 @@ export default function SearchInput({
             autoFocus={autoFocus}
             isSingleOption={isSingleOption}
             open={open}
-            invalidIdentifier={invalidIdentifier}
-            invalidPhone={invalidPhone}
+            isInvalid={isInvalid}
             {...props}
           />
         </div>

@@ -145,7 +145,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         });
       }
     },
-    [searchOptions],
+    [setPhoneNumberQuery, setIdentifierSearch],
   );
 
   const isIdentifierValid = useMemo(() => {
@@ -157,7 +157,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     } catch {
       return false;
     }
-  }, [identifierSearch.value, identifierSearch.regex]);
+  }, [identifierSearch]);
 
   const isPhoneValid = !!phoneNumber && isValidPhoneNumber(phoneNumber);
 
@@ -207,6 +207,16 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     });
   };
 
+  const isSearchInvalid = useMemo(() => {
+    if (phoneNumber) {
+      return !isPhoneValid;
+    }
+    if (identifierSearch.value) {
+      return !isIdentifierValid;
+    }
+    return false;
+  }, [phoneNumber, isPhoneValid, identifierSearch.value, isIdentifierValid]);
+
   return (
     <div>
       <div className="container max-w-5xl mx-auto py-6">
@@ -235,8 +245,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
               onSearch={handleSearch}
               className="w-full"
               autoFocus
-              invalidIdentifier={!isIdentifierValid && !!identifierSearch.value}
-              invalidPhone={!!phoneNumber && !isPhoneValid}
+              isInvalid={isSearchInvalid}
             />
 
             <div className="min-h-[200px]" id="patient-search-results">
