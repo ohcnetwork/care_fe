@@ -1,4 +1,4 @@
-import { AuthUserModel, UpdatePasswordForm } from "@/components/Users/models";
+import { UpdatePasswordForm } from "@/components/Users/models";
 
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
@@ -118,25 +118,6 @@ const routes = {
     method: "PUT",
     TRes: Type<{ message: string }>(),
     TBody: Type<UpdatePasswordForm>(),
-  },
-  // User Endpoints
-  currentUser: {
-    path: "/api/v1/users/getcurrentuser/",
-    TRes: Type<AuthUserModel>(),
-  },
-
-  deleteProfilePicture: {
-    path: "/api/v1/users/{username}/profile_picture/",
-    method: "DELETE",
-    TRes: Type<AuthUserModel>(),
-    TBody: Type<void>(),
-  },
-
-  deleteUser: {
-    path: "/api/v1/users/{username}/",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<void>(),
   },
 
   getScheduleAbleFacilityUser: {
