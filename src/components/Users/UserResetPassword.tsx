@@ -66,6 +66,7 @@ export default function UserResetPassword({
   const form = useForm({
     mode: "onSubmit",
     resolver: zodResolver(PasswordSchema),
+    mode: "onSubmit",
     defaultValues: {
       old_password: "",
       new_password_1: "",
