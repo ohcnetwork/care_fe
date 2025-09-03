@@ -4,8 +4,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 
-import { EncounterHeader } from "@/pages/Encounters/EncounterHeader";
-
+import Loading from "@/components/Common/Loading";
+import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
+import patientApi from "@/types/emr/patient/patientApi";
+import query from "@/Utils/request/query";
+import { useQuery } from "@tanstack/react-query";
 import { BookAppointmentDetails } from "./BookAppointmentDetails";
 
 interface Props {
@@ -16,13 +19,24 @@ interface Props {
 export default function BookAppointment({ patientId, facilityId }: Props) {
   const { t } = useTranslation();
 
+  const { data: patient } = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: query(patientApi.getPatient, {
+      pathParams: { id: patientId },
+    }),
+  });
+
+  if (!patient) {
+    return <Loading />;
+  }
+
   return (
     <Page title={t("book_appointment")} hideTitleOnPage>
       <div className="flex flex-col gap-4">
-        <EncounterHeader
-          canWriteSelectedEncounter={false}
-          patientId={patientId}
+        <PatientHeader
+          patient={patient}
           facilityId={facilityId}
+          isPatientPage
         />
         <Tabs defaultValue="appointment">
           <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
