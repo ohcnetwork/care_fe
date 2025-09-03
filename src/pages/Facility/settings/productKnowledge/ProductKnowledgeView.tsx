@@ -215,7 +215,9 @@ export default function ProductKnowledgeView({
                           </p>
                           <p className="font-medium">
                             {guideline.stability_duration.value}{" "}
-                            {guideline.stability_duration.unit?.code || ""}
+                            {t(
+                              `unit_${guideline.stability_duration.unit?.code}`,
+                            ) || ""}
                           </p>
                         </div>
                       </div>

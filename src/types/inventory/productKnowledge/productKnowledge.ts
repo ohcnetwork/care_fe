@@ -89,3 +89,14 @@ export interface ProductKnowledgeCreate
 export interface ProductKnowledgeUpdate extends ProductKnowledgeBase {
   facility: string;
 }
+
+export const UCUM_TIME_UNITS_CODES = [
+  // { code: "ms", display: "milliseconds", system: "http://unitsofmeasure.org" },
+  // { code: "s", display: "seconds", system: "http://unitsofmeasure.org" },
+  { code: "min", display: "minutes", system: "http://unitsofmeasure.org" },
+  { code: "h", display: "hours", system: "http://unitsofmeasure.org" },
+  { code: "d", display: "days", system: "http://unitsofmeasure.org" },
+  { code: "wk", display: "weeks", system: "http://unitsofmeasure.org" },
+  { code: "mo", display: "months", system: "http://unitsofmeasure.org" },
+  { code: "a", display: "years", system: "http://unitsofmeasure.org" },
+];
