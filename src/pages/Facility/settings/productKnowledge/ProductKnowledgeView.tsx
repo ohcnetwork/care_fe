@@ -153,6 +153,12 @@ export default function ProductKnowledgeView({
                 {product.alternate_identifier || "-"}
               </p>
             </div>
+            <div>
+              <p className="text-sm text-gray-500">{t("base_unit")}</p>
+              <div className="rounded-lg border bg-gray-50/50 p-3">
+                <CodeDisplay code={product.base_unit} />
+              </div>
+            </div>
           </CardContent>
         </Card>
 
