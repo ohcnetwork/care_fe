@@ -83,6 +83,7 @@ import {
   StructuredQuestionType,
 } from "@/components/Questionnaire/data/StructuredFormData";
 
+import useBreakpoints from "@/hooks/useBreakpoints";
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
 import mutate from "@/Utils/request/mutate";
@@ -275,6 +276,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [expandPath, setExpandPath] = useState<string[]>([]);
   const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
+  const isMobile = useBreakpoints({ default: true, md: false });
+
   const handleOnErrors = (error: HTTPError, fallbackMessage: string) => {
     const errorData = (
       error as {
@@ -344,8 +347,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   });
 
   const { data: availableTags, isLoading: isLoadingAvailableTags } = useQuery({
-    queryKey: ["tags", tagSearchQuery],
-    queryFn: query(questionnaireApi.tags.list, {
+    queryKey: ["questionnaireTags", tagSearchQuery],
+    queryFn: query.debounced(questionnaireApi.tags.list, {
       queryParams: {
         name: tagSearchQuery || undefined,
       },
@@ -961,79 +964,75 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="edit">
-          <div className="flex flex-col lg:flex-row gap-2">
-            <div className="space-y-4 lg:w-60 top-4 self-start h-fit max-h-screen overflow-y-auto lg:sticky">
-              <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
-                <CardHeader className="p-0">
-                  <CardTitle>{t("navigation")}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <nav className="space-y-1">
-                    {rootQuestions.map((question, index) => {
-                      const hasSubQuestions =
-                        question.type === "group" &&
-                        question.questions &&
-                        question.questions.length > 0;
-                      return (
-                        <div key={question.link_id} className="space-y-1">
-                          <button
-                            onClick={() => {
-                              scrollToQuestion(question.link_id);
-                              toggleQuestionExpanded(question.link_id);
-                            }}
-                            className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
-                              expandedQuestions.has(question.link_id)
-                                ? "bg-accent"
-                                : ""
-                            }`}
-                          >
-                            <span className="font-medium text-gray-500">
-                              {index + 1}.
-                            </span>
-                            <span className="flex-1 truncate">
-                              {question.text || t("untitled_question")}
-                            </span>
-                          </button>
-                          {hasSubQuestions && question.questions && (
-                            <div className="ml-6 border-l-2 border-gray-200 pl-2 space-y-1">
-                              {question.questions.map(
-                                (subQuestion, subIndex) => (
-                                  <button
-                                    key={subQuestion.id}
-                                    onClick={() => {
-                                      if (
-                                        !expandedQuestions.has(question.link_id)
-                                      ) {
-                                        toggleQuestionExpanded(
-                                          question.link_id,
-                                        );
-                                        setTimeout(() => {
-                                          scrollToQuestion(subQuestion.link_id);
-                                        }, 100);
-                                      } else {
-                                        scrollToQuestion(subQuestion.link_id);
-                                      }
-                                    }}
-                                    className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
-                                  >
-                                    <span className="font-medium text-gray-500">
-                                      {index + 1}.{subIndex + 1}
-                                    </span>
-                                    <span className="flex-1 truncate">
-                                      {subQuestion.text || "Untitled Question"}
-                                    </span>
-                                  </button>
-                                ),
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </nav>
-                </CardContent>
-              </Card>
-              <div className="space-y-4 max-w-sm lg:hidden">
+          <div className="flex flex-col md:flex-row gap-2">
+            <Card className="hidden lg:block w-60 sticky top-4 self-start h-fit max-h-screen overflow-y-auto rounded-none border-none bg-transparent shadow-none space-y-3 mt-2">
+              <CardHeader className="p-0">
+                <CardTitle>{t("navigation")}</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <nav className="space-y-1">
+                  {rootQuestions.map((question, index) => {
+                    const hasSubQuestions =
+                      question.type === "group" &&
+                      question.questions &&
+                      question.questions.length > 0;
+                    return (
+                      <div key={question.link_id} className="space-y-1">
+                        <button
+                          onClick={() => {
+                            scrollToQuestion(question.link_id);
+                            toggleQuestionExpanded(question.link_id);
+                          }}
+                          className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
+                            expandedQuestions.has(question.link_id)
+                              ? "bg-accent"
+                              : ""
+                          }`}
+                        >
+                          <span className="font-medium text-gray-500">
+                            {index + 1}.
+                          </span>
+                          <span className="flex-1 truncate">
+                            {question.text || t("untitled_question")}
+                          </span>
+                        </button>
+                        {hasSubQuestions && question.questions && (
+                          <div className="ml-6 border-l-2 border-gray-200 pl-2 space-y-1">
+                            {question.questions.map((subQuestion, subIndex) => (
+                              <button
+                                key={subQuestion.id}
+                                onClick={() => {
+                                  if (
+                                    !expandedQuestions.has(question.link_id)
+                                  ) {
+                                    toggleQuestionExpanded(question.link_id);
+                                    setTimeout(() => {
+                                      scrollToQuestion(subQuestion.link_id);
+                                    }, 100);
+                                  } else {
+                                    scrollToQuestion(subQuestion.link_id);
+                                  }
+                                }}
+                                className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
+                              >
+                                <span className="font-medium text-gray-500">
+                                  {index + 1}.{subIndex + 1}
+                                </span>
+                                <span className="flex-1 truncate">
+                                  {subQuestion.text || "Untitled Question"}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </nav>
+              </CardContent>
+            </Card>
+            {isMobile && (
+              <div className="space-y-4">
                 <QuestionnaireProperties
                   form={form}
                   updateQuestionnaireField={updateQuestionnaireField}
@@ -1069,8 +1068,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   setExpandedQuestions={setExpandedQuestions}
                 />
               </div>
-            </div>
-
+            )}
             <div className="space-y-4 flex-1">
               <Form {...form}>
                 <form>
@@ -1240,6 +1238,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               }
                               expandPath={expandPath}
                               questionRefs={questionRefs}
+                              totalSiblings={rootQuestions.length}
                             />
                           </div>
                         ))}
@@ -1274,7 +1273,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 </form>
               </Form>
             </div>
-            <div className="space-y-4 w-60 hidden lg:block top-4 self-start h-fit lg:sticky">
+            <div className="space-y-4 w-60 hidden md:block sticky top-4 self-start h-fit">
               <QuestionnaireProperties
                 form={form}
                 updateQuestionnaireField={updateQuestionnaireField}
@@ -1541,6 +1540,7 @@ interface QuestionEditorProps {
   handleEnableWhenDependentClick: (path: string[], targetId: string) => void;
   expandPath?: string[];
   questionRefs: React.RefObject<{ [key: string]: HTMLDivElement | null }>;
+  totalSiblings?: number;
 }
 
 function QuestionEditor({
@@ -1566,6 +1566,7 @@ function QuestionEditor({
   handleEnableWhenDependentClick,
   expandPath,
   questionRefs,
+  totalSiblings,
 }: QuestionEditorProps): React.ReactElement {
   const { t } = useTranslation();
   const {
@@ -1868,49 +1869,51 @@ function QuestionEditor({
             <ChevronsUpDown className="size-4 text-gray-500" />
           )}
         </CollapsibleTrigger>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="size-8">
-              <CareIcon icon="l-ellipsis-v" className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {!isFirst && (
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMoveUp?.();
-                }}
-              >
-                <ChevronUp className="mr-2 size-4" />
-                {t("move_up")}
-              </DropdownMenuItem>
-            )}
-            {!isLast && (
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMoveDown?.();
-                }}
-              >
-                <ChevronDown className="mr-2 size-4" />
-                {t("move_down")}
-              </DropdownMenuItem>
-            )}
+        {!(depth > 0 && totalSiblings === 1) && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="size-8">
+                <CareIcon icon="l-ellipsis-v" className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {!isFirst && (
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveUp?.();
+                  }}
+                >
+                  <ChevronUp className="mr-2 size-4" />
+                  {t("move_up")}
+                </DropdownMenuItem>
+              )}
+              {!isLast && (
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveDown?.();
+                  }}
+                >
+                  <ChevronDown className="mr-2 size-4" />
+                  {t("move_down")}
+                </DropdownMenuItem>
+              )}
 
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              className="text-destructive"
-            >
-              <CareIcon icon="l-trash-alt" className="mr-2 size-4" />
-              {t("delete")}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                className="text-destructive"
+              >
+                <CareIcon icon="l-trash-alt" className="mr-2 size-4" />
+                {t("delete")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       <CollapsibleContent>
@@ -2772,6 +2775,7 @@ function QuestionEditor({
                       isLast={idx === (questions?.length || 0) - 1}
                       expandPath={expandPath?.slice(1)}
                       questionRefs={questionRefs}
+                      totalSiblings={questions?.length || 0}
                     />
                   </div>
                 ))}

@@ -4,8 +4,7 @@ import dayjs from "dayjs";
 import { Loader2, SaveIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { Trans } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -29,6 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -403,9 +403,9 @@ const AvailabilityEditor = ({
         <div className="flex items-center gap-3">
           <CareIcon icon="l-clock" className="text-lg text-blue-600" />
           <span className="font-semibold">{availability.name}</span>
-          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+          <Badge variant="blue" className="rounded-full text-xs">
             {t(`SCHEDULE_AVAILABILITY_TYPE__${availability.slot_type}`)}
-          </span>
+          </Badge>
         </div>
 
         <AlertDialog
