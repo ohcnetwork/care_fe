@@ -34,7 +34,7 @@ import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import {
-  getResourceRequestCategoryText,
+  getResourceRequestCategoryEnum,
   ResourceRequest,
 } from "@/types/resourceRequest/resourceRequest";
 
@@ -273,7 +273,9 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                         <Badge variant="destructive">{t("emergency")}</Badge>
                       )}
                       <Badge variant="secondary">
-                        {t(getResourceRequestCategoryText(resource.category))}
+                        {t(
+                          `resource_request_category__${getResourceRequestCategoryEnum(resource.category)}`,
+                        )}
                       </Badge>
                     </div>
                     <div className="flex flex-row gap-2">

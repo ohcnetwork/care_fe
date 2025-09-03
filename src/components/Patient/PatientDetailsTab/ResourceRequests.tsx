@@ -19,7 +19,7 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import {
-  getResourceRequestCategoryText,
+  getResourceRequestCategoryEnum,
   RESOURCE_REQUEST_STATUS_COLORS,
 } from "@/types/resourceRequest/resourceRequest";
 
@@ -85,7 +85,9 @@ export const ResourceRequests = (props: PatientProps) => {
               resourceRequests.results.map((request, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">
-                    {t(getResourceRequestCategoryText(request.category))}
+                    {t(
+                      `resource_request_category__${getResourceRequestCategoryEnum(request.category)}`,
+                    )}
                   </TableCell>
                   <TableCell>{request.title}</TableCell>
                   <TableCell>

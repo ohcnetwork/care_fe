@@ -51,6 +51,7 @@ import validators from "@/Utils/validators";
 import patientApi from "@/types/emr/patient/patientApi";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import {
+  getResourceRequestCategoryEnum,
   RESOURCE_REQUEST_STATUSES,
   ResourceRequest,
   ResourceRequestCategory,
@@ -128,7 +129,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     if (resourceData) {
       form.reset({
         status: resourceData.status,
-        category: resourceData.category,
+        category: getResourceRequestCategoryEnum(resourceData.category),
         assigned_facility: resourceData.assigned_facility,
         assigned_to: resourceData.assigned_to?.id,
         emergency: resourceData.emergency ? "true" : "false",
@@ -396,9 +397,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {valuesOf(ResourceRequestCategory).map((option) => (
-                          <SelectItem key={option} value={option}>
-                            {t(`resource_request_category__${option}`)}
+                        {valuesOf(ResourceRequestCategory).map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {t(`resource_request_category__${category}`)}
                           </SelectItem>
                         ))}
                       </SelectContent>

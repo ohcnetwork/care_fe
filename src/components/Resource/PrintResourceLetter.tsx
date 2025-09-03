@@ -10,7 +10,7 @@ import Loading from "@/components/Common/Loading";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
-import { getResourceRequestCategoryText } from "@/types/resourceRequest/resourceRequest";
+import { getResourceRequestCategoryEnum } from "@/types/resourceRequest/resourceRequest";
 
 export default function PrintResourceLetter({ id }: { id: string }) {
   const { t } = useTranslation();
@@ -71,7 +71,9 @@ export default function PrintResourceLetter({ id }: { id: string }) {
               </div>
               <div>
                 <span className="font-semibold">{t("category")}:</span>{" "}
-                {t(getResourceRequestCategoryText(data.category))}
+                {t(
+                  `resource_request_category__${getResourceRequestCategoryEnum(data.category)}`,
+                )}
               </div>
               <div>
                 <span className="font-semibold">{t("quantity_required")}:</span>{" "}
