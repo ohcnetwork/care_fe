@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "raviger";
+import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -19,7 +19,6 @@ export function UpdateSpecimenDefinition({
   specimenDefinitionId,
 }: UpdateSpecimenDefinitionProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { data: specimenDefinition, isFetching } = useQuery({
