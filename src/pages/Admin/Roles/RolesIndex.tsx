@@ -68,7 +68,7 @@ function RoleCard({
               ))}
               {role.permissions.length > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{role.permissions.length - 3} more
+                  {`+${role.permissions.length - 3} ${t("more")}`}
                 </Badge>
               )}
             </div>
@@ -170,7 +170,7 @@ export default function RolesIndex() {
                       : t("add_role")}
                   </SheetTitle>
                 </SheetHeader>
-                <div className="mt-6 pb-6">
+                <div className="flex-1 overflow-y-auto mt-6 pb-6">
                   <RoleForm
                     role={selectedRole}
                     permissions={permissions}
