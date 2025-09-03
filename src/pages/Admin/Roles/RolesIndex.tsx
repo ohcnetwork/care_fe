@@ -168,7 +168,7 @@ export default function RolesIndex() {
                   {t("add_role")}
                 </Button>
               </SheetTrigger>
-              <SheetContent>
+              <SheetContent className="flex flex-col">
                 <SheetHeader>
                   <SheetTitle>
                     {selectedRole && selectedRole.id
@@ -176,7 +176,7 @@ export default function RolesIndex() {
                       : t("add_role")}
                   </SheetTitle>
                 </SheetHeader>
-                <div className="mt-6 pb-6">
+                <div className="flex-1 overflow-y-auto lg:overflow-y-visible mt-6 pb-6 pr-2">
                   <RoleForm
                     role={selectedRole}
                     permissions={permissions}
