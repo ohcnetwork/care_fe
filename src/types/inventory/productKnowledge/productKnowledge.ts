@@ -78,6 +78,7 @@ export interface ProductKnowledgeBase {
   names: ProductName[];
   storage_guidelines: StorageGuideline[];
   definitional?: ProductDefinition;
+  base_unit: Code;
 }
 
 export interface ProductKnowledgeCreate

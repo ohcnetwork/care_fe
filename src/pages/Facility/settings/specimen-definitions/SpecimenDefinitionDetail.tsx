@@ -24,6 +24,7 @@ import { Card } from "@/components/ui/card";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading";
 import { Code } from "@/types/base/code/code";
 import {
   DurationSpec,
@@ -75,7 +76,7 @@ export function SpecimenDefinitionDetail({
   };
 
   if (isLoading) {
-    return <div>{t("loading")}</div>;
+    return <CardListWithHeaderSkeleton count={1} />;
   }
 
   if (!specimenDefinition) {

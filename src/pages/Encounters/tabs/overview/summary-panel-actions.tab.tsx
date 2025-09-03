@@ -2,9 +2,11 @@ import { CheckIcon, NotebookPen } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
+import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { PLUGIN_Component } from "@/PluginEngine";
 
 export const SummaryPanelActionsTab = () => {
   const { t } = useTranslation();
@@ -17,6 +19,7 @@ export const SummaryPanelActionsTab = () => {
       manageCareTeam,
       dispenseMedicine,
     },
+    selectedEncounter,
   } = useEncounter();
 
   const actions = [
@@ -59,6 +62,17 @@ export const SummaryPanelActionsTab = () => {
             {action.label}
           </Button>
         ))}
+
+        {selectedEncounter && (
+          <PLUGIN_Component
+            __name="PatientInfoCardActions"
+            encounter={selectedEncounter}
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "justify-start sm:@sm:justify-center sm:@sm:flex-1",
+            )}
+          />
+        )}
 
         <div className="sm:@sm:flex-1 flex flex-col gap-2 border-t border-gray-300 border-dashed sm:@sm:border-none pt-3 sm:@sm:pt-0">
           <Button

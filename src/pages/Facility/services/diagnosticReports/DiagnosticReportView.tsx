@@ -20,8 +20,8 @@ import { FileListTable } from "@/components/Files/FileListTable";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
+import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
 import { ObservationHistorySheet } from "@/pages/Facility/services/serviceRequests/components/ObservationHistorySheet";
-import { PatientHeader } from "@/pages/Facility/services/serviceRequests/components/PatientHeader";
 import { DIAGNOSTIC_REPORT_STATUS_COLORS } from "@/types/emr/diagnosticReport/diagnosticReport";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import { ObservationStatus } from "@/types/emr/observation/observation";
@@ -94,13 +94,11 @@ export default function DiagnosticReportView({
       </div>
 
       <div className="space-y-6">
-        <div className="px-2">
-          <PatientHeader
-            patient={report.encounter.patient}
-            facilityId={report.encounter.facility.id}
-            encounterId={report.encounter.id}
-          />
-        </div>
+        <PatientHeader
+          patient={report.encounter.patient}
+          facilityId={report.encounter.facility.id}
+          className="md:p-0 p-0"
+        />
         {/* Report Details */}
         <Card>
           <CardHeader>

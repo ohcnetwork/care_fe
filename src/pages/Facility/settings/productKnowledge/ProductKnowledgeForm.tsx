@@ -116,6 +116,7 @@ function ProductKnowledgeFormContent({
     status: z.nativeEnum(ProductKnowledgeStatus),
     alternate_identifier: z.string().optional(),
     code: CodeSchema.nullable(),
+    base_unit: CodeSchema.nullable(),
     names: z
       .array(
         z.object({
@@ -178,6 +179,7 @@ function ProductKnowledgeFormContent({
         status: existingData.status,
         alternate_identifier: existingData.alternate_identifier,
         code: existingData.code?.code ? existingData.code : null,
+        base_unit: existingData.base_unit?.code ? existingData.base_unit : null,
         names: existingData.names || [],
         storage_guidelines: existingData.storage_guidelines || [],
         definitional:
@@ -195,6 +197,7 @@ function ProductKnowledgeFormContent({
       names: [],
       storage_guidelines: [],
       code: null,
+      base_unit: null,
       definitional: null,
       status: ProductKnowledgeStatus.active,
     };
@@ -436,6 +439,37 @@ function ProductKnowledgeFormContent({
                       </FormItem>
                     )}
                   />
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-1">
+                  <div>
+                    <FormLabel>{t("base_unit")}</FormLabel>
+                    <div className="mt-2">
+                      <Select
+                        value={form.watch("base_unit")?.code || ""}
+                        onValueChange={(value) => {
+                          const selectedUnit = DOSAGE_UNITS_CODES.find(
+                            (unit) => unit.code === value,
+                          );
+                          if (selectedUnit)
+                            form.setValue("base_unit", selectedUnit);
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue
+                            placeholder={t("dosage_form_placeholder")}
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DOSAGE_UNITS_CODES.map((unit) => (
+                            <SelectItem key={unit.code} value={unit.code}>
+                              {unit.display}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
@@ -772,38 +806,25 @@ function ProductKnowledgeFormContent({
                       <FormField
                         control={form.control}
                         name="definitional.dosage_form"
-                        render={({ field }) => (
+                        render={() => (
                           <FormItem className="flex flex-col">
                             <FormLabel aria-required>
                               {t("dosage_form")}
                             </FormLabel>
                             <FormControl>
-                              <Select
-                                value={field.value?.code || ""}
-                                onValueChange={(value) => {
-                                  const selectedUnit = DOSAGE_UNITS_CODES.find(
-                                    (unit) => unit.code === value,
-                                  );
-                                  if (selectedUnit)
-                                    field.onChange(selectedUnit);
+                              <ValueSetSelect
+                                system="system-medication-form-codes"
+                                value={form.watch("definitional.dosage_form")}
+                                placeholder={t("dosage_form_placeholder")}
+                                onSelect={(code) => {
+                                  form.setValue("definitional.dosage_form", {
+                                    code: code.code,
+                                    display: code.display,
+                                    system: code.system,
+                                  });
                                 }}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue
-                                    placeholder={t("dosage_form_placeholder")}
-                                  />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {DOSAGE_UNITS_CODES.map((unit) => (
-                                    <SelectItem
-                                      key={unit.code}
-                                      value={unit.code}
-                                    >
-                                      {unit.display}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                                showCode={true}
+                              />
                             </FormControl>
                           </FormItem>
                         )}

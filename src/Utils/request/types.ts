@@ -15,6 +15,7 @@ export interface ApiRoute<TData, TBody = unknown> {
   path: string;
   TRes: TData;
   noAuth?: boolean;
+  defaultQueryParams?: QueryParams;
 }
 
 type ExtractRouteParams<T extends string> =
