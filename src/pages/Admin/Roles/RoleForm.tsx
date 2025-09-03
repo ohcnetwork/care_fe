@@ -25,7 +25,7 @@ interface RoleFormProps {
   role: RoleRead | null;
   onSuccess: () => void;
 }
-const PAGE_LIMIT = 10;
+const PAGE_LIMIT = 100;
 export default function RoleForm({ role, onSuccess }: RoleFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
