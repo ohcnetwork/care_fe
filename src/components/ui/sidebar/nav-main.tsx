@@ -102,7 +102,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                           {link.children
                             ?.filter((link) => link.visibility !== false)
                             .map((subItem) => (
-                              <>
+                              <Fragment key={subItem.name}>
                                 {subItem.header && (
                                   <div className="flex items-center gap-2 mt-2">
                                     {subItem.headerIcon}
@@ -111,7 +111,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                                     </span>
                                   </div>
                                 )}
-                                <SidebarMenuSubItem key={subItem.name}>
+                                <SidebarMenuSubItem>
                                   <SidebarMenuSubButton
                                     asChild
                                     data-cy={`nav-${subItem.name.toLowerCase().replace(/\s+/g, "-")}`}
@@ -134,7 +134,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                                     </ActiveLink>
                                   </SidebarMenuSubButton>
                                 </SidebarMenuSubItem>
-                              </>
+                              </Fragment>
                             ))}
                         </SidebarMenuSub>
                       </CollapsibleContent>

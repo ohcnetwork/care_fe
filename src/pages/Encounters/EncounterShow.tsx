@@ -225,7 +225,7 @@ export const EncounterShow = (props: Props) => {
         <EncounterHistorySelector />
         <NavTabs
           showMoreAfterIndex={showMoreAfterIndex}
-          className="w-full"
+          className="@container w-full"
           tabContentClassName="flex-none overflow-x-auto overflow-y-hidden lg:overflow-y-auto lg:h-[calc(100vh-12rem)]"
           tabs={tabs}
           currentTab={props.tab}

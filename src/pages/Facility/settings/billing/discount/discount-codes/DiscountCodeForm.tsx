@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -17,11 +18,6 @@ import { Input } from "@/components/ui/input";
 
 import { Code } from "@/types/base/code/code";
 
-const formSchema = z.object({
-  code: z.string().min(1, { message: "field_required" }),
-  display: z.string().min(1, { message: "field_required" }),
-});
-
 interface DiscountCodeFormProps {
   defaultValues?: Code;
   onSubmit: (data: Code) => void;
@@ -32,6 +28,15 @@ export function DiscountCodeForm({
   onSubmit,
 }: DiscountCodeFormProps) {
   const { t } = useTranslation();
+
+  const formSchema = useMemo(
+    () =>
+      z.object({
+        code: z.string().min(1, { message: t("field_required") }),
+        display: z.string().min(1, { message: t("field_required") }),
+      }),
+    [t],
+  );
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -87,7 +92,11 @@ export function DiscountCodeForm({
         />
 
         <div className="pt-2">
-          <Button type="submit" className="w-full">
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={!form.formState.isDirty}
+          >
             {t("save")}
           </Button>
         </div>
