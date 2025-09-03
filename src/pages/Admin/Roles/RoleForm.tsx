@@ -1,5 +1,9 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React from "react";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -15,33 +19,52 @@ import { Permission } from "@/types/emr/permission/permission";
 import permissionApi from "@/types/emr/permission/permissionApi";
 import { RoleRead } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
-import { useQuery } from "@tanstack/react-query";
+import { useInView } from "react-intersection-observer";
 
 interface RoleFormProps {
   role: RoleRead | null;
   onSuccess: () => void;
 }
-
+const PAGE_LIMIT = 10;
 export default function RoleForm({ role, onSuccess }: RoleFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { ref, inView } = useInView();
+
   const [formData, setFormData] = React.useState({
     name: role?.name || "",
     description: role?.description || "",
     permissions: role?.permissions.map((p: Permission) => p.slug) || [],
   });
 
-  const { data: permissionsResponse, isLoading: permissionsLoading } = useQuery(
-    {
-      queryKey: ["permissions"],
-      queryFn: query(permissionApi.listPermissions, {
-        queryParams: {
-          limit: 1000, // Get all permissions for the form
-        },
-      }),
+  const getQueryParams = (pageParam: number) => ({
+    limit: String(PAGE_LIMIT),
+    offset: String(pageParam),
+  });
+
+  const {
+    data: permissionsList,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetching: _isFetchingPermissions,
+  } = useInfiniteQuery({
+    queryKey: ["permissions"],
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query.debounced(permissionApi.listPermissions, {
+        queryParams: getQueryParams(pageParam),
+      })({ signal });
+      return response;
     },
-  );
-  const permissions = permissionsResponse?.results || [];
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * PAGE_LIMIT;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
+    select: (data) => data?.pages.flatMap((p) => p.results) || [],
+  });
+
+  const permissions = permissionsList || [];
 
   const createRoleMutation = useMutation({
     mutationFn: mutate(roleApi.createRole),
@@ -84,6 +107,10 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
         : [...prev.permissions, permissionSlug],
     }));
   };
+
+  useEffect(() => {
+    if (inView && hasNextPage) fetchNextPage();
+  }, [inView, hasNextPage, fetchNextPage]);
 
   const isLoading =
     createRoleMutation.isPending || updateRoleMutation.isPending;
@@ -154,38 +181,36 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-3 max-h-60 overflow-y-auto">
-            {permissionsLoading ? (
-              <span className="w-full h-30 flex justify-center items-center">
-                {t("loading")}
-              </span>
-            ) : (
-              permissions.map((permission) => (
-                <div
-                  key={permission.slug}
-                  className="flex items-center space-x-2"
+            {permissions.map((permission, index) => (
+              <div
+                key={permission.slug}
+                className="flex items-center space-x-2"
+                ref={index == permissions.length - 1 ? ref : undefined}
+              >
+                <Checkbox
+                  id={permission.slug}
+                  checked={formData.permissions.includes(permission.slug)}
+                  onCheckedChange={() =>
+                    handlePermissionToggle(permission.slug)
+                  }
+                />
+                <Label
+                  htmlFor={permission.slug}
+                  className="flex-1 cursor-pointer"
                 >
-                  <Checkbox
-                    id={permission.slug}
-                    checked={formData.permissions.includes(permission.slug)}
-                    onCheckedChange={() =>
-                      handlePermissionToggle(permission.slug)
-                    }
-                  />
-                  <Label
-                    htmlFor={permission.slug}
-                    className="flex-1 cursor-pointer"
-                  >
-                    <div>
-                      <div className="font-medium">{permission.name}</div>
-                      {permission.description && (
-                        <div className="text-sm text-gray-500">
-                          {permission.description}
-                        </div>
-                      )}
-                    </div>
-                  </Label>
-                </div>
-              ))
+                  <div>
+                    <div className="font-medium">{permission.name}</div>
+                    {permission.description && (
+                      <div className="text-sm text-gray-500">
+                        {permission.description}
+                      </div>
+                    )}
+                  </div>
+                </Label>
+              </div>
+            ))}
+            {isFetching && (
+              <div className="text-center text-sm">{t("loading")}</div>
             )}
           </div>
         </CardContent>
