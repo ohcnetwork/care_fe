@@ -47,7 +47,6 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
     fetchNextPage,
     hasNextPage,
     isFetching,
-    isFetching: _isFetchingPermissions,
   } = useInfiniteQuery({
     queryKey: ["permissions"],
     queryFn: async ({ pageParam = 0, signal }) => {
