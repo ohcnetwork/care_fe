@@ -1,7 +1,6 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { differenceInYears, format } from "date-fns";
-import React from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 

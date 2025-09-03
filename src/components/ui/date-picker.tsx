@@ -18,9 +18,19 @@ interface DatePickerProps {
   date?: Date;
   onChange?: (date?: Date) => void;
   disabled?: (date: Date) => boolean;
+  className?: string;
+  disablePicker?: boolean;
+  dateFormat?: string;
 }
 
-export function DatePicker({ date, onChange, disabled }: DatePickerProps) {
+export function DatePicker({
+  date,
+  onChange,
+  disabled,
+  className,
+  disablePicker,
+  dateFormat = "PPP",
+}: DatePickerProps) {
   const { t } = useTranslation();
 
   const [open, setOpen] = useState(false);
@@ -34,19 +44,20 @@ export function DatePicker({ date, onChange, disabled }: DatePickerProps) {
             "w-full justify-start text-left font-normal",
             !date && "text-gray-500",
             "sm:w-auto",
+            className,
           )}
+          disabled={disablePicker}
         >
-          <CareIcon
-            icon="l-calender"
-            className="mr-0 sm:mr-2 size-4 shrink-0"
-          />
+          <CareIcon icon="l-calender" className="mr-0 size-4 shrink-0" />
           <span className="truncate">
             {date ? (
               <>
                 <span className="block sm:hidden">
                   {format(date, "MMM d, yyyy")}
                 </span>
-                <span className="hidden sm:block">{format(date, "PPP")}</span>
+                <span className="hidden sm:block">
+                  {format(date, dateFormat)}
+                </span>
               </>
             ) : (
               <span>{t("pick_a_date")}</span>
@@ -62,7 +73,7 @@ export function DatePicker({ date, onChange, disabled }: DatePickerProps) {
             onChange?.(date);
             setOpen(false);
           }}
-          initialFocus
+          autoFocus
           disabled={disabled}
         />
       </PopoverContent>

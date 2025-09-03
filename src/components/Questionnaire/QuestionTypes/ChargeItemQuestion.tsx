@@ -35,8 +35,10 @@ import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/cha
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
-import { ResponseValue } from "@/types/questionnaire/form";
+import {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 
 interface ChargeItemQuestionProps {
   encounterId: string;
@@ -178,7 +180,7 @@ export function ChargeItemQuestion({
   const [cidSearch, setCidSearch] = useState("");
 
   const { data: chargeItemDefinitions, isLoading } = useQuery({
-    queryKey: ["charge_item_definitions", cidSearch],
+    queryKey: ["chargeItemDefinitions", cidSearch],
     queryFn: query.debounced(chargeItemDefinitionApi.listChargeItemDefinition, {
       pathParams: { facilityId },
       queryParams: { limit: 100, status: "active", title: cidSearch },
