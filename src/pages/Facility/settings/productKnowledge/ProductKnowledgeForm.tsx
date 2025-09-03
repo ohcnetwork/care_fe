@@ -60,7 +60,7 @@ const formSchema = z.object({
   slug: z.string().min(1, "Slug is required"),
   product_type: z.nativeEnum(ProductKnowledgeType),
   status: z.nativeEnum(ProductKnowledgeStatus),
-  alternate_identifier: z.string().optional(),
+  alternate_identifier: z.string().trim().optional(),
   code: codeSchema.nullable(),
   base_unit: codeSchema.nullable(),
   names: z
@@ -174,7 +174,7 @@ function ProductKnowledgeFormContent({
         slug: existingData.slug,
         product_type: existingData.product_type,
         status: existingData.status,
-        alternate_identifier: existingData.alternate_identifier,
+        alternate_identifier: existingData.alternate_identifier || "",
         code: existingData.code?.code ? existingData.code : null,
         base_unit: existingData.base_unit?.code ? existingData.base_unit : null,
         names: existingData.names || [],
