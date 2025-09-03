@@ -1,227 +1,131 @@
 {
-  "global": [
-    {
-      "key": "escape",
-      "action": "close-dialog",
-      "description": "Close Dialog",
-      "when": "always"
-    },
+    "global": [
+      { "key": "escape",              "action": "close-dialog",
+                                      "description": "Close Dialog",
+                                      "when": "always" },
+      
+      { "key": "ctrl+k",              "action": "command-palette",
+                                      "description": "Open Command Palette",
+                                      "when": "always" },
+                                      
+      { "key": "?",                   "action": "show-shortcuts",
+                                      "description": "Show Keyboard Shortcuts",
+                                      "when": "always" }
+    ],
+    
+    "encounter": [
+      { "key": "a",                   "action": "add-allergy",
+                                      "description": "Add Allergy",
+                                      "when": "canEdit" },
+                                      
+      { "key": "s",                   "action": "add-symptoms", 
+                                      "description": "Add Symptoms",
+                                      "when": "canEdit" },
+                                      
+      { "key": "d",                   "action": "add-diagnosis",
+                                      "description": "Add Diagnosis", 
+                                      "when": "canEdit" },
 
-    {
-      "key": "ctrl+k",
-      "action": "command-palette",
-      "description": "Open Command Palette",
-      "when": "always"
-    },
+      { "key": "f",                   "action": "add-questionnaire",
+                                      "description": "New Questionnaire/Form",
+                                      "when": "canEdit && questionnairesEnabled" },
+                                      
+      { "key": "u e",                   "action": "update-encounter",
+                                      "description": "Update Encounter",
+                                      "when": "canEdit" },
+                                      
+      { "key": "h",                   "action": "clinical-history",
+                                      "description": "Clinical History",
+                                      "when": "always" },
+  
+      { "key": "g g",                 "action": "encounter-overview",
+                                      "description": "Go to Overview",
+                                      "when": "always" },
+                                      
+      { "key": "g p",                 "action": "plots",
+                                      "description": "Go to Plots",
+                                      "when": "always" },
+                                      
+      { "key": "g o",                 "action": "observations", 
+                                      "description": "Go to Observations",
+                                      "when": "always" },
+                                      
+      { "key": "g m",                 "action": "medicines",
+                                      "description": "Go to Medicines",
+                                      "when": "always" },
+                                      
+      { "key": "g f",                 "action": "files",
+                                      "description": "Go to Files",
+                                      "when": "always" },
+                                      
+      { "key": "g n",                 "action": "notes",
+                                      "description": "Go to Notes", 
+                                      "when": "always" },
+                                      
+      { "key": "g d",                 "action": "devices",
+                                      "description": "Go to Devices",
+                                      "when": "always" },
+                                      
+      { "key": "g c",                 "action": "consents",
+                                      "description": "Go to Consents",
+                                      "when": "always" },
+                                      
+      { "key": "g s",                 "action": "service-requests",
+                                      "description": "Go to Service Requests",
+                                      "when": "always" },
+                                      
+      { "key": "g r",                 "action": "diagnostic-reports",
+                                      "description": "Go to Diagnostic Reports", 
+                                      "when": "always" },
+                                      
+      { "key": "cmd+e",              "action": "open-command-dialog",
+                                      "description": "Open Command Dialog",
+                                      "when": "canEdit" },
+      { "key": "ctrl+e",             "action": "open-command-dialog",
+                                      "description": "Open Command Dialog",
+                                      "when": "canEdit" },
 
-    {
-      "key": "?",
-      "action": "show-shortcuts",
-      "description": "Show Keyboard Shortcuts",
-      "when": "always"
-    }
-  ],
+      { "key": "q 1",                 "action": "questionnaire-1",
+                                      "description": "Questionnaire 1",
+                                      "when": "canEdit && questionnairesEnabled" },
 
-  "encounter": [
-    {
-      "key": "a",
-      "action": "add-allergy",
-      "description": "Add Allergy",
-      "when": "canEdit"
-    },
+      { "key": "q 2",                 "action": "questionnaire-2",
+                                      "description": "Questionnaire 2",
+                                      "when": "canEdit && questionnairesEnabled" },
 
-    {
-      "key": "s",
-      "action": "add-symptoms",
-      "description": "Add Symptoms",
-      "when": "canEdit"
-    },
+      { "key": "q 3",                 "action": "questionnaire-3",
+                                      "description": "Questionnaire 3",
+                                      "when": "canEdit && questionnairesEnabled" },
 
-    {
-      "key": "d",
-      "action": "add-diagnosis",
-      "description": "Add Diagnosis",
-      "when": "canEdit"
-    },
+      { "key": "q 4",                 "action": "questionnaire-4",
+                                      "description": "Questionnaire 4",
+                                      "when": "canEdit && questionnairesEnabled" },
 
-    {
-      "key": "f",
-      "action": "add-questionnaire",
-      "description": "New Questionnaire/Form",
-      "when": "canEdit && questionnairesEnabled"
-    },
+      { "key": "q 5",                 "action": "questionnaire-5",
+                                      "description": "Questionnaire 5",
+                                      "when": "canEdit && questionnairesEnabled" },
 
-    {
-      "key": "u e",
-      "action": "update-encounter",
-      "description": "Update Encounter",
-      "when": "canEdit"
-    },
+      { "key": "q 6",                 "action": "questionnaire-6",
+                                      "description": "Questionnaire 6",
+                                      "when": "canEdit && questionnairesEnabled" },
 
-    {
-      "key": "h",
-      "action": "clinical-history",
-      "description": "Clinical History",
-      "when": "always"
-    },
+      { "key": "q 7",                 "action": "questionnaire-7",
+                                      "description": "Questionnaire 7",
+                                      "when": "canEdit && questionnairesEnabled" },
 
-    {
-      "key": "g g",
-      "action": "encounter-overview",
-      "description": "Go to Overview",
-      "when": "always"
-    },
+      { "key": "q 8",                 "action": "questionnaire-8",
+                                      "description": "Questionnaire 8",
+                                      "when": "canEdit && questionnairesEnabled" },
 
-    {
-      "key": "g p",
-      "action": "plots",
-      "description": "Go to Plots",
-      "when": "always"
-    },
+      { "key": "q 9",                 "action": "questionnaire-9",
+                                      "description": "Questionnaire 9",
+                                      "when": "canEdit && questionnairesEnabled" },
 
-    {
-      "key": "g o",
-      "action": "observations",
-      "description": "Go to Observations",
-      "when": "always"
-    },
-
-    {
-      "key": "g m",
-      "action": "medicines",
-      "description": "Go to Medicines",
-      "when": "always"
-    },
-
-    {
-      "key": "g f",
-      "action": "files",
-      "description": "Go to Files",
-      "when": "always"
-    },
-
-    {
-      "key": "g n",
-      "action": "notes",
-      "description": "Go to Notes",
-      "when": "always"
-    },
-
-    {
-      "key": "g d",
-      "action": "devices",
-      "description": "Go to Devices",
-      "when": "always"
-    },
-
-    {
-      "key": "g c",
-      "action": "consents",
-      "description": "Go to Consents",
-      "when": "always"
-    },
-
-    {
-      "key": "g s",
-      "action": "service-requests",
-      "description": "Go to Service Requests",
-      "when": "always"
-    },
-
-    {
-      "key": "g r",
-      "action": "diagnostic-reports",
-      "description": "Go to Diagnostic Reports",
-      "when": "always"
-    },
-
-    {
-      "key": "cmd+e",
-      "action": "open-command-dialog",
-      "description": "Open Command Dialog",
-      "when": "canEdit"
-    },
-    {
-      "key": "ctrl+e",
-      "action": "open-command-dialog",
-      "description": "Open Command Dialog",
-      "when": "canEdit"
-    },
-
-    {
-      "key": "q 1",
-      "action": "questionnaire-1",
-      "description": "Questionnaire 1",
-      "when": "canEdit && questionnairesEnabled"
-    },
-
-    {
-      "key": "q 2",
-      "action": "questionnaire-2",
-      "description": "Questionnaire 2",
-      "when": "canEdit && questionnairesEnabled"
-    },
-
-    {
-      "key": "q 3",
-      "action": "questionnaire-3",
-      "description": "Questionnaire 3",
-      "when": "canEdit && questionnairesEnabled"
-    },
-
-    {
-      "key": "q 4",
-      "action": "questionnaire-4",
-      "description": "Questionnaire 4",
-      "when": "canEdit && questionnairesEnabled"
-    },
-
-    {
-      "key": "q 5",
-      "action": "questionnaire-5",
-      "description": "Questionnaire 5",
-      "when": "canEdit && questionnairesEnabled"
-    },
-
-    {
-      "key": "q 6",
-      "action": "questionnaire-6",
-      "description": "Questionnaire 6",
-      "when": "canEdit && questionnairesEnabled"
-    },
-
-    {
-      "key": "q 7",
-      "action": "questionnaire-7",
-      "description": "Questionnaire 7",
-      "when": "canEdit && questionnairesEnabled"
-    },
-
-    {
-      "key": "q 8",
-      "action": "questionnaire-8",
-      "description": "Questionnaire 8",
-      "when": "canEdit && questionnairesEnabled"
-    },
-
-    {
-      "key": "q 9",
-      "action": "questionnaire-9",
-      "description": "Questionnaire 9",
-      "when": "canEdit && questionnairesEnabled"
-    },
-
-    {
-      "key": "m c",
-      "action": "mark-as-completed",
-      "description": "Mark as Completed",
-      "when": "canEdit"
-    },
-    {
-      "key": "l",
-      "action": "assign-location",
-      "description": "Assign Location",
-      "when": "canEdit"
-    }
-  ]
-}
+      { "key": "m c",                 "action": "mark-as-completed",
+                                      "description": "Mark as Completed",
+                                      "when": "canEdit" },
+     { "key": "l",                 "action": "assign-location",
+                                      "description": "Assign Location",
+                                      "when": "canEdit" }
+    ]
+  }
