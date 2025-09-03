@@ -29,6 +29,7 @@ import {
 import {
   Appointment,
   GetSlotsForDayResponse,
+  SchedulableResourceType,
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -65,7 +66,8 @@ export function AppointmentSlotPicker({
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
       pathParams: { facilityId },
       body: {
-        user: resourceId ?? "",
+        resource_type: SchedulableResourceType.Practitioner,
+        resource_id: resourceId ?? "",
         day: dateQueryString(selectedDate),
       },
     }),
@@ -85,7 +87,8 @@ export function AppointmentSlotPicker({
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
       pathParams: { facilityId },
       body: {
-        user: resourceId ?? "",
+        resource_type: SchedulableResourceType.Practitioner,
+        resource_id: resourceId ?? "",
         day: dateQueryString(new Date()),
       },
     }),

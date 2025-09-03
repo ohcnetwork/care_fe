@@ -40,6 +40,9 @@ import { CreateSpecimenDefinition } from "./specimen-definitions/CreateSpecimenD
 import { SpecimenDefinitionDetail } from "./specimen-definitions/SpecimenDefinitionDetail";
 import { SpecimenDefinitionsList } from "./specimen-definitions/SpecimenDefinitionsList";
 import { UpdateSpecimenDefinition } from "./specimen-definitions/UpdateSpecimenDefinition";
+import TokenCategoryForm from "./tokenCategory/TokenCategoryForm";
+import TokenCategoryList from "./tokenCategory/TokenCategoryList";
+import TokenCategoryView from "./tokenCategory/TokenCategoryView";
 
 interface SettingsLayoutProps {
   facilityId: string;
@@ -162,6 +165,14 @@ const getRoutes = (facilityId: string) => ({
   ),
   "/product/:id/edit": ({ id }: { id: string }) => (
     <ProductForm facilityId={facilityId} productId={id} />
+  ),
+  "/token_category": () => <TokenCategoryList facilityId={facilityId} />,
+  "/token_category/new": () => <TokenCategoryForm facilityId={facilityId} />,
+  "/token_category/:id": ({ id }: { id: string }) => (
+    <TokenCategoryView facilityId={facilityId} tokenCategoryId={id} />
+  ),
+  "/token_category/:id/edit": ({ id }: { id: string }) => (
+    <TokenCategoryForm facilityId={facilityId} tokenCategoryId={id} />
   ),
 
   "/reportbuilder": () => <ReportBuilderList facilityId={facilityId} />,

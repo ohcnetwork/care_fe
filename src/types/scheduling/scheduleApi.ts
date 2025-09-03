@@ -10,6 +10,7 @@ import {
   AvailabilityHeatmapRequest,
   AvailabilityHeatmapResponse,
   GetSlotsForDayResponse,
+  SchedulableResourceType,
   ScheduleAvailability,
   ScheduleAvailabilityCreateRequest,
   ScheduleException,
@@ -18,6 +19,7 @@ import {
   ScheduleTemplateCreateRequest,
   ScheduleTemplateUpdateRequest,
 } from "@/types/scheduling/schedule";
+import { TokenGenerate } from "@/types/tokens/token/token";
 import { UserReadMinimal } from "@/types/user/user";
 
 export default {
@@ -104,7 +106,11 @@ export default {
       path: "/api/v1/facility/{facilityId}/slots/get_slots_for_day/",
       method: HttpMethod.POST,
       TRes: Type<GetSlotsForDayResponse>(),
-      TBody: Type<{ user: string; day: string }>(),
+      TBody: Type<{
+        resource_type: SchedulableResourceType;
+        resource_id: string;
+        day: string;
+      }>(),
     },
     availabilityStats: {
       path: "/api/v1/facility/{facilityId}/slots/availability_stats/",
@@ -151,6 +157,12 @@ export default {
       method: HttpMethod.POST,
       TBody: Type<AppointmentRescheduleRequest>(),
       TRes: Type<Appointment>(),
+    },
+    generateToken: {
+      path: "/api/v1/facility/{facilityId}/appointments/{id}/generate_token/",
+      method: HttpMethod.POST,
+      TRes: Type<Appointment>(),
+      TBody: Type<TokenGenerate>(),
     },
     /**
      * Lists schedulable users for a facility
