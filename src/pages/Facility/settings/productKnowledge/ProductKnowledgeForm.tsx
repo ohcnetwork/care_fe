@@ -697,7 +697,7 @@ function ProductKnowledgeFormContent({
                                           <span>
                                             {t(`unit_${duration.code}`)}
                                             <span className="text-sm ml-1">
-                                              {`(${duration.code})`}
+                                              {duration.code}
                                             </span>
                                           </span>
                                         </SelectItem>
