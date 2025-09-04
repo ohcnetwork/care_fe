@@ -24,6 +24,7 @@ import {
 } from "@/components/Common/SkeletonLoading";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import { EncounterCard } from "@/components/Facility/EncounterCard";
+import CreateTokenForm from "@/components/Tokens/CreateTokenForm";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
@@ -47,6 +48,10 @@ export default function VerifyPatient() {
 
   const { canCreateAppointment, canCreateEncounter, canListEncounters } =
     getPermissions(hasPermission, facility?.permissions ?? []);
+
+  // For now, using canCreateAppointment as a proxy for token creation permission
+  // This can be updated when specific token permissions are available
+  const canCreateToken = canCreateAppointment;
 
   const {
     mutate: verifyPatient,
@@ -164,7 +169,7 @@ export default function VerifyPatient() {
             </CardHeader>
           </Card>
 
-          {(canCreateAppointment || canCreateEncounter) && (
+          {(canCreateAppointment || canCreateEncounter || canCreateToken) && (
             <Card>
               <CardHeader>
                 <CardTitle>{t("quick_actions")}</CardTitle>
@@ -178,7 +183,7 @@ export default function VerifyPatient() {
                         : ""}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+              <CardContent className="grid gap-4 sm:grid-cols-1 lg:grid-cols-3">
                 {canCreateAppointment && (
                   <Button
                     asChild
@@ -237,6 +242,45 @@ export default function VerifyPatient() {
                               </span>
                               <span className="text-xs md:text-sm text-gray-500 line-clamp-1">
                                 {t("start_a_new_clinical_encounter")}
+                              </span>
+                            </div>
+                            <CareIcon
+                              icon="l-arrow-right"
+                              className="ml-auto size-4 md:size-5 text-gray-400 transform translate-x-0 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100"
+                            />
+                          </div>
+                        </div>
+                      </Button>
+                    }
+                  />
+                )}
+
+                {canCreateToken && (
+                  <CreateTokenForm
+                    patientId={patientData.id}
+                    facilityId={facilityId}
+                    patientName={patientData.name}
+                    trigger={
+                      <Button
+                        variant="outline"
+                        data-cy="create-token-button"
+                        className="group relative h-[100px] md:h-[120px] overflow-hidden border-0 bg-linear-to-br from-amber-50 to-orange-50 p-0 shadow-md hover:shadow-xl transition-all duration-300 justify-start"
+                      >
+                        <div className="w-full p-4 md:p-6">
+                          <div className="absolute inset-0 bg-linear-to-br from-primary/80 to-primary opacity-0 transition-opacity duration-300 group-hover:opacity-10" />
+                          <div className="relative flex w-full items-center gap-3 md:gap-4">
+                            <div className="flex size-10 md:size-12 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                              <CareIcon
+                                icon="l-ticket"
+                                className="size-5 md:size-6 text-primary"
+                              />
+                            </div>
+                            <div className="flex flex-col items-start gap-0.5">
+                              <span className="text-base md:text-lg font-semibold text-gray-800 group-hover:text-primary transition-colors line-clamp-1">
+                                {t("create_token")}
+                              </span>
+                              <span className="text-xs md:text-sm text-gray-500 line-clamp-1">
+                                {t("generate_a_new_token")}
                               </span>
                             </div>
                             <CareIcon

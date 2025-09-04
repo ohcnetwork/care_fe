@@ -3,7 +3,6 @@ import {
   CalendarIcon,
   CheckCircledIcon,
   ClockIcon,
-  DownloadIcon,
   DrawingPinIcon,
   EnterIcon,
   EyeNoneIcon,
@@ -14,7 +13,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, differenceInYears, format, isBefore } from "date-fns";
-import { BanIcon, EyeIcon, Loader2, PrinterIcon } from "lucide-react";
+import { BanIcon, EyeIcon, Loader2 } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -69,12 +68,11 @@ import query from "@/Utils/request/query";
 import {
   formatName,
   getReadableDuration,
-  saveElementAsImage,
   stringifyNestedObject,
 } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
+import { TokenGenerationSheet } from "@/pages/Appointments/components/TokenGenerationSheet";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   ENCOUNTER_CLASSES_COLORS,
@@ -182,34 +180,43 @@ export default function AppointmentDetail(props: Props) {
           )}
         >
           <AppointmentDetails appointment={appointment} facility={facility} />
-          <div className="mt-3">
-            <div id="section-to-print" className="print:w-[400px] print:pt-4">
-              <div id="appointment-token-card" className="bg-gray-50 md:p-4">
-                <AppointmentTokenCard
-                  appointment={appointment}
-                  facility={facility}
-                />
+          <div className="mt-6">
+            {appointment.token?.number ? (
+              <Card className="h-56 md:mx-4 p-8 flex flex-col items-center justify-center text-center">
+                <p className="text-xs uppercase tracking-wide text-gray-500">
+                  {t("token_no")}
+                </p>
+                <span className="mt-2 text-6xl font-bold tracking-tight">
+                  {appointment.token.number}
+                </span>
+              </Card>
+            ) : (
+              <div className="h-56 md:mx-4 border-2 border-dashed border-gray-300 bg-gray-50 rounded flex flex-col items-center justify-center text-center">
+                <span className="text-6xl text-gray-400 font-bold leading-none">
+                  --
+                </span>
+                <p className="mt-2 text-sm text-gray-600">
+                  {t("token_number_not_generated")}
+                </p>
+                <div className="mt-4">
+                  <TokenGenerationSheet
+                    facilityId={facility.id}
+                    appointmentId={appointment.id}
+                    trigger={
+                      <Button variant="outline" size="lg" className="px-6">
+                        <PlusCircledIcon className="size-4 mr-2" />
+                        {t("generate_token")}
+                      </Button>
+                    }
+                    onSuccess={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: ["appointment", appointment.id],
+                      });
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="flex gap-2 justify-end px-6 mt-4 md:mt-0">
-              <Button variant="outline" onClick={() => print()}>
-                <PrinterIcon className="size-4 mr-2" />
-                <span>{t("print")}</span>
-              </Button>
-              <Button
-                variant="default"
-                onClick={async () => {
-                  await saveElementAsImage(
-                    "appointment-token-card",
-                    `${patient.name}'s Appointment.png`,
-                  );
-                  toast.success("Appointment card has been saved!");
-                }}
-              >
-                <DownloadIcon className="size-4 mr-2" />
-                <span>{t("save")}</span>
-              </Button>
-            </div>
+            )}
             {/* Lets only show encounter details if the appointment is not in a final status or if there is an encounter linked to the appointment */}
             {(![...AppointmentFinalStatuses, "noshow"].includes(
               appointment.status,
@@ -574,7 +581,25 @@ const AppointmentDetails = ({
           </div>
         </CardContent>
       </Card>
-
+      <TokenGenerationSheet
+        facilityId={facility.id}
+        appointmentId={appointment.id}
+        trigger={
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full justify-start h-12"
+          >
+            <PlusCircledIcon className="size-4 mr-3" />
+            {t("generate_token")}
+          </Button>
+        }
+        onSuccess={() => {
+          queryClient.invalidateQueries({
+            queryKey: ["appointment", appointment.id],
+          });
+        }}
+      />
       <Card>
         <CardHeader>
           <CardTitle>{t("practitioner_information")}</CardTitle>
