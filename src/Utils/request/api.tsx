@@ -1,8 +1,5 @@
-import { UpdatePasswordForm } from "@/components/Users/models";
-
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
-import { MFAAuthenticationToken } from "@/types/auth/otp";
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import { Code } from "@/types/base/code/code";
 import { PatientRead } from "@/types/emr/patient/patient";
@@ -22,18 +19,6 @@ import { UserReadMinimal } from "@/types/user/user";
  */
 export function Type<T>(): T {
   return {} as T;
-}
-
-export interface JwtTokenObtainPair {
-  access: string;
-  refresh: string;
-}
-
-export type LoginResponse = JwtTokenObtainPair | MFAAuthenticationToken;
-
-export interface LoginCredentials {
-  username: string;
-  password: string;
 }
 
 export enum HttpMethod {
@@ -60,66 +45,6 @@ export const API = <TResponse, TBody = undefined>(
  * @deprecated use object specific api instead
  */
 const routes = {
-  // Auth Endpoints
-  login: {
-    path: "/api/v1/auth/login/",
-    method: "POST",
-    noAuth: true,
-    TRes: Type<LoginResponse>(),
-    TBody: Type<LoginCredentials>(),
-  },
-
-  logout: {
-    path: "/api/v1/auth/logout/",
-    method: "POST",
-    TBody: Type<JwtTokenObtainPair>(),
-  },
-
-  token_refresh: {
-    path: "/api/v1/auth/token/refresh/",
-    method: "POST",
-    TRes: Type<JwtTokenObtainPair>(),
-    TBody: Type<{ refresh: JwtTokenObtainPair["refresh"] }>(),
-  },
-
-  checkResetToken: {
-    path: "/api/v1/password_reset/check/",
-    method: "POST",
-    noAuth: true,
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<{
-      token: string;
-    }>(),
-  },
-
-  resetPassword: {
-    path: "/api/v1/password_reset/confirm/",
-    method: "POST",
-    noAuth: true,
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<{
-      password: string;
-      confirm: string;
-    }>(),
-  },
-
-  forgotPassword: {
-    path: "/api/v1/password_reset/",
-    method: "POST",
-    noAuth: true,
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<{
-      username: string;
-    }>(),
-  },
-
-  updatePassword: {
-    path: "/api/v1/password_change/",
-    method: "PUT",
-    TRes: Type<{ message: string }>(),
-    TBody: Type<UpdatePasswordForm>(),
-  },
-
   getScheduleAbleFacilityUser: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
     TRes: Type<UserReadMinimal>(),
