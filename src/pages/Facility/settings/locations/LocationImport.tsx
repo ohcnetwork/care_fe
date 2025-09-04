@@ -1,6 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { AlertCircle, ChevronDown, ChevronRight, Upload } from "lucide-react";
+import { navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +21,8 @@ import {
 } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
 
+import Page from "@/components/Common/Page";
+
 import mutate from "@/Utils/request/mutate";
 import {
   BatchRequestBody,
@@ -36,6 +40,7 @@ import locationApi from "@/types/location/locationApi";
 
 interface LocationImportProps {
   facilityId: string;
+  step?: "upload" | "preview";
 }
 
 const LocationFormLabels = {
@@ -119,15 +124,22 @@ const processRowLocations = (data: string[][]) => {
 };
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-export default function LocationImport({ facilityId }: LocationImportProps) {
+export default function LocationImport({
+  facilityId,
+  step,
+}: LocationImportProps) {
+  const { t } = useTranslation();
   const [processedLocations, setProcessedLocations] = useState<
     LocationImportT[]
   >([]);
   const [currentStep, setCurrentStep] = useState<"upload" | number | "review">(
-    "upload",
+    step === "preview" ? "review" : "upload",
   );
   const [uploadError, setUploadError] = useState<string>("");
-  const { saveLocations } = useSaveLocations(facilityId);
+  const { saveLocations, queue } = useSaveLocations(facilityId);
+
+  // Check if there are any pending save requests
+  const isSaving = queue.length > 0;
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -175,7 +187,7 @@ export default function LocationImport({ facilityId }: LocationImportProps) {
 
         setUploadError("");
         setProcessedLocations(processRowLocations(data));
-        setCurrentStep("review");
+        navigate(`/facility/${facilityId}/settings/locations/import/preview`);
       } catch (error) {
         console.error("=== CSV PROCESSING ERROR ===");
         console.error("Error details:", error);
@@ -186,122 +198,144 @@ export default function LocationImport({ facilityId }: LocationImportProps) {
     reader.readAsText(file);
   };
 
+  // If we're in preview mode but have no processed locations, redirect to upload
+  if (step === "preview" && processedLocations.length === 0) {
+    navigate(`/facility/${facilityId}/settings/locations/import`);
+    return null;
+  }
+
   if (currentStep === "upload") {
     return (
-      <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Upload className="h-5 w-5" />
-              Import Locations from CSV
-            </CardTitle>
-            <CardDescription>
-              Upload a CSV file to import floor, room, and sub-room locations
-              with their hierarchy preserved.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-              <input
-                type="file"
-                accept=".csv"
-                onChange={handleFileUpload}
-                className="hidden"
-                id="csv-upload"
-              />
-              <label htmlFor="csv-upload" className="cursor-pointer">
-                <div className="flex flex-col items-center gap-4">
-                  <Upload className="h-12 w-12 text-gray-400" />
-                  <div>
-                    <p className="text-lg font-medium">
-                      Click to upload CSV file
+      <Page title={t("locations")} hideTitleOnPage>
+        <div className="max-w-4xl mx-auto">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                Import Locations from CSV
+              </CardTitle>
+              <CardDescription>
+                Upload a CSV file to import floor, room, and sub-room locations
+                with their hierarchy preserved.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="csv-upload"
+                />
+                <label htmlFor="csv-upload" className="cursor-pointer">
+                  <div className="flex flex-col items-center gap-4">
+                    <Upload className="h-12 w-12 text-gray-400" />
+                    <div>
+                      <p className="text-lg font-medium">
+                        Click to upload CSV file
+                      </p>
+                      <p className="text-sm text-gray-500">or drag and drop</p>
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      Expected columns: location, type, description (repeated
+                      for each hierarchy level)
                     </p>
-                    <p className="text-sm text-gray-500">or drag and drop</p>
-                  </div>
-                  <p className="text-xs text-gray-400">
-                    Expected columns: location, type, description (repeated for
-                    each hierarchy level)
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Location types can use labels like "bed", "room", "ward",
-                    etc. The last description column is optional.
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const sampleCSV = `Building,type,description,Room,type,description,Bed,type,description
+                    <p className="text-xs text-gray-500 mt-2">
+                      Location types can use labels like "bed", "room", "ward",
+                      etc. The last description column is optional.
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const sampleCSV = `Building,type,description,Room,type,description,Bed,type,description
 Main Building,building,Main hospital building,ICU,ward,Intensive Care Unit,Bed 1,bed,ICU Bed 1
 Main Building,building,Main hospital building,ICU,ward,Intensive Care Unit,Bed 2,bed,ICU Bed 2
 Main Building,building,Main hospital building,Reception,room,Main reception area,Waiting Area,area,Patient waiting space`;
-                      const blob = new Blob([sampleCSV], { type: "text/csv" });
-                      const url = window.URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-                      a.href = url;
-                      a.download = "sample_locations.csv";
-                      a.click();
-                      window.URL.revokeObjectURL(url);
-                    }}
-                  >
-                    Download Sample CSV
-                  </Button>
-                </div>
-              </label>
-            </div>
-
-            {uploadError && (
-              <Alert className="mt-4" variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{uploadError}</AlertDescription>
-              </Alert>
-            )}
-
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-              <h4 className="font-medium text-sm mb-2">
-                Valid Location Types:
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(LocationFormLabels).map(([key, label]) => (
-                  <Badge key={key} variant="outline" className="text-xs">
-                    {label} ({key})
-                  </Badge>
-                ))}
+                        const blob = new Blob([sampleCSV], {
+                          type: "text/csv",
+                        });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = "sample_locations.csv";
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                      }}
+                    >
+                      Download Sample CSV
+                    </Button>
+                  </div>
+                </label>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+
+              {uploadError && (
+                <Alert className="mt-4" variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{uploadError}</AlertDescription>
+                </Alert>
+              )}
+
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h4 className="font-medium text-sm mb-2">
+                  Valid Location Types:
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(LocationFormLabels).map(([key, label]) => (
+                    <Badge key={key} variant="outline" className="text-xs">
+                      {label} ({key})
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </Page>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle>Location Import Wizard</CardTitle>
-          <CardDescription>
-            Review and validate locations before importing
-          </CardDescription>
-          <div className="mt-4">
-            <Progress value={100} className="h-2" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Review All Locations</h3>
-            <HierarchicalLocationPreview locations={processedLocations} />
-          </div>
-          <div className="flex justify-end">
-            <Button
-              className="mt-4"
-              onClick={() => saveLocations(processedLocations)}
-            >
-              Save
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <Page title={t("locations")} hideTitleOnPage>
+      <div className="max-w-7xl mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle>Location Import Wizard</CardTitle>
+            <CardDescription>
+              Review and validate locations before importing
+            </CardDescription>
+            <div className="mt-4">
+              <Progress value={100} className="h-2" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">
+                Review All Locations
+              </h3>
+              <HierarchicalLocationPreview locations={processedLocations} />
+            </div>
+            <div className="flex justify-between gap-4 mt-4">
+              <Button
+                variant="outline"
+                onClick={() =>
+                  navigate(`/facility/${facilityId}/settings/locations/import`)
+                }
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => saveLocations(processedLocations)}
+                disabled={isSaving}
+              >
+                {isSaving ? "Importing..." : "Import Locations"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </Page>
   );
 }
 

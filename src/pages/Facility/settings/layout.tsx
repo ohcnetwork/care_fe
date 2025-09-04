@@ -54,6 +54,9 @@ const getRoutes = (facilityId: string) => ({
   ),
   "/locations": () => <LocationSettings facilityId={facilityId} />,
   "/locations/import": () => <LocationImport facilityId={facilityId} />,
+  "/locations/import/preview": () => (
+    <LocationImport facilityId={facilityId} step="preview" />
+  ),
   "/locations/:id": ({ id }: { id: string }) => (
     <LocationSettings facilityId={facilityId} locationId={id} />
   ),
