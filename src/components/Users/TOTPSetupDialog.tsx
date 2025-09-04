@@ -21,12 +21,12 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 
-import { TOTPSetupResponse } from "@/types/auth/otp";
+import { TotpSetupResponse } from "@/types/auth/auth";
 
-interface TOTPSetupDialogProps {
+interface TotpSetupDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  setupData: TOTPSetupResponse;
+  setupData: TotpSetupResponse;
   onVerify: (code: string) => void;
   verificationError?: string;
   isVerifying: boolean;
@@ -39,7 +39,7 @@ export function TOTPSetupDialog({
   onVerify,
   verificationError,
   isVerifying,
-}: TOTPSetupDialogProps) {
+}: TotpSetupDialogProps) {
   const { t } = useTranslation();
   const [verificationCode, setVerificationCode] = useState("");
   const [showSecretKey, setShowSecretKey] = useState(false);

@@ -80,44 +80,46 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
             {t("valueset_preview_description")}
           </p>
         </SheetHeader>
-        <Autocomplete
-          options={mergeAutocompleteOptions(
-            searchQuery?.results?.map((option) => ({
-              label: option.display || "",
-              value: option.code,
-            })) ?? [],
-          )}
-          value={selected}
-          freeInput={true}
-          onChange={setSelected}
-          onSearch={(val) => {
-            setSearch(val);
-            setSelected("");
-          }}
-          placeholder={t("search_concept")}
-          noOptionsMessage={
-            searchQuery && !isFetching ? t("no_results_found") : t("searching")
-          }
-          className="px-1 mt-6"
-        />
-        <div className="mt-6 space-y-4">
-          {detailsToShow.length > 0 ? (
-            detailsToShow.map((item) => (
-              <div
-                key={item.code}
-                className="border rounded-lg p-4 bg-white shadow-sm"
-              >
-                <h3 className="text-lg font-medium">{item.display}</h3>
-                <p className="text-sm text-gray-600">
-                  <strong>CODE:</strong> {item.code}
-                </p>
-              </div>
-            ))
-          ) : (
-            <div className="p-4 text-center text-gray-500">
-              {t("no_concepts")}
+          <div className="px-1 mt-6">
+            <Autocomplete
+              options={mergeAutocompleteOptions(
+                searchQuery?.results?.map((option) => ({
+                  label: option.display || "",
+                  value: option.code,
+                })) ?? [],
+              )}
+              value={selected}
+              freeInput={true}
+              onChange={setSelected}
+              onSearch={(val) => {
+                setSearch(val);
+                setSelected("");
+              }}
+              placeholder={t("search_concept")}
+              noOptionsMessage={
+                searchQuery && !isFetching ? t("no_results_found") : t("searching")
+              }
+            />
+            <div className="mt-6 space-y-4">
+              {detailsToShow.length > 0 ? (
+                detailsToShow.map((item) => (
+                  <div
+                    key={item.code}
+                    className="border rounded-lg p-4 bg-white shadow-sm"
+                  >
+                    <h3 className="text-lg font-medium">{item.display}</h3>
+                    <p className="text-sm text-gray-600">
+                      <strong>CODE:</strong> {item.code}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <div className="p-4 text-center text-gray-500">
+                  {t("no_concepts")}
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </SheetContent>
     </Sheet>
