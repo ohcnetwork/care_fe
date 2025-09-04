@@ -9,6 +9,7 @@ import {
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { CalendarFold, CircleDashed, Tag } from "lucide-react";
 
+import { t } from "i18next";
 import { SelectedDateBadge, getDateOperations } from "./date-filter";
 import { GenericSelectedBadge } from "./generic-filter";
 import { SelectedTagBadge } from "./tag-filter";
@@ -33,7 +34,7 @@ export const encounterStatusFilter = (
     "command",
     Array.from(ENCOUNTER_STATUS).map((value) => ({
       value: value,
-      label: value,
+      label: t(value),
       color: ENCOUNTER_STATUS_FILTER_COLORS[value],
     })),
     undefined,
@@ -63,11 +64,11 @@ export const encounterClassFilter = (
 ) =>
   createFilterConfig(
     key,
-    "class",
+    t("class"),
     "command",
     Array.from(ENCOUNTER_CLASS).map((value) => ({
       value: value,
-      label: `encounter_class__${value}`,
+      label: t(`encounter_class__${value}`),
       color: ENCOUNTER_CLASS_FILTER_COLORS[value as EncounterClass],
     })),
     undefined,
@@ -98,11 +99,11 @@ export const encounterPriorityFilter = (
 ) =>
   createFilterConfig(
     key,
-    label || "priority",
+    label ? t(label) : t("priority"),
     "command",
     Array.from(ENCOUNTER_PRIORITY).map((value) => ({
       value: value.toLowerCase(),
-      label: `encounter_priority__${value}`,
+      label: t(`encounter_priority__${value}`),
       color: ENCOUNTER_PRIORITY_FILTER_COLORS[value as EncounterPriority],
     })),
     undefined,
@@ -132,7 +133,7 @@ export const startedDateFilter = (
 ) =>
   createFilterConfig(
     key,
-    label || "started_date",
+    label ? t(label) : t("started_date"),
     "date",
     [],
     undefined,
@@ -149,7 +150,7 @@ export const completedDateFilter = (
 ) =>
   createFilterConfig(
     key,
-    label || "completed_date",
+    label ? t(label) : t("completed_date"),
     "date",
     [],
     undefined,
@@ -168,7 +169,7 @@ export const tagFilter = (
 ) =>
   createFilterConfig(
     key,
-    label || "tags",
+    label ? t(label) : t("tags", { count: 2 }),
     "tag",
     [],
     resource,

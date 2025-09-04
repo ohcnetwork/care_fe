@@ -117,7 +117,6 @@ function FilterOptionsList({
   setFocusItemIndex: (index: number) => void;
   mode?: FilterMode;
 }) {
-  const { t } = useTranslation();
   const [focusItemRef, setFocusItemRef] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -175,9 +174,7 @@ function FilterOptionsList({
               )}
             />
           )}
-          <span className="text-sm text-gray-700 flex-1">
-            {t(option.label)}
-          </span>
+          <span className="text-sm text-gray-700 flex-1">{option.label}</span>
         </div>
       ))}
     </div>
@@ -193,14 +190,13 @@ export const GenericSelectedBadge = ({
   selectedLength: number;
   className?: string;
 }) => {
-  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
       <Badge
         variant="outline"
         className={cn("text-xs whitespace-nowrap", className)}
       >
-        {t(selectedValue)}
+        {selectedValue}
       </Badge>
       {selectedLength > 1 && (
         <span className="text-xs bg-gray-100 text-gray-500 px-1 rounded-md whitespace-nowrap">

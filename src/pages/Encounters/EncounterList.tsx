@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
-  encounterClassFilter,
   encounterPriorityFilter,
   encounterStatusFilter,
   tagFilter,
@@ -205,7 +204,6 @@ export function EncounterList({
 
   const filters = [
     encounterStatusFilter("status"),
-    encounterClassFilter("encounter_class"),
     encounterPriorityFilter("priority"),
     tagFilter("tags", TagResource.ENCOUNTER, "multi", t("tags", { count: 2 })),
   ];

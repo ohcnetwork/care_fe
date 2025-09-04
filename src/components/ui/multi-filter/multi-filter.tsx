@@ -116,7 +116,7 @@ export default function MultiFilter({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="w-[320px] max-w-[calc(100vw-1rem)]  p-0"
+          className="w-[calc(100vw)] max-w-[calc(100vw-3rem)] sm:max-w-xs p-0"
           align="start"
         >
           {activeFilter ? (

@@ -157,7 +157,7 @@ export function RenderDateFilter({
               className="w-full"
               styles={{
                 day: {
-                  width: "40px",
+                  width: "2.5rem",
                 },
                 weekdays: {
                   width: "100%",
