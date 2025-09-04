@@ -79,8 +79,8 @@ export default function ValueSetSelect({
               variant="white"
               role="combobox"
               className={cn(
-                "w-full flex justify-between h-auto whitespace-normal text-left font-normal border-gray-300 shadow-xs hover:bg-white",
-                !value?.display && "text-gray-500",
+                "w-full flex justify-between h-auto whitespace-normal text-left font-normal border-gray-300 shadow-xs",
+                !value?.display && "text-gray-500 hover:bg-white",
               )}
               disabled={disabled}
             >
@@ -157,8 +157,8 @@ export default function ValueSetSelect({
             variant="white"
             role="combobox"
             className={cn(
-              "flex justify-between truncate font-normal border-gray-300 shadow-xs hover:bg-white",
-              !value?.display && "text-gray-500",
+              "flex justify-between truncate font-normal border-gray-300 shadow-xs",
+              !value?.display && "text-gray-500 hover:bg-white",
             )}
             disabled={disabled}
           >
