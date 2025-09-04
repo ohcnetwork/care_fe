@@ -543,7 +543,6 @@ export default function PatientRegistration(
                                 }
                               }}
                               data-cy="same-phone-number-checkbox"
-                              className="mt-2"
                             />
                           </FormControl>
                           <FormLabel>

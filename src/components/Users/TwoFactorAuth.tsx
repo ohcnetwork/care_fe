@@ -15,8 +15,8 @@ import { TOTPSetupDialog } from "@/components/Users/TOTPSetupDialog";
 
 import mutate from "@/Utils/request/mutate";
 import { HTTPError, StructuredError } from "@/Utils/request/types";
+import { BackupCodesResponse, TotpSetupResponse } from "@/types/auth/auth";
 import authApi from "@/types/auth/authApi";
-import { TOTPSetupResponse, TOTPVerifyResponse } from "@/types/auth/otp";
 
 interface DialogState {
   password: boolean;
@@ -37,7 +37,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
     regenerateConfirm: false,
   });
   const [verificationError, setVerificationError] = useState("");
-  const [setupData, setSetupData] = useState<TOTPSetupResponse | null>(null);
+  const [setupData, setSetupData] = useState<TotpSetupResponse | null>(null);
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [showRegenerateBackupCodes, setShowRegenerateBackupCodes] =
     useState(false);
@@ -74,7 +74,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
 
   const { mutate: setupTOTP, isPending: isSettingUp } = useMutation({
     mutationFn: mutate(authApi.totp.setup),
-    onSuccess: (data: TOTPSetupResponse) => {
+    onSuccess: (data: TotpSetupResponse) => {
       setSetupData(data);
       closePasswordDialog();
       openSetupDialog();
@@ -93,7 +93,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
 
   const { mutate: verifyTOTP, isPending: isVerifying } = useMutation({
     mutationFn: mutate(authApi.totp.verify),
-    onSuccess: (data: TOTPVerifyResponse) => {
+    onSuccess: (data: BackupCodesResponse) => {
       if (data.backup_codes && Array.isArray(data.backup_codes)) {
         setBackupCodes(data.backup_codes);
         closeSetupDialog();
@@ -130,7 +130,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
   const { mutate: regenerateBackupCodes, isPending: isRegenerating } =
     useMutation({
       mutationFn: mutate(authApi.totp.regenerateBackupCodes),
-      onSuccess: (data: { backup_codes: string[] }) => {
+      onSuccess: (data: BackupCodesResponse) => {
         setBackupCodes(data.backup_codes);
         closeRegenerateConfirm();
         setShowRegenerateBackupCodes(true);

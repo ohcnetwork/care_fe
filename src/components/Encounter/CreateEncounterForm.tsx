@@ -43,10 +43,8 @@ import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
-  ENCOUNTER_CLASS,
   ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_PRIORITY,
-  EncounterClass,
   EncounterCreate,
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
@@ -59,7 +57,6 @@ interface Props {
   facilityId: string;
   patientName: string;
   appointment?: string;
-  encounterClass?: EncounterClass;
   trigger?: React.ReactNode;
   onSuccess?: () => void;
   disableRedirectOnSuccess?: boolean;
@@ -70,7 +67,6 @@ export default function CreateEncounterForm({
   facilityId,
   patientName,
   appointment,
-  encounterClass,
   trigger,
   onSuccess,
   disableRedirectOnSuccess = false,
@@ -81,7 +77,7 @@ export default function CreateEncounterForm({
 
   const encounterFormSchema = z.object({
     status: z.enum(["planned", "in_progress", "on_hold"] as const),
-    encounter_class: z.enum(ENCOUNTER_CLASS),
+    encounter_class: z.enum(careConfig.encounterClasses),
     priority: z.enum(ENCOUNTER_PRIORITY),
     organizations: z.array(z.string()).min(1, {
       message: t("at_least_one_department_is_required"),
@@ -94,7 +90,7 @@ export default function CreateEncounterForm({
     resolver: zodResolver(encounterFormSchema),
     defaultValues: {
       status: "planned",
-      encounter_class: encounterClass || careConfig.defaultEncounterType,
+      encounter_class: careConfig.defaultEncounterType,
       priority: "routine",
       organizations: [],
       start_date: new Date().toISOString(),
@@ -223,7 +219,7 @@ export default function CreateEncounterForm({
                   <FormItem>
                     <FormLabel>{t("type_of_encounter")}</FormLabel>
                     <div className="grid grid-cols-2 gap-3">
-                      {ENCOUNTER_CLASS.map((value) => {
+                      {careConfig.encounterClasses.map((value) => {
                         const Icon = ENCOUNTER_CLASS_ICONS[value];
                         return (
                           <Button
