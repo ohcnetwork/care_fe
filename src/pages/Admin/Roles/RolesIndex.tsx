@@ -158,7 +158,7 @@ export default function RolesIndex() {
                       : t("add_role")}
                   </SheetTitle>
                 </SheetHeader>
-                <div className="mt-6 pb-6 overflow-auto">
+                <div className="mt-6 overflow-auto pr-2">
                   <RoleForm role={selectedRole} onSuccess={handleSheetClose} />
                 </div>
               </SheetContent>
