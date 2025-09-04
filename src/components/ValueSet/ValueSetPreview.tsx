@@ -57,22 +57,25 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
             {t("valueset_preview_description")}
           </p>
         </SheetHeader>
-        <Autocomplete
-          options={mergeAutocompleteOptions(
-            searchQuery?.results?.map((option) => ({
-              label: option.display || "",
-              value: option.code,
-            })) ?? [],
-          )}
-          value={search}
-          onChange={setSearch}
-          onSearch={setSearch}
-          placeholder={t("search_concept")}
-          noOptionsMessage={
-            searchQuery && !isFetching ? t("no_results_found") : t("searching")
-          }
-          className="px-1 mt-6"
-        />
+        <div className="px-1 mt-6">
+          <Autocomplete
+            options={mergeAutocompleteOptions(
+              searchQuery?.results?.map((option) => ({
+                label: option.display || "",
+                value: option.code,
+              })) ?? [],
+            )}
+            value={search}
+            onChange={setSearch}
+            onSearch={setSearch}
+            placeholder={t("search_concept")}
+            noOptionsMessage={
+              searchQuery && !isFetching
+                ? t("no_results_found")
+                : t("searching")
+            }
+          />
+        </div>
       </SheetContent>
     </Sheet>
   );
