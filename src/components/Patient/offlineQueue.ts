@@ -184,6 +184,7 @@ export const queuePatientUpdateOffline = async ({
               ...(entry.payload as PatientCreate),
               ...updatePatientData,
             }),
+            syncStatus: "pending" as const,
           }
         : {
             ...entry,
@@ -191,6 +192,7 @@ export const queuePatientUpdateOffline = async ({
               ...(entry.payload as PatientUpdate),
               ...updatePatientData,
             },
+            syncStatus: "pending" as const,
           };
 
       await db.OfflineWrites.update(patientId, updatedEntry);

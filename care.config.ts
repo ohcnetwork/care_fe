@@ -156,10 +156,6 @@ const careConfig = {
   queryPersistMaxAge,
   pingUrl: env.REACT_PING_URL || "https://care-api.do.ohc.network/ping/",
 
-  cleanupSuccessOfflineRecords: env.REACT_OFFLINE_CLEANUP_AFTER_SECONDS
-    ? parseInt(env.REACT_OFFLINE_CLEANUP_AFTER_SECONDS, 10)*1000
-    : 1000 * 60 * 60 * 24 * 7, // 7 days in milliseconds
-
   patientRegistration: {
     /**
      * Minimum number of geo-organization levels the user must select

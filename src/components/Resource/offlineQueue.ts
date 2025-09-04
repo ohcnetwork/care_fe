@@ -253,6 +253,7 @@ export const queueUpdatedResourceRequest = async ({
       const updatedEntry: any = {
         ...entry,
         payload: updatedPayload,
+        syncStatus: "pending" as const,
       };
 
       await db.OfflineWrites.update(resourceId, updatedEntry);

@@ -548,6 +548,7 @@ export const queueRescheduleOfflineRecord = async ({
         } satisfies PathParamsObject<
           typeof scheduleApis.slots.createAppointment
         >,
+        syncStatus: "pending" as const,
       };
 
       await db.OfflineWrites.update(createAppointmentExist.id, updateEntry);
@@ -558,6 +559,7 @@ export const queueRescheduleOfflineRecord = async ({
       const updateEntry: OfflineWritesEntry = {
         ...rescheduleEntryExist,
         payload: rescheduleAppointmentData,
+        syncStatus: "pending" as const,
       };
 
       await db.OfflineWrites.update(rescheduleEntryExist.id, updateEntry);
@@ -692,7 +694,10 @@ export const queueUpdateAppointmentRecordOffline = async ({
 
   try {
     if (existingStatusEntry) {
-      await db.OfflineWrites.update(statusupdateId, writeEntry);
+      await db.OfflineWrites.update(statusupdateId, {
+        ...writeEntry,
+        syncStatus: "pending" as const,
+      });
     } else {
       const saveResult = await saveOfflineWrite(writeEntry);
       if (!saveResult.success) {

@@ -304,11 +304,6 @@ const SyncStatusHeader: React.FC<{
             >
               {isSyncing ? t("syncing") : t("sync_now")}
             </Button>
-            {!isOnline && (
-              <p className="text-xs text-gray-500 text-right">
-                {t("sync_requires_internet_connection")}
-              </p>
-            )}
           </div>
         </div>
       </div>

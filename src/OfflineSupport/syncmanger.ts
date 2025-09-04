@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { onlineManager } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -165,7 +164,7 @@ export class SyncManager {
       this.isRunning = false;
       this.abortController = null;
       this.options.onSyncComplete?.();
-      await this.cleanupSyncedRecords(careConfig.cleanupSuccessOfflineRecords);
+      await this.cleanupSyncedRecords();
     }
 
     return result;
@@ -319,11 +318,9 @@ export class SyncManager {
   /**
    * Cleanup successfully synced records while preserving hierarchical integrity
    * Only deletes records if their entire dependency chain is synced
-   * Configure through care config: cleanupSucessOfflineRecords
+   
    */
-  public async cleanupSyncedRecords(
-    olderThanMs: number,
-  ): Promise<CleanupResult> {
+  public async cleanupSyncedRecords(): Promise<CleanupResult> {
     const db = new AppCacheDB();
     const result: CleanupResult = {
       deletedCount: 0,
@@ -339,14 +336,7 @@ export class SyncManager {
 
       const allRecords = await query.toArray();
 
-      const now = Date.now();
-      const cutoffTime = now - olderThanMs;
-
-      const eligibleRecords = allRecords.filter(
-        (record) => record.clientTimestamp < cutoffTime,
-      );
-
-      if (eligibleRecords.length === 0) {
+      if (allRecords.length === 0) {
         result.preservedCount = allRecords.length;
         return result;
       }
@@ -355,7 +345,7 @@ export class SyncManager {
       const byId = new Map(allRecords.map((r) => [r.id, r]));
 
       // Group into families by root ancestor
-      const families = new Map<string, typeof eligibleRecords>();
+      const families = new Map<string, typeof allRecords>();
 
       const findRoot = (r: any) => {
         let cur = r;
@@ -365,7 +355,7 @@ export class SyncManager {
         return cur?.id ?? r.id;
       };
 
-      for (const rec of eligibleRecords) {
+      for (const rec of allRecords) {
         const root = findRoot(rec);
         const arr = families.get(root) ?? [];
         arr.push(rec);
