@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import Filter from "./filter";
-import useFilter from "./utils/useFilter";
+import useMultiFilter from "./utils/useMultiFilter";
 import { FilterState, FilterValues } from "./utils/utils";
 
 function SubMenuFilter({
@@ -71,7 +71,7 @@ export function SelectedFilterBar({
 }) {
   const { t } = useTranslation();
   const { filter, selected, selectedOperation, availableOperations } =
-    useFilter(selectedFilterKey, selectedFilters);
+    useMultiFilter(selectedFilterKey, selectedFilters);
 
   return (
     <DropdownMenu

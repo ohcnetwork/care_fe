@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { FilterConfig, FilterState, FilterValues } from "./utils";
 
-export default function useFilterState(
+export default function useMultiFilterState(
   filters: FilterConfig[],
   onFilterUpdate?: (query: Record<string, unknown>) => void,
   queryParams?: Record<string, unknown>,

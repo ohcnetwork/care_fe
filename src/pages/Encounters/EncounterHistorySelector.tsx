@@ -18,7 +18,7 @@ import {
   tagFilter,
 } from "@/components/ui/multi-filter/filter-list";
 import MultiFilter from "@/components/ui/multi-filter/multi-filter";
-import useFilterState from "@/components/ui/multi-filter/utils/useFilterState";
+import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -227,7 +227,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     handleOperationChange,
     handleClearAll,
     handleClearFilter,
-  } = useFilterState(filters, onFilterUpdate);
+  } = useMultiFilterState(filters, onFilterUpdate);
 
   return (
     <div className="space-y-4 pt-2">
@@ -275,7 +275,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             onOperationChange={handleOperationChange}
             onClearAll={handleClearAll}
             onClearFilter={handleClearFilter}
-            placeholder="Filter"
+            placeholder={t("filter")}
             triggerButtonClassName="self-start"
           />
         </div>

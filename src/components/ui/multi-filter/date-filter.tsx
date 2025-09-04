@@ -22,7 +22,7 @@ import { Separator } from "@/components/ui/separator";
 
 import FilterHeader from "./filter-header";
 import NavigationHelper from "./utils/navigation-helper";
-import useNavigationShortcuts from "./utils/useNavigationShortcuts";
+import useMultiFilterNavigationShortcuts from "./utils/useMultiFilterNavigationShortcuts";
 import {
   DateRangeOption,
   FilterConfig,
@@ -118,10 +118,8 @@ export function RenderDateFilter({
   const [focusItemRef, setFocusItemRef] = useState<HTMLButtonElement | null>(
     null,
   );
-  const { focusItemIndex, setFocusItemIndex } = useNavigationShortcuts(
-    dateRangeOptions.length + 1,
-    handleBack,
-  );
+  const { focusItemIndex, setFocusItemIndex } =
+    useMultiFilterNavigationShortcuts(dateRangeOptions.length + 1, handleBack);
 
   useEffect(() => {
     if (focusItemRef) {
@@ -141,7 +139,7 @@ export function RenderDateFilter({
       )}
       {isCustomDateRange && (
         <FilterHeader
-          label={"custom_date_range"}
+          label={t("custom_date_range")}
           onBack={() => setIsCustomDateRange(false)}
         />
       )}

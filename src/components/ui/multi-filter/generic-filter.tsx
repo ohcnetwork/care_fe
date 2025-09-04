@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import FilterHeader from "./filter-header";
-import useFilterSearch from "./utils/useFilterSearch";
-import useNavigationShortcuts from "./utils/useNavigationShortcuts";
+import useMultiFilterNavigationShortcuts from "./utils/useMultiFilterNavigationShortcuts";
+import useMultiFilterSearch from "./utils/useMultiFilterSearch";
 import {
   FilterConfig,
   FilterMode,
@@ -37,7 +37,7 @@ export default function GenericFilter({
     search,
     setSearch,
     filteredItems: filteredOptions,
-  } = useFilterSearch(filter.options);
+  } = useMultiFilterSearch(filter.options);
 
   const handleOptionToggle = (value: string, checked: boolean) => {
     if (!onFilterChange) return;
@@ -61,10 +61,8 @@ export default function GenericFilter({
     }
   };
 
-  const { focusItemIndex, setFocusItemIndex } = useNavigationShortcuts(
-    filteredOptions.length,
-    handleBack,
-  );
+  const { focusItemIndex, setFocusItemIndex } =
+    useMultiFilterNavigationShortcuts(filteredOptions.length, handleBack);
 
   return (
     <div className="p-0">

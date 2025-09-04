@@ -16,7 +16,7 @@ import {
 import Filter from "./filter";
 import { SelectedFilterBar } from "./selected-filter-bar";
 import NavigationHelper from "./utils/navigation-helper";
-import useNavigationShortcuts from "./utils/useNavigationShortcuts";
+import useMultiFilterNavigationShortcuts from "./utils/useMultiFilterNavigationShortcuts";
 import { FilterState, FilterValues } from "./utils/utils";
 
 interface MultiFilterProps {
@@ -191,10 +191,10 @@ function FilterList({
   const { t } = useTranslation();
   const [focusItemRef, setFocusItemRef] = useState<HTMLDivElement | null>(null);
 
-  const { focusItemIndex, setFocusItemIndex } = useNavigationShortcuts(
-    Object.keys(selectedFilters).length,
-    () => setActiveFilter(null),
-  );
+  const { focusItemIndex, setFocusItemIndex } =
+    useMultiFilterNavigationShortcuts(Object.keys(selectedFilters).length, () =>
+      setActiveFilter(null),
+    );
 
   useKeyboardShortcut(
     ["ArrowRight"],
