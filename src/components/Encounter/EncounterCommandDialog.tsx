@@ -381,11 +381,11 @@ export function EncounterCommandDialog({
             </div>
           ))}
           {useCareApps().some(
-            (plugin) => plugin.components?.PatientInfoCardActions,
+            (plugin) => plugin.components?.EncounterActions,
           ) && (
             <CommandGroup heading={t("plugin_actions")} className="px-2">
               <PLUGIN_Component
-                __name="PatientInfoCardActions"
+                __name="EncounterActions"
                 encounter={encounter}
                 className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100 w-full py-2"
               />
