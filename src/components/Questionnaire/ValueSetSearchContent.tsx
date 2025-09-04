@@ -390,7 +390,7 @@ export default function ValueSetSearchContent({
         variant="destructive"
         disabled={clearFavouritesMutation.isPending}
         onConfirm={() => {
-          clearFavouritesMutation.mutate(undefined);
+          clearFavouritesMutation.mutate();
         }}
       />
     </Command>
