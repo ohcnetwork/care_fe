@@ -43,19 +43,15 @@ export const Appointments = (props: PatientProps) => {
 
   const { data, isLoading } = useQuery({
     queryKey: ["patient-appointments", patientId],
-    queryFn: query(
-      facilityId
-        ? scheduleApis.appointments.list
-        : scheduleApis.appointments.getAppointments,
-      {
-        pathParams: { facilityId: facilityId ?? "", patientId },
-        queryParams: {
-          patient: patientId,
-          limit: 100,
-          ordering: "-token_slot__start_datetime",
-        },
+    queryFn: query(scheduleApis.appointments.getAppointments, {
+      pathParams: { patientId },
+      queryParams: {
+        facilityId: facilityId,
+        patient: patientId,
+        limit: 100,
+        ordering: "-token_slot__start_datetime",
       },
-    ),
+    }),
   });
 
   useEffect(() => {

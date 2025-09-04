@@ -49,6 +49,12 @@ function generateFacilityLinks(
       visibility: permissions.canViewAppointments,
     },
     {
+      name: t("queues"),
+      url: `${baseUrl}/queues`,
+      icon: <CareIcon icon="d-calendar" />,
+      visibility: permissions.canViewAppointments,
+    },
+    {
       name: t("patients"),
       url: `${baseUrl}/patients`,
       icon: <CareIcon icon="d-patient" />,
@@ -164,6 +170,10 @@ function generateFacilityLinks(
         {
           name: t("product"),
           url: `${baseUrl}/settings/product`,
+        },
+        {
+          name: t("token_category"),
+          url: `${baseUrl}/settings/token_category`,
         },
         // {
         //   name: t("patient_identifier_config"),
