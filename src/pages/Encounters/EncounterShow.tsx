@@ -1,5 +1,5 @@
 import { navigate } from "raviger";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -12,14 +12,15 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
-import { useEncounterShortcuts } from "@/hooks/useEncounterShortcuts";
+import {
+  useEncounterShortcutDisplays,
+  useEncounterShortcuts,
+} from "@/hooks/useEncounterShortcuts";
 import { useSidebarAutoCollapse } from "@/hooks/useSidebarAutoCollapse";
 
 import { getPermissions } from "@/common/Permissions";
 
-import { entriesOf } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import { EncounterHeader } from "@/pages/Encounters/EncounterHeader";
 import EncounterHistorySelector from "@/pages/Encounters/EncounterHistorySelector";
 import { EncounterConsentsTab } from "@/pages/Encounters/tabs/consents";
 import { EncounterDevicesTab } from "@/pages/Encounters/tabs/devices";
@@ -31,7 +32,16 @@ import { EncounterPlotsTab } from "@/pages/Encounters/tabs/plots";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
+import { entriesOf } from "@/Utils/utils";
 
+import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
+import { Button } from "@/components/ui/button";
+import { CommandShortcut } from "@/components/ui/command";
+import {
+  PatientDeceasedInfo,
+  PatientHeader,
+} from "@/pages/Facility/services/serviceRequests/PatientHeader";
+import { PLUGIN_Component } from "@/PluginEngine";
 import { EncounterDiagnosticReportsTab } from "./tabs/diagnostic-reports";
 import { EncounterNotesTab } from "./tabs/notes";
 import { EncounterServiceRequestTab } from "./tabs/service-requests";
@@ -59,6 +69,8 @@ export const EncounterShow = (props: Props) => {
   } = useEncounter();
 
   useSidebarAutoCollapse({ restore: false });
+  const [actionsOpen, setActionsOpen] = useState(false);
+  const getShortcutDisplay = useEncounterShortcutDisplays();
 
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -170,15 +182,50 @@ export const EncounterShow = (props: Props) => {
       className="block md:px-1 -mt-4"
       hideTitleOnPage
     >
-      <EncounterHeader
-        encounter={selectedEncounter}
-        canWriteSelectedEncounter={canWriteSelectedEncounter}
-      />
+      <div className="flex flex-col gap-2">
+        <PatientHeader
+          patient={patient}
+          facilityId={facilityId}
+          className="bg-white shadow-sm border-none rounded-sm"
+          actions={
+            <>
+              {canWriteSelectedEncounter && selectedEncounter && (
+                <div className="flex flex-col items-end justify-center gap-4">
+                  <PLUGIN_Component
+                    __name="PatientInfoCardQuickActions"
+                    encounter={selectedEncounter}
+                    className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
+                  />
+
+                  <EncounterCommandDialog
+                    encounter={selectedEncounter}
+                    open={actionsOpen}
+                    onOpenChange={setActionsOpen}
+                    trigger={
+                      <Button
+                        variant="primary_gradient"
+                        onClick={() => setActionsOpen(true)}
+                        className="text-base font-semibold rounded-md w-full"
+                      >
+                        {t("encounter_actions")}
+                        <CommandShortcut className="text-white hidden md:inline">
+                          {getShortcutDisplay("open-command-dialog")}
+                        </CommandShortcut>
+                      </Button>
+                    }
+                  />
+                </div>
+              )}
+            </>
+          }
+        />
+        <PatientDeceasedInfo patient={patient} />
+      </div>
       <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
         <EncounterHistorySelector />
         <NavTabs
           showMoreAfterIndex={showMoreAfterIndex}
-          className="w-full"
+          className="@container w-full"
           tabContentClassName="flex-none overflow-x-auto overflow-y-hidden lg:overflow-y-auto lg:h-[calc(100vh-12rem)]"
           tabs={tabs}
           currentTab={props.tab}
