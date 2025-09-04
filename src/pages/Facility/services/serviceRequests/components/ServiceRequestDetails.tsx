@@ -39,13 +39,11 @@ function formatSpecimenRequirements(
 }
 
 interface ServiceRequestDetailsProps {
-  facilityId: string;
   request: ServiceRequestReadSpec;
   activityDefinition: ActivityDefinitionReadSpec;
 }
 
 export function ServiceRequestDetails({
-  facilityId: _facilityId,
   request,
   activityDefinition,
 }: ServiceRequestDetailsProps) {

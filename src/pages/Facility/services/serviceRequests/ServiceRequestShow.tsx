@@ -413,7 +413,6 @@ export default function ServiceRequestShow({
           </div>
 
           <ServiceRequestDetails
-            facilityId={facilityId}
             request={request}
             activityDefinition={activityDefinition}
           />
