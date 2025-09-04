@@ -161,7 +161,7 @@ export default function ActivityDefinitionList({
                   onChange={(e) =>
                     updateQuery({ search: e.target.value || undefined })
                   }
-                  className="w-full md:w-[280px] pl-10"
+                  className="w-full md:w-64 pl-10"
                 />
               </div>
             </div>
