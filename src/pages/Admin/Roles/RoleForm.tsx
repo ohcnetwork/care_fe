@@ -115,7 +115,10 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
     createRoleMutation.isPending || updateRoleMutation.isPending;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col space-y-6 max-h-[calc(100vh-7rem)]"
+    >
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="name">{t("name")}</Label>
@@ -144,8 +147,8 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
+      <Card className="flex flex-col flex-1 min-h-80">
+        <CardHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
             <CardTitle>{t("permissions")}</CardTitle>
             <div className="flex gap-2">
@@ -178,8 +181,8 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3 max-h-60 overflow-y-auto">
+        <CardContent className="flex-1 overflow-auto">
+          <div className="space-y-3 h-full pr-2">
             {permissions.map((permission, index) => (
               <div
                 key={permission.slug}
@@ -215,7 +218,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end space-x-2">
+      <div className="flex justify-end space-x-2 flex-shrink-0">
         <Button
           type="button"
           variant="outline"
