@@ -14,6 +14,10 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface TokenRefreshRequest {
+  refresh: JwtTokenObtainPair["refresh"];
+}
+
 export type LoginResponse = JwtTokenObtainPair | MfaAuthenticationToken;
 
 export interface ForgotPasswordRequest {
