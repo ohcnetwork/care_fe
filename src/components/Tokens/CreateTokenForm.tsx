@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Ticket } from "lucide-react";
 import { navigate } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -17,13 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import RadioInput from "@/components/ui/RadioInput";
 import {
   Sheet,
   SheetContent,
@@ -38,8 +32,6 @@ import { LocationSearch } from "@/components/Location/LocationSearch";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { HealthcareServiceSelector } from "@/pages/Facility/services/HealthcareServiceSelector";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { cn } from "@/lib/utils";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
 import { LocationList } from "@/types/location/location";
@@ -47,6 +39,8 @@ import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { TokenGenerateWithQueue, TokenRead } from "@/types/tokens/token/token";
 import { TokenCategoryRead } from "@/types/tokens/tokenCategory/tokenCategory";
 import tokenCategoryApi from "@/types/tokens/tokenCategory/tokenCategoryApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import { UserReadMinimal } from "@/types/user/user";
@@ -69,7 +63,7 @@ export default function CreateTokenForm({
   disableRedirectOnSuccess = false,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentStep, setCurrentStep] = useState<1 | 2>(1);
+
   const [selectedResourceType, setSelectedResourceType] =
     useState<SchedulableResourceType>(SchedulableResourceType.Practitioner);
 
@@ -112,14 +106,32 @@ export default function CreateTokenForm({
       queryKey: ["tokenCategories", facilityId, selectedResourceType],
       queryFn: query(tokenCategoryApi.list, {
         pathParams: { facility_id: facilityId },
+        queryParams: {
+          resource_type: selectedResourceType,
+        },
       }),
-      enabled: isOpen && currentStep === 2,
+      enabled: isOpen,
     },
   );
 
   // HealthcareServiceSelector handles its own data fetching
 
-  const categories = categoriesResponse?.results || [];
+  const categories = categoriesResponse?.results;
+
+  // Set default category when categories of resource type are loaded
+  useEffect(() => {
+    form.setValue("categoryId", "");
+
+    if (categories?.length && !form.watch("categoryId")) {
+      const options = categories.filter(
+        (category) => category.resource_type === selectedResourceType,
+      );
+      form.setValue(
+        "categoryId",
+        options.find((category) => category.default)?.id ?? options[0].id,
+      );
+    }
+  }, [categories, form, selectedResourceType]);
 
   const { mutate: createToken, isPending } = useMutation({
     mutationFn: mutate(tokenQueueApi.generateToken, {
@@ -156,31 +168,11 @@ export default function CreateTokenForm({
     setIsOpen(open);
     if (!open) {
       // Reset all state when closing
-      setCurrentStep(1);
       setSelectedResourceType(SchedulableResourceType.Practitioner);
       setSelectedUser(null);
       setSelectedLocation(null);
       setSelectedService(null);
       form.reset();
-    }
-  };
-
-  const handleNext = () => {
-    if (currentStep === 1 && selectedResourceType) {
-      setCurrentStep(2);
-    }
-  };
-
-  const handleBack = () => {
-    if (currentStep === 2) {
-      setCurrentStep(1);
-      // Reset form fields and resource selection from step 2
-      form.setValue("resourceId", "");
-      form.setValue("categoryId", "");
-      form.setValue("note", "");
-      setSelectedUser(null);
-      setSelectedLocation(null);
-      setSelectedService(null);
     }
   };
 
@@ -199,13 +191,9 @@ export default function CreateTokenForm({
       </SheetTrigger>
       <SheetContent className="overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>
-            {currentStep === 1 ? t("select_resource_type") : t("create_token")}
-          </SheetTitle>
+          <SheetTitle>{t("create_token")}</SheetTitle>
           <SheetDescription>
-            {currentStep === 1 ? (
-              t("select_resource_type_description")
-            ) : patientName ? (
+            {patientName ? (
               <Trans
                 i18nKey="create_token_for_patient"
                 values={{ patientName }}
@@ -223,37 +211,49 @@ export default function CreateTokenForm({
             onSubmit={form.handleSubmit(onSubmit)}
             className="mt-4 space-y-2"
           >
-            {currentStep === 1 ? (
-              <div className="space-y-5">
-                {/* Resource Type Selection */}
-                <div className="space-y-3">
-                  <div className="grid grid-cols-1 gap-3">
-                    {Object.values(SchedulableResourceType).map((type) => (
-                      <Button
-                        key={type}
-                        type="button"
-                        variant="outline"
-                        className={cn(
-                          "h-auto min-h-16 w-full justify-start text-left",
-                          selectedResourceType === type &&
-                            "ring-2 ring-primary text-primary bg-primary/5",
-                        )}
-                        onClick={() => setSelectedResourceType(type)}
-                      >
-                        <div className="flex flex-col items-start">
-                          <div className="text-sm font-semibold">
-                            {t(`resource_type__${type}`)}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {t(`resource_type_description__${type}`)}
-                          </div>
+            <div className="space-y-6">
+              {/* Resource Type Selection */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-900">
+                  {t("select_resource_type")}
+                </label>
+                <div className="grid grid-cols-1 gap-3 mt-1">
+                  {Object.values(SchedulableResourceType).map((type) => (
+                    <Button
+                      key={type}
+                      type="button"
+                      variant="outline"
+                      className={cn(
+                        "h-auto min-h-16 w-full justify-start text-left",
+                        selectedResourceType === type &&
+                          "ring-2 ring-primary text-primary bg-primary/5",
+                      )}
+                      onClick={() => {
+                        setSelectedResourceType(type);
+                        // Reset resource selection when type changes
+                        form.setValue("resourceId", "");
+                        setSelectedUser(null);
+                        setSelectedLocation(null);
+                        setSelectedService(null);
+                      }}
+                    >
+                      <div className="flex flex-col items-start">
+                        <div className="text-sm font-semibold">
+                          {t(`resource_type__${type}`)}
                         </div>
-                      </Button>
-                    ))}
-                  </div>
+                        <div className="text-xs text-gray-500">
+                          {t(`resource_type_description__${type}`)}
+                        </div>
+                      </div>
+                    </Button>
+                  ))}
                 </div>
               </div>
-            ) : (
+
+              {/* Separator */}
+              <div className="border-t border-gray-200" />
+
+              {/* Form Fields */}
               <div className="space-y-5">
                 {/* Resource Selection */}
                 <FormField
@@ -325,42 +325,35 @@ export default function CreateTokenForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t("category")}</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={isLoadingCategories}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue
-                              placeholder={
-                                isLoadingCategories
-                                  ? t("loading_categories")
-                                  : t("select_token_category")
-                              }
-                            />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {categories.map((category: TokenCategoryRead) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              <div className="flex items-center gap-2">
-                                <span>{category.name}</span>
-                                {category.shorthand && (
-                                  <span className="text-xs text-gray-500">
-                                    ({category.shorthand})
-                                  </span>
-                                )}
-                                {category.default && (
-                                  <span className="text-xs text-primary">
-                                    ({t("default")})
-                                  </span>
-                                )}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        {isLoadingCategories ? (
+                          <div className="flex items-center justify-center py-8 text-gray-500">
+                            {t("loading_categories")}
+                          </div>
+                        ) : categories && categories.length > 0 ? (
+                          <RadioInput
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            disabled={isLoadingCategories}
+                            options={
+                              categories?.map(
+                                (category: TokenCategoryRead) => ({
+                                  value: category.id,
+                                  label: `${category.name}${
+                                    category.shorthand
+                                      ? ` (${category.shorthand})`
+                                      : ""
+                                  }`,
+                                }),
+                              ) ?? []
+                            }
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center py-8 text-gray-500">
+                            {t("no_categories_found")}
+                          </div>
+                        )}
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -384,45 +377,30 @@ export default function CreateTokenForm({
                   )}
                 />
               </div>
-            )}
-            <div className="flex justify-between mt-6 space-x-2">
-              {currentStep === 2 && (
-                <Button type="button" variant="outline" onClick={handleBack}>
-                  {t("back")}
-                </Button>
-              )}
-              <div className="flex gap-2 ml-auto">
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setIsOpen(false);
-                    form.reset();
-                  }}
-                  className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
-                >
-                  {t("cancel")}
-                </Button>
-                {currentStep === 1 ? (
-                  <Button
-                    type="button"
-                    onClick={handleNext}
-                    disabled={!selectedResourceType}
-                  >
-                    {t("next")}
-                  </Button>
-                ) : (
-                  <Button
-                    type="submit"
-                    disabled={
-                      isPending ||
-                      !form.watch("resourceId") ||
-                      !form.watch("categoryId")
-                    }
-                  >
-                    {isPending ? t("creating") : t("create_token")}
-                  </Button>
-                )}
-              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 mt-6">
+              <Button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  form.reset();
+                }}
+                className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                type="submit"
+                disabled={
+                  isPending ||
+                  !selectedResourceType ||
+                  !form.watch("resourceId") ||
+                  !form.watch("categoryId")
+                }
+              >
+                {isPending ? t("creating") : t("create_token")}
+              </Button>
             </div>
           </form>
         </Form>

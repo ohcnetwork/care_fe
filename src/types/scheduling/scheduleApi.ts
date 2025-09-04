@@ -17,6 +17,7 @@ import {
   ScheduleExceptionCreateRequest,
   ScheduleTemplate,
   ScheduleTemplateCreateRequest,
+  ScheduleTemplateSetChargeItemDefinitionRequest,
   ScheduleTemplateUpdateRequest,
 } from "@/types/scheduling/schedule";
 import { TokenGenerate } from "@/types/tokens/token/token";
@@ -54,6 +55,12 @@ export default {
       method: HttpMethod.DELETE,
       TBody: Type<void>(),
       TRes: Type<void>(),
+    },
+    setChargeItemDefinition: {
+      path: "/api/v1/facility/{facilityId}/schedule/{id}/set_charge_item_definition/",
+      method: HttpMethod.POST,
+      TRes: Type<ScheduleTemplate>(),
+      TBody: Type<ScheduleTemplateSetChargeItemDefinitionRequest>(),
     },
 
     /**

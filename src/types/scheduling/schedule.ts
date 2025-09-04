@@ -3,6 +3,7 @@ import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
 import { Badge } from "@/components/ui/badge";
 
 import { Time } from "@/Utils/types";
+import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
@@ -42,6 +43,7 @@ export interface ScheduleTemplate {
   availabilities: ScheduleAvailability[];
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
+  charge_item_definition: ChargeItemDefinitionRead;
 }
 
 type ScheduleAvailabilityBase = {
@@ -69,7 +71,9 @@ export interface ScheduleTemplateCreateRequest {
   resource_type: SchedulableResourceType;
   resource_id: string;
 }
-
+export interface ScheduleTemplateSetChargeItemDefinitionRequest {
+  charge_item_definition: string;
+}
 export interface ScheduleTemplateUpdateRequest {
   name: string;
   valid_from: string;
