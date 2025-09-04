@@ -161,7 +161,10 @@ describe("All combination of questionnaire submissions", () => {
     facilityCreation.selectFirstRandomFacility();
     cy.getFacilityIdAndNavigate("encounters/patients");
     cy.get("button").contains("View Encounter").first().click();
-    cy.get("svg.lucide-external-link").filter(":visible").first().click();
+    cy.get("[data-slot='patient-info-hover-card-trigger']")
+      .filter(":visible")
+      .click();
+    cy.get("a").contains("View Profile").click();
     cy.get("[role='tablist']").contains("Updates").click();
     cy.get("a").contains("Add Patient Updates").click();
     cy.get("button").contains("Add Questionnaire").click();
