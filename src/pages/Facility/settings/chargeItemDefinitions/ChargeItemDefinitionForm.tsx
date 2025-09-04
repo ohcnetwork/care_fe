@@ -734,7 +734,6 @@ export function ChargeItemDefinitionForm({
               errors={getSelectedComponentError(MonetaryComponentType.tax)}
             />
 
-            {/* MRP and Purchase Price */}
             <div className="space-y-6">
               {/* MRP */}
               <div className="p-4 bg-gray-50 rounded-lg border">
