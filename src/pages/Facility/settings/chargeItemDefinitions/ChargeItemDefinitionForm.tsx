@@ -43,7 +43,10 @@ import {
   MonetaryComponentRead,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
-import { MRP_CODE } from "@/types/billing/chargeItem/chargeItem";
+import {
+  MRP_CODE,
+  PURCHASE_PRICE_CODE,
+} from "@/types/billing/chargeItem/chargeItem";
 import {
   ChargeItemDefinitionCreate,
   ChargeItemDefinitionRead,
@@ -283,9 +286,9 @@ export function ChargeItemDefinitionForm({
       title: initialData?.title || "",
       slug: initialData?.slug || "",
       status: initialData?.status || ChargeItemDefinitionStatus.active,
-      description: initialData?.description,
-      purpose: initialData?.purpose,
-      derived_from_uri: initialData?.derived_from_uri,
+      description: initialData?.description || "",
+      purpose: initialData?.purpose || "",
+      derived_from_uri: initialData?.derived_from_uri || undefined,
       price_components: initialData?.price_components.map(
         mapPriceComponent,
       ) || [
@@ -315,7 +318,15 @@ export function ChargeItemDefinitionForm({
   const priceComponents = form.watch("price_components");
   const basePrice = form.watch("price_components.0.amount")?.toString() || "0";
   const mrp = priceComponents.find(
-    (c) => c.monetary_component_type === MonetaryComponentType.informational,
+    (c) =>
+      c.code?.code === MRP_CODE &&
+      c.monetary_component_type === MonetaryComponentType.informational,
+  )?.amount;
+
+  const purchasePrice = priceComponents.find(
+    (c) =>
+      c.code?.code === PURCHASE_PRICE_CODE &&
+      c.monetary_component_type === MonetaryComponentType.informational,
   )?.amount;
 
   // Handle form submission
@@ -353,7 +364,19 @@ export function ChargeItemDefinitionForm({
 
   const mrpCode = facilityData.instance_informational_codes.find(
     (c) => c.code === MRP_CODE,
-  );
+  ) || {
+    code: MRP_CODE,
+    system: "care",
+    display: t("mrp"),
+  };
+
+  const purchasePriceCode = facilityData.instance_informational_codes.find(
+    (c) => c.code === PURCHASE_PRICE_CODE,
+  ) || {
+    code: PURCHASE_PRICE_CODE,
+    system: "care",
+    display: t("purchase_price"),
+  };
 
   // Get currently selected components by type
   const getSelectedComponents = (type: MonetaryComponentType) =>
@@ -424,7 +447,9 @@ export function ChargeItemDefinitionForm({
   const handleMrpChange = (value: string) => {
     const currentComponents = form.getValues("price_components");
     const mrpIndex = currentComponents.findIndex(
-      (c) => c.monetary_component_type === MonetaryComponentType.informational,
+      (c) =>
+        c.code?.code === MRP_CODE &&
+        c.monetary_component_type === MonetaryComponentType.informational,
     );
 
     if (mrpIndex >= 0) {
@@ -440,6 +465,33 @@ export function ChargeItemDefinitionForm({
         monetary_component_type: MonetaryComponentType.informational,
         amount: value,
         code: mrpCode,
+      };
+      form.setValue("price_components", [...currentComponents, newComponent]);
+    }
+  };
+
+  const handlePurchasePriceChange = (value: string) => {
+    console.log("Purchase price change:", value, "Code:", purchasePriceCode);
+    const currentComponents = form.getValues("price_components");
+    const purchasePriceIndex = currentComponents.findIndex(
+      (c) =>
+        c.code?.code === PURCHASE_PRICE_CODE &&
+        c.monetary_component_type === MonetaryComponentType.informational,
+    );
+
+    if (purchasePriceIndex >= 0) {
+      const updatedComponents = [...currentComponents];
+      updatedComponents[purchasePriceIndex] = {
+        ...updatedComponents[purchasePriceIndex],
+        amount: value,
+        code: purchasePriceCode,
+      };
+      form.setValue("price_components", updatedComponents);
+    } else {
+      const newComponent = {
+        monetary_component_type: MonetaryComponentType.informational,
+        amount: value,
+        code: purchasePriceCode,
       };
       form.setValue("price_components", [...currentComponents, newComponent]);
     }
@@ -590,7 +642,9 @@ export function ChargeItemDefinitionForm({
                     <Input
                       {...field}
                       value={field.value || ""}
-                      onChange={(e) => field.onChange(e.target.value)}
+                      onChange={(e) =>
+                        field.onChange(e.target.value || undefined)
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -680,28 +734,51 @@ export function ChargeItemDefinitionForm({
               errors={getSelectedComponentError(MonetaryComponentType.tax)}
             />
 
-            {/* MRP */}
-            <div className="p-4 bg-gray-50 rounded-lg border">
-              <FormItem className="flex items-center justify-between gap-2">
-                <FormLabel className="font-medium text-gray-900 text-xl">
-                  {t("mrp")}
-                </FormLabel>
-                <div className="flex flex-col items-end gap-2">
-                  <FormControl className="w-48">
-                    <MonetaryAmountInput
-                      value={mrp ?? 0}
-                      onChange={(e) => handleMrpChange(e.target.value)}
-                      placeholder="0.00"
-                    />
-                  </FormControl>
-                  <FormMessage>
-                    {
-                      form.formState.errors.price_components?.[0]?.amount
-                        ?.message
-                    }
-                  </FormMessage>
-                </div>
-              </FormItem>
+            {/* MRP and Purchase Price */}
+            <div className="space-y-6">
+              {/* MRP */}
+              <div className="p-4 bg-gray-50 rounded-lg border">
+                <FormItem className="flex flex-col sm:flex-row">
+                  <FormLabel className="font-medium text-gray-900 text-xl">
+                    {t("mrp")}
+                  </FormLabel>
+                  <div className="sm:flex flex-1 flex-col items-end gap-2">
+                    <FormControl>
+                      <MonetaryAmountInput
+                        value={mrp ?? 0}
+                        onChange={(e) => handleMrpChange(e.target.value)}
+                        placeholder="0.00"
+                      />
+                    </FormControl>
+                    <FormMessage>
+                      {
+                        form.formState.errors.price_components?.[0]?.amount
+                          ?.message
+                      }
+                    </FormMessage>
+                  </div>
+                </FormItem>
+              </div>
+
+              {/* Purchase Price */}
+              <div className="p-4 bg-gray-50 rounded-lg border">
+                <FormItem className="flex flex-col sm:flex-row">
+                  <FormLabel className="font-medium text-gray-900 text-xl">
+                    {t("purchase_price")}
+                  </FormLabel>
+                  <div className="sm:flex flex-1 flex-col items-end gap-2">
+                    <FormControl>
+                      <MonetaryAmountInput
+                        value={purchasePrice ?? 0}
+                        onChange={(e) =>
+                          handlePurchasePriceChange(e.target.value)
+                        }
+                        placeholder="0.00"
+                      />
+                    </FormControl>
+                  </div>
+                </FormItem>
+              </div>
             </div>
 
             {/* Price Summary */}
