@@ -90,11 +90,13 @@ function PriceComponentRow({ label, components }: PriceComponentRowProps) {
 export interface ChargeItemsTableProps {
   facilityId: string;
   accountId: string;
+  patientId: string;
 }
 
 export function ChargeItemsTable({
   facilityId,
   accountId,
+  patientId,
 }: ChargeItemsTableProps) {
   const { t } = useTranslation();
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
@@ -253,7 +255,7 @@ export function ChargeItemsTable({
                           )}
                         </Button>
                       </TableCell>
-                      <TableCell className="border-x p-3 text-gray-950 font-medium">
+                      <TableCell className="bor-medium">
                         {item.title}
                         {item.description && (
                           <p className="text-xs text-gray-500 whitespace-pre-wrap">
@@ -262,16 +264,21 @@ export function ChargeItemsTable({
                         )}
                       </TableCell>
                       <TableCell className="border-x p-3 text-gray-950">
-                        {item.service_resource === "service_request" &&
-                          item.service_resource_id && (
-                            <Link
-                              href={`/facility/${facilityId}/services_requests/${item.service_resource_id}`}
-                              className="flex items-center gap-0.5 underline text-gray-600"
-                            >
-                              {t("service_request")}
-                              <ExternalLinkIcon className="size-3" />
-                            </Link>
-                          )}
+                        {item.service_resource && item.service_resource_id && (
+                          <Link
+                            href={
+                              item.service_resource === "service_request"
+                                ? `/facility/${facilityId}/services_requests/${item.service_resource_id}`
+                                : item.service_resource === "appointment"
+                                  ? `/facility/${facilityId}/patient/${patientId}/appointments/${item.service_resource_id}`
+                                  : ""
+                            }
+                            className="flex items-center gap-0.5 underline text-gray-600"
+                          >
+                            {t(item.service_resource)}
+                            <ExternalLinkIcon className="size-3" />
+                          </Link>
+                        )}
                       </TableCell>
                       <TableCell className="border-x p-3 text-gray-950">
                         <MonetaryDisplay amount={baseAmount} />

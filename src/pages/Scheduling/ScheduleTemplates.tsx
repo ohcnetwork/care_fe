@@ -1,33 +1,51 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { Edit3Icon } from "lucide-react";
 import { useQueryParams } from "raviger";
+import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
+import DefinitionSelector from "@/components/Common/DefinitionSelector";
 import Loading from "@/components/Common/Loading";
-import { formatAvailabilityTime } from "@/components/Users/UserAvailabilityTab";
 
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import scheduleApi from "@/types/scheduling/scheduleApi";
+
+import { getPermissions } from "@/common/Permissions";
+import { usePermissions } from "@/context/PermissionContext";
+import { ChargeItemDefinitionForm } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionForm";
 import EditScheduleTemplateSheet from "@/pages/Scheduling/components/EditScheduleTemplateSheet";
 import {
+  formatAvailabilityTime,
   getDaysOfWeekFromAvailabilities,
   getSlotsPerSession,
 } from "@/pages/Scheduling/utils";
-import { ScheduleTemplate } from "@/types/scheduling/schedule";
+import facilityApi from "@/types/facility/facilityApi";
+import {
+  SchedulableResourceType,
+  ScheduleTemplate,
+} from "@/types/scheduling/schedule";
 
 interface Props {
   items?: ScheduleTemplate[];
   facilityId: string;
-  userId: string;
+  resourceType: SchedulableResourceType;
+  resourceId: string;
 }
 
 export default function ScheduleTemplates({
   items,
   facilityId,
-  userId,
+  resourceType,
+  resourceId,
 }: Props) {
   const { t } = useTranslation();
   if (items == null) {
@@ -50,7 +68,8 @@ export default function ScheduleTemplates({
           <ScheduleTemplateItem
             template={template}
             facilityId={facilityId}
-            userId={userId}
+            resourceType={resourceType}
+            resourceId={resourceId}
           />
         </li>
       ))}
@@ -61,14 +80,58 @@ export default function ScheduleTemplates({
 const ScheduleTemplateItem = ({
   template,
   facilityId,
-  userId,
+  resourceType,
+  resourceId,
 }: {
   template: ScheduleTemplate;
   facilityId: string;
-  userId: string;
+  resourceType: SchedulableResourceType;
+  resourceId: string;
 }) => {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams<{ edit: string | null }>();
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(facilityApi.get, {
+      pathParams: { facilityId },
+    }),
+  });
+  const [chargeItemSearch, setChargeItemSearch] = useState("");
+  const queryClient = useQueryClient();
+  const { hasPermission } = usePermissions();
+  const { canCreateChargeItemDefinition } = getPermissions(
+    hasPermission,
+    facilityData?.permissions ?? [],
+  );
+
+  const {
+    data: chargeItemDefinitions,
+    isLoading: isLoadingChargeItemDefinitions,
+  } = useQuery({
+    queryKey: ["chargeItemDefinitions", facilityId, chargeItemSearch],
+    queryFn: query.debounced(chargeItemDefinitionApi.listChargeItemDefinition, {
+      pathParams: { facilityId },
+      queryParams: {
+        limit: 14,
+        title: chargeItemSearch,
+      },
+    }),
+  });
+
+  const { mutate: setChargeItemDefinition } = useMutation({
+    mutationFn: mutate(scheduleApi.templates.setChargeItemDefinition, {
+      pathParams: {
+        facilityId,
+        id: template.id,
+      },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["schedule", facilityId, { resourceType, resourceId }],
+      });
+      toast.success(t("charge_item_definition_updated_successfully"));
+    },
+  });
 
   return (
     <div className="rounded-lg bg-white py-2 shadow-sm">
@@ -92,11 +155,67 @@ const ScheduleTemplateItem = ({
           </div>
         </div>
 
-        <div>
+        <div className="flex gap-2">
+          {canCreateChargeItemDefinition && (
+            <DefinitionSelector
+              title={t("select_charge_item_definitions")}
+              description={t("select_or_create_charge_item_definitions")}
+              value={
+                template.charge_item_definition
+                  ? {
+                      label: template.charge_item_definition.title,
+                      value: template.charge_item_definition.id,
+                      details: [
+                        {
+                          label: t("base_amount"),
+                          value:
+                            template.charge_item_definition.price_components.find(
+                              (c) => c.monetary_component_type === "base",
+                            )?.amount ?? undefined,
+                        },
+                      ],
+                    }
+                  : undefined
+              }
+              onChange={(item) =>
+                setChargeItemDefinition({
+                  charge_item_definition: item.value,
+                })
+              }
+              options={
+                chargeItemDefinitions?.results.map((chargeDef) => ({
+                  label: chargeDef.title,
+                  value: chargeDef.id,
+                  details: [
+                    {
+                      label: t("amount"),
+                      value:
+                        chargeDef.price_components.find(
+                          (c) => c.monetary_component_type === "base",
+                        )?.amount ?? undefined,
+                    },
+                  ],
+                })) || []
+              }
+              isLoading={isLoadingChargeItemDefinitions}
+              placeholder={t("manage_charges")}
+              onSearch={setChargeItemSearch}
+              canCreate
+              createForm={(onSuccess) => (
+                <div className="py-2">
+                  <ChargeItemDefinitionForm
+                    facilityId={facilityId}
+                    onSuccess={onSuccess}
+                  />
+                </div>
+              )}
+            />
+          )}
           <EditScheduleTemplateSheet
             template={template}
             facilityId={facilityId}
-            userId={userId}
+            resourceId={resourceId}
+            resourceType={resourceType}
             open={qParams.edit === template.id}
             onOpenChange={(open) =>
               setQParams({ ...qParams, edit: open ? template.id : null })
