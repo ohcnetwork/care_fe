@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -40,7 +40,6 @@ import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowl
 
 function ProductKnowledgeCard({
   product,
-  facilityId,
 }: {
   product: ProductKnowledgeBase;
   facilityId: string;
@@ -74,17 +73,13 @@ function ProductKnowledgeCard({
               </p>
             )}
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/settings/product_knowledge/${product.id}`,
-              )
-            }
-          >
-            <CareIcon icon="l-edit" className="size-4" />
-            {t("see_details")}
+        </div>
+        <div className="flex justify-end">
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/product_knowledge/${product.id}`}>
+              <CareIcon icon="l-edit" className="size-4" />
+              {t("see_details")}
+            </Link>
           </Button>
         </div>
       </CardContent>
@@ -265,17 +260,11 @@ export default function ProductKnowledgeList({
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              navigate(
-                                `/facility/${facilityId}/settings/product_knowledge/${product.id}`,
-                              )
-                            }
-                          >
-                            <CareIcon icon="l-edit" className="size-4" />
-                            {t("see_details")}
+                          <Button asChild variant="outline" size="sm">
+                            <Link href={`/product_knowledge/${product.id}`}>
+                              <CareIcon icon="l-edit" className="size-4" />
+                              {t("see_details")}
+                            </Link>
                           </Button>
                         </TableCell>
                       </TableRow>
