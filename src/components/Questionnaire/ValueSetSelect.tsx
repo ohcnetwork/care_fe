@@ -70,7 +70,7 @@ export default function ValueSetSelect({
 
   if (isMobile && !hideTrigger) {
     return (
-      <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
+      <Sheet open={internalOpen || controlledOpen} onOpenChange={setInternalOpen}>
         <SheetTrigger asChild>
           {mobileTrigger ? (
             mobileTrigger
