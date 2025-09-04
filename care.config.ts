@@ -1,6 +1,9 @@
 import { CountryCode } from "libphonenumber-js/types.cjs";
 
-import { EncounterClass } from "@/types/emr/encounter/encounter";
+import {
+  ENCOUNTER_CLASS,
+  EncounterClass,
+} from "@/types/emr/encounter/encounter";
 
 const env = import.meta.env;
 
@@ -51,6 +54,8 @@ const careConfig = {
   availableLocales: (env.REACT_ALLOWED_LOCALES || "")
     .split(",")
     .map((l) => l.trim()),
+  encounterClasses: (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",") ??
+    ENCOUNTER_CLASS) as [EncounterClass, ...EncounterClass[]],
 
   defaultEncounterType: (env.REACT_DEFAULT_ENCOUNTER_TYPE ||
     "hh") as EncounterClass,
@@ -92,11 +97,6 @@ const careConfig = {
       true,
     ),
   },
-
-  enableMinimalPatientRegistration: boolean(
-    "REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION",
-    false,
-  ),
 
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
@@ -141,6 +141,27 @@ const careConfig = {
   imageUploadMaxSizeInMB: env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB
     ? parseInt(env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB, 10)
     : 2,
+
+  patientRegistration: {
+    /**
+     * Minimum number of geo-organization levels the user must select
+     * during patient registration.
+     *
+     * If not set, all levels are required.
+     */
+    minGeoOrganizationLevelsRequired:
+      env.REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED
+        ? Math.max(
+            parseInt(env.REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED, 10),
+            1,
+          )
+        : undefined,
+
+    minimalPatientRegistration: boolean(
+      "REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION",
+      false,
+    ),
+  },
 } as const;
 
 export default careConfig;

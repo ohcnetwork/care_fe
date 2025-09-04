@@ -9,7 +9,7 @@ import {
   PlusIcon,
   Shuffle,
 } from "lucide-react";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -95,7 +95,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
-import { PatientHeader } from "@/pages/Facility/services/serviceRequests/components/PatientHeader";
+import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import batchApi from "@/types/base/batch/batchApi";
 import { Code } from "@/types/base/code/code";
@@ -107,9 +107,9 @@ import {
 import accountApi from "@/types/billing/account/accountApi";
 import {
   ChargeItemBatchResponse,
+  ChargeItemRead,
   extractChargeItemsFromBatchResponse,
 } from "@/types/billing/chargeItem/chargeItem";
-import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import {
   MEDICATION_DISPENSE_STATUS_COLORS,
   MedicationDispenseCategory,
@@ -227,7 +227,6 @@ const AddMedicationSheet = ({
       as_needed_for: undefined,
     });
   const [showDosageDialog, setShowDosageDialog] = useState(false);
-  const unitDisabled = !!selectedProduct?.definitional?.dosage_form;
 
   // Update local state when the sheet opens or when editing a different item
   useEffect(() => {
@@ -235,13 +234,13 @@ const AddMedicationSheet = ({
       setLocalDosageInstruction(existingDosageInstructions);
     } else if (open) {
       resetForm();
-      if (selectedProduct?.definitional?.dosage_form) {
+      if (selectedProduct?.base_unit) {
         handleUpdateDosageInstruction({
           dose_and_rate: {
             type: "ordered",
             dose_quantity: {
               value: 0,
-              unit: selectedProduct.definitional.dosage_form,
+              unit: selectedProduct.base_unit,
             },
           },
         });
@@ -390,7 +389,6 @@ const AddMedicationSheet = ({
                                         });
                                       }
                                     }}
-                                    unitDisabled={unitDisabled}
                                   />
                                 </div>
                                 <Button
@@ -426,7 +424,6 @@ const AddMedicationSheet = ({
                                   });
                                   setShowDosageDialog(false);
                                 }}
-                                unitDisabled={unitDisabled}
                               />
                             </PopoverContent>
                           </Popover>
@@ -695,6 +692,7 @@ export default function MedicationBillForm({ patientId }: Props) {
   const queryClient = useQueryClient();
   const { facilityId } = useCurrentFacility();
   const { locationId } = useCurrentLocation();
+  const [{ encounterId }] = useQueryParams();
   const [productKnowledgeInventoriesMap, setProductKnowledgeInventoriesMap] =
     useState<Record<string, InventoryRead[] | undefined>>({});
   const [isInvoiceSheetOpen, setIsInvoiceSheetOpen] = useState(false);
@@ -1167,7 +1165,8 @@ export default function MedicationBillForm({ patientId }: Props) {
           category: MedicationDispenseCategory.outpatient,
           when_prepared: new Date(),
           dosage_instruction: item.dosageInstructions ?? [],
-          encounter: medication?.encounter ?? defaultEncounterId!,
+          encounter:
+            medication?.encounter ?? defaultEncounterId! ?? encounterId,
           location: locationId,
           authorizing_prescription: medication?.id ?? null,
           item: selectedInventory.id,
@@ -1266,7 +1265,7 @@ export default function MedicationBillForm({ patientId }: Props) {
         </div>
 
         {patient && (
-          <div className="mb-4 p-4 rounded-none shadow-none bg-gray-100">
+          <div className="mb-4 rounded-none shadow-none bg-gray-100">
             <PatientHeader patient={patient} facilityId={facilityId} />
           </div>
         )}
@@ -1775,7 +1774,12 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                           {
                                                             selectedInventory?.net_content
                                                           }{" "}
-                                                          {t("units")}
+                                                          {
+                                                            selectedInventory
+                                                              ?.product
+                                                              .product_knowledge
+                                                              .base_unit.display
+                                                          }
                                                         </Badge>
                                                       </div>
                                                     );
@@ -1871,7 +1875,11 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                         className="ml-2"
                                                       >
                                                         {inv.net_content}{" "}
-                                                        {t("units")}
+                                                        {
+                                                          inv.product
+                                                            ?.product_knowledge
+                                                            .base_unit.display
+                                                        }
                                                       </Badge>
                                                     </div>
                                                   </div>
@@ -2570,13 +2578,11 @@ interface DosageDialogProps {
   onChange?: (
     value?: MedicationRequestDosageInstruction["dose_and_rate"],
   ) => void;
-  unitDisabled?: boolean;
 }
 
 const DosageDialog: React.FC<DosageDialogProps> = ({
   dosageRange,
   onChange,
-  unitDisabled,
 }) => {
   const { t } = useTranslation();
 
@@ -2601,7 +2607,6 @@ const DosageDialog: React.FC<DosageDialogProps> = ({
               }));
             }
           }}
-          unitDisabled={unitDisabled}
         />
       </div>
       <div>
@@ -2620,7 +2625,6 @@ const DosageDialog: React.FC<DosageDialogProps> = ({
               }));
             }
           }}
-          unitDisabled={unitDisabled}
         />
       </div>
       <div className="flex justify-end gap-2">

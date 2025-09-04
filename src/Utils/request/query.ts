@@ -12,19 +12,32 @@ import { getResponseBody, makeHeaders, makeUrl } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
 
 export async function callApi<Route extends ApiRoute<unknown, unknown>>(
-  { baseUrl, path, method, noAuth }: Route,
+  { baseUrl, path, method, noAuth, defaultQueryParams }: Route,
   options?: ApiCallOptions<Route>,
 ): Promise<Route["TRes"]> {
-  const url = `${baseUrl ?? careConfig.apiUrl}${makeUrl(path, options?.queryParams, options?.pathParams)}`;
+  const url = `${baseUrl ?? careConfig.apiUrl}${makeUrl(
+    path,
+    {
+      ...(defaultQueryParams ?? {}),
+      ...options?.queryParams,
+    },
+    options?.pathParams,
+  )}`;
+
+  const isFormData = options?.body instanceof FormData;
 
   const fetchOptions: RequestInit = {
     method,
-    headers: makeHeaders(noAuth ?? false, options?.headers),
+    headers: makeHeaders(noAuth ?? false, options?.headers, isFormData),
     signal: options?.signal,
   };
 
   if (options?.body) {
-    fetchOptions.body = JSON.stringify(options.body);
+    if (isFormData) {
+      fetchOptions.body = options.body as FormData;
+    } else {
+      fetchOptions.body = JSON.stringify(options.body);
+    }
   }
 
   let res: Response;

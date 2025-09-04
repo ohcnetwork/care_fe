@@ -55,7 +55,7 @@ import {
   ScheduleTemplate,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 type AvailabilityTabQueryParams = {
   tab?: "schedule" | "exceptions" | null;
@@ -291,7 +291,7 @@ function DayDetailsPopover({
   templates: ScheduleTemplate[];
   unavailableExceptions: ScheduleException[];
   setQParams: (params: AvailabilityTabQueryParams) => void;
-  user: UserBase;
+  user: UserReadMinimal;
 }) {
   const { t } = useTranslation();
   const { facilityId } = usePathParams("/facility/:facilityId/*")!;

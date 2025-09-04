@@ -47,8 +47,10 @@ import {
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
-import { Status } from "@/types/emr/serviceRequest/serviceRequest";
-import { toServiceRequestUpdateSpec } from "@/types/emr/serviceRequest/serviceRequest";
+import {
+  Status,
+  toServiceRequestUpdateSpec,
+} from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import {
   SpecimenRead,
@@ -58,13 +60,13 @@ import {
 import specimenApi from "@/types/emr/specimen/specimenApi";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
 
+import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
 import AddMultipleChargeItemsSheet from "./components/AddMultipleChargeItemsSheet";
 import { ChargeItemCard } from "./components/ChargeItemCard";
 import { DiagnosticReportForm } from "./components/DiagnosticReportForm";
 import { DiagnosticReportReview } from "./components/DiagnosticReportReview";
 import { MultiQRCodePrintSheet } from "./components/MultiQRCodePrintSheet";
 import { ObservationHistorySheet } from "./components/ObservationHistorySheet";
-import { PatientHeader } from "./components/PatientHeader";
 import { ServiceRequestDetails } from "./components/ServiceRequestDetails";
 import { SpecimenForm } from "./components/SpecimenForm";
 import { SpecimenHistorySheet } from "./components/SpecimenHistorySheet";
@@ -407,7 +409,6 @@ export default function ServiceRequestShow({
             <PatientHeader
               patient={request.encounter.patient}
               facilityId={facilityId}
-              encounterId={request.encounter.id}
             />
           </div>
 

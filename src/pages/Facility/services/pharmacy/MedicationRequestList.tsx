@@ -18,6 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import {
   Table,
   TableBody,
@@ -226,77 +227,75 @@ export default function MedicationRequestList({
 
       {/* Table section */}
       <div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("patient_name")}</TableHead>
-              <TableHead>{t("priority")}</TableHead>
-              <TableHead>{t("category")}</TableHead>
-              <TableHead>{t("total_medicines")}</TableHead>
-              <TableHead>{t("action")}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
+        {isLoading ? (
+          <TableSkeleton count={5} />
+        ) : (
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
-                  {t("loading")}
-                </TableCell>
+                <TableHead>{t("patient_name")}</TableHead>
+                <TableHead>{t("priority")}</TableHead>
+                <TableHead>{t("category")}</TableHead>
+                <TableHead>{t("total_medicines")}</TableHead>
+                <TableHead>{t("action")}</TableHead>
               </TableRow>
-            ) : prescriptionQueue?.results?.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
-                  {t("no_prescriptions_found")}
-                </TableCell>
-              </TableRow>
-            ) : (
-              prescriptionQueue?.results?.map(
-                (item: MedicationRequestSummary) => (
-                  <TableRow key={item.encounter.id}>
-                    <TableCell className="font-semibold">
-                      {item.encounter.patient.name}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={MEDICATION_PRIORITY_COLORS[item.priority]}
-                      >
-                        {t(item.priority)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          ENCOUNTER_CLASSES_COLORS[
-                            item.encounter.encounter_class
-                          ]
-                        }
-                      >
-                        {t(
-                          `encounter_class__${item.encounter.encounter_class}`,
-                        )}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{item.count}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        className="font-semibold"
-                        onClick={() => {
-                          navigate(
-                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}${qParams.billing_status === "partial" ? "/partial" : ""}`,
-                          );
-                        }}
-                      >
-                        <ArrowUpRightSquare strokeWidth={1.5} />
-                        {t("see_prescription")}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ),
-              )
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {prescriptionQueue?.results?.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8">
+                    {t("no_prescriptions_found")}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                prescriptionQueue?.results?.map(
+                  (item: MedicationRequestSummary) => (
+                    <TableRow key={item.encounter.id}>
+                      <TableCell className="font-semibold">
+                        {item.encounter.patient.name}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={MEDICATION_PRIORITY_COLORS[item.priority]}
+                        >
+                          {t(item.priority)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            ENCOUNTER_CLASSES_COLORS[
+                              item.encounter.encounter_class
+                            ]
+                          }
+                        >
+                          {t(
+                            `encounter_class__${item.encounter.encounter_class}`,
+                          )}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{item.count}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          className="font-semibold"
+                          onClick={() => {
+                            navigate(
+                              `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}${qParams.billing_status === "partial" ? "/partial" : ""}`,
+                            );
+                          }}
+                        >
+                          <ArrowUpRightSquare strokeWidth={1.5} />
+                          {t("see_prescription")}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ),
+                )
+              )}
+            </TableBody>
+          </Table>
+        )}
       </div>
       <div className="mt-8 flex justify-center">
         <Pagination totalCount={prescriptionQueue?.count || 0} />

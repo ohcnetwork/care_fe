@@ -1,6 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRightSquare, BarChart3, SlidersHorizontal } from "lucide-react";
-import { Check } from "lucide-react";
+import {
+  ArrowUpRightSquare,
+  BarChart3,
+  Check,
+  SlidersHorizontal,
+} from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -253,7 +257,7 @@ export default function ToDispatchSupplyRequestTable({
                         {request.quantity}
                       </span>
                       <span className="text-gray-600 capitalize">
-                        {request.item.definitional?.dosage_form?.display}
+                        {request.item.base_unit.display}
                       </span>
                     </div>
                   </TableCell>

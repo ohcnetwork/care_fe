@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { CircleDashed } from "lucide-react";
+import React, { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -9,18 +10,12 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { FilterSelect } from "@/components/ui/filter-select";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -28,13 +23,16 @@ import Page from "@/components/Common/Page";
 import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import {
+  ENCOUNTER_PRIORITY,
   ENCOUNTER_STATUS_ICONS,
+  EncounterClass,
   EncounterPriority,
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
@@ -45,12 +43,12 @@ import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 interface EncounterListProps {
   encounters?: EncounterRead[];
   facilityId: string;
+  encounterClass?: EncounterClass;
 }
 
 const buildQueryParams = (
   facilityId: string,
   status?: string,
-  encounterClass?: string,
   priority?: string,
 ) => {
   const params: Record<string, string | undefined> = {};
@@ -61,9 +59,6 @@ const buildQueryParams = (
     params.live = status === "live" ? "true" : undefined;
   } else if (status) {
     params.status = status;
-  }
-  if (encounterClass) {
-    params.encounter_class = encounterClass;
   }
   if (priority) {
     params.priority = priority;
@@ -89,19 +84,26 @@ function EmptyState() {
 export function EncounterList({
   encounters: propEncounters,
   facilityId,
+  encounterClass,
 }: EncounterListProps) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    cacheBlacklist: ["name", "encounter_id", "external_identifier", "tags"],
+    cacheBlacklist: [
+      "name",
+      "encounter_id",
+      "external_identifier",
+      "tags",
+      "patient_filter",
+    ],
   });
   const { t } = useTranslation();
   const {
     status,
-    encounter_class: encounterClass,
     priority,
     name,
     encounter_id,
     external_identifier,
+    patient_filter,
   } = qParams;
   const handleFieldChange = () => {
     updateQuery({
@@ -112,6 +114,7 @@ export function EncounterList({
       encounter_id: undefined,
       external_identifier: undefined,
       tags: qParams.tags,
+      patient_filter: undefined,
     });
   };
 
@@ -123,23 +126,33 @@ export function EncounterList({
           encounter_class: encounterClass,
           priority,
           tags: qParams.tags,
+          patient: patient_filter,
         },
         [key]: value || undefined,
       });
     },
-    [status, encounterClass, priority, updateQuery],
+    [
+      status,
+      encounterClass,
+      priority,
+      updateQuery,
+      qParams.tags,
+      patient_filter,
+    ],
   );
 
-  const { data: queryEncounters, isLoading } = useQuery({
-    queryKey: ["encounters", facilityId, qParams],
+  const { data: queryEncounters, isFetching } = useQuery({
+    queryKey: ["encounters", facilityId, qParams, encounterClass],
     queryFn: query.debounced(encounterApi.list, {
       queryParams: {
-        ...buildQueryParams(facilityId, status, encounterClass, priority),
+        ...buildQueryParams(facilityId, status, priority),
         name,
+        encounter_class: encounterClass,
         external_identifier,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         tags: qParams.tags,
+        patient: patient_filter,
       },
     }),
     enabled: !propEncounters && !encounter_id,
@@ -179,6 +192,14 @@ export function EncounterList({
     },
   ];
 
+  const ENCOUNTER_STATUS = [
+    "planned",
+    "in_progress",
+    "discharged",
+    "completed",
+    "cancelled",
+  ] as const;
+
   const encounters =
     propEncounters ||
     queryEncounters?.results ||
@@ -192,10 +213,14 @@ export function EncounterList({
 
   return (
     <Page
-      title={t("encounters")}
+      title={t("encounter_class_encounters", {
+        encounterClassName: encounterClass
+          ? t(`encounter_class__${encounterClass}`)
+          : t("all"),
+      })}
       componentRight={
         <Badge className="bg-purple-50 text-purple-700 ml-2 rounded-xl px-3 py-0.5 m-3 w-max border-gray-200">
-          {isLoading
+          {isFetching
             ? t("loading")
             : t("entity_count", {
                 count: queryEncounters?.count ?? 0,
@@ -205,7 +230,7 @@ export function EncounterList({
       }
     >
       <div className="space-y-4 mt-4 flex flex-col">
-        <div className="rounded-lg border border-gray-200 bg-card shadow-xs flex flex-col">
+        <div className="rounded-lg border border-gray-200 bg-card shadow-xs flex flex-col overflow-auto">
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
@@ -214,14 +239,13 @@ export function EncounterList({
                     <Button
                       data-cy="search-encounter"
                       variant="outline"
-                      size="sm"
                       className={cn(
-                        "h-8 min-w-[120px] justify-start",
+                        "min-w-32 justify-start text-gray-500 font-normal h-9 sm:w-auto w-full",
                         (name || encounter_id || external_identifier) &&
-                          "bg-primary/10 text-primary hover:bg-primary/20",
+                          "bg-primary/10 text-primary font-medium hover:bg-primary/20",
                       )}
                     >
-                      <CareIcon icon="l-search" className="mr-2 size-4" />
+                      <CareIcon icon="l-search" className="size-4" />
                       {name || encounter_id || external_identifier ? (
                         <span className="truncate">
                           {name || encounter_id || external_identifier}
@@ -252,105 +276,38 @@ export function EncounterList({
                   </PopoverContent>
                 </Popover>
 
-                <div>
-                  <Select
-                    value={priority || "all"}
+                <PatientIdentifierFilter
+                  onSelect={(patientId) =>
+                    updateQuery({ patient_filter: patientId })
+                  }
+                  placeholder={t("filter_by_identifier")}
+                  className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+                  patientId={qParams.patient_filter}
+                />
+
+                <div className="sm:w-auto w-full">
+                  <FilterSelect
+                    value={priority || ""}
                     onValueChange={(value) => {
                       updateQuery({
                         status,
                         encounter_class: encounterClass,
-                        priority:
-                          value === "all"
-                            ? undefined
-                            : (value as EncounterPriority),
+                        priority: value as EncounterPriority,
                       });
                     }}
-                  >
-                    <SelectTrigger className="h-9 w-[120px]">
-                      <SelectValue placeholder={t("priority")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">{t("all_priorities")}</SelectItem>
-                      <SelectItem value="asap">
-                        <div className="flex items-center">
-                          <span className="mr-2">🟡</span>{" "}
-                          {t("encounter_priority__ASAP")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="callback_results">
-                        <div className="flex items-center">
-                          <span className="mr-2">🔵</span>
-                          {t("encounter_priority__callback_results")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="callback_for_scheduling">
-                        <div className="flex items-center">
-                          <span className="mr-2">🟣</span>
-                          {t("encounter_priority__callback_for_scheduling")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="elective">
-                        <div className="flex items-center">
-                          <span className="mr-2">🟤</span>
-                          {t("encounter_priority__elective")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="emergency">
-                        <div className="flex items-center">
-                          <span className="mr-2">🔴</span>{" "}
-                          {t("encounter_priority__emergency")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="preop">
-                        <div className="flex items-center">
-                          <span className="mr-2">🟠</span>{" "}
-                          {t("encounter_priority__preop")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="as_needed">
-                        <div className="flex items-center">
-                          <span className="mr-2">⚫️</span>
-                          {t("encounter_priority__as_needed")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="routine">
-                        <div className="flex items-center">
-                          <span className="mr-2">⚪️</span>
-                          {t("encounter_priority__routine")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="rush_reporting">
-                        <div className="flex items-center">
-                          <span className="mr-2">🟤</span>
-                          {t("encounter_priority__rush_reporting")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="stat">
-                        <div className="flex items-center">
-                          <span className="mr-2">🔴</span>{" "}
-                          {t("encounter_priority__stat")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="timing_critical">
-                        <div className="flex items-center">
-                          <span className="mr-2">🟡</span>
-                          {t("encounter_priority__timing_critical")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="use_as_directed">
-                        <div className="flex items-center">
-                          <span className="mr-2">🔵</span>
-                          {t("encounter_priority__use_as_directed")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="urgent">
-                        <div className="flex items-center">
-                          <span className="mr-2">🟠</span>{" "}
-                          {t("encounter_priority__urgent")}
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                    options={ENCOUNTER_PRIORITY.map((value) =>
+                      t(`encounter_priority__${value}`),
+                    )}
+                    label={t("priority")}
+                    onClear={() => {
+                      updateQuery({
+                        status,
+                        encounter_class: encounterClass,
+                        priority: undefined,
+                      });
+                    }}
+                    className="h-9 shadow-sm rounded-md min-w-32"
+                  />
                 </div>
 
                 <TagSelectorPopover
@@ -362,116 +319,37 @@ export function EncounterList({
                     });
                   }}
                   resource={TagResource.ENCOUNTER}
-                  className="w-auto mt-0 h-8"
+                  className="mt-0 bg-white font-normal sm:w-auto w-full"
                 />
 
                 {/* Status Filter - Mobile */}
-                <div className="md:hidden">
-                  <Select
-                    value={status || "all"}
+                <div className="md:hidden sm:w-auto w-full">
+                  <FilterSelect
+                    label={t("status")}
+                    icon={<CircleDashed className="size-4" />}
+                    value={status || ""}
                     onValueChange={(value) => {
                       updateQuery({
-                        ...{ encounter_class: encounterClass, priority },
                         status: value === "all" ? undefined : value,
                       });
                     }}
-                  >
-                    <SelectTrigger className="h-8 w-[120px]">
-                      <SelectValue placeholder={t("status")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">{t("all_status")}</SelectItem>
-                      <SelectItem value="planned">
-                        <div className="flex items-center">
-                          <CareIcon icon="l-calender" className="mr-2 size-4" />
-                          {t("planned")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="in_progress">
-                        <div className="flex items-center">
-                          <CareIcon icon="l-spinner" className="mr-2 size-4" />
-                          {t("in_progress")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="completed">
-                        <div className="flex items-center">
-                          <CareIcon icon="l-check" className="mr-2 size-4" />
-                          {t("completed")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="cancelled">
-                        <div className="flex items-center">
-                          <CareIcon icon="l-x" className="mr-2 size-4" />
-                          {t("cancelled")}
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Class Filter - Mobile */}
-                <div className="md:hidden">
-                  <Select
-                    value={encounterClass || "all"}
-                    onValueChange={(value) => {
+                    options={ENCOUNTER_STATUS.map((value) =>
+                      t(`encounter_status__${value}`),
+                    )}
+                    onClear={() => {
                       updateQuery({
-                        status,
+                        status: undefined,
+                        encounter_class: encounterClass,
                         priority,
-                        encounter_class: value === "all" ? undefined : value,
                       });
                     }}
-                  >
-                    <SelectTrigger className="h-8 w-[120px]">
-                      <SelectValue placeholder={t("type")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">{t("all_types")}</SelectItem>
-                      <SelectItem value="imp">
-                        <div className="flex items-center">
-                          <CareIcon icon="l-hospital" className="mr-2 size-4" />
-                          {t("inpatient")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="amb">
-                        <div className="flex items-center">
-                          <CareIcon icon="l-user" className="mr-2 size-4" />
-                          {t("ambulatory")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="obsenc">
-                        <div className="flex items-center">
-                          <CareIcon icon="l-eye" className="mr-2 size-4" />
-                          {t("observation")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="emer">
-                        <div className="flex items-center">
-                          <CareIcon
-                            icon="l-ambulance"
-                            className="mr-2 size-4"
-                          />
-                          {t("emergency")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="vr">
-                        <div className="flex items-center">
-                          <CareIcon icon="l-video" className="mr-2 size-4" />
-                          {t("virtual")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="hh">
-                        <div className="flex items-center">
-                          <CareIcon icon="l-home" className="mr-2 size-4" />
-                          {t("home_health")}
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                    className="h-9 shadow-sm rounded-md min-w-32"
+                  />
                 </div>
               </div>
 
               {/* Status Filter - Desktop */}
-              <div className="hidden md:flex items-center">
+              <div className="hidden md:flex items-center py-2">
                 <Tabs value={status || "all"} className="w-full">
                   <TabsList className="bg-transparent p-0 h-8">
                     <div className="flex flex-wrap">
@@ -487,19 +365,11 @@ export function EncounterList({
                       >
                         {t("all_status")}
                       </TabsTrigger>
-                      {(
-                        [
-                          "planned",
-                          "in_progress",
-                          "discharged",
-                          "completed",
-                          "cancelled",
-                        ] as const
-                      ).map((status) => (
+                      {ENCOUNTER_STATUS.map((status) => (
                         <TabsTrigger
                           key={status}
                           value={status}
-                          className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                          className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary px-1 lg:px-2"
                           onClick={() =>
                             updateQuery({
                               ...{ encounter_class: encounterClass, priority },
@@ -507,10 +377,9 @@ export function EncounterList({
                             })
                           }
                         >
-                          <CareIcon
-                            icon={ENCOUNTER_STATUS_ICONS[status]}
-                            className="size-4"
-                          />
+                          {React.createElement(ENCOUNTER_STATUS_ICONS[status], {
+                            className: "size-4",
+                          })}
                           {t(`encounter_status__${status}`)}
                         </TabsTrigger>
                       ))}
@@ -521,113 +390,6 @@ export function EncounterList({
             </div>
 
             <Separator className="hidden md:block" />
-
-            {/* Class Filter - Desktop */}
-            <div className="hidden md:block p-4">
-              <Tabs value={encounterClass || "all"} className="w-full">
-                <TabsList className="bg-transparent p-0 h-8">
-                  <div className="flex flex-wrap">
-                    <TabsTrigger
-                      value="all"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() =>
-                        updateQuery({
-                          status,
-                          priority,
-                          encounter_class: undefined,
-                        })
-                      }
-                    >
-                      {t("all_types")}
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="imp"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() =>
-                        updateQuery({
-                          status,
-                          priority,
-                          encounter_class: "imp",
-                        })
-                      }
-                    >
-                      <CareIcon icon="l-hospital" className="size-4" />
-                      {t("encounter_class__imp")}
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="amb"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() =>
-                        updateQuery({
-                          status,
-                          priority,
-                          encounter_class: "amb",
-                        })
-                      }
-                    >
-                      <CareIcon icon="l-user" className="size-4" />
-                      {t("encounter_class__amb")}
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="obsenc"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() =>
-                        updateQuery({
-                          status,
-                          priority,
-                          encounter_class: "obsenc",
-                        })
-                      }
-                    >
-                      <CareIcon icon="l-eye" className="size-4" />
-                      {t("encounter_class__obsenc")}
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="emer"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() =>
-                        updateQuery({
-                          status,
-                          priority,
-                          encounter_class: "emer",
-                        })
-                      }
-                    >
-                      <CareIcon icon="l-ambulance" className="size-4" />
-                      {t("emergency")}
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="vr"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() =>
-                        updateQuery({
-                          status,
-                          priority,
-                          encounter_class: "vr",
-                        })
-                      }
-                    >
-                      <CareIcon icon="l-video" className="size-4" />
-                      {t("encounter_class__vr")}
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="hh"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() =>
-                        updateQuery({
-                          status,
-                          priority,
-                          encounter_class: "hh",
-                        })
-                      }
-                    >
-                      <CareIcon icon="l-home" className="size-4" />
-                      {t("encounter_class__hh")}
-                    </TabsTrigger>
-                  </div>
-                </TabsList>
-              </Tabs>
-            </div>
           </div>
         </div>
 
@@ -635,7 +397,7 @@ export function EncounterList({
           className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
           data-cy="encounter-list-cards"
         >
-          {isLoading ? (
+          {isFetching ? (
             <CardGridSkeleton count={6} />
           ) : encounters.length === 0 ? (
             <div className="col-span-full">

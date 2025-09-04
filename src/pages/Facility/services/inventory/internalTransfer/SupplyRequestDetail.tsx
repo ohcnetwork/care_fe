@@ -1,8 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { MoreVertical } from "lucide-react";
-import { Link } from "raviger";
-import { useQueryParams } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import React, { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -41,8 +40,6 @@ import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryAp
 import {
   SUPPLY_REQUEST_PRIORITY_COLORS,
   SUPPLY_REQUEST_STATUS_COLORS,
-} from "@/types/inventory/supplyRequest/supplyRequest";
-import {
   SupplyRequestCreate,
   SupplyRequestStatus,
 } from "@/types/inventory/supplyRequest/supplyRequest";
@@ -389,8 +386,7 @@ export default function SupplyRequestDetail({
                 {t("requested_quantity")}
               </p>
               <p className="font-semibold text-lg">
-                {supplyRequest.quantity}{" "}
-                {supplyRequest.item?.definitional?.dosage_form?.display}
+                {supplyRequest.quantity} {supplyRequest.item?.base_unit.display}
               </p>
             </div>
             <div>
@@ -466,11 +462,10 @@ export default function SupplyRequestDetail({
                     </TableCell>
                     <TableCell className="font-medium text-gray-950">
                       {delivery.supplied_item_quantity}{" "}
-                      {delivery.supplied_item?.product_knowledge.definitional
-                        ?.dosage_form?.display ||
+                      {delivery.supplied_item?.product_knowledge.base_unit
+                        .display ||
                         delivery.supplied_inventory_item?.product
-                          ?.product_knowledge.definitional?.dosage_form
-                          ?.display}
+                          ?.product_knowledge.base_unit.display}
                     </TableCell>
                     <TableCell className="font-medium text-gray-950">
                       {delivery.supplied_inventory_item?.product?.batch

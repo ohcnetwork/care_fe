@@ -1,4 +1,3 @@
-import React from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
@@ -18,6 +17,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import {
+  ExpandableText,
+  ExpandableTextContent,
+  ExpandableTextExpandButton,
+} from "@/components/ui/expandable-text";
 
 import {
   CardGridSkeleton,
@@ -75,7 +79,7 @@ function TagConfigCard({
       <CardContent className="p-6">
         <div className="mb-4 flex items-start justify-between gap-4">
           <div className="flex-1">
-            <div className="mb-2 flex items-center gap-2">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
               <Badge variant={TAG_STATUS_COLORS[config.status]}>
                 {t(config.status)}
               </Badge>
@@ -87,12 +91,21 @@ function TagConfigCard({
                 </Badge>
               )}
             </div>
-            <h3 className="font-medium text-gray-900">{config.display}</h3>
+            <h3 className="font-medium text-gray-900 text-lg">
+              {config.display}
+            </h3>
             <p className="mt-1 text-sm text-gray-500 capitalize">
               {t(config.resource)} | {t("priority")}: {config.priority}
             </p>
             {config.description && (
-              <p className="mt-2 text-sm text-gray-600">{config.description}</p>
+              <ExpandableText>
+                <ExpandableTextContent className="mt-2 text-sm text-gray-600">
+                  {config.description}
+                </ExpandableTextContent>
+                <ExpandableTextExpandButton>
+                  {t("read_more")}
+                </ExpandableTextExpandButton>
+              </ExpandableText>
             )}
           </div>
           <div className="flex items-center gap-2">
@@ -140,6 +153,7 @@ function TagConfigCard({
             )}
             <Button variant="outline" size="sm">
               <CareIcon icon="l-arrow-right" className="size-4" />
+              {t("view")}
             </Button>
           </div>
         </div>
@@ -225,18 +239,19 @@ export default function TagConfigTable({
             </TableHeader>
             <TableBody className="bg-white">
               {sortedConfigs.map((config: TagConfig) => (
-                <TableRow
-                  key={config.id}
-                  className="divide-x cursor-pointer hover:bg-gray-50"
-                  onClick={() => onView(config.id)}
-                >
+                <TableRow key={config.id} className="divide-x hover:bg-gray-50">
                   <TableCell className="font-medium">
-                    <div>
-                      <div>{config.display}</div>
+                    <div className="flex flex-col text-sm break-words whitespace-normal">
+                      <span>{config.display}</span>
                       {config.description && (
-                        <div className="text-sm text-gray-500">
-                          {config.description}
-                        </div>
+                        <ExpandableText>
+                          <ExpandableTextContent className="text-gray-500">
+                            {config.description}
+                          </ExpandableTextContent>
+                          <ExpandableTextExpandButton>
+                            {t("read_more")}
+                          </ExpandableTextExpandButton>
+                        </ExpandableText>
                       )}
                     </div>
                   </TableCell>

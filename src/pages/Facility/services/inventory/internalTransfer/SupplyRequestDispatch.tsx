@@ -106,10 +106,7 @@ export default function SupplyRequestDispatch({
 
   useEffect(() => {
     if (highlightedDeliveryId) {
-      highlightedRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
+      highlightedRef.current?.scrollIntoView();
       const timer = setTimeout(() => {
         setHighlightedDeliveryId(undefined);
         const newQParams = { ...qParams };
@@ -416,8 +413,7 @@ export default function SupplyRequestDispatch({
             </div>
             <div className="text-sm font-semibold text-gray-950">
               {supplyRequest.quantity}{" "}
-              {supplyRequest.item.definitional?.dosage_form?.display ||
-                t("units")}
+              {supplyRequest.item.base_unit.display || t("units")}
             </div>
           </div>
           <div>

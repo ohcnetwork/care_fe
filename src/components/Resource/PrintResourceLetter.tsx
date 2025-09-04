@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
+import { Badge } from "@/components/ui/badge";
+
 import Loading from "@/components/Common/Loading";
 
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
@@ -89,9 +91,9 @@ export default function PrintResourceLetter({ id }: { id: string }) {
             {/* Status Section */}
             <div className="mb-4">
               <span className="font-semibold">{t("current_status")}: </span>
-              <span className="rounded bg-gray-100 px-2 py-1">
-                {data.status}
-              </span>
+              <Badge variant="secondary">
+                {t(`resource_status__${data.status}`)}
+              </Badge>
             </div>
           </div>
 
@@ -107,12 +109,11 @@ export default function PrintResourceLetter({ id }: { id: string }) {
               </div>
             </div>
 
-            {data.status !== "PENDING" && (
+            {["approved", "rejected"].includes(data.status) && (
               <div>
                 <div className="mb-20">
                   <div className="font-semibold">
-                    {data.status === "REJECTED" ? t("rejected") : t("approved")}{" "}
-                    {t("by")}:
+                    {t(`resource_status__${data.status}`)} {t("by")}:
                   </div>
                   <div>{formatName(data.updated_by)}</div>
                   <div className="text-sm text-gray-600">
