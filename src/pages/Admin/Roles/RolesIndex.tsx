@@ -8,11 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import {
-  ExpandableText,
-  ExpandableTextContent,
-  ExpandableTextExpandButton,
-} from "@/components/ui/expandable-text";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
@@ -57,19 +52,26 @@ function RoleCard({
       <CardContent className="p-6">
         <div className="mb-4 flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-gray-900 mb-2 truncate" title={role.name}>
-              {role.name}
-            </h3>
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 mb-2">
+              <h3
+                className="font-medium text-gray-900 mb-2 truncate"
+                title={role.name}
+              >
+                {role.name}
+              </h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEdit(role)}
+                className="shrink-0 w-full sm:w-auto"
+              >
+                <CareIcon icon="l-edit" className="size-4" />
+                {t("edit")}
+              </Button>
+            </div>
             {role.description && (
               <div className="text-sm text-gray-600 mb-3">
-                <ExpandableText>
-                  <ExpandableTextContent className="line-clamp-2">
-                    {role.description}
-                  </ExpandableTextContent>
-                  <ExpandableTextExpandButton>
-                    ...
-                  </ExpandableTextExpandButton>
-                </ExpandableText>
+                {role.description}
               </div>
             )}
             <div className="flex flex-wrap gap-1">
@@ -84,15 +86,11 @@ function RoleCard({
               ))}
               {role.permissions.length > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{role.permissions.length - 3} more
+                  +{role.permissions.length - 3} {t("more")}
                 </Badge>
               )}
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={() => onEdit(role)} className="shrink-0">
-            <CareIcon icon="l-edit" className="size-4" />
-            {t("edit")}
-          </Button>
         </div>
       </CardContent>
     </Card>
@@ -234,7 +232,7 @@ export default function RolesIndex() {
         ) : (
           <>
             {/* Mobile Card View */}
-            <div className="grid gap-4 md:hidden">
+            <div className="flex flex-col gap-4 md:hidden">
               {roles.map((role: RoleRead) => (
                 <RoleCard key={role.id} role={role} onEdit={handleEdit} />
               ))}
@@ -259,19 +257,8 @@ export default function RolesIndex() {
                             {role.name}
                           </div>
                         </TableCell>
-                        <TableCell className="text-gray-600 max-w-80">
-                          {role.description ? (
-                            <ExpandableText>
-                              <ExpandableTextContent className="line-clamp-2">
-                                {role.description}
-                              </ExpandableTextContent>
-                              <ExpandableTextExpandButton>
-                                ...
-                              </ExpandableTextExpandButton>
-                            </ExpandableText>
-                          ) : (
-                            "-"
-                          )}
+                        <TableCell className="text-gray-600 max-w-80 whitespace-normal">
+                          {role.description ? role.description : "-"}
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
