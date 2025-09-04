@@ -381,6 +381,7 @@ const SyncStatusOverview: React.FC<{
   facilityId?: string;
   refreshTrigger?: number;
 }> = ({ facilityId, refreshTrigger }) => {
+  const { t } = useTranslation();
   const { open: isSidebarOpen } = useSidebar();
   const { syncData } = useSyncData(facilityId, refreshTrigger);
 
@@ -389,35 +390,35 @@ const SyncStatusOverview: React.FC<{
       className={`grid gap-4 sm:grid-cols-1 ${isSidebarOpen ? "md:grid-cols-1" : "md:grid-cols-2"} lg:grid-cols-2 xl:grid-cols-3`}
     >
       <StatusCard
-        title="Pending"
+        title={t("pending")}
         count={syncData.statistics.pending}
         status="Ready to sync"
         color="blue"
         icon="l-clock"
       />
       <StatusCard
-        title="Failed"
+        title={t("failed")}
         count={syncData.statistics.failed}
         status="Need attention"
         color="red"
         icon="l-exclamation-triangle"
       />
       <StatusCard
-        title="Conflicted"
+        title={t("conflicted")}
         count={syncData.statistics.conflicted}
         status="User action required"
         color="orange"
         icon="l-exclamation-circle"
       />
       <StatusCard
-        title="Blocked"
+        title={t("blocked")}
         count={syncData.statistics.blocked}
         status="Waiting for parent sync"
         color="gray"
         icon="l-ban"
       />
       <StatusCard
-        title="Successful"
+        title={t("successful")}
         count={syncData.statistics.successful}
         status="Synced today"
         color="green"
@@ -1038,6 +1039,7 @@ const SyncStatusTabs: React.FC<{
   setEditConfirmEntry,
   refreshTrigger,
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("pending");
   const { syncData } = useSyncData(facilityId, refreshTrigger);
   const isOnline = onlineManager.isOnline();
@@ -1076,7 +1078,7 @@ const SyncStatusTabs: React.FC<{
 
             <Select value={activeTab} onValueChange={setActiveTab}>
               <SelectTrigger className="sm:hidden">
-                <SelectValue placeholder="Select status" />
+                <SelectValue placeholder={t("select_status")} />
               </SelectTrigger>
               <SelectContent>
                 {tabs.map((tab) => (
@@ -1336,15 +1338,15 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
                 {t("delete_record_description")}
                 <br />
                 <br />
-                <strong>Type:</strong> {deleteConfirmEntry?.type}
+                <strong>{t("type")}:</strong> {deleteConfirmEntry?.type}
                 <br />
-                <strong>ID:</strong> {deleteConfirmEntry?.id}
+                <strong>{t("id")}:</strong> {deleteConfirmEntry?.id}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
               <AlertDialogAction onClick={handleDeleteConfirmAction}>
-                Delete
+                {t("delete")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -1367,9 +1369,9 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
                   </p>
                   <div className="bg-blue-50 p-3 rounded-md">
                     <p className="text-sm text-blue-800">
-                      <strong>Type:</strong> {editConfirmEntry?.type}
+                      <strong>{t("type")}:</strong> {editConfirmEntry?.type}
                       <br />
-                      <strong>ID:</strong> {editConfirmEntry?.id}
+                      <strong>{t("id")}:</strong> {editConfirmEntry?.id}
                     </p>
                   </div>
                 </div>
@@ -1382,7 +1384,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
                   setEditConfirmEntry(null);
                 }}
               >
-                Cancel
+                {t("cancel")}
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={() => {
@@ -1391,7 +1393,7 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
                   handleEdit();
                 }}
               >
-                Continue to Edit
+                {t("continue_to_edit")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
