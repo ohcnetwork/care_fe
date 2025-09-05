@@ -471,7 +471,6 @@ export function ChargeItemDefinitionForm({
   };
 
   const handlePurchasePriceChange = (value: string) => {
-    console.log("Purchase price change:", value, "Code:", purchasePriceCode);
     const currentComponents = form.getValues("price_components");
     const purchasePriceIndex = currentComponents.findIndex(
       (c) =>
