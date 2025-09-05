@@ -62,7 +62,7 @@ export default function TagConfigForm({
     category: z.nativeEnum(TagCategory, {
       required_error: t("field_required"),
     }),
-    description: z.string().optional(),
+    description: z.string().trim().optional(),
     priority: z.number().min(0, t("priority_non_negative")),
     status: z.nativeEnum(TagStatus, {
       required_error: t("field_required"),
