@@ -49,6 +49,7 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { DispensedItemsSheet } from "./MedicationBillForm";
 
 interface MedicationTableProps {
@@ -251,6 +252,8 @@ export default function MedicationDispenseList({
     },
   });
 
+  const maxVisibleTabs = useBreakpoints({ default: 3, md: 4 });
+
   return (
     <div>
       <div className="mb-4 flex flex-col gap-4">
@@ -261,7 +264,7 @@ export default function MedicationDispenseList({
             options={Object.values(MEDICATION_REQUEST_STATUS)}
             showMoreDropdown={true}
             showAllOption={false}
-            maxVisibleTabs={4}
+            maxVisibleTabs={maxVisibleTabs}
             defaultVisibleOptions={[
               "active",
               "completed",

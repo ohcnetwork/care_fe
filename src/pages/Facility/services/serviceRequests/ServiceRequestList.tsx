@@ -29,6 +29,7 @@ import ServiceRequestTable from "@/components/ServiceRequest/ServiceRequestTable
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import {
   Priority,
   SERVICE_REQUEST_PRIORITY_COLORS,
@@ -143,14 +144,14 @@ function FilterSelect({
             <CareIcon icon="l-filter" className="size-4" />
             {!value ? null : (
               <>
-                <span>{isStatus ? "Status" : "Priority"}</span>
-                {isStatus && <span className="text-gray-500">is</span>}
+                <span>{isStatus ? t("status") : t("priority")}</span>
+                {isStatus && <span className="text-gray-500">{t("is")}</span>}
                 <span>{t(value)}</span>
               </>
             )}
             {!value && (
               <span className="text-gray-500">
-                {isStatus ? "Status" : "Priority"}
+                {isStatus ? t("status") : t("priority")}
               </span>
             )}
           </div>
@@ -220,6 +221,8 @@ export default function ServiceRequestList({
     updateQuery({ priority: undefined });
   };
 
+  const maxVisibleTabs = useBreakpoints({ default: 3, md: 4 });
+
   return (
     <Page title={t("service_requests")} hideTitleOnPage>
       <SpecimenIDScanDialog
@@ -254,7 +257,7 @@ export default function ServiceRequestList({
               options={Object.values(Status)}
               variant="underline"
               showMoreDropdown={true}
-              maxVisibleTabs={4}
+              maxVisibleTabs={maxVisibleTabs}
               defaultVisibleOptions={[
                 Status.active,
                 Status.on_hold,
