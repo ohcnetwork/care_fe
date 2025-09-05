@@ -46,6 +46,19 @@ const HEADERS_MAP = {
   taxRate: "RATE",
 } as const;
 
+const BASE_UNIT = {
+  tablets: {
+    code: "{tbl}",
+    display: "tablets",
+    system: "http://unitsofmeasure.org",
+  },
+  count: {
+    code: "{count}",
+    display: "count",
+    system: "http://unitsofmeasure.org",
+  },
+};
+
 type Datapoints = Record<keyof typeof HEADERS_MAP, string>[];
 
 async function buildProductKnowledges(datapoints: Datapoints) {
@@ -66,6 +79,7 @@ async function buildProductKnowledges(datapoints: Datapoints) {
         status: ProductKnowledgeStatus.active,
         names: [],
         storage_guidelines: [],
+        base_unit: BASE_UNIT.count,
       }) as ProductKnowledgeCreate,
   );
 
