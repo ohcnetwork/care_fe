@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { AlertCircle, CalendarIcon, ExternalLink } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { useEffect } from "react";
@@ -23,19 +23,17 @@ import {
   CardListSkeleton,
 } from "@/components/Common/SkeletonLoading";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
-import { EncounterCard } from "@/components/Facility/EncounterCard";
 import CreateTokenForm from "@/components/Tokens/CreateTokenForm";
+import PatientHomeTabs from "./home/PatientHomeTabs";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 
 export default function VerifyPatient() {
@@ -68,18 +66,6 @@ export default function VerifyPatient() {
     },
   });
 
-  const { data: encounters, isLoading: encounterLoading } = useQuery({
-    queryKey: ["encounters", "live", patientData?.id],
-    queryFn: query(encounterApi.list, {
-      queryParams: {
-        patient: patientData?.id,
-        live: false,
-      },
-      silent: true,
-    }),
-    enabled: !!patientData?.id && canListEncounters,
-  });
-
   useEffect(() => {
     if (phone_number && year_of_birth && partial_id) {
       verifyPatient({
@@ -90,7 +76,7 @@ export default function VerifyPatient() {
     }
   }, [phone_number, year_of_birth, partial_id, verifyPatient]);
 
-  if (isVerifyingPatient || !facility || encounterLoading) {
+  if (isVerifyingPatient || !facility) {
     return (
       <div className="space-y-4">
         <CardListSkeleton count={1} />
@@ -121,47 +107,28 @@ export default function VerifyPatient() {
                       />
                     </div>
                     <div>
-                      {encounters?.results && encounters.results.length > 0 ? (
-                        <Link
-                          href={`/facility/${facility.id}/patient/${patientData.id}`}
-                          className="flex flex-col group"
-                        >
-                          <div className="flex items-center gap-2">
-                            <h1
-                              data-cy="verify-patient-name"
-                              className="text-xl font-bold capitalize text-gray-950 group-hover:text-primary transition-colors"
-                            >
-                              {patientData.name}
-                            </h1>
-                            <ExternalLink className="size-4 text-gray-400 group-hover:text-primary transition-colors" />
-                          </div>
-                          <h3 className="text-sm font-medium text-gray-600">
-                            {formatPatientAge(patientData, true)},{"  "}
-                            <span className="capitalize">
-                              {patientData.gender.replace("_", " ")}
-                            </span>
-                            {patientData.blood_group &&
-                              ", " + patientData.blood_group.replace("_", " ")}
-                          </h3>
-                        </Link>
-                      ) : (
-                        <>
+                      <Link
+                        href={`/facility/${facility.id}/patient/${patientData.id}`}
+                        className="flex flex-col group"
+                      >
+                        <div className="flex items-center gap-2">
                           <h1
                             data-cy="verify-patient-name"
-                            className="text-xl font-bold capitalize text-gray-950"
+                            className="text-xl font-bold capitalize text-gray-950 group-hover:text-primary transition-colors"
                           >
                             {patientData.name}
                           </h1>
-                          <h3 className="text-sm font-medium text-gray-600">
-                            {formatPatientAge(patientData, true)},{"  "}
-                            <span className="capitalize">
-                              {patientData.gender.replace("_", " ")}
-                            </span>
-                            {patientData.blood_group &&
-                              ", " + patientData.blood_group.replace("_", " ")}
-                          </h3>
-                        </>
-                      )}
+                          <ExternalLink className="size-4 text-gray-400 group-hover:text-primary transition-colors" />
+                        </div>
+                        <h3 className="text-sm font-medium text-gray-600">
+                          {formatPatientAge(patientData, true)},{"  "}
+                          <span className="capitalize">
+                            {patientData.gender.replace("_", " ")}
+                          </span>
+                          {patientData.blood_group &&
+                            ", " + patientData.blood_group.replace("_", " ")}
+                        </h3>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -297,49 +264,15 @@ export default function VerifyPatient() {
             </Card>
           )}
 
-          {canListEncounters && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle>{t("active_encounters")}</CardTitle>
-                <CardDescription>
-                  {t("view_and_manage_patient_encounters")}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-3 pt-2">
-                {encounters?.results && encounters.results.length > 0 ? (
-                  <>
-                    {encounters.results.map((encounter) => (
-                      <EncounterCard
-                        encounter={encounter}
-                        key={encounter.id}
-                        permissions={facility?.permissions ?? []}
-                        facilityId={
-                          encounter.facility.id === facilityId
-                            ? facilityId
-                            : undefined
-                        }
-                      />
-                    ))}
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center justify-center p-6 md:p-8 text-center border rounded-lg border-dashed">
-                    <div className="rounded-full bg-primary/10 p-2 md:p-3 mb-3 md:mb-4">
-                      <CareIcon
-                        icon="l-folder-open"
-                        className="size-5 md:size-6 text-primary"
-                      />
-                    </div>
-                    <h3 className="text-base md:text-lg font-semibold mb-1">
-                      {t("no_active_encounters_found")}
-                    </h3>
-                    <p className="text-xs md:text-sm text-gray-500">
-                      {t("create_a_new_encounter_to_get_started")}
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+          <PatientHomeTabs
+            patientId={patientData.id}
+            facilityId={facilityId}
+            facilityPermissions={facility?.permissions ?? []}
+            canListEncounters={canListEncounters}
+            canCreateAppointment={canCreateAppointment}
+            canCreateToken={canCreateToken}
+            patientData={patientData}
+          />
         </div>
       ) : (
         isError && (

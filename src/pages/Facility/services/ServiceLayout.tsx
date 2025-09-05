@@ -1,4 +1,5 @@
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
 import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { useRoutes } from "raviger";
@@ -19,6 +20,25 @@ const getRoutes = (facilityId: string, serviceId: string) => ({
       facilityId={facilityId}
       resourceType={SchedulableResourceType.HealthcareService}
       resourceId={serviceId}
+    />
+  ),
+  "/queues/:queueId/ongoing": ({ queueId }: { queueId: string }) => (
+    <ManageQueuePage
+      facilityId={facilityId}
+      resourceType={SchedulableResourceType.HealthcareService}
+      resourceId={serviceId}
+      queueId={queueId}
+      tab="ongoing"
+    />
+  ),
+
+  "/queues/:queueId/completed": ({ queueId }: { queueId: string }) => (
+    <ManageQueuePage
+      facilityId={facilityId}
+      resourceType={SchedulableResourceType.HealthcareService}
+      resourceId={serviceId}
+      queueId={queueId}
+      tab="completed"
     />
   ),
 

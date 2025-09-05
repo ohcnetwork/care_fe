@@ -43,4 +43,10 @@ export default {
     TRes: Type<TokenRead>(),
     TBody: Type<TokenGenerateWithQueue>(),
   },
+  setNextTokenToSubQueue: {
+    path: "/api/v1/facility/{facility_id}/token/queue/{id}/set_next_token_to_subqueue/",
+    method: HttpMethod.POST,
+    TRes: Type<TokenRead>(),
+    TBody: Type<{ sub_queue: string; category?: string }>(),
+  },
 } as const;

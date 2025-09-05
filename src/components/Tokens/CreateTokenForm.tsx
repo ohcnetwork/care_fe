@@ -146,7 +146,10 @@ export default function CreateTokenForm({
       });
       onSuccess?.();
       if (!disableRedirectOnSuccess) {
-        navigate(`/facility/${facilityId}/tokens/${data.id}`);
+        // facility/:facilityId/queues/:queueId/tokens/:tokenId
+        navigate(
+          `/facility/${facilityId}/queues/${data.queue.id}/tokens/${data.id}`,
+        );
       }
     },
   });

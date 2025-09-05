@@ -1,5 +1,5 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { PaginatedResponse, UpsertRequest } from "@/Utils/request/types";
 import {
   TokenGenerate,
   TokenRead,
@@ -11,6 +11,9 @@ export default {
     path: "/api/v1/facility/{facility_id}/token/queue/{queue_id}/token/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<TokenRead>>(),
+    defaultQueryParams: {
+      ordering: "number",
+    },
   },
   get: {
     path: "/api/v1/facility/{facility_id}/token/queue/{queue_id}/token/{id}/",
@@ -28,6 +31,12 @@ export default {
     method: HttpMethod.PUT,
     TRes: Type<TokenRead>(),
     TBody: Type<TokenUpdate>(),
+  },
+  upsert: {
+    path: "/api/v1/facility/{facility_id}/token/queue/{queue_id}/token/upsert/",
+    method: HttpMethod.POST,
+    TRes: Type<TokenRead>(),
+    TBody: Type<UpsertRequest<TokenGenerate, TokenUpdate>>(),
   },
   setNext: {
     path: "/api/v1/facility/{facility_id}/token/queue/{queue_id}/token/{id}/set_next/",

@@ -5,6 +5,7 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { ScheduleHome } from "@/components/Schedule/ScheduleHome";
 import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
 import BedsList from "@/pages/Facility/locations/BedsList";
+import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
 import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
 import { InventoryList } from "@/pages/Facility/services/inventory/InventoryList";
 import { ReceiveStock } from "@/pages/Facility/services/inventory/ReceiveStock";
@@ -13,6 +14,7 @@ import { IncomingDeliveries } from "@/pages/Facility/services/inventory/external
 import { PurchaseOrders } from "@/pages/Facility/services/inventory/externalSupply/PurchaseOrders";
 import PurchaseOrdersBySupplier from "@/pages/Facility/services/inventory/externalSupply/PurchaseOrdersBySupplier";
 import ReceiveItem from "@/pages/Facility/services/inventory/internalTransfer/ReceiveItem";
+import SupplyDeliveryCreate from "@/pages/Facility/services/inventory/internalTransfer/SupplyDeliveryCreate";
 import SupplyRequestDetail from "@/pages/Facility/services/inventory/internalTransfer/SupplyRequestDetail";
 import SupplyRequestDispatch from "@/pages/Facility/services/inventory/internalTransfer/SupplyRequestDispatch";
 import ToDispatch from "@/pages/Facility/services/inventory/internalTransfer/ToDispatch";
@@ -97,6 +99,16 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     <ToDispatch facilityId={facilityId} locationId={locationId} />
   ),
 
+  "/internal_transfers/create_delivery": () => (
+    <SupplyDeliveryCreate facilityId={facilityId} locationId={locationId} />
+  ),
+  "/internal_transfers/to_dispatch/delivery/:id": ({ id }: { id: string }) => (
+    <SupplyRequestDispatch
+      facilityId={facilityId}
+      locationId={locationId}
+      supplyDeliveryId={id}
+    />
+  ),
   "/internal_transfers/to_dispatch/:id": ({ id }: { id: string }) => (
     <SupplyRequestDispatch
       facilityId={facilityId}
@@ -260,6 +272,25 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       facilityId={facilityId}
       resourceType={SchedulableResourceType.Location}
       resourceId={locationId}
+    />
+  ),
+  "/queues/:queueId/ongoing": ({ queueId }: { queueId: string }) => (
+    <ManageQueuePage
+      facilityId={facilityId}
+      resourceType={SchedulableResourceType.Location}
+      resourceId={locationId}
+      queueId={queueId}
+      tab="ongoing"
+    />
+  ),
+
+  "/queues/:queueId/completed": ({ queueId }: { queueId: string }) => (
+    <ManageQueuePage
+      facilityId={facilityId}
+      resourceType={SchedulableResourceType.Location}
+      resourceId={locationId}
+      queueId={queueId}
+      tab="completed"
     />
   ),
 

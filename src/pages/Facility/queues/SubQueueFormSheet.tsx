@@ -18,6 +18,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -28,7 +35,7 @@ import {
 
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import {
-  TokenSubQueueCreate,
+  TokenSubQueueStatus,
   TokenSubQueueUpdate,
 } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
 import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
@@ -37,10 +44,12 @@ import query from "@/Utils/request/query";
 
 const createSubQueueFormSchema = z.object({
   name: z.string().min(1, "Service point name is required"),
+  status: z.nativeEnum(TokenSubQueueStatus),
 });
 
 const editSubQueueFormSchema = z.object({
   name: z.string().min(1, "Service point name is required"),
+  status: z.nativeEnum(TokenSubQueueStatus),
 });
 
 type CreateSubQueueFormData = z.infer<typeof createSubQueueFormSchema>;
@@ -76,6 +85,7 @@ export default function SubQueueFormSheet({
     ),
     defaultValues: {
       name: "",
+      status: TokenSubQueueStatus.ACTIVE,
     },
   });
 
@@ -93,15 +103,17 @@ export default function SubQueueFormSheet({
     if (subQueue && isEditMode) {
       form.reset({
         name: subQueue.name,
+        status: subQueue.status,
       });
     }
   }, [subQueue, isEditMode, form]);
 
   // Reset form when sheet opens/closes
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen && !isEditMode) {
       form.reset({
         name: "",
+        status: TokenSubQueueStatus.ACTIVE,
       });
     }
   }, [isOpen, form]);
@@ -117,9 +129,6 @@ export default function SubQueueFormSheet({
       queryClient.invalidateQueries({
         queryKey: ["tokenSubQueues", facilityId],
       });
-    },
-    onError: (error) => {
-      toast.error(error?.message || t("failed_to_create_service_point"));
     },
   });
 
@@ -154,7 +163,7 @@ export default function SubQueueFormSheet({
         ...data,
         resource_type: resourceType,
         resource_id: resourceId,
-      } as TokenSubQueueCreate);
+      });
     }
   };
 
@@ -197,8 +206,35 @@ export default function SubQueueFormSheet({
                       <Input
                         placeholder={t("enter_service_point_name")}
                         {...field}
+                        autoFocus
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("status")}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t("select_status")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={TokenSubQueueStatus.ACTIVE}>
+                          {t("active")}
+                        </SelectItem>
+                        <SelectItem value={TokenSubQueueStatus.INACTIVE}>
+                          {t("inactive")}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

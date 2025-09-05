@@ -105,7 +105,7 @@ export default function QueueFormSheet({
       form.reset({
         name: queue.name,
         date: new Date(queue.date),
-        set_is_primary: queue.set_is_primary,
+        set_is_primary: queue.is_primary,
       });
     }
   }, [queue, isEditMode, form]);
@@ -224,7 +224,11 @@ export default function QueueFormSheet({
                   <FormItem>
                     <FormLabel>{t("queue_name")}</FormLabel>
                     <FormControl>
-                      <Input placeholder={t("enter_queue_name")} {...field} />
+                      <Input
+                        placeholder={t("enter_queue_name")}
+                        {...field}
+                        autoFocus
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

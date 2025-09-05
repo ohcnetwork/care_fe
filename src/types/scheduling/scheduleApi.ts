@@ -20,7 +20,7 @@ import {
   ScheduleTemplateSetChargeItemDefinitionRequest,
   ScheduleTemplateUpdateRequest,
 } from "@/types/scheduling/schedule";
-import { TokenGenerate } from "@/types/tokens/token/token";
+import { TokenGenerate, TokenRead } from "@/types/tokens/token/token";
 import { UserReadMinimal } from "@/types/user/user";
 
 export default {
@@ -191,6 +191,15 @@ export default {
       path: "/api/v1/patient/{patientId}/get_appointments/",
       method: HttpMethod.GET,
       TRes: Type<PaginatedResponse<Appointment>>(),
+    },
+
+    /**
+     * Get tokens for a patient
+     */
+    get_tokens: {
+      path: "/api/v1/patient/{patientId}/get_tokens/",
+      method: HttpMethod.GET,
+      TRes: Type<PaginatedResponse<TokenRead>>(),
     },
 
     // Tag-related endpoints

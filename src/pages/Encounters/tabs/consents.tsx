@@ -20,6 +20,7 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { buildEncounterUrl } from "@/pages/Encounters/utils/utils";
 import { ConsentModel } from "@/types/consent/consent";
 import consentApi from "@/types/consent/consentApi";
 
@@ -153,7 +154,11 @@ function ConsentCard({
           className="w-full justify-center items-center gap-2 rounded-t-none"
           onClick={() =>
             navigate(
-              `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/consents/${consentId}`,
+              buildEncounterUrl(
+                patientId,
+                `/encounter/${encounterId}/consents/${consentId}`,
+                facilityId,
+              ),
             )
           }
         >

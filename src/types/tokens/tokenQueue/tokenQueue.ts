@@ -5,12 +5,14 @@ export interface TokenQueue {
   id: string;
   name: string;
   date: string;
-  set_is_primary: boolean;
+  is_primary: boolean;
 }
 
-export interface TokenQueueCreate extends Omit<TokenQueue, "id"> {
+export interface TokenQueueCreate
+  extends Omit<TokenQueue, "id" | "is_primary"> {
   resource_type: SchedulableResourceType;
   resource_id: string;
+  set_is_primary: boolean;
 }
 
 export interface TokenQueueRead extends TokenQueue {
