@@ -34,7 +34,7 @@ const logger = getLogger();
 
 const GOOGLE_SHEET_ID = "1CB3rqqc2MBaR8e0_oFjEh7KRTOWMamAExNHJ5qGZJpE";
 const SHEET_NAME = "Sheet1";
-const FACILITY_ID = "84874c7b-8905-4a00-ae91-9ffe08a65472";
+const FACILITY_ID = "fa778d26-b5d5-4ff0-9785-ff44486e6bd6";
 
 const HEADERS_MAP = {
   item: "Item",
@@ -42,6 +42,7 @@ const HEADERS_MAP = {
   batchNumber: "Batch No..",
   expiryDate: "Exp Date",
   quantity: "Qty",
+  purchasePrice: "P/Rate",
   sellingPrice: "S/Rate",
   taxRate: "RATE",
 } as const;
@@ -65,11 +66,20 @@ async function buildProductKnowledges(datapoints: Datapoints) {
   const productKnowledges = Object.entries(
     Object.fromEntries(
       datapoints.map((datapoint) => {
-        return [datapoint.item, { hsnCode: datapoint.hsnCode }];
+        return [
+          datapoint.item,
+          {
+            hsnCode: datapoint.hsnCode,
+            baseUnit:
+              +datapoint.sellingPrice < +datapoint.purchasePrice
+                ? BASE_UNIT.tablets
+                : BASE_UNIT.count,
+          },
+        ];
       }),
     ),
   ).map(
-    ([item, { hsnCode }]) =>
+    ([item, { hsnCode, baseUnit }]) =>
       ({
         name: item,
         slug: createSlug(item),
@@ -79,7 +89,7 @@ async function buildProductKnowledges(datapoints: Datapoints) {
         status: ProductKnowledgeStatus.active,
         names: [],
         storage_guidelines: [],
-        base_unit: BASE_UNIT.count,
+        base_unit: baseUnit,
       }) as ProductKnowledgeCreate,
   );
 
@@ -114,6 +124,34 @@ async function buildProductKnowledges(datapoints: Datapoints) {
   );
 }
 
+const taxComponent = (factor: number, code: "cgst" | "sgst") => {
+  return {
+    monetary_component_type: MonetaryComponentType.tax,
+    code: {
+      system: "http://ohc.network/codes/monetary/tax",
+      code,
+      display: code.toUpperCase(),
+    },
+    factor,
+  };
+};
+
+const TAX_COMPONENTS = {
+  "5": [taxComponent(2.5, "cgst"), taxComponent(2.5, "sgst")],
+  "12": [taxComponent(6, "cgst"), taxComponent(6, "sgst")],
+  "18": [taxComponent(9, "cgst"), taxComponent(9, "sgst")],
+};
+
+function getTaxComponents(datapoint: Datapoints[number]) {
+  if (datapoint.taxRate in TAX_COMPONENTS) {
+    return TAX_COMPONENTS[datapoint.taxRate as keyof typeof TAX_COMPONENTS];
+  }
+  logger(
+    `Unknown tax rate: ${datapoint.taxRate} for (slug: ${createSlug(`${datapoint.item}-${datapoint.batchNumber}`)})`,
+  );
+  return [];
+}
+
 async function buildChargeItemDefinitions(datapoints: Datapoints) {
   const chargeItemDefinitions = Object.values(
     Object.fromEntries(
@@ -130,6 +168,7 @@ async function buildChargeItemDefinitions(datapoints: Datapoints) {
                 monetary_component_type: MonetaryComponentType.base,
                 amount: datapoint.sellingPrice,
               },
+              ...getTaxComponents(datapoint),
             ],
           } satisfies ChargeItemDefinitionCreate,
         ];
