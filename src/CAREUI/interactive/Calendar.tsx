@@ -1,4 +1,4 @@
-import { CircleStop } from "lucide-react";
+import { LocateFixed } from "lucide-react";
 import React, { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -16,6 +16,7 @@ interface Props {
   onMonthChange?: (month: Date) => void;
   renderDay?: (date: Date) => React.ReactNode;
   highlightToday?: boolean;
+  setSelectedDate?: (date: Date) => void;
 }
 
 export default function Calendar(props: Props) {
@@ -62,18 +63,8 @@ export default function Calendar(props: Props) {
   const handleToday = () => {
     const today = new Date();
     props.onMonthChange?.(today);
-
-    // Scroll to today's date after a short delay to ensure the calendar has updated
-    setTimeout(() => {
-      if (todayRef.current) {
-        todayRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      }
-    }, 100);
+    props.setSelectedDate?.(today);
   };
-
   // Effect to scroll to today when the month changes to current month
   useEffect(() => {
     const today = new Date();
@@ -99,15 +90,15 @@ export default function Calendar(props: Props) {
   return (
     <div className={`${props.className} w-full`}>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-bold uppercase">
+        <span className="sm:text-xl font-semibold uppercase text-gray-950">
           {currentMonth.toLocaleString("default", {
             month: "long",
             year: "numeric",
           })}
-        </h2>
+        </span>
         <div className="flex gap-2">
           <Button variant="ghost" size="lg" onClick={handleToday}>
-            <CircleStop className="size-4" />
+            <LocateFixed className="size-4" />
             <span className="text-xs font-semibold underline">
               {t("today")}
             </span>
@@ -131,16 +122,18 @@ export default function Calendar(props: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-0.5 md:gap-1.5">
+      <div className="grid grid-cols-7 gap-1 md:gap-1.5">
         {weekDays.map((day) => (
-          <div key={day} className="text-center font-medium">
+          <div key={day} className="text-center font-medium mb-3">
             {day}
           </div>
         ))}
 
         {calendarDays.map((date, index) => {
           if (!date) {
-            return <div key={`empty-${index}`} className="min-h-16" />;
+            return (
+              <div key={`empty-${index}`} className="md:min-h-16 min-h-12" />
+            );
           }
 
           const isToday = date.toDateString() === new Date().toDateString();
@@ -150,7 +143,7 @@ export default function Calendar(props: Props) {
               key={index}
               ref={isToday ? todayRef : null}
               className={cn(
-                "relative min-h-16 rounded-lg transition-all",
+                "relative md:min-h-16 min-h-12 rounded-lg transition-all",
                 isToday &&
                   highlightToday &&
                   "ring-2 ring-primary-400 shadow-lg",

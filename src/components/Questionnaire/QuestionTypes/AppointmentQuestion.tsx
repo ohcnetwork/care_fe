@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
+import { DateSelection } from "@/pages/Appointments/BookAppointment/DateSelection";
 import { AppointmentSlotPicker } from "@/pages/Appointments/components/AppointmentSlotPicker";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
@@ -99,6 +100,8 @@ export function AppointmentQuestion({
   const [resource, setResource] = useState<UserReadMinimal>();
   const [open, setOpen] = useState(false);
   const { hasError } = useFieldError(question.id, errors);
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   const values =
     (questionnaireResponse.values?.[0]?.value as CreateAppointmentQuestion[]) ||
@@ -261,16 +264,23 @@ export function AppointmentQuestion({
               <SheetHeader>
                 <SheetTitle>{t("select_appointment_slot")}</SheetTitle>
               </SheetHeader>
-              <div className="mt-6">
-                {resource && (
-                  <AppointmentSlotPicker
-                    facilityId={facilityId}
-                    resourceId={resource.id}
-                    onSlotSelect={handleSlotSelect}
-                    selectedSlotId={value.slot_id}
-                    onSlotDetailsChange={setSelectedSlot}
-                  />
-                )}
+              <div className="space-y-4">
+                <DateSelection
+                  facilityId={facilityId}
+                  resourceId={resource?.id ?? ""}
+                  setSelectedDate={setSelectedDate}
+                  selectedDate={selectedDate}
+                  setSelectedMonth={setSelectedMonth}
+                  selectedMonth={selectedMonth}
+                />
+                <AppointmentSlotPicker
+                  selectedDate={selectedDate}
+                  facilityId={facilityId}
+                  resourceId={resource?.id ?? ""}
+                  selectedSlotId={value.slot_id}
+                  onSlotDetailsChange={setSelectedSlot}
+                  onSlotSelect={handleSlotSelect}
+                />
               </div>
             </SheetContent>
           </Sheet>

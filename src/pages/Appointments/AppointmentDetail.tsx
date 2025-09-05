@@ -90,6 +90,7 @@ import {
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
+import { DateSelection } from "./BookAppointment/DateSelection";
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
 
 interface Props {
@@ -102,7 +103,6 @@ export default function AppointmentDetail(props: Props) {
   const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
-
   const { canViewAppointments, canUpdateAppointment, canCreateAppointment } =
     getPermissions(hasPermission, facility?.permissions ?? []);
 
@@ -649,8 +649,9 @@ const AppointmentActions = ({
     appointment.user,
   );
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
-
   const currentStatus = appointment.status;
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Allow check-in/start consultation as long as the appointment is before 24 hours ahead of slot's start time
   const canCheckIn = isBefore(
@@ -918,13 +919,25 @@ const AppointmentActions = ({
                       onSelect={(user) => user && setSelectedPractitioner(user)}
                     />
                   </div>
-                  <AppointmentSlotPicker
-                    facilityId={facilityId}
-                    resourceId={selectedPractitioner?.id}
-                    selectedSlotId={selectedSlotId}
-                    onSlotSelect={setSelectedSlotId}
-                    currentAppointment={appointment}
-                  />
+                  <div className="space-y-4">
+                    <DateSelection
+                      facilityId={facilityId}
+                      resourceId={selectedPractitioner?.id}
+                      currentAppointment={appointment}
+                      setSelectedDate={setSelectedDate}
+                      selectedDate={selectedDate}
+                      setSelectedMonth={setSelectedMonth}
+                      selectedMonth={selectedMonth}
+                    />
+                    <AppointmentSlotPicker
+                      selectedDate={selectedDate}
+                      facilityId={facilityId}
+                      resourceId={selectedPractitioner?.id}
+                      selectedSlotId={selectedSlotId}
+                      onSlotSelect={setSelectedSlotId}
+                      currentAppointment={appointment}
+                    />
+                  </div>
 
                   <div className="flex justify-end gap-2 mt-6">
                     <Button

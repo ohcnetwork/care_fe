@@ -1,19 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  format,
-  isBefore,
-  isPast,
-  isSameDay,
-  isToday,
-  isWithinInterval,
-  startOfToday,
-} from "date-fns";
-import { useState } from "react";
+import { format, isWithinInterval } from "date-fns";
+import { ClipboardCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
-
-import Calendar from "@/CAREUI/interactive/Calendar";
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -22,17 +12,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
-import {
-  groupSlotsByAvailability,
-  useAvailabilityHeatmap,
-} from "@/pages/Appointments/utils";
+import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import {
   Appointment,
   GetSlotsForDayResponse,
   SchedulableResourceType,
   TokenSlot,
 } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApi";
+import scheduleApi from "@/types/scheduling/scheduleApi";
+import { useEffect } from "react";
 
 interface AppointmentSlotPickerProps {
   facilityId: string;
@@ -41,6 +29,7 @@ interface AppointmentSlotPickerProps {
   selectedSlotId?: string;
   onSlotDetailsChange?: (slot: TokenSlot) => void;
   currentAppointment?: Appointment;
+  selectedDate?: Date;
 }
 
 export function AppointmentSlotPicker({
@@ -50,49 +39,26 @@ export function AppointmentSlotPicker({
   selectedSlotId,
   onSlotDetailsChange,
   currentAppointment,
+  selectedDate: selectedDateProp,
 }: AppointmentSlotPickerProps) {
   const { t } = useTranslation();
-  const [selectedMonth, setSelectedMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
-  const heatmapQuery = useAvailabilityHeatmap({
-    facilityId,
-    userId: resourceId,
-    month: selectedMonth,
-  });
 
   const slotsQuery = useQuery({
-    queryKey: ["slots", facilityId, resourceId, dateQueryString(selectedDate)],
-    queryFn: query(scheduleApis.slots.getSlotsForDay, {
+    queryKey: [
+      "slots",
+      facilityId,
+      resourceId,
+      dateQueryString(selectedDateProp),
+    ],
+    queryFn: query(scheduleApi.slots.getSlotsForDay, {
       pathParams: { facilityId },
       body: {
         resource_type: SchedulableResourceType.Practitioner,
         resource_id: resourceId ?? "",
-        day: dateQueryString(selectedDate),
+        day: dateQueryString(selectedDateProp),
       },
     }),
-    enabled: !!resourceId && !!selectedDate,
-    select: (data: GetSlotsForDayResponse) => {
-      if (currentAppointment) {
-        return data.results.filter(
-          (slot) => slot.id !== currentAppointment.token_slot.id,
-        );
-      }
-      return data.results;
-    },
-  });
-
-  const slotsTodayQuery = useQuery({
-    queryKey: ["slots", facilityId, resourceId, dateQueryString(new Date())],
-    queryFn: query(scheduleApis.slots.getSlotsForDay, {
-      pathParams: { facilityId },
-      body: {
-        resource_type: SchedulableResourceType.Practitioner,
-        resource_id: resourceId ?? "",
-        day: dateQueryString(new Date()),
-      },
-    }),
-    enabled: !!resourceId,
+    enabled: !!resourceId && !!selectedDateProp,
     select: (data: GetSlotsForDayResponse) => {
       if (currentAppointment) {
         return data.results.filter(
@@ -105,7 +71,7 @@ export function AppointmentSlotPicker({
 
   // Update slot details when a slot is selected
   const handleSlotSelect = (slotId: string | undefined) => {
-    onSlotSelect(slotId);
+    onSlotSelect(slotId ?? "");
     if (slotId && onSlotDetailsChange) {
       const allSlots = slotsQuery.data || [];
       const selectedSlot = allSlots.find((slot) => slot.id === slotId);
@@ -116,171 +82,103 @@ export function AppointmentSlotPicker({
     }
   };
 
-  const renderDay = (date: Date) => {
-    const isSelected = isSameDay(date, selectedDate);
-    const isBeforeToday = isBefore(date, startOfToday());
+  useEffect(() => {
+    onSlotSelect(undefined);
+  }, [selectedDateProp]);
 
-    const availability = (() => {
-      // If the date is today and there are slots for today, ignore the heatmap
-      // as the heatmap does not account for past slots and instead compute
-      // the availability for the day based on the slots that are currently
-      // available
-      if (isToday(date) && slotsTodayQuery.data) {
-        const slots = slotsTodayQuery.data.filter(
-          (slot) => !isPast(slot.end_datetime),
-        );
-        return {
-          booked_slots: slots.reduce((a, s) => a + s.allocated, 0),
-          total_slots: slots.reduce(
-            (acc, slot) => acc + slot.availability.tokens_per_slot,
-            0,
-          ),
-        };
-      }
-
-      return heatmapQuery.data?.[dateQueryString(date)];
-    })();
-
-    if (
-      heatmapQuery.isFetching ||
-      !availability ||
-      availability.total_slots === 0 ||
-      isBeforeToday
-    ) {
-      return (
-        <button
-          disabled
-          onClick={() => {
-            setSelectedDate(date);
-          }}
-          className={cn(
-            "h-full w-full hover:bg-gray-50 rounded-lg relative overflow-hidden border border-gray-200 cursor-not-allowed",
-            isSelected ? "ring-2 ring-primary-500" : "",
-          )}
-        >
-          <div className="relative z-10">
-            <span>{date.getDate()}</span>
-            {!heatmapQuery.isFetching && (
-              <span className="text-xs text-gray-400 block">
-                {t("no_slots")}
-              </span>
-            )}
-          </div>
-        </button>
-      );
-    }
-
-    const { booked_slots, total_slots } = availability;
-    const bookedPercentage = booked_slots / total_slots;
-    const tokensLeft = total_slots - booked_slots;
-    const isFullyBooked = tokensLeft <= 0;
-
-    return (
-      <button
-        disabled={isBeforeToday || isFullyBooked}
-        onClick={() => {
-          setSelectedDate(date);
-        }}
-        className={cn(
-          "h-full w-full hover:bg-gray-50 rounded-lg relative overflow-hidden border-2 hover:scale-105 hover:shadow-md transition-all",
-          isSelected ? "border-primary-500" : "border-gray-200",
-          isFullyBooked ? "bg-gray-200" : "bg-white",
-        )}
-      >
-        <div className="relative z-10">
-          <span>{date.getDate()}</span>
-          {Number.isFinite(tokensLeft) && (
-            <span
-              className={cn(
-                "text-xs text-gray-500 block font-semibold",
-                bookedPercentage >= 0.8
-                  ? "text-red-500"
-                  : bookedPercentage >= 0.5
-                    ? "text-yellow-500"
-                    : "text-primary-500",
-              )}
-            >
-              {t("tokens_left", { count: tokensLeft })}
-            </span>
-          )}
-        </div>
-        {!isFullyBooked && (
-          <div
-            className={cn(
-              "absolute bottom-0 left-0 w-full transition-all",
-              bookedPercentage > 0.8
-                ? "bg-red-100"
-                : bookedPercentage > 0.5
-                  ? "bg-yellow-100"
-                  : "bg-primary-100",
-            )}
-            style={{ height: `${Math.min(bookedPercentage * 100, 100)}%` }}
-          />
-        )}
-      </button>
-    );
-  };
+  const selectedDate = selectedDateProp ?? new Date();
 
   return (
-    <>
-      <div className="w-full">
-        <Calendar
-          month={selectedMonth}
-          onMonthChange={(month) => {
-            setSelectedMonth(month);
-          }}
-          renderDay={renderDay}
-          className="mb-6"
-          highlightToday={false}
-        />
-      </div>
-
-      <div className="flex flex-col gap-3 w-full">
-        <div className="flex justify-between">
-          <span className="font-semibold text-gray-950 text-base">
-            {format(selectedDate, "MMMM d yyyy")}
+    <div
+      className={cn(
+        "sm:flex flex-col gap-3 w-full",
+        !resourceId && "opacity-50 pointer-events-none",
+      )}
+    >
+      <div className="hidden sm:flex justify-between">
+        <span className="font-semibold text-gray-950 text-base">
+          {format(selectedDate, "MMMM d yyyy")}
+        </span>
+        {!!slotsQuery.data?.length && (
+          <span className="text-sm font-medium text-gray-700">
+            {slotsQuery.data?.length} {t("available_time_slots")}
           </span>
+        )}
+      </div>
+      <div className="flex flex-col gap-2 sm:hidden">
+        <span className="font-semibold text-lg text-gray-950 mb-2">
+          {format(selectedDate, "MMMM d yyyy")}
+        </span>
+        <div className="mb-2">
           {!!slotsQuery.data?.length && (
             <span className="text-sm font-medium text-gray-700">
               {slotsQuery.data?.length} {t("available_time_slots")}
             </span>
           )}
         </div>
-        <div className="border-b border-gray-200 w-full" />
-        {slotsQuery.isFetching ? (
-          <div className="flex flex-wrap gap-4">
-            {Array.from({ length: 8 }).map((_, index) => (
-              <Skeleton key={index} className="h-10 w-20" />
-            ))}
-          </div>
-        ) : (
-          <ScrollArea className="h-[30rem]">
-            <div>
-              {slotsQuery.data == null && (
-                <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
-                  <p className="text-gray-400">
-                    {t("to_view_available_slots_select_resource_and_date")}
-                  </p>
+      </div>
+      <div className="border-b border-gray-200 w-full" />
+      {slotsQuery.isFetching ? (
+        <div className="flex flex-wrap gap-4">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <Skeleton key={index} className="h-10 w-20" />
+          ))}
+        </div>
+      ) : (
+        <ScrollArea>
+          <div>
+            {slotsQuery.data == null && (
+              <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-3">
+                  <div className="w-32 h-4 bg-gray-50 rounded" />
+                  <div className="grid grid-cols-4 gap-2">
+                    {Array.from({ length: 12 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="h-12 bg-gray-50 rounded flex text-gray-400 items-center justify-center"
+                      >
+                        --:--
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              )}
-              {slotsQuery.data?.length === 0 && (
-                <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
-                  <p className="text-gray-400">
-                    {t("no_slots_available_for_this_date")}
-                  </p>
+                <div className="flex flex-col gap-3">
+                  <div className="w-32 h-4 bg-gray-50 rounded" />
+                  <div className="grid grid-cols-4 gap-4">
+                    {Array.from({ length: 12 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="h-12 bg-gray-50 rounded flex text-gray-400 items-center justify-center"
+                      >
+                        --:--
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              )}
-              {!!slotsQuery.data?.length &&
-                groupSlotsByAvailability(slotsQuery.data).map(
-                  ({ availability, slots }) => (
-                    <div key={availability.name} className="@container">
-                      <h4 className="text-lg font-semibold mb-3">
+              </div>
+            )}
+
+            {slotsQuery.data?.length === 0 && (
+              <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
+                <p className="text-gray-400">
+                  {t("no_slots_available_for_this_date")}
+                </p>
+              </div>
+            )}
+            {!!slotsQuery.data?.length &&
+              groupSlotsByAvailability(slotsQuery.data).map(
+                ({ availability, slots }) => (
+                  <div key={availability.name} className="flex flex-col">
+                    <div className="flex flex-row gap-2 items-center mb-2 mt-2 sm:mt-0">
+                      <ClipboardCheck size={16} />
+                      <span className="text-sm font-medium text-gray-700">
                         {availability.name}
-                      </h4>
-                      <div className="flex @max-[15rem]:flex-col flex-wrap gap-2">
-                        {slots.map((slot) => (
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:flex flex-wrap gap-2">
+                      {slots.map((slot) => (
+                        <div key={slot.id}>
                           <TokenSlotButton
-                            key={slot.id}
                             slot={slot}
                             availability={availability}
                             selectedSlotId={selectedSlotId}
@@ -291,19 +189,18 @@ export function AppointmentSlotPicker({
                                   : slot.id,
                               );
                             }}
-                            className="@max-[15rem]:w-full"
                           />
-                        ))}
-                      </div>
-                      <Separator className="my-6" />
+                        </div>
+                      ))}
                     </div>
-                  ),
-                )}
-            </div>
-          </ScrollArea>
-        )}
-      </div>
-    </>
+                    <Separator className="my-6" />
+                  </div>
+                ),
+              )}
+          </div>
+        </ScrollArea>
+      )}
+    </div>
   );
 }
 
@@ -333,11 +230,12 @@ export const TokenSlotButton = ({
     <Button
       key={slot.id}
       size="lg"
+      type="button"
       variant={selectedSlotId === slot.id ? "primary" : "outline"}
       onClick={onClick}
       disabled={slot.allocated === availability.tokens_per_slot}
       className={cn(
-        "flex flex-col items-center group gap-0 w-24 relative",
+        "flex flex-col items-center group gap-0 w-full sm:w-24 relative",
         className,
       )}
     >

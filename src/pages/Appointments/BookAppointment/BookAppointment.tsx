@@ -10,6 +10,7 @@ import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
 import { BookAppointmentDetails } from "./BookAppointmentDetails";
+import { BookingsList } from "./BookingsList";
 
 interface Props {
   patientId: string;
@@ -37,6 +38,7 @@ export default function BookAppointment({ patientId, facilityId }: Props) {
           patient={patient}
           facilityId={facilityId}
           isPatientPage
+          className="bg-white shadow-sm border-none rounded-sm"
         />
         <Tabs defaultValue="appointment">
           <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
@@ -60,9 +62,7 @@ export default function BookAppointment({ patientId, facilityId }: Props) {
             <BookAppointmentDetails patientId={patientId} />
           </TabsContent>
           <TabsContent value="encounter">
-            <div>
-              <h3>Encounter</h3>
-            </div>
+            <BookingsList patientId={patientId} facilityId={facilityId ?? ""} />
           </TabsContent>
         </Tabs>
       </div>
