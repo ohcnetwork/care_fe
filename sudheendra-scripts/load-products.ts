@@ -34,7 +34,7 @@ const logger = getLogger();
 
 const GOOGLE_SHEET_ID = "1CB3rqqc2MBaR8e0_oFjEh7KRTOWMamAExNHJ5qGZJpE";
 const SHEET_NAME = "Sheet1";
-const FACILITY_ID = "fa778d26-b5d5-4ff0-9785-ff44486e6bd6";
+const FACILITY_ID = process.env.FACILITY_ID;
 
 const HEADERS_MAP = {
   item: "Item",
