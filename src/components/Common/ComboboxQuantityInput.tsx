@@ -28,7 +28,6 @@ interface Props {
   quantity?: DosageQuantity | QuantitySpec | null;
   onChange: (quantity: DosageQuantity | QuantitySpec | null) => void;
   disabled?: boolean;
-  unitDisabled?: boolean;
   placeholder?: string;
   autoFocus?: boolean;
   units?: readonly Code[];
@@ -39,7 +38,6 @@ export function ComboboxQuantityInput({
   quantity,
   onChange,
   disabled,
-  unitDisabled,
   placeholder = "Enter a number...",
   autoFocus,
   units = DOSAGE_UNITS_CODES,
@@ -60,10 +58,8 @@ export function ComboboxQuantityInput({
     const value = e.target.value;
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
       setInputValue(value);
-      if (!unitDisabled) {
-        setOpen(true);
-        setActiveIndex(0);
-      }
+      setOpen(true);
+      setActiveIndex(0);
       if (value === "") {
         onChange(null);
       }
@@ -77,7 +73,7 @@ export function ComboboxQuantityInput({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (disabled || unitDisabled || !showDropdown) return;
+    if (disabled || !showDropdown) return;
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -113,10 +109,7 @@ export function ComboboxQuantityInput({
 
   return (
     <div className={cn("relative flex w-full flex-col gap-1", className)}>
-      <Popover
-        open={!disabled && !unitDisabled && open && showDropdown}
-        onOpenChange={setOpen}
-      >
+      <Popover open={!disabled && open && showDropdown} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <div className="relative">
             <Input
@@ -136,7 +129,6 @@ export function ComboboxQuantityInput({
               <div
                 className={cn(
                   "absolute right-4 pr-2 top-1/2 -translate-y-1/2 text-sm text-gray-500",
-                  unitDisabled && "pointer-events-none",
                 )}
               >
                 {selectedUnit.display}
