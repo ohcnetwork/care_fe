@@ -34,7 +34,7 @@ const logger = getLogger();
 
 const GOOGLE_SHEET_ID = "1CB3rqqc2MBaR8e0_oFjEh7KRTOWMamAExNHJ5qGZJpE";
 const SHEET_NAME = "Sheet1";
-const FACILITY_ID = "176286ef-178f-4e7d-af8b-a30b2951f641";
+const FACILITY_ID = "84874c7b-8905-4a00-ae91-9ffe08a65472";
 
 const HEADERS_MAP = {
   item: "Item",
@@ -97,7 +97,6 @@ async function buildProductKnowledges(datapoints: Datapoints) {
 
       return results as ProductKnowledgeBase[];
     },
-    500,
   );
 }
 
@@ -151,7 +150,6 @@ async function buildChargeItemDefinitions(datapoints: Datapoints) {
       );
       return results as ChargeItemDefinitionBase[];
     },
-    500,
   );
 }
 
@@ -212,7 +210,6 @@ async function buildProducts(
       );
       return results as ProductBase[];
     },
-    500,
   );
 }
 
