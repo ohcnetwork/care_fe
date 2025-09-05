@@ -92,8 +92,8 @@ const formSchema = z.object({
     .nullable()
     .optional()
     .refine((data) => {
-      if (!data) return true; // definitional is optional
-      return data.dosage_form && data.dosage_form.code; // if definitional exists, dosage_form is required
+      if (!data) return true; // definitional is optional.
+      return data.dosage_form && data.dosage_form.code; // if definitional exists, dosage_form is required.
     }),
 });
 
