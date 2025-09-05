@@ -15,7 +15,10 @@ export function makeUrl(
   }
 
   if (query) {
-    path += `?${makeQueryParams(query)}`;
+    const queryString = makeQueryParams(query);
+    if (queryString) {
+      path += `?${queryString}`;
+    }
   }
 
   return path;

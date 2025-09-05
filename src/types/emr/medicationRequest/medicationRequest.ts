@@ -589,12 +589,12 @@ export function parseMedicationStringToRequest(
     as_needed_boolean: false,
   };
 
-  if (productKnowledge?.definitional?.dosage_form) {
+  if (productKnowledge?.base_unit) {
     dosageInstruction.dose_and_rate = {
       type: "ordered",
       dose_quantity: {
         value: 0,
-        unit: productKnowledge.definitional.dosage_form,
+        unit: productKnowledge.base_unit,
       },
     };
   }

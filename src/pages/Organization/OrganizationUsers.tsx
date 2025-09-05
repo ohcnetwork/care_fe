@@ -159,7 +159,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                 <CardGridSkeleton count={6} />
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                 {users?.results?.length === 0 ? (
                   <Card className="col-span-full">
                     <CardContent className="p-6 text-center text-gray-500">
