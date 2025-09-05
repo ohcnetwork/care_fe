@@ -66,46 +66,43 @@ interface PaymentReconciliationSheetProps {
 }
 
 // Add schema before the component
-const formSchema = z.object({
-  reconciliation_type: z.nativeEnum(PaymentReconciliationType),
-  status: z.nativeEnum(PaymentReconciliationStatus),
-  kind: z.nativeEnum(PaymentReconciliationKind),
-  issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
-  outcome: z.nativeEnum(PaymentReconciliationOutcome),
-  method: z.nativeEnum(PaymentReconciliationPaymentMethod),
-  payment_datetime: z.string(),
-  amount: z.string().refine(
-    (val) => {
-      const num = Number(val);
-      return !isNaN(num) && num > 0 && /^\d+(\.\d{0,2})?$/.test(val);
-    },
-    { message: t("enter_valid_amount") },
-  ),
-  tendered_amount: z.string().refine(
-    (val) => {
-      const num = Number(val);
-      return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
-    },
-    {
-      message: t("enter_valid_amount"),
-    },
-  ),
-  returned_amount: z.string().refine(
-    (val) => {
-      const num = Number(val);
-      return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
-    },
-    {
-      message: t("enter_valid_amount"),
-    },
-  ),
-  target_invoice: z.string().optional(),
-  reference_number: z.string().optional(),
-  authorization: z.string().optional(),
-  disposition: z.string().optional(),
-  note: z.string().optional(),
-  account: z.string(),
-});
+const formSchema = z
+  .object({
+    reconciliation_type: z.nativeEnum(PaymentReconciliationType),
+    status: z.nativeEnum(PaymentReconciliationStatus),
+    kind: z.nativeEnum(PaymentReconciliationKind),
+    issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
+    outcome: z.nativeEnum(PaymentReconciliationOutcome),
+    method: z.nativeEnum(PaymentReconciliationPaymentMethod),
+    payment_datetime: z.string(),
+    amount: z.string().refine(
+      (val) => {
+        const num = Number(val);
+        return !isNaN(num) && num > 0 && /^\d+(\.\d{0,2})?$/.test(val);
+      },
+      { message: t("enter_valid_amount") },
+    ),
+    tendered_amount: z.string().refine(
+      (val) => {
+        const num = Number(val);
+        return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
+      },
+      {
+        message: t("enter_valid_amount"),
+      },
+    ),
+    returned_amount: z.string().optional(),
+    target_invoice: z.string().optional(),
+    reference_number: z.string().optional(),
+    authorization: z.string().optional(),
+    disposition: z.string().optional(),
+    note: z.string().optional(),
+    account: z.string(),
+  })
+  .refine((data) => Number(data.tendered_amount) >= Number(data.amount), {
+    message: t("tender_amount_cannot_be_less_than_payment_amount"),
+    path: ["tendered_amount"],
+  });
 
 export function PaymentReconciliationSheet({
   open,
@@ -230,7 +227,9 @@ export function PaymentReconciliationSheet({
           <SheetTitle>{t("record_payment")}</SheetTitle>
           <SheetDescription>
             {invoice
-              ? t("recording_payment_for_invoice", { id: invoice.id })
+              ? t("recording_payment_for_invoice", {
+                  id: invoice.number,
+                })
               : t("recording_payment")}
           </SheetDescription>
         </SheetHeader>
@@ -395,13 +394,13 @@ export function PaymentReconciliationSheet({
                   />
 
                   {Number(returnedAmount) > 0 && (
-                    <div className="rounded-md bg-muted p-3">
+                    <div className="rounded-md bg-green-50 border border-green-200 p-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">
+                        <span className="text-sm font-medium text-green-800">
                           {t("change_to_return")}
                         </span>
                         <MonetaryDisplay
-                          className="font-semibold"
+                          className="font-semibold text-green-800"
                           amount={returnedAmount}
                         />
                       </div>
