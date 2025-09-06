@@ -25,18 +25,18 @@ import {
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
-import { MFAMethod, MFAOption } from "@/types/auth/otp";
+import { MfaMethod, MfaOption } from "@/types/auth/auth";
 
 import { AuthHero } from "./AuthHero";
 
 export const Authenticate = () => {
   const { t } = useTranslation();
   const [error, setError] = useState<string>("");
-  const [currentMethod, setCurrentMethod] = useState<MFAMethod>("totp");
+  const [currentMethod, setCurrentMethod] = useState<MfaMethod>("totp");
   const { verifyMFA, isVerifyingMFA } = useAuthContext();
 
   // Available MFA methods configuration
-  const mfaOptions: MFAOption[] = [
+  const mfaOptions: MfaOption[] = [
     {
       id: "totp",
       label: t("use_auth_app"),
@@ -101,7 +101,7 @@ export const Authenticate = () => {
   );
 
   // Handle method change
-  const handleMethodChange = (method: MFAMethod) => {
+  const handleMethodChange = (method: MfaMethod) => {
     setCurrentMethod(method);
     form.reset();
     setError("");

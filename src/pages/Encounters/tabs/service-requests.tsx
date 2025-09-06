@@ -57,6 +57,7 @@ export const EncounterServiceRequestTab = () => {
         ordering: "-created_date",
       },
     }),
+    enabled: !!facilityId,
   });
 
   const handleClearPriority = () => {
@@ -94,7 +95,7 @@ export const EncounterServiceRequestTab = () => {
             value={qParams.status || ""}
             onValueChange={(value) => updateQuery({ status: value })}
             options={Object.values(Status)}
-            label="status"
+            label={t("status")}
             onClear={handleClearStatus}
           />
         </div>
@@ -104,7 +105,7 @@ export const EncounterServiceRequestTab = () => {
             value={qParams.priority || ""}
             onValueChange={(value) => updateQuery({ priority: value })}
             options={Object.values(Priority)}
-            label="priority"
+            label={t("priority")}
             onClear={handleClearPriority}
           />
         </div>
