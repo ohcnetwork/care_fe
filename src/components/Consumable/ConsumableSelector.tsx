@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/popover";
 
 import query from "@/Utils/request/query";
+import { cn } from "@/lib/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
   ProductKnowledgeBase,
@@ -57,8 +58,7 @@ export default function ConsumableSelector({
     queryFn: query.debounced(productKnowledgeApi.listProductKnowledge, {
       queryParams: {
         facility: facilityId,
-        limit: 100,
-        offset: 0,
+        limit: 14,
         name: search,
         status: "active",
         product_type: ProductKnowledgeType.consumable,
@@ -74,7 +74,7 @@ export default function ConsumableSelector({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={`w-full ${className || ""}`}
+          className={cn("w-full", className)}
           disabled={disabled}
         >
           <PlusIcon />

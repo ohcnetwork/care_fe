@@ -102,11 +102,11 @@ const createFormSchema = () =>
         reference_id: z.string().uuid(),
         productKnowledge: z.any(),
         isSelected: z.boolean(),
-        quantity: z.number().min(0),
+        quantity: z.number().min(1),
         lots: z.array(
           z.object({
             selectedInventoryId: z.string(),
-            quantity: z.number().min(0),
+            quantity: z.number().min(1),
           }),
         ),
       }),
@@ -381,7 +381,7 @@ export default function DispenseConsumableDrawer({
           }
 
           const dispenseData: MedicationDispenseCreate = {
-            status: MedicationDispenseStatus.preparation,
+            status: MedicationDispenseStatus.completed,
             category: MedicationDispenseCategory.outpatient,
             when_prepared: new Date(),
             dosage_instruction: [],
@@ -526,11 +526,11 @@ export default function DispenseConsumableDrawer({
                             reference_id: crypto.randomUUID(),
                             productKnowledge: product,
                             isSelected: true,
-                            quantity: 0,
+                            quantity: 1,
                             lots: [
                               {
                                 selectedInventoryId: "",
-                                quantity: 0,
+                                quantity: 1,
                               },
                             ],
                           });
@@ -771,7 +771,7 @@ export default function DispenseConsumableDrawer({
                                                             {
                                                               selectedInventoryId:
                                                                 inv.id,
-                                                              quantity: 0,
+                                                              quantity: 1,
                                                             },
                                                           ],
                                                         );
@@ -973,11 +973,11 @@ export default function DispenseConsumableDrawer({
                             reference_id: crypto.randomUUID(),
                             productKnowledge: product,
                             isSelected: true,
-                            quantity: 0,
+                            quantity: 1,
                             lots: [
                               {
                                 selectedInventoryId: "",
-                                quantity: 0,
+                                quantity: 1,
                               },
                             ],
                           });
