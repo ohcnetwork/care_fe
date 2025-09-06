@@ -43,6 +43,7 @@ import {
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
 import { DateTimeInput } from "@/components/Common/DateTimeInput";
+import UserSelector from "@/components/Common/UserSelector";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
@@ -52,6 +53,7 @@ import MedicationValueSetSelect from "@/components/Questionnaire/MedicationValue
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
+import useAuthUser from "@/hooks/useAuthUser";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
@@ -84,6 +86,7 @@ import {
   useFieldError,
   validateFields,
 } from "@/types/questionnaire/validation";
+import { UserReadMinimal } from "@/types/user/user";
 
 function formatDoseRange(range?: DoseRange): string {
   if (!range?.high?.value) return "";
@@ -206,6 +209,7 @@ export function MedicationRequestQuestion({
 }: MedicationRequestQuestionProps) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
+  const currentUser = useAuthUser() as UserReadMinimal;
   const isPreview = patientId === "preview";
   const medications =
     (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
@@ -233,6 +237,7 @@ export function MedicationRequestQuestion({
               ...medication,
               requested_product_internal: medication.requested_product,
               requested_product: medication.requested_product?.id,
+              requester: medication.requester || currentUser,
             })),
           },
         ],
@@ -255,8 +260,9 @@ export function MedicationRequestQuestion({
 
   const handleAddMedication = (medication: Code) => {
     const initialDetails = {
-      ...parseMedicationStringToRequest(medication),
+      ...parseMedicationStringToRequest(currentUser, medication),
       authored_on: new Date().toISOString(),
+      requester: currentUser,
     };
 
     if (desktopLayout) {
@@ -270,7 +276,13 @@ export function MedicationRequestQuestion({
     productKnowledge: ProductKnowledgeBase,
   ) => {
     const initialDetails = {
-      ...parseMedicationStringToRequest(undefined, productKnowledge),
+      ...parseMedicationStringToRequest(
+        currentUser,
+        undefined,
+        productKnowledge,
+      ),
+      authored_on: new Date().toISOString(),
+      requester: currentUser,
     };
 
     if (desktopLayout) {
@@ -312,11 +324,12 @@ export function MedicationRequestQuestion({
           ...request,
           requested_product: requested_product?.id,
           requested_product_internal: requested_product,
+          requester: request.requester || currentUser,
         };
       } else {
         const statement = record as MedicationStatementRead;
         return {
-          ...parseMedicationStringToRequest(statement.medication),
+          ...parseMedicationStringToRequest(currentUser, statement.medication),
           authored_on: new Date().toISOString(),
           note: statement.note,
         } as MedicationRequest;
@@ -402,6 +415,7 @@ export function MedicationRequestQuestion({
           index={-1}
           questionId={questionnaireResponse.question_id}
           errors={errors}
+          facilityId={facilityId}
         />
       )}
     </div>
@@ -558,14 +572,14 @@ export function MedicationRequestQuestion({
           <div className="min-w-fit">
             <div
               className={cn(
-                "max-w-[2344px] relative lg:border border-gray-200 rounded-md",
+                "max-w-[2624px] relative lg:border border-gray-200 rounded-md",
                 {
                   "bg-gray-50/50": !desktopLayout,
                 },
               )}
             >
               {/* Header - Only show on desktop */}
-              <div className="hidden lg:grid grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_220px_180px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
+              <div className="hidden lg:grid grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_220px_280px_180px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("medicine")}
                 </div>
@@ -597,6 +611,9 @@ export function MedicationRequestQuestion({
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("authored_on")}
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                  {t("requester")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("note")}
@@ -743,6 +760,7 @@ export function MedicationRequestQuestion({
                                   index={index}
                                   questionId={questionnaireResponse.question_id}
                                   errors={errors}
+                                  facilityId={facilityId}
                                 />
                               </CardContent>
                             </CollapsibleContent>
@@ -759,6 +777,7 @@ export function MedicationRequestQuestion({
                           index={index}
                           questionId={questionnaireResponse.question_id}
                           errors={errors}
+                          facilityId={facilityId}
                         />
                       )}
                     </React.Fragment>
@@ -813,6 +832,7 @@ interface MedicationRequestGridRowProps {
   index: number;
   questionId: string;
   errors?: QuestionValidationError[];
+  facilityId?: string;
 }
 
 const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
@@ -823,6 +843,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   index,
   questionId,
   errors,
+  facilityId,
 }) => {
   const { t } = useTranslation();
   const [showDosageDialog, setShowDosageDialog] = useState(false);
@@ -974,7 +995,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 lg:grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_220px_180px_48px] border-b border-gray-200 hover:bg-gray-50/50 space-y-3 lg:space-y-0",
+        "grid grid-cols-1 lg:grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_220px_280px_180px_48px] border-b border-gray-200 hover:bg-gray-50/50 space-y-3 lg:space-y-0",
         {
           "opacity-40 pointer-events-none": disabled,
         },
@@ -1372,6 +1393,21 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         <DateTimeInput
           value={medication.authored_on}
           onDateChange={(val) => onUpdate?.({ authored_on: val })}
+          disabled={disabled || isReadOnly}
+        />
+      </div>
+      {/* Requester */}
+      <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+        <Label className="mb-1.5 block text-sm lg:hidden">
+          {t("requester")}
+        </Label>
+        <UserSelector
+          selected={medication.requester}
+          onChange={(user) => {
+            onUpdate?.({ requester: user });
+          }}
+          placeholder={t("select_requester")}
+          facilityId={facilityId}
           disabled={disabled || isReadOnly}
         />
       </div>

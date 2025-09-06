@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
-import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
 import { FacilityRead } from "@/types/facility/facility";
 import { Appointment } from "@/types/scheduling/schedule";
 
@@ -62,8 +61,7 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
                 {t("token_no")}
               </Label>
               <p className="text-5xl font-bold leading-none">
-                {/* TODO: get token number from backend */}
-                {getFakeTokenNumber(appointment)}
+                {appointment.token?.number}
               </p>
             </div>
           </div>
