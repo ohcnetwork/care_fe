@@ -42,6 +42,7 @@ import {
 import accountApi from "@/types/billing/account/accountApi";
 import {
   ChargeItemRead,
+  ChargeItemServiceResource,
   ChargeItemStatus,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
@@ -122,7 +123,7 @@ export default function ServiceRequestShow({
         facilityId: facilityId,
       },
       queryParams: {
-        service_resource: "service_request",
+        service_resource: ChargeItemServiceResource.service_request,
         service_resource_id: serviceRequestId,
       },
     }),
@@ -482,6 +483,7 @@ export default function ServiceRequestShow({
             onOpenChange={setIsMultiAddOpen}
             facilityId={facilityId}
             serviceRequestId={serviceRequestId}
+            serviceResourceType={ChargeItemServiceResource.service_request}
             onChargeItemsAdded={() => {
               queryClient.invalidateQueries({
                 queryKey: ["chargeItems", facilityId, serviceRequestId],

@@ -1,9 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { groupItemsByTime } from "@/lib/time";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,12 +28,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -61,6 +58,7 @@ import {
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 
 interface MedicationTableProps {
+  facilityId: string;
   medications: MedicationDispenseRead[];
   selectedMedications: string[];
   onSelectionChange: (id: string) => void;
@@ -69,6 +67,7 @@ interface MedicationTableProps {
 }
 
 function MedicationTable({
+  facilityId,
   medications,
   selectedMedications,
   onSelectionChange,
@@ -122,6 +121,9 @@ function MedicationTable({
             <TableHead className="text-gray-700">{t("dosage")}</TableHead>
             <TableHead className="text-gray-700">{t("frequency")}</TableHead>
             <TableHead className="text-gray-700">{t("quantity")}</TableHead>
+            <TableHead className="text-gray-700">
+              {t("item_location")}
+            </TableHead>
             <TableHead className="text-gray-700">{t("status")}</TableHead>
             <TableHead className="text-gray-700">
               {t("prepared_date")}
@@ -129,6 +131,7 @@ function MedicationTable({
             <TableHead className="text-gray-700">
               {t("payment_status")}
             </TableHead>
+            <TableHead className="text-gray-700">{t("invoice")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white">
@@ -137,7 +140,7 @@ function MedicationTable({
             const frequency = instruction?.timing?.code;
             const dosage = instruction?.dose_and_rate?.dose_quantity;
             const isPaid =
-              medication.charge_item.paid_invoice?.status ===
+              medication.charge_item?.paid_invoice?.status ===
               InvoiceStatus.balanced;
             const shouldShowCheckbox = showCheckbox;
 
@@ -148,29 +151,16 @@ function MedicationTable({
               >
                 {shouldShowCheckbox && (
                   <TableCell className="text-gray-950 p-0">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="flex items-center justify-center p-2">
-                            {shouldShowCheckbox && isPaid && (
-                              <Checkbox
-                                checked={selectedMedications.includes(
-                                  medication.id,
-                                )}
-                                onCheckedChange={() =>
-                                  onSelectionChange(medication.id)
-                                }
-                              />
-                            )}
-                          </span>
-                        </TooltipTrigger>
-                        {shouldShowCheckbox && !isPaid && (
-                          <TooltipContent>
-                            <p>{t("cannot_complete_unpaid_medication")}</p>
-                          </TooltipContent>
-                        )}
-                      </Tooltip>
-                    </TooltipProvider>
+                    <span className="flex items-center justify-center p-2">
+                      {shouldShowCheckbox && (
+                        <Checkbox
+                          checked={selectedMedications.includes(medication.id)}
+                          onCheckedChange={() =>
+                            onSelectionChange(medication.id)
+                          }
+                        />
+                      )}
+                    </span>
                   </TableCell>
                 )}
                 <TableCell className="text-gray-950 font-semibold">
@@ -189,7 +179,10 @@ function MedicationTable({
                     : frequency?.display || "-"}
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
-                  {medication.charge_item.quantity || "-"}
+                  {medication.quantity || "-"}
+                </TableCell>
+                <TableCell className="text-gray-950 font-medium">
+                  {medication.item.location.name || "-"}
                 </TableCell>
                 <TableCell className={"text-gray-950"}>
                   {editableStatuses.includes(medication.status) ? (
@@ -249,6 +242,24 @@ function MedicationTable({
                     {isPaid ? t("paid") : t("unpaid")}
                   </Badge>
                 </TableCell>
+                <TableCell>
+                  {medication?.charge_item?.paid_invoice && (
+                    <Button variant="link" asChild>
+                      <Link
+                        href={`/facility/${facilityId}/billing/invoices/${medication.charge_item.paid_invoice?.id}`}
+                        basePath={`/`}
+                        className="hover:text-primary underline underline-offset-2"
+                        target="_blank"
+                      >
+                        {t("view_invoice")}
+                        <CareIcon
+                          icon="l-external-link-alt"
+                          className="size-3"
+                        />
+                      </Link>
+                    </Button>
+                  )}
+                </TableCell>
               </TableRow>
             );
           })}
@@ -274,11 +285,11 @@ export default function DispensedMedicationList({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedMedications, setSelectedMedications] = useState<string[]>([]);
-  const [paymentFilter, setPaymentFilter] = useState<"paid" | "unpaid">("paid");
-  const { qParams, Pagination, resultsPerPage } = useFilters({
+  const { qParams, Pagination, resultsPerPage, updateQuery } = useFilters({
     limit: 100,
     disableCache: true,
   });
+  const paymentFilter = (qParams.payment_status as "paid" | "unpaid") || "paid";
   const [billableChargeItems, setBillableChargeItems] = useState<
     ChargeItemRead[]
   >([]);
@@ -352,12 +363,12 @@ export default function DispensedMedicationList({
 
   const filteredMedications = response?.results?.filter((med) => {
     if (paymentFilter === "paid")
-      return med.charge_item.paid_invoice?.status === InvoiceStatus.balanced;
+      return med.charge_item?.paid_invoice?.status === InvoiceStatus.balanced;
     if (paymentFilter === "unpaid")
       return (
-        !med.charge_item.paid_invoice ||
-        med.charge_item.paid_invoice?.status === InvoiceStatus.issued ||
-        med.charge_item.paid_invoice?.status === InvoiceStatus.draft
+        !med.charge_item?.paid_invoice ||
+        med.charge_item?.paid_invoice?.status === InvoiceStatus.issued ||
+        med.charge_item?.paid_invoice?.status === InvoiceStatus.draft
       );
     return true;
   });
@@ -369,7 +380,7 @@ export default function DispensedMedicationList({
     paymentFilter === "unpaid"
       ? filteredMedications
           ?.filter((med) => {
-            return med.charge_item.status === ChargeItemStatus.billable;
+            return med.charge_item?.status === ChargeItemStatus.billable;
           })
           .map((med) => med.charge_item)
       : [];
@@ -429,9 +440,7 @@ export default function DispensedMedicationList({
       <div className="mb-4">
         <Tabs
           value={paymentFilter}
-          onValueChange={(value) =>
-            setPaymentFilter(value as typeof paymentFilter)
-          }
+          onValueChange={(value) => updateQuery({ payment_status: value })}
           className="w-full"
         >
           <TabsList>
@@ -459,14 +468,14 @@ export default function DispensedMedicationList({
                   {t("today")}
                 </h3>
                 <MedicationTable
+                  facilityId={facilityId}
                   medications={groupedMedications.today}
                   selectedMedications={selectedMedications}
                   onSelectionChange={handleSelectionChange}
                   onSelectAll={handleSelectAll}
                   showCheckbox={
-                    paymentFilter !== "unpaid" &&
-                    (status === MedicationDispenseStatus.preparation ||
-                      status === MedicationDispenseStatus.in_progress)
+                    status === MedicationDispenseStatus.preparation ||
+                    status === MedicationDispenseStatus.in_progress
                   }
                 />
               </div>
@@ -479,14 +488,14 @@ export default function DispensedMedicationList({
                   {t("yesterday")}
                 </h3>
                 <MedicationTable
+                  facilityId={facilityId}
                   medications={groupedMedications.yesterday}
                   selectedMedications={selectedMedications}
                   onSelectionChange={handleSelectionChange}
                   onSelectAll={handleSelectAll}
                   showCheckbox={
-                    paymentFilter !== "unpaid" &&
-                    (status === MedicationDispenseStatus.preparation ||
-                      status === MedicationDispenseStatus.in_progress)
+                    status === MedicationDispenseStatus.preparation ||
+                    status === MedicationDispenseStatus.in_progress
                   }
                 />
               </div>
@@ -499,14 +508,14 @@ export default function DispensedMedicationList({
                   {t("this_week")}
                 </h3>
                 <MedicationTable
+                  facilityId={facilityId}
                   medications={groupedMedications.thisWeek}
                   selectedMedications={selectedMedications}
                   onSelectionChange={handleSelectionChange}
                   onSelectAll={handleSelectAll}
                   showCheckbox={
-                    paymentFilter !== "unpaid" &&
-                    (status === MedicationDispenseStatus.preparation ||
-                      status === MedicationDispenseStatus.in_progress)
+                    status === MedicationDispenseStatus.preparation ||
+                    status === MedicationDispenseStatus.in_progress
                   }
                 />
               </div>
@@ -519,14 +528,14 @@ export default function DispensedMedicationList({
                   {t("this_month")}
                 </h3>
                 <MedicationTable
+                  facilityId={facilityId}
                   medications={groupedMedications.thisMonth}
                   selectedMedications={selectedMedications}
                   onSelectionChange={handleSelectionChange}
                   onSelectAll={handleSelectAll}
                   showCheckbox={
-                    paymentFilter !== "unpaid" &&
-                    (status === MedicationDispenseStatus.preparation ||
-                      status === MedicationDispenseStatus.in_progress)
+                    status === MedicationDispenseStatus.preparation ||
+                    status === MedicationDispenseStatus.in_progress
                   }
                 />
               </div>
@@ -539,14 +548,14 @@ export default function DispensedMedicationList({
                   {t("this_year")}
                 </h3>
                 <MedicationTable
+                  facilityId={facilityId}
                   medications={groupedMedications.thisYear}
                   selectedMedications={selectedMedications}
                   onSelectionChange={handleSelectionChange}
                   onSelectAll={handleSelectAll}
                   showCheckbox={
-                    paymentFilter !== "unpaid" &&
-                    (status === MedicationDispenseStatus.preparation ||
-                      status === MedicationDispenseStatus.in_progress)
+                    status === MedicationDispenseStatus.preparation ||
+                    status === MedicationDispenseStatus.in_progress
                   }
                 />
               </div>
@@ -559,14 +568,14 @@ export default function DispensedMedicationList({
                   {t("older")}
                 </h3>
                 <MedicationTable
+                  facilityId={facilityId}
                   medications={groupedMedications.older}
                   selectedMedications={selectedMedications}
                   onSelectionChange={handleSelectionChange}
                   onSelectAll={handleSelectAll}
                   showCheckbox={
-                    paymentFilter !== "unpaid" &&
-                    (status === MedicationDispenseStatus.preparation ||
-                      status === MedicationDispenseStatus.in_progress)
+                    status === MedicationDispenseStatus.preparation ||
+                    status === MedicationDispenseStatus.in_progress
                   }
                 />
               </div>

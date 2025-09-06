@@ -444,9 +444,7 @@ function ProductKnowledgeFormContent({
                         }}
                       >
                         <SelectTrigger>
-                          <SelectValue
-                            placeholder={t("dosage_form_placeholder")}
-                          />
+                          <SelectValue placeholder={t("select_base_unit")} />
                         </SelectTrigger>
                         <SelectContent>
                           {DOSAGE_UNITS_CODES.map((unit) => (

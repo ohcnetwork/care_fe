@@ -142,7 +142,22 @@ export const PatientHome = (props: {
                   <div className="font-semibold text-secondary-900">
                     {t("actions")}
                   </div>
+                  {/* Add link to patient home page */}
+
                   <div className="mt-2 h-full space-y-2">
+                    <Button asChild variant="outline" className="w-full">
+                      <Link
+                        href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                          {
+                            phone_number: patientData.phone_number,
+                            year_of_birth: patientData.year_of_birth.toString(),
+                            partial_id: patientData.id.slice(0, 5),
+                          },
+                        ).toString()}`}
+                      >
+                        {t("patient_home")}
+                      </Link>
+                    </Button>
                     <div className="space-y-3 text-left text-lg font-semibold text-secondary-900">
                       <div className="space-y-2">
                         <PLUGIN_Component
