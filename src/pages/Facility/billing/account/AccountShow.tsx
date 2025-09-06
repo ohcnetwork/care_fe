@@ -1,7 +1,7 @@
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { Link, navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -53,6 +53,7 @@ import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
 import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
 import AccountSheet from "./AccountSheet";
+import BedChargeItemsTable from "./components/BedChargeItemsTable";
 import ChargeItemsTable from "./components/ChargeItemsTable";
 
 function formatDate(date?: string) {
@@ -64,7 +65,7 @@ function formatDate(date?: string) {
   });
 }
 
-type tab = "charge_items" | "invoices" | "payments";
+type tab = "charge_items" | "invoices" | "payments" | "bed_charge_items";
 
 const closedStatusText = {
   [AccountBillingStatus.closed_baddebt]: "close_account_help_closed_baddebt",
@@ -91,6 +92,7 @@ export function AccountShow({
     sheetOpen: boolean;
     reason: AccountBillingStatus;
   }>({ sheetOpen: false, reason: AccountBillingStatus.closed_baddebt });
+  const [{ encounterId }] = useQueryParams();
 
   const { data: account, isLoading } = useQuery({
     queryKey: ["account", accountId],
@@ -450,7 +452,8 @@ export function AccountShow({
         value={tab}
         onValueChange={(value) =>
           navigate(
-            `/facility/${facilityId}/billing/account/${accountId}/${value}`,
+            `/facility/${facilityId}/billing/account/${accountId}/${value}` +
+              (encounterId !== undefined ? `?encounterId=${encounterId}` : ""),
           )
         }
         className="mt-8"
@@ -475,6 +478,14 @@ export function AccountShow({
             >
               {t("payments")}
             </TabsTrigger>
+            {encounterId && (
+              <TabsTrigger
+                value="bed_charge_items"
+                className="border-b-2 px-6 py-2 text-sm font-medium data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 rounded-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent text-gray-600"
+              >
+                {t("bed_charge_items")}
+              </TabsTrigger>
+            )}
           </TabsList>
         </div>
 
@@ -493,6 +504,14 @@ export function AccountShow({
         <TabsContent value="payments">
           <PaymentsData facilityId={facilityId} accountId={accountId} />
         </TabsContent>
+        {
+          <TabsContent value="bed_charge_items" className="mt-4">
+            <BedChargeItemsTable
+              facilityId={facilityId}
+              accountId={accountId}
+            />
+          </TabsContent>
+        }
       </Tabs>
 
       <AccountSheet

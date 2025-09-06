@@ -23,6 +23,13 @@ export const CHARGE_ITEM_STATUS_COLORS = {
   entered_in_error: "destructive",
 } as const satisfies Record<ChargeItemStatus, string>;
 
+export enum ChargeItemServiceResource {
+  service_request = "service_request",
+  medication_dispense = "medication_dispense",
+  appointment = "appointment",
+  bed_association = "bed_association",
+}
+
 export interface ChargeItemOverrideReason {
   code: string;
   display?: string;
@@ -37,8 +44,6 @@ export interface ChargeItemBase {
   unit_price_components: MonetaryComponent[];
   note?: string;
   override_reason?: ChargeItemOverrideReason;
-  service_resource?: "service_request";
-  service_resource_id?: string;
   total_price: string;
   paid_invoice?: InvoiceRead;
 }
@@ -52,8 +57,11 @@ export interface ChargeItemCreate
     | "paid_invoice"
     | "total_price"
   > {
-  encounter: string;
+  encounter?: string;
+  patient?: string;
   account?: string;
+  service_resource?: ChargeItemServiceResource;
+  service_resource_id?: string;
 }
 
 export interface ApplyChargeItemDefinitionRequest {
@@ -61,7 +69,7 @@ export interface ApplyChargeItemDefinitionRequest {
   quantity: string;
   encounter?: string;
   patient?: string;
-  service_resource?: "service_request";
+  service_resource?: ChargeItemServiceResource;
   service_resource_id?: string;
 }
 
@@ -81,6 +89,8 @@ export interface ChargeItemRead extends ChargeItemBase {
   total_price_components: MonetaryComponent[];
   total_price: string;
   charge_item_definition: ChargeItemDefinitionBase;
+  service_resource: ChargeItemServiceResource;
+  service_resource_id?: string;
 }
 
 export interface ChargeItemBatchResponse {
@@ -94,3 +104,5 @@ export function extractChargeItemsFromBatchResponse(
     .map((item) => item.data?.charge_item)
     .filter((item): item is ChargeItemRead => !!item);
 }
+
+export const MRP_CODE = "mrp";

@@ -16,7 +16,7 @@ import PrintPaymentReconciliation from "@/pages/Facility/billing/paymentReconcil
 import { LocationLayout } from "@/pages/Facility/locations/LocationLayout";
 import { FacilityOverview } from "@/pages/Facility/overview";
 import FacilityServices from "@/pages/Facility/services/FacilityServices";
-import HealthcareServiceShow from "@/pages/Facility/services/HealthcareServiceShow";
+import { ServiceLayout } from "@/pages/Facility/services/ServiceLayout";
 import DiagnosticReportPrint from "@/pages/Facility/services/diagnosticReports/DiagnosticReportPrint";
 import DiagnosticReportView from "@/pages/Facility/services/diagnosticReports/DiagnosticReportView";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
@@ -43,8 +43,8 @@ const FacilityRoutes: AppRoutes = {
   "/facility/:facilityId/services": ({ facilityId }) => (
     <FacilityServices facilityId={facilityId} />
   ),
-  "/facility/:facilityId/services/:serviceId": ({ facilityId, serviceId }) => (
-    <HealthcareServiceShow facilityId={facilityId} serviceId={serviceId} />
+  "/facility/:facilityId/services/:serviceId*": ({ facilityId, serviceId }) => (
+    <ServiceLayout facilityId={facilityId} serviceId={serviceId} />
   ),
   "/facility/:facilityId/services_requests/:serviceRequestId": ({
     facilityId,
@@ -56,21 +56,31 @@ const FacilityRoutes: AppRoutes = {
     />
   ),
 
-  "/facility/:facilityId/patient/:patientId/diagnostic_reports/:diagnosticReportId":
-    ({ facilityId, patientId, diagnosticReportId }) => (
+  ...[
+    "/facility/:facilityId/patient/:patientId/diagnostic_reports/:diagnosticReportId",
+    "/organization/organizationId/patient/:patientId/diagnostic_reports/:diagnosticReportId",
+  ].reduce((acc: AppRoutes, path) => {
+    acc[path] = ({ facilityId, patientId, diagnosticReportId }) => (
       <DiagnosticReportView
         patientId={patientId}
         facilityId={facilityId}
         diagnosticReportId={diagnosticReportId}
       />
-    ),
-  "/facility/:facilityId/patient/:patientId/diagnostic_reports/:diagnosticReportId/print":
-    ({ patientId, diagnosticReportId }) => (
+    );
+    return acc;
+  }, {}),
+  ...[
+    "/facility/:facilityId/patient/:patientId/diagnostic_reports/:diagnosticReportId/print",
+    "/organization/organizationId/patient/:patientId/diagnostic_reports/:diagnosticReportId/print",
+  ].reduce((acc: AppRoutes, path) => {
+    acc[path] = ({ patientId, diagnosticReportId }) => (
       <DiagnosticReportPrint
         patientId={patientId}
         diagnosticReportId={diagnosticReportId}
       />
-    ),
+    );
+    return acc;
+  }, {}),
   "/facility/:facilityId/billing/accounts": ({ facilityId }) => (
     <AccountList facilityId={facilityId} />
   ),
@@ -101,6 +111,16 @@ const FacilityRoutes: AppRoutes = {
     accountId,
   }) => (
     <AccountShow facilityId={facilityId} accountId={accountId} tab="payments" />
+  ),
+  "/facility/:facilityId/billing/account/:accountId/bed_charge_items": ({
+    facilityId,
+    accountId,
+  }) => (
+    <AccountShow
+      facilityId={facilityId}
+      accountId={accountId}
+      tab="bed_charge_items"
+    />
   ),
   "/facility/:facilityId/billing/account/:accountId/invoices/create": ({
     facilityId,

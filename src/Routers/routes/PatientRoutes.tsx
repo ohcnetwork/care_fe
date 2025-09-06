@@ -12,7 +12,7 @@ import { ConsentDetailPage } from "@/pages/Encounters/ConsentDetail";
 import EncountersOverview from "@/pages/Encounters/EncountersOverview";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 import ClinicalHistoryPage from "@/pages/Patient/History";
-import VerifyPatient from "@/pages/Patients/VerifyPatient";
+import VerifyPatient from "@/pages/Patient/VerifyPatient";
 import careConfig from "@careConfig";
 
 const ExcalidrawEditor = lazy(
@@ -63,16 +63,24 @@ const PatientRoutes: AppRoutes = {
       locationId={locationId}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/consents/:consentId":
-    ({ facilityId, patientId, encounterId, consentId }) => (
-      <EncounterProvider
-        encounterId={encounterId}
-        patientId={patientId}
-        facilityId={facilityId}
-      >
-        <ConsentDetailPage consentId={consentId} />
-      </EncounterProvider>
-    ),
+  ...[
+    "/facility/:facilityId/patient/:patientId/encounter/:encounterId/consents/:consentId",
+    "/organization/organizationId/patient/:patientId/encounter/:encounterId/consents/:consentId",
+  ].reduce((acc: AppRoutes, path) => {
+    acc[path] = ({ facilityId, patientId, encounterId, consentId }) => {
+      return (
+        <EncounterProvider
+          encounterId={encounterId}
+          patientId={patientId}
+          facilityId={facilityId}
+        >
+          <ConsentDetailPage consentId={consentId} />
+        </EncounterProvider>
+      );
+    };
+    return acc;
+  }, {}),
+
   "/facility/:facilityId/patients/verify": () => <VerifyPatient />,
   "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
   "/patient/:id/update": ({ id }) => <PatientRegistration patientId={id} />,

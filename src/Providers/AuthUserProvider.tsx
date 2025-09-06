@@ -10,16 +10,16 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 
 import { LocalStorageKeys } from "@/common/constants";
 
-import routes, {
-  JwtTokenObtainPair,
-  LoginResponse,
-  Type,
-} from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { userAtom } from "@/atoms/user-atom";
+import {
+  JwtTokenObtainPair,
+  LoginResponse,
+  MfaAuthenticationToken,
+} from "@/types/auth/auth";
 import authApi from "@/types/auth/authApi";
-import { MFAAuthenticationToken, TokenData } from "@/types/auth/otp";
+import { TokenData } from "@/types/auth/otp";
 import userApi from "@/types/user/userApi";
 
 interface Props {
@@ -28,7 +28,7 @@ interface Props {
   otpAuthorized: React.ReactNode;
 }
 
-const isMFAResponse = (data: LoginResponse): data is MFAAuthenticationToken => {
+const isMFAResponse = (data: LoginResponse): data is MfaAuthenticationToken => {
   return "temp_token" in data;
 };
 
@@ -68,7 +68,7 @@ export default function AuthUserProvider({
 
   const tokenRefreshQuery = useQuery({
     queryKey: ["user-refresh-token"],
-    queryFn: query(routes.token_refresh, {
+    queryFn: query(authApi.tokenRefresh, {
       body: { refresh: refreshToken || "" },
     }),
     refetchIntervalInBackground: true,
@@ -91,7 +91,7 @@ export default function AuthUserProvider({
   }, [tokenRefreshQuery.data, tokenRefreshQuery.isError]);
 
   const { mutateAsync: signIn, isPending: isAuthenticating } = useMutation({
-    mutationFn: mutate(routes.login),
+    mutationFn: mutate(authApi.login),
     onSuccess: async (data: LoginResponse) => {
       if (isMFAResponse(data)) {
         localStorage.setItem("mfa_temp_token", data.temp_token);
@@ -144,10 +144,10 @@ export default function AuthUserProvider({
 
     if (accessToken && refreshToken) {
       try {
-        await mutate({
-          ...routes.logout,
-          TRes: Type<Record<string, never>>(),
-        })({ access: accessToken, refresh: refreshToken });
+        await mutate(authApi.logout)({
+          access: accessToken,
+          refresh: refreshToken,
+        });
       } catch (error) {
         console.error("Error during logout:", error);
       }

@@ -51,7 +51,9 @@ import {
 import {
   CHARGE_ITEM_STATUS_COLORS,
   ChargeItemRead,
+  ChargeItemServiceResource,
   ChargeItemStatus,
+  MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
@@ -94,7 +96,6 @@ export interface ChargeItemsTableProps {
   accountId: string;
   patientId: string;
 }
-
 export function ChargeItemsTable({
   facilityId,
   accountId,
@@ -156,6 +157,18 @@ export function ChargeItemsTable({
     return item.unit_price_components?.find(
       (c) => c.monetary_component_type === MonetaryComponentType.base,
     );
+  };
+
+  const getLinkedResource = (item: ChargeItemRead) => {
+    if (!item.service_resource || !item.service_resource_id) return "";
+    switch (item.service_resource) {
+      case ChargeItemServiceResource.service_request:
+        return `/facility/${facilityId}/services_requests/${item.service_resource_id}`;
+      case ChargeItemServiceResource.appointment:
+        return `/facility/${facilityId}/patient/${patientId}/appointments/${item.service_resource_id}`;
+      default:
+        return "";
+    }
   };
 
   return (
@@ -226,6 +239,9 @@ export function ChargeItemsTable({
                   {t("resource")}
                 </TableHead>
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                  {t("mrp")}
+                </TableHead>
+                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
                   {t("unit_price")}
                 </TableHead>
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
@@ -254,7 +270,14 @@ export function ChargeItemsTable({
                   const isExpanded = expandedItems[item.id] || false;
                   const baseComponent = getBaseComponent(item);
                   const baseAmount = String(baseComponent?.amount || "0");
+                  const linkedResource = getLinkedResource(item);
 
+                  const mrpAmount = item.unit_price_components.find(
+                    (c) =>
+                      c.monetary_component_type ===
+                        MonetaryComponentType.informational &&
+                      c.code?.code === MRP_CODE,
+                  )?.amount;
                   const mainRow = (
                     <TableRow
                       key={item.id}
@@ -274,7 +297,7 @@ export function ChargeItemsTable({
                           )}
                         </Button>
                       </TableCell>
-                      <TableCell className="border-x p-3 text-gray-950 font-medium">
+                      <TableCell className="bor-medium">
                         {item.title}
                         {item.description && (
                           <p className="text-xs text-gray-500 whitespace-pre-wrap">
@@ -283,16 +306,22 @@ export function ChargeItemsTable({
                         )}
                       </TableCell>
                       <TableCell className="border-x p-3 text-gray-950">
-                        {item.service_resource === "service_request" &&
-                          item.service_resource_id && (
-                            <Link
-                              href={`/facility/${facilityId}/services_requests/${item.service_resource_id}`}
-                              className="flex items-center gap-0.5 underline text-gray-600"
-                            >
-                              {t("service_request")}
-                              <ExternalLinkIcon className="size-3" />
-                            </Link>
-                          )}
+                        {linkedResource !== "" ? (
+                          <Link
+                            href={linkedResource}
+                            className="flex items-center gap-0.5 underline text-gray-600"
+                          >
+                            {t(item.service_resource)}
+                            <ExternalLinkIcon className="size-3" />
+                          </Link>
+                        ) : (
+                          <span className="text-gray-500">
+                            {t(item.service_resource)}
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="border-x p-3 text-gray-950">
+                        <MonetaryDisplay amount={mrpAmount} />
                       </TableCell>
                       <TableCell className="border-x p-3 text-gray-950">
                         <MonetaryDisplay amount={baseAmount} />

@@ -23,7 +23,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import {
+  MonetaryDisplay,
+  getCurrencySymbol,
+} from "@/components/ui/monetary-display";
 import {
   Table,
   TableBody,
@@ -47,6 +50,7 @@ import accountApi from "@/types/billing/account/accountApi";
 import {
   ChargeItemRead,
   ChargeItemStatus,
+  MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import {
@@ -77,6 +81,8 @@ interface CreateInvoicePageProps {
   onSuccess?: () => void;
   showHeader?: boolean;
   sourceUrl?: string;
+  locationId?: string;
+  patientId?: string;
 }
 
 interface PriceComponentRowProps {
@@ -104,6 +110,7 @@ function PriceComponentRow({
             {component.code && `${component.code.display} `}({label})
           </TableCell>
           <TableCell></TableCell>
+          <TableCell></TableCell>
           <TableCell className="text-right">
             <MonetaryDisplay {...component} />
           </TableCell>
@@ -128,6 +135,8 @@ export function CreateInvoicePage({
   onSuccess,
   showHeader = true,
   sourceUrl,
+  locationId,
+  patientId,
 }: CreateInvoicePageProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -408,11 +417,14 @@ export function CreateInvoicePage({
                       <TableHead className="border bg-gray-100 text-gray-700">
                         {t("quantity")}
                       </TableHead>
+                      <TableHead className="border bg-gray-100 text-gray-700 text-right">
+                        {t("mrp")} ({getCurrencySymbol()})
+                      </TableHead>
                       <TableHead className="border-y bg-gray-100 text-gray-700 text-right">
-                        {t("unit_price")} ({t("inr")})
+                        {t("unit_price")} ({getCurrencySymbol()})
                       </TableHead>
                       <TableHead className="border rounded-tr-md bg-gray-100 text-gray-700 text-right font-semibold">
-                        {t("amount")} ({t("inr")})
+                        {t("amount")} ({getCurrencySymbol()})
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -421,6 +433,12 @@ export function CreateInvoicePage({
                       const isExpanded = expandedItems[item.id] || false;
                       const baseComponent = getBaseComponent(item);
                       const baseAmount = baseComponent?.amount || "0";
+                      const mrpAmount = item.unit_price_components.find(
+                        (c) =>
+                          c.monetary_component_type ===
+                            MonetaryComponentType.informational &&
+                          c.code?.code === MRP_CODE,
+                      )?.amount;
 
                       const mainRow = (
                         <TableRow
@@ -459,6 +477,9 @@ export function CreateInvoicePage({
                           </TableCell>
                           <TableCell className="font-medium text-base border-y text-gray-950">
                             {item.quantity}
+                          </TableCell>
+                          <TableCell className="font-medium text-base border-y text-gray-950 text-right">
+                            <MonetaryDisplay amount={mrpAmount} />
                           </TableCell>
                           <TableCell className="font-medium text-base border-y text-gray-950 text-right">
                             <MonetaryDisplay amount={baseAmount} />
@@ -506,6 +527,7 @@ export function CreateInvoicePage({
                         >
                           <TableCell></TableCell>
                           <TableCell>{t("amount")}</TableCell>
+                          <TableCell></TableCell>
                           <TableCell></TableCell>
                           <TableCell></TableCell>
                           <TableCell className="text-right">
@@ -558,6 +580,17 @@ export function CreateInvoicePage({
               disabled={createMutation.isPending}
             >
               {t("cancel")}
+            </Button>
+            <Button
+              type="button"
+              variant="outline_primary"
+              onClick={() =>
+                navigate(
+                  `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation?payment_status=unpaid`,
+                )
+              }
+            >
+              {t("dispense_now")}
             </Button>
             <Button
               type="submit"

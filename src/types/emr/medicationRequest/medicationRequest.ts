@@ -214,6 +214,12 @@ export interface MedicationRequest {
   requested_product?: string;
   requested_product_internal?: ProductKnowledgeBase;
   dispense_status?: MedicationRequestDispenseStatus;
+  requester: UserReadMinimal;
+}
+
+export interface MedicationRequestRequest
+  extends Omit<MedicationRequest, "requester"> {
+  requester?: string;
 }
 
 export enum MedicationPriority {
@@ -250,6 +256,7 @@ export interface MedicationRequestRead {
   requested_product?: ProductKnowledgeBase;
   inventory_items_internal?: InventoryRead[];
   dispense_status?: MedicationRequestDispenseStatus;
+  requester?: UserReadMinimal;
 }
 
 export interface MedicationRequestSummary {
@@ -582,6 +589,7 @@ export const MEDICATION_REQUEST_TIMING_OPTIONS: Record<
  * You can extend the dictionaries & regex to cover more cases (IV, subcutaneous, brand names, etc.).
  */
 export function parseMedicationStringToRequest(
+  requester: UserReadMinimal,
   medication?: Code,
   productKnowledge?: ProductKnowledgeBase,
 ): MedicationRequest {
@@ -589,12 +597,12 @@ export function parseMedicationStringToRequest(
     as_needed_boolean: false,
   };
 
-  if (productKnowledge?.definitional?.dosage_form) {
+  if (productKnowledge?.base_unit) {
     dosageInstruction.dose_and_rate = {
       type: "ordered",
       dose_quantity: {
         value: 0,
-        unit: productKnowledge.definitional.dosage_form,
+        unit: productKnowledge.base_unit,
       },
     };
   }
@@ -614,6 +622,7 @@ export function parseMedicationStringToRequest(
     priority: "routine",
     category: "inpatient",
     authored_on: new Date().toISOString(),
+    requester: requester,
   };
 
   return medicationRequest;
