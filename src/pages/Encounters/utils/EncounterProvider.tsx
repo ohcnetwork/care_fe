@@ -91,6 +91,7 @@ export function EncounterProvider({
     queryKey: ["patient", patientId],
     queryFn: query(patientApi.getPatient, {
       pathParams: { id: patientId },
+      silent: true,
     }),
   });
 
@@ -184,7 +185,7 @@ export function EncounterProvider({
         patientId,
         primaryEncounterId,
         selectedEncounterId,
-        patient,
+        patient: patient ?? primaryEncounter?.patient,
         primaryEncounter,
         selectedEncounter,
         isPatientLoading,

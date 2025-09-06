@@ -102,7 +102,7 @@ export default function ToDispatchSupplyRequestTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col md:flex-row items-center gap-4">
         <ProductKnowledgeSelect
           value={selectedProduct}
           onChange={(product) => updateQuery({ item: product?.id })}

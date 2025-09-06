@@ -97,6 +97,7 @@ const RenderCard = ({
                   </p>
                   <Badge
                     variant={QUESTIONNAIRE_STATUS_COLORS[questionnaire.status]}
+                    className="whitespace-nowrap flex-shrink-0"
                   >
                     {t(questionnaire.status)}
                   </Badge>
