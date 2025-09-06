@@ -17,15 +17,19 @@ import { LocalStorageKeys } from "@/common/constants";
 
 import { createUserPersister } from "@/OfflineSupport/createUserPersister";
 import useNetworkStatus from "@/Utils/networkstatus";
-import { JwtTokenObtainPair, LoginResponse } from "@/Utils/request/api";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { userAtom } from "@/atoms/user-atom";
-import { MfaAuthenticationToken } from "@/types/auth/auth";
+import {
+  JwtTokenObtainPair,
+  LoginResponse,
+  MfaAuthenticationToken,
+} from "@/types/auth/auth";
 import authApi from "@/types/auth/authApi";
 import { TokenData } from "@/types/auth/otp";
 import userApi from "@/types/user/userApi";
+
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 
 interface Props {
   children: React.ReactNode;
