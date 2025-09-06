@@ -87,6 +87,11 @@ interface EntitySelectionSheetProps {
    * This is called when the user clicks the "Add" button
    */
   onConfirm: () => void;
+  /**
+   * If `true`, renders the `MedicationValueSetSelect`.
+   * Defaults to `false`.
+   */
+  enableProduct?: boolean;
 }
 
 export function EntitySelectionSheet({
@@ -101,6 +106,7 @@ export function EntitySelectionSheet({
   onConfirm,
   children,
   placeholder,
+  enableProduct = false,
 }: EntitySelectionSheetProps) {
   const { t } = useTranslation();
   const [selectedEntity, setSelectedEntity] = useState<Code | null>(null);
@@ -133,7 +139,7 @@ export function EntitySelectionSheet({
 
   return (
     <>
-      {system === "system-medication" ? (
+      {enableProduct ? (
         <MedicationValueSetSelect
           onSelect={handleSelect}
           onProductSelect={handleProductSelect}
@@ -182,7 +188,7 @@ export function EntitySelectionSheet({
               </SheetHeader>
               <div className="flex-1 overflow-y-auto pb-safe">{children}</div>
             </div>
-          ) : system === "system-medication" ? (
+          ) : enableProduct ? (
             <MedicationValueSetSelect
               onSelect={handleSelect}
               onProductSelect={handleProductSelect}

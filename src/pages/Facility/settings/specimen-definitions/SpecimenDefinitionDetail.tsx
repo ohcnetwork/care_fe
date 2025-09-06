@@ -24,6 +24,7 @@ import { Card } from "@/components/ui/card";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading";
 import { Code } from "@/types/base/code/code";
 import {
   DurationSpec,
@@ -45,7 +46,7 @@ export function SpecimenDefinitionDetail({
   const queryClient = useQueryClient();
 
   const { data: specimenDefinition, isLoading } = useQuery({
-    queryKey: ["specimen_definitions", facilityId, specimenDefinitionId],
+    queryKey: ["specimenDefinitions", facilityId, specimenDefinitionId],
     queryFn: query(specimenDefinitionApi.retrieveSpecimenDefinition, {
       pathParams: { facilityId, specimenDefinitionId },
     }),
@@ -58,11 +59,7 @@ export function SpecimenDefinitionDetail({
       }),
       onSuccess: () => {
         toast.success(t("specimen_definition_retired_successfully"));
-        queryClient.invalidateQueries({ queryKey: ["specimen_definitions"] });
-        queryClient.invalidateQueries({
-          queryKey: ["specimen_definitions", facilityId, specimenDefinitionId],
-        });
-
+        queryClient.invalidateQueries({ queryKey: ["specimenDefinitions"] });
         navigate(`/facility/${facilityId}/settings/specimen_definitions`);
       },
       onError: () => {
@@ -79,7 +76,7 @@ export function SpecimenDefinitionDetail({
   };
 
   if (isLoading) {
-    return <div>{t("loading")}</div>;
+    return <CardListWithHeaderSkeleton count={1} />;
   }
 
   if (!specimenDefinition) {

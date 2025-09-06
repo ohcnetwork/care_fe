@@ -177,11 +177,10 @@ export default function SupplyDeliveryTable({
                         {delivery.supplied_item_quantity}
                       </span>
                       <span className="text-gray-600 capitalize">
-                        {delivery.supplied_item?.product_knowledge.definitional
-                          ?.dosage_form.display ||
+                        {delivery.supplied_item?.product_knowledge.base_unit
+                          .display ||
                           delivery.supplied_inventory_item?.product
-                            ?.product_knowledge.definitional?.dosage_form
-                            ?.display ||
+                            ?.product_knowledge.base_unit?.display ||
                           t("units")}
                       </span>
                     </div>

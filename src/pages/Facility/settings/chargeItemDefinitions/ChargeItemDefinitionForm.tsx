@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckIcon, Loader2 } from "lucide-react";
 import { navigate } from "raviger";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { FieldErrors, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
@@ -43,6 +43,7 @@ import {
   MonetaryComponentRead,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
+import { MRP_CODE } from "@/types/billing/chargeItem/chargeItem";
 import {
   ChargeItemDefinitionCreate,
   ChargeItemDefinitionRead,
@@ -229,12 +230,13 @@ export function ChargeItemDefinitionForm({
   },
 }: ChargeItemDefinitionFormProps) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   // Fetch facility data for available components
   const { data: facilityData, isLoading } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: query(facilityApi.getFacility, {
-      pathParams: { id: facilityId },
+    queryFn: query(facilityApi.get, {
+      pathParams: { facilityId },
     }),
   });
 
@@ -300,7 +302,9 @@ export function ChargeItemDefinitionForm({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug", generateSlug(value.title || ""));
+        form.setValue("slug", generateSlug(value.title || ""), {
+          shouldValidate: true,
+        });
       }
     });
 
@@ -310,13 +314,9 @@ export function ChargeItemDefinitionForm({
   // Get current form values
   const priceComponents = form.watch("price_components");
   const basePrice = form.watch("price_components.0.amount")?.toString() || "0";
-
-  // // Get MRP component if it exists
-  // const mrpComponent = form
-  //   .watch("price_component")
-  //   .find(
-  //     (c) => c.monetary_component_type === MonetaryComponentType.informational,
-  //   );
+  const mrp = priceComponents.find(
+    (c) => c.monetary_component_type === MonetaryComponentType.informational,
+  )?.amount;
 
   // Handle form submission
   const { mutate: upsert, isPending } = useMutation({
@@ -328,6 +328,7 @@ export function ChargeItemDefinitionForm({
           pathParams: { facilityId },
         }),
     onSuccess: (chargeItemDefinition: ChargeItemDefinitionRead) => {
+      queryClient.invalidateQueries({ queryKey: ["chargeItemDefinitions"] });
       onSuccess?.(chargeItemDefinition);
     },
   });
@@ -349,6 +350,10 @@ export function ChargeItemDefinitionForm({
     ...facilityData.instance_discount_monetary_components,
   ];
   const availableTaxes = [...facilityData.instance_tax_monetary_components];
+
+  const mrpCode = facilityData.instance_informational_codes.find(
+    (c) => c.code === MRP_CODE,
+  );
 
   // Get currently selected components by type
   const getSelectedComponents = (type: MonetaryComponentType) =>
@@ -376,7 +381,13 @@ export function ChargeItemDefinitionForm({
     if (selected) {
       newComponents = [
         ...currentComponents,
-        { ...component, monetary_component_type: type },
+        {
+          ...component,
+          monetary_component_type: type,
+          factor: component.factor != null ? component.factor : undefined,
+          amount:
+            component.factor != null ? undefined : String(component.amount),
+        },
       ];
     } else {
       newComponents = currentComponents.filter(
@@ -403,45 +414,36 @@ export function ChargeItemDefinitionForm({
     const newComponents = [...currentComponents];
     newComponents[componentIndex] = {
       ...component,
-      [component.factor != null ? "factor" : "amount"]: value,
+      factor: component.factor != null ? value : undefined,
+      amount: component.factor != null ? undefined : String(value),
     };
 
     form.setValue("price_components", newComponents, { shouldValidate: true });
   };
 
-  // // Function to handle MRP changes
-  // const handleMRPChange = (value: number) => {
-  //   const currentComponents = form.getValues("price_component");
-  //   const mrpIndex = currentComponents.findIndex(
-  //     (c) => c.monetary_component_type === MonetaryComponentType.informational,
-  //   );
+  const handleMrpChange = (value: string) => {
+    const currentComponents = form.getValues("price_components");
+    const mrpIndex = currentComponents.findIndex(
+      (c) => c.monetary_component_type === MonetaryComponentType.informational,
+    );
 
-  //   if (isNaN(value) && mrpIndex !== -1) {
-  //     // Remove MRP component if value is NaN
-  //     const newComponents = [...currentComponents];
-  //     newComponents.splice(mrpIndex, 1);
-  //     form.setValue("price_component", newComponents, { shouldValidate: true });
-  //   } else if (!isNaN(value)) {
-  //     // Add or update MRP component
-  //     const mrpComponent = {
-  //       monetary_component_type: MonetaryComponentType.informational,
-  //       title: "MRP",
-  //       amount: value,
-  //     };
-
-  //     if (mrpIndex === -1) {
-  //       form.setValue("price_component", [...currentComponents, mrpComponent], {
-  //         shouldValidate: true,
-  //       });
-  //     } else {
-  //       const newComponents = [...currentComponents];
-  //       newComponents[mrpIndex] = mrpComponent;
-  //       form.setValue("price_component", newComponents, {
-  //         shouldValidate: true,
-  //       });
-  //     }
-  //   }
-  // };
+    if (mrpIndex >= 0) {
+      const updatedComponents = [...currentComponents];
+      updatedComponents[mrpIndex] = {
+        ...updatedComponents[mrpIndex],
+        amount: value,
+        code: mrpCode,
+      };
+      form.setValue("price_components", updatedComponents);
+    } else {
+      const newComponent = {
+        monetary_component_type: MonetaryComponentType.informational,
+        amount: value,
+        code: mrpCode,
+      };
+      form.setValue("price_components", [...currentComponents, newComponent]);
+    }
+  };
 
   return (
     <Form {...form}>
@@ -604,59 +606,40 @@ export function ChargeItemDefinitionForm({
             <CardTitle>{t("pricing_components")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Base Price and MRP */}
-            <div className="p-4 bg-gray-50 rounded-lg border">
-              <div className="space-y-4">
-                {/* MRP */}
-                {/* <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium text-gray-900">{t("mrp")}</h4>
-                    <p className="text-sm text-gray-600">
-                      {t("mrp_description")}
-                    </p>
-                  </div>
-                  <div className="w-48">
-                    <MonetaryAmountInput
-                      value={mrpComponent?.amount ?? ""}
-                      onChange={(e) => handleMRPChange(e.target.valueAsNumber)}
-                      placeholder={t("optional")}
-                    />
-                  </div>
-                </div> */}
-
-                {/* Base Price */}
-                <FormField
-                  control={form.control}
-                  name="price_components.0.amount"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center justify-between gap-2">
-                      <FormLabel className="font-medium text-gray-900 text-xl">
-                        {t("base_price")}
-                      </FormLabel>
-                      <div className="flex flex-col items-end gap-2">
-                        <FormControl className="w-48">
-                          <MonetaryAmountInput
-                            {...field}
-                            value={field.value ?? 0}
-                            onChange={(e) =>
-                              field.onChange(String(e.target.value))
-                            }
-                            placeholder="0.00"
-                          />
-                        </FormControl>
-                        <FormMessage>
-                          {
-                            form.formState.errors.price_components?.[0]?.amount
-                              ?.message
-                          }
-                        </FormMessage>
-                      </div>
-                    </FormItem>
-                  )}
-                />
+            {/* Base Price */}
+            <div className="rounded-lg border p-4 bg-gray-50 space-y-2">
+              <div>
+                <h4 className="text-lg font-medium text-gray-900">
+                  {t("base_price")}
+                </h4>
+                <p className="text-sm text-gray-600">
+                  {t("base_price_explanation")}
+                </p>
               </div>
-            </div>
 
+              <FormField
+                control={form.control}
+                name="price_components.0.amount"
+                render={({ field }) => (
+                  <FormItem className="w-full space-y-1">
+                    <FormControl>
+                      <MonetaryAmountInput
+                        {...field}
+                        value={field.value ?? 0}
+                        onChange={(e) => field.onChange(String(e.target.value))}
+                        placeholder="0.00"
+                      />
+                    </FormControl>
+                    <FormMessage>
+                      {
+                        form.formState.errors.price_components?.[0]?.amount
+                          ?.message
+                      }
+                    </FormMessage>
+                  </FormItem>
+                )}
+              />
+            </div>
             {/* Discounts */}
             <MonetaryComponentSelectionSection
               title={t("discounts")}
@@ -696,6 +679,30 @@ export function ChargeItemDefinitionForm({
               type={MonetaryComponentType.tax}
               errors={getSelectedComponentError(MonetaryComponentType.tax)}
             />
+
+            {/* MRP */}
+            <div className="p-4 bg-gray-50 rounded-lg border">
+              <FormItem className="flex items-center justify-between gap-2">
+                <FormLabel className="font-medium text-gray-900 text-xl">
+                  {t("mrp")}
+                </FormLabel>
+                <div className="flex flex-col items-end gap-2">
+                  <FormControl className="w-48">
+                    <MonetaryAmountInput
+                      value={mrp ?? 0}
+                      onChange={(e) => handleMrpChange(e.target.value)}
+                      placeholder="0.00"
+                    />
+                  </FormControl>
+                  <FormMessage>
+                    {
+                      form.formState.errors.price_components?.[0]?.amount
+                        ?.message
+                    }
+                  </FormMessage>
+                </div>
+              </FormItem>
+            </div>
 
             {/* Price Summary */}
             <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-100">

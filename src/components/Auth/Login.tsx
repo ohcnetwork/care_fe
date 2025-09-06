@@ -43,6 +43,7 @@ import ViewCache from "@/Utils/ViewCache";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
+import authApi from "@/types/auth/authApi";
 import { TokenData } from "@/types/auth/otp";
 
 import { AuthHero } from "./AuthHero";
@@ -137,7 +138,7 @@ const Login = (props: LoginProps) => {
         const firstError = errors[0] as OtpError;
         setOtpError(firstError.msg);
       } else {
-        setOtpError(t("send_otp_error"));
+        setOtpError("send_otp_error");
       }
     },
   });
@@ -166,7 +167,7 @@ const Login = (props: LoginProps) => {
       }
     },
     onError: (error: any) => {
-      let errorMessage = t("invalid_otp");
+      let errorMessage = "invalid_otp";
       if (
         error.cause &&
         Array.isArray(error.cause.errors) &&
@@ -188,7 +189,7 @@ const Login = (props: LoginProps) => {
 
   // Forgot Password Mutation
   const { mutate: submitForgetPassword } = useMutation({
-    mutationFn: mutate(routes.forgotPassword),
+    mutationFn: mutate(authApi.forgotPassword),
     onSuccess: () => {
       toast.success(t("password_sent"));
     },
@@ -539,7 +540,7 @@ const Login = (props: LoginProps) => {
                           placeholder={t("enter_phone_number")}
                         />
                         {otpError && (
-                          <p className="text-sm text-red-500">{otpError}</p>
+                          <p className="text-sm text-red-500">{t(otpError)}</p>
                         )}
                       </div>
 
@@ -577,7 +578,7 @@ const Login = (props: LoginProps) => {
                           </div>
                           {otpValidationError && (
                             <p className="text-sm text-red-500 text-center">
-                              {otpValidationError}
+                              {t(otpValidationError)}
                             </p>
                           )}
                         </div>

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -21,8 +21,10 @@ import {
 } from "@/components/ui/table";
 
 import Page from "@/components/Common/Page";
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import {
+  CardGridSkeleton,
+  TableSkeleton,
+} from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -38,7 +40,6 @@ import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowl
 
 function ProductKnowledgeCard({
   product,
-  facilityId,
 }: {
   product: ProductKnowledgeBase;
   facilityId: string;
@@ -65,18 +66,20 @@ function ProductKnowledgeCard({
                 {product.code.system} | {product.code.code}
               </p>
             )}
+            {product.alternate_identifier && (
+              <p className="mt-1 text-sm text-gray-500">
+                {t("product_knowledge_alternate_identifier")}:{" "}
+                {product.alternate_identifier}
+              </p>
+            )}
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/settings/product_knowledge/${product.id}`,
-              )
-            }
-          >
-            <CareIcon icon="l-edit" className="size-4" />
-            {t("see_details")}
+        </div>
+        <div className="flex justify-end">
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/product_knowledge/${product.id}`}>
+              <CareIcon icon="l-edit" className="size-4" />
+              {t("see_details")}
+            </Link>
           </Button>
         </div>
       </CardContent>
@@ -219,6 +222,9 @@ export default function ProductKnowledgeList({
                   <TableHeader className="bg-gray-100">
                     <TableRow>
                       <TableHead>{t("name")}</TableHead>
+                      <TableHead>
+                        {t("product_knowledge_alternate_identifier")}
+                      </TableHead>
                       <TableHead>{t("product_type")}</TableHead>
                       <TableHead>{t("status")}</TableHead>
                       <TableHead>{t("actions")}</TableHead>
@@ -229,6 +235,9 @@ export default function ProductKnowledgeList({
                       <TableRow key={product.id} className="divide-x">
                         <TableCell className="font-medium">
                           {product.name}
+                        </TableCell>
+                        <TableCell>
+                          {product.alternate_identifier || "-"}
                         </TableCell>
                         <TableCell>
                           <Badge
@@ -251,17 +260,11 @@ export default function ProductKnowledgeList({
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              navigate(
-                                `/facility/${facilityId}/settings/product_knowledge/${product.id}`,
-                              )
-                            }
-                          >
-                            <CareIcon icon="l-edit" className="size-4" />
-                            {t("see_details")}
+                          <Button asChild variant="outline" size="sm">
+                            <Link href={`/product_knowledge/${product.id}`}>
+                              <CareIcon icon="l-edit" className="size-4" />
+                              {t("see_details")}
+                            </Link>
                           </Button>
                         </TableCell>
                       </TableRow>

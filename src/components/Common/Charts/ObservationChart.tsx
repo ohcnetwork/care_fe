@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
   CartesianGrid,
@@ -11,6 +10,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Card } from "@/components/ui/card";
 import {
@@ -124,6 +125,7 @@ export const ObservationVisualizer = ({
       encounterId,
       allCodes.map((c) => c.code).join(","),
     ],
+
     queryFn: query(patientApi.observationsAnalyse, {
       pathParams: { patientId },
       queryParams: {
@@ -135,7 +137,6 @@ export const ObservationVisualizer = ({
     }),
     enabled: canAccess,
   });
-
   if (isLoading) {
     return (
       <div
@@ -246,11 +247,14 @@ export const ObservationVisualizer = ({
       {processedDataByGroup.map((group, groupIndex) => (
         <Card key={groupIndex} className="p-4">
           <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <h3 className="text-sm font-medium">{group.title}</h3>
               <Popover>
-                <PopoverTrigger>
-                  <Info className="size-4 text-gray-500 hover:text-gray-700 cursor-pointer" />
+                <PopoverTrigger className="!px-0">
+                  <CareIcon
+                    icon="l-info-circle"
+                    className="size-4 text-gray-500 hover:text-gray-700 cursor-pointer"
+                  />
                 </PopoverTrigger>
                 <PopoverContent
                   className="max-w-fit w-[calc(100vw-2rem)] sm:max-w-fit sm:w-auto break-words"

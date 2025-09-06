@@ -5,17 +5,15 @@ import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 
 import Page from "@/components/Common/Page";
-import PatientInfoCard from "@/components/Patient/PatientInfoCard";
 import { QuestionnaireForm } from "@/components/Questionnaire/QuestionnaireForm";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import { getPermissions } from "@/common/Permissions";
-
 import query from "@/Utils/request/query";
-import { formatDateTime } from "@/Utils/utils";
-import { usePermissions } from "@/context/PermissionContext";
-import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
+import {
+  PatientDeceasedInfo,
+  PatientHeader,
+} from "@/pages/Facility/services/serviceRequests/PatientHeader";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 
 interface Props {
@@ -45,41 +43,21 @@ export default function EncounterQuestionnaire({
     enabled: !!encounterId,
   });
 
-  const { hasPermission } = usePermissions();
-  const { canWriteEncounter } = getPermissions(
-    hasPermission,
-    encounterId ? (encounter?.patient.permissions ?? []) : [],
-  );
-
-  const canWrite = encounterId
-    ? canWriteEncounter &&
-      !inactiveEncounterStatus.includes(encounter?.status ?? "")
-    : false;
-
   return (
-    <Page title={t("questionnaire_one")}>
-      <div className="flex flex-col space-y-4 mt-4">
+    <Page
+      title={t("questionnaire_one")}
+      className="block md:px-1 -mt-4"
+      hideTitleOnPage
+    >
+      <div className="flex flex-col space-y-4">
         {encounter && (
-          <div className="size-full rounded-lg border border-gray-200 bg-white text-black shadow-sm">
-            <PatientInfoCard
+          <div className="flex flex-col gap-2">
+            <PatientHeader
               patient={encounter.patient}
-              encounter={encounter}
-              fetchPatientData={() => {}}
-              disableButtons={true}
-              canWrite={canWrite}
+              facilityId={facilityId}
+              className="bg-white shadow-sm rounded-sm"
             />
-
-            <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">
-              <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700 md:text-right">
-                <div className="flex items-center">
-                  <span className="text-secondary-900">
-                    {t("last_modified")}:{" "}
-                  </span>
-                  &nbsp;
-                  {formatDateTime(encounter.modified_date)}
-                </div>
-              </div>
-            </div>
+            <PatientDeceasedInfo patient={encounter.patient} />
           </div>
         )}
         <Card className="mt-2">

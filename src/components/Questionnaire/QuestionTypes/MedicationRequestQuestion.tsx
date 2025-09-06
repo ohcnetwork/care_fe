@@ -80,8 +80,10 @@ import {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
-import { useFieldError } from "@/types/questionnaire/validation";
-import { validateFields } from "@/types/questionnaire/validation";
+import {
+  useFieldError,
+  validateFields,
+} from "@/types/questionnaire/validation";
 
 function formatDoseRange(range?: DoseRange): string {
   if (!range?.high?.value) return "";
@@ -784,6 +786,7 @@ export function MedicationRequestQuestion({
           onConfirm={handleConfirmMedicationInSheet}
           placeholder={addMedicationPlaceholder}
           onProductEntitySelected={handleAddProductMedication}
+          enableProduct
         >
           {newMedicationSheetContent}
         </EntitySelectionSheet>
@@ -827,8 +830,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   const dosageInstruction = medication.dosage_instruction[0] || {};
   const isReadOnly = !!medication.id;
   const { hasError } = useFieldError(questionId, errors, index);
-  const unitDisabled =
-    !!medication.requested_product_internal?.definitional?.dosage_form;
 
   const [currentInstructions, setCurrentInstructions] = useState<Code[]>(
     dosageInstruction?.additional_instruction || [],
@@ -866,13 +867,9 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
 
   interface DosageDialogProps {
     dosageRange: DoseRange;
-    unitDisabled?: boolean;
   }
 
-  const DosageDialog: React.FC<DosageDialogProps> = ({
-    dosageRange,
-    unitDisabled,
-  }) => {
+  const DosageDialog: React.FC<DosageDialogProps> = ({ dosageRange }) => {
     const [localDoseRange, setLocalDoseRange] =
       useState<DoseRange>(dosageRange);
 
@@ -896,7 +893,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               }
             }}
             disabled={disabled || isReadOnly}
-            unitDisabled={unitDisabled}
             className="lg:max-w-[200px]"
           />
         </div>
@@ -917,7 +913,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               }
             }}
             disabled={disabled || !localDoseRange.low.value || isReadOnly}
-            unitDisabled={unitDisabled}
             className="lg:max-w-[200px]"
           />
         </div>
@@ -1050,7 +1045,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                     }
                   }}
                   disabled={disabled || isReadOnly}
-                  unitDisabled={unitDisabled}
                   className="lg:max-w-[200px]"
                 />
               </div>
@@ -1084,7 +1078,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               <PopoverContent className="w-55 p-4" align="start">
                 <DosageDialog
                   dosageRange={dosageInstruction.dose_and_rate.dose_range}
-                  unitDisabled={unitDisabled}
                 />
               </PopoverContent>
             </Popover>
@@ -1093,7 +1086,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               <DialogContent>
                 <DosageDialog
                   dosageRange={dosageInstruction.dose_and_rate.dose_range}
-                  unitDisabled={unitDisabled}
                 />
               </DialogContent>
             </Dialog>
