@@ -83,12 +83,6 @@ export default function AddChargeItemSheet({
     );
   };
 
-  const getTotalComponent = (item: ChargeItemRead) => {
-    return item.total_price_components?.find(
-      (c) => c.monetary_component_type === MonetaryComponentType.base,
-    );
-  };
-
   const { data: response, isLoading } = useQuery({
     queryKey: ["charge-items", qParams],
     queryFn: query.debounced(chargeItemApi.listChargeItem, {
@@ -201,7 +195,7 @@ export default function AddChargeItemSheet({
                       <TableHead>{t("item")}</TableHead>
                       <TableHead>{t("quantity")}</TableHead>
                       <TableHead>{t("unit_price")}</TableHead>
-                      <TableHead>{t("amount")}</TableHead>
+                      <TableHead>{t("total")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -231,9 +225,7 @@ export default function AddChargeItemSheet({
                             />
                           </TableCell>
                           <TableCell>
-                            <MonetaryDisplay
-                              amount={getTotalComponent(item)?.amount || "0"}
-                            />
+                            <MonetaryDisplay amount={item.total_price} />
                           </TableCell>
                         </TableRow>
                       ))
