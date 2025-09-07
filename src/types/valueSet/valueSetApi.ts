@@ -21,8 +21,8 @@ export default {
   create: {
     path: "/api/v1/valueset/",
     method: HttpMethod.POST,
-    TRes: Type<ValueSetRead>(),
     TBody: Type<ValueSetCreate>(),
+    TRes: Type<ValueSetRead>(),
   },
   get: {
     path: "/api/v1/valueset/{slug}/",
@@ -32,14 +32,14 @@ export default {
   update: {
     path: "/api/v1/valueset/{slug}/",
     method: HttpMethod.PUT,
-    TRes: Type<ValueSetRead>(),
     TBody: Type<ValueSetUpdate>(),
+    TRes: Type<ValueSetRead>(),
   },
   lookup: {
     path: "/api/v1/valueset/lookup_code/",
     method: HttpMethod.POST,
-    TRes: Type<ValueSetLookupResponse>(),
     TBody: Type<ValueSetLookupRequest>(),
+    TRes: Type<ValueSetLookupResponse>(),
   },
   expand: {
     path: "/api/v1/valueset/{slug}/expand/",
@@ -50,8 +50,8 @@ export default {
   previewSearch: {
     path: "/api/v1/valueset/preview_search/",
     method: HttpMethod.POST,
-    TRes: Type<{ results: Code[] }>(),
     TBody: Type<ValueSetBase>(),
+    TRes: Type<{ results: Code[] }>(),
   },
   favourites: {
     path: "/api/v1/valueset/{slug}/favourites/",
