@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -130,7 +130,13 @@ export function PlugConfigEdit({ slug }: Props) {
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         title={t("are_you_sure")}
-        description={t("delete_config_description", { slug: config.slug })}
+        description={
+          <Trans
+            i18nKey="delete_config_description"
+            values={{ slug: config.slug }}
+            components={{ strong: <strong /> }}
+          />
+        }
         confirmText={t("delete")}
         onConfirm={handleDelete}
         variant="destructive"
