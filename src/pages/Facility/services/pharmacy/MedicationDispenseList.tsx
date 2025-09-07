@@ -283,7 +283,7 @@ export default function MedicationDispenseList({
               />
             </div>
           </div>
-          <div className="ml-auto flex gap-2 sm:flex-row w-full sm:w-auto">
+          <div className="ml-auto flex gap-2 flex-col sm:flex-row w-full sm:w-auto">
             <Button
               variant="outline"
               className="w-full sm:w-auto border-gray-400 font-semibold"
