@@ -2,6 +2,11 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import {
+  Preference,
+  SpecimenDefinitionCreate,
+  SpecimenDefinitionStatus,
+} from "@/types/emr/specimenDefinition/specimenDefinition.js";
+import {
   type BaseConfig,
   DEFAULT_CONFIG,
   type ProcessedRow,
@@ -23,25 +28,6 @@ const __dirname = path.dirname(__filename);
 
 const logger = getLogger();
 
-interface SpecimenData {
-  title: string;
-  slug: string;
-  status: string;
-  description: string;
-  type_collected: {
-    code: string;
-    system: string;
-    display: string;
-  };
-  preference: string;
-  container_cap: {
-    code: string;
-    system: string;
-    display: string;
-  };
-  container_minimumvolume: number;
-}
-
 // Configuration
 const CONFIG: BaseConfig = {
   inputFile: path.join(__dirname, "SpecimenDefinition.csv"),
@@ -55,42 +41,126 @@ const CONFIG: BaseConfig = {
 };
 
 // Function to process CSV data
-function processCsvData(rows: Record<string, string>[]): SpecimenData[] {
+function processCsvData(
+  rows: Record<string, string>[],
+): SpecimenDefinitionCreate[] {
   return rows.map((row) => {
     const minimumVolume = parseFloat(row.container_minimumvolume || "0");
+
+    // Helper function to create Code object only if all fields are present
+    const createCode = (code: string, system: string, display: string) => {
+      if (code && system && display) {
+        return { code, system, display };
+      }
+      return undefined;
+    };
+
+    // Create type_collected (required field)
+    const typeCollected = createCode(
+      row.type_collected_code,
+      row.type_collected_system,
+      row.type_collected_display,
+    );
+    if (!typeCollected) {
+      throw new Error(
+        `Missing required type_collected data for row with title: ${row.title}`,
+      );
+    }
+
+    // Create container cap (optional)
+    const containerCap = createCode(
+      row.container_cap_code,
+      row.container_cap_system,
+      row.container_cap_display,
+    );
+
+    // Create minimum volume unit (optional)
+    const minimumVolumeUnit = createCode(
+      row.container_minimumvolume_unit_code,
+      row.container_minimumvolume_unit_system,
+      row.container_minimumvolume_unit_display,
+    );
+
+    // Create retention time unit (optional)
+    const retentionTimeUnit = createCode(
+      row.retention_time_unit_code,
+      row.retention_time_unit_system,
+      row.retention_time_unit_display,
+    );
+
+    // Build container object (optional)
+    const container =
+      containerCap || minimumVolumeUnit
+        ? {
+            ...(containerCap && { cap: containerCap }),
+            ...(minimumVolumeUnit &&
+              !isNaN(minimumVolume) &&
+              minimumVolume > 0 && {
+                minimum_volume: {
+                  quantity: {
+                    value: minimumVolume,
+                    unit: minimumVolumeUnit,
+                  },
+                },
+              }),
+          }
+        : undefined;
+
+    // Build retention time (optional)
+    const retentionTime =
+      row.retention_time && retentionTimeUnit
+        ? {
+            value: parseFloat(row.retention_time_value) || 0,
+            unit: retentionTimeUnit,
+          }
+        : undefined;
+
+    // Build type_tested (optional)
+    const typeTested =
+      container || row.requirement || retentionTime || row.single_use
+        ? {
+            is_derived: false,
+            preference: (row.preference as Preference) || Preference.preferred,
+            ...(container && { container }),
+            ...(row.requirement && { requirement: row.requirement }),
+            ...(retentionTime && { retention_time: retentionTime }),
+            ...(row.single_use && {
+              single_use: row.single_use === "true" || row.single_use === "1",
+            }),
+          }
+        : undefined;
 
     return {
       title: row.title,
       slug: row.slug,
-      status: row.status || "active",
+      status:
+        (row.status as SpecimenDefinitionStatus) ||
+        SpecimenDefinitionStatus.active,
       description: row.description,
-      type_collected: {
-        code: row.type_collected_code || "",
-        system: row.type_collected_system || "",
-        display: row.type_collected_display || "",
-      },
-      preference: row.preference || "preferred",
-      container_cap: {
-        code: row.container_cap_code || "",
-        system: row.container_cap_system || "",
-        display: row.container_cap_display || "",
-      },
-      container_minimumvolume: isNaN(minimumVolume) ? 0 : minimumVolume,
+      type_collected: typeCollected,
+      ...(typeTested && { type_tested: typeTested }),
     };
   });
 }
 
 // Function to upsert specimen definition
-async function upsertSpecimenDefinition(data: SpecimenData): Promise<any> {
+async function upsertSpecimenDefinition(
+  data: SpecimenDefinitionCreate,
+): Promise<any> {
   const specimenData = {
     title: data.title,
     slug: data.slug,
     description: data.description,
-    status: data.status,
+    status: data.status || SpecimenDefinitionStatus.active,
     type_collected: data.type_collected,
-    preference: data.preference,
-    container_cap: data.container_cap,
-    container_minimumvolume: data.container_minimumvolume,
+    type_tested: {
+      is_derived: false, // Assuming not derived by default
+      preference: data.type_tested?.preference || Preference.preferred,
+      container: data.type_tested?.container,
+      requirement: data.type_tested?.requirement,
+      retention_time: data.type_tested?.retention_time,
+      single_use: data.type_tested?.single_use,
+    },
   };
 
   return await makeApiCall(
@@ -137,16 +207,7 @@ async function main(configOverride?: Partial<typeof CONFIG>) {
     logger(colorize("Upserting specimen definitions...", 0));
     const results = await makeBatchApiCall(
       `/api/v1/facility/${finalConfig.facilityId}/specimen_definition/upsert/`,
-      processedData.map((item) => ({
-        title: item.title,
-        slug: item.slug,
-        description: item.description,
-        status: item.status,
-        type_collected: item.type_collected,
-        preference: item.preference,
-        container_cap: item.container_cap,
-        container_minimumvolume: item.container_minimumvolume,
-      })),
+      processedData,
       finalConfig,
     );
 
