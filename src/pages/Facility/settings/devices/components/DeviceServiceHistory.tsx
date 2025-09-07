@@ -75,7 +75,7 @@ export default function DeviceServiceHistory({
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <CardTitle>{t("service_history")}</CardTitle>
         <AddServiceHistorySheet
           facilityId={facilityId}
