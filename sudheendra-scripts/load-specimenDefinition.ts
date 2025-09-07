@@ -122,9 +122,7 @@ function processCsvData(
       ...(container && { container }),
       ...(row.requirement && { requirement: row.requirement }),
       ...(retentionTime && { retention_time: retentionTime }),
-      ...(row.single_use && {
-        single_use: row.single_use === "true" || row.single_use === "1",
-      }),
+      single_use: row.single_use === "true" || false,
     };
 
     return {
