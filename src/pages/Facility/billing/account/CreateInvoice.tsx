@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   useInfiniteQuery,
   useMutation,
+  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp, PlusIcon } from "lucide-react";
@@ -41,7 +42,11 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import {
+  MonetaryComponent,
+  MonetaryComponentType,
+} from "@/types/base/monetaryComponent/monetaryComponent";
+import accountApi from "@/types/billing/account/accountApi";
 import {
   ChargeItemRead,
   ChargeItemStatus,
@@ -54,6 +59,8 @@ import {
   InvoiceStatus,
 } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
+
+import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -80,8 +87,8 @@ interface CreateInvoicePageProps {
 
 interface PriceComponentRowProps {
   label: string;
-  components: any[];
-  totalPriceComponents: any[];
+  components: MonetaryComponent[];
+  totalPriceComponents: MonetaryComponent[];
 }
 
 function PriceComponentRow({
@@ -148,6 +155,7 @@ export function CreateInvoicePage({
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
     {},
   );
+  const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -158,6 +166,20 @@ export function CreateInvoicePage({
       charge_items: preSelectedChargeItems?.map((item) => item.id) || [],
     },
   });
+
+  const { data: account } = useQuery({
+    queryKey: ["account", accountId],
+    queryFn: query(accountApi.retrieveAccount, {
+      pathParams: { facilityId, accountId },
+    }),
+    enabled: !!facilityId && !!accountId,
+  });
+
+  const handleChargeItemsAdded = () => {
+    queryClient.invalidateQueries({
+      queryKey: ["chargeItems", facilityId, accountId],
+    });
+  };
 
   const {
     data: chargeItemsData,
@@ -243,25 +265,31 @@ export function CreateInvoicePage({
     }));
   };
 
-  const getUnitComponentsByType = (item: any, type: MonetaryComponentType) => {
+  const getUnitComponentsByType = (
+    item: ChargeItemRead,
+    type: MonetaryComponentType,
+  ) => {
     return (
       item.unit_price_components?.filter(
-        (c: any) => c.monetary_component_type === type,
+        (c) => c.monetary_component_type === type,
       ) || []
     );
   };
 
-  const getTotalComponentsByType = (item: any, type: MonetaryComponentType) => {
+  const getTotalComponentsByType = (
+    item: ChargeItemRead,
+    type: MonetaryComponentType,
+  ) => {
     return (
       item.total_price_components?.filter(
-        (c: any) => c.monetary_component_type === type,
+        (c) => c.monetary_component_type === type,
       ) || []
     );
   };
 
-  const getBaseComponent = (item: any) => {
+  const getBaseComponent = (item: ChargeItemRead) => {
     return item.unit_price_components?.find(
-      (c: any) => c.monetary_component_type === MonetaryComponentType.base,
+      (c) => c.monetary_component_type === MonetaryComponentType.base,
     );
   };
 
@@ -331,8 +359,18 @@ export function CreateInvoicePage({
           </div>
 
           <div className="pb-2">
-            <div className="text-sm font-medium text-gray-950">
-              {t("billable_charge_items")}
+            <div className="flex justify-between items-center mb-4">
+              <div className="text-sm font-medium text-gray-950">
+                {t("billable_charge_items")}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsAddChargeItemsOpen(true)}
+              >
+                <PlusIcon className="size-4 mr-2" />
+                {t("add_charge_items")}
+              </Button>
             </div>
             {isLoading ? (
               <TableSkeleton count={3} />
@@ -394,7 +432,7 @@ export function CreateInvoicePage({
                     {chargeItems.filter(Boolean).flatMap((item) => {
                       const isExpanded = expandedItems[item.id] || false;
                       const baseComponent = getBaseComponent(item);
-                      const baseAmount = baseComponent?.amount || 0;
+                      const baseAmount = baseComponent?.amount || "0";
                       const mrpAmount = item.unit_price_components.find(
                         (c) =>
                           c.monetary_component_type ===
@@ -574,6 +612,16 @@ export function CreateInvoicePage({
           </div>
         </form>
       </Form>
+
+      {account?.patient && (
+        <AddChargeItemsBillingSheet
+          open={isAddChargeItemsOpen}
+          onOpenChange={setIsAddChargeItemsOpen}
+          facilityId={facilityId}
+          patientId={account.patient.id}
+          onChargeItemsAdded={handleChargeItemsAdded}
+        />
+      )}
     </div>
   );
 }

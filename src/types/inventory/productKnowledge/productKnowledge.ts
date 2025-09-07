@@ -86,7 +86,8 @@ export interface ProductKnowledgeCreate
   facility: string;
 }
 
-export interface ProductKnowledgeUpdate extends ProductKnowledgeBase {
+export interface ProductKnowledgeUpdate
+  extends Omit<ProductKnowledgeBase, "id"> {
   facility: string;
 }
 

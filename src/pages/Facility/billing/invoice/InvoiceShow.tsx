@@ -64,10 +64,13 @@ import useAppHistory from "@/hooks/useAppHistory";
 import dayjs from "@/Utils/dayjs";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
-import EditInvoiceSheet from "@/pages/Facility/billing/invoice/EditInvoiceSheet";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
-import { MRP_CODE } from "@/types/billing/chargeItem/chargeItem";
+import {
+  ChargeItemRead,
+  MRP_CODE,
+} from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import {
   INVOICE_STATUS_COLORS,
@@ -106,6 +109,10 @@ export function InvoiceShow({
 }) {
   const { t } = useTranslation();
   const [isPaymentSheetOpen, setIsPaymentSheetOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedChargeItems, setSelectedChargeItems] = useState<
+    ChargeItemRead[]
+  >([]);
   const [chargeItemToRemove, setChargeItemToRemove] = useState<string | null>(
     null,
   );
@@ -200,10 +207,13 @@ export function InvoiceShow({
     }
   };
 
-  const getUnitComponentsByType = (item: any, type: MonetaryComponentType) => {
+  const getUnitComponentsByType = (
+    item: ChargeItemRead,
+    type: MonetaryComponentType,
+  ) => {
     return (
       item.unit_price_components?.filter(
-        (c: any) => c.monetary_component_type === type,
+        (c) => c.monetary_component_type === type,
       ) || []
     );
   };
@@ -213,8 +223,10 @@ export function InvoiceShow({
     const invoiceTaxCodes = new Set<string>();
     invoice.charge_items.forEach((item) => {
       getUnitComponentsByType(item, MonetaryComponentType.tax).forEach(
-        (taxComponent: any) => {
-          invoiceTaxCodes.add(taxComponent.code.code);
+        (taxComponent) => {
+          if (taxComponent.code?.code) {
+            invoiceTaxCodes.add(taxComponent.code.code);
+          }
         },
       );
     });
@@ -222,9 +234,9 @@ export function InvoiceShow({
     return Array.from(invoiceTaxCodes);
   };
 
-  const getBaseComponent = (item: any) => {
+  const getBaseComponent = (item: ChargeItemRead) => {
     return item.unit_price_components?.find(
-      (c: any) => c.monetary_component_type === MonetaryComponentType.base,
+      (c) => c.monetary_component_type === MonetaryComponentType.base,
     );
   };
 
@@ -359,15 +371,19 @@ export function InvoiceShow({
               </Badge>
             </div>
             <div className="flex flex-row gap-2">
-              <EditInvoiceSheet
-                facilityId={facilityId}
-                invoiceId={invoiceId}
-                onSuccess={() => {
-                  queryClient.invalidateQueries({
-                    queryKey: ["invoice", invoiceId],
-                  });
-                }}
-              />
+              {invoice.status === InvoiceStatus.draft && (
+                <Button
+                  variant="outline"
+                  className="border-gray-400 gap-1"
+                  onClick={() => {
+                    setIsEditDialogOpen(true);
+                    setSelectedChargeItems(invoice.charge_items);
+                  }}
+                >
+                  <CareIcon icon="l-edit" className="size-4" />
+                  {t("edit_items")}
+                </Button>
+              )}
               <Button
                 variant="outline"
                 asChild
@@ -543,7 +559,7 @@ export function InvoiceShow({
                     ) : (
                       invoice.charge_items.flatMap((item, index) => {
                         const baseComponent = getBaseComponent(item);
-                        const baseAmount = baseComponent?.amount || 0;
+                        const baseAmount = baseComponent?.amount || "0";
                         const mrpAmount = item.unit_price_components.find(
                           (c) =>
                             c.monetary_component_type ===
@@ -691,6 +707,19 @@ export function InvoiceShow({
                                       {t("actions")}
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setIsEditDialogOpen(true);
+                                        // Pass only this item to edit
+                                        setSelectedChargeItems([item]);
+                                      }}
+                                    >
+                                      <CareIcon
+                                        icon="l-edit"
+                                        className="mr-2 size-4"
+                                      />
+                                      <span>{t("edit")}</span>
+                                    </DropdownMenuItem>
                                     <DropdownMenuItem
                                       onClick={() =>
                                         setChargeItemToRemove(item.id)
@@ -1087,6 +1116,21 @@ export function InvoiceShow({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <EditInvoiceDialog
+        open={isEditDialogOpen}
+        onOpenChange={(open) => {
+          setIsEditDialogOpen(open);
+          if (!open) {
+            setSelectedChargeItems([]);
+          }
+        }}
+        facilityId={facilityId}
+        chargeItems={selectedChargeItems}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["invoice", invoiceId] });
+        }}
+      />
 
       {sourceUrl && (
         <Alert className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-2xl w-full mx-auto shadow-lg rounded-lg p-0 bg-white border border-gray-200">

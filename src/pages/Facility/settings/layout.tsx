@@ -136,27 +136,21 @@ const getRoutes = (facilityId: string) => ({
   "/charge_item_definitions/new": () => (
     <CreateChargeItemDefinition facilityId={facilityId} />
   ),
-  "/charge_item_definitions/:id": ({ id }: { id: string }) => (
-    <ChargeItemDefinitionDetail
-      facilityId={facilityId}
-      chargeItemDefinitionId={id}
-    />
+  "/charge_item_definitions/:slug": ({ slug }: { slug: string }) => (
+    <ChargeItemDefinitionDetail facilityId={facilityId} slug={slug} />
   ),
-  "/charge_item_definitions/:id/edit": ({ id }: { id: string }) => (
-    <UpdateChargeItemDefinition
-      facilityId={facilityId}
-      chargeItemDefinitionId={id}
-    />
+  "/charge_item_definitions/:slug/edit": ({ slug }: { slug: string }) => (
+    <UpdateChargeItemDefinition facilityId={facilityId} slug={slug} />
   ),
   "/product_knowledge": () => <ProductKnowledgeList facilityId={facilityId} />,
   "/product_knowledge/new": () => (
     <ProductKnowledgeForm facilityId={facilityId} />
   ),
-  "/product_knowledge/:id": ({ id }: { id: string }) => (
-    <ProductKnowledgeView facilityId={facilityId} productKnowledgeId={id} />
+  "/product_knowledge/:slug": ({ slug }: { slug: string }) => (
+    <ProductKnowledgeView facilityId={facilityId} slug={slug} />
   ),
-  "/product_knowledge/:id/edit": ({ id }: { id: string }) => (
-    <ProductKnowledgeForm facilityId={facilityId} productKnowledgeId={id} />
+  "/product_knowledge/:slug/edit": ({ slug }: { slug: string }) => (
+    <ProductKnowledgeForm facilityId={facilityId} slug={slug} />
   ),
   "/product": () => <ProductList facilityId={facilityId} />,
   "/product/new": () => <ProductForm facilityId={facilityId} />,

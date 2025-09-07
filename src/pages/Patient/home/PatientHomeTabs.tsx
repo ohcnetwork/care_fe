@@ -13,7 +13,7 @@ interface PatientHomeTabsProps {
   facilityId: string;
   facilityPermissions: string[];
   canListEncounters: boolean;
-  canCreateAppointment: boolean;
+  canWriteAppointment: boolean;
   canCreateToken: boolean;
   patientData: PatientRead;
 }
@@ -23,7 +23,7 @@ export default function PatientHomeTabs({
   facilityId,
   facilityPermissions,
   canListEncounters,
-  canCreateAppointment,
+  canWriteAppointment,
   canCreateToken,
   patientData,
 }: PatientHomeTabsProps) {
@@ -36,7 +36,7 @@ export default function PatientHomeTabs({
         <TabsTrigger value="encounters" className="flex items-center gap-2">
           <span>{t("encounters")}</span>
         </TabsTrigger>
-        {canCreateAppointment && (
+        {canWriteAppointment && (
           <TabsTrigger value="appointments" className="flex items-center gap-2">
             <span>{t("appointments")}</span>
           </TabsTrigger>
@@ -57,7 +57,7 @@ export default function PatientHomeTabs({
         />
       </TabsContent>
 
-      {canCreateAppointment && (
+      {canWriteAppointment && (
         <TabsContent value="appointments" className="mt-4">
           <Appointments
             patientData={patientData}

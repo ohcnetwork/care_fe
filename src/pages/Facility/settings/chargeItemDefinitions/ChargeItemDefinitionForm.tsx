@@ -322,7 +322,7 @@ export function ChargeItemDefinitionForm({
   const { mutate: upsert, isPending } = useMutation({
     mutationFn: isUpdate
       ? mutate(chargeItemDefinitionApi.updateChargeItemDefinition, {
-          pathParams: { facilityId, id: initialData!.id },
+          pathParams: { facilityId, slug: initialData!.slug },
         })
       : mutate(chargeItemDefinitionApi.createChargeItemDefinition, {
           pathParams: { facilityId },

@@ -18,6 +18,7 @@ import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
+import { InvoiceStatus } from "@/types/billing/invoice/invoice";
 import {
   MEDICATION_DISPENSE_STATUS_COLORS,
   MedicationDispenseRead,
@@ -140,7 +141,7 @@ export function DispenseHistory({
                       disabled={!facilityId}
                     >
                       <Link
-                        href={`/facility/${facilityId}/locations/${medication.location.id}/medication_dispense/patient/${patientId}/${medication.status}`}
+                        href={`/facility/${facilityId}/locations/${medication.location.id}/medication_dispense/patient/${patientId}/${medication.status}?payment_status=${medication.charge_item?.paid_invoice?.status === InvoiceStatus.balanced ? "paid" : "unpaid"}`}
                       >
                         {t("dispense")}
                       </Link>

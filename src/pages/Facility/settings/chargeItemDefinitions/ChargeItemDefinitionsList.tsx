@@ -64,7 +64,7 @@ function ChargeItemDefinitionCard({
               size="sm"
               onClick={() =>
                 navigate(
-                  `/facility/${facilityId}/settings/charge_item_definitions/${definition.id}`,
+                  `/facility/${facilityId}/settings/charge_item_definitions/${definition.slug}`,
                 )
               }
             >
@@ -161,7 +161,7 @@ export function ChargeItemDefinitionsList({
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
                   options={Object.values(ChargeItemDefinitionStatus)}
-                  label="status"
+                  label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
                 />
               </div>
@@ -201,7 +201,7 @@ export function ChargeItemDefinitionsList({
                   </TableHeader>
                   <TableBody className="bg-white">
                     {chargeItemDefinitions.map((definition) => (
-                      <TableRow key={definition.id} className="divide-x">
+                      <TableRow key={definition.slug} className="divide-x">
                         <TableCell className="font-medium">
                           {definition.title}
                         </TableCell>
@@ -225,7 +225,7 @@ export function ChargeItemDefinitionsList({
                             size="sm"
                             onClick={() =>
                               navigate(
-                                `/facility/${facilityId}/settings/charge_item_definitions/${definition.id}`,
+                                `/facility/${facilityId}/settings/charge_item_definitions/${definition.slug}`,
                               )
                             }
                           >

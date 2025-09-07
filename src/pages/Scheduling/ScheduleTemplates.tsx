@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { Edit3Icon } from "lucide-react";
 import { useQueryParams } from "raviger";
-import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -11,17 +10,15 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
-import DefinitionSelector from "@/components/Common/DefinitionSelector";
 import Loading from "@/components/Common/Loading";
+import ScheduleChargeItemDefinitionSelector from "@/pages/Scheduling/components/ScheduleChargeItemDefinitionSelector";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
 import { getPermissions } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
-import { ChargeItemDefinitionForm } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionForm";
 import EditScheduleTemplateSheet from "@/pages/Scheduling/components/EditScheduleTemplateSheet";
 import {
   formatAvailabilityTime,
@@ -96,27 +93,12 @@ const ScheduleTemplateItem = ({
       pathParams: { facilityId },
     }),
   });
-  const [chargeItemSearch, setChargeItemSearch] = useState("");
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
   const { canCreateChargeItemDefinition } = getPermissions(
     hasPermission,
     facilityData?.permissions ?? [],
   );
-
-  const {
-    data: chargeItemDefinitions,
-    isLoading: isLoadingChargeItemDefinitions,
-  } = useQuery({
-    queryKey: ["chargeItemDefinitions", facilityId, chargeItemSearch],
-    queryFn: query.debounced(chargeItemDefinitionApi.listChargeItemDefinition, {
-      pathParams: { facilityId },
-      queryParams: {
-        limit: 14,
-        title: chargeItemSearch,
-      },
-    }),
-  });
 
   const { mutate: setChargeItemDefinition } = useMutation({
     mutationFn: mutate(scheduleApi.templates.setChargeItemDefinition, {
@@ -157,58 +139,17 @@ const ScheduleTemplateItem = ({
 
         <div className="flex gap-2">
           {canCreateChargeItemDefinition && (
-            <DefinitionSelector
-              title={t("select_charge_item_definitions")}
-              description={t("select_or_create_charge_item_definitions")}
-              value={
-                template.charge_item_definition
-                  ? {
-                      label: template.charge_item_definition.title,
-                      value: template.charge_item_definition.id,
-                      details: [
-                        {
-                          label: t("base_amount"),
-                          value:
-                            template.charge_item_definition.price_components.find(
-                              (c) => c.monetary_component_type === "base",
-                            )?.amount ?? undefined,
-                        },
-                      ],
-                    }
-                  : undefined
-              }
-              onChange={(item) =>
+            <ScheduleChargeItemDefinitionSelector
+              facilityId={facilityId}
+              scheduleTemplate={template}
+              onChange={(value) =>
                 setChargeItemDefinition({
-                  charge_item_definition: item.value,
+                  charge_item_definition: value.charge_item_definition,
+                  re_visit_allowed_days: value.re_visit_allowed_days || 0,
+                  re_visit_charge_item_definition:
+                    value.re_visit_charge_item_definition,
                 })
               }
-              options={
-                chargeItemDefinitions?.results.map((chargeDef) => ({
-                  label: chargeDef.title,
-                  value: chargeDef.id,
-                  details: [
-                    {
-                      label: t("amount"),
-                      value:
-                        chargeDef.price_components.find(
-                          (c) => c.monetary_component_type === "base",
-                        )?.amount ?? undefined,
-                    },
-                  ],
-                })) || []
-              }
-              isLoading={isLoadingChargeItemDefinitions}
-              placeholder={t("manage_charges")}
-              onSearch={setChargeItemSearch}
-              canCreate
-              createForm={(onSuccess) => (
-                <div className="py-2">
-                  <ChargeItemDefinitionForm
-                    facilityId={facilityId}
-                    onSuccess={onSuccess}
-                  />
-                </div>
-              )}
             />
           )}
           <EditScheduleTemplateSheet

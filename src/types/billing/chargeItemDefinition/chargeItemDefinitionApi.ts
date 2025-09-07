@@ -14,7 +14,7 @@ export default {
     TRes: Type<PaginatedResponse<ChargeItemDefinitionBase>>(),
   },
   retrieveChargeItemDefinition: {
-    path: "/api/v1/facility/{facilityId}/charge_item_definition/{chargeItemDefinitionId}/",
+    path: "/api/v1/facility/{facilityId}/charge_item_definition/{slug}/",
     method: HttpMethod.GET,
     TRes: Type<ChargeItemDefinitionRead>(),
   },
@@ -25,7 +25,7 @@ export default {
     TBody: Type<ChargeItemDefinitionCreate>(),
   },
   updateChargeItemDefinition: {
-    path: "/api/v1/facility/{facilityId}/charge_item_definition/{id}/",
+    path: "/api/v1/facility/{facilityId}/charge_item_definition/{slug}/",
     method: HttpMethod.PUT,
     TRes: Type<ChargeItemDefinitionRead>(),
     TBody: Type<ChargeItemDefinitionCreate>(),

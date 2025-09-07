@@ -479,6 +479,7 @@ export function BedChargeItemsTable({
                                   <EditChargeItemSheet
                                     facilityId={facilityId}
                                     item={item}
+                                    accountId={accountId}
                                     trigger={
                                       <Button
                                         id={`edit-charge-item-${item.id}`}

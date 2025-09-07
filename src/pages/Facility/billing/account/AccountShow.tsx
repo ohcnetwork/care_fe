@@ -131,7 +131,7 @@ export function AccountShow({
           : AccountBillingStatus.closed_baddebt,
       });
     }
-  }, [account]);
+  }, [account, isAccountBillingClosed]);
 
   const rebalanceMutation = useMutation({
     mutationFn: mutate(accountApi.rebalanceAccount, {

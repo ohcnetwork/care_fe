@@ -40,6 +40,7 @@ export default function PatientHomeTokens({
       pathParams: { patientId },
       queryParams: {
         limit: resultsPerPage,
+        facility: facilityId,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         ordering: "-created_date",
       },

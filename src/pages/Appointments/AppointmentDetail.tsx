@@ -103,8 +103,11 @@ export default function AppointmentDetail(props: Props) {
   const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
-  const { canViewAppointments, canUpdateAppointment, canCreateAppointment } =
-    getPermissions(hasPermission, facility?.permissions ?? []);
+
+  const { canViewAppointments, canWriteAppointment } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
 
   const { data: appointment } = useQuery({
     queryKey: ["appointment", props.appointmentId],
@@ -363,7 +366,7 @@ export default function AppointmentDetail(props: Props) {
               </div>
             )}
 
-            {canUpdateAppointment && (
+            {canWriteAppointment && (
               <>
                 <div className="md:mx-4 mt-4">
                   <AppointmentActions
@@ -371,7 +374,7 @@ export default function AppointmentDetail(props: Props) {
                     appointment={appointment}
                     updateAppointment={updateAppointment}
                     onViewPatient={redirectToPatientPage}
-                    canCreateAppointment={canCreateAppointment}
+                    canWriteAppointment={canWriteAppointment}
                     isUpdating={isUpdating}
                   />
                 </div>
@@ -626,7 +629,7 @@ interface AppointmentActionsProps {
   appointment: AppointmentRead;
   updateAppointment: (data: AppointmentUpdateRequest) => void;
   onViewPatient: () => void;
-  canCreateAppointment: boolean;
+  canWriteAppointment: boolean;
   isUpdating: boolean;
 }
 
@@ -635,7 +638,7 @@ const AppointmentActions = ({
   appointment,
   updateAppointment,
   onViewPatient,
-  canCreateAppointment,
+  canWriteAppointment,
   isUpdating,
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
@@ -808,7 +811,7 @@ const AppointmentActions = ({
         </div>
 
         {/* Secondary Actions */}
-        {canCreateAppointment && (
+        {canWriteAppointment && (
           <div className="space-y-3">
             <Separator />
 

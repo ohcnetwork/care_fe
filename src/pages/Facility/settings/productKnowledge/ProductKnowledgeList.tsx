@@ -76,7 +76,7 @@ function ProductKnowledgeCard({
         </div>
         <div className="flex justify-end">
           <Button asChild variant="outline" size="sm">
-            <Link href={`/product_knowledge/${product.id}`}>
+            <Link href={`/product_knowledge/${product.slug}`}>
               <CareIcon icon="l-edit" className="size-4" />
               {t("see_details")}
             </Link>
@@ -261,7 +261,7 @@ export default function ProductKnowledgeList({
                         </TableCell>
                         <TableCell>
                           <Button asChild variant="outline" size="sm">
-                            <Link href={`/product_knowledge/${product.id}`}>
+                            <Link href={`/product_knowledge/${product.slug}`}>
                               <CareIcon icon="l-edit" className="size-4" />
                               {t("see_details")}
                             </Link>

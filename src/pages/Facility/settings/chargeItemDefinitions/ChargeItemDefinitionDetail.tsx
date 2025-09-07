@@ -30,28 +30,28 @@ import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/charge
 
 interface ChargeItemDefinitionDetailProps {
   facilityId: string;
-  chargeItemDefinitionId: string;
+  slug: string;
 }
 
 export function ChargeItemDefinitionDetail({
   facilityId,
-  chargeItemDefinitionId,
+  slug,
 }: ChargeItemDefinitionDetailProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { data: chargeItemDefinition, isLoading } = useQuery({
-    queryKey: ["chargeItemDefinitions", chargeItemDefinitionId],
+    queryKey: ["chargeItemDefinitions", slug],
     queryFn: query(chargeItemDefinitionApi.retrieveChargeItemDefinition, {
-      pathParams: { facilityId, chargeItemDefinitionId },
+      pathParams: { facilityId, slug },
     }),
   });
 
   const { mutate: updateChargeItemDefinition, isPending: isDeleting } =
     useMutation({
       mutationFn: mutate(chargeItemDefinitionApi.updateChargeItemDefinition, {
-        pathParams: { facilityId, id: chargeItemDefinitionId },
+        pathParams: { facilityId, slug: slug },
       }),
       onSuccess: () => {
         toast.success(t("definition_deleted_successfully"));
@@ -88,7 +88,9 @@ export function ChargeItemDefinitionDetail({
         </div>
         <div className="text-right">
           {component.amount ? (
-            <p className="font-medium">₹{component.amount}</p>
+            <p className="font-medium">
+              {/* TODO: Internationalize currency symbol */}₹{component.amount}
+            </p>
           ) : component.factor ? (
             <p className="font-medium">{component.factor}%</p>
           ) : (
@@ -172,7 +174,7 @@ export function ChargeItemDefinitionDetail({
               <Button
                 onClick={() =>
                   navigate(
-                    `/facility/${facilityId}/settings/charge_item_definitions/${chargeItemDefinitionId}/edit`,
+                    `/facility/${facilityId}/settings/charge_item_definitions/${slug}/edit`,
                   )
                 }
               >

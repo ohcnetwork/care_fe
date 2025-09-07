@@ -89,8 +89,9 @@ export default function ActivityDefinitionView({
           (observation) => observation.id,
         ) || [],
       charge_item_definitions:
-        definition.charge_item_definitions.map((chargeItem) => chargeItem.id) ||
-        [],
+        definition.charge_item_definitions.map(
+          (chargeItemDefinition) => chargeItemDefinition.slug,
+        ) || [],
       locations: definition.locations.map((location) => location.id) || [],
       status: "retired",
       diagnostic_report_codes: definition.diagnostic_report_codes || [],
@@ -323,7 +324,7 @@ export default function ActivityDefinitionView({
               <div className="space-y-4">
                 {definition.charge_item_definitions.map((chargeItem) => (
                   <div
-                    key={chargeItem.id}
+                    key={chargeItem.slug}
                     className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50"
                   >
                     <div className="space-y-2">

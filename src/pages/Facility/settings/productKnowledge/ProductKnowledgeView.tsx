@@ -29,7 +29,7 @@ import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowl
 
 interface Props {
   facilityId: string;
-  productKnowledgeId: string;
+  slug: string;
 }
 
 function CodeDisplay({ code }: { code: Code | null }) {
@@ -43,10 +43,7 @@ function CodeDisplay({ code }: { code: Code | null }) {
   );
 }
 
-export default function ProductKnowledgeView({
-  facilityId,
-  productKnowledgeId,
-}: Props) {
+export default function ProductKnowledgeView({ facilityId, slug }: Props) {
   const { t } = useTranslation();
 
   const {
@@ -54,9 +51,12 @@ export default function ProductKnowledgeView({
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["productKnowledge", productKnowledgeId],
+    queryKey: ["productKnowledge", slug],
     queryFn: query(productKnowledgeApi.retrieveProductKnowledge, {
-      pathParams: { productKnowledgeId },
+      pathParams: { slug },
+      queryParams: {
+        facility: facilityId,
+      },
     }),
   });
 
@@ -123,7 +123,7 @@ export default function ProductKnowledgeView({
             variant="outline"
             onClick={() =>
               navigate(
-                `/facility/${facilityId}/settings/product_knowledge/${product.id}/edit`,
+                `/facility/${facilityId}/settings/product_knowledge/${product.slug}/edit`,
               )
             }
           >
