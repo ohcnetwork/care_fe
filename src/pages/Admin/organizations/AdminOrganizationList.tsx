@@ -116,7 +116,7 @@ export default function AdminOrganizationList({
               defaultSize={20}
               minSize={15}
               maxSize={30}
-              className="hidden md:block rounded-2xl border bg-white"
+              className="hidden md:block rounded-xl border bg-white"
             >
               <AdminOrganizationNavbar
                 organizationType={organizationType}
@@ -134,7 +134,7 @@ export default function AdminOrganizationList({
 
             <ResizablePanel
               defaultSize={80}
-              className="pl-0 md:pl-4 rounded-2xl border-0 md:border bg-white"
+              className="pl-0 md:pl-4 rounded-xl border-0 md:border bg-white"
             >
               {organizationId && (
                 <div className="md:pt-4 flex items-center mx-auto max-w-4xl">
