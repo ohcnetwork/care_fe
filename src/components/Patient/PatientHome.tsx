@@ -50,7 +50,7 @@ export const PatientHome = (props: {
     hasPermission,
   );
 
-  const { canCreateAppointment } = getPermissions(
+  const { canWriteAppointment } = getPermissions(
     hasPermission,
     patientData?.permissions ?? [],
   );
@@ -72,7 +72,7 @@ export const PatientHome = (props: {
       title={t("patient_details")}
       options={
         <>
-          {facilityId && canCreateAppointment && (
+          {facilityId && canWriteAppointment && (
             <Button asChild variant="primary">
               <Link
                 href={`/facility/${facilityId}/patient/${id}/book-appointment`}

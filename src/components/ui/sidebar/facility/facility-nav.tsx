@@ -24,7 +24,7 @@ function generateFacilityLinks(
   permissions: {
     canViewAppointments: boolean;
     canListEncounters: boolean;
-    canCreateAppointment: boolean;
+    canWriteAppointment: boolean;
     canCreateEncounter: boolean;
     canViewEncounter: boolean;
   },
@@ -59,7 +59,7 @@ function generateFacilityLinks(
       url: `${baseUrl}/patients`,
       icon: <CareIcon icon="d-patient" />,
       visibility:
-        permissions.canCreateAppointment ||
+        permissions.canWriteAppointment ||
         permissions.canListEncounters ||
         permissions.canCreateEncounter,
       children: [
@@ -213,14 +213,14 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
   const {
     canViewAppointments,
     canListEncounters,
-    canCreateAppointment,
+    canWriteAppointment,
     canCreateEncounter,
     canViewEncounter,
   } = getPermissions(hasPermission, facility?.permissions ?? []);
   const permissions = {
     canViewAppointments,
     canListEncounters,
-    canCreateAppointment,
+    canWriteAppointment,
     canCreateEncounter,
     canViewEncounter,
   };
