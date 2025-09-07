@@ -116,19 +116,16 @@ function processCsvData(
         : undefined;
 
     // Build type_tested (optional)
-    const typeTested =
-      container || row.requirement || retentionTime || row.single_use
-        ? {
-            is_derived: false,
-            preference: (row.preference as Preference) || Preference.preferred,
-            ...(container && { container }),
-            ...(row.requirement && { requirement: row.requirement }),
-            ...(retentionTime && { retention_time: retentionTime }),
-            ...(row.single_use && {
-              single_use: row.single_use === "true" || row.single_use === "1",
-            }),
-          }
-        : undefined;
+    const typeTested = {
+      is_derived: false,
+      preference: (row.preference as Preference) || Preference.preferred,
+      ...(container && { container }),
+      ...(row.requirement && { requirement: row.requirement }),
+      ...(retentionTime && { retention_time: retentionTime }),
+      ...(row.single_use && {
+        single_use: row.single_use === "true" || row.single_use === "1",
+      }),
+    };
 
     return {
       title: row.title,
