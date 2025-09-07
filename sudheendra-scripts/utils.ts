@@ -461,13 +461,25 @@ export async function makeApiCall(
     method,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Basic ${Buffer.from(`${process.env.USER_NAME}:${process.env.PASSWORD}`).toString("base64")}`,
+      Authorization: `Basic ${Buffer.from(`${process.env.USERNAME}:${process.env.PASSWORD}`).toString("base64")}`,
     },
     body: JSON.stringify({ datapoints: [data] }),
   });
 
   if (!response.ok) {
     const errorText = await response.json();
+
+    // Check if it's a "slug must be unique" error
+    const errorString = JSON.stringify(errorText).toLowerCase();
+    if (errorString.includes("slug must be unique")) {
+      throw {
+        status: response.status,
+        statusText: response.statusText,
+        errorText: "slug must be unique",
+        isAlreadyExists: true,
+      };
+    }
+
     const specificError = extractDjangoError(errorText);
 
     throw {
@@ -669,7 +681,7 @@ export type parserType = "local" | "google-sheets";
 
 // Common configuration defaults
 export const DEFAULT_CONFIG = {
-  facilityId: process.env.FACILITY_ID || "f3aab8c6-9cc4-41bc-84e9-cdba0ff5ca86",
+  facilityId: process.env.FACILITY_ID || "db12139b-aac0-4f07-a6ac-1d7629390a99",
   apiBaseUrl: process.env.API_BASE_URL || "http://localhost:8000",
   parser: "local" as parserType,
   sheetName: "Sheet1",

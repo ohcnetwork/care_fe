@@ -207,8 +207,6 @@ function parseCode(
   if (cleanCode.includes(".")) {
     if (cleanCode.endsWith(".0")) {
       cleanCode = cleanCode.slice(0, -2);
-    } else {
-      cleanCode = cleanCode.replace(/\.0/g, "");
     }
   }
   return {
@@ -318,7 +316,7 @@ async function upsertObservationDefinition(data: ParsedObservationDefinition) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Basic ${Buffer.from(`${process.env.USER_NAME}:${process.env.PASSWORD}`).toString("base64")}`,
+      Authorization: `Basic ${Buffer.from(`${process.env.USERNAME}:${process.env.PASSWORD}`).toString("base64")}`,
     },
     body: JSON.stringify({ datapoints: [data] }),
   });
@@ -388,7 +386,11 @@ async function upsertObservationDefinition(data: ParsedObservationDefinition) {
  * Main script
  */
 async function main(configOverride?: Partial<typeof CONFIG>) {
-  const finalConfig = mergeConfigWithCli(CONFIG, configOverride);
+  // If configOverride is provided, don't merge CLI args (called programmatically)
+  // Otherwise, merge CLI args (called from command line)
+  const finalConfig = configOverride
+    ? { ...CONFIG, ...configOverride }
+    : mergeConfigWithCli(CONFIG, configOverride);
 
   try {
     logger(colorize("Starting observation definition loader...", 0));
@@ -517,8 +519,8 @@ if (require.main === module) {
 }
 
 export {
+  csvRowToObservationDefinition,
   main,
   parseCSV,
-  csvRowToObservationDefinition,
   upsertObservationDefinition,
 };

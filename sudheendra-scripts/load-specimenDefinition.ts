@@ -102,7 +102,11 @@ async function upsertSpecimenDefinition(data: SpecimenData): Promise<any> {
 
 // Main function
 async function main(configOverride?: Partial<typeof CONFIG>) {
-  const finalConfig = mergeConfigWithCli(CONFIG, configOverride);
+  // If configOverride is provided, don't merge CLI args (called programmatically)
+  // Otherwise, merge CLI args (called from command line)
+  const finalConfig = configOverride
+    ? { ...CONFIG, ...configOverride }
+    : mergeConfigWithCli(CONFIG, configOverride);
 
   try {
     logger(colorize("Starting specimen definition loader...", 0));
@@ -180,4 +184,4 @@ if (require.main === module) {
   main();
 }
 
-export { main, loadData, processCsvData, upsertSpecimenDefinition };
+export { loadData, main, processCsvData, upsertSpecimenDefinition };

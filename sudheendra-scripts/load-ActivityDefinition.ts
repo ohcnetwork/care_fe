@@ -1,6 +1,8 @@
+import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+dotenv.config({ path: [".env.local", ".env"] });
 
 // Import other loaders
 import { main as loadChargeItems } from "./load-chargeItem.js";
@@ -76,7 +78,7 @@ async function lookupCode(searchTerm: string): Promise<Code | null> {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Basic ${Buffer.from(`${process.env.USER_NAME}:${process.env.PASSWORD}`).toString("base64")}`,
+          Authorization: `Basic ${Buffer.from(`${process.env.USERNAME}:${process.env.PASSWORD}`).toString("base64")}`,
         },
         body: JSON.stringify({
           count: 10,
@@ -389,10 +391,22 @@ async function main(configOverride?: Partial<typeof CONFIG>) {
         status: item.status,
         category: item.category,
         kind: item.kind,
-        observation_slugs: item.observation_slugs,
-        specimen_slugs: item.specimen_slugs,
-        charge_item_slugs: item.charge_item_slugs,
-        diagnostic_report_loinc_codes: item.diagnostic_report_loinc_codes,
+        observation_result_requirements:
+          item.observation_slugs.length > 0
+            ? item.observation_slugs.length
+            : undefined,
+        specimen_requirements:
+          item.specimen_slugs.length > 0
+            ? item.specimen_slugs.length
+            : undefined,
+        charge_item_definitions:
+          item.charge_item_slugs.length > 0
+            ? item.charge_item_slugs.length
+            : undefined,
+        diagnostic_report_codes:
+          item.diagnostic_report_loinc_codes.length > 0
+            ? item.diagnostic_report_loinc_codes.length
+            : undefined,
         code: item.code,
         body_site: item.body_site,
       })),
@@ -443,4 +457,4 @@ if (require.main === module) {
   main();
 }
 
-export { main, loadData, processCsvData, upsertActivityDefinition };
+export { loadData, main, processCsvData, upsertActivityDefinition };
