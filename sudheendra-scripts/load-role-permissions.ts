@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 
 import { RoleCreate } from "@/types/emr/role/role";
+import { batchRequest } from "sudheendra-scripts/utils";
 
 dotenv.config({ path: [".env.local", ".env"] });
 
@@ -107,6 +108,7 @@ async function createRoles(datapoints: RoleCreate[]) {
 
   const result = await response.json();
   console.log(`Created ${result.length} roles`);
+  return result;
 }
 
 const existingRoles = [
@@ -825,15 +827,7 @@ function checkRoles(role: RoleCreate) {
 async function main() {
   const csvContent = await fetchRolePermissionsCsv();
   const roles = await parseRolePermissionsCsv(csvContent);
-
-  for (const role of roles) {
-    checkRoles(role);
-    try {
-      await createRoles([role]);
-    } catch (error) {
-      console.error(`Failed to create role ${role.name}:`, error);
-    }
-  }
+  await batchRequest(roles, createRoles);
 }
 
 main();
