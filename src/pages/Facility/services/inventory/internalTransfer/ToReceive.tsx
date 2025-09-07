@@ -41,7 +41,7 @@ export default function ToReceive({ facilityId, locationId }: Props) {
   return (
     <Page title={t("to_receive")} hideTitleOnPage>
       <div className="space-y-4">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">
               {t("to_receive")}
@@ -68,7 +68,7 @@ export default function ToReceive({ facilityId, locationId }: Props) {
         </div>
 
         <Tabs value={currentTab} onValueChange={handleTabChange}>
-          <TabsList className="w-full justify-start border-b border-gray-200 bg-transparent p-0 h-auto rounded-none">
+          <TabsList className="w-full justify-start border-b border-gray-200 bg-transparent p-0 h-auto rounded-none overflow-x-auto">
             <TabsTrigger
               value="requests_raised"
               className="border-0 border-b-2 border-transparent px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800 data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
