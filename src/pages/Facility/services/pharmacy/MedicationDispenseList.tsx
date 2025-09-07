@@ -252,7 +252,7 @@ export default function MedicationDispenseList({
     },
   });
 
-  const maxVisibleTabs = useBreakpoints({ default: 3, md: 4 });
+  const maxVisibleTabs = useBreakpoints({ default: 2, md: 4 });
 
   return (
     <div>
@@ -283,7 +283,7 @@ export default function MedicationDispenseList({
               />
             </div>
           </div>
-          <div className="ml-auto flex gap-2">
+          <div className="ml-auto flex gap-2 sm:flex-row w-full sm:w-auto">
             <Button
               variant="outline"
               className="w-full sm:w-auto border-gray-400 font-semibold"
