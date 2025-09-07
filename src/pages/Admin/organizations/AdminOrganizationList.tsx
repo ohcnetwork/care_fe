@@ -108,15 +108,12 @@ export default function AdminOrganizationList({
           <div className="flex flex-col sm:flex-row items-start justify-between mb-2 sm:mb-4">
             <h3>{t(organizationType)}</h3>
           </div>
-          <ResizablePanelGroup
-            direction="horizontal"
-            className="rounded-lg gap-2"
-          >
+          <ResizablePanelGroup direction="horizontal" className="rounded-lg">
             <ResizablePanel
               defaultSize={20}
               minSize={15}
               maxSize={30}
-              className="hidden md:block rounded-xl border bg-white"
+              className="hidden md:block rounded-lg border bg-white"
             >
               <AdminOrganizationNavbar
                 organizationType={organizationType}
@@ -129,12 +126,12 @@ export default function AdminOrganizationList({
 
             <ResizableHandle
               withHandle
-              className="hidden md:flex items-center justify-center"
+              className="hidden md:flex items-center justify-center mr-2"
             />
 
             <ResizablePanel
               defaultSize={80}
-              className="pl-0 md:pl-4 rounded-xl border-0 md:border bg-white"
+              className="pl-0 md:pl-4 rounded-lg border-0 md:border bg-white"
             >
               {organizationId && (
                 <div className="md:pt-4 flex items-center mx-auto max-w-4xl">
