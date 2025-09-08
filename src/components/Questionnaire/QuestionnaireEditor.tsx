@@ -811,8 +811,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       status: mappedData.status || "draft",
       version: mappedData.version || "1.0",
       subject_type: mappedData.subject_type || "encounter",
-      questions: mappedData.questions || [],
     });
+    updateQuestions(mappedData.questions || []);
 
     form.trigger();
 
@@ -1743,11 +1743,11 @@ function QuestionEditor({
             }}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a value" />
+              <SelectValue placeholder={t("select_a_value")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Yes">Yes</SelectItem>
-              <SelectItem value="No">No</SelectItem>
+              <SelectItem value="Yes">{t("yes")}</SelectItem>
+              <SelectItem value="No">{t("no")}</SelectItem>
             </SelectContent>
           </Select>
         );
@@ -1767,7 +1767,7 @@ function QuestionEditor({
             }}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a value" />
+              <SelectValue placeholder={t("select_a_value")} />
             </SelectTrigger>
             <SelectContent>
               {currentEnableWhen.answer_option?.map((option) => (
@@ -1824,7 +1824,7 @@ function QuestionEditor({
               newConditions[index] = newCondition;
               updateField("enable_when", newConditions);
             }}
-            placeholder="Answer value"
+            placeholder={t("answer_value")}
           />
         );
     }
