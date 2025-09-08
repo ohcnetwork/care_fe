@@ -4,12 +4,9 @@ import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
-import {
-  buildLocationHierarchy,
-  formatName,
-  formatPatientAge,
-} from "@/Utils/utils";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 import { FacilityRead } from "@/types/facility/facility";
+import { buildLocationHierarchy } from "@/types/location/utils";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { renderTokenNumber, TokenRetrieve } from "@/types/tokens/token/token";
 
