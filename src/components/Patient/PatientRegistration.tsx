@@ -132,18 +132,20 @@ export default function PatientRegistration(
             ? z.string().trim().optional()
             : z.string().trim().nonempty(t("address_is_required")),
           same_address: z.boolean(),
-          permanent_address: z.string().superRefine((val, ctx) => {
-            if (
-              !ctx.path.includes("same_address") &&
-              !form.getValues("same_address") &&
-              (!val || val.trim() === "")
-            ) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: t("field_required"),
-              });
-            }
-          }),
+          permanent_address: minimalPatientRegistration
+            ? z.string().trim().optional()
+            : z.string().superRefine((val, ctx) => {
+                if (
+                  !ctx.path.includes("same_address") &&
+                  !form.getValues("same_address") &&
+                  (!val || val.trim() === "")
+                ) {
+                  ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: t("field_required"),
+                  });
+                }
+              }),
           pincode: minimalPatientRegistration
             ? validators().pincode.optional()
             : validators().pincode,
@@ -868,30 +870,24 @@ export default function PatientRegistration(
                               checked={field.value}
                               onCheckedChange={(v) => {
                                 field.onChange(v);
-                                if (v) {
-                                  form.setValue(
-                                    "permanent_address",
-                                    form.getValues("address") || "",
-                                    {
-                                      shouldDirty: true,
-                                      shouldValidate:
-                                        form.formState.isSubmitted,
-                                    },
-                                  );
-                                  form.clearErrors("permanent_address");
-                                  form.trigger("address");
-                                } else {
-                                  form.setValue(
-                                    "permanent_address",
-                                    form.getValues("permanent_address") || "",
-                                    {
-                                      shouldDirty: true,
-                                      shouldValidate:
-                                        form.formState.isSubmitted,
-                                    },
-                                  );
-                                  form.trigger("permanent_address");
-                                }
+                                const addressValue =
+                                  form.getValues("address") || "";
+                                const permanentAddressValue = v
+                                  ? addressValue
+                                  : form.getValues("permanent_address") || "";
+
+                                form.setValue(
+                                  "permanent_address",
+                                  permanentAddressValue,
+                                  {
+                                    shouldDirty: true,
+                                    shouldValidate: form.formState.isSubmitted,
+                                  },
+                                );
+                                form.clearErrors("permanent_address");
+                                form.trigger(
+                                  v ? "address" : "permanent_address",
+                                );
                               }}
                               data-cy="same-address-checkbox"
                             />
@@ -955,7 +951,7 @@ export default function PatientRegistration(
                 )}
               />
 
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="nationality"
