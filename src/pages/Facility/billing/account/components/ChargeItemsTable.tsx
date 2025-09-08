@@ -51,6 +51,7 @@ import {
   CHARGE_ITEM_STATUS_COLORS,
   ChargeItemRead,
   ChargeItemStatus,
+  MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
@@ -205,6 +206,9 @@ export function ChargeItemsTable({
                   {t("resource")}
                 </TableHead>
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                  {t("mrp")}
+                </TableHead>
+                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
                   {t("unit_price")}
                 </TableHead>
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
@@ -233,7 +237,12 @@ export function ChargeItemsTable({
                   const isExpanded = expandedItems[item.id] || false;
                   const baseComponent = getBaseComponent(item);
                   const baseAmount = String(baseComponent?.amount || "0");
-
+                  const mrpAmount = item.unit_price_components.find(
+                    (c) =>
+                      c.monetary_component_type ===
+                        MonetaryComponentType.informational &&
+                      c.code?.code === MRP_CODE,
+                  )?.amount;
                   const mainRow = (
                     <TableRow
                       key={item.id}
@@ -272,6 +281,9 @@ export function ChargeItemsTable({
                               <ExternalLinkIcon className="size-3" />
                             </Link>
                           )}
+                      </TableCell>
+                      <TableCell className="border-x p-3 text-gray-950">
+                        <MonetaryDisplay amount={mrpAmount} />
                       </TableCell>
                       <TableCell className="border-x p-3 text-gray-950">
                         <MonetaryDisplay amount={baseAmount} />
