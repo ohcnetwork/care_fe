@@ -13,6 +13,7 @@ import EncountersOverview from "@/pages/Encounters/EncountersOverview";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 import ClinicalHistoryPage from "@/pages/Patient/History";
 import VerifyPatient from "@/pages/Patients/VerifyPatient";
+import careConfig from "@careConfig";
 
 const ExcalidrawEditor = lazy(
   () => import("@/components/Common/Drawings/ExcalidrawEditor"),
@@ -23,8 +24,32 @@ const PatientRoutes: AppRoutes = {
     <PatientIndex facilityId={facilityId} />
   ),
   "/facility/:facilityId/encounters": ({ facilityId }) => (
-    <Redirect to={`/facility/${facilityId}/encounters/patients`} />
+    <Redirect
+      to={`/facility/${facilityId}/encounters/patients/${
+        careConfig.defaultEncounterType || "all"
+      }`}
+    />
   ),
+  "/facility/:facilityId/encounters/patients": ({ facilityId }) => (
+    <Redirect
+      to={`/facility/${facilityId}/encounters/patients/${
+        careConfig.defaultEncounterType || "all"
+      }`}
+    />
+  ),
+  "/facility/:facilityId/encounters/patients/all": ({ facilityId }) => (
+    <EncountersOverview facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/encounters/patients/:encounterClass": ({
+    facilityId,
+    encounterClass,
+  }) => (
+    <EncountersOverview
+      facilityId={facilityId}
+      encounterClass={encounterClass}
+    />
+  ),
+
   "/facility/:facilityId/encounters/:tab": ({ facilityId, tab }) => (
     <EncountersOverview facilityId={facilityId} tab={tab} />
   ),
@@ -38,16 +63,24 @@ const PatientRoutes: AppRoutes = {
       locationId={locationId}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/consents/:consentId":
-    ({ facilityId, patientId, encounterId, consentId }) => (
-      <EncounterProvider
-        encounterId={encounterId}
-        patientId={patientId}
-        facilityId={facilityId}
-      >
-        <ConsentDetailPage consentId={consentId} />
-      </EncounterProvider>
-    ),
+  ...[
+    "/facility/:facilityId/patient/:patientId/encounter/:encounterId/consents/:consentId",
+    "/organization/organizationId/patient/:patientId/encounter/:encounterId/consents/:consentId",
+  ].reduce((acc: AppRoutes, path) => {
+    acc[path] = ({ facilityId, patientId, encounterId, consentId }) => {
+      return (
+        <EncounterProvider
+          encounterId={encounterId}
+          patientId={patientId}
+          facilityId={facilityId}
+        >
+          <ConsentDetailPage consentId={consentId} />
+        </EncounterProvider>
+      );
+    };
+    return acc;
+  }, {}),
+
   "/facility/:facilityId/patients/verify": () => <VerifyPatient />,
   "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
   "/patient/:id/update": ({ id }) => <PatientRegistration patientId={id} />,

@@ -1,8 +1,8 @@
 export class PatientEncounter {
   // Navigation
   navigateToEncounters() {
-    cy.verifyAndClickElement('[data-cy="nav-patients"]', "Patients");
-    cy.verifyAndClickElement('[data-cy="nav-encounters"]', "Encounters");
+    cy.get('[data-sidebar="menu"]').contains("Patients").click();
+    cy.get('[data-sidebar="menu"]').contains("All Encounters").click();
     return this;
   }
 
@@ -62,7 +62,10 @@ export class PatientEncounter {
   }
 
   clickPatientDetailsButton() {
-    cy.get("svg.lucide-external-link").filter(":visible").first().click();
+    cy.get("[data-slot='patient-info-hover-card-trigger']")
+      .filter(":visible")
+      .click();
+    cy.get("a").contains("View Profile").click();
     return this;
   }
 
