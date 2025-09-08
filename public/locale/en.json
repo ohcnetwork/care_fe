@@ -4368,6 +4368,7 @@
   "serial_number_mode_auto": "Auto-generated",
   "serial_number_mode_help": "Choose how serial numbers are assigned for this identifier type.",
   "serial_number_mode_user": "User entered",
+  "service": "Service",
   "service_available_locations": "Locations where this service is available",
   "service_date": "Service Date",
   "service_date_min_date": "Service date must be set to today or a past date",
@@ -5199,6 +5200,5 @@
   "you_have_unsaved_changes_what_would_you_like_to_do": "You have unsaved changes. What would you like to do?",
   "you_need_at_least_a_location_to_create_an_assest": "You need at least a location to create an assest.",
   "zoom_in": "Zoom In",
-  "zoom_out": "Zoom Out",
-  "service": "Service"
+  "zoom_out": "Zoom Out"
 }
