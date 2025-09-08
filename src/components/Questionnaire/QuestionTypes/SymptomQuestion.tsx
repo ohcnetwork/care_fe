@@ -85,7 +85,7 @@ const SYMPTOM_INITIAL_VALUE: Omit<SymptomRequest, "encounter"> = {
   verification_status: "confirmed",
   severity: "moderate",
   category: "problem_list_item",
-  onset: { onset_datetime: new Date().toISOString().split("T")[0] },
+  onset: { onset_datetime: dateQueryString(new Date()) },
 };
 
 function StatusSelect({

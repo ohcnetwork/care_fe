@@ -29,6 +29,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import Page from "@/components/Common/Page";
+import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -36,6 +37,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
+import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { DOSAGE_UNITS_CODES } from "@/types/emr/medicationRequest/medicationRequest";
 import {
   ProductKnowledgeBase,
@@ -61,6 +63,7 @@ const formSchema = z.object({
   product_type: z.nativeEnum(ProductKnowledgeType),
   status: z.nativeEnum(ProductKnowledgeStatus),
   alternate_identifier: z.string().trim().optional(),
+  category: z.string(),
   code: codeSchema.nullable(),
   base_unit: codeSchema.nullable(),
   names: z
@@ -99,21 +102,26 @@ const formSchema = z.object({
 
 export default function ProductKnowledgeForm({
   facilityId,
-  productKnowledgeId,
+  slug,
+  categorySlug,
   onSuccess,
 }: {
   facilityId: string;
-  productKnowledgeId?: string;
+  slug?: string;
+  categorySlug?: string;
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
-
-  const isEditMode = Boolean(productKnowledgeId);
+  console.log(categorySlug);
+  const isEditMode = Boolean(slug);
 
   const { data: existingData, isFetching } = useQuery({
-    queryKey: ["productKnowledge", productKnowledgeId],
+    queryKey: ["productKnowledge", slug],
     queryFn: query(productKnowledgeApi.retrieveProductKnowledge, {
-      pathParams: { productKnowledgeId: productKnowledgeId! },
+      pathParams: { slug: slug! },
+      queryParams: {
+        facility: facilityId,
+      },
     }),
     enabled: isEditMode,
   });
@@ -136,28 +144,31 @@ export default function ProductKnowledgeForm({
   return (
     <ProductKnowledgeFormContent
       facilityId={facilityId}
-      productKnowledgeId={productKnowledgeId}
+      slug={slug}
       existingData={existingData}
       onSuccess={onSuccess}
+      categorySlug={categorySlug}
     />
   );
 }
 
 function ProductKnowledgeFormContent({
   facilityId,
-  productKnowledgeId,
+  slug,
   existingData,
+  categorySlug,
   onSuccess = () =>
     navigate(`/facility/${facilityId}/settings/product_knowledge`),
 }: {
   facilityId: string;
-  productKnowledgeId?: string;
+  slug?: string;
   existingData?: ProductKnowledgeBase;
+  categorySlug?: string;
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const isEditMode = Boolean(productKnowledgeId);
+  const isEditMode = Boolean(slug);
 
   // Create default storage guidelines and units
   const defaultUnitCode: Code = {
@@ -175,6 +186,7 @@ function ProductKnowledgeFormContent({
         product_type: existingData.product_type,
         status: existingData.status,
         alternate_identifier: existingData.alternate_identifier || "",
+        category: existingData.category.slug,
         code: existingData.code?.code ? existingData.code : null,
         base_unit: existingData.base_unit?.code ? existingData.base_unit : null,
         names: existingData.names || [],
@@ -195,6 +207,7 @@ function ProductKnowledgeFormContent({
       base_unit: null,
       definitional: null,
       status: ProductKnowledgeStatus.active,
+      category: categorySlug,
     };
   };
 
@@ -246,16 +259,21 @@ function ProductKnowledgeFormContent({
     {
       mutationFn: mutate(productKnowledgeApi.updateProductKnowledge, {
         pathParams: {
-          productKnowledgeId: productKnowledgeId || "",
+          slug: slug || "",
+        },
+        queryParams: {
+          facility: facilityId,
         },
       }),
-      onSuccess: () => {
+      onSuccess: (productKnowledge: ProductKnowledgeBase) => {
         queryClient.invalidateQueries({ queryKey: ["productKnowledge"] });
         queryClient.invalidateQueries({
-          queryKey: ["productKnowledge", productKnowledgeId],
+          queryKey: ["productKnowledge", slug],
         });
         toast.success(t("product_knowledge_updated_successfully"));
-        navigate(`/facility/${facilityId}/settings/product_knowledge`);
+        navigate(
+          `/facility/${facilityId}/settings/product_knowledge/${productKnowledge.slug}`,
+        );
       },
     },
   );
@@ -277,10 +295,9 @@ function ProductKnowledgeFormContent({
         : undefined,
     };
 
-    if (isEditMode && productKnowledgeId) {
+    if (isEditMode && slug) {
       const updatePayload = {
         ...formattedData,
-        id: productKnowledgeId,
         facility: facilityId,
       };
       updateProductKnowledge(updatePayload as ProductKnowledgeUpdate);
@@ -409,6 +426,31 @@ function ProductKnowledgeFormContent({
                     )}
                   />
 
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel aria-required>{t("category")}</FormLabel>
+                        <FormControl>
+                          <ResourceCategoryPicker
+                            facilityId={facilityId}
+                            resourceType={
+                              ResourceCategoryResourceType.product_knowledge
+                            }
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            placeholder={t("select_category")}
+                            className="w-full"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
                   <div>
                     <FormLabel>{t("code")}</FormLabel>
                     <div className="mt-2">
@@ -427,9 +469,7 @@ function ProductKnowledgeFormContent({
                       />
                     </div>
                   </div>
-                </div>
 
-                <div className="grid gap-4 md:grid-cols-1">
                   <div>
                     <FormLabel>{t("base_unit")}</FormLabel>
                     <div className="mt-2">
@@ -444,9 +484,7 @@ function ProductKnowledgeFormContent({
                         }}
                       >
                         <SelectTrigger>
-                          <SelectValue
-                            placeholder={t("dosage_form_placeholder")}
-                          />
+                          <SelectValue placeholder={t("select_base_unit")} />
                         </SelectTrigger>
                         <SelectContent>
                           {DOSAGE_UNITS_CODES.map((unit) => (

@@ -4,6 +4,7 @@ import {
   ENCOUNTER_CLASS,
   EncounterClass,
 } from "@/types/emr/encounter/encounter";
+import { NonEmptyArray } from "@/Utils/types";
 
 const env = import.meta.env;
 
@@ -55,7 +56,7 @@ const careConfig = {
     .split(",")
     .map((l) => l.trim()),
   encounterClasses: (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",") ??
-    ENCOUNTER_CLASS) as [EncounterClass, ...EncounterClass[]],
+    ENCOUNTER_CLASS) as NonEmptyArray<EncounterClass>,
 
   defaultEncounterType: (env.REACT_DEFAULT_ENCOUNTER_TYPE ||
     "hh") as EncounterClass,

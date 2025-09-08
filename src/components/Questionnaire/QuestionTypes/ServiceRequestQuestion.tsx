@@ -23,16 +23,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
+import UserSelector from "@/components/Common/UserSelector";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
+
+import useAuthUser from "@/hooks/useAuthUser";
 
 import query from "@/Utils/request/query";
 import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import {
+  ServiceRequestApplyActivityDefinitionSpec as BaseServiceRequestApplyActivityDefinitionSpec,
   Intent,
   Priority,
-  ServiceRequestApplyActivityDefinitionSpec,
   ServiceRequestReadSpec,
   Status,
 } from "@/types/emr/serviceRequest/serviceRequest";
@@ -40,6 +43,21 @@ import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
+
+// Extend the base type to use UserReadMinimal for requester
+interface ServiceRequestApplyActivityDefinitionSpec
+  extends Omit<
+    BaseServiceRequestApplyActivityDefinitionSpec,
+    "service_request"
+  > {
+  service_request: Omit<
+    BaseServiceRequestApplyActivityDefinitionSpec["service_request"],
+    "requester"
+  > & {
+    requester: UserReadMinimal;
+  };
+}
 
 interface ServiceRequestQuestionProps {
   encounterId: string;
@@ -111,6 +129,7 @@ interface ServiceRequestFormProps {
   index?: number;
   isPreview?: boolean;
   activityDefinition?: ActivityDefinitionReadSpec;
+  facilityId?: string;
 }
 
 function ServiceRequestForm({
@@ -124,6 +143,7 @@ function ServiceRequestForm({
   index,
   isPreview = false,
   activityDefinition,
+  facilityId = "",
 }: ServiceRequestFormProps) {
   const { t } = useTranslation();
 
@@ -281,6 +301,16 @@ function ServiceRequestForm({
           </div>
 
           <div className="space-y-2">
+            <Label>{t("requester")}</Label>
+            <UserSelector
+              selected={serviceRequest.service_request.requester}
+              onChange={(user) => onUpdate?.({ requester: user })}
+              placeholder={t("select_requester")}
+              facilityId={facilityId}
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label>{t("note")}</Label>
             <Textarea
               value={serviceRequest.service_request.note || ""}
@@ -396,6 +426,16 @@ function ServiceRequestForm({
               </div>
 
               <div className="space-y-2">
+                <Label>{t("requester")}</Label>
+                <UserSelector
+                  selected={serviceRequest.service_request.requester}
+                  onChange={(user) => onUpdate?.({ requester: user })}
+                  placeholder={t("select_requester")}
+                  facilityId={facilityId}
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label>{t("note")}</Label>
                 <Textarea
                   value={serviceRequest.service_request.note || ""}
@@ -421,6 +461,7 @@ export function ServiceRequestQuestion({
   errors,
 }: ServiceRequestQuestionProps) {
   const { t } = useTranslation();
+  const currentUser = useAuthUser() as CurrentUserRead;
   const [selectedActivityDefinition, setSelectedActivityDefinition] = useState<
     string | null
   >(null);
@@ -458,7 +499,7 @@ export function ServiceRequestQuestion({
     queryFn: query(activityDefinitionApi.retrieveActivityDefinition, {
       pathParams: {
         facilityId: facilityId,
-        activityDefinitionId: selectedActivityDefinition || "",
+        activityDefinitionSlug: selectedActivityDefinition || "",
       },
     }),
     enabled: !!selectedActivityDefinition,
@@ -467,7 +508,7 @@ export function ServiceRequestQuestion({
   useEffect(() => {
     if (selectedActivityDefinition && selectedActivityDefinitionData) {
       const selectedAD = activityDefinitions?.results.find(
-        (ad) => ad.id === selectedActivityDefinition,
+        (ad) => ad.slug === selectedActivityDefinition,
       );
       if (!selectedAD) return;
 
@@ -477,13 +518,14 @@ export function ServiceRequestQuestion({
           status: Status.active,
           intent: Intent.order,
           priority: Priority.routine,
-          category: selectedAD.category,
+          category: selectedAD.classification,
           do_not_perform: false,
           note: null,
           code: selectedAD.code,
           body_site: selectedAD.body_site,
           occurance: null,
           patient_instruction: null,
+          requester: currentUser,
           locations:
             selectedActivityDefinitionData.locations?.map(
               (location) => location.id,
@@ -500,6 +542,7 @@ export function ServiceRequestQuestion({
     selectedActivityDefinitionData,
     activityDefinitions,
     encounterId,
+    currentUser,
   ]);
 
   const handleAddServiceRequest = () => {
@@ -618,7 +661,7 @@ export function ServiceRequestQuestion({
     () =>
       activityDefinitions?.results.map((ad) => ({
         label: ad.title,
-        value: ad.id,
+        value: ad.slug,
       })) || [],
     [activityDefinitions?.results],
   );
@@ -635,10 +678,10 @@ export function ServiceRequestQuestion({
     ) {
       setServiceRequests(initialServiceRequests);
     }
-  }, [questionnaireResponse.values]);
+  }, [questionnaireResponse.values, serviceRequests]);
 
-  const handleActivityDefinitionSelect = (activityDefinitionId: string) => {
-    setSelectedActivityDefinition(activityDefinitionId);
+  const handleActivityDefinitionSelect = (activityDefinitionSlug: string) => {
+    setSelectedActivityDefinition(activityDefinitionSlug);
   };
 
   return (
@@ -654,6 +697,7 @@ export function ServiceRequestQuestion({
           errors={errors}
           questionId={questionnaireResponse.question_id}
           index={index}
+          facilityId={facilityId}
         />
       ))}
 
@@ -689,6 +733,7 @@ export function ServiceRequestQuestion({
           onAdd={handleAddServiceRequest}
           disabled={disabled}
           isPreview
+          facilityId={facilityId}
         />
       )}
 

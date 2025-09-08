@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { PlusIcon } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -30,7 +31,9 @@ import useFilters from "@/hooks/useFilters";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import AddChargeItemsBillingSheet from "@/pages/Facility/billing/account/components/AddChargeItemsBillingSheet";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
@@ -52,20 +55,30 @@ export default function AddChargeItemSheet({
   const [selectedItems, setSelectedItems] = React.useState<Set<string>>(
     new Set(),
   );
+  const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = React.useState(false);
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 10,
     disableCache: true,
   });
 
-  const getBaseComponent = (item: ChargeItemRead) => {
-    return item.unit_price_components?.find(
-      (c) => c.monetary_component_type === MonetaryComponentType.base,
-    );
+  // Get account information to extract patient ID
+  const { data: account } = useQuery({
+    queryKey: ["account", accountId],
+    queryFn: query(accountApi.retrieveAccount, {
+      pathParams: { facilityId, accountId },
+    }),
+    enabled: !!facilityId && !!accountId && open,
+  });
+
+  const handleChargeItemsAdded = () => {
+    queryClient.invalidateQueries({
+      queryKey: ["charge-items", qParams],
+    });
   };
 
-  const getTotalComponent = (item: ChargeItemRead) => {
-    return item.total_price_components?.find(
+  const getBaseComponent = (item: ChargeItemRead) => {
+    return item.unit_price_components?.find(
       (c) => c.monetary_component_type === MonetaryComponentType.base,
     );
   };
@@ -78,7 +91,7 @@ export default function AddChargeItemSheet({
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         account: accountId,
-        search: qParams.search,
+        title: qParams.search,
         status: "billable",
       },
     }),
@@ -101,7 +114,17 @@ export default function AddChargeItemSheet({
     },
   });
 
-  const items = (response?.results as ChargeItemRead[]) || [];
+  const items = React.useMemo(
+    () => (response?.results as ChargeItemRead[]) || [],
+    [response?.results],
+  );
+
+  // select all by default
+  React.useEffect(() => {
+    if (items.length > 0) {
+      setSelectedItems(new Set(items.map((item) => item.id)));
+    }
+  }, [items]);
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -132,14 +155,24 @@ export default function AddChargeItemSheet({
         </SheetHeader>
 
         <div className="mt-6">
-          <Input
-            placeholder={t("search_charge_items")}
-            value={qParams.search || ""}
-            onChange={(e) =>
-              updateQuery({ search: e.target.value || undefined })
-            }
-            className="max-w-xs mb-4"
-          />
+          <div className="flex justify-between items-center mb-2">
+            <Input
+              placeholder={t("search_charge_items")}
+              value={qParams.search || ""}
+              onChange={(e) =>
+                updateQuery({ search: e.target.value || undefined })
+              }
+              className="max-w-xs"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsAddChargeItemsOpen(true)}
+            >
+              <PlusIcon className="size-4 mr-2" />
+              {t("add_charge_items")}
+            </Button>
+          </div>
 
           {isLoading ? (
             <TableSkeleton count={5} />
@@ -162,7 +195,7 @@ export default function AddChargeItemSheet({
                       <TableHead>{t("item")}</TableHead>
                       <TableHead>{t("quantity")}</TableHead>
                       <TableHead>{t("unit_price")}</TableHead>
-                      <TableHead>{t("amount")}</TableHead>
+                      <TableHead>{t("total")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -192,9 +225,7 @@ export default function AddChargeItemSheet({
                             />
                           </TableCell>
                           <TableCell>
-                            <MonetaryDisplay
-                              amount={getTotalComponent(item)?.amount || "0"}
-                            />
+                            <MonetaryDisplay amount={item.total_price} />
                           </TableCell>
                         </TableRow>
                       ))
@@ -221,6 +252,16 @@ export default function AddChargeItemSheet({
           </Button>
         </SheetFooter>
       </SheetContent>
+
+      {account?.patient && (
+        <AddChargeItemsBillingSheet
+          open={isAddChargeItemsOpen}
+          onOpenChange={setIsAddChargeItemsOpen}
+          facilityId={facilityId}
+          patientId={account.patient.id}
+          onChargeItemsAdded={handleChargeItemsAdded}
+        />
+      )}
     </Sheet>
   );
 }

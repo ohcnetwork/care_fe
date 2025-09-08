@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { MoreVertical, Printer } from "lucide-react";
+import { ArrowLeft, MoreVertical, Printer } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -79,7 +79,10 @@ export default function DiagnosticReportView({
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="space-y-6 flex justify-between">
-        <BackButton />
+        <BackButton>
+          <ArrowLeft />
+          <span>{t("back")}</span>
+        </BackButton>
         <Button
           variant="outline"
           onClick={() =>
