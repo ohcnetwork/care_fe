@@ -489,9 +489,9 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                         if (isPhone(value) !== isPhone(field.value)) {
                           form.setValue(`contact.${index}.value`, "");
                         }
-                        form.clearErrors(`contact.${index}.value`);
-
+                        // Always trigger revalidation after onChange
                         field.onChange(value);
+                        form.trigger(`contact.${index}.value`);
                       }}
                     >
                       <FormControl>
