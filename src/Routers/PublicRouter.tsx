@@ -17,8 +17,18 @@ import PatientLogin from "@/pages/PublicAppointments/auth/PatientLogin";
 export const routes = {
   "/": () =>
     careConfig.disablePatientLogin ? <Redirect to="/login" /> : <LandingPage />,
-  "/facilities": () => <FacilitiesPage />,
-  "/facility/:id": ({ id }: { id: string }) => <FacilityDetailsPage id={id} />,
+  "/facilities": () =>
+    careConfig.disablePatientLogin ? (
+      <Redirect to="/login" />
+    ) : (
+      <FacilitiesPage />
+    ),
+  "/facility/:id": ({ id }: { id: string }) =>
+    careConfig.disablePatientLogin ? (
+      <Redirect to="/login" />
+    ) : (
+      <FacilityDetailsPage id={id} />
+    ),
   "/facility/:facilityId/appointments/:staffId/otp/:page": ({
     facilityId,
     staffId,
@@ -27,7 +37,12 @@ export const routes = {
     facilityId: string;
     staffId: string;
     page: string;
-  }) => <PatientLogin facilityId={facilityId} staffId={staffId} page={page} />,
+  }) =>
+    careConfig.disablePatientLogin ? (
+      <Redirect to="/login" />
+    ) : (
+      <PatientLogin facilityId={facilityId} staffId={staffId} page={page} />
+    ),
   "/login": () => <Login />,
   "/2fa": () => <Authenticate />,
   "/forgot-password": () => <Login forgot={true} />,
