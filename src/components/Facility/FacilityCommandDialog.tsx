@@ -15,7 +15,7 @@ import { useTranslation } from "react-i18next";
 import { PERMISSION_CREATE_PATIENT } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
-import { formatKeyboardShortcut } from "@/Utils/formatKeyboardShortcut";
+import { formatKeyboardShortcut } from "@/Utils/keyboardShortcutUtils";
 
 interface ActionItem {
   id: string;

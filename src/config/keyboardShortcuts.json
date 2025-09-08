@@ -6,6 +6,14 @@
                                       "description": "Register New Patient",
                                       "when": "canCreate" },
       
+      { "key": "h",                   "action": "patient-home",
+                                      "description": "Go to Patient Home",
+                                      "when": "always" },
+      
+      { "key": "p",                   "action": "print-token",
+                                      "description": "Print Token",
+                                      "when": "always" },
+      
       { "key": "shift+?",             "action": "show-shortcuts",
                                       "description": "Show Keyboard Shortcuts",
                                       "when": "always" }

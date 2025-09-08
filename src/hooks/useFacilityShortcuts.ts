@@ -5,6 +5,7 @@ import { PERMISSION_CREATE_PATIENT } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { FacilityAction, FacilityActionId } from "@/types/shortcuts";
+import { shortcutActionHandler } from "@/Utils/keyboardShortcutUtils";
 import { useKeyboardShortcuts } from "./useKeyboardShortcuts";
 
 export function useFacilityShortcuts() {
@@ -25,6 +26,10 @@ export function useFacilityShortcuts() {
         requiresFacility: true,
         permission: PERMISSION_CREATE_PATIENT,
       },
+      // Generic shortcut handlers - just add the ID here!
+      // To add new shortcuts: just add the ID to this array and add data-shortcut-id to the element
+      { id: "patient-home", handler: shortcutActionHandler("patient-home") },
+      { id: "print-token", handler: shortcutActionHandler("print-token") },
     ];
   }, [navigate, facility?.id]);
 
