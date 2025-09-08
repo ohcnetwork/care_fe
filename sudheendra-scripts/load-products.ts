@@ -213,23 +213,11 @@ async function buildChargeItemDefinitions(datapoints: Datapoints) {
   );
 }
 
-async function buildProducts(
-  datapoints: Datapoints,
-  productKnowledges: ProductKnowledgeBase[],
-) {
+async function buildProducts(datapoints: Datapoints) {
   logger(`Creating ${datapoints.length} products`);
 
   return batchRequest(
     datapoints.map((datapoint) => {
-      const productKnowledge = productKnowledges.find(
-        (productKnowledge) => productKnowledge.name === datapoint.item,
-      );
-      if (!productKnowledge) {
-        throw new Error(`Product knowledge not found for ${datapoint.item}`);
-      }
-
-      const cidSlug = createSlug(`${datapoint.item}-${datapoint.batchNumber}`);
-
       return {
         status: ProductStatusOptions.active,
         batch: datapoint.batchNumber
@@ -241,8 +229,10 @@ async function buildProducts(
               "yyyy-MM-dd",
             )
           : undefined,
-        product_knowledge: productKnowledge.id,
-        charge_item_definition: cidSlug,
+        product_knowledge: createSlug(datapoint.item),
+        charge_item_definition: createSlug(
+          `${datapoint.item}-${datapoint.batchNumber}`,
+        ),
       } satisfies ProductCreate;
     }),
 
@@ -324,7 +314,7 @@ async function main() {
   const chargeItemDefinitions = await buildChargeItemDefinitions(datapoints);
   logger(`Created ${chargeItemDefinitions.length} charge item definitions`);
 
-  const products = await buildProducts(datapoints, productKnowledges);
+  const products = await buildProducts(datapoints);
   logger(`Created ${products.length} products`);
 
   await buildInventoryItems(datapoints, products);
