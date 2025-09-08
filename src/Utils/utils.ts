@@ -6,6 +6,7 @@ import { t } from "i18next";
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
 import { PatientRead } from "@/types/emr/patient/patient";
+import { LocationList } from "@/types/location/location";
 
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
@@ -442,4 +443,27 @@ export function formatTruncatedList<T>(
   const remainingCount = items.length - maxItems;
 
   return `${displayedItems.map(getDisplayValue).join(", ")} ... +${remainingCount} ${t("more") || moreText}`;
+}
+
+/**
+ * Builds a location hierarchy path from a location object with parent references
+ * @param location - The location object to build hierarchy for
+ * @param separator - The separator to use between location names (optional)
+ * @returns Array of location names from root to leaf, or formatted string if separator provided
+ */
+export function buildLocationHierarchy(
+  location: LocationList,
+  separator?: string,
+): string[] | string {
+  const hierarchy: string[] = [];
+  let current: LocationList | undefined = location;
+
+  while (current) {
+    if (current.name && current.name.trim()) {
+      hierarchy.unshift(current.name.trim());
+    }
+    current = current.parent;
+  }
+
+  return separator ? hierarchy.join(separator) : hierarchy;
 }
