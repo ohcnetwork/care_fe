@@ -557,17 +557,17 @@ const AppointmentDetails = ({
           <div className="flex flex-row items-start gap-4 text-sm">
             <DrawingPinIcon className="size-5 text-gray-600 mt-1" />
             <div className="min-w-0 flex-1">
-              <ClickableAddress
-                address={
-                  appointment.patient.address || t("no_address_provided")
-                }
-              />
               <p className="text-gray-600 break-words">
                 {stringifyNestedObject(appointment.patient.geo_organization)}
               </p>
               <p className="text-gray-600">
                 {t("pincode")}: {appointment.patient.pincode}
               </p>
+              <ClickableAddress
+                address={
+                  appointment.patient.address || t("no_address_provided")
+                }
+              />
             </div>
           </div>
         </CardContent>
