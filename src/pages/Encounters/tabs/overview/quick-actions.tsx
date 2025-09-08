@@ -18,7 +18,10 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
   const { t } = useTranslation();
   const getShortcutDisplay = useEncounterShortcutDisplays();
   return (
-    <div {...props} className={cn("flex gap-3", props.className)}>
+    <div
+      {...props}
+      className={cn("grid grid-cols-2 sm:grid-cols-4 gap-3", props.className)}
+    >
       <QuickAction
         icon={<AllergyIcon className="size-8 text-yellow-700" />}
         title={t("allergy")}
