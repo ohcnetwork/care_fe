@@ -12,7 +12,7 @@ import { ConsentDetailPage } from "@/pages/Encounters/ConsentDetail";
 import EncountersOverview from "@/pages/Encounters/EncountersOverview";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 import ClinicalHistoryPage from "@/pages/Patient/History";
-import VerifyPatient from "@/pages/Patients/VerifyPatient";
+import VerifyPatient from "@/pages/Patient/VerifyPatient";
 import careConfig from "@careConfig";
 
 const ExcalidrawEditor = lazy(

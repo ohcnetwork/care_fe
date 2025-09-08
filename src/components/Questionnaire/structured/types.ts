@@ -7,9 +7,15 @@ import {
 import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import { EncounterEdit } from "@/types/emr/encounter/encounter";
-import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  MedicationRequest,
+  MedicationRequestRequest,
+} from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
-import { ServiceRequestApplyActivityDefinitionSpec } from "@/types/emr/serviceRequest/serviceRequest";
+import {
+  ServiceRequestApplyActivityDefinitionForm,
+  ServiceRequestApplyActivityDefinitionSpec,
+} from "@/types/emr/serviceRequest/serviceRequest";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
 import { FileUploadQuestion } from "@/types/files/file";
 import {
@@ -28,14 +34,14 @@ export interface StructuredDataMap {
   appointment: CreateAppointmentQuestion;
   files: FileUploadQuestion;
   time_of_death: string;
-  service_request: ServiceRequestApplyActivityDefinitionSpec;
+  service_request: ServiceRequestApplyActivityDefinitionForm;
   charge_item: ApplyChargeItemDefinitionRequest;
 }
 
 // Map structured types to their request types
 export interface StructuredRequestMap {
   allergy_intolerance: { datapoints: AllergyIntoleranceRequest[] };
-  medication_request: { datapoints: MedicationRequest[] };
+  medication_request: { datapoints: MedicationRequestRequest[] };
   symptom: { datapoints: SymptomRequest[] };
   diagnosis: { datapoints: DiagnosisRequest[] };
   medication_statement: { datapoints: MedicationStatementRequest[] };

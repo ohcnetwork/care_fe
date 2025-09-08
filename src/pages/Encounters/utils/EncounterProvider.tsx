@@ -9,6 +9,7 @@ import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 import { Permissions, getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
+import { DispenseConsumableButton } from "@/components/Consumable/DispenseConsumableButton";
 import { usePermissions } from "@/context/PermissionContext";
 import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
 import { DispenseMedicineButton } from "@/pages/Encounters/tabs/overview/summary-panel-details-tab/dispense-medicine";
@@ -52,6 +53,7 @@ type EncounterContextType = {
     manageCareTeam: () => void;
     manageDepartments: () => void;
     dispenseMedicine: () => void;
+    dispenseConsumable: () => void;
   };
 };
 
@@ -62,6 +64,7 @@ enum EncounterAction {
   ManageCareTeam,
   ManageDepartments,
   DispenseMedicine,
+  DispenseConsumable,
 }
 
 const encounterContext = createContext<EncounterContextType | undefined>(
@@ -217,6 +220,9 @@ export function EncounterProvider({
           dispenseMedicine: () => {
             setActiveAction(EncounterAction.DispenseMedicine);
           },
+          dispenseConsumable: () => {
+            setActiveAction(EncounterAction.DispenseConsumable);
+          },
         },
       }}
     >
@@ -279,6 +285,13 @@ export function EncounterProvider({
         open={activeAction === EncounterAction.DispenseMedicine}
         setOpen={(open) => {
           setActiveAction(open ? EncounterAction.DispenseMedicine : null);
+        }}
+      />
+
+      <DispenseConsumableButton
+        open={activeAction === EncounterAction.DispenseConsumable}
+        setOpen={(open) => {
+          setActiveAction(open ? EncounterAction.DispenseConsumable : null);
         }}
       />
     </encounterContext.Provider>

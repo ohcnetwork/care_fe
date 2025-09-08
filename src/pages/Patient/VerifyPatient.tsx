@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { AlertCircle, CalendarIcon, ExternalLink } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { useEffect } from "react";
@@ -23,18 +23,17 @@ import {
   CardListSkeleton,
 } from "@/components/Common/SkeletonLoading";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
-import { EncounterCard } from "@/components/Facility/EncounterCard";
+import CreateTokenForm from "@/components/Tokens/CreateTokenForm";
+import PatientHomeTabs from "./home/PatientHomeTabs";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 
 export default function VerifyPatient() {
@@ -45,8 +44,12 @@ export default function VerifyPatient() {
   const { facility, facilityId } = useCurrentFacility();
   const { hasPermission } = usePermissions();
 
-  const { canCreateAppointment, canCreateEncounter, canListEncounters } =
+  const { canWriteAppointment, canCreateEncounter, canListEncounters } =
     getPermissions(hasPermission, facility?.permissions ?? []);
+
+  // For now, using canWriteAppointment as a proxy for token creation permission
+  // This can be updated when specific token permissions are available
+  const canCreateToken = canWriteAppointment;
 
   const {
     mutate: verifyPatient,
@@ -63,18 +66,6 @@ export default function VerifyPatient() {
     },
   });
 
-  const { data: encounters, isLoading: encounterLoading } = useQuery({
-    queryKey: ["encounters", "live", patientData?.id],
-    queryFn: query(encounterApi.list, {
-      queryParams: {
-        patient: patientData?.id,
-        live: false,
-      },
-      silent: true,
-    }),
-    enabled: !!patientData?.id && canListEncounters,
-  });
-
   useEffect(() => {
     if (phone_number && year_of_birth && partial_id) {
       verifyPatient({
@@ -85,7 +76,7 @@ export default function VerifyPatient() {
     }
   }, [phone_number, year_of_birth, partial_id, verifyPatient]);
 
-  if (isVerifyingPatient || !facility || encounterLoading) {
+  if (isVerifyingPatient || !facility) {
     return (
       <div className="space-y-4">
         <CardListSkeleton count={1} />
@@ -116,47 +107,28 @@ export default function VerifyPatient() {
                       />
                     </div>
                     <div>
-                      {encounters?.results && encounters.results.length > 0 ? (
-                        <Link
-                          href={`/facility/${facility.id}/patient/${patientData.id}`}
-                          className="flex flex-col group"
-                        >
-                          <div className="flex items-center gap-2">
-                            <h1
-                              data-cy="verify-patient-name"
-                              className="text-xl font-bold capitalize text-gray-950 group-hover:text-primary transition-colors"
-                            >
-                              {patientData.name}
-                            </h1>
-                            <ExternalLink className="size-4 text-gray-400 group-hover:text-primary transition-colors" />
-                          </div>
-                          <h3 className="text-sm font-medium text-gray-600">
-                            {formatPatientAge(patientData, true)},{"  "}
-                            <span className="capitalize">
-                              {patientData.gender.replace("_", " ")}
-                            </span>
-                            {patientData.blood_group &&
-                              ", " + patientData.blood_group.replace("_", " ")}
-                          </h3>
-                        </Link>
-                      ) : (
-                        <>
+                      <Link
+                        href={`/facility/${facility.id}/patient/${patientData.id}`}
+                        className="flex flex-col group"
+                      >
+                        <div className="flex items-center gap-2">
                           <h1
                             data-cy="verify-patient-name"
-                            className="text-xl font-bold capitalize text-gray-950"
+                            className="text-xl font-bold capitalize text-gray-950 group-hover:text-primary transition-colors"
                           >
                             {patientData.name}
                           </h1>
-                          <h3 className="text-sm font-medium text-gray-600">
-                            {formatPatientAge(patientData, true)},{"  "}
-                            <span className="capitalize">
-                              {patientData.gender.replace("_", " ")}
-                            </span>
-                            {patientData.blood_group &&
-                              ", " + patientData.blood_group.replace("_", " ")}
-                          </h3>
-                        </>
-                      )}
+                          <ExternalLink className="size-4 text-gray-400 group-hover:text-primary transition-colors" />
+                        </div>
+                        <h3 className="text-sm font-medium text-gray-600">
+                          {formatPatientAge(patientData, true)},{"  "}
+                          <span className="capitalize">
+                            {patientData.gender.replace("_", " ")}
+                          </span>
+                          {patientData.blood_group &&
+                            ", " + patientData.blood_group.replace("_", " ")}
+                        </h3>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -164,22 +136,22 @@ export default function VerifyPatient() {
             </CardHeader>
           </Card>
 
-          {(canCreateAppointment || canCreateEncounter) && (
+          {(canWriteAppointment || canCreateEncounter || canCreateToken) && (
             <Card>
               <CardHeader>
                 <CardTitle>{t("quick_actions")}</CardTitle>
                 <CardDescription>
-                  {canCreateAppointment && canCreateEncounter
+                  {canWriteAppointment && canCreateEncounter
                     ? t("quick_actions_description")
-                    : canCreateAppointment
+                    : canWriteAppointment
                       ? t("quick_actions_description_create_appointment")
                       : canCreateEncounter
                         ? t("quick_actions_description_create_encounter")
                         : ""}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
-                {canCreateAppointment && (
+              <CardContent className="grid gap-4 sm:grid-cols-1 lg:grid-cols-3">
+                {canWriteAppointment && (
                   <Button
                     asChild
                     variant="outline"
@@ -249,53 +221,58 @@ export default function VerifyPatient() {
                     }
                   />
                 )}
-              </CardContent>
-            </Card>
-          )}
 
-          {canListEncounters && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle>{t("active_encounters")}</CardTitle>
-                <CardDescription>
-                  {t("view_and_manage_patient_encounters")}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-3 pt-2">
-                {encounters?.results && encounters.results.length > 0 ? (
-                  <>
-                    {encounters.results.map((encounter) => (
-                      <EncounterCard
-                        encounter={encounter}
-                        key={encounter.id}
-                        permissions={facility?.permissions ?? []}
-                        facilityId={
-                          encounter.facility.id === facilityId
-                            ? facilityId
-                            : undefined
-                        }
-                      />
-                    ))}
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center justify-center p-6 md:p-8 text-center border rounded-lg border-dashed">
-                    <div className="rounded-full bg-primary/10 p-2 md:p-3 mb-3 md:mb-4">
-                      <CareIcon
-                        icon="l-folder-open"
-                        className="size-5 md:size-6 text-primary"
-                      />
-                    </div>
-                    <h3 className="text-base md:text-lg font-semibold mb-1">
-                      {t("no_active_encounters_found")}
-                    </h3>
-                    <p className="text-xs md:text-sm text-gray-500">
-                      {t("create_a_new_encounter_to_get_started")}
-                    </p>
-                  </div>
+                {canCreateToken && (
+                  <CreateTokenForm
+                    patientId={patientData.id}
+                    facilityId={facilityId}
+                    patientName={patientData.name}
+                    trigger={
+                      <Button
+                        variant="outline"
+                        data-cy="create-token-button"
+                        className="group relative h-[100px] md:h-[120px] overflow-hidden border-0 bg-linear-to-br from-amber-50 to-orange-50 p-0 shadow-md hover:shadow-xl transition-all duration-300 justify-start"
+                      >
+                        <div className="w-full p-4 md:p-6">
+                          <div className="absolute inset-0 bg-linear-to-br from-primary/80 to-primary opacity-0 transition-opacity duration-300 group-hover:opacity-10" />
+                          <div className="relative flex w-full items-center gap-3 md:gap-4">
+                            <div className="flex size-10 md:size-12 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                              <CareIcon
+                                icon="l-ticket"
+                                className="size-5 md:size-6 text-primary"
+                              />
+                            </div>
+                            <div className="flex flex-col items-start gap-0.5">
+                              <span className="text-base md:text-lg font-semibold text-gray-800 group-hover:text-primary transition-colors line-clamp-1">
+                                {t("create_token")}
+                              </span>
+                              <span className="text-xs md:text-sm text-gray-500 line-clamp-1">
+                                {t("generate_a_new_token")}
+                              </span>
+                            </div>
+                            <CareIcon
+                              icon="l-arrow-right"
+                              className="ml-auto size-4 md:size-5 text-gray-400 transform translate-x-0 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100"
+                            />
+                          </div>
+                        </div>
+                      </Button>
+                    }
+                  />
                 )}
               </CardContent>
             </Card>
           )}
+
+          <PatientHomeTabs
+            patientId={patientData.id}
+            facilityId={facilityId}
+            facilityPermissions={facility?.permissions ?? []}
+            canListEncounters={canListEncounters}
+            canWriteAppointment={canWriteAppointment}
+            canCreateToken={canCreateToken}
+            patientData={patientData}
+          />
         </div>
       ) : (
         isError && (

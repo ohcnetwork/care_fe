@@ -1,7 +1,7 @@
 import { Code } from "@/types/base/code/code";
 import {
   ActivityDefinitionReadSpec,
-  Category,
+  Classification,
 } from "@/types/emr/activityDefinition/activityDefinition";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
@@ -59,7 +59,7 @@ export interface BaseServiceRequestSpec {
   status: Status;
   intent: Intent;
   priority: Priority;
-  category: Category;
+  category: Classification;
   do_not_perform: boolean;
   note: string | null;
   code: Code;
@@ -69,16 +69,27 @@ export interface BaseServiceRequestSpec {
 }
 
 export interface ServiceRequestCreateSpec
-  extends Omit<BaseServiceRequestSpec, "id"> {
+  extends Omit<BaseServiceRequestSpec, "id" | "requester"> {
   encounter: string;
   locations: string[];
+  requester: string;
 }
 
 export interface ServiceRequestApplyActivityDefinitionSpec {
   encounter: string;
   activity_definition: string;
+  service_request: Omit<BaseServiceRequestSpec, "id" | "requester"> & {
+    locations: string[];
+    requester: string;
+  };
+}
+
+export interface ServiceRequestApplyActivityDefinitionForm {
+  encounter: string;
+  activity_definition: string;
   service_request: Omit<BaseServiceRequestSpec, "id"> & {
     locations: string[];
+    requester: UserReadMinimal;
   };
 }
 
@@ -99,6 +110,7 @@ export interface ServiceRequestReadSpec extends BaseServiceRequestSpec {
   updated_by: UserReadMinimal;
   created_date: string;
   updated_at: string;
+  requester?: UserReadMinimal;
 }
 
 /**

@@ -18,7 +18,7 @@ import PrintPaymentReconciliation from "@/pages/Facility/billing/paymentReconcil
 import { LocationLayout } from "@/pages/Facility/locations/LocationLayout";
 import { FacilityOverview } from "@/pages/Facility/overview";
 import FacilityServices from "@/pages/Facility/services/FacilityServices";
-import HealthcareServiceShow from "@/pages/Facility/services/HealthcareServiceShow";
+import { ServiceLayout } from "@/pages/Facility/services/ServiceLayout";
 import DiagnosticReportPrint from "@/pages/Facility/services/diagnosticReports/DiagnosticReportPrint";
 import DiagnosticReportView from "@/pages/Facility/services/diagnosticReports/DiagnosticReportView";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
@@ -59,9 +59,9 @@ const FacilityRoutes: AppRoutes = {
       <FacilityServices facilityId={facilityId} />
     </FacilityLayout>
   ),
-  "/facility/:facilityId/services/:serviceId": ({ facilityId, serviceId }) => (
+  "/facility/:facilityId/services/:serviceId*": ({ facilityId, serviceId }) => (
     <FacilityLayout>
-      <HealthcareServiceShow facilityId={facilityId} serviceId={serviceId} />
+      <ServiceLayout facilityId={facilityId} serviceId={serviceId} />
     </FacilityLayout>
   ),
   "/facility/:facilityId/services_requests/:serviceRequestId": ({
@@ -155,6 +155,18 @@ const FacilityRoutes: AppRoutes = {
         facilityId={facilityId}
         accountId={accountId}
         tab="payments"
+      />
+    </FacilityLayout>
+  ),
+  "/facility/:facilityId/billing/account/:accountId/bed_charge_items": ({
+    facilityId,
+    accountId,
+  }) => (
+    <FacilityLayout>
+      <AccountShow
+        facilityId={facilityId}
+        accountId={accountId}
+        tab="bed_charge_items"
       />
     </FacilityLayout>
   ),
