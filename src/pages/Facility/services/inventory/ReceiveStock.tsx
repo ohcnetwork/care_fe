@@ -182,7 +182,7 @@ export function ReceiveStock({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-row gap-2 items-end justify-between"
+          className="flex flex-row gap-2 items-end justify-between flex-wrap"
         >
           <FormField
             control={form.control}
