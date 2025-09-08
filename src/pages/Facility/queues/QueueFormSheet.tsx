@@ -37,6 +37,7 @@ import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
+import dayjs from "dayjs";
 
 const createQueueFormSchema = z.object({
   name: z.string().min(1, "Queue name is required"),
@@ -247,6 +248,9 @@ export default function QueueFormSheet({
                         <DatePicker
                           date={field.value}
                           onChange={field.onChange}
+                          disabled={(date) =>
+                            dayjs(date).isBefore(dayjs(), "day")
+                          }
                         />
                       </FormControl>
                       <FormMessage />
