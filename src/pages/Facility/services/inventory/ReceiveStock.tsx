@@ -174,8 +174,10 @@ export function ReceiveStock({
               `/facility/${facilityId}/locations/${locationId}/external_supply/inward_entry`,
             )
           }
+          className="flex items-center gap-2"
         >
           <X className="size-4" />
+          <span className="hidden sm:inline">{t("close")}</span>
         </Button>
       </div>
       <Separator className="my-1" />
