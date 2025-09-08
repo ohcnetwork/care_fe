@@ -392,23 +392,20 @@ export function ValueSetForm({
               <Button
                 variant="outline_primary"
                 onClickCapture={(e) => {
-                  const name = form.getValues("name");
-                  const slug = form.getValues("slug");
-                  const parsed = valuesetFormSchema
-                    .pick({ name: true, slug: true })
-                    .safeParse({ name, slug });
+                  const values = form.getValues();
+                  const parsed = valuesetFormSchema.safeParse(values);
                   if (!parsed.success) {
                     e.preventDefault();
                     e.stopPropagation();
-                    void form.trigger(["name", "slug"], { shouldFocus: true });
+                    void form.trigger(undefined, { shouldFocus: true });
                     return;
                   }
                 }}
                 onClick={async () => {
-                  await form.trigger(["name", "slug"]);
+                  await form.trigger();
                 }}
               >
-                <CareIcon icon={"l-eye"} className="h-4 w-4" />
+                <CareIcon icon={"l-eye"} className="size-4" />
                 {t("valueset_preview")}
               </Button>
             }
