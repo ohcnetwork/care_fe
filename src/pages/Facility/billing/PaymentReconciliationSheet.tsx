@@ -80,7 +80,7 @@ const formSchema = z
         const num = Number(val);
         return !isNaN(num) && num > 0 && /^\d+(\.\d{0,2})?$/.test(val);
       },
-      { message: t("enter_valid_amount") },
+      { message: t("payment_amount_must_be_greater_than_0") },
     ),
     tendered_amount: z.string().refine(
       (val) => {

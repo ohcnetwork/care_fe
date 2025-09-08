@@ -3230,6 +3230,7 @@
   "pause_request": "Pause Request",
   "payment": "Payment",
   "payment_amount": "Payment Amount",
+  "payment_amount_must_be_greater_than_0": "Amount must be greater than 0",
   "payment_cancelled": "Payment Cancelled",
   "payment_date": "Payment Date",
   "payment_details": "Payment Details",
