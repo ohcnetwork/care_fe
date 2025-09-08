@@ -20,6 +20,7 @@ import { Separator } from "@/components/ui/separator";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
+import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -39,30 +40,6 @@ function CodeDisplay({ code }: { code: Code | null }) {
       <p className="text-sm font-medium">{code.display}</p>
       <p className="text-xs text-gray-500">{code.system}</p>
       <p className="text-xs text-gray-500">{code.display}</p>
-    </div>
-  );
-}
-
-function LoadingSkeleton() {
-  return (
-    <div className="container mx-auto max-w-3xl space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <div className="h-8 w-48 animate-pulse rounded-md bg-gray-200" />
-          <div className="h-4 w-32 animate-pulse rounded-md bg-gray-200" />
-        </div>
-      </div>
-      <div className="space-y-6">
-        <div className="rounded-lg border border-gray-200 p-6">
-          <div className="space-y-4">
-            <div className="h-6 w-32 animate-pulse rounded-md bg-gray-200" />
-            <div className="space-y-2">
-              <div className="h-4 w-full animate-pulse rounded-md bg-gray-200" />
-              <div className="h-4 w-3/4 animate-pulse rounded-md bg-gray-200" />
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
@@ -108,11 +85,7 @@ export default function ObservationDefinitionView({
   };
 
   if (isLoading) {
-    return (
-      <Page title={t("loading")}>
-        <LoadingSkeleton />
-      </Page>
-    );
+    return <CardListWithHeaderSkeleton count={3} />;
   }
 
   if (isError || !definition) {
