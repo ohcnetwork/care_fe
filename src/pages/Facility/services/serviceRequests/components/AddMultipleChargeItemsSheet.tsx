@@ -156,7 +156,7 @@ export default function AddMultipleChargeItemsSheet({
         {
           quantity: "1",
           encounter: finalEncounterId,
-          charge_item_definition: selectedCID.id,
+          charge_item_definition: selectedCID.slug,
           charge_item_definition_object: selectedCID,
           service_resource: serviceResourceType as ChargeItemServiceResource,
           service_resource_id: serviceRequestId,

@@ -100,6 +100,7 @@ export function UpdateChargeItemDefinition({
 
         <ChargeItemDefinitionForm
           facilityId={facilityId}
+          categorySlug={chargeItemDefinition.category.slug}
           initialData={chargeItemDefinition}
           isUpdate={true}
           onSuccess={(chargeItemDefinition) =>

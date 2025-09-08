@@ -1119,7 +1119,7 @@ export function InvoiceShow({
 
       <EditInvoiceDialog
         open={isEditDialogOpen}
-        onOpenChange={(open) => {
+        onOpenChange={(open: boolean) => {
           setIsEditDialogOpen(open);
           if (!open) {
             setSelectedChargeItems([]);

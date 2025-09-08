@@ -1,5 +1,6 @@
 import { Code } from "@/types/base/code/code";
 import { Duration } from "@/types/base/duration/duration";
+import { ResourceCategoryRead } from "@/types/base/resourceCategory/resourceCategory";
 
 export enum ProductKnowledgeType {
   medication = "medication",
@@ -79,16 +80,19 @@ export interface ProductKnowledgeBase {
   storage_guidelines: StorageGuideline[];
   definitional?: ProductDefinition;
   base_unit: Code;
+  category: ResourceCategoryRead;
 }
 
 export interface ProductKnowledgeCreate
-  extends Omit<ProductKnowledgeBase, "id"> {
+  extends Omit<ProductKnowledgeBase, "id" | "category"> {
   facility: string;
+  category: string;
 }
 
 export interface ProductKnowledgeUpdate
-  extends Omit<ProductKnowledgeBase, "id"> {
+  extends Omit<ProductKnowledgeBase, "id" | "category"> {
   facility: string;
+  category: string;
 }
 
 export const UCUM_TIME_UNITS_CODES = [

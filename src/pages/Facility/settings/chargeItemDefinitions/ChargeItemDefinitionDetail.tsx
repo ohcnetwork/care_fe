@@ -65,6 +65,7 @@ export function ChargeItemDefinitionDetail({
     updateChargeItemDefinition({
       ...chargeItemDefinition,
       status: ChargeItemDefinitionStatus.retired,
+      category: chargeItemDefinition.category.slug,
     });
   };
 

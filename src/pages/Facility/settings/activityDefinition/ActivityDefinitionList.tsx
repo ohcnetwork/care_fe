@@ -1,283 +1,57 @@
-import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { EmptyState } from "@/components/ui/empty-state";
-import { FilterSelect } from "@/components/ui/filter-select";
-import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
 import Page from "@/components/Common/Page";
-import {
-  CardGridSkeleton,
-  TableSkeleton,
-} from "@/components/Common/SkeletonLoading";
+import { ResourceCategoryList } from "@/components/Common/ResourceCategoryList";
+import { ActivityDefinitionList as ActivityDefinitionListComponent } from "@/pages/Facility/settings/activityDefinition/ActivityDefinitionListComponent";
+import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 
-import useFilters from "@/hooks/useFilters";
-
-import query from "@/Utils/request/query";
-import {
-  ACTIVITY_DEFINITION_STATUS_COLORS,
-  Category,
-  Status,
-  type ActivityDefinitionReadSpec,
-} from "@/types/emr/activityDefinition/activityDefinition";
-import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
-
-function ActivityDefinitionCard({
-  definition,
-  facilityId,
-}: {
-  definition: ActivityDefinitionReadSpec;
+interface ActivityDefinitionListProps {
   facilityId: string;
-}) {
-  const { t } = useTranslation();
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-start justify-between gap-4">
-            <h3 className="text-xl font-semibold text-gray-900">
-              {definition.title}
-            </h3>
-            <Badge
-              variant={ACTIVITY_DEFINITION_STATUS_COLORS[definition.status]}
-            >
-              {t(definition.status)}
-            </Badge>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-600">
-              {t(definition.category)}
-            </p>
-            <p className="text-xs text-gray-400">{t(definition.kind)}</p>
-          </div>
-
-          <div className="mt-4">
-            <Button
-              variant="outline"
-              size="md"
-              className="w-full justify-center"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/activity_definitions/${definition.id}`,
-                )
-              }
-            >
-              <CareIcon icon="l-edit" className="size-4 mr-2" />
-              {t("see_details")}
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  categorySlug?: string;
 }
 
 export default function ActivityDefinitionList({
   facilityId,
-}: {
-  facilityId: string;
-}) {
+  categorySlug,
+}: ActivityDefinitionListProps) {
   const { t } = useTranslation();
-  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
-    limit: 15,
-    disableCache: true,
-  });
 
-  // TODO: Remove this once we have a default status (robo's PR)
-  useEffect(() => {
-    if (!qParams.status) {
-      updateQuery({ status: "active" });
-    }
-  }, []);
+  const onNavigate = (slug: string) => {
+    navigate(
+      `/facility/${facilityId}/settings/activity_definitions/categories/${slug}`,
+    );
+  };
 
-  const { data: response, isLoading } = useQuery({
-    queryKey: ["activityDefinitions", qParams],
-    queryFn: query.debounced(activityDefinitionApi.listActivityDefinition, {
-      pathParams: { facilityId },
-      queryParams: {
-        limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        title: qParams.search,
-        status: qParams.status,
-        category: qParams.category,
-        ordering: "-created_date",
-      },
-    }),
-  });
-
-  const activityDefinitions = response?.results || [];
+  const onCreateItem = () => {
+    navigate(
+      `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}/new`,
+    );
+  };
 
   return (
     <Page title={t("activity_definitions")} hideTitleOnPage>
-      <div className="container mx-auto">
-        <div className="mb-4">
-          <h1 className="text-2xl font-bold text-gray-700">
-            {t("activity_definitions")}
-          </h1>
-          <div className="mb-6 flex sm:flex-row sm:items-center sm:justify-between flex-col gap-4">
-            <div>
-              <p className="text-gray-600 text-sm">
-                {t("manage_activity_definitions")}
-              </p>
-            </div>
-            <Button
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/activity_definitions/new`,
-                )
-              }
-            >
-              <CareIcon icon="l-plus" className="mr-2" />
-              {t("add_activity_definition")}
-            </Button>
-          </div>
-
-          {/* Filter/Search Layout - match ServiceRequestList */}
-          <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
-            <div className="w-full md:w-auto">
-              <div className="relative w-full md:w-auto">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  <CareIcon icon="l-search" className="size-5" />
-                </span>
-                <Input
-                  placeholder={t("search_activity_definitions")}
-                  value={qParams.search || ""}
-                  onChange={(e) =>
-                    updateQuery({ search: e.target.value || undefined })
-                  }
-                  className="w-full md:w-64 pl-10"
-                />
-              </div>
-            </div>
-            <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full sm:w-auto">
-              <div className="flex-1 sm:flex-initial sm:w-auto">
-                <FilterSelect
-                  value={qParams.status || ""}
-                  onValueChange={(value) => updateQuery({ status: value })}
-                  options={Object.values(Status)}
-                  label={t("status")}
-                  onClear={() => updateQuery({ status: undefined })}
-                />
-              </div>
-              <div className="flex-1 sm:flex-initial sm:w-auto">
-                <FilterSelect
-                  value={qParams.category || ""}
-                  onValueChange={(value) => updateQuery({ category: value })}
-                  options={Object.values(Category)}
-                  label={t("category")}
-                  onClear={() => updateQuery({ category: undefined })}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {isLoading ? (
-          <>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 md:hidden">
-              <CardGridSkeleton count={4} />
-            </div>
-            <div className="hidden md:block">
-              <TableSkeleton count={5} />
-            </div>
-          </>
-        ) : activityDefinitions.length === 0 ? (
-          <EmptyState
-            icon="l-folder-open"
-            title={t("no_activity_definitions_found")}
-            description={t("adjust_activity_definition_filters")}
-          />
-        ) : (
-          <>
-            {/* Mobile Card View */}
-            <div className="grid gap-4 md:hidden">
-              {activityDefinitions.map(
-                (definition: ActivityDefinitionReadSpec) => (
-                  <ActivityDefinitionCard
-                    key={definition.id}
-                    definition={definition}
-                    facilityId={facilityId}
-                  />
-                ),
-              )}
-            </div>
-            {/* Desktop Table View */}
-            <div className="hidden md:block">
-              <div className="rounded-lg border">
-                <Table>
-                  <TableHeader className="bg-gray-100">
-                    <TableRow>
-                      <TableHead>{t("title")}</TableHead>
-                      <TableHead>{t("category")}</TableHead>
-                      <TableHead>{t("status")}</TableHead>
-                      <TableHead>{t("kind")}</TableHead>
-                      <TableHead>{t("actions")}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody className="bg-white">
-                    {activityDefinitions.map(
-                      (definition: ActivityDefinitionReadSpec) => (
-                        <TableRow key={definition.id} className="divide-x">
-                          <TableCell className="font-medium">
-                            {definition.title}
-                          </TableCell>
-                          <TableCell>{t(definition.category)}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                ACTIVITY_DEFINITION_STATUS_COLORS[
-                                  definition.status
-                                ]
-                              }
-                            >
-                              {t(definition.status)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{t(definition.kind)}</TableCell>
-                          <TableCell>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                navigate(
-                                  `/facility/${facilityId}/settings/activity_definitions/${definition.id}`,
-                                )
-                              }
-                            >
-                              <CareIcon icon="l-edit" className="size-4" />
-                              {t("see_details")}
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ),
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-          </>
+      <ResourceCategoryList
+        facilityId={facilityId}
+        categorySlug={categorySlug}
+        resourceType={ResourceCategoryResourceType.activity_definition}
+        basePath={`/facility/${facilityId}/settings/activity_definitions`}
+        baseTitle={t("activity_definition")}
+        onNavigate={onNavigate}
+        onCreateItem={onCreateItem}
+        createItemLabel={t("add_activity_definition")}
+        createItemIcon="l-plus"
+        createItemTooltip={t(
+          "activity_definitions_can_only_be_added_to_leaf_categories",
         )}
-
-        <div className="mt-4 flex justify-center">
-          <Pagination totalCount={response?.count || 0} />
-        </div>
-      </div>
+      >
+        {categorySlug && (
+          <ActivityDefinitionListComponent
+            facilityId={facilityId}
+            categorySlug={categorySlug}
+          />
+        )}
+      </ResourceCategoryList>
     </Page>
   );
 }

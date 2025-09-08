@@ -1,4 +1,5 @@
 import { MonetaryComponent } from "@/types/base/monetaryComponent/monetaryComponent";
+import { ResourceCategoryRead } from "@/types/base/resourceCategory/resourceCategory";
 
 export enum ChargeItemDefinitionStatus {
   draft = "draft",
@@ -21,13 +22,16 @@ export interface ChargeItemDefinitionBase {
   description?: string;
   purpose?: string;
   price_components: MonetaryComponent[];
+  category: ResourceCategoryRead;
 }
 
 export interface ChargeItemDefinitionRead extends ChargeItemDefinitionBase {
   version?: number;
+  category: ResourceCategoryRead;
 }
 
 export interface ChargeItemDefinitionCreate
-  extends Omit<ChargeItemDefinitionBase, "id"> {
+  extends Omit<ChargeItemDefinitionBase, "id" | "category"> {
+  category: string;
   version?: number;
 }

@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { NavTabs } from "@/components/ui/nav-tabs";
+import { ManageQueueFinishedTab } from "@/pages/Facility/queues/ManageQueueFinishedTab";
 import { ManageQueueOngoingTab } from "@/pages/Facility/queues/ManageQueueOngoingTab";
 import QueueFormSheet from "@/pages/Facility/queues/QueueFormSheet";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
@@ -151,7 +152,13 @@ export function ManageQueuePage({
             },
             completed: {
               label: t("finished"),
-              component: <div>Completed</div>,
+              component: (
+                <ManageQueueFinishedTab
+                  facilityId={facilityId}
+                  queueId={queueId}
+                  subQueues={activeSubQueues}
+                />
+              ),
             },
           }}
           currentTab={tab}

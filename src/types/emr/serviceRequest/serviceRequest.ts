@@ -1,7 +1,7 @@
 import { Code } from "@/types/base/code/code";
 import {
   ActivityDefinitionReadSpec,
-  Category,
+  Classification,
 } from "@/types/emr/activityDefinition/activityDefinition";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
@@ -59,7 +59,7 @@ export interface BaseServiceRequestSpec {
   status: Status;
   intent: Intent;
   priority: Priority;
-  category: Category;
+  category: Classification;
   do_not_perform: boolean;
   note: string | null;
   code: Code;
