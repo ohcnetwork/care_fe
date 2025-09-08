@@ -804,17 +804,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       ...form.getValues(),
       ...mappedData,
     } as QuestionnaireDetail);
-
-    // Update form values and mark as dirty to enable the save button
-    updateQuestionnaireField("title", mappedData.title || "");
-    updateQuestionnaireField("slug", mappedData.slug || "");
-    updateQuestionnaireField("description", mappedData.description || "");
-    updateQuestionnaireField("status", mappedData.status || "draft");
-    updateQuestionnaireField("version", mappedData.version || "1.0");
-    updateQuestionnaireField(
-      "subject_type",
-      mappedData.subject_type || "encounter",
-    );
+    form.reset({
+      title: mappedData.title || "",
+      slug: mappedData.slug || "",
+      description: mappedData.description || "",
+      status: mappedData.status || "draft",
+      version: mappedData.version || "1.0",
+      subject_type: mappedData.subject_type || "encounter",
+    });
     updateQuestions(mappedData.questions || []);
 
     form.trigger();
@@ -1746,11 +1743,11 @@ function QuestionEditor({
             }}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a value" />
+              <SelectValue placeholder={t("select_a_value")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Yes">Yes</SelectItem>
-              <SelectItem value="No">No</SelectItem>
+              <SelectItem value="Yes">{t("yes")}</SelectItem>
+              <SelectItem value="No">{t("no")}</SelectItem>
             </SelectContent>
           </Select>
         );
@@ -1770,7 +1767,7 @@ function QuestionEditor({
             }}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a value" />
+              <SelectValue placeholder={t("select_a_value")} />
             </SelectTrigger>
             <SelectContent>
               {currentEnableWhen.answer_option?.map((option) => (
@@ -1827,7 +1824,7 @@ function QuestionEditor({
               newConditions[index] = newCondition;
               updateField("enable_when", newConditions);
             }}
-            placeholder="Answer value"
+            placeholder={t("answer_value")}
           />
         );
     }
@@ -2884,7 +2881,7 @@ function QuestionEditor({
                           }}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a question" />
+                            <SelectValue placeholder={t("select_a_question")} />
                           </SelectTrigger>
                           <SelectContent>
                             {(rootQuestions || [])
@@ -2943,7 +2940,9 @@ function QuestionEditor({
                               }}
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder="Select a sub-question" />
+                                <SelectValue
+                                  placeholder={t("select_a_sub_question")}
+                                />
                               </SelectTrigger>
                               <SelectContent>
                                 {q.questions?.map((subQuestion, index) => {
