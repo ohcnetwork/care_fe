@@ -182,8 +182,8 @@ export function SpecimenDefinitionsList({
         ) : specimenDefinitions.length === 0 ? (
           <EmptyState
             icon="l-folder-open"
-            title={t("no_definitions_found")}
-            description={t("adjust_filters")}
+            title={t("no_specimen_definitions_found")}
+            description={t("adjust_specimen_definition_filters")}
           />
         ) : (
           <>

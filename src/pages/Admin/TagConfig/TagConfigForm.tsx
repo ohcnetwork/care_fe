@@ -62,7 +62,7 @@ export default function TagConfigForm({
     category: z.nativeEnum(TagCategory, {
       required_error: t("field_required"),
     }),
-    description: z.string().optional(),
+    description: z.string().trim().optional(),
     priority: z.number().min(0, t("priority_non_negative")),
     status: z.nativeEnum(TagStatus, {
       required_error: t("field_required"),
@@ -252,7 +252,7 @@ export default function TagConfigForm({
                 disabled={isLoading}
               >
                 <FormControl>
-                  <SelectTrigger className="capitalize">
+                  <SelectTrigger className="capitalize" ref={field.ref}>
                     <SelectValue placeholder={t("select_category")}>
                       {t(field.value)}
                     </SelectValue>
@@ -283,7 +283,7 @@ export default function TagConfigForm({
                 disabled={isLoading || isEditing}
               >
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger ref={field.ref}>
                     <SelectValue placeholder={t("select_resource")}>
                       {t(field.value)}
                     </SelectValue>
@@ -336,7 +336,7 @@ export default function TagConfigForm({
                 disabled={isLoading}
               >
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger ref={field.ref}>
                     <SelectValue placeholder={t("select_status")}>
                       {t(field.value)}
                     </SelectValue>

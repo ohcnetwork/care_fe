@@ -1,21 +1,11 @@
-import { format, formatDistanceToNow, startOfMinute } from "date-fns";
+import { formatDistanceToNow, startOfMinute, subDays } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import RadioInput from "@/components/ui/RadioInput";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -326,51 +316,31 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
 
       <div className="space-y-2">
         <Label>{t("start_time")}</Label>
-        <div className="flex gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "flex-1 justify-start text-left font-normal",
-                  !administrationRequest.occurrence_period_start &&
-                    "text-gray-500",
-                )}
-                disabled={!isPastTime || !!administrationRequest.id}
-              >
-                <CareIcon icon="l-calender" className="mr-2 size-4" />
-                {administrationRequest.occurrence_period_start
-                  ? format(
-                      new Date(administrationRequest.occurrence_period_start),
-                      "PPP",
-                    )
-                  : t("pick_a_date")}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={
-                  administrationRequest.occurrence_period_start
-                    ? new Date(administrationRequest.occurrence_period_start)
-                    : undefined
-                }
-                onSelect={(date) => {
-                  if (!date) return;
-                  handleDateChange(date.toISOString(), true);
-                }}
-                initialFocus
-                disabled={(date) => {
-                  const now = new Date();
-                  const encounterStart = new Date(medication.authored_on);
-                  return date < encounterStart || date > now;
-                }}
-              />
-            </PopoverContent>
-          </Popover>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <DatePicker
+            date={
+              administrationRequest.occurrence_period_start
+                ? new Date(administrationRequest.occurrence_period_start)
+                : undefined
+            }
+            onChange={(date) => {
+              if (!date) return;
+              handleDateChange(date.toISOString(), true);
+            }}
+            disabled={(date) => {
+              const now = new Date();
+              const encounterStart = subDays(
+                new Date(medication.authored_on),
+                1,
+              );
+              return date < encounterStart || date > now;
+            }}
+            disablePicker={!isPastTime || !!administrationRequest.id}
+            className="flex-1"
+          />
           <Input
             type="time"
-            className="w-full max-w-[7rem] sm:max-w-[9.5rem] text-sm sm:text-base py-0"
+            className="w-full sm:max-w-40 text-sm sm:text-base"
             value={formatTime(administrationRequest.occurrence_period_start)}
             onChange={(e) => handleTimeChange(e, true)}
             disabled={!isPastTime || !!administrationRequest.id}
@@ -383,56 +353,36 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
 
       <div className="space-y-2">
         <Label>{t("end_time")}</Label>
-        <div className="flex gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "flex-1 justify-start text-left font-normal",
-                  !administrationRequest.occurrence_period_end &&
-                    "text-gray-500",
-                )}
-                disabled={
-                  !isPastTime ||
-                  (!!administrationRequest.id &&
-                    administrationRequest.status !== "in_progress") ||
-                  administrationRequest.status === "in_progress"
-                }
-              >
-                <CareIcon icon="l-calender" className="mr-2 size-4" />
-                {administrationRequest.occurrence_period_end
-                  ? format(
-                      new Date(administrationRequest.occurrence_period_end),
-                      "PPP",
-                    )
-                  : t("pick_a_date")}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={
-                  administrationRequest.occurrence_period_end
-                    ? new Date(administrationRequest.occurrence_period_end)
-                    : undefined
-                }
-                onSelect={(date) => {
-                  if (!date) return;
-                  handleDateChange(date.toISOString(), false);
-                }}
-                initialFocus
-                disabled={(date) => {
-                  const now = new Date();
-                  const encounterStart = new Date(medication.authored_on);
-                  return date < encounterStart || date > now;
-                }}
-              />
-            </PopoverContent>
-          </Popover>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <DatePicker
+            date={
+              administrationRequest.occurrence_period_end
+                ? new Date(administrationRequest.occurrence_period_end)
+                : undefined
+            }
+            onChange={(date) => {
+              if (!date) return;
+              handleDateChange(date.toISOString(), false);
+            }}
+            disabled={(date) => {
+              const now = new Date();
+              const encounterStart = subDays(
+                new Date(medication.authored_on),
+                1,
+              );
+              return date < encounterStart || date > now;
+            }}
+            className="flex-1"
+            disablePicker={
+              !isPastTime ||
+              (!!administrationRequest.id &&
+                administrationRequest.status !== "in_progress") ||
+              administrationRequest.status === "in_progress"
+            }
+          />
           <Input
             type="time"
-            className="w-full max-w-[7rem] sm:max-w-[9.5rem] text-sm sm:text-base py-0"
+            className="w-full sm:max-w-40 text-sm sm:text-base"
             value={formatTime(administrationRequest.occurrence_period_end)}
             onChange={(e) => handleTimeChange(e, false)}
             disabled={

@@ -264,7 +264,7 @@ export function PaymentReconciliationSheet({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger ref={field.ref}>
                           <SelectValue
                             placeholder={t("select_payment_method")}
                           />
@@ -314,7 +314,7 @@ export function PaymentReconciliationSheet({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger ref={field.ref}>
                           <SelectValue
                             placeholder={t("select_reconciliation_type")}
                           />

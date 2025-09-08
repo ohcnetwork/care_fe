@@ -190,7 +190,7 @@ export default function PatientIdentifierConfigForm({
                           onValueChange={field.onChange}
                           value={field.value}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder={t("select_use")} />
                           </SelectTrigger>
                           <SelectContent>
@@ -532,7 +532,7 @@ export default function PatientIdentifierConfigForm({
                           onValueChange={field.onChange}
                           value={field.value}
                         >
-                          <SelectTrigger className="mt-2">
+                          <SelectTrigger className="mt-2" ref={field.ref}>
                             <SelectValue placeholder={t("select_status")} />
                           </SelectTrigger>
                           <SelectContent>
