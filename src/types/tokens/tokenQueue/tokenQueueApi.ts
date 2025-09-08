@@ -6,6 +6,7 @@ import {
   TokenQueueCreate,
   TokenQueueRead,
   TokenQueueRetrieveSpec,
+  TokenQueueSummary,
   TokenQueueUpdate,
 } from "@/types/tokens/tokenQueue/tokenQueue";
 
@@ -48,5 +49,10 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<TokenRead>(),
     TBody: Type<{ sub_queue: string; category?: string }>(),
+  },
+  summary: {
+    path: "/api/v1/facility/{facility_id}/token/queue/{id}/summary/",
+    method: HttpMethod.GET,
+    TRes: Type<TokenQueueSummary>(),
   },
 } as const;

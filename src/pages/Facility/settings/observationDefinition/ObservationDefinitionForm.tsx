@@ -107,22 +107,22 @@ const formSchema = z.object({
 
 export default function ObservationDefinitionForm({
   facilityId,
-  observationDefinitionId,
+  observationSlug,
   onSuccess,
 }: {
   facilityId: string;
-  observationDefinitionId?: string;
+  observationSlug?: string;
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
 
-  const isEditMode = Boolean(observationDefinitionId);
+  const isEditMode = Boolean(observationSlug);
 
   const { data: existingData, isFetching } = useQuery({
-    queryKey: ["observationDefinitions", observationDefinitionId],
+    queryKey: ["observationDefinitions", observationSlug],
     queryFn: query(observationDefinitionApi.retrieveObservationDefinition, {
       pathParams: {
-        observationDefinitionId: observationDefinitionId!,
+        observationSlug: observationSlug!,
       },
       queryParams: {
         facility: facilityId,
@@ -149,7 +149,7 @@ export default function ObservationDefinitionForm({
   return (
     <ObservationDefinitionFormContent
       facilityId={facilityId}
-      observationDefinitionId={observationDefinitionId}
+      observationSlug={observationSlug}
       existingData={existingData}
       onSuccess={onSuccess}
     />
@@ -158,19 +158,19 @@ export default function ObservationDefinitionForm({
 
 function ObservationDefinitionFormContent({
   facilityId,
-  observationDefinitionId,
+  observationSlug,
   existingData,
   onSuccess = () =>
     navigate(`/facility/${facilityId}/settings/observation_definitions`),
 }: {
   facilityId: string;
-  observationDefinitionId?: string;
+  observationSlug?: string;
   existingData?: ObservationDefinitionReadSpec;
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const isEditMode = Boolean(observationDefinitionId);
+  const isEditMode = Boolean(observationSlug);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -224,13 +224,16 @@ function ObservationDefinitionFormContent({
   const { mutate: updateObservationDefinition, isPending: isUpdating } =
     useMutation({
       mutationFn: mutate(observationDefinitionApi.updateObservationDefinition, {
-        pathParams: { observationDefinitionId: observationDefinitionId || "" },
+        pathParams: { observationSlug: observationSlug || "" },
+        queryParams: {
+          facility: facilityId,
+        },
       }),
-      onSuccess: () => {
+      onSuccess: (observationDefinition: ObservationDefinitionReadSpec) => {
         queryClient.invalidateQueries({ queryKey: ["observationDefinitions"] });
         toast.success(t("observation_definition_updated"));
         navigate(
-          `/facility/${facilityId}/settings/observation_definitions/${observationDefinitionId}`,
+          `/facility/${facilityId}/settings/observation_definitions/${observationDefinition.slug}`,
         );
       },
     });
@@ -238,7 +241,7 @@ function ObservationDefinitionFormContent({
   const isPending = isCreating || isUpdating;
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    if (isEditMode && observationDefinitionId) {
+    if (isEditMode && observationSlug) {
       updateObservationDefinition(data as ObservationDefinitionUpdateSpec);
     } else {
       const payload: ObservationDefinitionCreateSpec = {

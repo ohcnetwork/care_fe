@@ -27,9 +27,9 @@ interface ScheduleChargeItemDefinitionSelectorProps {
   facilityId: string;
   scheduleTemplate: ScheduleTemplate;
   onChange: (value: {
-    charge_item_definition: string;
+    charge_item_definition_slug: string;
     re_visit_allowed_days: number;
-    re_visit_charge_item_definition?: string;
+    re_visit_charge_item_definition_slug?: string;
   }) => void;
 }
 
@@ -43,14 +43,14 @@ export default function ScheduleChargeItemDefinitionSelector({
   const [isCreateSheetOpen, setIsCreateSheetOpen] = useState(false);
   const [consulationSearch, setSearch] = useState("");
   const queryClient = useQueryClient();
-  const [selectedCid, setSelectedCid] = useState(
-    scheduleTemplate.charge_item_definition?.id,
+  const [selectedCSlug, setSelectedCSlug] = useState(
+    scheduleTemplate.charge_item_definition?.slug,
   );
   const [reVisitDays, setReVisitDays] = useState(
     scheduleTemplate.revisit_allowed_days,
   );
-  const [reVisitCid, setReVisitCid] = useState<string>(
-    scheduleTemplate.revisit_charge_item_definition?.id,
+  const [reVisitCSlug, setReVisitCSlug] = useState<string>(
+    scheduleTemplate.revisit_charge_item_definition?.slug,
   );
   const [reVisitSearch, setReVisitSearch] = useState("");
 
@@ -87,9 +87,9 @@ export default function ScheduleChargeItemDefinitionSelector({
 
   const handleSubmit = () => {
     onChange({
-      charge_item_definition: selectedCid,
+      charge_item_definition_slug: selectedCSlug,
       re_visit_allowed_days: reVisitDays,
-      re_visit_charge_item_definition: reVisitCid,
+      re_visit_charge_item_definition_slug: reVisitCSlug,
     });
     setIsOpen(false);
   };
@@ -98,8 +98,8 @@ export default function ScheduleChargeItemDefinitionSelector({
     if (!open) {
       setSearch("");
       setReVisitSearch("");
-      setSelectedCid(scheduleTemplate.charge_item_definition?.id);
-      setReVisitCid(scheduleTemplate.revisit_charge_item_definition?.id);
+      setSelectedCSlug(scheduleTemplate.charge_item_definition?.slug);
+      setReVisitCSlug(scheduleTemplate.revisit_charge_item_definition?.slug);
       setReVisitDays(scheduleTemplate.revisit_allowed_days);
       queryClient.invalidateQueries({
         queryKey: ["chargeItemDefinitions", facilityId, consulationSearch],
@@ -139,20 +139,20 @@ export default function ScheduleChargeItemDefinitionSelector({
                     options={mergeAutocompleteOptions(
                       consultationChargeItemDefinitions?.results.map((cid) => ({
                         label: cid.title,
-                        value: cid.id,
+                        value: cid.slug,
                       })) || [],
-                      selectedCid
+                      selectedCSlug
                         ? {
                             label:
                               consultationChargeItemDefinitions?.results.find(
-                                (cid) => cid.id === selectedCid,
+                                (cid) => cid.slug === selectedCSlug,
                               )?.title || "",
-                            value: selectedCid,
+                            value: selectedCSlug,
                           }
                         : undefined,
                     )}
-                    value={selectedCid || ""}
-                    onChange={setSelectedCid}
+                    value={selectedCSlug || ""}
+                    onChange={setSelectedCSlug}
                     onSearch={setSearch}
                     placeholder={t("select_charge_item_definition")}
                     isLoading={isConsultationLoading}
@@ -213,20 +213,20 @@ export default function ScheduleChargeItemDefinitionSelector({
                     options={mergeAutocompleteOptions(
                       revisitChargeItemDefinitions?.results.map((cid) => ({
                         label: cid.title,
-                        value: cid.id,
+                        value: cid.slug,
                       })) || [],
-                      reVisitCid
+                      reVisitCSlug
                         ? {
                             label:
                               revisitChargeItemDefinitions?.results.find(
-                                (cid) => cid.id === reVisitCid,
+                                (cid) => cid.slug === reVisitCSlug,
                               )?.title || "",
-                            value: reVisitCid,
+                            value: reVisitCSlug,
                           }
                         : undefined,
                     )}
-                    value={reVisitCid || ""}
-                    onChange={setReVisitCid}
+                    value={reVisitCSlug || ""}
+                    onChange={setReVisitCSlug}
                     onSearch={setReVisitSearch}
                     placeholder={t("select_charge_item_definition")}
                     isLoading={isRevisitLoading}
@@ -277,7 +277,7 @@ export default function ScheduleChargeItemDefinitionSelector({
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={!selectedCid || !reVisitDays}
+              disabled={!selectedCSlug || !reVisitDays}
               className="w-full sm:w-auto"
             >
               {t("save")}

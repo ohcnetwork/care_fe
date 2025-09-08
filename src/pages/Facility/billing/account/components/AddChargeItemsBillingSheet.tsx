@@ -108,7 +108,7 @@ export default function AddChargeItemsBillingSheet({
         ...selectedItems,
         {
           quantity: "1",
-          charge_item_definition: selectedCID.id,
+          charge_item_definition: selectedCID.slug,
           charge_item_definition_object: selectedCID,
           patient: patientId,
         },

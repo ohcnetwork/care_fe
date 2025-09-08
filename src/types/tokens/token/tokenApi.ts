@@ -3,6 +3,7 @@ import { PaginatedResponse, UpsertRequest } from "@/Utils/request/types";
 import {
   TokenGenerate,
   TokenRead,
+  TokenRetrieve,
   TokenUpdate,
 } from "@/types/tokens/token/token";
 
@@ -18,7 +19,7 @@ export default {
   get: {
     path: "/api/v1/facility/{facility_id}/token/queue/{queue_id}/token/{id}/",
     method: HttpMethod.GET,
-    TRes: Type<TokenRead>(),
+    TRes: Type<TokenRetrieve>(),
   },
   create: {
     path: "/api/v1/facility/{facility_id}/token/queue/{queue_id}/token/",

@@ -146,7 +146,7 @@ export function ProductFormContent({
   facilityId,
   productId,
   existingData,
-  productKnowledgeId,
+  slug,
   containerClassName,
   onSuccess = () => navigate(`/facility/${facilityId}/settings/product`),
   onCancel = () => navigate(`/facility/${facilityId}/settings/product`),
@@ -157,7 +157,7 @@ export function ProductFormContent({
   facilityId: string;
   productId?: string;
   existingData?: ProductRead;
-  productKnowledgeId?: string;
+  slug?: string;
   containerClassName?: string;
   onSuccess?: (product: ProductRead) => void;
   onCancel?: () => void;
@@ -185,13 +185,16 @@ export function ProductFormContent({
   });
 
   const { data: existingProductKnowledge } = useQuery({
-    queryKey: ["productKnowledge", productKnowledgeId],
+    queryKey: ["productKnowledge", slug],
     queryFn: query(productKnowledgeApi.retrieveProductKnowledge, {
       pathParams: {
-        productKnowledgeId: productKnowledgeId!,
+        slug: slug!,
+      },
+      queryParams: {
+        facility: facilityId,
       },
     }),
-    enabled: !!productKnowledgeId && enabled,
+    enabled: !!slug && enabled,
   });
 
   // Add selected product knowledge to the product knowledge list if it's not already there
@@ -231,7 +234,7 @@ export function ProductFormContent({
       isEditMode && existingData
         ? {
             status: existingData.status,
-            product_knowledge: existingData.product_knowledge.id,
+            product_knowledge: existingData.product_knowledge.slug,
             charge_item_definition: existingData.charge_item_definition?.id,
             batch: existingData.batch || undefined,
             expiration_date: existingData.expiration_date
@@ -240,7 +243,7 @@ export function ProductFormContent({
           }
         : {
             status: ProductStatusOptions.active,
-            product_knowledge: productKnowledgeId,
+            product_knowledge: slug,
           },
   });
 
@@ -489,7 +492,7 @@ export function ProductFormContent({
                               setCreateCidOpen(false);
                               form.setValue(
                                 "charge_item_definition",
-                                chargeItemDefinition.id,
+                                chargeItemDefinition.slug,
                               );
                             }}
                             onCancel={() => setCreateCidOpen(false)}

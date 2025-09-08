@@ -21,7 +21,7 @@ interface ProductSelectProps {
   className?: string;
   onProductSubmit?: (submitFn: () => void) => void;
   onProductCreate?: (product: ProductRead) => void;
-  productKnowledgeId?: string;
+  productKnowledgeSlug?: string;
   enabled?: boolean;
 }
 
@@ -32,7 +32,7 @@ export function ProductSearch({
   disabled,
   onProductSubmit,
   onProductCreate,
-  productKnowledgeId,
+  productKnowledgeSlug,
   enabled = true,
 }: ProductSelectProps) {
   const { t } = useTranslation();
@@ -45,12 +45,12 @@ export function ProductSearch({
   const hasSetSubmitFunction = useRef(false);
 
   const { data: products, isFetching: isProductsFetching } = useQuery({
-    queryKey: ["products", productKnowledgeId],
+    queryKey: ["products", productKnowledgeSlug],
     queryFn: query(productApi.listProduct, {
       pathParams: { facilityId },
       queryParams: {
         status: ProductStatusOptions.active,
-        product_knowledge: productKnowledgeId,
+        product_knowledge: productKnowledgeSlug,
       },
     }),
     enabled,
@@ -147,7 +147,7 @@ export function ProductSearch({
       {isCreatingProduct && (
         <ProductFormContent
           facilityId={facilityId}
-          productKnowledgeId={productKnowledgeId}
+          slug={productKnowledgeSlug}
           onSuccess={(product) => {
             setIsCreatingProduct(false);
             hasSetSubmitFunction.current = false;

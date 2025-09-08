@@ -113,7 +113,7 @@ export function ChargeItemsTable({
   });
 
   const { data: chargeItems, isLoading } = useQuery({
-    queryKey: ["chargeItems", qParams, accountId],
+    queryKey: ["chargeItems", accountId, qParams],
     queryFn: query(chargeItemApi.listChargeItem, {
       pathParams: { facilityId },
       queryParams: {
@@ -131,7 +131,7 @@ export function ChargeItemsTable({
 
   const handleChargeItemsAdded = () => {
     queryClient.invalidateQueries({
-      queryKey: ["chargeItems", qParams, accountId],
+      queryKey: ["chargeItems", accountId, qParams],
     });
   };
 
@@ -333,12 +333,21 @@ export function ChargeItemsTable({
                         <MonetaryDisplay amount={item.total_price} />
                       </TableCell>
                       <TableCell className="border-x p-3 text-gray-950">
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center gap-1">
                           <Badge
                             variant={CHARGE_ITEM_STATUS_COLORS[item.status]}
                           >
                             {t(item.status)}
                           </Badge>
+                          {item.paid_invoice && (
+                            <Link
+                              href={`/facility/${facilityId}/billing/invoices/${item.paid_invoice.id}`}
+                              className="flex items-center gap-0.5 underline text-gray-600"
+                              title={t("view_invoice")}
+                            >
+                              <ExternalLinkIcon className="size-3.5" />
+                            </Link>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell className="border-x p-3 text-gray-950">
@@ -381,6 +390,7 @@ export function ChargeItemsTable({
                           <EditChargeItemSheet
                             facilityId={facilityId}
                             item={item}
+                            accountId={accountId}
                             trigger={
                               <Button
                                 id={`edit-charge-item-${item.id}`}

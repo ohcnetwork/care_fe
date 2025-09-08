@@ -34,6 +34,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import Loading from "@/components/Common/Loading";
+import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -43,6 +44,7 @@ import {
   MonetaryComponentRead,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
+import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import {
   MRP_CODE,
   PURCHASE_PRICE_CODE,
@@ -77,6 +79,7 @@ const priceComponentSchema = z.object({
 interface ChargeItemDefinitionFormProps {
   facilityId: string;
   initialData?: ChargeItemDefinitionRead;
+  categorySlug?: string;
   isUpdate?: boolean;
   onSuccess?: (chargeItemDefinition: ChargeItemDefinitionRead) => void;
   onCancel?: () => void;
@@ -225,8 +228,15 @@ export function ChargeItemDefinitionForm({
   facilityId,
   initialData,
   isUpdate = false,
+  categorySlug,
   onSuccess = () => {
-    navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
+    if (categorySlug) {
+      navigate(
+        `/facility/${facilityId}/settings/charge_item_definitions/categories/${categorySlug}`,
+      );
+    } else {
+      navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
+    }
   },
   onCancel = () => {
     navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
@@ -256,6 +266,7 @@ export function ChargeItemDefinitionForm({
     description: z.string().optional(),
     purpose: z.string().optional(),
     derived_from_uri: z.string().url().optional(),
+    category: z.string(),
     price_components: z.array(priceComponentSchema).refine(
       (components) => {
         // Ensure there is exactly one base price component and it's the first one
@@ -289,6 +300,7 @@ export function ChargeItemDefinitionForm({
       description: initialData?.description || "",
       purpose: initialData?.purpose || "",
       derived_from_uri: initialData?.derived_from_uri || undefined,
+      category: categorySlug,
       price_components: initialData?.price_components.map(
         mapPriceComponent,
       ) || [
@@ -333,7 +345,7 @@ export function ChargeItemDefinitionForm({
   const { mutate: upsert, isPending } = useMutation({
     mutationFn: isUpdate
       ? mutate(chargeItemDefinitionApi.updateChargeItemDefinition, {
-          pathParams: { facilityId, id: initialData!.id },
+          pathParams: { facilityId, slug: initialData!.slug },
         })
       : mutate(chargeItemDefinitionApi.createChargeItemDefinition, {
           pathParams: { facilityId },
@@ -347,6 +359,7 @@ export function ChargeItemDefinitionForm({
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const submissionData: ChargeItemDefinitionCreate = {
       ...values,
+      category: values.category,
     };
     upsert(submissionData);
   };
@@ -549,6 +562,29 @@ export function ChargeItemDefinitionForm({
                     <p className="text-sm text-gray-500 mt-1">
                       {t("slug_format_message")}
                     </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel aria-required>{t("category")}</FormLabel>
+                    <FormControl>
+                      <ResourceCategoryPicker
+                        facilityId={facilityId}
+                        resourceType={
+                          ResourceCategoryResourceType.charge_item_definition
+                        }
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        placeholder={t("select_category")}
+                        className="w-full"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

@@ -22,6 +22,16 @@ export function ServiceNav() {
           icon: <CareIcon icon="l-map-pin" />,
         },
         {
+          name: t("schedule"),
+          url: `${baseUrl}/schedule`,
+          icon: <CareIcon icon="l-calender" />,
+        },
+        {
+          name: t("appointments"),
+          url: `${baseUrl}/appointments`,
+          icon: <CareIcon icon="l-calender" />,
+        },
+        {
           name: t("queues"),
           url: `${baseUrl}/queues`,
           icon: <CareIcon icon="l-calender" />,

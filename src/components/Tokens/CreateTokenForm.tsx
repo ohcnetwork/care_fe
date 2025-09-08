@@ -27,6 +27,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import { dateQueryString } from "@/Utils/utils";
 
 import { LocationSearch } from "@/components/Location/LocationSearch";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
@@ -161,7 +162,7 @@ export default function CreateTokenForm({
       note: data.note,
       resource_type: selectedResourceType,
       resource_id: data.resourceId,
-      date: new Date().toISOString().split("T")[0], // Today's date
+      date: dateQueryString(new Date()),
     };
 
     createToken(tokenRequest);

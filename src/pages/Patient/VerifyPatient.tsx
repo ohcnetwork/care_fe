@@ -44,12 +44,12 @@ export default function VerifyPatient() {
   const { facility, facilityId } = useCurrentFacility();
   const { hasPermission } = usePermissions();
 
-  const { canCreateAppointment, canCreateEncounter, canListEncounters } =
+  const { canWriteAppointment, canCreateEncounter, canListEncounters } =
     getPermissions(hasPermission, facility?.permissions ?? []);
 
-  // For now, using canCreateAppointment as a proxy for token creation permission
+  // For now, using canWriteAppointment as a proxy for token creation permission
   // This can be updated when specific token permissions are available
-  const canCreateToken = canCreateAppointment;
+  const canCreateToken = canWriteAppointment;
 
   const {
     mutate: verifyPatient,
@@ -136,14 +136,14 @@ export default function VerifyPatient() {
             </CardHeader>
           </Card>
 
-          {(canCreateAppointment || canCreateEncounter || canCreateToken) && (
+          {(canWriteAppointment || canCreateEncounter || canCreateToken) && (
             <Card>
               <CardHeader>
                 <CardTitle>{t("quick_actions")}</CardTitle>
                 <CardDescription>
-                  {canCreateAppointment && canCreateEncounter
+                  {canWriteAppointment && canCreateEncounter
                     ? t("quick_actions_description")
-                    : canCreateAppointment
+                    : canWriteAppointment
                       ? t("quick_actions_description_create_appointment")
                       : canCreateEncounter
                         ? t("quick_actions_description_create_encounter")
@@ -151,7 +151,7 @@ export default function VerifyPatient() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-1 lg:grid-cols-3">
-                {canCreateAppointment && (
+                {canWriteAppointment && (
                   <Button
                     asChild
                     variant="outline"
@@ -269,7 +269,7 @@ export default function VerifyPatient() {
             facilityId={facilityId}
             facilityPermissions={facility?.permissions ?? []}
             canListEncounters={canListEncounters}
-            canCreateAppointment={canCreateAppointment}
+            canWriteAppointment={canWriteAppointment}
             canCreateToken={canCreateToken}
             patientData={patientData}
           />
