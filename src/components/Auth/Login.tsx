@@ -508,8 +508,7 @@ const Login = (props: LoginProps) => {
                   </>
                 ) : (
                   <Tabs
-                    defaultValue="staff"
-                    value={mode}
+                    value={mode === "patient" ? "patient" : "staff"}
                     onValueChange={(value) => {
                       setQueryParams({ mode: value as LoginMode });
                       if (value === "staff") {
