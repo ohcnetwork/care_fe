@@ -79,7 +79,7 @@ const RenderCard = ({
   const navigate = useNavigate();
 
   return (
-    <div className="lg:hidden space-y-4 px-4">
+    <div className="md:hidden space-y-4 px-4">
       {isLoading ? (
         <CardGridSkeleton count={5} />
       ) : valuesets.length === 0 ? (
@@ -201,7 +201,7 @@ const RenderTable = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   return (
-    <div className="hidden lg:block overflow-hidden rounded-lg bg-white shadow-sm">
+    <div className="hidden md:block overflow-hidden rounded-lg bg-white shadow-sm">
       {isLoading ? (
         <TableSkeleton count={5} />
       ) : valuesets.length === 0 ? (
