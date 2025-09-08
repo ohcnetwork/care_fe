@@ -17,8 +17,8 @@ import {
   ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import {
-  ProductBase,
   ProductCreate,
+  ProductRead,
   ProductStatusOptions,
 } from "@/types/inventory/product/product";
 import {
@@ -27,6 +27,12 @@ import {
   ProductKnowledgeStatus,
   ProductKnowledgeType,
 } from "@/types/inventory/productKnowledge/productKnowledge";
+import {
+  SupplyDeliveryBase,
+  SupplyDeliveryStatus,
+  SupplyDeliveryType,
+  SupplyDeliveryUpsert,
+} from "@/types/inventory/supplyDelivery/supplyDelivery";
 
 dotenv.config({ path: [".env.local", ".env"] });
 
@@ -35,6 +41,7 @@ const logger = getLogger();
 const GOOGLE_SHEET_ID = "1CB3rqqc2MBaR8e0_oFjEh7KRTOWMamAExNHJ5qGZJpE";
 const SHEET_NAME = "Sheet1";
 const FACILITY_ID = process.env.FACILITY_ID;
+const LOCATION_ID = process.env.LOCATION_ID;
 
 const HEADERS_MAP = {
   item: "Item",
@@ -209,7 +216,6 @@ async function buildChargeItemDefinitions(datapoints: Datapoints) {
 async function buildProducts(
   datapoints: Datapoints,
   productKnowledges: ProductKnowledgeBase[],
-  chargeItemDefinitions: ChargeItemDefinitionBase[],
 ) {
   logger(`Creating ${datapoints.length} products`);
 
@@ -223,14 +229,6 @@ async function buildProducts(
       }
 
       const cidSlug = createSlug(`${datapoint.item}-${datapoint.batchNumber}`);
-      const chargeItemDefinition = chargeItemDefinitions.find(
-        (chargeItemDefinition) => chargeItemDefinition.slug === cidSlug,
-      );
-      if (!chargeItemDefinition) {
-        throw new Error(
-          `Charge item definition not found for ${datapoint.item}`,
-        );
-      }
 
       return {
         status: ProductStatusOptions.active,
@@ -244,7 +242,7 @@ async function buildProducts(
             )
           : undefined,
         product_knowledge: productKnowledge.id,
-        charge_item_definition: chargeItemDefinition.id,
+        charge_item_definition: cidSlug,
       } satisfies ProductCreate;
     }),
 
@@ -261,14 +259,59 @@ async function buildProducts(
       logger(
         colorize(`${loggerPrefix} | Done creating batch of products`, offset),
       );
-      return results as ProductBase[];
+      return results as ProductRead[];
+    },
+  );
+}
+
+async function buildInventoryItems(
+  datapoints: Datapoints,
+  products: ProductRead[],
+) {
+  logger(`Creating ${products.length} inventory items`);
+
+  return batchRequest(
+    datapoints.map((datapoint) => ({
+      ...datapoint,
+      product: products.find(
+        (product) =>
+          product.product_knowledge.name === datapoint.item &&
+          product.batch?.lot_number === datapoint.batchNumber,
+      ),
+    })),
+    async (products, { offset, batchSize }) => {
+      const loggerPrefix = `[${offset}:${offset + batchSize - 1}]`.padStart(16);
+      logger(
+        colorize(`${loggerPrefix} | Creating batch of inventory items`, offset),
+      );
+
+      const results = await request(`/api/v1/supply_delivery/upsert/`, "POST", {
+        datapoints: products.map(
+          (datapoint) =>
+            ({
+              supplied_item_quantity: +datapoint.quantity,
+              supplied_item: datapoint.product!.id,
+              destination: LOCATION_ID,
+              status: SupplyDeliveryStatus.completed,
+              supplied_item_type: SupplyDeliveryType.product,
+            }) as SupplyDeliveryUpsert,
+        ),
+      });
+
+      logger(
+        colorize(
+          `${loggerPrefix} | Done creating batch of inventory items`,
+          offset,
+        ),
+      );
+      return results as SupplyDeliveryBase[];
     },
   );
 }
 
 async function main() {
   const csvContent = await fetchCsvFromGoogleSheet(GOOGLE_SHEET_ID, SHEET_NAME);
-  let datapoints = transformCsvToObjects(csvContent, HEADERS_MAP);
+  let datapoints = transformCsvToObjects(csvContent, HEADERS_MAP).slice(0, 100);
 
   // cleanup: exclude rows without item names
   datapoints = datapoints.filter((row) => row.item !== "");
@@ -281,12 +324,10 @@ async function main() {
   const chargeItemDefinitions = await buildChargeItemDefinitions(datapoints);
   logger(`Created ${chargeItemDefinitions.length} charge item definitions`);
 
-  const products = await buildProducts(
-    datapoints,
-    productKnowledges,
-    chargeItemDefinitions,
-  );
+  const products = await buildProducts(datapoints, productKnowledges);
   logger(`Created ${products.length} products`);
+
+  await buildInventoryItems(datapoints, products);
 }
 
 main();
