@@ -48,30 +48,37 @@ function ActivityDefinitionCard({
   return (
     <Card>
       <CardContent className="p-6">
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <div>
-            <div className="mb-2 flex items-center gap-2">
-              <Badge
-                variant={ACTIVITY_DEFINITION_STATUS_COLORS[definition.status]}
-              >
-                {t(definition.status)}
-              </Badge>
-            </div>
-            <h3 className="font-medium text-gray-900">{definition.title}</h3>
-            <p className="mt-1 text-sm text-gray-500">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-4">
+            <h3 className="text-xl font-semibold text-gray-900">
+              {definition.title}
+            </h3>
+            <Badge
+              variant={ACTIVITY_DEFINITION_STATUS_COLORS[definition.status]}
+            >
+              {t(definition.status)}
+            </Badge>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-gray-600">
               {t(definition.category)}
             </p>
-            <p className="mt-1 text-xs text-gray-400">{t(definition.kind)}</p>
+            <p className="text-xs text-gray-400">{t(definition.kind)}</p>
+          </div>
+
+          <div className="mt-4">
             <Button
               variant="outline"
-              size="sm"
+              size="md"
+              className="w-full justify-center"
               onClick={() =>
                 navigate(
                   `/facility/${facilityId}/settings/activity_definitions/${definition.id}`,
                 )
               }
             >
-              <CareIcon icon="l-edit" className="size-4" />
+              <CareIcon icon="l-edit" className="size-4 mr-2" />
               {t("see_details")}
             </Button>
           </div>
@@ -154,7 +161,7 @@ export default function ActivityDefinitionList({
                   onChange={(e) =>
                     updateQuery({ search: e.target.value || undefined })
                   }
-                  className="w-full md:w-[300px] pl-10"
+                  className="w-full md:w-64 pl-10"
                 />
               </div>
             </div>
@@ -164,7 +171,7 @@ export default function ActivityDefinitionList({
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
                   options={Object.values(Status)}
-                  label="status"
+                  label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
                 />
               </div>
@@ -173,7 +180,7 @@ export default function ActivityDefinitionList({
                   value={qParams.category || ""}
                   onValueChange={(value) => updateQuery({ category: value })}
                   options={Object.values(Category)}
-                  label="category"
+                  label={t("category")}
                   onClear={() => updateQuery({ category: undefined })}
                 />
               </div>
