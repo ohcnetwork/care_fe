@@ -2881,7 +2881,7 @@ function QuestionEditor({
                           }}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a question" />
+                            <SelectValue placeholder={t("select_a_question")} />
                           </SelectTrigger>
                           <SelectContent>
                             {(rootQuestions || [])
@@ -2940,7 +2940,9 @@ function QuestionEditor({
                               }}
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder="Select a sub-question" />
+                                <SelectValue
+                                  placeholder={t("select_a_sub_question")}
+                                />
                               </SelectTrigger>
                               <SelectContent>
                                 {q.questions?.map((subQuestion, index) => {
