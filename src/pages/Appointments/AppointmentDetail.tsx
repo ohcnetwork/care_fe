@@ -87,11 +87,12 @@ import {
   AppointmentFinalStatuses,
   AppointmentRead,
   AppointmentUpdateRequest,
+  SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
-import { DateSelection } from "./BookAppointment/DateSelection";
-import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
+import { AppointmentDateSelection } from "./BookAppointment/AppointmentDateSelection";
+import { AppointmentSlotPicker } from "./BookAppointment/AppointmentSlotPicker";
 
 interface Props {
   appointmentId: string;
@@ -653,7 +654,6 @@ const AppointmentActions = ({
   );
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
   const currentStatus = appointment.status;
-  const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Allow check-in/start consultation as long as the appointment is before 24 hours ahead of slot's start time
@@ -923,19 +923,19 @@ const AppointmentActions = ({
                     />
                   </div>
                   <div className="space-y-4">
-                    <DateSelection
+                    <AppointmentDateSelection
                       facilityId={facilityId}
                       resourceId={selectedPractitioner?.id}
+                      resourceType={SchedulableResourceType.Practitioner}
                       currentAppointment={appointment}
                       setSelectedDate={setSelectedDate}
                       selectedDate={selectedDate}
-                      setSelectedMonth={setSelectedMonth}
-                      selectedMonth={selectedMonth}
                     />
                     <AppointmentSlotPicker
                       selectedDate={selectedDate}
                       facilityId={facilityId}
                       resourceId={selectedPractitioner?.id}
+                      resourceType={SchedulableResourceType.Practitioner}
                       selectedSlotId={selectedSlotId}
                       onSlotSelect={setSelectedSlotId}
                       currentAppointment={appointment}

@@ -1,5 +1,5 @@
 import { LocateFixed } from "lucide-react";
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -65,32 +65,13 @@ export default function Calendar(props: Props) {
     props.onMonthChange?.(today);
     props.setSelectedDate?.(today);
   };
-  // Effect to scroll to today when the month changes to current month
-  useEffect(() => {
-    const today = new Date();
-    const isCurrentMonth =
-      currentMonth.getMonth() === today.getMonth() &&
-      currentMonth.getFullYear() === today.getFullYear();
-
-    if (isCurrentMonth && todayRef.current) {
-      // Small delay to ensure DOM is updated
-      setTimeout(() => {
-        if (todayRef.current) {
-          todayRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-        }
-      }, 50);
-    }
-  }, [currentMonth]);
 
   const weekDays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
   return (
     <div className={`${props.className} w-full`}>
       <div className="mb-4 flex items-center justify-between">
-        <span className="sm:text-xl font-semibold uppercase text-gray-950">
+        <span className="sm:text-lg font-semibold uppercase text-gray-950">
           {currentMonth.toLocaleString("default", {
             month: "long",
             year: "numeric",
@@ -122,7 +103,7 @@ export default function Calendar(props: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 md:gap-1.5">
+      <div className="grid grid-cols-7 gap-1">
         {weekDays.map((day) => (
           <div key={day} className="text-center font-medium mb-3">
             {day}
@@ -143,7 +124,7 @@ export default function Calendar(props: Props) {
               key={index}
               ref={isToday ? todayRef : null}
               className={cn(
-                "relative md:min-h-16 min-h-12 rounded-lg transition-all",
+                "relative md:min-h-16 min-h-12 rounded-lg transition-all bg-gray-50",
                 isToday &&
                   highlightToday &&
                   "ring-2 ring-primary-400 shadow-lg",

@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Page from "@/components/Common/Page";
 
 import Loading from "@/components/Common/Loading";
-import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
+import { PatientHeader } from "@/components/Patient/PatientHeader";
 import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";

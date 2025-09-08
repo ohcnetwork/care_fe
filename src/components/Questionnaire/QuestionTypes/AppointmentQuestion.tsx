@@ -17,8 +17,8 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
-import { DateSelection } from "@/pages/Appointments/BookAppointment/DateSelection";
-import { AppointmentSlotPicker } from "@/pages/Appointments/components/AppointmentSlotPicker";
+import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/AppointmentDateSelection";
+import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
@@ -35,6 +35,7 @@ import {
 } from "@/types/questionnaire/validation";
 import {
   CreateAppointmentQuestion,
+  SchedulableResourceType,
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import { UserReadMinimal } from "@/types/user/user";
@@ -100,8 +101,8 @@ export function AppointmentQuestion({
   const [resource, setResource] = useState<UserReadMinimal>();
   const [open, setOpen] = useState(false);
   const { hasError } = useFieldError(question.id, errors);
-  const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
   const values =
     (questionnaireResponse.values?.[0]?.value as CreateAppointmentQuestion[]) ||
@@ -265,22 +266,42 @@ export function AppointmentQuestion({
                 <SheetTitle>{t("select_appointment_slot")}</SheetTitle>
               </SheetHeader>
               <div className="space-y-4">
-                <DateSelection
+                <AppointmentDateSelection
                   facilityId={facilityId}
-                  resourceId={resource?.id ?? ""}
+                  resourceId={resource?.id || undefined}
+                  resourceType={SchedulableResourceType.Practitioner}
                   setSelectedDate={setSelectedDate}
                   selectedDate={selectedDate}
-                  setSelectedMonth={setSelectedMonth}
-                  selectedMonth={selectedMonth}
                 />
                 <AppointmentSlotPicker
                   selectedDate={selectedDate}
                   facilityId={facilityId}
-                  resourceId={resource?.id ?? ""}
-                  selectedSlotId={value.slot_id}
+                  resourceId={resource?.id || undefined}
+                  resourceType={SchedulableResourceType.Practitioner}
+                  selectedSlotId={selectedSlotId}
                   onSlotDetailsChange={setSelectedSlot}
-                  onSlotSelect={handleSlotSelect}
+                  onSlotSelect={setSelectedSlotId}
                 />
+                <div className="flex justify-end gap-2 mt-6">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setOpen(false);
+                      setSelectedSlot(undefined);
+                    }}
+                  >
+                    {t("cancel")}
+                  </Button>
+                  <Button
+                    variant="default"
+                    disabled={!selectedSlotId}
+                    onClick={() => {
+                      handleSlotSelect(selectedSlotId);
+                    }}
+                  >
+                    {t("submit")}
+                  </Button>
+                </div>
               </div>
             </SheetContent>
           </Sheet>

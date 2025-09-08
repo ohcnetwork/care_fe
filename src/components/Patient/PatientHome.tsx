@@ -22,7 +22,7 @@ import patientApi from "@/types/emr/patient/patientApi";
 import {
   PatientDeceasedInfo,
   PatientHeader,
-} from "@/pages/Facility/services/serviceRequests/PatientHeader";
+} from "@/components/Patient/PatientHeader";
 import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
 
 export const PatientHome = (props: {

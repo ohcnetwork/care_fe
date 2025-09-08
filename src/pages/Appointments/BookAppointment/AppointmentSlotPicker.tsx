@@ -29,7 +29,8 @@ interface AppointmentSlotPickerProps {
   selectedSlotId?: string;
   onSlotDetailsChange?: (slot: TokenSlot) => void;
   currentAppointment?: Appointment;
-  selectedDate?: Date;
+  selectedDate: Date;
+  resourceType: SchedulableResourceType;
 }
 
 export function AppointmentSlotPicker({
@@ -39,26 +40,22 @@ export function AppointmentSlotPicker({
   selectedSlotId,
   onSlotDetailsChange,
   currentAppointment,
-  selectedDate: selectedDateProp,
+  selectedDate,
+  resourceType,
 }: AppointmentSlotPickerProps) {
   const { t } = useTranslation();
 
   const slotsQuery = useQuery({
-    queryKey: [
-      "slots",
-      facilityId,
-      resourceId,
-      dateQueryString(selectedDateProp),
-    ],
+    queryKey: ["slots", facilityId, resourceId, dateQueryString(selectedDate)],
     queryFn: query(scheduleApi.slots.getSlotsForDay, {
       pathParams: { facilityId },
       body: {
-        resource_type: SchedulableResourceType.Practitioner,
+        resource_type: resourceType,
         resource_id: resourceId ?? "",
-        day: dateQueryString(selectedDateProp),
+        day: dateQueryString(selectedDate),
       },
     }),
-    enabled: !!resourceId && !!selectedDateProp,
+    enabled: !!resourceId && !!selectedDate,
     select: (data: GetSlotsForDayResponse) => {
       if (currentAppointment) {
         return data.results.filter(
@@ -71,7 +68,7 @@ export function AppointmentSlotPicker({
 
   // Update slot details when a slot is selected
   const handleSlotSelect = (slotId: string | undefined) => {
-    onSlotSelect(slotId ?? "");
+    onSlotSelect(slotId);
     if (slotId && onSlotDetailsChange) {
       const allSlots = slotsQuery.data || [];
       const selectedSlot = allSlots.find((slot) => slot.id === slotId);
@@ -84,9 +81,11 @@ export function AppointmentSlotPicker({
 
   useEffect(() => {
     onSlotSelect(undefined);
-  }, [selectedDateProp]);
+  }, [selectedDate]);
 
-  const selectedDate = selectedDateProp ?? new Date();
+  const totalSlots = groupSlotsByAvailability(slotsQuery.data || []).flatMap(
+    (group) => group.slots,
+  ).length;
 
   return (
     <div
@@ -101,7 +100,7 @@ export function AppointmentSlotPicker({
         </span>
         {!!slotsQuery.data?.length && (
           <span className="text-sm font-medium text-gray-700">
-            {slotsQuery.data?.length} {t("available_time_slots")}
+            {totalSlots} {t("available_time_slots")}
           </span>
         )}
       </div>
@@ -125,7 +124,7 @@ export function AppointmentSlotPicker({
           ))}
         </div>
       ) : (
-        <ScrollArea>
+        <ScrollArea className="h-100 sm:h-full">
           <div>
             {slotsQuery.data == null && (
               <div className="flex flex-col gap-5">
@@ -225,6 +224,8 @@ export const TokenSlotButton = ({
     start: slot.start_datetime,
     end: slot.end_datetime,
   });
+
+  console.log(selectedSlotId, "dhsjdfh");
 
   return (
     <Button

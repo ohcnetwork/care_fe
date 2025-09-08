@@ -35,12 +35,12 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import { entriesOf } from "@/Utils/utils";
 
 import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
-import { Button } from "@/components/ui/button";
-import { CommandShortcut } from "@/components/ui/command";
 import {
   PatientDeceasedInfo,
   PatientHeader,
-} from "@/pages/Facility/services/serviceRequests/PatientHeader";
+} from "@/components/Patient/PatientHeader";
+import { Button } from "@/components/ui/button";
+import { CommandShortcut } from "@/components/ui/command";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { EncounterDiagnosticReportsTab } from "./tabs/diagnostic-reports";
 import { EncounterNotesTab } from "./tabs/notes";

@@ -21,7 +21,7 @@ import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocat
 import { MedicationDispenseStatus } from "@/types/emr/medicationDispense/medicationDispense";
 import patientApi from "@/types/emr/patient/patientApi";
 
-import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
+import { PatientHeader } from "@/components/Patient/PatientHeader";
 import DispensedMedicationList from "./DispensedMedicationList";
 
 interface Props {

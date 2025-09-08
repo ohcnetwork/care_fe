@@ -1,8 +1,20 @@
-import { differenceInMinutes, format } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
+import {
+  differenceInMinutes,
+  format,
+  isFuture,
+  isPast,
+  isToday,
+} from "date-fns";
 import { CalendarDays } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import query from "@/Utils/request/query";
+import { Appointment, AppointmentStatus } from "@/types/scheduling/schedule";
+import scheduleApi from "@/types/scheduling/scheduleApi";
+
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,13 +30,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar } from "@/components/Common/Avatar";
 
 import { dateQueryString, formatName } from "@/Utils/utils";
-import {
-  Appointment,
-  AppointmentNonCancelledStatuses,
-  AppointmentStatus,
-} from "@/types/scheduling/schedule";
-
-import { BookingListContent } from "./BookingListContent";
+import { AppointmentNonCancelledStatuses } from "@/types/scheduling/schedule";
 
 interface BookingsListProps {
   patientId: string;
@@ -59,18 +65,21 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="upcoming" className="space-y-4 overflow-x-scroll">
+            <TodayBookings patientId={patientId} facilityId={facilityId} />
+            <span className="font-semibold text-gray-950 mb-4">
+              {t("next")}
+            </span>
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              date_from={dateQueryString(new Date())}
-              isUpcoming={true}
+              dateFrom={dateQueryString(new Date())}
             />
           </TabsContent>
           <TabsContent value="past" className="space-y-4 overflow-x-scroll">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              date_to={dateQueryString(new Date())}
+              dateTo={dateQueryString(new Date())}
               status={
                 AppointmentNonCancelledStatuses as unknown as AppointmentStatus[]
               }
@@ -92,7 +101,7 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
   );
 };
 
-export const AppointmentCard = ({
+const AppointmentCard = ({
   appointment,
   patientId,
   facilityId,
@@ -183,7 +192,7 @@ export const AppointmentCard = ({
   );
 };
 
-export const AppointmentTable = ({
+const AppointmentTable = ({
   appointments,
   facilityId,
   patientId,
@@ -312,5 +321,135 @@ export const AppointmentTable = ({
           ))}
       </TableBody>
     </Table>
+  );
+};
+
+const BookingListContent = ({
+  patientId,
+  facilityId,
+  dateFrom,
+  dateTo,
+  status,
+}: {
+  patientId: string;
+  facilityId: string;
+  dateFrom?: string;
+  dateTo?: string;
+  status?: AppointmentStatus[];
+  isUpcoming?: boolean;
+}) => {
+  const { t } = useTranslation();
+  const { data: appointments, isLoading } = useQuery({
+    queryKey: ["book-appointment", patientId, dateFrom, dateTo],
+    queryFn: query(scheduleApi.appointments.getAppointments, {
+      pathParams: { patientId },
+      queryParams: {
+        limit: 100,
+        date_after: dateFrom,
+        date_before: dateTo,
+        status: status?.join(","),
+      },
+    }),
+  });
+
+  const filteredAppointments: Appointment[] = !appointments?.results
+    ? []
+    : appointments.results.filter((appointment) => {
+        const appointmentDate = new Date(appointment.token_slot.start_datetime);
+
+        if (isToday(appointmentDate)) {
+          return false;
+        }
+
+        if (dateFrom && isPast(appointmentDate)) {
+          return false;
+        }
+
+        if (dateTo && isFuture(appointmentDate)) {
+          return false;
+        }
+
+        if (status?.length && !status.includes(appointment.status)) {
+          return false;
+        }
+
+        return true;
+      });
+
+  if (isLoading) {
+    return <TableSkeleton count={10} />;
+  }
+
+  if (filteredAppointments.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">{t("no_appointments")}</p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <AppointmentTable
+        appointments={filteredAppointments}
+        facilityId={facilityId}
+        patientId={patientId}
+      />
+      {filteredAppointments.map((appointment) => (
+        <AppointmentCard
+          key={appointment.id}
+          appointment={appointment}
+          patientId={patientId}
+          facilityId={facilityId}
+          appointmentId={appointment.id}
+        />
+      ))}
+    </>
+  );
+};
+
+const TodayBookings = ({
+  patientId,
+  facilityId,
+}: {
+  patientId: string;
+  facilityId: string;
+}) => {
+  const { t } = useTranslation();
+  const { data: appointments } = useQuery({
+    queryKey: ["book-appointment", patientId, dateQueryString(new Date())],
+    queryFn: query(scheduleApi.appointments.getAppointments, {
+      pathParams: { patientId },
+      queryParams: {
+        limit: 100,
+        date_after: dateQueryString(new Date()),
+      },
+    }),
+  });
+  const todayAppointments = appointments?.results.filter((appointment) =>
+    isToday(new Date(appointment.token_slot.start_datetime)),
+  );
+  if (!todayAppointments || todayAppointments.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <span className="font-semibold text-gray-950 mb-4">{t("today")}</span>
+      <AppointmentTable
+        appointments={todayAppointments}
+        facilityId={facilityId}
+        patientId={patientId}
+      />
+      {todayAppointments.map((appointment) => (
+        <AppointmentCard
+          key={appointment.id}
+          appointment={appointment}
+          patientId={patientId}
+          facilityId={facilityId}
+          appointmentId={appointment.id}
+        />
+      ))}
+    </>
   );
 };

@@ -51,7 +51,7 @@ import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
-import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
+import { PatientHeader } from "@/components/Patient/PatientHeader";
 import AccountSheet from "./AccountSheet";
 import BedChargeItemsTable from "./components/BedChargeItemsTable";
 import ChargeItemsTable from "./components/ChargeItemsTable";

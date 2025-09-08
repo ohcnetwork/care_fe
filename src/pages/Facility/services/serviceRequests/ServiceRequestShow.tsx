@@ -61,7 +61,7 @@ import {
 import specimenApi from "@/types/emr/specimen/specimenApi";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
 
-import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
+import { PatientHeader } from "@/components/Patient/PatientHeader";
 import AddMultipleChargeItemsSheet from "./components/AddMultipleChargeItemsSheet";
 import { ChargeItemCard } from "./components/ChargeItemCard";
 import { DiagnosticReportForm } from "./components/DiagnosticReportForm";

@@ -15,27 +15,27 @@ import {
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+import { useState } from "react";
 
-interface DateSelectionProps {
+interface AppointmentDateSelectionProps {
   facilityId: string;
-  resourceId: string;
+  resourceId?: string;
+  resourceType: SchedulableResourceType;
   currentAppointment?: Appointment;
   setSelectedDate: (selectedDate: Date) => void;
-  selectedDate?: Date;
-  setSelectedMonth: (selectedMonth: Date) => void;
-  selectedMonth: Date;
+  selectedDate: Date;
 }
 
-export const DateSelection = ({
+export const AppointmentDateSelection = ({
   facilityId,
   resourceId,
+  resourceType,
   currentAppointment,
   setSelectedDate,
   selectedDate,
-  selectedMonth,
-  setSelectedMonth,
-}: DateSelectionProps) => {
+}: AppointmentDateSelectionProps) => {
   const { t } = useTranslation();
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
 
   return (
     <div className="flex flex-col gap-3 w-full">
@@ -48,16 +48,15 @@ export const DateSelection = ({
       )}
       <Calendar
         month={selectedMonth}
-        onMonthChange={(month) => {
-          setSelectedMonth(month);
-        }}
+        onMonthChange={setSelectedMonth}
         setSelectedDate={setSelectedDate}
         renderDay={(date) => {
           return (
-            <RenderDay
+            <DateColumn
               date={date}
               facilityId={facilityId}
               resourceId={resourceId}
+              resourceType={resourceType}
               selectedDate={selectedDate}
               setSelectedDate={setSelectedDate}
               currentAppointment={currentAppointment}
@@ -72,17 +71,18 @@ export const DateSelection = ({
   );
 };
 
-interface RenderDayProps {
+interface DateColumnProps {
   facilityId: string;
-  resourceId: string;
-  selectedDate?: Date;
+  resourceId?: string;
+  selectedDate: Date;
+  resourceType: SchedulableResourceType;
   setSelectedDate: (date: Date) => void;
   date: Date;
   currentAppointment?: Appointment;
   selectedMonth: Date;
 }
 
-const RenderDay = ({
+const DateColumn = ({
   date,
   facilityId,
   resourceId,
@@ -90,7 +90,8 @@ const RenderDay = ({
   setSelectedDate,
   currentAppointment,
   selectedMonth,
-}: RenderDayProps) => {
+  resourceType,
+}: DateColumnProps) => {
   const isSelected = isSameDay(date, selectedDate ?? new Date());
   const isBeforeToday = isBefore(date, startOfToday());
   const { t } = useTranslation();
@@ -106,8 +107,8 @@ const RenderDay = ({
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
       pathParams: { facilityId },
       body: {
-        resource_type: SchedulableResourceType.Practitioner,
-        resource_id: resourceId,
+        resource_type: resourceType,
+        resource_id: resourceId || "",
         day: dateQueryString(new Date()),
       },
     }),
@@ -156,7 +157,7 @@ const RenderDay = ({
           setSelectedDate(date);
         }}
         className={cn(
-          "h-full w-full hover:bg-gray-50 rounded-lg relative overflow-hidden border border-gray-200 cursor-not-allowed",
+          "h-full w-full hover:bg-gray-50 rounded-lg relative overflow-hidden cursor-not-allowed",
           isSelected ? "ring-2 ring-primary-500" : "",
         )}
       >
@@ -182,11 +183,16 @@ const RenderDay = ({
         setSelectedDate(date);
       }}
       className={cn(
-        "h-full w-full hover:bg-gray-50 rounded-lg relative overflow-hidden border-2 hover:scale-105 hover:shadow-md transition-all",
-        isSelected ? "border-primary-500" : "border-gray-200",
-        isFullyBooked ? "bg-gray-200" : "bg-white",
+        "h-full w-full hover:bg-gray-50 rounded-md relative overflow-hidden border hover:scale-105 hover:shadow-md transition-all",
+        isSelected
+          ? "border-2 border-primary-600 bg-green-50 hover:bg-green-50"
+          : "border-gray-400",
+        isFullyBooked && "bg-gray-200",
       )}
     >
+      {isSelected && (
+        <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-6 h-1 rounded-b-sm bg-primary-600 z-20" />
+      )}
       <div className="relative z-10">
         <span>{date.getDate()}</span>
         {Number.isFinite(tokensLeft) && (

@@ -9,7 +9,7 @@ import { PractitionerSelector } from "@/pages/Appointments/components/Practition
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { UserReadMinimal } from "@/types/user/user";
 
-interface FilterAppointmentProps {
+interface AppointmentFormSectionProps {
   facilityId: string;
   resource: UserReadMinimal | undefined;
   selectedTags: TagConfig[];
@@ -18,7 +18,7 @@ interface FilterAppointmentProps {
   setReason: (reason: string) => void;
   setResourceId: (resourceId: string) => void;
 }
-export const FilterAppointment = ({
+export const AppointmentFormSection = ({
   facilityId,
   setResourceId,
   resource,
@@ -26,7 +26,7 @@ export const FilterAppointment = ({
   setSelectedTags,
   reason,
   setReason,
-}: FilterAppointmentProps) => {
+}: AppointmentFormSectionProps) => {
   const { t } = useTranslation();
 
   return (
