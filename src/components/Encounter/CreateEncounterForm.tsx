@@ -227,7 +227,7 @@ export default function CreateEncounterForm({
                             type="button"
                             data-cy={`encounter-type-${value}`}
                             className={cn(
-                              "h-auto min-h-24 w-full justify-start text-lg",
+                              "h-auto min-h-24 w-full justify-center text-lg",
                               field.value === value &&
                                 "ring-2 ring-primary text-primary",
                             )}
