@@ -1,5 +1,5 @@
 import { Avatar } from "@/components/Common/Avatar";
-import { PatientAddressLink } from "@/components/Patient/RenderPatientAddress";
+import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { Button } from "@/components/ui/button";
 import { PatientRead } from "@/types/emr/patient/patient";

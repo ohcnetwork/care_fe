@@ -9,8 +9,8 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
+import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
-import { PatientAddressLink } from "@/components/Patient/RenderPatientAddress";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import { getPermissions } from "@/common/Permissions";

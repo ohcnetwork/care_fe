@@ -57,7 +57,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
-import { PatientAddressLink } from "@/components/Patient/RenderPatientAddress";
+import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
