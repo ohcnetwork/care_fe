@@ -284,7 +284,7 @@ function HealthcareServiceFormContent({
                           onValueChange={field.onChange}
                           value={field.value}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger ref={field.ref}>
                             <SelectValue
                               placeholder={t("select_internal_type")}
                             />
