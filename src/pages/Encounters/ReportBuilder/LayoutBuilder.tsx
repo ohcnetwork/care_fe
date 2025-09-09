@@ -309,7 +309,7 @@ export default function LayoutBuilder({ form }: LayoutBuilderProps) {
                     onValueChange={handlePageNumberingAlignChange}
                     disabled={!pageNumberingEnabled}
                   >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full" ref={field.ref}>
                       <SelectValue placeholder={t("select_alignment")} />
                     </SelectTrigger>
                     <SelectContent>
@@ -341,7 +341,7 @@ export default function LayoutBuilder({ form }: LayoutBuilderProps) {
                   <FormLabel>{t("font_family")}</FormLabel>
                   <FormControl>
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger>
+                      <SelectTrigger ref={field.ref}>
                         <SelectValue placeholder={t("select_font")} />
                       </SelectTrigger>
                       <SelectContent>
@@ -366,7 +366,7 @@ export default function LayoutBuilder({ form }: LayoutBuilderProps) {
                   <FormLabel>{t("font_size")}</FormLabel>
                   <FormControl>
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger>
+                      <SelectTrigger ref={field.ref}>
                         <SelectValue placeholder={t("select_size")} />
                       </SelectTrigger>
                       <SelectContent>
