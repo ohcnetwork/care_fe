@@ -15,6 +15,7 @@ import {
 import {
   Condition,
   ConditionOperation,
+  getConditionValue,
   Metrics,
 } from "@/types/base/condition/condition";
 
@@ -95,9 +96,7 @@ export function CompactConditionEditor({
                 <span>
                   {metric?.verbose_name || condition.metric}{" "}
                   <span className="font-mono pr-2 ">{condition.operation}</span>
-                  {condition.operation === ConditionOperation.equality
-                    ? condition.value
-                    : `${condition.value.min} - ${condition.value.max}`}
+                  {getConditionValue(condition)}
                 </span>
                 <Button
                   type="button"

@@ -1,4 +1,5 @@
 import { Code } from "@/types/base/code/code";
+import { QualifiedRange } from "@/types/base/qualifiedRange/qualifiedRange";
 
 export enum QuestionType {
   boolean = "boolean",
@@ -42,6 +43,7 @@ export interface BaseObservationDefinitionSpec {
   method: Code | null;
   permitted_unit: Code | null;
   derived_from_uri?: string;
+  qualified_ranges: QualifiedRange[];
 }
 
 export interface ObservationDefinitionCreateSpec

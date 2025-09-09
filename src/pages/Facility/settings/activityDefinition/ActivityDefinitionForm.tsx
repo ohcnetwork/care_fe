@@ -297,7 +297,7 @@ function ActivityDefinitionFormContent({
             diagnostic_report_codes: existingData.diagnostic_report_codes || [],
             specimen_requirements:
               existingData.specimen_requirements?.map((s) => ({
-                value: s.id,
+                value: s.slug,
                 label: s.title,
                 details: [
                   {
@@ -324,7 +324,7 @@ function ActivityDefinitionFormContent({
               })) || [],
             observation_result_requirements:
               existingData.observation_result_requirements?.map((obs) => ({
-                value: obs.id,
+                value: obs.slug,
                 label: obs.title,
                 details: [
                   {
@@ -353,7 +353,7 @@ function ActivityDefinitionFormContent({
               })) || [],
             charge_item_definitions:
               existingData.charge_item_definitions?.map((c) => ({
-                value: c.id,
+                value: c.slug,
                 label: c.title,
                 details: [
                   {
@@ -801,7 +801,7 @@ function ActivityDefinitionFormContent({
                         options={
                           specimenDefinitions?.results.map((spec) => ({
                             label: spec.title,
-                            value: spec.id,
+                            value: spec.slug,
                             details: [
                               {
                                 label: t("type"),
@@ -867,7 +867,7 @@ function ActivityDefinitionFormContent({
                         options={
                           observationDefinitions?.results.map((obs) => ({
                             label: obs.title,
-                            value: obs.id,
+                            value: obs.slug,
                             details: [
                               {
                                 label: t("category"),
@@ -927,7 +927,7 @@ function ActivityDefinitionFormContent({
                         options={
                           chargeItemDefinitions?.results.map((chargeDef) => ({
                             label: chargeDef.title,
-                            value: chargeDef.id,
+                            value: chargeDef.slug,
                             details: [
                               {
                                 label: t("status"),

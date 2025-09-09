@@ -41,13 +41,7 @@ import { useInView } from "react-intersection-observer";
 
 const PAGE_SIZE = 50;
 
-const INACTIVE_TOKEN_STATUSES = [
-  TokenStatus.UNFULFILLED,
-  TokenStatus.COMPLETED,
-  TokenStatus.FULFILLED,
-  TokenStatus.CANCELLED,
-  TokenStatus.ENTERED_IN_ERROR,
-];
+const INACTIVE_TOKEN_STATUSES = [TokenStatus.FULFILLED, TokenStatus.CANCELLED];
 
 export function ManageQueueFinishedTab({
   facilityId,
