@@ -19,32 +19,31 @@ import {
 } from "./patient";
 
 export default {
-  addPatient: {
+  create: {
     path: "/api/v1/patient/",
     method: HttpMethod.POST,
     TBody: Type<PatientCreate>(),
     TRes: Type<PatientRead>(),
   },
-
-  updatePatient: {
+  update: {
     path: "/api/v1/patient/{id}/",
     method: HttpMethod.PUT,
     TBody: Type<PatientUpdate>(),
     TRes: Type<PatientRead>(),
   },
-  listPatient: {
+  list: {
     path: "/api/v1/patient/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<PatientRead>>(),
   },
-  getPatient: {
+  get: {
     path: "/api/v1/patient/{id}/",
     method: HttpMethod.GET,
     TRes: Type<PatientRead>(),
   },
 
   // Patient Search
-  searchPatient: {
+  search: {
     path: "/api/v1/patient/search/",
     method: HttpMethod.POST,
     TBody: Type<PatientSearchRequest>(),

@@ -141,7 +141,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 
   const { data: patientList, isFetching } = useQuery({
     queryKey: ["patient-search", facilityId, phoneNumber, identifierSearch],
-    queryFn: query.debounced(patientApi.searchPatient, {
+    queryFn: query.debounced(patientApi.search, {
       body: phoneNumber
         ? { phone_number: phoneNumber }
         : identifierSearch.config && identifierSearch.value

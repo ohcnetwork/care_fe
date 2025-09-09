@@ -73,7 +73,7 @@ export default function PatientEncounterOrIdentifierFilter({
   // Fetch patient details when patientId is provided
   const { data: patientDetails } = useQuery({
     queryKey: ["patient-details", patientId],
-    queryFn: query(patientApi.getPatient, {
+    queryFn: query(patientApi.get, {
       pathParams: { id: patientId! },
     }),
     enabled: !!patientId,
@@ -89,7 +89,7 @@ export default function PatientEncounterOrIdentifierFilter({
   // Patient search query (for identifier-based search)
   const { data: patientList, isFetching: isPatientFetching } = useQuery({
     queryKey: ["patient-search", searchTerm, searchType],
-    queryFn: query.debounced(patientApi.searchPatient, {
+    queryFn: query.debounced(patientApi.search, {
       body:
         searchType && searchTerm && searchType !== "encounter"
           ? { config: searchType, value: searchTerm }

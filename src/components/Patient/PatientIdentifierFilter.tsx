@@ -80,7 +80,7 @@ export default function PatientIdentifierFilter({
   // Fetch patient details when patientId is provided
   const { data: patientDetails } = useQuery({
     queryKey: ["patient-details", patientId],
-    queryFn: query(patientApi.getPatient, {
+    queryFn: query(patientApi.get, {
       pathParams: { id: patientId! },
     }),
     enabled: !!patientId,
@@ -96,7 +96,7 @@ export default function PatientIdentifierFilter({
   // Patient search query
   const { data: patientList, isFetching } = useQuery({
     queryKey: ["patient-search", searchTerm, searchType],
-    queryFn: query.debounced(patientApi.searchPatient, {
+    queryFn: query.debounced(patientApi.search, {
       body:
         searchType && searchTerm
           ? { config: searchType, value: searchTerm }

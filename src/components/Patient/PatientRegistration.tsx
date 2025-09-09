@@ -256,7 +256,7 @@ export default function PatientRegistration(
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
     mutationKey: ["create_patient"],
-    mutationFn: mutate(patientApi.addPatient),
+    mutationFn: mutate(patientApi.create),
     onSuccess: (resp: PatientRead) => {
       toast.success(t("patient_registration_success"));
       // Lets navigate the user to the verify page as the patient is not accessible to the user yet
@@ -278,7 +278,7 @@ export default function PatientRegistration(
     isPending: isUpdatingPatient,
     isSuccess: isUpdateSuccess,
   } = useMutation({
-    mutationFn: mutate(patientApi.updatePatient, {
+    mutationFn: mutate(patientApi.update, {
       pathParams: { id: patientId || "" },
     }),
     onSuccess: () => {
@@ -323,7 +323,6 @@ export default function PatientRegistration(
         permanent_address: values.same_address
           ? values.address
           : values.permanent_address,
-        facility: facilityId,
         pincode: values.pincode || undefined,
         tags: values.tags,
         identifiers: editableIdentifiers,
@@ -355,7 +354,7 @@ export default function PatientRegistration(
 
   const patientPhoneSearch = useQuery({
     queryKey: ["patients", "phone-number", phoneNumber],
-    queryFn: query.debounced(patientApi.searchPatient, {
+    queryFn: query.debounced(patientApi.search, {
       body: {
         phone_number: phoneNumber,
       },
@@ -369,7 +368,7 @@ export default function PatientRegistration(
 
   const patientQuery = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(patientApi.getPatient, {
+    queryFn: query(patientApi.get, {
       pathParams: { id: patientId || "" },
     }),
     enabled: !!patientId,

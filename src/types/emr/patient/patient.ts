@@ -24,7 +24,6 @@ export interface PatientIdentifierCreate {
 }
 
 export interface PatientBase {
-  id: string;
   name: string;
   gender: GenderChoices;
   phone_number: string;
@@ -39,7 +38,7 @@ export interface PatientBase {
 }
 
 export interface PatientListRead extends PatientBase {
-  date_of_birth: string | null;
+  id: string;
   year_of_birth: number | null;
   created_date: string;
   modified_date: string;
@@ -55,16 +54,14 @@ export interface PatientRead extends PatientListRead, Permissions {
   facility_identifiers: PatientIdentifier[];
 }
 
-export interface PatientCreate extends Omit<PatientBase, "id"> {
+export interface PatientUpdate extends PatientBase {
   age?: number;
+  geo_organization?: string;
   identifiers: PatientIdentifierCreate[];
-  facility: string;
-  tags?: string[];
 }
 
-export interface PatientUpdate extends Omit<PatientBase, "id"> {
-  age?: number;
-  identifiers: PatientIdentifierCreate[];
+export interface PatientCreate extends PatientUpdate {
+  tags?: string[];
 }
 
 export interface PartialPatientModel {
@@ -84,6 +81,7 @@ export interface PatientSearchRequest {
   phone_number?: string;
   config?: string;
   value?: string;
+  facility?: string;
 }
 
 export interface PatientSearchRetrieveRequest {

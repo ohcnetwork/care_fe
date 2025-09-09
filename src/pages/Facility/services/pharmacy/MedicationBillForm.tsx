@@ -804,7 +804,7 @@ export default function MedicationBillForm({ patientId }: Props) {
 
   const { data: patient } = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(patientApi.getPatient, {
+    queryFn: query(patientApi.get, {
       pathParams: {
         id: patientId,
       },
