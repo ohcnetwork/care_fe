@@ -9,7 +9,10 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
-import { ClickableAddress } from "@/components/Common/ClickableAddress";
+import {
+  PatientAddressLink,
+  patientAddressText,
+} from "@/components/Common/RenderPatientAddress";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
@@ -204,19 +207,31 @@ export const Demography = (props: PatientProps) => {
         {
           label: t("current_address"),
           value: (
-            <ClickableAddress
-              address={patientData.address || ""}
-              className="flex flex-col gap-2"
-            />
+            <div className="flex flex-col gap-2">
+              <span>
+                {patientAddressText(patientData.address) || (
+                  <span className="text-gray-500 font-medium">
+                    {t("no_address_provided")}
+                  </span>
+                )}
+              </span>
+              <PatientAddressLink address={patientData.address} />
+            </div>
           ),
         },
         {
           label: t("permanent_address"),
           value: (
-            <ClickableAddress
-              address={patientData.permanent_address || ""}
-              className="flex flex-col gap-2"
-            />
+            <div className="flex flex-col gap-2">
+              <span>
+                {patientAddressText(patientData.permanent_address) || (
+                  <span className="text-gray-500 font-medium">
+                    {t("no_address_provided")}
+                  </span>
+                )}
+              </span>
+              <PatientAddressLink address={patientData.permanent_address} />
+            </div>
           ),
         },
         ...getGeoOrgDetails(patientData.geo_organization),

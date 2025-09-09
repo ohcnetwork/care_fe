@@ -64,7 +64,7 @@ import useAppHistory from "@/hooks/useAppHistory";
 import dayjs from "@/Utils/dayjs";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { ClickableAddress } from "@/components/Common/ClickableAddress";
+import { patientAddressText } from "@/components/Common/RenderPatientAddress";
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import EditInvoiceSheet from "@/pages/Facility/billing/invoice/EditInvoiceSheet";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
@@ -459,10 +459,15 @@ export function InvoiceShow({
                     </p>
                     <div className="flex gap-1 font-medium text-gray-700 text-sm ml-2">
                       {t("address")}:{" "}
-                      <ClickableAddress
-                        address={invoice.account.patient.address || ""}
-                        className="flex flex-col gap-1"
-                      />
+                      <p className="font-medium text-gray-700 text-sm whitespace-pre-wrap ml-2">
+                        {patientAddressText(
+                          invoice.account.patient.address,
+                        ) || (
+                          <span className="text-gray-500">
+                            {t("no_address_provided")}
+                          </span>
+                        )}
+                      </p>
                     </div>
                     <p className="font-medium text-gray-700 text-sm ml-2">
                       {t("phone")}:{" "}

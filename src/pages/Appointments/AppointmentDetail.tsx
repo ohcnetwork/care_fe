@@ -54,9 +54,12 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-import { ClickableAddress } from "@/components/Common/ClickableAddress";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import {
+  PatientAddressLink,
+  patientAddressText,
+} from "@/components/Common/RenderPatientAddress";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
@@ -563,11 +566,16 @@ const AppointmentDetails = ({
               <p className="text-gray-600">
                 {t("pincode")}: {appointment.patient.pincode}
               </p>
-              <ClickableAddress
-                address={
-                  appointment.patient.address || t("no_address_provided")
-                }
-              />
+              <div className="flex flex-col xl:flex-row xl:justify-between xl:items-end gap-2 w-full">
+                <p className="text-gray-600 break-words">
+                  {patientAddressText(appointment.patient.address) || (
+                    <span className="text-gray-500">
+                      {t("no_address_provided")}
+                    </span>
+                  )}
+                </p>
+                <PatientAddressLink address={appointment.patient.address} />
+              </div>
             </div>
           </div>
         </CardContent>

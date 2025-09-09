@@ -18,7 +18,7 @@ import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
-import { ClickableAddress } from "@/components/Common/ClickableAddress";
+import { patientAddressText } from "@/components/Common/RenderPatientAddress";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
 
@@ -66,10 +66,13 @@ function PatientCard({ patient }: { patient: PatientRead }) {
           </div>
           <div className="space-y-1 md:col-span-2">
             <p className="text-sm font-medium">{t("address")}</p>
-            <ClickableAddress
-              address={patient.address || ""}
-              className="flex flex-col gap-1"
-            />
+            <p className="text-sm text-gray-500 whitespace-pre-wrap">
+              {patientAddressText(patient.address) || (
+                <span className="text-gray-500">
+                  {t("no_address_provided")}
+                </span>
+              )}
+            </p>
           </div>
         </div>
       </CardContent>
