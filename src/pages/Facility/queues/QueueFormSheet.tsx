@@ -64,7 +64,7 @@ interface QueueFormSheetProps {
   queueId?: string; // If provided, we're in edit mode
   trigger?: React.ReactNode;
   onSuccess?: () => void;
-  defaultDate?: Date;
+  initialDate?: Date;
 }
 
 export default function QueueFormSheet({
@@ -74,7 +74,7 @@ export default function QueueFormSheet({
   queueId,
   trigger,
   onSuccess,
-  defaultDate,
+  initialDate,
 }: QueueFormSheetProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -88,12 +88,10 @@ export default function QueueFormSheet({
     ),
     defaultValues: {
       name: "",
-      date: defaultDate,
+      date: initialDate,
       set_is_primary: false,
     },
   });
-
-  console.log(defaultDate, "ddddddd");
 
   // Fetch queue data for editing
   const { data: queue, isLoading } = useQuery({
@@ -120,11 +118,11 @@ export default function QueueFormSheet({
     if (!isOpen) {
       form.reset({
         name: "",
-        date: defaultDate,
+        date: initialDate,
         set_is_primary: false,
       });
     }
-  }, [isOpen, form, defaultDate]);
+  }, [isOpen, form, initialDate]);
 
   const { mutate: createQueue, isPending: isCreating } = useMutation({
     mutationFn: mutate(tokenQueueApi.create, {

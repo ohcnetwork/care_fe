@@ -289,6 +289,7 @@ export default function QueuesIndex({
 
   const queues = queuesResponse?.results || [];
   const subQueues = subQueuesResponse?.results || [];
+  const isPast = dayjs(qParams.date).isBefore(dayjs(), "day");
 
   return (
     <Page title={t("token_queues")} hideTitleOnPage>
@@ -336,13 +337,9 @@ export default function QueuesIndex({
               facilityId={facilityId}
               resourceType={resourceType}
               resourceId={effectiveResourceId}
-              defaultDate={qParams.date}
+              initialDate={qParams.date}
               trigger={
-                <Button
-                  size="sm"
-                  className="font-bold"
-                  disabled={dayjs(qParams.date).isBefore(dayjs(), "day")}
-                >
+                <Button size="sm" className="font-bold" disabled={isPast}>
                   <Plus className="h-4 w-4 mr-2" />
                   {t("create_queue")}
                 </Button>
@@ -369,11 +366,9 @@ export default function QueuesIndex({
                     facilityId={facilityId}
                     resourceType={resourceType}
                     resourceId={effectiveResourceId}
-                    defaultDate={qParams.date}
+                    initialDate={qParams.date}
                     trigger={
-                      <Button
-                        disabled={dayjs(qParams.date).isBefore(dayjs(), "day")}
-                      >
+                      <Button disabled={isPast}>
                         <Plus className="h-4 w-4 mr-2" />
                         {t("create_first_queue")}
                       </Button>
