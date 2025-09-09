@@ -95,7 +95,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
               ? "border-gray-200 bg-transparent"
               : "bg-white/20 border-white/20 text-white",
           )}
-        ></kbd>
+        >
+          {t("shift_p")}
+        </kbd>
       </Button>
     );
   }
