@@ -143,14 +143,14 @@ function FilterSelect({
             <CareIcon icon="l-filter" className="size-4" />
             {!value ? null : (
               <>
-                <span>{isStatus ? "Status" : "Priority"}</span>
-                {isStatus && <span className="text-gray-500">is</span>}
+                <span>{isStatus ? t("status") : t("priority")}</span>
+                {isStatus && <span className="text-gray-500">{t("is")}</span>}
                 <span>{t(value)}</span>
               </>
             )}
             {!value && (
               <span className="text-gray-500">
-                {isStatus ? "Status" : "Priority"}
+                {isStatus ? t("status") : t("priority")}
               </span>
             )}
           </div>
@@ -247,7 +247,7 @@ export default function ServiceRequestList({
               </Button>
             </div>
           </div>
-          <div className="w-full mb-4">
+          <div className="w-full mb-4 overflow-x-auto">
             <FilterTabs
               value={qParams.status || Status.active}
               onValueChange={(value) => updateQuery({ status: value })}
