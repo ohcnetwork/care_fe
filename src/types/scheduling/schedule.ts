@@ -3,8 +3,8 @@ import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
 import { Badge } from "@/components/ui/badge";
 
 import { Time } from "@/Utils/types";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { PatientRead } from "@/types/emr/patient/patient";
+import { EncounterListRead } from "@/types/emr/encounter/encounter";
+import { PublicPatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { UserReadMinimal } from "@/types/user/user";
@@ -166,7 +166,7 @@ export type AppointmentStatus = (typeof AppointmentStatuses)[number];
 export interface Appointment {
   id: string;
   token_slot: TokenSlot;
-  patient: PatientRead;
+  patient: PublicPatientRead;
   booked_on: string;
   status: AppointmentNonCancelledStatus;
   note: string;
@@ -180,7 +180,7 @@ export interface AppointmentRead extends Appointment {
   updated_by: UserReadMinimal | null;
   created_by: UserReadMinimal;
   modified_date: string;
-  associated_encounter?: EncounterRead;
+  associated_encounter?: EncounterListRead;
 }
 
 export interface AppointmentCreateRequest {

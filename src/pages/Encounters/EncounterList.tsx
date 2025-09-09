@@ -33,6 +33,7 @@ import {
   ENCOUNTER_PRIORITY,
   ENCOUNTER_STATUS_ICONS,
   EncounterClass,
+  EncounterListRead,
   EncounterPriority,
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
@@ -405,7 +406,7 @@ export function EncounterList({
             </div>
           ) : (
             <>
-              {encounters.map((encounter: EncounterRead) => (
+              {encounters.map((encounter: EncounterListRead) => (
                 <EncounterInfoCard
                   key={encounter.id}
                   encounter={encounter}

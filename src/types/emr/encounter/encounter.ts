@@ -19,14 +19,14 @@ import { Badge } from "@/components/ui/badge";
 
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { PatientListRead, PatientRead } from "@/types/emr/patient/patient";
+import { Permissions } from "@/types/emr/permission/permission";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
+import { FacilityBareMinimum } from "@/types/facility/facility";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationAssociationStatus } from "@/types/location/association";
 import { LocationList } from "@/types/location/location";
-import { UserReadMinimal } from "@/types/user/user";
-import { FacilityBareMinimum } from "@/types/facility/facility";
-import { Permissions } from "@/types/emr/permission/permission";
 import { Appointment } from "@/types/scheduling/schedule";
+import { UserReadMinimal } from "@/types/user/user";
 
 export const ENCOUNTER_ADMIT_SOURCE = [
   "hosp_trans",
@@ -235,7 +235,9 @@ export interface EncounterListRead extends EncounterBase {
   tags: TagConfig[];
 }
 
-export interface EncounterRead extends Omit<EncounterListRead, "patient">, Permissions {
+export interface EncounterRead
+  extends Omit<EncounterListRead, "patient">,
+    Permissions {
   appointment: Appointment | null;
   patient: PatientRead;
   organizations: FacilityOrganizationRead[];

@@ -22,12 +22,12 @@ import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
   ENCOUNTER_STATUS_COLORS,
-  EncounterRead,
+  EncounterListRead,
 } from "@/types/emr/encounter/encounter";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 export interface EncounterInfoCardProps {
-  encounter: EncounterRead;
+  encounter: EncounterListRead;
   facilityId: string;
   hideBorder?: boolean;
 }
@@ -102,7 +102,8 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
             encounter.status === "completed"
               ? `/facility/${facilityId}/patients/verify?${new URLSearchParams({
                   phone_number: encounter.patient.phone_number,
-                  year_of_birth: encounter.patient.year_of_birth.toString(),
+                  year_of_birth:
+                    encounter.patient.year_of_birth?.toString() || "",
                   partial_id: encounter.patient.id.slice(0, 5),
                 }).toString()}`
               : `/facility/${facilityId}/patient/${encounter.patient.id}`

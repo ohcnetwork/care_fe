@@ -29,8 +29,8 @@ export default {
   updatePatient: {
     path: "/api/v1/patient/{id}/",
     method: HttpMethod.PUT,
-    TRes: Type<PatientRead>(),
     TBody: Type<PatientUpdate>(),
+    TRes: Type<PatientRead>(),
   },
   listPatient: {
     path: "/api/v1/patient/",
@@ -47,15 +47,15 @@ export default {
   searchPatient: {
     path: "/api/v1/patient/search/",
     method: HttpMethod.POST,
-    TRes: Type<PatientSearchResponse>(),
     TBody: Type<PatientSearchRequest>(),
+    TRes: Type<PatientSearchResponse>(),
   },
 
   searchRetrieve: {
     path: "/api/v1/patient/search_retrieve/",
     method: HttpMethod.POST,
-    TRes: Type<PatientRead>(),
     TBody: Type<PatientSearchRetrieveRequest>(),
+    TRes: Type<PatientRead>(),
   },
 
   // Questionnaire Responses
@@ -91,8 +91,8 @@ export default {
   createThread: {
     path: "/api/v1/patient/{patientId}/thread/",
     method: HttpMethod.POST,
-    TRes: Type<Thread>(),
     TBody: Type<{ title: string; encounter?: string }>(),
+    TRes: Type<Thread>(),
   },
   getMessages: {
     path: "/api/v1/patient/{patientId}/thread/{threadId}/note/",
@@ -102,16 +102,16 @@ export default {
   postMessage: {
     path: "/api/v1/patient/{patientId}/thread/{threadId}/note/",
     method: HttpMethod.POST,
-    TRes: Type<Message>(),
     TBody: Type<{ message: string }>(),
+    TRes: Type<Message>(),
   },
 
   // User Management
   addUser: {
     path: "/api/v1/patient/{patientId}/add_user/",
     method: HttpMethod.POST,
-    TRes: Type<UserReadMinimal>(),
     TBody: Type<{ user: string; role: string }>(),
+    TRes: Type<UserReadMinimal>(),
   },
   listUsers: {
     path: "/api/v1/patient/{patientId}/get_users/",
@@ -128,13 +128,13 @@ export default {
   setInstanceTags: {
     path: "/api/v1/patient/{external_id}/set_instance_tags/",
     method: HttpMethod.POST,
-    TRes: Type<unknown>(),
     TBody: Type<{ tags: string[] }>(),
+    TRes: Type<unknown>(),
   },
   removeInstanceTags: {
     path: "/api/v1/patient/{external_id}/remove_instance_tags/",
     method: HttpMethod.POST,
-    TRes: Type<unknown>(),
     TBody: Type<{ tags: string[] }>(),
+    TRes: Type<unknown>(),
   },
 } as const;

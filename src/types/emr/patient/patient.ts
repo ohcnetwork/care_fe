@@ -1,8 +1,8 @@
+import { Permissions } from "@/types/emr/permission/permission";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { Organization } from "@/types/organization/organization";
 import { PatientIdentifier } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { UserReadMinimal } from "@/types/user/user";
-import { Permissions } from "@/types/emr/permission/permission";
 
 export enum BloodGroupChoices {
   A_negative = "A_negative",
@@ -34,6 +34,8 @@ export interface PatientBase {
   pincode?: number;
   deceased_datetime?: string | null;
   blood_group?: BloodGroupChoices;
+  date_of_birth?: string | null;
+  nationality?: string | null; // This field needs to be added in the backend
 }
 
 export interface PatientListRead extends PatientBase {
@@ -85,9 +87,9 @@ export interface PatientSearchRequest {
 }
 
 export interface PatientSearchRetrieveRequest {
-  phone_number?: string;
-  year_of_birth?: string;
-  partial_id?: string;
+  phone_number: string;
+  year_of_birth: string;
+  partial_id: string;
 }
 
 export function getPartialId(patient: PartialPatientModel | PatientListRead) {
@@ -95,4 +97,18 @@ export function getPartialId(patient: PartialPatientModel | PatientListRead) {
     return patient.partial_id;
   }
   return patient.id.slice(0, 5);
+}
+
+export interface PublicPatientRead {
+  id: string;
+  name: string;
+  gender: GenderChoices;
+  phone_number: string;
+  emergency_phone_number: string;
+  address: string;
+  pincode: number;
+  date_of_birth: string;
+  year_of_birth: number;
+  geo_organization: Organization;
+  blood_group: BloodGroupChoices;
 }

@@ -211,7 +211,9 @@ export const Demography = (props: PatientProps) => {
             <ClickableAddress address={patientData.permanent_address || ""} />
           ),
         },
-        ...getGeoOrgDetails(patientData.geo_organization),
+        ...(patientData.geo_organization
+          ? getGeoOrgDetails(patientData.geo_organization)
+          : []),
       ],
     },
     {

@@ -13,13 +13,13 @@ import { encounterIcons } from "@/common/constants";
 import { formatDateTime } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import {
-  EncounterRead,
   completedEncounterStatus,
+  EncounterListRead,
 } from "@/types/emr/encounter/encounter";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 
 interface EncounterCardProps {
-  encounter: EncounterRead;
+  encounter: EncounterListRead;
   permissions: string[];
   facilityId?: string;
 }
