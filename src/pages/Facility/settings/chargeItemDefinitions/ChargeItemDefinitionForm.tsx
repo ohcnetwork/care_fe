@@ -515,7 +515,7 @@ export function ChargeItemDefinitionForm({
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder={t("select_status")} />
                           </SelectTrigger>
                         </FormControl>
