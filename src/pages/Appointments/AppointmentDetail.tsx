@@ -54,10 +54,10 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-import { ClickableAddress } from "@/components/Common/ClickableAddress";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
+import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -92,6 +92,7 @@ import {
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
+import { formatPatientAddress } from "@/components/Patient/utils";
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
 
 interface Props {
@@ -556,20 +557,23 @@ const AppointmentDetails = ({
           </div>
           <div className="flex flex-row items-start gap-4 text-sm">
             <DrawingPinIcon className="size-5 text-gray-600 mt-1" />
-            <div className="min-w-0 flex-1">
-              <p className="font-medium break-words">
-                <ClickableAddress
-                  address={
-                    appointment.patient.address || t("no_address_provided")
-                  }
-                />
-              </p>
-              <p className="text-gray-600 break-words">
-                {stringifyNestedObject(appointment.patient.geo_organization)}
-              </p>
-              <p className="text-gray-600">
-                {t("pincode")}: {appointment.patient.pincode}
-              </p>
+            <div className="flex flex-col xl:flex-row xl:justify-between xl:items-end gap-2 w-full">
+              <div>
+                <p className="text-gray-600 break-words">
+                  {formatPatientAddress(appointment.patient.address) || (
+                    <span className="text-gray-500">
+                      {t("no_address_provided")}
+                    </span>
+                  )}
+                </p>
+                <p className="text-gray-600 break-words">
+                  {stringifyNestedObject(appointment.patient.geo_organization)}
+                </p>
+                <p className="text-gray-600">
+                  {t("pincode")}: {appointment.patient.pincode}
+                </p>
+              </div>
+              <PatientAddressLink address={appointment.patient.address} />
             </div>
           </div>
         </CardContent>
