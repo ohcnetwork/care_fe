@@ -234,7 +234,7 @@ export default function ServiceRequestShow({
     enabled: !!request?.encounter.patient.id,
   });
 
-  const activityDefinitionSlug = request?.activity_definition?.id;
+  const activityDefinitionSlug = request?.activity_definition?.slug;
 
   const { data: activityDefinition, isLoading: isLoadingActivityDefinition } =
     useQuery({

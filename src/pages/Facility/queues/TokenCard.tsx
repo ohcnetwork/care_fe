@@ -22,7 +22,7 @@ const TokenCard = ({ id, token, facility }: Props) => {
   return (
     <Card
       id={id}
-      className="p-6 lg:w-[25rem] border border-gray-300 relative hover:scale-101 hover:shadow-md transition-all duration-300 ease-in-out print:scale-100 print:rotate-0 print:shadow-none print:hover:scale-100 print:hover:rotate-0 print:hover:shadow-none"
+      className="p-6 border border-gray-300 relative hover:scale-101 hover:shadow-md transition-all duration-300 ease-in-out print:scale-100 print:rotate-0 print:shadow-none print:hover:scale-100 print:hover:rotate-0 print:hover:shadow-none"
     >
       <div className="absolute inset-0 opacity-[0.1] pointer-events-none bg-[url('/images/care_logo_gray.svg')] bg-center bg-no-repeat bg-[length:40%_auto] lg:bg-[length:60%_auto]" />
 

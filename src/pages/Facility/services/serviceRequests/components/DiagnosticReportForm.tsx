@@ -688,7 +688,7 @@ export function DiagnosticReportForm({
               return {
                 ...(obsData.id
                   ? { observation_id: obsData.id }
-                  : { observation_definition: definitionId }),
+                  : { observation_definition: observationDefinition?.slug }),
                 observation: {
                   status: ObservationStatus.FINAL,
                   subject_type: "patient",

@@ -186,7 +186,7 @@ function ProductKnowledgeFormContent({
         product_type: existingData.product_type,
         status: existingData.status,
         alternate_identifier: existingData.alternate_identifier || "",
-        category: existingData.category.slug,
+        category: existingData.category?.slug,
         code: existingData.code?.code ? existingData.code : null,
         base_unit: existingData.base_unit?.code ? existingData.base_unit : null,
         names: existingData.names || [],

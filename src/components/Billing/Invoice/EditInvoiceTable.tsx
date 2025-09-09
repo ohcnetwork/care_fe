@@ -143,6 +143,7 @@ export function EditInvoiceTable({
         {
           monetary_component_type: MonetaryComponentType.base,
           amount: item.baseAmount,
+          conditions: [],
         },
         // Only include discount component if there's a non-zero value
         ...(parseFloat(item.discountValue) > 0
@@ -157,6 +158,8 @@ export function EditInvoiceTable({
                   item.discountType === "percentage"
                     ? parseFloat(item.discountValue)
                     : undefined,
+                // TODO: This is definitely not correct, we need to pass on the conditions, also verify #146
+                conditions: [],
               },
             ]
           : []),

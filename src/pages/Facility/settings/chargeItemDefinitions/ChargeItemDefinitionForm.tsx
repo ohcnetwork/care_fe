@@ -20,9 +20,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
+  mapPriceComponent,
   MonetaryAmountInput,
   MonetaryDisplay,
-  mapPriceComponent,
 } from "@/components/ui/monetary-display";
 import {
   Select,
@@ -33,12 +33,18 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import { CompactConditionEditor } from "@/components/Billing/CompactConditionEditor";
 import Loading from "@/components/Common/Loading";
 import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
+import {
+  Condition,
+  conditionSchema,
+  Metrics,
+} from "@/types/base/condition/condition";
 import {
   MonetaryComponent,
   MonetaryComponentRead,
@@ -71,6 +77,7 @@ const priceComponentSchema = z.object({
       message: "Amount must be greater than 0",
     })
     .optional(),
+  conditions: z.array(conditionSchema),
 });
 
 interface ChargeItemDefinitionFormProps {
@@ -99,8 +106,10 @@ function MonetaryComponentSelectionSection({
   selectedComponents,
   onComponentToggle,
   onValueChange,
+  onConditionsChange,
   type,
   errors,
+  availableMetrics,
 }: {
   title: string;
   description: string;
@@ -108,8 +117,13 @@ function MonetaryComponentSelectionSection({
   selectedComponents: MonetaryComponent[];
   onComponentToggle: (component: MonetaryComponent, selected: boolean) => void;
   onValueChange: (component: MonetaryComponent, value: number) => void;
+  onConditionsChange: (
+    component: MonetaryComponent,
+    conditions: Condition[],
+  ) => void;
   type: MonetaryComponentType;
   errors: FieldErrors<z.infer<typeof priceComponentSchema>>[];
+  availableMetrics: Metrics[];
 }) {
   const { t } = useTranslation();
 
@@ -200,6 +214,21 @@ function MonetaryComponentSelectionSection({
                   {errors[idx].amount?.message || errors[idx].factor?.message}
                 </p>
               )}
+
+              {/* Condition editor for discount components only */}
+              {type === MonetaryComponentType.discount && (
+                <CompactConditionEditor
+                  conditions={component.conditions || []}
+                  availableMetrics={availableMetrics}
+                  onChange={(conditions) =>
+                    onConditionsChange(
+                      { ...component, monetary_component_type: type },
+                      conditions,
+                    )
+                  }
+                  className="mt-2"
+                />
+              )}
             </div>
           );
         })}
@@ -250,6 +279,12 @@ export function ChargeItemDefinitionForm({
     }),
   });
 
+  // Fetch available metrics for conditions
+  const { data: availableMetrics = [] } = useQuery({
+    queryKey: ["metrics"],
+    queryFn: query(chargeItemDefinitionApi.listMetrics),
+  });
+
   // Main form schema
   const formSchema = z.object({
     title: z.string().min(1, { message: t("field_required") }),
@@ -298,12 +333,14 @@ export function ChargeItemDefinitionForm({
       purpose: initialData?.purpose,
       derived_from_uri: initialData?.derived_from_uri,
       category: categorySlug,
-      price_components: initialData?.price_components.map(
-        mapPriceComponent,
-      ) || [
+      price_components: initialData?.price_components.map((component) => ({
+        ...mapPriceComponent(component),
+        conditions: component.conditions,
+      })) || [
         {
           monetary_component_type: MonetaryComponentType.base,
           amount: "0",
+          conditions: [],
         },
       ],
     },
@@ -349,6 +386,10 @@ export function ChargeItemDefinitionForm({
     const submissionData: ChargeItemDefinitionCreate = {
       ...values,
       category: values.category,
+      price_components: values.price_components.map((component) => ({
+        ...component,
+        conditions: component.conditions,
+      })),
     };
     upsert(submissionData);
   };
@@ -389,7 +430,7 @@ export function ChargeItemDefinitionForm({
     type: MonetaryComponentType = MonetaryComponentType.tax,
   ) => {
     const currentComponents = form.getValues("price_components");
-    let newComponents: MonetaryComponent[];
+    let newComponents: z.infer<typeof priceComponentSchema>[];
 
     if (selected) {
       newComponents = [
@@ -426,9 +467,30 @@ export function ChargeItemDefinitionForm({
 
     const newComponents = [...currentComponents];
     newComponents[componentIndex] = {
-      ...component,
+      ...newComponents[componentIndex],
       factor: component.factor != null ? value : undefined,
       amount: component.factor != null ? undefined : String(value),
+    };
+
+    form.setValue("price_components", newComponents, { shouldValidate: true });
+  };
+
+  // Handle component conditions change
+  const handleComponentConditionsChange = (
+    component: MonetaryComponent,
+    conditions: Condition[],
+  ) => {
+    const currentComponents = form.getValues("price_components");
+    const componentIndex = currentComponents.findIndex((c) =>
+      monetaryComponentIsEqual(c, component),
+    );
+
+    if (componentIndex === -1) return;
+
+    const newComponents = [...currentComponents];
+    newComponents[componentIndex] = {
+      ...newComponents[componentIndex],
+      conditions,
     };
 
     form.setValue("price_components", newComponents, { shouldValidate: true });
@@ -445,6 +507,7 @@ export function ChargeItemDefinitionForm({
       updatedComponents[mrpIndex] = {
         ...updatedComponents[mrpIndex],
         amount: value,
+        // Todo: We should replace MRP code implementation with a generic informational code implementation
         code: mrpCode,
       };
       form.setValue("price_components", updatedComponents);
@@ -453,6 +516,7 @@ export function ChargeItemDefinitionForm({
         monetary_component_type: MonetaryComponentType.informational,
         amount: value,
         code: mrpCode,
+        conditions: [],
       };
       form.setValue("price_components", [...currentComponents, newComponent]);
     }
@@ -464,7 +528,7 @@ export function ChargeItemDefinitionForm({
         onSubmit={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          form.handleSubmit(onSubmit)();
+          form.handleSubmit(onSubmit as any)();
         }}
         className="space-y-6"
       >
@@ -581,7 +645,7 @@ export function ChargeItemDefinitionForm({
           </CardHeader>
           <CardContent className="space-y-4">
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="description"
               render={({ field }) => (
                 <FormItem>
@@ -599,7 +663,7 @@ export function ChargeItemDefinitionForm({
             />
 
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="purpose"
               render={({ field }) => (
                 <FormItem>
@@ -617,7 +681,7 @@ export function ChargeItemDefinitionForm({
             />
 
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="derived_from_uri"
               render={({ field }) => (
                 <FormItem>
@@ -692,8 +756,10 @@ export function ChargeItemDefinitionForm({
                 )
               }
               onValueChange={handleComponentValueChange}
+              onConditionsChange={handleComponentConditionsChange}
               type={MonetaryComponentType.discount}
               errors={getSelectedComponentError(MonetaryComponentType.discount)}
+              availableMetrics={availableMetrics}
             />
 
             {/* Taxes */}
@@ -712,8 +778,10 @@ export function ChargeItemDefinitionForm({
                 )
               }
               onValueChange={handleComponentValueChange}
+              onConditionsChange={handleComponentConditionsChange}
               type={MonetaryComponentType.tax}
               errors={getSelectedComponentError(MonetaryComponentType.tax)}
+              availableMetrics={availableMetrics}
             />
 
             {/* MRP */}
