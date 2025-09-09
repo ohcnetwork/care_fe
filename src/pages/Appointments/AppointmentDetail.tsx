@@ -559,14 +559,8 @@ const AppointmentDetails = ({
           </div>
           <div className="flex flex-row items-start gap-4 text-sm">
             <DrawingPinIcon className="size-5 text-gray-600 mt-1" />
-            <div className="min-w-0 flex-1">
-              <p className="text-gray-600 break-words">
-                {stringifyNestedObject(appointment.patient.geo_organization)}
-              </p>
-              <p className="text-gray-600">
-                {t("pincode")}: {appointment.patient.pincode}
-              </p>
-              <div className="flex flex-col xl:flex-row xl:justify-between xl:items-end gap-2 w-full">
+            <div className="flex flex-col xl:flex-row xl:justify-between xl:items-end gap-2 w-full">
+              <div>
                 <p className="text-gray-600 break-words">
                   {patientAddressText(appointment.patient.address) || (
                     <span className="text-gray-500">
@@ -574,8 +568,14 @@ const AppointmentDetails = ({
                     </span>
                   )}
                 </p>
-                <PatientAddressLink address={appointment.patient.address} />
+                <p className="text-gray-600 break-words">
+                  {stringifyNestedObject(appointment.patient.geo_organization)}
+                </p>
+                <p className="text-gray-600">
+                  {t("pincode")}: {appointment.patient.pincode}
+                </p>
               </div>
+              <PatientAddressLink address={appointment.patient.address} />
             </div>
           </div>
         </CardContent>
