@@ -9,7 +9,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
-import { ClickableAddress } from "@/components/Common/ClickableAddress";
+import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
@@ -18,6 +18,7 @@ import { GENDER_TYPES } from "@/common/constants";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import { formatPatientAge } from "@/Utils/utils";
+import { formatPatientAddress } from "@/components/Patient/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { TagResource } from "@/types/emr/tagConfig/tagConfig";
 import {
@@ -203,12 +204,32 @@ export const Demography = (props: PatientProps) => {
         />,
         {
           label: t("current_address"),
-          value: <ClickableAddress address={patientData.address || ""} />,
+          value: (
+            <div className="flex flex-col gap-2">
+              <span>
+                {formatPatientAddress(patientData.address) || (
+                  <span className="text-gray-500 font-medium">
+                    {t("no_address_provided")}
+                  </span>
+                )}
+              </span>
+              <PatientAddressLink address={patientData.address} />
+            </div>
+          ),
         },
         {
           label: t("permanent_address"),
           value: (
-            <ClickableAddress address={patientData.permanent_address || ""} />
+            <div className="flex flex-col gap-2">
+              <span>
+                {formatPatientAddress(patientData.permanent_address) || (
+                  <span className="text-gray-500 font-medium">
+                    {t("no_address_provided")}
+                  </span>
+                )}
+              </span>
+              <PatientAddressLink address={patientData.permanent_address} />
+            </div>
           ),
         },
         ...getGeoOrgDetails(patientData.geo_organization),

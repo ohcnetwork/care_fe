@@ -252,7 +252,7 @@ function RuleFields({
                       disabled={disabled}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger ref={field.ref}>
                           <SelectValue placeholder={t("select_system")} />
                         </SelectTrigger>
                       </FormControl>
@@ -455,7 +455,7 @@ export function ValueSetForm({
                 disabled={isSystemDefined}
               >
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger ref={field.ref}>
                     <SelectValue placeholder={t("select_status")} />
                   </SelectTrigger>
                 </FormControl>
