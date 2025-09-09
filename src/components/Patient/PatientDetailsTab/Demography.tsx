@@ -9,11 +9,8 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
-import {
-  PatientAddressLink,
-  patientAddressText,
-} from "@/components/Common/RenderPatientAddress";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
+import { PatientAddressLink } from "@/components/Patient/RenderPatientAddress";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import { getPermissions } from "@/common/Permissions";
@@ -21,6 +18,7 @@ import { GENDER_TYPES } from "@/common/constants";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import { formatPatientAge } from "@/Utils/utils";
+import { formatPatientAddress } from "@/components/Patient/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { TagResource } from "@/types/emr/tagConfig/tagConfig";
 import {
@@ -209,7 +207,7 @@ export const Demography = (props: PatientProps) => {
           value: (
             <div className="flex flex-col gap-2">
               <span>
-                {patientAddressText(patientData.address) || (
+                {formatPatientAddress(patientData.address) || (
                   <span className="text-gray-500 font-medium">
                     {t("no_address_provided")}
                   </span>
@@ -224,7 +222,7 @@ export const Demography = (props: PatientProps) => {
           value: (
             <div className="flex flex-col gap-2">
               <span>
-                {patientAddressText(patientData.permanent_address) || (
+                {formatPatientAddress(patientData.permanent_address) || (
                   <span className="text-gray-500 font-medium">
                     {t("no_address_provided")}
                   </span>

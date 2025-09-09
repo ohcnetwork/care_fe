@@ -64,7 +64,7 @@ import useAppHistory from "@/hooks/useAppHistory";
 import dayjs from "@/Utils/dayjs";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { patientAddressText } from "@/components/Common/RenderPatientAddress";
+import { formatPatientAddress } from "@/components/Patient/utils";
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import EditInvoiceSheet from "@/pages/Facility/billing/invoice/EditInvoiceSheet";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
@@ -460,7 +460,7 @@ export function InvoiceShow({
                     <div className="flex gap-1 font-medium text-gray-700 text-sm ml-2">
                       {t("address")}:{" "}
                       <p className="font-medium text-gray-700 text-sm whitespace-pre-wrap ml-2">
-                        {patientAddressText(
+                        {formatPatientAddress(
                           invoice.account.patient.address,
                         ) || (
                           <span className="text-gray-500">

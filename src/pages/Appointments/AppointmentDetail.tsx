@@ -56,11 +56,8 @@ import { Textarea } from "@/components/ui/textarea";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import {
-  PatientAddressLink,
-  patientAddressText,
-} from "@/components/Common/RenderPatientAddress";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
+import { PatientAddressLink } from "@/components/Patient/RenderPatientAddress";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -95,6 +92,7 @@ import {
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
+import { formatPatientAddress } from "@/components/Patient/utils";
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
 
 interface Props {
@@ -562,7 +560,7 @@ const AppointmentDetails = ({
             <div className="flex flex-col xl:flex-row xl:justify-between xl:items-end gap-2 w-full">
               <div>
                 <p className="text-gray-600 break-words">
-                  {patientAddressText(appointment.patient.address) || (
+                  {formatPatientAddress(appointment.patient.address) || (
                     <span className="text-gray-500">
                       {t("no_address_provided")}
                     </span>

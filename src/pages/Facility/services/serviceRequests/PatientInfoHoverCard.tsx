@@ -1,8 +1,6 @@
 import { Avatar } from "@/components/Common/Avatar";
-import {
-  PatientAddressLink,
-  patientAddressText,
-} from "@/components/Common/RenderPatientAddress";
+import { PatientAddressLink } from "@/components/Patient/RenderPatientAddress";
+import { formatPatientAddress } from "@/components/Patient/utils";
 import { Button } from "@/components/ui/button";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { formatPatientAge } from "@/Utils/utils";
@@ -75,7 +73,7 @@ export const PatientInfoHoverCard = ({
             <span className="text-gray-700">{t("location")}</span>
             <div className="flex items-end justify-between gap-2 w-full">
               <span className="text-gray-950 my-auto whitespace-break-spaces">
-                {patientAddressText(patient.address) || (
+                {formatPatientAddress(patient.address) || (
                   <span className="text-gray-500">
                     {t("no_address_provided")}
                   </span>

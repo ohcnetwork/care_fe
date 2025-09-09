@@ -30,8 +30,3 @@ export const PatientAddressLink = ({ address }: { address?: string }) => {
     </>
   );
 };
-
-export const patientAddressText = (address?: string) => {
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  return address?.replace(urlRegex, "").trim();
-};
