@@ -15,9 +15,6 @@ import { GenericSelectedBadge } from "./genericFilter";
 import { SelectedTagBadge } from "./tagFilter";
 import {
   DateRangeOption,
-  ENCOUNTER_CLASS_FILTER_COLORS,
-  ENCOUNTER_PRIORITY_FILTER_COLORS,
-  ENCOUNTER_STATUS_FILTER_COLORS,
   FilterConfig,
   FilterDateRange,
   FilterMode,
@@ -25,6 +22,12 @@ import {
   Operation,
   createFilterConfig,
 } from "./utils/utils";
+
+import {
+  ENCOUNTER_CLASS_FILTER_COLORS,
+  ENCOUNTER_PRIORITY_FILTER_COLORS,
+  ENCOUNTER_STATUS_FILTER_COLORS,
+} from "@/types/emr/encounter/encounter";
 
 export const encounterStatusFilter = (
   key: string = "encounter_status",
@@ -56,7 +59,7 @@ export const encounterStatusFilter = (
       }
       return <></>;
     },
-    () => customOperations || [{ label: "is" }], // ["is", "is_not"],
+    () => customOperations || [{ label: "is" }],
     mode,
     <CircleDashed className="w-4 h-4" />,
   );
@@ -90,7 +93,7 @@ export const encounterClassFilter = (
       }
       return <></>;
     },
-    () => customOperations || [{ label: "is" }], // ["is", "is_not"],
+    () => customOperations || [{ label: "is" }],
     mode,
   );
 
@@ -126,7 +129,7 @@ export const encounterPriorityFilter = (
       }
       return <></>;
     },
-    () => customOperations || [{ label: "is" }], // ["is", "is_not"],
+    () => customOperations || [{ label: "is" }],
     mode,
   );
 export const dateFilter = (
@@ -176,11 +179,11 @@ export const tagFilter = (
     (selected: FilterValues) => {
       const selectedTags = selected as TagConfig[];
       if (selectedTags.length === 1)
-        return [{ label: "includes", value: "all" }]; // ["includes", "does_not_include"];
+        return [{ label: "includes", value: "all" }];
       return [
         { label: "has_all_of", value: "all" },
         { label: "has_any_of", value: "any" },
-      ]; // ["has_all_of", "has_any_of", "exclude_if_any", "exclude_if_all"];
+      ];
     },
     mode,
     <Tag className="w-4 h-4" />,
