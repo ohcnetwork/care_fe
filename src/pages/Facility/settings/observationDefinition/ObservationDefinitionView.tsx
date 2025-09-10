@@ -65,7 +65,7 @@ function ObservationInterpretationDisplay({
     );
   }
 
-  const getInterpretationSummary = (range: QualifiedRange, index: number) => {
+  const getInterpretationSummary = (range: QualifiedRange) => {
     const rangeCount = range.ranges?.length || 0;
     const valuesetCount = range.valueset_interpretation?.length || 0;
 
@@ -116,7 +116,7 @@ function ObservationInterpretationDisplay({
               {operationSummary}
               {range.conditions.length > 2 && (
                 <span className="text-xs text-gray-500">
-                  +{range.conditions.length - 2} more
+                  +{range.conditions.length - 2} {t("more")}
                 </span>
               )}
             </div>
@@ -132,7 +132,7 @@ function ObservationInterpretationDisplay({
               {rangeSummary}
               {rangeCount > 2 && (
                 <span className="text-xs text-gray-500">
-                  +{rangeCount - 2} more
+                  +{rangeCount - 2} {t("more")}
                 </span>
               )}
             </div>
@@ -148,7 +148,7 @@ function ObservationInterpretationDisplay({
               {valuesetSummary}
               {valuesetCount > 2 && (
                 <span className="text-xs text-gray-500">
-                  +{valuesetCount - 2} more
+                  +{valuesetCount - 2} {t("more")}
                 </span>
               )}
             </div>
@@ -167,7 +167,7 @@ function ObservationInterpretationDisplay({
               {t("interpretation")} #{index + 1}
             </span>
           </div>
-          {getInterpretationSummary(range, index)}
+          {getInterpretationSummary(range)}
         </div>
       ))}
     </div>
