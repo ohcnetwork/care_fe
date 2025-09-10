@@ -206,6 +206,13 @@
     },
     {
       "key": "p",
+      "action": "print-charge-items",
+      "description": "Print Charge Items",
+      "when": "always",
+      "subContext": "charge-items-table"
+    },
+    {
+      "key": "p",
       "action": "print-invoice",
       "description": "Print Invoice",
       "when": "always",
