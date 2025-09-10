@@ -79,10 +79,7 @@ export const PrintChargeItems = (props: {
       },
       pageSize: 100,
     }),
-  }) as {
-    data: { results: ChargeItemRead[]; count: number } | undefined;
-    isLoading: boolean;
-  };
+  });
 
   if (isLoading) return <Loading />;
 
