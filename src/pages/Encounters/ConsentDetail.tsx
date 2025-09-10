@@ -1,12 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import {
-  AlertCircle,
-  ArrowLeft,
-  ChevronLeft,
-  Download,
-  FileText,
-} from "lucide-react";
+import { AlertCircle, ChevronLeft, Download, FileText } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -18,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
+import BackButton from "@/components/Common/BackButton";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import ConsentFormSheet from "@/components/Consent/ConsentFormSheet";
@@ -138,13 +133,7 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
 
   return (
     <div>
-      <Link
-        href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/consents`}
-        className="flex items-center hover:underline md:px-6"
-      >
-        <ArrowLeft className="size-4" />
-        {t("back")}
-      </Link>
+      <BackButton />
       <Page title="">
         <div className="container mx-auto py-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
