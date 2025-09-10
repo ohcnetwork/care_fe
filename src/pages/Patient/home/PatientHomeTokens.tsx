@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Table,
   TableBody,
@@ -15,10 +16,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import query from "@/Utils/request/query";
 import useFilters from "@/hooks/useFilters";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { TokenRead, renderTokenNumber } from "@/types/tokens/token/token";
+import query from "@/Utils/request/query";
+import { dateQueryString } from "@/Utils/utils";
 
 interface PatientHomeTokensProps {
   patientId: string;
@@ -30,9 +32,26 @@ export default function PatientHomeTokens({
   facilityId,
 }: PatientHomeTokensProps) {
   const { t } = useTranslation();
-  const { qParams, Pagination, resultsPerPage } = useFilters({
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     disableCache: true,
   });
+
+  // Set default date to today if no date is specified
+  useEffect(() => {
+    if (!qParams.date) {
+      const today = new Date();
+      updateQuery({ date: dateQueryString(today) });
+    }
+  }, [qParams.date, updateQuery]);
+
+  // Handle date filter
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      updateQuery({ date: dateQueryString(date) });
+    } else {
+      updateQuery({ date: undefined });
+    }
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ["getTokens", patientId, qParams],
@@ -41,6 +60,7 @@ export default function PatientHomeTokens({
       queryParams: {
         limit: resultsPerPage,
         facility: facilityId,
+        date: qParams.date,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         ordering: "-created_date",
       },
@@ -51,10 +71,18 @@ export default function PatientHomeTokens({
 
   return (
     <div className="mt-4 px-3 md:px-0">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-2 sm:space-y-0">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center mb-4 space-y-2 sm:space-y-0">
         <h2 className="text-2xl font-semibold leading-tight text-center sm:text-left">
           {t("tokens")}
         </h2>
+        <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-2">
+            <DatePicker
+              date={qParams.date ? new Date(qParams.date) : undefined}
+              onChange={handleDateChange}
+            />
+          </div>
+        </div>
       </div>
 
       <div className="rounded-lg border border-gray-200 bg-white">
