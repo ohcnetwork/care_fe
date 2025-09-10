@@ -25,6 +25,12 @@ import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading"
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { Code } from "@/types/base/code/code";
+import { getConditionOperationSummary } from "@/types/base/condition/condition";
+import {
+  getRangeSummary,
+  getValuesetSummary,
+  QualifiedRange,
+} from "@/types/base/qualifiedRange/qualifiedRange";
 import { OBSERVATION_DEFINITION_STATUS_COLORS } from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 
@@ -39,7 +45,131 @@ function CodeDisplay({ code }: { code: Code | null }) {
     <div className="space-y-1">
       <p className="text-sm font-medium">{code.display}</p>
       <p className="text-xs text-gray-500">{code.system}</p>
-      <p className="text-xs text-gray-500">{code.display}</p>
+      <p className="text-xs text-gray-500">{code.code}</p>
+    </div>
+  );
+}
+
+function ObservationInterpretationDisplay({
+  qualifiedRanges,
+}: {
+  qualifiedRanges: QualifiedRange[];
+}) {
+  const { t } = useTranslation();
+
+  if (!qualifiedRanges || qualifiedRanges.length === 0) {
+    return (
+      <p className="text-sm text-gray-500 py-2">
+        {t("no_interpretations_configured")}
+      </p>
+    );
+  }
+
+  const getInterpretationSummary = (range: QualifiedRange, index: number) => {
+    const rangeCount = range.ranges?.length || 0;
+    const valuesetCount = range.valueset_interpretation?.length || 0;
+
+    const operationSummary = range.conditions
+      ?.slice(0, 2)
+      .map((condition, conditionIndex) => (
+        <span
+          key={`condition-${conditionIndex}`}
+          className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded"
+        >
+          {getConditionOperationSummary(condition, t(condition.metric))}
+        </span>
+      ));
+
+    const rangeSummary = range.ranges
+      ?.slice(0, 2)
+      .map((rangeItem, rangeIndex) => (
+        <span
+          key={`range-${rangeIndex}`}
+          className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-800"
+        >
+          {getRangeSummary(rangeItem)}
+        </span>
+      ));
+
+    const valuesetSummary = range.valueset_interpretation
+      ?.slice(0, 2)
+      .map((valueset, valuesetIndex) => (
+        <span
+          key={`valueset-${valuesetIndex}`}
+          className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded"
+          style={{
+            backgroundColor: valueset.interpretation.color || undefined,
+          }}
+        >
+          {getValuesetSummary(valueset)}
+        </span>
+      ));
+
+    return (
+      <div className="space-y-3">
+        {range.conditions && range.conditions.length > 0 && (
+          <div>
+            <p className="text-xs font-medium text-gray-500 mb-1">
+              {t("conditions")}
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {operationSummary}
+              {range.conditions.length > 2 && (
+                <span className="text-xs text-gray-500">
+                  +{range.conditions.length - 2} more
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {rangeCount > 0 && (
+          <div>
+            <p className="text-xs font-medium text-gray-500 mb-1">
+              {t("ranges")}
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {rangeSummary}
+              {rangeCount > 2 && (
+                <span className="text-xs text-gray-500">
+                  +{rangeCount - 2} more
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {valuesetCount > 0 && (
+          <div>
+            <p className="text-xs font-medium text-gray-500 mb-1">
+              {t("value_sets")}
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {valuesetSummary}
+              {valuesetCount > 2 && (
+                <span className="text-xs text-gray-500">
+                  +{valuesetCount - 2} more
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      {qualifiedRanges.map((range, index) => (
+        <div key={index} className="p-3 rounded-lg border bg-gray-50/50">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-gray-700">
+              {t("interpretation")} #{index + 1}
+            </span>
+          </div>
+          {getInterpretationSummary(range, index)}
+        </div>
+      ))}
     </div>
   );
 }
@@ -259,6 +389,19 @@ export default function ObservationDefinitionView({
                   </div>
                 </div>
               )}
+              {definition.qualified_ranges &&
+                definition.qualified_ranges.length > 0 && (
+                  <div>
+                    <p className="mb-2 text-sm text-gray-500">
+                      {t("observation_interpretation")}
+                    </p>
+                    <div className="rounded-lg border bg-gray-50/50 p-3">
+                      <ObservationInterpretationDisplay
+                        qualifiedRanges={definition.qualified_ranges}
+                      />
+                    </div>
+                  </div>
+                )}
             </div>
           </CardContent>
         </Card>
@@ -296,6 +439,17 @@ export default function ObservationDefinitionView({
                             <CodeDisplay code={comp.permitted_unit} />
                           </div>
                         )}
+                        {comp.qualified_ranges &&
+                          comp.qualified_ranges.length > 0 && (
+                            <div>
+                              <p className="text-sm text-gray-500">
+                                {t("observation_interpretation")}
+                              </p>
+                              <ObservationInterpretationDisplay
+                                qualifiedRanges={comp.qualified_ranges}
+                              />
+                            </div>
+                          )}
                       </div>
                     </div>
                   </div>

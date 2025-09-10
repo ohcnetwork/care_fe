@@ -15,6 +15,7 @@ export interface ObservationDefinitionComponentSpec {
   code: Code;
   permitted_data_type: QuestionType;
   permitted_unit: Code;
+  qualified_ranges: QualifiedRange[];
 }
 
 export const OBSERVATION_DEFINITION_CATEGORY = [

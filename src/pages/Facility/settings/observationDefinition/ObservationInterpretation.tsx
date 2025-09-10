@@ -85,8 +85,6 @@ export function ObservationInterpretation({
     }
   }, [qualifiedRanges]);
 
-  console.log("qualifiedRanges", qualifiedRanges);
-
   const hasExistingData = () => {
     return qualifiedRanges.some(
       (range) =>
@@ -108,7 +106,6 @@ export function ObservationInterpretation({
   };
 
   const confirmTypeChange = () => {
-    console.log("calling confirmTypeChange");
     if (pendingTypeChange) {
       setSelectedInterpretationType(pendingTypeChange);
 
@@ -297,7 +294,7 @@ export function ObservationInterpretation({
       );
     }
     return (
-      <div className="flex flex-row gap-8 items-start flex-1 text-sm">
+      <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-start flex-1 text-sm">
         <span>#{index + 1}</span>
         <div className="flex flex-col gap-1">
           <span className="text-xs font-medium">{t("conditions")}</span>
@@ -346,11 +343,11 @@ export function ObservationInterpretation({
           {t("no_interpretations_configured")}
         </p>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-4">
           {qualifiedRanges?.map((range, index) => (
             <div
               key={index}
-              className={`flex items-center justify-between p-3 rounded-md border ${
+              className={`flex flex-col sm:flex-row gap-2 items-center justify-between p-3 rounded-md border ${
                 wouldBeAffectedByTypeChange(range, index)
                   ? "bg-red-50 border-red-300"
                   : "bg-gray-50 border-gray-200"
@@ -362,7 +359,7 @@ export function ObservationInterpretation({
                   {t("type_changed_values_need_to_be_updated")}
                 </span>
               )}
-              <div className="flex gap-1">
+              <div className="flex flex-row justify-between gap-1 w-full sm:w-auto">
                 <Button
                   type="button"
                   variant="ghost"
@@ -656,11 +653,11 @@ export function ConditionComponent({
             ? (value as ConditionOperationInRangeValue)
             : { min: undefined, max: undefined };
         return (
-          <div className="flex gap-2 w-fit">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Input
               type="number"
               placeholder="Min"
-              className="w-32"
+              className="w-full sm:w-32"
               value={currentRange.min || ""}
               onChange={(e) =>
                 handleSetValue(
@@ -675,7 +672,7 @@ export function ConditionComponent({
             <Input
               type="number"
               placeholder="Max"
-              className="w-32"
+              className="w-full sm:w-32"
               value={currentRange.max || ""}
               onChange={(e) =>
                 handleSetValue(
@@ -745,8 +742,8 @@ export function ConditionComponent({
                   <Trash2 className="size-4" />
                 </Button>
               </div>
-              <div className="flex flex-row gap-2">
-                <div className="flex flex-row gap-2 flex-1">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex flex-col sm:flex-row gap-2 flex-1">
                   <div className="flex flex-col gap-2 flex-1">
                     <FormLabel className="text-sm">{t("type")}</FormLabel>
                     <Select
@@ -767,9 +764,7 @@ export function ConditionComponent({
                   </div>
 
                   <div className="flex flex-col gap-2 flex-1">
-                    <FormLabel className="text-sm">
-                      {t("comparison_operation")}
-                    </FormLabel>
+                    <FormLabel className="text-sm">{t("comperator")}</FormLabel>
                     <Select
                       value={condition.operation}
                       onValueChange={(value) =>
@@ -835,7 +830,7 @@ function InterpretationComponent({
   };
 
   return (
-    <div className="flex flex-row gap-2 w-full justify-between">
+    <div className="flex flex-col sm:flex-row gap-2 w-full justify-between">
       <div className="flex flex-col gap-2 flex-1">
         <FormLabel className="text-sm">{t("display")}</FormLabel>
         <Input
@@ -954,7 +949,7 @@ function NumericRangeComponent({
             </Button>
           </div>
 
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             {range?.interpretation && (
               <InterpretationComponent
                 interpretation={range.interpretation}

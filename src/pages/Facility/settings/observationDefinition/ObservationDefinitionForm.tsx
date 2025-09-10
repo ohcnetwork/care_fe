@@ -106,6 +106,7 @@ const formSchema = z.object({
           .refine((data) => data.code && data.display && data.system, {
             message: "Required",
           }),
+        qualified_ranges: qualifiedRangeSchema,
       }),
     )
     .default([]),
@@ -194,7 +195,19 @@ function ObservationDefinitionFormContent({
             body_site: existingData.body_site || null,
             method: existingData.method || null,
             permitted_unit: existingData.permitted_unit || null,
-            component: existingData.component || [],
+            component:
+              existingData.component.map((c) => ({
+                ...c,
+                qualified_ranges: c.qualified_ranges.map((range, index) => ({
+                  ...range,
+                  id: index,
+                  conditions: range.conditions,
+                  _interpretation_type:
+                    range?.ranges?.length > 0
+                      ? InterpretationType.ranges
+                      : InterpretationType.valuesets,
+                })),
+              })) || [],
             qualified_ranges:
               existingData.qualified_ranges?.map((range, index) => ({
                 ...range,
@@ -600,6 +613,7 @@ function ObservationDefinitionFormContent({
                               display: "",
                               system: "",
                             },
+                            qualified_ranges: [],
                           },
                         ]);
                       }}
@@ -635,6 +649,7 @@ function ObservationDefinitionFormContent({
                               display: "",
                               system: "",
                             },
+                            qualified_ranges: [],
                           },
                         ]);
                       }}
@@ -761,6 +776,23 @@ function ObservationDefinitionFormContent({
                               )}
                             />
                           </div>
+
+                          <FormField
+                            control={form.control}
+                            name={`component.${index}.qualified_ranges`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <ObservationInterpretation
+                                    qualifiedRanges={field.value}
+                                    setQualifiedRanges={(
+                                      value: QualifiedRange[],
+                                    ) => field.onChange(value)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
                         </div>
                       </div>
                     ))}
