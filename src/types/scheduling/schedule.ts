@@ -76,7 +76,7 @@ export interface ScheduleTemplateCreateRequest {
 export interface ScheduleTemplateSetChargeItemDefinitionRequest {
   charge_item_definition: string;
   re_visit_allowed_days: number;
-  re_visit_charge_item_definition?: string;
+  re_visit_charge_item_definition: string | null;
 }
 export interface ScheduleTemplateUpdateRequest {
   name: string;

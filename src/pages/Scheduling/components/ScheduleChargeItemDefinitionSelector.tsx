@@ -29,7 +29,7 @@ interface ScheduleChargeItemDefinitionSelectorProps {
   onChange: (value: {
     charge_item_definition_slug: string;
     re_visit_allowed_days: number;
-    re_visit_charge_item_definition_slug?: string;
+    re_visit_charge_item_definition_slug: string | null;
   }) => void;
 }
 

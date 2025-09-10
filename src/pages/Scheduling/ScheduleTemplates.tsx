@@ -147,7 +147,7 @@ const ScheduleTemplateItem = ({
                   charge_item_definition: value.charge_item_definition_slug,
                   re_visit_allowed_days: value.re_visit_allowed_days || 0,
                   re_visit_charge_item_definition:
-                    value.re_visit_charge_item_definition_slug,
+                    value.re_visit_charge_item_definition_slug || null,
                 })
               }
             />
