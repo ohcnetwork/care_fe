@@ -104,7 +104,7 @@ function TreeViewItem({
               getColorForTag(tag.id, 0),
             )}
           />
-          <span className="text-sm">{tag.display}</span>
+          <span className="text-sm truncate flex-1">{tag.display}</span>
           {tag.has_children && (
             <Badge variant="secondary" className="text-xs p-0.5 ml-auto">
               {t("group")}
@@ -244,20 +244,20 @@ function TagFilterDropdown({
                 className="flex items-center gap-2 px-2 py-1 cursor-pointer"
               >
                 <Checkbox checked={true} className="h-4 w-4" />
-                <div className="flex items-center gap-2 flex-1">
+                <div className="flex items-center gap-2 max-w-xs truncate">
                   {tag.parent && (
                     <Component
                       className="h-3 w-3 text-black/80"
                       strokeWidth={1.25}
                     />
                   )}
-                  <span className="text-sm flex flex-row items-center gap-1">
+                  <span className="text-sm flex flex-row items-center gap-1 min-w-0">
                     {tag.parent && (
-                      <span className="flex gap-1 items-center">
-                        <span className="text-gray-700">
+                      <span className="flex gap-1 items-center flex-shrink-0">
+                        <span className="text-gray-700 truncate">
                           {tag.parent.display}
                         </span>
-                        <ChevronRight className="h-3 w-3" />
+                        <ChevronRight className="h-3 w-3 flex-shrink-0" />
                       </span>
                     )}
                     <div
@@ -266,7 +266,7 @@ function TagFilterDropdown({
                         getColorForTag(tag.id, index),
                       )}
                     />
-                    {tag.display}
+                    <span className="truncate">{tag.display}</span>
                   </span>
                 </div>
               </DropdownMenuItem>
@@ -327,14 +327,14 @@ function TagFilterDropdown({
                 className="flex items-center gap-2 px-2 py-1 cursor-pointer"
               >
                 <Checkbox checked={false} className="h-4 w-4" />
-                <div className="flex items-center gap-2 flex-1">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
                   <div
                     className={cn(
                       "h-3 w-3 rounded-full flex-shrink-0 border",
                       getColorForTag(tag.id, index),
                     )}
                   />
-                  <span className="text-sm">{tag.display}</span>
+                  <span className="text-sm truncate">{tag.display}</span>
                 </div>
               </DropdownMenuItem>
             ))}
@@ -426,7 +426,7 @@ function GroupSubmenu({
           </Badge>
         </div>
       </DropdownMenuSubTrigger>
-      <DropdownMenuSubContent className="w-[280px]">
+      <DropdownMenuSubContent>
         <div className="p-2 border-b border-gray-200">
           <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
             {group.display}
@@ -502,11 +502,16 @@ export const SelectedTagBadge = ({ selected }: { selected: TagConfig[] }) => {
   const firstColor = COLOR_PALETTE[0];
   const secondColor = COLOR_PALETTE[1];
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
       {selected.length === 1 ? (
-        <span className={cn(firstColor, "rounded-full w-2 h-2 border")}></span>
+        <span
+          className={cn(
+            firstColor,
+            "rounded-full w-2 h-2 border flex-shrink-0",
+          )}
+        ></span>
       ) : (
-        <div className="relative w-4 h-2">
+        <div className="relative w-4 h-2 flex-shrink-0">
           <span
             className={cn(
               firstColor,

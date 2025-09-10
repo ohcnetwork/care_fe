@@ -219,7 +219,7 @@ export function AccountSheet({
                         onValueChange={field.onChange}
                         disabled={isCreating}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger ref={field.ref}>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -246,7 +246,7 @@ export function AccountSheet({
                         value={field.value}
                         onValueChange={field.onChange}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger ref={field.ref}>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>

@@ -10,7 +10,10 @@ import { QuestionnaireForm } from "@/components/Questionnaire/QuestionnaireForm"
 import useAppHistory from "@/hooks/useAppHistory";
 
 import query from "@/Utils/request/query";
-import { EncounterHeader } from "@/pages/Encounters/EncounterHeader";
+import {
+  PatientDeceasedInfo,
+  PatientHeader,
+} from "@/pages/Facility/services/serviceRequests/PatientHeader";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 
 interface Props {
@@ -48,10 +51,14 @@ export default function EncounterQuestionnaire({
     >
       <div className="flex flex-col space-y-4">
         {encounter && (
-          <EncounterHeader
-            encounter={encounter}
-            canWriteSelectedEncounter={false}
-          />
+          <div className="flex flex-col gap-2">
+            <PatientHeader
+              patient={encounter.patient}
+              facilityId={facilityId}
+              className="bg-white shadow-sm rounded-sm"
+            />
+            <PatientDeceasedInfo patient={encounter.patient} />
+          </div>
         )}
         <Card className="mt-2">
           <CardContent className="lg:p-4 p-0">

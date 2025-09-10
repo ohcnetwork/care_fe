@@ -17,6 +17,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 import Page from "@/components/Common/Page";
+import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
 import { Code } from "@/types/base/code/code";
@@ -42,30 +43,6 @@ function CodeDisplay({ code }: { code: Code | null }) {
   );
 }
 
-function LoadingSkeleton() {
-  return (
-    <div className="container mx-auto max-w-3xl space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <div className="h-8 w-48 animate-pulse rounded-md bg-gray-200" />
-          <div className="h-4 w-32 animate-pulse rounded-md bg-gray-200" />
-        </div>
-      </div>
-      <div className="space-y-6">
-        <div className="rounded-lg border border-gray-200 p-6">
-          <div className="space-y-4">
-            <div className="h-6 w-32 animate-pulse rounded-md bg-gray-200" />
-            <div className="space-y-2">
-              <div className="h-4 w-full animate-pulse rounded-md bg-gray-200" />
-              <div className="h-4 w-3/4 animate-pulse rounded-md bg-gray-200" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function ProductKnowledgeView({
   facilityId,
   productKnowledgeId,
@@ -84,11 +61,7 @@ export default function ProductKnowledgeView({
   });
 
   if (isLoading) {
-    return (
-      <Page title={t("loading")}>
-        <LoadingSkeleton />
-      </Page>
-    );
+    return <CardListWithHeaderSkeleton count={3} />;
   }
 
   if (isError || !product) {
@@ -180,6 +153,12 @@ export default function ProductKnowledgeView({
                 {product.alternate_identifier || "-"}
               </p>
             </div>
+            <div>
+              <p className="text-sm text-gray-500">{t("base_unit")}</p>
+              <div className="rounded-lg border bg-gray-50/50 p-3">
+                <CodeDisplay code={product.base_unit} />
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -236,7 +215,9 @@ export default function ProductKnowledgeView({
                           </p>
                           <p className="font-medium">
                             {guideline.stability_duration.value}{" "}
-                            {guideline.stability_duration.unit?.code || ""}
+                            {t(
+                              `unit_${guideline.stability_duration.unit?.code}`,
+                            ) || ""}
                           </p>
                         </div>
                       </div>

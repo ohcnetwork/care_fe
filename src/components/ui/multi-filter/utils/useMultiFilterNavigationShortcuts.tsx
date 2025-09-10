@@ -1,7 +1,7 @@
 import { useState } from "react";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 
-export default function useNavigationShortcuts(
+export default function useMultiFilterNavigationShortcuts(
   optionsLength: number,
   handleBack?: () => void,
 ) {

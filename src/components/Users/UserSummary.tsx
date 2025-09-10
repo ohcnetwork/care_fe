@@ -169,13 +169,13 @@ export default function UserSummaryTab({
         )}
         {canEditUser && (
           <Card className="border-red-500">
-            <CardHeader>
+            <CardHeader className="px-4 sm:px-6">
               <CardTitle className="text-destructive">
                 {t("danger_zone")}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-md border p-4">
+            <CardContent className="gap-4 px-4 sm:px-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-md border p-3 sm:p-4">
                 <div className="space-y-1">
                   <h3 className="text-sm font-medium">{t("delete_account")}</h3>
                   <p className="text-sm text-gray-700">

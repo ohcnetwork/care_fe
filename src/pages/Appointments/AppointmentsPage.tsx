@@ -113,7 +113,7 @@ import {
   tagFilter,
 } from "@/components/ui/multi-filter/filter-list";
 import MultiFilter from "@/components/ui/multi-filter/multi-filter";
-import useFilterState from "@/components/ui/multi-filter/utils/useFilterState";
+import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import {
   FilterDateRange,
   shortDateRangeOptions,
@@ -463,7 +463,7 @@ export default function AppointmentsPage() {
     handleOperationChange,
     handleClearAll,
     handleClearFilter,
-  } = useFilterState(filters, onFilterUpdate, {
+  } = useMultiFilterState(filters, onFilterUpdate, {
     ...qParams,
     tags: selectedTags,
     date:

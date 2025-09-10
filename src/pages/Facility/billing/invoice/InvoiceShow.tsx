@@ -64,9 +64,11 @@ import useAppHistory from "@/hooks/useAppHistory";
 import dayjs from "@/Utils/dayjs";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatPatientAddress } from "@/components/Patient/utils";
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import EditInvoiceSheet from "@/pages/Facility/billing/invoice/EditInvoiceSheet";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import { MRP_CODE } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import {
   INVOICE_STATUS_COLORS,
@@ -455,9 +457,18 @@ export function InvoiceShow({
                     <p className="font-semibold text-gray-950 text-base ml-2">
                       {invoice.account.patient.name}
                     </p>
-                    <p className="font-medium text-gray-700 text-sm whitespace-pre-wrap ml-2">
-                      {invoice.account.patient.address}
-                    </p>
+                    <div className="flex gap-1 font-medium text-gray-700 text-sm ml-2">
+                      {t("address")}:{" "}
+                      <p className="font-medium text-gray-700 text-sm whitespace-pre-wrap ml-2">
+                        {formatPatientAddress(
+                          invoice.account.patient.address,
+                        ) || (
+                          <span className="text-gray-500">
+                            {t("no_address_provided")}
+                          </span>
+                        )}
+                      </p>
+                    </div>
                     <p className="font-medium text-gray-700 text-sm ml-2">
                       {t("phone")}:{" "}
                       {formatPhoneNumberIntl(
@@ -491,6 +502,9 @@ export function InvoiceShow({
                       <TableHead className={tableHeadClass}>#</TableHead>
                       <TableHead className={tableHeadClass}>
                         {t("item")}
+                      </TableHead>
+                      <TableHead className={tableHeadClass}>
+                        {t("mrp")} ({getCurrencySymbol()})
                       </TableHead>
                       <TableHead className={tableHeadClass}>
                         {t("unit_price")} ({getCurrencySymbol()})
@@ -540,6 +554,12 @@ export function InvoiceShow({
                       invoice.charge_items.flatMap((item, index) => {
                         const baseComponent = getBaseComponent(item);
                         const baseAmount = baseComponent?.amount || 0;
+                        const mrpAmount = item.unit_price_components.find(
+                          (c) =>
+                            c.monetary_component_type ===
+                              MonetaryComponentType.informational &&
+                            c.code?.code === MRP_CODE,
+                        )?.amount;
 
                         const mainRow = (
                           <TableRow
@@ -555,6 +575,14 @@ export function InvoiceShow({
                               className={cn(tableCellClass, "font-medium")}
                             >
                               {item.title}
+                            </TableCell>
+                            <TableCell
+                              className={cn(tableCellClass, "text-right")}
+                            >
+                              <MonetaryDisplay
+                                amount={mrpAmount}
+                                hideCurrency
+                              />
                             </TableCell>
                             <TableCell
                               className={cn(tableCellClass, "text-right")}

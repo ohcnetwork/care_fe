@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-export default function useFilterSearch<
+export default function useMultiFilterSearch<
   T extends { value: string; label: string },
 >(items: T[]) {
   const { t } = useTranslation();

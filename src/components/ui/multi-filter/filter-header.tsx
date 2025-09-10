@@ -1,5 +1,4 @@
 import { ChevronLeft } from "lucide-react";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
@@ -10,7 +9,6 @@ function FilterHeader({
   label: string;
   onBack: () => void;
 }) {
-  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200">
       <Button
@@ -21,7 +19,7 @@ function FilterHeader({
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
-      <span className="text-sm font-medium">{t(label)}</span>
+      <span className="text-sm font-medium">{label}</span>
     </div>
   );
 }

@@ -117,3 +117,17 @@ export const FormSkeleton = ({ rows }: { rows: number }) => (
     ))}
   </div>
 );
+
+export function CardListWithHeaderSkeleton({ count }: { count: number }) {
+  return (
+    <div className="container mx-auto max-w-3xl space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <div className="h-8 w-48 animate-pulse rounded-md bg-gray-200" />
+          <div className="h-4 w-32 animate-pulse rounded-md bg-gray-200" />
+        </div>
+      </div>
+      <CardGridSkeleton count={count} />
+    </div>
+  );
+}

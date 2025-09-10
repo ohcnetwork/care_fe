@@ -386,8 +386,7 @@ export default function SupplyRequestDetail({
                 {t("requested_quantity")}
               </p>
               <p className="font-semibold text-lg">
-                {supplyRequest.quantity}{" "}
-                {supplyRequest.item?.definitional?.dosage_form?.display}
+                {supplyRequest.quantity} {supplyRequest.item?.base_unit.display}
               </p>
             </div>
             <div>
@@ -463,11 +462,10 @@ export default function SupplyRequestDetail({
                     </TableCell>
                     <TableCell className="font-medium text-gray-950">
                       {delivery.supplied_item_quantity}{" "}
-                      {delivery.supplied_item?.product_knowledge.definitional
-                        ?.dosage_form?.display ||
+                      {delivery.supplied_item?.product_knowledge.base_unit
+                        .display ||
                         delivery.supplied_inventory_item?.product
-                          ?.product_knowledge.definitional?.dosage_form
-                          ?.display}
+                          ?.product_knowledge.base_unit.display}
                     </TableCell>
                     <TableCell className="font-medium text-gray-950">
                       {delivery.supplied_inventory_item?.product?.batch

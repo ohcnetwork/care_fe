@@ -10,13 +10,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
-  encounterClassFilter,
   encounterPriorityFilter,
   encounterStatusFilter,
   tagFilter,
 } from "@/components/ui/multi-filter/filter-list";
 import MultiFilter from "@/components/ui/multi-filter/multi-filter";
-import useFilterState from "@/components/ui/multi-filter/utils/useFilterState";
+import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import {
   Popover,
   PopoverContent,
@@ -33,7 +32,7 @@ import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilte
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
+import { EncounterClass, EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
@@ -41,12 +40,12 @@ import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 interface EncounterListProps {
   encounters?: EncounterRead[];
   facilityId: string;
+  encounterClass?: EncounterClass;
 }
 
 const buildQueryParams = (
   facilityId: string,
   status?: string,
-  encounterClass?: string,
   priority?: string,
 ) => {
   const params: Record<string, string | undefined> = {};
@@ -57,9 +56,6 @@ const buildQueryParams = (
     params.live = status === "live" ? "true" : undefined;
   } else if (status) {
     params.status = status;
-  }
-  if (encounterClass) {
-    params.encounter_class = encounterClass;
   }
   if (priority) {
     params.priority = priority;
@@ -85,6 +81,7 @@ function EmptyState() {
 export function EncounterList({
   encounters: propEncounters,
   facilityId,
+  encounterClass,
 }: EncounterListProps) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
@@ -99,7 +96,6 @@ export function EncounterList({
   const { t } = useTranslation();
   const {
     status,
-    encounter_class: encounterClass,
     priority,
     name,
     encounter_id,
@@ -142,12 +138,13 @@ export function EncounterList({
     ],
   );
 
-  const { data: queryEncounters, isLoading } = useQuery({
-    queryKey: ["encounters", facilityId, qParams],
+  const { data: queryEncounters, isFetching } = useQuery({
+    queryKey: ["encounters", facilityId, qParams, encounterClass],
     queryFn: query.debounced(encounterApi.list, {
       queryParams: {
-        ...buildQueryParams(facilityId, status, encounterClass, priority),
+        ...buildQueryParams(facilityId, status, priority),
         name,
+        encounter_class: encounterClass,
         external_identifier,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
@@ -206,7 +203,6 @@ export function EncounterList({
 
   const filters = [
     encounterStatusFilter("status"),
-    encounterClassFilter("encounter_class"),
     encounterPriorityFilter("priority"),
     tagFilter("tags", TagResource.ENCOUNTER, "multi", t("tags", { count: 2 })),
   ];
@@ -224,17 +220,21 @@ export function EncounterList({
     handleOperationChange,
     handleClearAll,
     handleClearFilter,
-  } = useFilterState(filters, onFilterUpdate, {
+  } = useMultiFilterState(filters, onFilterUpdate, {
     ...qParams,
     tags: selectedTags,
   });
 
   return (
     <Page
-      title={t("encounters")}
+      title={t("encounter_class_encounters", {
+        encounterClassName: encounterClass
+          ? t(`encounter_class__${encounterClass}`)
+          : t("all"),
+      })}
       componentRight={
         <Badge className="bg-purple-50 text-purple-700 ml-2 rounded-xl px-3 py-0.5 m-3 w-max border-gray-200">
-          {isLoading
+          {isFetching
             ? t("loading")
             : t("entity_count", {
                 count: queryEncounters?.count ?? 0,
@@ -319,7 +319,7 @@ export function EncounterList({
           className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
           data-cy="encounter-list-cards"
         >
-          {isLoading ? (
+          {isFetching ? (
             <CardGridSkeleton count={6} />
           ) : encounters.length === 0 ? (
             <div className="col-span-full">

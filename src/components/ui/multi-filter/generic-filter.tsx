@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import FilterHeader from "./filter-header";
-import useFilterSearch from "./utils/useFilterSearch";
-import useNavigationShortcuts from "./utils/useNavigationShortcuts";
+import useMultiFilterNavigationShortcuts from "./utils/useMultiFilterNavigationShortcuts";
+import useMultiFilterSearch from "./utils/useMultiFilterSearch";
 import {
   FilterConfig,
   FilterMode,
@@ -37,7 +37,7 @@ export default function GenericFilter({
     search,
     setSearch,
     filteredItems: filteredOptions,
-  } = useFilterSearch(filter.options);
+  } = useMultiFilterSearch(filter.options);
 
   const handleOptionToggle = (value: string, checked: boolean) => {
     if (!onFilterChange) return;
@@ -61,10 +61,8 @@ export default function GenericFilter({
     }
   };
 
-  const { focusItemIndex, setFocusItemIndex } = useNavigationShortcuts(
-    filteredOptions.length,
-    handleBack,
-  );
+  const { focusItemIndex, setFocusItemIndex } =
+    useMultiFilterNavigationShortcuts(filteredOptions.length, handleBack);
 
   return (
     <div className="p-0">
@@ -119,7 +117,6 @@ function FilterOptionsList({
   setFocusItemIndex: (index: number) => void;
   mode?: FilterMode;
 }) {
-  const { t } = useTranslation();
   const [focusItemRef, setFocusItemRef] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -177,9 +174,7 @@ function FilterOptionsList({
               )}
             />
           )}
-          <span className="text-sm text-gray-700 flex-1">
-            {t(option.label)}
-          </span>
+          <span className="text-sm text-gray-700 flex-1">{option.label}</span>
         </div>
       ))}
     </div>
@@ -195,14 +190,16 @@ export const GenericSelectedBadge = ({
   selectedLength: number;
   className?: string;
 }) => {
-  const { t } = useTranslation();
   return (
-    <div className="flex items-center gap-1">
-      <Badge variant="outline" className={cn("text-xs", className)}>
-        {t(selectedValue)}
+    <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
+      <Badge
+        variant="outline"
+        className={cn("text-xs whitespace-nowrap", className)}
+      >
+        {selectedValue}
       </Badge>
       {selectedLength > 1 && (
-        <span className="text-xs bg-gray-100 text-gray-500 px-1 rounded-md">
+        <span className="text-xs bg-gray-100 text-gray-500 px-1 rounded-md whitespace-nowrap">
           +{selectedLength - 1}
         </span>
       )}

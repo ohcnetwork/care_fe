@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import FilterHeader from "./filter-header";
 import NavigationHelper from "./utils/navigation-helper";
-import useNavigationShortcuts from "./utils/useNavigationShortcuts";
+import useMultiFilterNavigationShortcuts from "./utils/useMultiFilterNavigationShortcuts";
 import {
   DateFilterMeta,
   DateRangeOption,
@@ -171,10 +171,8 @@ function DateRangeOptions({
   const [focusItemRef, setFocusItemRef] = useState<HTMLButtonElement | null>(
     null,
   );
-  const { focusItemIndex, setFocusItemIndex } = useNavigationShortcuts(
-    options.length + 1,
-    handleBack,
-  );
+  const { focusItemIndex, setFocusItemIndex } =
+    useMultiFilterNavigationShortcuts(options.length + 1, handleBack);
 
   useEffect(() => {
     if (focusItemRef) {

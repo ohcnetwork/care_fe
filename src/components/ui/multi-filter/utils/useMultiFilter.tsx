@@ -1,6 +1,6 @@
 import { FilterState } from "./utils";
 
-export default function useFilter(
+export default function useMultiFilter(
   key: string,
   selectedFilters: Record<string, FilterState>,
 ) {

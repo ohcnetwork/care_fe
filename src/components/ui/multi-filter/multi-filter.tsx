@@ -16,7 +16,7 @@ import {
 import Filter from "./filter";
 import { SelectedFilterBar } from "./selected-filter-bar";
 import NavigationHelper from "./utils/navigation-helper";
-import useNavigationShortcuts from "./utils/useNavigationShortcuts";
+import useMultiFilterNavigationShortcuts from "./utils/useMultiFilterNavigationShortcuts";
 import { FilterState, FilterValues } from "./utils/utils";
 
 interface MultiFilterProps {
@@ -117,7 +117,7 @@ export default function MultiFilter({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="w-[320px] max-w-[calc(100vw-1rem)]  p-0"
+          className="w-[calc(100vw)] max-w-[calc(100vw-3rem)] sm:max-w-xs p-0"
           align="start"
         >
           {activeFilter ? (
@@ -193,10 +193,10 @@ function FilterList({
   const { t } = useTranslation();
   const [focusItemRef, setFocusItemRef] = useState<HTMLDivElement | null>(null);
 
-  const { focusItemIndex, setFocusItemIndex } = useNavigationShortcuts(
-    Object.keys(selectedFilters).length,
-    () => setActiveFilter(null),
-  );
+  const { focusItemIndex, setFocusItemIndex } =
+    useMultiFilterNavigationShortcuts(Object.keys(selectedFilters).length, () =>
+      setActiveFilter(null),
+    );
 
   useKeyboardShortcut(
     ["ArrowRight"],

@@ -12,7 +12,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import Filter from "./filter";
-import useFilter from "./utils/useFilter";
+import useMultiFilter from "./utils/useMultiFilter";
 import { FilterState, FilterValues, Operation } from "./utils/utils";
 
 function SubMenuFilter({
@@ -76,7 +76,7 @@ export function SelectedFilterBar({
 }) {
   const { t } = useTranslation();
   const { filter, selected, selectedOperation, availableOperations } =
-    useFilter(selectedFilterKey, selectedFilters);
+    useMultiFilter(selectedFilterKey, selectedFilters);
 
   if (!selectedOperation) return <></>;
 
