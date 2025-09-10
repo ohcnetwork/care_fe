@@ -21,12 +21,14 @@ export interface KeyboardShortcut {
   action: string;
   description: string;
   when: string;
+  subContext?: string;
 }
 
 export function useKeyboardShortcuts(
   contexts: ShortcutContext[],
   conditions: ShortcutConditions,
   handlers: ShortcutHandlers,
+  activeSubContext?: string,
 ) {
   const shortcuts = useMemo(() => {
     const allShortcuts: KeyboardShortcut[] = [];
@@ -84,6 +86,15 @@ export function useKeyboardShortcuts(
         return;
       }
 
+      if (
+        (activeSubContext &&
+          shortcut.subContext &&
+          shortcut.subContext !== activeSubContext) ||
+        (shortcut.subContext && !activeSubContext)
+      ) {
+        return;
+      }
+
       const key = shortcut.key.toLowerCase();
 
       if (key.includes(" ")) {
@@ -116,7 +127,26 @@ export function useKeyboardShortcuts(
       const key = parts[parts.length - 1].toLowerCase();
       const modifiers = parts.slice(0, -1);
 
-      if (event.key.toLowerCase() !== key) return false;
+      // Handle numeric keys with shift modifier
+      let expectedKey = key;
+      if (modifiers.includes("shift") && /^\d$/.test(key)) {
+        // Map numeric keys to their shifted equivalents
+        const shiftMap: Record<string, string> = {
+          "1": "!",
+          "2": "@",
+          "3": "#",
+          "4": "$",
+          "5": "%",
+          "6": "^",
+          "7": "&",
+          "8": "*",
+          "9": "(",
+          "0": ")",
+        };
+        expectedKey = shiftMap[key] || key;
+      }
+
+      if (event.key.toLowerCase() !== expectedKey.toLowerCase()) return false;
 
       const requiredModifiers = {
         shift: false,

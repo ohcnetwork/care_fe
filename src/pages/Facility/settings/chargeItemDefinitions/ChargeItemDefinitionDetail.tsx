@@ -18,7 +18,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { ConditionOperation } from "@/types/base/condition/condition";
+import { getConditionValue } from "@/types/base/condition/condition";
 import {
   MonetaryComponent,
   MonetaryComponentOrder,
@@ -286,10 +286,7 @@ export function ChargeItemDefinitionDetail({
                                     <span className="font-mono pr-2 ">
                                       {condition.operation}
                                     </span>
-                                    {condition.operation ===
-                                    ConditionOperation.equality
-                                      ? condition.value
-                                      : `${condition.value.min} - ${condition.value.max}`}
+                                    {getConditionValue(condition)}
                                   </span>
                                 </div>
                               );

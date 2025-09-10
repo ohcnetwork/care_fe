@@ -595,7 +595,6 @@ export default function DispensedMedicationList({
           open={createInvoiceSheetOpen}
           onOpenChange={setCreateInvoiceSheetOpen}
           preSelectedChargeItems={billableChargeItems}
-          redirectInNewTab={false}
           sourceUrl={`/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation`}
           onSuccess={() => {
             setCreateInvoiceSheetOpen(false);

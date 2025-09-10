@@ -13,12 +13,21 @@ import {
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, differenceInYears, format, isBefore } from "date-fns";
-import { BanIcon, ExternalLinkIcon, EyeIcon, Loader2 } from "lucide-react";
-import { navigate } from "raviger";
+import {
+  BanIcon,
+  ExternalLinkIcon,
+  EyeIcon,
+  Loader2,
+  PrinterIcon,
+} from "lucide-react";
+import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
+
+import { ChargeItemsSection } from "@/components/Billing/ChargeItems/ChargeItemsSection";
+import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
 
 import { cn } from "@/lib/utils";
 
@@ -53,23 +62,16 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-import { ClickableAddress } from "@/components/Common/ClickableAddress";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
+import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import {
-  formatName,
-  getReadableDuration,
-  stringifyNestedObject,
-} from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { TokenGenerationSheet } from "@/pages/Appointments/components/TokenGenerationSheet";
@@ -89,10 +91,19 @@ import {
   AppointmentUpdateRequest,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import {
+  formatName,
+  getReadableDuration,
+  stringifyNestedObject,
+} from "@/Utils/utils";
 
-import { renderTokenNumber } from "@/types/tokens/token/token";
-import { Link } from "raviger";
-import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
+import { formatPatientAddress } from "@/components/Patient/utils";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { AppointmentSlotPicker } from "@/pages/Appointments/components/AppointmentSlotPicker";
+import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
+import { TokenCard } from "./components/AppointmentTokenCard";
 
 interface Props {
   appointmentId: string;
@@ -104,7 +115,8 @@ export default function AppointmentDetail(props: Props) {
   const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
-
+  useFacilityShortcuts();
+  const getShortcutDisplay = useShortcutDisplays();
   const { canViewAppointments, canWriteAppointment } = getPermissions(
     hasPermission,
     facility?.permissions ?? [],
@@ -186,26 +198,40 @@ export default function AppointmentDetail(props: Props) {
           <AppointmentDetails appointment={appointment} facility={facility} />
           <div className="mt-6">
             {appointment.token?.number ? (
-              <Card className="h-56 md:mx-4 p-8 flex flex-col items-center justify-center text-center">
-                <p className="text-xs uppercase tracking-wide text-gray-500">
-                  {t("token_no")}
-                </p>
-                <span className="mt-2 text-6xl font-bold tracking-tight">
-                  {renderTokenNumber(appointment.token)}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-2 flex"
-                  asChild
+              <>
+                <div
+                  id="section-to-print"
+                  className="print:w-[400px] print:pt-4 mx-4"
                 >
-                  <Link
-                    href={`/facility/${facility.id}/queues/${appointment.token?.queue.id}/practitioner/${appointment.user.id}`}
+                  <TokenCard
+                    appointment={appointment}
+                    token={appointment.token}
+                    facility={facility}
+                  />
+                </div>
+                <div className="pt-3 mx-4 flex gap-2 justify-end">
+                  <Button variant="outline" asChild>
+                    <Link
+                      href={`/facility/${facility.id}/queues/${appointment.token?.queue.id}/practitioner/${appointment.user.id}`}
+                    >
+                      {t("open")} <ExternalLinkIcon className="size-4" />
+                    </Link>
+                  </Button>
+                  <Button
+                    data-shortcut-id="print-token"
+                    variant="outline"
+                    onClick={() => print()}
                   >
-                    {t("open")} <ExternalLinkIcon className="size-4" />
-                  </Link>
-                </Button>
-              </Card>
+                    <PrinterIcon className="size-4 mr-2" />
+                    {t("print")}
+                    {getShortcutDisplay("print-token") && (
+                      <div className="size-5 rounded-md border border-gray-200">
+                        {getShortcutDisplay("print-token")}
+                      </div>
+                    )}
+                  </Button>
+                </div>
+              </>
             ) : (
               <div className="h-56 md:mx-4 border-2 border-dashed border-gray-300 bg-gray-50 rounded flex flex-col items-center justify-center text-center">
                 <span className="text-6xl text-gray-400 font-bold leading-none">
@@ -579,20 +605,23 @@ const AppointmentDetails = ({
           </div>
           <div className="flex flex-row items-start gap-4 text-sm">
             <DrawingPinIcon className="size-5 text-gray-600 mt-1" />
-            <div className="min-w-0 flex-1">
-              <p className="font-medium break-words">
-                <ClickableAddress
-                  address={
-                    appointment.patient.address || t("no_address_provided")
-                  }
-                />
-              </p>
-              <p className="text-gray-600 break-words">
-                {stringifyNestedObject(appointment.patient.geo_organization)}
-              </p>
-              <p className="text-gray-600">
-                {t("pincode")}: {appointment.patient.pincode}
-              </p>
+            <div className="flex flex-col xl:flex-row xl:justify-between xl:items-end gap-2 w-full">
+              <div>
+                <p className="text-gray-600 break-words">
+                  {formatPatientAddress(appointment.patient.address) || (
+                    <span className="text-gray-500">
+                      {t("no_address_provided")}
+                    </span>
+                  )}
+                </p>
+                <p className="text-gray-600 break-words">
+                  {stringifyNestedObject(appointment.patient.geo_organization)}
+                </p>
+                <p className="text-gray-600">
+                  {t("pincode")}: {appointment.patient.pincode}
+                </p>
+              </div>
+              <PatientAddressLink address={appointment.patient.address} />
             </div>
           </div>
         </CardContent>
@@ -615,6 +644,16 @@ const AppointmentDetails = ({
             queryKey: ["appointment", appointment.id],
           });
         }}
+      />
+
+      <ChargeItemsSection
+        facilityId={facility.id}
+        resourceId={appointment.id}
+        patientId={appointment.patient.id}
+        serviceResourceType={ChargeItemServiceResource.appointment}
+        sourceUrl={`/facility/${facility.id}/patient/${appointment.patient.id}/appointments/${appointment.id}`}
+        encounterId={appointment.associated_encounter?.id}
+        disableCreateChargeItems={true}
       />
       <Card>
         <CardHeader>

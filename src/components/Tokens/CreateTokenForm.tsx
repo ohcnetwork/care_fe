@@ -43,22 +43,21 @@ import tokenCategoryApi from "@/types/tokens/tokenCategory/tokenCategoryApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
+import { PatientRead } from "@/types/emr/patient/patient";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 interface Props {
-  patientId?: string;
+  patient?: PatientRead;
   facilityId: string;
-  patientName?: string;
   trigger?: React.ReactNode;
   onSuccess?: () => void;
   disableRedirectOnSuccess?: boolean;
 }
 
 export default function CreateTokenForm({
-  patientId,
+  patient,
   facilityId,
-  patientName,
   trigger,
   onSuccess,
   disableRedirectOnSuccess = false,
@@ -147,17 +146,22 @@ export default function CreateTokenForm({
       });
       onSuccess?.();
       if (!disableRedirectOnSuccess) {
-        // facility/:facilityId/queues/:queueId/tokens/:tokenId
-        navigate(
-          `/facility/${facilityId}/queues/${data.queue.id}/tokens/${data.id}`,
-        );
+        navigate(`/facility/${facilityId}/patients/verify`, {
+          query: {
+            phone_number: patient?.phone_number,
+            year_of_birth: patient?.year_of_birth.toString(),
+            partial_id: patient?.id.slice(0, 5),
+            queue_id: data.queue.id,
+            token_id: data.id,
+          },
+        });
       }
     },
   });
 
   function onSubmit(data: z.infer<typeof tokenFormSchema>) {
     const tokenRequest: TokenGenerateWithQueue = {
-      patient: patientId,
+      patient: patient?.id,
       category: data.categoryId,
       note: data.note,
       resource_type: selectedResourceType,
@@ -197,10 +201,10 @@ export default function CreateTokenForm({
         <SheetHeader>
           <SheetTitle>{t("create_token")}</SheetTitle>
           <SheetDescription>
-            {patientName ? (
+            {patient?.name ? (
               <Trans
                 i18nKey="create_token_for_patient"
-                values={{ patientName }}
+                values={{ patientName: patient?.name }}
                 components={{
                   strong: <strong className="font-semibold text-gray-950" />,
                 }}

@@ -17,8 +17,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import {
   PAYMENT_RECONCILIATION_OUTCOME_COLORS,
   PAYMENT_RECONCILIATION_STATUS_COLORS,
@@ -26,6 +25,9 @@ import {
   PaymentReconciliationStatus,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 
 const methodMap: Record<PaymentReconciliationPaymentMethod, string> = {
   cash: "Cash",
@@ -62,6 +64,9 @@ export function PaymentReconciliationShow({
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const queryClient = useQueryClient();
+
+  useFacilityShortcuts("payment-reconciliation-show");
+  const getShortcutDisplay = useShortcutDisplays(["facility"]);
 
   const { data: payment, isLoading } = useQuery({
     queryKey: ["paymentReconciliation", paymentReconciliationId],
@@ -110,7 +115,7 @@ export function PaymentReconciliationShow({
         <div className="flex items-center gap-2">
           <div>
             <h1 className="text-2xl font-bold flex items-center flex-wrap gap-2">
-              {t("payment")}
+              {t(payment.is_credit_note ? "refund" : "payment")}
             </h1>
             <span className="text-sm text-gray-500">#{payment.id}</span>
             <div className="flex flex-wrap space-x-1">
@@ -132,9 +137,13 @@ export function PaymentReconciliationShow({
         <Button variant="outline" asChild>
           <Link
             href={`/facility/${facilityId}/billing/payments/${paymentReconciliationId}/print`}
+            data-shortcut-id="print-payment-receipt"
           >
             <CareIcon icon="l-print" className="mr-2 size-4" />
             {t("print_receipt")}
+            <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-2">
+              {getShortcutDisplay("print-payment-receipt")}
+            </div>
           </Link>
         </Button>
       </div>
@@ -251,16 +260,17 @@ export function PaymentReconciliationShow({
                             }
                           />
                         )}
-                        {payment.returned_amount != null && (
-                          <InfoItem
-                            label={t("change_returned")}
-                            value={
-                              <MonetaryDisplay
-                                amount={payment.returned_amount}
-                              />
-                            }
-                          />
-                        )}
+                        {!payment.is_credit_note &&
+                          payment.returned_amount != null && (
+                            <InfoItem
+                              label={t("change_returned")}
+                              value={
+                                <MonetaryDisplay
+                                  amount={payment.returned_amount}
+                                />
+                              }
+                            />
+                          )}
                       </div>
                     </div>
                   </>
@@ -294,8 +304,12 @@ export function PaymentReconciliationShow({
                       <Link
                         href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice.id}`}
                         className="text-lg font-medium text-primary hover:underline"
+                        data-shortcut-id="view-invoice-payment"
                       >
                         {t("view_invoice")}
+                        <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-2">
+                          {getShortcutDisplay("view-invoice-payment")}
+                        </div>
                       </Link>
                       <Badge variant="outline">
                         {payment.target_invoice.status}
@@ -322,17 +336,25 @@ export function PaymentReconciliationShow({
                   <Button variant="outline" size="sm" asChild>
                     <Link
                       href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice.id}`}
+                      data-shortcut-id="view-invoice-payment"
                     >
                       <CareIcon icon="l-eye" className="mr-2 size-4" />
                       {t("view_invoice")}
+                      <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-2">
+                        {getShortcutDisplay("view-invoice-payment")}
+                      </div>
                     </Link>
                   </Button>
                   <Button variant="outline" size="sm" asChild>
                     <Link
                       href={`/facility/${facilityId}/billing/invoice/${payment.target_invoice.id}/print`}
+                      data-shortcut-id="print-payment-receipt"
                     >
                       <CareIcon icon="l-print" className="mr-2 size-4" />
                       {t("print_invoice")}
+                      <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-2">
+                        {getShortcutDisplay("print-payment-receipt")}
+                      </div>
                     </Link>
                   </Button>
                 </div>
@@ -382,18 +404,28 @@ export function PaymentReconciliationShow({
                 <Button className="w-full" variant="outline" asChild>
                   <Link
                     href={`/facility/${facilityId}/billing/payments/${paymentReconciliationId}/print`}
+                    data-shortcut-id="print-payment-receipt"
+                    className="flex items-center w-full relative"
                   >
                     <CareIcon icon="l-print" className="mr-2 size-4" />
                     {t("print_receipt")}
+                    <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-auto">
+                      {getShortcutDisplay("print-payment-receipt")}
+                    </div>
                   </Link>
                 </Button>
                 {payment.target_invoice && (
                   <Button className="w-full" variant="outline" asChild>
                     <Link
                       href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice.id}`}
+                      data-shortcut-id="view-invoice-payment"
+                      className="flex items-center w-full relative"
                     >
                       <CareIcon icon="l-eye" className="mr-2 size-4" />
                       {t("view_invoice")}
+                      <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-auto">
+                        {getShortcutDisplay("view-invoice-payment")}
+                      </div>
                     </Link>
                   </Button>
                 )}
@@ -402,7 +434,7 @@ export function PaymentReconciliationShow({
                     PaymentReconciliationStatus.entered_in_error && (
                     <>
                       <Button
-                        className="w-full"
+                        className="w-full flex items-center relative"
                         variant="outline"
                         onClick={() =>
                           updatePaymentMutation.mutate({
@@ -411,12 +443,16 @@ export function PaymentReconciliationShow({
                           })
                         }
                         disabled={updatePaymentMutation.isPending}
+                        data-shortcut-id="mark-payment-cancelled"
                       >
                         <CareIcon icon="l-ban" className="mr-2 size-4" />
                         {t("mark_as_cancelled")}
+                        <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-auto">
+                          {getShortcutDisplay("mark-payment-cancelled")}
+                        </div>
                       </Button>
                       <Button
-                        className="w-full"
+                        className="w-full flex items-center relative"
                         variant="outline"
                         onClick={() =>
                           updatePaymentMutation.mutate({
@@ -426,24 +462,32 @@ export function PaymentReconciliationShow({
                           })
                         }
                         disabled={updatePaymentMutation.isPending}
+                        data-shortcut-id="mark-payment-error"
                       >
                         <CareIcon
                           icon="l-exclamation-triangle"
                           className="mr-2 size-4"
                         />
                         {t("mark_as_entered_in_error")}
+                        <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-auto">
+                          {getShortcutDisplay("mark-payment-error")}
+                        </div>
                       </Button>
                     </>
                   )}
                 <Button
-                  className="w-full"
+                  className="w-full flex items-center relative"
                   variant="outline"
                   onClick={() =>
                     goBack(`/facility/${facilityId}/billing/payments`)
                   }
+                  data-shortcut-id="go-back"
                 >
                   <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
                   {t("back_to_payments")}
+                  <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-auto">
+                    {getShortcutDisplay("go-back")}
+                  </div>
                 </Button>
               </div>
             </CardContent>

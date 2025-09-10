@@ -28,7 +28,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
 import mutate from "@/Utils/request/mutate";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   ChargeItemRead,
@@ -42,6 +44,7 @@ interface EditInvoiceTableProps {
   chargeItems: ChargeItemRead[];
   onClose: () => void;
   onSuccess: () => void;
+  enableShortcut?: boolean;
 }
 
 const chargeItemSchema = z.object({
@@ -70,7 +73,11 @@ const formSchema = z.object({
       id: z.string(),
       title: z.string(),
       status: z.nativeEnum(ChargeItemStatus),
-      description: z.string().optional(),
+      description: z
+        .string()
+        .optional()
+        .nullable()
+        .transform((val) => (val === "" ? null : val)),
       ...chargeItemSchema.shape,
     }),
   ),
@@ -83,9 +90,11 @@ export function EditInvoiceTable({
   chargeItems,
   onClose,
   onSuccess,
+  enableShortcut,
 }: EditInvoiceTableProps) {
   const { t } = useTranslation();
-
+  useFacilityShortcuts("edit-invoiceTable");
+  const getShortcutDisplay = useShortcutDisplays(["facility"]);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -107,7 +116,7 @@ export function EditInvoiceTable({
           id: item.id,
           title: item.title,
           status: item.status as ChargeItemStatus,
-          description: item.description,
+          description: item.description || "",
           baseAmount: String(baseComponent?.amount || "0"),
           quantity: String(item.quantity),
           discountType: isPercentage ? "percentage" : "amount",
@@ -133,7 +142,6 @@ export function EditInvoiceTable({
   });
 
   const onSubmit = (data: FormValues) => {
-    console.log("Form errors:", form.formState.errors);
     const updates: ChargeItemUpdate[] = data.items.map((item) => ({
       id: item.id,
       title: item.title,
@@ -164,7 +172,7 @@ export function EditInvoiceTable({
             ]
           : []),
       ],
-      description: item.description,
+      description: item.description || undefined,
     }));
 
     updateChargeItems({ datapoints: updates });
@@ -305,11 +313,30 @@ export function EditInvoiceTable({
         </div>
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onClose}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            data-shortcut-id={enableShortcut ? "cancel-action" : undefined}
+          >
             {t("cancel")}
+            {enableShortcut && (
+              <div className="text-xs flex items-center justify-center w-9 h-6 rounded-md border border-gray-200">
+                {getShortcutDisplay("cancel-action")}
+              </div>
+            )}
           </Button>
-          <Button type="submit" disabled={isPending}>
+          <Button
+            type="submit"
+            disabled={isPending}
+            data-shortcut-id={enableShortcut ? "submit-action" : undefined}
+          >
             {isPending ? t("saving") : t("save")}
+            {enableShortcut && (
+              <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200">
+                {getShortcutDisplay("submit-action")}
+              </div>
+            )}
           </Button>
         </div>
       </form>

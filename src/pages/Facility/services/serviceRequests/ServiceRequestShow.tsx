@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, MoreVertical, PlusIcon, PrinterIcon } from "lucide-react";
+import { ArrowLeft, MoreVertical, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -28,24 +28,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { ChargeItemsSection } from "@/components/Billing/ChargeItems/ChargeItemsSection";
+
 import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
 import batchApi from "@/types/base/batch/batchApi";
-import {
-  AccountBillingStatus,
-  AccountStatus,
-} from "@/types/billing/account/Account";
-import accountApi from "@/types/billing/account/accountApi";
-import {
-  ChargeItemRead,
-  ChargeItemServiceResource,
-  ChargeItemStatus,
-} from "@/types/billing/chargeItem/chargeItem";
-import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
 import {
@@ -62,8 +53,6 @@ import specimenApi from "@/types/emr/specimen/specimenApi";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
 
 import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
-import AddMultipleChargeItemsSheet from "./components/AddMultipleChargeItemsSheet";
-import { ChargeItemCard } from "./components/ChargeItemCard";
 import { DiagnosticReportForm } from "./components/DiagnosticReportForm";
 import { DiagnosticReportReview } from "./components/DiagnosticReportReview";
 import { MultiQRCodePrintSheet } from "./components/MultiQRCodePrintSheet";
@@ -93,18 +82,10 @@ export default function ServiceRequestShow({
     lg: false,
   });
 
-  const [isMultiAddOpen, setIsMultiAddOpen] = useState(false);
   const [isPrintingAllQRCodes, setIsPrintingAllQRCodes] = useState(false);
   const [isQRCodeSheetOpen, setIsQRCodeSheetOpen] = useState(false);
   const [selectedSpecimenDefinition, setSelectedSpecimenDefinition] =
     useState<SpecimenDefinitionRead | null>(null);
-  const [invoiceSheetState, setInvoiceSheetState] = useState<{
-    open: boolean;
-    chargeItems: ChargeItemRead[];
-  }>({
-    open: false,
-    chargeItems: [],
-  });
 
   const { data: request, isLoading: isLoadingRequest } = useQuery({
     queryKey: ["serviceRequest", facilityId, serviceRequestId],
@@ -114,20 +95,6 @@ export default function ServiceRequestShow({
         serviceRequestId: serviceRequestId,
       },
     }),
-  });
-
-  const { data: chargeItems, isLoading: _isLoadingChargeItems } = useQuery({
-    queryKey: ["chargeItems", facilityId, serviceRequestId],
-    queryFn: query(chargeItemApi.listChargeItem, {
-      pathParams: {
-        facilityId: facilityId,
-      },
-      queryParams: {
-        service_resource: ChargeItemServiceResource.service_request,
-        service_resource_id: serviceRequestId,
-      },
-    }),
-    enabled: !!serviceRequestId,
   });
 
   const {
@@ -218,21 +185,6 @@ export default function ServiceRequestShow({
       },
     });
   };
-
-  const { data: account } = useQuery({
-    queryKey: ["accounts", request?.encounter.patient.id],
-    queryFn: query(accountApi.listAccount, {
-      pathParams: { facilityId },
-      queryParams: {
-        patient: request?.encounter.patient.id,
-        limit: 1,
-        offset: 0,
-        status: AccountStatus.active,
-        billing_status: AccountBillingStatus.open,
-      },
-    }),
-    enabled: !!request?.encounter.patient.id,
-  });
 
   const activityDefinitionSlug = request?.activity_definition?.slug;
 
@@ -337,10 +289,6 @@ export default function ServiceRequestShow({
     }
   };
 
-  const billableChargeItems = chargeItems?.results.filter(
-    (chargeItem) => chargeItem.status === ChargeItemStatus.billable,
-  );
-
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50 relative">
       <div className="flex-1 p-4 max-w-6xl">
@@ -419,77 +367,16 @@ export default function ServiceRequestShow({
             activityDefinition={activityDefinition}
           />
           <div className="space-y-3 pt-5">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">{t("charge_items")}</h2>
-              <div className="flex items-center gap-2">
-                {billableChargeItems && billableChargeItems.length > 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setInvoiceSheetState({
-                        open: true,
-                        chargeItems: billableChargeItems,
-                      })
-                    }
-                  >
-                    <PlusIcon className="size-4 mr-2" />
-                    {t("create_invoice")}
-                  </Button>
-                )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsMultiAddOpen(true)}
-                >
-                  <PlusIcon className="size-4 mr-2" />
-                  {t("add_charge_items")}
-                </Button>
-              </div>
-            </div>
-            {chargeItems &&
-              chargeItems.results.length > 0 &&
-              chargeItems.results.map((chargeItem) => (
-                <ChargeItemCard
-                  key={chargeItem.id}
-                  chargeItem={chargeItem}
-                  serviceRequestId={serviceRequestId}
-                />
-              ))}
-          </div>
-
-          {invoiceSheetState.open && (
-            <CreateInvoiceSheet
+            <ChargeItemsSection
               facilityId={facilityId}
-              accountId={account?.results[0].id || ""}
-              open={invoiceSheetState.open}
-              onOpenChange={() =>
-                setInvoiceSheetState({ open: false, chargeItems: [] })
-              }
-              preSelectedChargeItems={invoiceSheetState.chargeItems}
-              onSuccess={() => {
-                queryClient.invalidateQueries({
-                  queryKey: ["chargeItems", facilityId, serviceRequestId],
-                });
-                setInvoiceSheetState({ open: false, chargeItems: [] });
-              }}
+              resourceId={serviceRequestId}
+              encounterId={request.encounter.id}
+              serviceResourceType={ChargeItemServiceResource.service_request}
               sourceUrl={`/facility/${facilityId}${locationId ? `/locations/${locationId}` : ""}/services_requests/${serviceRequestId}`}
-              redirectInNewTab={false}
+              locationId={locationId}
+              patientId={request.encounter.patient.id}
             />
-          )}
-
-          <AddMultipleChargeItemsSheet
-            open={isMultiAddOpen}
-            onOpenChange={setIsMultiAddOpen}
-            facilityId={facilityId}
-            serviceRequestId={serviceRequestId}
-            serviceResourceType={ChargeItemServiceResource.service_request}
-            onChargeItemsAdded={() => {
-              queryClient.invalidateQueries({
-                queryKey: ["chargeItems", facilityId, serviceRequestId],
-              });
-            }}
-          />
+          </div>
 
           {specimenRequirements.length > 0 && !selectedSpecimenDefinition && (
             <div className="space-y-3 pt-5">

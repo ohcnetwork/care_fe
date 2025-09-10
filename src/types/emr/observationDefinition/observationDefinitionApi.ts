@@ -1,6 +1,7 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
+import { Metrics } from "@/types/base/condition/condition";
 import {
   ObservationDefinitionCreateSpec,
   ObservationDefinitionReadSpec,
@@ -26,5 +27,10 @@ export default {
     path: "/api/v1/observation_definition/{observationSlug}/",
     method: HttpMethod.PUT,
     TRes: Type<ObservationDefinitionReadSpec>(),
+  },
+  getAllMetrics: {
+    path: "/api/v1/observation_definition/metrics/",
+    method: HttpMethod.GET,
+    TRes: Type<Metrics[]>(),
   },
 } as const;
