@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import {
   SelectActionButton,
   SelectActionOption,
-} from "@/components/ui/select-action-button";
+} from "@/components/ui/selectActionButton";
 import batchApi from "@/types/base/batch/batchApi";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
