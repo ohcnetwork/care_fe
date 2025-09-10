@@ -1,6 +1,6 @@
 import { UserReadMinimal } from "@/types/user/user";
 
-export interface Message {
+export interface NoteRead {
   id: string;
   message: string; // Markdown
   message_history: Record<string, unknown>;
@@ -8,4 +8,8 @@ export interface Message {
   updated_by: UserReadMinimal;
   created_date: string;
   modified_date: string;
+}
+
+export interface NoteCreate {
+  message: string;
 }

@@ -4,8 +4,6 @@ import {
   Observation,
   ObservationAnalyzeResponse,
 } from "@/types/emr/observation";
-import { Message } from "@/types/notes/messages";
-import { Thread } from "@/types/notes/threads";
 import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -80,30 +78,6 @@ export default {
     path: "/api/v1/patient/{patientId}/observation/analyse/",
     method: HttpMethod.POST,
     TRes: Type<ObservationAnalyzeResponse>(),
-  },
-
-  // Notes and Threads
-  listThreads: {
-    path: "/api/v1/patient/{patientId}/thread/",
-    method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<Thread>>(),
-  },
-  createThread: {
-    path: "/api/v1/patient/{patientId}/thread/",
-    method: HttpMethod.POST,
-    TRes: Type<Thread>(),
-    TBody: Type<{ title: string; encounter?: string }>(),
-  },
-  getMessages: {
-    path: "/api/v1/patient/{patientId}/thread/{threadId}/note/",
-    method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<Message>>(),
-  },
-  postMessage: {
-    path: "/api/v1/patient/{patientId}/thread/{threadId}/note/",
-    method: HttpMethod.POST,
-    TRes: Type<Message>(),
-    TBody: Type<{ message: string }>(),
   },
 
   // User Management
