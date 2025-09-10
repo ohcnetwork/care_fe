@@ -38,7 +38,7 @@ export const AppointmentDateSelection = ({
   const [selectedMonth, setSelectedMonth] = useState(new Date());
 
   return (
-    <div className="flex flex-col gap-3 w-full">
+    <div className="flex flex-col gap-3 md:min-w-121 lg:w-full">
       {!resourceId ? (
         <span className="text-gray-950 font-medium">
           {t("choose_practitioner")}

@@ -113,7 +113,7 @@ export const BookAppointmentDetails = ({
           setReason={setReason}
           setResourceId={setResourceId}
         />
-        <div className="hidden sm:flex flex-col xl:flex-row gap-6 bg-white shadow rounded-lg p-4 w-full">
+        <div className="hidden sm:flex sm:flex-col lg:flex-row gap-6 bg-white shadow rounded-lg p-4 w-full sm:max-h-full">
           <AppointmentDateSelection
             facilityId={facilityId}
             resourceId={resourceId}

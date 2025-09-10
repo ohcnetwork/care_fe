@@ -14,7 +14,10 @@ import query from "@/Utils/request/query";
 import { Appointment, AppointmentStatus } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import {
+  CardGridSkeleton,
+  TableSkeleton,
+} from "@/components/Common/SkeletonLoading";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -66,7 +69,7 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
           </TabsList>
           <TabsContent value="upcoming" className="space-y-4 overflow-x-scroll">
             <TodayBookings patientId={patientId} facilityId={facilityId} />
-            <span className="font-semibold text-gray-950 mb-4">
+            <span className="text-lg font-semibold text-gray-950 mb-4">
               {t("next")}
             </span>
             <BookingListContent
@@ -107,7 +110,7 @@ const AppointmentCard = ({
   facilityId,
   appointmentId,
 }: {
-  appointment: Appointment | undefined;
+  appointment: Appointment;
   patientId: string;
   facilityId: string;
   appointmentId: string;
@@ -115,37 +118,34 @@ const AppointmentCard = ({
   const { t } = useTranslation();
 
   return (
-    <div className="p-3 shadow rounded-lg bg-white sm:hidden mt-1">
+    <div className="p-3 shadow rounded-lg bg-white mt-1">
       <div className="flex flex-col gap-3">
         <div className="flex flex-row gap-6">
           <div className="flex flex-col">
             <span className="font-medium text-gray-950">
               {format(
-                new Date(appointment?.token_slot?.start_datetime ?? ""),
+                new Date(appointment.token_slot.start_datetime),
                 "EEE, dd MMM",
               )}
             </span>
             <span className="text-sm text-gray-600 font-medium">
-              {appointment?.token_slot.availability.name}
+              {appointment.token_slot.availability.name}
             </span>
           </div>
           <div className="flex flex-col">
             <span className="font-medium text-gray-950">
               {format(
-                new Date(appointment?.token_slot?.start_datetime ?? ""),
+                new Date(appointment.token_slot.start_datetime),
                 "hh:mm a",
               )}{" "}
               -{" "}
-              {format(
-                new Date(appointment?.token_slot?.end_datetime ?? ""),
-                "hh:mm a",
-              )}
+              {format(new Date(appointment.token_slot.end_datetime), "hh:mm a")}
             </span>
             <span className="text-sm text-gray-600 font-medium">
               {t("duration")}:{" "}
               {differenceInMinutes(
-                new Date(appointment?.token_slot.end_datetime ?? ""),
-                new Date(appointment?.token_slot.start_datetime ?? ""),
+                new Date(appointment.token_slot.end_datetime),
+                new Date(appointment.token_slot.start_datetime),
               )}{" "}
               {t("minutes")}
             </span>
@@ -156,21 +156,12 @@ const AppointmentCard = ({
             <div className="flex flex-row gap-2">
               <Avatar
                 className="size-8 rounded-full border border-white shadow-sm"
-                name={
-                  appointment?.booked_by
-                    ? formatName(appointment?.booked_by)
-                    : "N/A"
-                }
+                name={formatName(appointment.user)}
+                imageUrl={appointment.user.profile_picture_url}
               />
-              <div className="flex flex-row items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2">
                 <span className="text-sm font-medium text-gray-950">
-                  {appointment?.booked_by
-                    ? formatName(appointment?.booked_by)
-                    : ""}
-                </span>
-                <div className="size-1 bg-gray-600 rounded-full" />
-                <span className="text-sm text-gray-700 font-medium capitalize">
-                  {appointment?.booked_by?.user_type ?? t("na")}
+                  {formatName(appointment.user)}
                 </span>
               </div>
             </div>
@@ -197,128 +188,118 @@ const AppointmentTable = ({
   facilityId,
   patientId,
 }: {
-  appointments: Appointment[] | undefined;
+  appointments: Appointment[];
   facilityId: string;
   patientId: string;
 }) => {
   const { t } = useTranslation();
 
   return (
-    <Table className="hidden sm:table border-separate border-spacing-y-2 border-spacing-x-0">
+    <Table className="border-separate border-spacing-y-2 border-spacing-x-0">
       <TableHeader className="bg-gray-100 border border-gray-200  border-y border-l rounded-tl-md align-middle">
         <TableRow className="divide-x">
-          <TableHead className="border-y bg-gray-100 text-gray-700 text-sm">
+          <TableHead className="w-14 border-y bg-gray-100 text-gray-700 text-sm">
             {t("date")}
           </TableHead>
-          <TableHead className="border-y bg-gray-100 text-gray-700 text-sm">
+          <TableHead className="w-14 border-y bg-gray-100 text-gray-700 text-sm">
             {t("time")}
           </TableHead>
-          <TableHead className="border-y bg-gray-100 text-gray-700 text-sm w-30">
+          <TableHead className="w-30 border-y bg-gray-100 text-gray-700 text-sm">
             {t("practitioner")}
           </TableHead>
-          <TableHead className="border-y bg-gray-100 hidden xl:table-cell text-gray-700 text-sm">
+          <TableHead className="w-14 border-y bg-gray-100 hidden xl:table-cell text-gray-700 text-sm">
             {t("status")}
           </TableHead>
-          <TableHead className="border-y bg-gray-100 text-gray-700 text-sm">
+          <TableHead className="w-14 border-y bg-gray-100 text-gray-700 text-sm">
             {t("actions")}
           </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody className="bg-white">
-        {appointments &&
-          appointments.map((appointment) => (
-            <TableRow
-              key={appointment?.id} // added key for React
-              className="shadow bg-white space-y-3 rounded-lg"
-            >
-              <TableCell className="p-4">
-                <div className="flex gap-2 items-start justify-start">
-                  <CalendarDays size={16} className="mt-1" />
-                  <div className="flex flex-col">
-                    <span className="font-medium text-gray-950">
-                      {format(
-                        new Date(appointment?.token_slot?.start_datetime ?? ""),
-                        "EEE, dd MMM",
-                      )}
-                    </span>
-                    <span className="text-sm text-gray-600 font-medium">
-                      {appointment?.token_slot?.availability?.name}
-                    </span>
-                  </div>
-                </div>
-              </TableCell>
-
-              <TableCell>
+        {appointments.map((appointment) => (
+          <TableRow
+            key={appointment.id} // added key for React
+            className="shadow bg-white space-y-3 rounded-lg"
+          >
+            <TableCell className="p-4">
+              <div className="flex gap-2 items-start justify-start">
+                <CalendarDays size={16} className="mt-1" />
                 <div className="flex flex-col">
                   <span className="font-medium text-gray-950">
                     {format(
-                      new Date(appointment?.token_slot?.start_datetime ?? ""),
-                      "hh:mm a",
-                    )}{" "}
-                    -{" "}
-                    {format(
-                      new Date(appointment?.token_slot?.end_datetime ?? ""),
-                      "hh:mm a",
+                      new Date(appointment.token_slot.start_datetime),
+                      "EEE, dd MMM",
                     )}
                   </span>
                   <span className="text-sm text-gray-600 font-medium">
-                    {t("duration")}:{" "}
-                    {differenceInMinutes(
-                      new Date(appointment?.token_slot?.end_datetime ?? ""),
-                      new Date(appointment?.token_slot?.start_datetime ?? ""),
-                    )}{" "}
-                    {t("minutes")}
+                    {appointment.token_slot.availability.name}
                   </span>
                 </div>
-              </TableCell>
+              </div>
+            </TableCell>
 
-              <TableCell>
-                <div className="px-2 py-1">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-row gap-2">
-                      <Avatar
-                        className="size-8 rounded-full border border-white shadow-sm"
-                        name={
-                          appointment?.booked_by
-                            ? formatName(appointment?.booked_by)
-                            : "N/A"
-                        }
-                      />
-                      <div className="flex flex-row items-center justify-center gap-2">
-                        <span className="text-sm font-medium text-gray-950">
-                          {appointment?.booked_by
-                            ? formatName(appointment?.booked_by)
-                            : "N/A"}
-                        </span>
-                        <div className="size-1 bg-gray-600 rounded-full" />
-                        <span className="text-sm text-gray-700 font-medium capitalize">
-                          {appointment?.booked_by?.user_type ?? t("na")}
-                        </span>
-                      </div>
+            <TableCell>
+              <div className="flex flex-col">
+                <span className="font-medium text-gray-950">
+                  {format(
+                    new Date(appointment.token_slot.start_datetime),
+                    "hh:mm a",
+                  )}{" "}
+                  -{" "}
+                  {format(
+                    new Date(appointment.token_slot.end_datetime),
+                    "hh:mm a",
+                  )}
+                </span>
+                <span className="text-sm text-gray-600 font-medium">
+                  {t("duration")}:{" "}
+                  {differenceInMinutes(
+                    new Date(appointment.token_slot.end_datetime),
+                    new Date(appointment.token_slot.start_datetime),
+                  )}{" "}
+                  {t("minutes")}
+                </span>
+              </div>
+            </TableCell>
+
+            <TableCell>
+              <div className="px-2 py-1">
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-row gap-2">
+                    <Avatar
+                      className="size-8 rounded-full border border-white shadow-sm"
+                      name={formatName(appointment.user)}
+                      imageUrl={appointment.user.profile_picture_url}
+                    />
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-sm font-medium text-gray-950">
+                        {formatName(appointment.user)}
+                      </span>
                     </div>
                   </div>
                 </div>
-              </TableCell>
+              </div>
+            </TableCell>
 
-              <TableCell className="hidden xl:table-cell">
-                <div className="flex flex-row items-start justify-start">
-                  <Badge variant="green" className="text-gray-700">
-                    {t(appointment?.status)}
-                  </Badge>
-                </div>
-              </TableCell>
+            <TableCell className="hidden xl:table-cell">
+              <div className="flex flex-row items-start justify-start">
+                <Badge variant="green" className="text-gray-700">
+                  {t(appointment.status)}
+                </Badge>
+              </div>
+            </TableCell>
 
-              <TableCell>
-                <Button variant="outline" className="text-gray-950">
-                  <Link
-                    href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment?.id}`}
-                  >
-                    {t("see_details")}
-                  </Link>
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
+            <TableCell>
+              <Button variant="outline" className="text-gray-950">
+                <Link
+                  href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
+                >
+                  {t("see_details")}
+                </Link>
+              </Button>
+            </TableCell>
+          </TableRow>
+        ))}
       </TableBody>
     </Table>
   );
@@ -377,7 +358,16 @@ const BookingListContent = ({
       });
 
   if (isLoading) {
-    return <TableSkeleton count={10} />;
+    return (
+      <div className="w-full">
+        <div className="hidden sm:block">
+          <TableSkeleton count={10} />
+        </div>
+        <div className="sm:hidden">
+          <CardGridSkeleton count={10} />
+        </div>
+      </div>
+    );
   }
 
   if (filteredAppointments.length === 0) {
@@ -389,22 +379,26 @@ const BookingListContent = ({
   }
 
   return (
-    <>
-      <AppointmentTable
-        appointments={filteredAppointments}
-        facilityId={facilityId}
-        patientId={patientId}
-      />
-      {filteredAppointments.map((appointment) => (
-        <AppointmentCard
-          key={appointment.id}
-          appointment={appointment}
-          patientId={patientId}
+    <div className="w-full">
+      <div className="hidden sm:block">
+        <AppointmentTable
+          appointments={filteredAppointments}
           facilityId={facilityId}
-          appointmentId={appointment.id}
+          patientId={patientId}
         />
-      ))}
-    </>
+      </div>
+      <div className="sm:hidden">
+        {filteredAppointments.map((appointment) => (
+          <AppointmentCard
+            key={appointment.id}
+            appointment={appointment}
+            patientId={patientId}
+            facilityId={facilityId}
+            appointmentId={appointment.id}
+          />
+        ))}
+      </div>
+    </div>
   );
 };
 
@@ -434,22 +428,26 @@ const TodayBookings = ({
   }
 
   return (
-    <>
+    <div className="w-full">
       <span className="font-semibold text-gray-950 mb-4">{t("today")}</span>
-      <AppointmentTable
-        appointments={todayAppointments}
-        facilityId={facilityId}
-        patientId={patientId}
-      />
-      {todayAppointments.map((appointment) => (
-        <AppointmentCard
-          key={appointment.id}
-          appointment={appointment}
-          patientId={patientId}
+      <div className="hidden sm:block">
+        <AppointmentTable
+          appointments={todayAppointments}
           facilityId={facilityId}
-          appointmentId={appointment.id}
+          patientId={patientId}
         />
-      ))}
-    </>
+      </div>
+      <div className="sm:hidden">
+        {todayAppointments.map((appointment) => (
+          <AppointmentCard
+            key={appointment.id}
+            appointment={appointment}
+            patientId={patientId}
+            facilityId={facilityId}
+            appointmentId={appointment.id}
+          />
+        ))}
+      </div>
+    </div>
   );
 };

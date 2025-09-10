@@ -71,7 +71,7 @@ export default function Calendar(props: Props) {
   return (
     <div className={`${props.className} w-full`}>
       <div className="mb-4 flex items-center justify-between">
-        <span className="sm:text-lg font-semibold uppercase text-gray-950">
+        <span className="sm:text-lg font-semibold text-gray-950">
           {currentMonth.toLocaleString("default", {
             month: "long",
             year: "numeric",

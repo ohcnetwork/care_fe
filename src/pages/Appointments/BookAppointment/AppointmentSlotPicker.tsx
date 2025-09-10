@@ -94,7 +94,7 @@ export function AppointmentSlotPicker({
         !resourceId && "opacity-50 pointer-events-none",
       )}
     >
-      <div className="hidden sm:flex justify-between">
+      <div className="hidden sm:flex sm:justify-between items-center lg:flex-col xl:flex-row lg:gap-1 xl:justify-between">
         <span className="font-semibold text-gray-950 text-base">
           {format(selectedDate, "MMMM d yyyy")}
         </span>
@@ -124,7 +124,7 @@ export function AppointmentSlotPicker({
           ))}
         </div>
       ) : (
-        <ScrollArea className="h-100 sm:h-full">
+        <ScrollArea className="h-110 sm:h-90">
           <div>
             {slotsQuery.data == null && (
               <div className="flex flex-col gap-5">
@@ -174,22 +174,19 @@ export function AppointmentSlotPicker({
                         {availability.name}
                       </span>
                     </div>
-                    <div className="grid grid-cols-2 sm:flex flex-wrap gap-2">
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-1 xl:grid-cols-3 2xl:grid-cols-5 gap-2">
                       {slots.map((slot) => (
-                        <div key={slot.id}>
-                          <TokenSlotButton
-                            slot={slot}
-                            availability={availability}
-                            selectedSlotId={selectedSlotId}
-                            onClick={() => {
-                              handleSlotSelect(
-                                selectedSlotId === slot.id
-                                  ? undefined
-                                  : slot.id,
-                              );
-                            }}
-                          />
-                        </div>
+                        <TokenSlotButton
+                          key={slot.id}
+                          slot={slot}
+                          availability={availability}
+                          selectedSlotId={selectedSlotId}
+                          onClick={() => {
+                            handleSlotSelect(
+                              selectedSlotId === slot.id ? undefined : slot.id,
+                            );
+                          }}
+                        />
                       ))}
                     </div>
                     <Separator className="my-6" />
@@ -236,7 +233,7 @@ export const TokenSlotButton = ({
       onClick={onClick}
       disabled={slot.allocated === availability.tokens_per_slot}
       className={cn(
-        "flex flex-col items-center group gap-0 w-full sm:w-24 relative",
+        "flex flex-col items-center group gap-0 w- relative",
         className,
       )}
     >
