@@ -481,7 +481,7 @@ export function PaymentReconciliationSheet({
               <Button
                 type="submit"
                 disabled={isPending}
-                data-shortcut-id="submit-record-payment"
+                data-shortcut-id="submit-action"
               >
                 {isPending ? (
                   <>
@@ -495,7 +495,7 @@ export function PaymentReconciliationSheet({
                   t("record_payment")
                 )}
                 <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200">
-                  {getShortcutDisplay("submit-record-payment")}
+                  {getShortcutDisplay("submit-action")}
                 </div>
               </Button>
             </SheetFooter>

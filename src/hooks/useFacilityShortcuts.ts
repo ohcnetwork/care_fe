@@ -55,10 +55,6 @@ export function useFacilityShortcuts(subContext?: string) {
         handler: shortcutActionHandler("record-payment"),
       },
       {
-        id: "submit-record-payment",
-        handler: shortcutActionHandler("submit-record-payment"),
-      },
-      {
         id: "select-chargeItem-billing-sheet",
         handler: shortcutActionHandler("select-chargeItem-billing-sheet"),
       },
