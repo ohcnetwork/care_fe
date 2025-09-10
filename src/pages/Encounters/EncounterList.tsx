@@ -13,8 +13,8 @@ import {
   encounterPriorityFilter,
   encounterStatusFilter,
   tagFilter,
-} from "@/components/ui/multi-filter/filter-list";
-import MultiFilter from "@/components/ui/multi-filter/multi-filter";
+} from "@/components/ui/multi-filter/filterConfigs";
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import {
   Popover,
@@ -31,11 +31,11 @@ import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilte
 
 import useFilters from "@/hooks/useFilters";
 
-import query from "@/Utils/request/query";
 import { EncounterClass, EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
+import query from "@/Utils/request/query";
 
 interface EncounterListProps {
   encounters?: EncounterRead[];

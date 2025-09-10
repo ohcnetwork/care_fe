@@ -1,12 +1,12 @@
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 
-import { RenderDateFilter } from "./date-filter";
-import GenericFilter from "./generic-filter";
-import { RenderTagFilter } from "./tag-filter";
+import RenderDateFilter from "./dateFilter";
+import GenericFilter from "./genericFilter";
+import RenderTagFilter from "./tagFilter";
 import NavigationHelper from "./utils/navigation-helper";
 import { FilterDateRange, FilterState, FilterValues } from "./utils/utils";
 
-export default function Filter({
+export default function FilterRenderer({
   activeFilter,
   selectedFilters,
   onFilterChange,

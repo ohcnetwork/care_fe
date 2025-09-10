@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { cn } from "@/lib/utils";
-import Filter from "./filter";
+import FilterRenderer from "./filterRenderer";
 import useMultiFilter from "./utils/useMultiFilter";
 import { FilterState, FilterValues, Operation } from "./utils/utils";
 
@@ -119,7 +119,7 @@ export function SelectedFilterBar({
         </Button>
       </div>
       <DropdownMenuContent className="w-[320px] p-0" align="start">
-        <Filter
+        <FilterRenderer
           activeFilter={filter.key}
           selectedFilters={selectedFilters}
           onFilterChange={onFilterChange}

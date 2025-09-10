@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-import FilterHeader from "./filter-header";
+import FilterHeader from "./filterHeader";
 import useMultiFilterNavigationShortcuts from "./utils/useMultiFilterNavigationShortcuts";
 import useMultiFilterSearch from "./utils/useMultiFilterSearch";
 import {

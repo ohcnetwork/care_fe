@@ -10,9 +10,9 @@ import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { CalendarFold, CircleDashed, Tag } from "lucide-react";
 
 import { t } from "i18next";
-import { SelectedDateBadge, getDateOperations } from "./date-filter";
-import { GenericSelectedBadge } from "./generic-filter";
-import { SelectedTagBadge } from "./tag-filter";
+import { SelectedDateBadge, getDateOperations } from "./dateFilter";
+import { GenericSelectedBadge } from "./genericFilter";
+import { SelectedTagBadge } from "./tagFilter";
 import {
   DateRangeOption,
   ENCOUNTER_CLASS_FILTER_COLORS,

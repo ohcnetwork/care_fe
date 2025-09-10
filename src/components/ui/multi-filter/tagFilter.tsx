@@ -32,7 +32,7 @@ import {
 } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
-import FilterHeader from "./filter-header";
+import FilterHeader from "./filterHeader";
 import {
   COLOR_PALETTE,
   FilterConfig,
@@ -467,7 +467,7 @@ function GroupSubmenu({
   );
 }
 
-export function RenderTagFilter({
+export default function RenderTagFilter({
   filter,
   selectedTags,
   onFilterChange,

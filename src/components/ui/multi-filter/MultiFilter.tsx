@@ -13,8 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import Filter from "./filter";
-import { SelectedFilterBar } from "./selected-filter-bar";
+import FilterRenderer from "./filterRenderer";
+import { SelectedFilterBar } from "./selectedFilterBar";
 import NavigationHelper from "./utils/navigation-helper";
 import useMultiFilterNavigationShortcuts from "./utils/useMultiFilterNavigationShortcuts";
 import { FilterState, FilterValues } from "./utils/utils";
@@ -121,7 +121,7 @@ export default function MultiFilter({
           align="start"
         >
           {activeFilter ? (
-            <Filter
+            <FilterRenderer
               activeFilter={activeFilter}
               selectedFilters={selectedFilters}
               handleBack={handleBack}

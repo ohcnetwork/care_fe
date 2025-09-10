@@ -15,7 +15,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import FilterHeader from "./filter-header";
+import FilterHeader from "./filterHeader";
 import NavigationHelper from "./utils/navigation-helper";
 import useMultiFilterNavigationShortcuts from "./utils/useMultiFilterNavigationShortcuts";
 import {
@@ -220,7 +220,7 @@ function DateRangeOptions({
   );
 }
 
-export function RenderDateFilter({
+export default function RenderDateFilter({
   filter,
   selected,
   onFilterChange,

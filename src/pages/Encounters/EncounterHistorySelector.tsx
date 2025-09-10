@@ -21,8 +21,8 @@ import {
   dateFilter,
   encounterStatusFilter,
   tagFilter,
-} from "@/components/ui/multi-filter/filter-list";
-import MultiFilter from "@/components/ui/multi-filter/multi-filter";
+} from "@/components/ui/multi-filter/filterConfigs";
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -36,9 +36,6 @@ import {
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
-import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { dateTimeQueryString } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   ENCOUNTER_STATUS_COLORS,
@@ -51,6 +48,9 @@ import {
   TagResource,
   getTagHierarchyDisplay,
 } from "@/types/emr/tagConfig/tagConfig";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { dateTimeQueryString } from "@/Utils/utils";
 
 interface EncounterCardProps {
   encounter: EncounterRead;

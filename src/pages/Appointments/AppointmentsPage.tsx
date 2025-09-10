@@ -81,14 +81,6 @@ import useFilters, { FilterState } from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
-import query from "@/Utils/request/query";
-import { useView } from "@/Utils/useView";
-import {
-  dateQueryString,
-  formatDateTime,
-  formatName,
-  formatPatientAge,
-} from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import {
   formatSlotTimeRange,
@@ -107,12 +99,20 @@ import {
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserReadMinimal } from "@/types/user/user";
+import query from "@/Utils/request/query";
+import { useView } from "@/Utils/useView";
+import {
+  dateQueryString,
+  formatDateTime,
+  formatName,
+  formatPatientAge,
+} from "@/Utils/utils";
 
 import {
   dateFilter,
   tagFilter,
-} from "@/components/ui/multi-filter/filter-list";
-import MultiFilter from "@/components/ui/multi-filter/multi-filter";
+} from "@/components/ui/multi-filter/filterConfigs";
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import {
   FilterDateRange,
