@@ -38,22 +38,11 @@ import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandD
 import { Button } from "@/components/ui/button";
 import { CommandShortcut } from "@/components/ui/command";
 import {
-  SelectActionButton,
-  SelectActionOption,
-} from "@/components/ui/select-action-button";
-import {
   PatientDeceasedInfo,
   PatientHeader,
 } from "@/pages/Facility/services/serviceRequests/PatientHeader";
 import { PLUGIN_Component } from "@/PluginEngine";
-import batchApi from "@/types/base/batch/batchApi";
-import encounterApi from "@/types/emr/encounter/encounterApi";
-import { BatchSubmissionResult } from "@/types/questionnaire/batch";
-import scheduleApi from "@/types/scheduling/scheduleApi";
-import tokenApi from "@/types/tokens/token/tokenApi";
-import mutate from "@/Utils/request/mutate";
-import { NonEmptyArray } from "@/Utils/types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AppointmentEncounterHeader } from "./AppointmentEncounterHeader";
 import { EncounterDiagnosticReportsTab } from "./tabs/diagnostic-reports";
 import { EncounterNotesTab } from "./tabs/notes";
 import { EncounterServiceRequestTab } from "./tabs/service-requests";
@@ -78,6 +67,7 @@ export const EncounterShow = (props: Props) => {
     patient,
     isPatientLoading,
     canWriteSelectedEncounter,
+    canWritePrimaryEncounter,
   } = useEncounter();
 
   useSidebarAutoCollapse({ restore: false });
@@ -108,136 +98,6 @@ export const EncounterShow = (props: Props) => {
   );
 
   const canAccess = canViewClinicalData || canViewEncounter;
-  const queryClient = useQueryClient();
-
-  const { mutate: updateEncounter } = useMutation({
-    mutationFn: mutate(encounterApi.update, {
-      pathParams: { id: primaryEncounter?.id || "" },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["encounter", primaryEncounterId],
-      });
-    },
-  });
-
-  const batchRequest = useMutation({
-    mutationFn: mutate(batchApi.batchRequest),
-    onSuccess: (results: { results: BatchSubmissionResult[] }) => {
-      queryClient.invalidateQueries({
-        queryKey: ["encounter", primaryEncounterId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["appointment", primaryEncounter?.appointment?.id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["tokens", primaryEncounter?.appointment?.token?.id],
-      });
-      if (
-        results.results.some(
-          (result) => result.reference_id === "encounter-closed",
-        )
-      ) {
-        toast.success(t("encounter_marked_as_complete"));
-        return;
-      }
-      if (
-        results.results.some(
-          (result) => result.reference_id === "appointment-closed",
-        )
-      ) {
-        toast.success(t("appointment_closed_successfully"));
-      }
-    },
-  });
-
-  const handleStartEncounter = (encounter: EncounterRead) => {
-    updateEncounter({
-      ...encounter,
-      status: "in_progress",
-      patient: encounter.patient.id,
-      facility: encounter.facility.id,
-    });
-  };
-
-  const handleCloseAppointment = (encounter: EncounterRead) => {
-    if (!encounter || !encounter.appointment) return;
-
-    const requests = [
-      {
-        url: scheduleApi.appointments.update.path
-          .replace("{facilityId}", encounter.facility.id)
-          .replace("{id}", encounter.appointment.id),
-        method: scheduleApi.appointments.update.method,
-        reference_id: "appointment-closed",
-        body: {
-          status: "fulfilled",
-          note: encounter.appointment.note || "",
-        },
-      },
-    ];
-
-    if (encounter.appointment.token) {
-      requests.push({
-        url: tokenApi.update.path
-          .replace("{facility_id}", encounter.facility.id)
-          .replace("{queue_id}", encounter.appointment.token.queue.id)
-          .replace("{id}", encounter.appointment.token.id),
-        method: tokenApi.update.method,
-        reference_id: "token-closed",
-        body: {
-          ...encounter.appointment.token,
-          status: "FULFILLED",
-        },
-      });
-    }
-
-    batchRequest.mutate({ requests });
-  };
-  const handleCompleteEncounter = (encounter: EncounterRead) => {
-    if (!encounter || !encounter.appointment) return;
-    const requests = [
-      {
-        url: encounterApi.update.path.replace("{id}", encounter.id),
-        method: encounterApi.update.method,
-        reference_id: "encounter-closed",
-        body: {
-          ...encounter,
-          patient: encounter.patient.id,
-          facility: encounter.facility.id,
-          status: "completed",
-        },
-      },
-      {
-        url: scheduleApi.appointments.update.path
-          .replace("{facilityId}", encounter.facility.id)
-          .replace("{id}", encounter.appointment?.id || ""),
-        method: scheduleApi.appointments.update.method,
-        reference_id: "appointment-closed",
-        body: {
-          status: "fulfilled",
-          note: encounter.appointment.note || "",
-        },
-      },
-    ];
-
-    if (encounter.appointment.token) {
-      requests.push({
-        url: tokenApi.update.path
-          .replace("{facility_id}", encounter.facility.id)
-          .replace("{queue_id}", encounter.appointment.token.queue.id)
-          .replace("{id}", encounter.appointment.token.id),
-        method: tokenApi.update.method,
-        reference_id: "token-closed",
-        body: {
-          ...encounter.appointment.token,
-          status: "FULFILLED",
-        },
-      });
-    }
-
-    batchRequest.mutate({ requests });
-  };
 
   useEffect(() => {
     if (!isPrimaryEncounterLoading && !isPatientLoading && !canAccess) {
@@ -318,61 +178,20 @@ export const EncounterShow = (props: Props) => {
     return <ErrorPage />;
   }
 
-  const availableOptions: NonEmptyArray<SelectActionOption<string>> =
-    primaryEncounter.appointment?.status === "fulfilled"
-      ? [
-          {
-            value: "mark_as_complete",
-            label: t("mark_as_complete"),
-          },
-        ]
-      : [
-          {
-            value: "mark_as_complete",
-            label: t("mark_as_complete"),
-          },
-          {
-            value: "close_appointment",
-            label: t("close_appointment"),
-          },
-        ];
-
   return (
     <Page
       title={t("encounter")}
       className="block md:px-1 -mt-4"
       hideTitleOnPage
     >
-      {primaryEncounter && primaryEncounter.appointment?.id && (
-        <div className="flex justify-between border border-gray-200 rounded-md p-2 bg-white w-full items-center mb-2">
-          <span>
-            {t("token_number")}:{" "}
-            {primaryEncounter.appointment.token?.number || t("no_token")}
-          </span>
-          {primaryEncounter.status !== "in_progress" &&
-          primaryEncounter.status !== "completed" ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleStartEncounter(primaryEncounter)}
-            >
-              {t("start_encounter")}
-            </Button>
-          ) : (
-            <SelectActionButton
-              options={availableOptions}
-              onAction={(value) => {
-                if (value === "mark_as_complete") {
-                  handleCompleteEncounter(primaryEncounter);
-                } else if (value === "close_appointment") {
-                  handleCloseAppointment(primaryEncounter);
-                }
-              }}
-              disabled={primaryEncounter.status === "completed"}
-            />
-          )}
-        </div>
-      )}
+      {primaryEncounter &&
+        primaryEncounter.appointment?.id &&
+        canWritePrimaryEncounter && (
+          <AppointmentEncounterHeader
+            appointment={primaryEncounter.appointment}
+            encounter={primaryEncounter}
+          />
+        )}
 
       <div className="flex flex-col gap-2">
         <PatientHeader

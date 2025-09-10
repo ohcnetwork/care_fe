@@ -10,13 +10,13 @@ import { cn } from "@/lib/utils";
 import { NonEmptyArray } from "@/Utils/types";
 import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import { ChevronDownIcon } from "lucide-react";
+import { CheckIcon, ChevronDownIcon } from "lucide-react";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 
 interface SelectActionOption<T = string> {
   value: T;
-  label: string;
-  icon?: React.ComponentType<{ className?: string }>;
+  child: React.ReactNode;
   variant?: "default" | "destructive";
 }
 
@@ -52,6 +52,8 @@ function SelectActionButton<T = string>({
   persistKey,
   fallbackText = "Select action",
 }: SelectActionButtonProps<T>) {
+  const { t } = useTranslation();
+
   const [selectActionButtonDefaults, setSelectActionButtonDefaults] = useAtom(
     selectActionButtonAtom,
   );
@@ -66,7 +68,8 @@ function SelectActionButton<T = string>({
       return options[0].value;
     },
   );
-  const currentOption = options.find((o) => o.value === selectedValue);
+  const currentOption =
+    options.find((o) => o.value === selectedValue) || options[0];
 
   const handleAction = () => {
     if (currentOption !== undefined) {
@@ -84,10 +87,13 @@ function SelectActionButton<T = string>({
     }
   };
 
+  console.log("current option", currentOption);
+  console.log(selectedValue, "selectedValue");
+  console.log(persistKey, "persist");
+
   // If there's only one option, render a simple button
   if (options.length === 1) {
     const option = options[0];
-    const IconComponent = option.icon;
 
     return (
       <Button
@@ -97,8 +103,7 @@ function SelectActionButton<T = string>({
         onClick={() => onAction(option.value)}
         className={className}
       >
-        {IconComponent && <IconComponent className="size-4" />}
-        {children || option.label}
+        {children || t(option.value as string)}
       </Button>
     );
   }
@@ -115,8 +120,7 @@ function SelectActionButton<T = string>({
         onClick={handleAction}
         className="rounded-r-none border-r-0"
       >
-        {currentOption?.icon && <currentOption.icon className="size-4" />}
-        {children || currentOption?.label || fallbackText}
+        {children || t(currentOption?.value as string) || fallbackText}
       </Button>
 
       {/* Dropdown trigger */}
@@ -135,18 +139,25 @@ function SelectActionButton<T = string>({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-[200px]">
           {options.map((option, index) => {
-            const IconComponent = option.icon;
             const isSelected = option.value === selectedValue;
 
             return (
               <React.Fragment key={index}>
                 <DropdownMenuItem
-                  onClick={() => handleOptionSelect(option.value)}
+                  onClick={() => {
+                    onAction(option.value);
+                    handleOptionSelect(option.value);
+                  }}
                   variant={option.variant}
-                  className={cn(isSelected && "bg-gray-100 dark:bg-gray-800")}
+                  className={cn(
+                    "flex flex-row gap-2",
+                    isSelected && "bg-gray-100 dark:bg-gray-800",
+                  )}
                 >
-                  {IconComponent && <IconComponent className="size-4" />}
-                  {option.label}
+                  <CheckIcon
+                    className={cn("size-4", !isSelected && "invisible")}
+                  />
+                  {option.child}
                 </DropdownMenuItem>
                 {index < options.length - 1 &&
                   option.variant === "destructive" &&
