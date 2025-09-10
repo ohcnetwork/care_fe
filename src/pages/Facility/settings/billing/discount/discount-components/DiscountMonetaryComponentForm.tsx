@@ -198,7 +198,7 @@ export function DiscountMonetaryComponentForm({
                       value={valueType}
                       onValueChange={handleValueTypeChange}
                     >
-                      <SelectTrigger className="flex-1">
+                      <SelectTrigger className="flex-1" ref={_field.ref}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
