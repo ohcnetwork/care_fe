@@ -467,7 +467,7 @@ const AppointmentDetails = ({
           </div>
           <div className="text-sm">
             <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
-              <p className="font-medium">{t("tags")}</p>
+              <p className="font-medium">{t("tags", { count: 2 })}</p>
               <TagAssignmentSheet
                 entityType="appointment"
                 entityId={appointment.id}
@@ -854,7 +854,9 @@ const AppointmentActions = ({
                 <div className="mt-6">
                   <div className="text-sm">
                     <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
-                      <Label className="font-medium">{t("tags")}</Label>
+                      <Label className="font-medium">
+                        {t("tags", { count: 2 })}
+                      </Label>
                       <TagAssignmentSheet
                         entityType="appointment"
                         entityId={appointment.id}
