@@ -15,3 +15,13 @@ export interface ThreadRead extends ThreadBase {
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
 }
+
+export const threadTemplates = [
+  "Treatment Plan",
+  "Medication Notes",
+  "Care Coordination",
+  "General Notes",
+  "Patient History",
+  "Referral Notes",
+  "Lab Results Discussion",
+] as const;

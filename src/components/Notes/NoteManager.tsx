@@ -58,22 +58,11 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime, isTouchDevice } from "@/Utils/utils";
 import { NoteRead } from "@/types/notes/messages";
-import { ThreadRead } from "@/types/notes/thread";
+import { ThreadRead, threadTemplates } from "@/types/notes/thread";
 import threadApi from "@/types/notes/threadApi";
+import { t } from "i18next";
 
 const MESSAGES_LIMIT = 20;
-
-// Thread templates for quick selection
-
-const threadTemplates = [
-  "Treatment Plan",
-  "Medication Notes",
-  "Care Coordination",
-  "General Notes",
-  "Patient History",
-  "Referral Notes",
-  "Lab Results Discussion",
-] as const;
 
 // Info tooltip component for help text
 const InfoTooltip = ({ content }: { content: string }) => (
@@ -316,7 +305,7 @@ const MobileNav = ({
         className="flex-1 flex flex-col items-center gap-1 h-auto py-2 rounded-none"
       >
         <MessageSquarePlus className="size-5" />
-        <span className="text-xs">New Thread</span>
+        <span className="text-xs">{t("new_thread")}</span>
       </Button>
     )}
   </div>
@@ -384,7 +373,7 @@ export function NoteManager({
           offset: String(pageParam),
         },
       })({ signal: new AbortController().signal });
-      return response as PaginatedResponse<NoteRead>;
+      return response;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
@@ -404,10 +393,10 @@ export function NoteManager({
     mutationFn: mutate(threadApi.create, {
       pathParams: { patientId },
     }),
-    onSuccess: (newThread) => {
+    onSuccess: (newThread: ThreadRead) => {
       queryClient.invalidateQueries({ queryKey: ["threads"] });
       setShowNewThreadDialog(false);
-      setSelectedThread((newThread as ThreadRead).id);
+      setSelectedThread(newThread.id);
       toast.success(t("notes__thread_created"));
     },
     onError: () => {
