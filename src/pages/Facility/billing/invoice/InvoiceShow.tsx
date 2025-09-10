@@ -337,12 +337,11 @@ export function InvoiceShow({
             <span>{t("back")}</span>
           </BackButton>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 max-w-full overflow-x-auto">
           {invoice?.status === InvoiceStatus.draft && (
             <Button
               data-shortcut-id="issue-invoice"
               variant="outline_primary"
-              className="w-full flex flex-row justify-stretch items-center"
               onClick={() => handleStatusChange(InvoiceStatus.issued)}
               disabled={isUpdatingInvoice}
             >
@@ -357,7 +356,6 @@ export function InvoiceShow({
             <Button
               data-shortcut-id="mark-as-balanced"
               variant="outline_primary"
-              className="w-full flex flex-row justify-stretch items-center"
               onClick={() => handleStatusChange(InvoiceStatus.balanced)}
               disabled={isUpdatingInvoice}
             >
