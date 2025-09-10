@@ -50,7 +50,7 @@ function CustomDateRange({
   return (
     <>
       <FilterHeader
-        label={"custom_date_range"}
+        label={t("custom_date_range")}
         onBack={() => setView("options")}
       />
       <div className="flex flex-col gap-2 p-0 pb-2 px-3 pt-2 max-h-[calc(100vh-30rem)] overflow-y-auto">
