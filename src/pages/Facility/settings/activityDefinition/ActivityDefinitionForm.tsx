@@ -30,6 +30,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import Page from "@/components/Common/Page";
 import RequirementsSelector from "@/components/Common/RequirementsSelector";
+import DefinitionBrowser from "@/components/Common/DefinitionBrowser";
 import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
 import LocationMultiSelect from "@/components/Location/LocationMultiSelect";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -914,48 +915,21 @@ function ActivityDefinitionFormContent({
                   <div className="rounded-lg border border-gray-200 shadow-sm p-4">
                     <FormLabel>{t("charge_item_definitions")}</FormLabel>
                     <div className="mt-2">
-                      <RequirementsSelector
+                      <DefinitionBrowser
+                        facilityId={facilityId}
+                        resourceType={
+                          ResourceCategoryResourceType.charge_item_definition
+                        }
+                        value={form.watch("charge_item_definitions") || []}
+                        onChange={(vals) =>
+                          form.setValue("charge_item_definitions", vals)
+                        }
+                        placeholder={t("select_charge_item_definitions")}
                         title={t("select_charge_item_definitions")}
                         description={t(
                           "select_or_create_charge_item_definitions",
                         )}
                         allowDuplicate={true}
-                        value={form.watch("charge_item_definitions") || []}
-                        onChange={(values) =>
-                          form.setValue("charge_item_definitions", values)
-                        }
-                        options={
-                          chargeItemDefinitions?.results.map((chargeDef) => ({
-                            label: chargeDef.title,
-                            value: chargeDef.slug,
-                            details: [
-                              {
-                                label: t("status"),
-                                value: t(chargeDef.status) ?? undefined,
-                              },
-                              {
-                                label: t("description"),
-                                value: chargeDef.description ?? undefined,
-                              },
-                              {
-                                label: t("purpose"),
-                                value: chargeDef.purpose ?? undefined,
-                              },
-                            ],
-                          })) || []
-                        }
-                        isLoading={isLoadingChargeItemDefinitions}
-                        placeholder={t("select_charge_item_definitions")}
-                        onSearch={setChargeItemSearch}
-                        canCreate={true}
-                        createForm={(onSuccess) => (
-                          <div className="py-2">
-                            <ChargeItemDefinitionForm
-                              facilityId={facilityId}
-                              onSuccess={onSuccess}
-                            />
-                          </div>
-                        )}
                       />
                     </div>
                   </div>
