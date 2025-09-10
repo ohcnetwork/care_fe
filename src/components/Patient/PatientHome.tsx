@@ -23,8 +23,8 @@ import {
   PatientDeceasedInfo,
   PatientHeader,
 } from "@/components/Patient/PatientHeader";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
-
 export const PatientHome = (props: {
   facilityId?: string;
   id: string;
@@ -34,7 +34,7 @@ export const PatientHome = (props: {
 
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-
+  useFacilityShortcuts();
   const { data: patientData, isLoading } = useQuery({
     queryKey: ["patient", id],
     queryFn: query(patientApi.getPatient, {

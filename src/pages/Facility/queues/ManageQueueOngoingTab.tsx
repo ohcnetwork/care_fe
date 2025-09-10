@@ -828,7 +828,19 @@ export function TokenCard({
       <div className="flex flex-col">
         {token ? (
           <Link
-            href={`/facility/${facilityId}/queues/${token.queue.id}/tokens/${token.id}`}
+            href={
+              token.patient
+                ? `/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                    {
+                      phone_number: token.patient.phone_number,
+                      year_of_birth: token.patient.year_of_birth.toString(),
+                      partial_id: token.patient.id.slice(0, 5),
+                      queue_id: token.queue.id,
+                      token_id: token.id,
+                    },
+                  ).toString()}`
+                : "#"
+            }
             className="font-semibold hover:underline transition-colors"
           >
             <span className="font-semibold flex items-center gap-1">

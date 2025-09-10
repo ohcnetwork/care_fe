@@ -96,10 +96,10 @@ import {
 
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
+import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
 import { AppointmentDateSelection } from "./BookAppointment/AppointmentDateSelection";
-import { AppointmentSlotPicker } from "./BookAppointment/AppointmentSlotPicker";
-import { AppointmentTokenCard } from "./components/AppointmentTokenCard";
 
 interface Props {
   appointmentId: string;
@@ -199,8 +199,9 @@ export default function AppointmentDetail(props: Props) {
                   id="section-to-print"
                   className="print:w-[400px] print:pt-4 mx-4"
                 >
-                  <AppointmentTokenCard
+                  <TokenCard
                     appointment={appointment}
+                    token={appointment.token}
                     facility={facility}
                   />
                 </div>
@@ -212,9 +213,11 @@ export default function AppointmentDetail(props: Props) {
                   >
                     <PrinterIcon className="size-4 mr-2" />
                     {t("print")}
-                    <div className="size-5 rounded-md border border-gray-200">
-                      {getShortcutDisplay("print-token")}
-                    </div>
+                    {getShortcutDisplay("print-token") && (
+                      <div className="size-5 rounded-md border border-gray-200">
+                        {getShortcutDisplay("print-token")}
+                      </div>
+                    )}
                   </Button>
                 </div>
               </>
