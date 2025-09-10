@@ -13,7 +13,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, differenceInYears, format, isBefore } from "date-fns";
-import { BanIcon, EyeIcon, Loader2 } from "lucide-react";
+import { BanIcon, EyeIcon, Loader2, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -66,13 +66,6 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import {
-  formatName,
-  getReadableDuration,
-  stringifyNestedObject,
-} from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { TokenGenerationSheet } from "@/pages/Appointments/components/TokenGenerationSheet";
@@ -92,9 +85,19 @@ import {
   AppointmentUpdateRequest,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import {
+  formatName,
+  getReadableDuration,
+  stringifyNestedObject,
+} from "@/Utils/utils";
 
 import { formatPatientAddress } from "@/components/Patient/utils";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
+import { AppointmentTokenCard } from "./components/AppointmentTokenCard";
 
 interface Props {
   appointmentId: string;
@@ -106,7 +109,8 @@ export default function AppointmentDetail(props: Props) {
   const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
-
+  useFacilityShortcuts();
+  const getShortcutDisplay = useShortcutDisplays();
   const { canViewAppointments, canWriteAppointment } = getPermissions(
     hasPermission,
     facility?.permissions ?? [],
@@ -188,14 +192,30 @@ export default function AppointmentDetail(props: Props) {
           <AppointmentDetails appointment={appointment} facility={facility} />
           <div className="mt-6">
             {appointment.token?.number ? (
-              <Card className="h-56 md:mx-4 p-8 flex flex-col items-center justify-center text-center">
-                <p className="text-xs uppercase tracking-wide text-gray-500">
-                  {t("token_no")}
-                </p>
-                <span className="mt-2 text-6xl font-bold tracking-tight">
-                  {appointment.token.number}
-                </span>
-              </Card>
+              <>
+                <div
+                  id="section-to-print"
+                  className="print:w-[400px] print:pt-4 mx-4"
+                >
+                  <AppointmentTokenCard
+                    appointment={appointment}
+                    facility={facility}
+                  />
+                </div>
+                <div className="pt-3 mx-4 flex justify-end">
+                  <Button
+                    data-shortcut-id="print-token"
+                    variant="outline"
+                    onClick={() => print()}
+                  >
+                    <PrinterIcon className="size-4 mr-2" />
+                    {t("print")}
+                    <div className="size-5 rounded-md border border-gray-200">
+                      {getShortcutDisplay("print-token")}
+                    </div>
+                  </Button>
+                </div>
+              </>
             ) : (
               <div className="h-56 md:mx-4 border-2 border-dashed border-gray-300 bg-gray-50 rounded flex flex-col items-center justify-center text-center">
                 <span className="text-6xl text-gray-400 font-bold leading-none">

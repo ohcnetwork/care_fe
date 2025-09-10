@@ -8,7 +8,7 @@ import { formatName, formatPatientAge } from "@/Utils/utils";
 import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import { FacilityRead } from "@/types/facility/facility";
 import { Appointment } from "@/types/scheduling/schedule";
-
+import { renderTokenNumber } from "@/types/tokens/token/token";
 interface Props {
   id?: string;
   appointment: Appointment;
@@ -22,7 +22,7 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
   return (
     <Card
       id={id}
-      className="p-6 lg:w-[25rem] border border-gray-300 relative hover:scale-105 hover:rotate-1 hover:shadow-xl transition-all duration-300 ease-in-out print:scale-100 print:rotate-0 print:shadow-none print:hover:scale-100 print:hover:rotate-0 print:hover:shadow-none"
+      className="p-6 border border-gray-300 relative transition-all duration-300 ease-in-out print:scale-100 print:rotate-0 print:shadow-none print:hover:scale-100 print:hover:rotate-0 print:hover:shadow-none"
     >
       <div className="absolute inset-0 opacity-[0.1] pointer-events-none bg-[url('/images/care_logo_gray.svg')] bg-center bg-no-repeat bg-[length:40%_auto] lg:bg-[length:60%_auto]" />
 
@@ -60,8 +60,8 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
               <Label className="text-black font-semibold text-sm/none whitespace-nowrap">
                 {t("token_no")}
               </Label>
-              <p className="text-5xl font-bold leading-none">
-                {appointment.token?.number}
+              <p className="text-2xl font-bold leading-none">
+                {renderTokenNumber(appointment.token!)}
               </p>
             </div>
           </div>
