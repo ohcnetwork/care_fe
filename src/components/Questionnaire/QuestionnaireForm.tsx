@@ -35,7 +35,7 @@ import {
   type Question,
   findQuestionById,
 } from "@/types/questionnaire/question";
-import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
+import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
@@ -50,7 +50,7 @@ import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
 
 export interface QuestionnaireFormState {
-  questionnaire: QuestionnaireDetail;
+  questionnaire: QuestionnaireRead;
   responses: QuestionnaireResponse[];
   errors: QuestionValidationError[];
 }
@@ -366,8 +366,8 @@ export function QuestionnaireForm({
     error: questionnaireError,
   } = useQuery({
     queryKey: ["questionnaireDetail", questionnaireSlug],
-    queryFn: query(questionnaireApi.detail, {
-      pathParams: { id: questionnaireSlug ?? "" },
+    queryFn: query(questionnaireApi.get, {
+      pathParams: { slug: questionnaireSlug ?? "" },
     }),
     enabled: !!questionnaireSlug && !FIXED_QUESTIONNAIRES[questionnaireSlug],
   });

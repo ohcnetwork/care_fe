@@ -3,7 +3,7 @@ import { StructuredQuestionType } from "@/components/Questionnaire/data/Structur
 import { UserReadMinimal } from "@/types/user/user";
 
 import { QuestionnaireResponse as Response } from "./form";
-import { QuestionnaireDetail } from "./questionnaire";
+import { QuestionnaireRead } from "./questionnaire";
 
 export type StructuredResponseValue = {
   id: string;
@@ -14,7 +14,7 @@ export interface QuestionnaireResponse {
   id: string;
   created_date: string;
   modified_date: string;
-  questionnaire?: QuestionnaireDetail;
+  questionnaire?: QuestionnaireRead;
   subject_id: string;
   responses: Response[];
   encounter: string;

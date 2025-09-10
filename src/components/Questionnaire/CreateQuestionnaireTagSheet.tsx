@@ -18,11 +18,11 @@ import {
 
 import mutate from "@/Utils/request/mutate";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
-import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
+import { QuestionnaireTagRead } from "@/types/questionnaire/tags";
 
 interface Props {
   trigger: React.ReactNode;
-  onTagCreated: (tag: QuestionnaireTagModel) => void;
+  onTagCreated: (tag: QuestionnaireTagRead) => void;
 }
 
 export default function CreateQuestionnaireTagSheet({
@@ -38,7 +38,7 @@ export default function CreateQuestionnaireTagSheet({
   const { mutate: createTag, isPending: isCreating } = useMutation({
     mutationFn: mutate(questionnaireApi.tags.create),
     onSuccess: (data: unknown) => {
-      const tagData = data as QuestionnaireTagModel;
+      const tagData = data as QuestionnaireTagRead;
       queryClient.invalidateQueries({
         queryKey: ["questionnaireTags"],
       });
