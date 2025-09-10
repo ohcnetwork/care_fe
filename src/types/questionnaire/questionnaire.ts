@@ -29,10 +29,6 @@ export interface QuestionnaireCreate extends QuestionnaireBase {
 }
 
 export type QuestionnaireUpdate = QuestionnaireBase;
-export interface QuestionnaireForms {
-  count: number;
-  results: QuestionnaireRead[];
-}
 
 export interface QuestionnaireSetOrganizations {
   organizations: string[];
