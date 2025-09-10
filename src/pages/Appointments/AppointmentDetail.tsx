@@ -211,9 +211,11 @@ export default function AppointmentDetail(props: Props) {
                   >
                     <PrinterIcon className="size-4 mr-2" />
                     {t("print")}
-                    <div className="size-5 rounded-md border border-gray-200">
-                      {getShortcutDisplay("print-token")}
-                    </div>
+                    {getShortcutDisplay("print-token") && (
+                      <div className="size-5 rounded-md border border-gray-200">
+                        {getShortcutDisplay("print-token")}
+                      </div>
+                    )}
                   </Button>
                 </div>
               </>

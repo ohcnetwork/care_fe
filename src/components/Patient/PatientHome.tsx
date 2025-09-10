@@ -19,12 +19,12 @@ import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import patientApi from "@/types/emr/patient/patientApi";
 
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import {
   PatientDeceasedInfo,
   PatientHeader,
 } from "@/pages/Facility/services/serviceRequests/PatientHeader";
 import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
-
 export const PatientHome = (props: {
   facilityId?: string;
   id: string;
@@ -34,7 +34,7 @@ export const PatientHome = (props: {
 
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-
+  useFacilityShortcuts();
   const { data: patientData, isLoading } = useQuery({
     queryKey: ["patient", id],
     queryFn: query(patientApi.getPatient, {
