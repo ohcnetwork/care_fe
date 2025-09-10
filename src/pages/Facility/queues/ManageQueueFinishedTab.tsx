@@ -6,18 +6,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  QueueColumn,
-  TokenCard,
-  TokenCardSkeleton,
-} from "@/pages/Facility/queues/ManageQueueOngoingTab";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   renderTokenNumber,
   TokenRead,
   TokenStatus,
 } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
-import { TokenSubQueueRead } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
@@ -25,54 +28,27 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { DoorOpenIcon, MoreHorizontal, RotateCcw } from "lucide-react";
+import {
+  DoorOpenIcon,
+  ExternalLink,
+  MoreHorizontal,
+  RotateCcw,
+} from "lucide-react";
+import { Link } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 
+const PAGE_SIZE = 50;
+
+const INACTIVE_TOKEN_STATUSES = [TokenStatus.FULFILLED, TokenStatus.CANCELLED];
+
 export function ManageQueueFinishedTab({
   facilityId,
   queueId,
-  subQueues,
 }: {
   facilityId: string;
   queueId: string;
-  subQueues: TokenSubQueueRead[];
-}) {
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex space-x-4 overflow-x-auto w-full">
-        {subQueues.map((subQueue) => (
-          <FinishedTokensColumn
-            key={subQueue.id}
-            facilityId={facilityId}
-            queueId={queueId}
-            subQueue={subQueue}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-const PAGE_SIZE = 50;
-
-const INACTIVE_TOKEN_STATUSES = [
-  //   TokenStatus.UNFULFILLED,
-  //   TokenStatus.COMPLETED,
-  TokenStatus.FULFILLED,
-  //   TokenStatus.CANCELLED,
-  //   TokenStatus.ENTERED_IN_ERROR,
-];
-
-function FinishedTokensColumn({
-  facilityId,
-  queueId,
-  subQueue,
-}: {
-  facilityId: string;
-  queueId: string;
-  subQueue: TokenSubQueueRead;
 }) {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
@@ -83,13 +59,12 @@ function FinishedTokensColumn({
         "infinite-tokens",
         facilityId,
         queueId,
-        { sub_queue: subQueue.id, status: INACTIVE_TOKEN_STATUSES },
+        { status: INACTIVE_TOKEN_STATUSES },
       ],
       queryFn: async ({ pageParam = 0, signal }) => {
         const response = await query(tokenApi.list, {
           pathParams: { facility_id: facilityId, queue_id: queueId },
           queryParams: {
-            sub_queue: subQueue.id,
             status: INACTIVE_TOKEN_STATUSES.join(","),
             limit: PAGE_SIZE,
             offset: pageParam,
@@ -113,46 +88,108 @@ function FinishedTokensColumn({
   const tokens = data?.pages.flatMap((page) => page.results) ?? [];
 
   return (
-    <QueueColumn
-      title={subQueue.name}
-      count={
-        <Badge size="sm" variant="blue">
-          {data?.pages[0]?.count ?? 0}
-        </Badge>
-      }
-    >
-      <div className="flex flex-col gap-4">
-        {tokens.length > 0 ? (
-          tokens.map((token, index) => (
-            <div
-              key={token.id}
-              ref={index === tokens.length - 1 ? ref : undefined}
-            >
-              <TokenCard
-                facilityId={facilityId}
-                token={token}
-                options={
+    <div className="flex flex-col gap-4">
+      {tokens.length > 0 ? (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t("token_number")}</TableHead>
+              <TableHead>{t("patient_name")}</TableHead>
+              <TableHead>{t("service_points")}</TableHead>
+              <TableHead>{t("status")}</TableHead>
+              <TableHead className="w-[100px]">{t("actions")}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {tokens.map((token, index) => (
+              <TableRow
+                key={token.id}
+                ref={index === tokens.length - 1 ? ref : undefined}
+              >
+                <TableCell>
+                  <span className="font-mono font-semibold">
+                    {renderTokenNumber(token)}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  {token.patient ? (
+                    <Link
+                      href={`/facility/${facilityId}/queues/${token.queue.id}/tokens/${token.id}`}
+                      className="hover:underline transition-colors flex items-center gap-1"
+                    >
+                      {token.patient.name}
+                      <ExternalLink className="size-3" />
+                    </Link>
+                  ) : (
+                    <span className="text-gray-500">-</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {token.sub_queue?.name || (
+                    <span className="text-gray-500">-</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={
+                      token.status === TokenStatus.FULFILLED
+                        ? "green"
+                        : token.status === TokenStatus.CANCELLED
+                          ? "destructive"
+                          : "secondary"
+                    }
+                    size="sm"
+                  >
+                    {t(token.status.toLowerCase())}
+                  </Badge>
+                </TableCell>
+                <TableCell>
                   <FinishedTokenOptions
                     token={token}
                     facilityId={facilityId}
                     queueId={queueId}
                   />
-                }
-              />
-            </div>
-          ))
-        ) : (
-          <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-10 border border-gray-100">
-            <DoorOpenIcon className="size-6 text-gray-700" />
-            <span className="text-sm font-semibold text-gray-700">
-              {t("no_patient_is_waiting")}
-            </span>
-          </div>
-        )}
-        {isFetchingNextPage && <TokenCardSkeleton count={5} />}
-      </div>
-    </QueueColumn>
+                </TableCell>
+              </TableRow>
+            ))}
+            {isFetchingNextPage && <FinishedTokensTableSkeleton count={5} />}
+          </TableBody>
+        </Table>
+      ) : (
+        <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-20 border border-gray-100">
+          <DoorOpenIcon className="size-8 text-gray-700" />
+          <span className="text-lg font-semibold text-gray-700">
+            {t("no_tokens_finished")}
+          </span>
+          <span className="text-sm text-gray-500">
+            {t("no_patient_is_finished")}
+          </span>
+        </div>
+      )}
+    </div>
   );
+}
+
+function FinishedTokensTableSkeleton({ count = 5 }: { count?: number }) {
+  return Array.from({ length: count }, (_, index) => (
+    <TableRow key={index}>
+      <TableCell>
+        <Skeleton className="h-4 w-16" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-32" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-24" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-6 w-20" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-8 w-8" />
+      </TableCell>
+    </TableRow>
+  ));
 }
 
 function FinishedTokenOptions({
@@ -191,8 +228,11 @@ function FinishedTokenOptions({
           "infinite-tokens",
           facilityId,
           queueId,
-          { sub_queue: token.sub_queue?.id, status: INACTIVE_TOKEN_STATUSES },
+          { status: INACTIVE_TOKEN_STATUSES },
         ],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["token-queue-summary", facilityId, queueId],
       });
       setShowMoveBackToInServiceDialog(false);
     },

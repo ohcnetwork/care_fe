@@ -1,4 +1,5 @@
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
+import { TokenStatus } from "@/types/tokens/token/token";
 import { UserReadMinimal } from "@/types/user/user";
 
 export interface TokenQueue {
@@ -26,4 +27,10 @@ export interface TokenQueueUpdate {
 export interface TokenQueueRetrieveSpec extends TokenQueueRead {
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
+}
+
+export interface TokenQueueSummary {
+  [categoryName: string]: {
+    [status in TokenStatus]: number;
+  };
 }

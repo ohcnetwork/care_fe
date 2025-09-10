@@ -55,6 +55,8 @@ interface AutocompleteProps {
   ref?: React.RefCallback<HTMLButtonElement | null>;
 
   "aria-invalid"?: boolean;
+  shortcutId?: string;
+  shortcutDisplay?: string;
 }
 
 export default function Autocomplete({
@@ -75,6 +77,8 @@ export default function Autocomplete({
   showClearButton = true,
   "data-cy": dataCy,
   ref,
+  shortcutId,
+  shortcutDisplay,
   ...props
 }: AutocompleteProps) {
   const [open, setOpen] = React.useState(false);
@@ -270,6 +274,7 @@ export default function Autocomplete({
             data-cy={dataCy}
             onClick={() => setOpen(!open)}
             ref={ref}
+            data-shortcut-id={shortcutId}
           >
             <span
               className={cn(
@@ -300,7 +305,20 @@ export default function Autocomplete({
           <span className="sr-only">{t("clear")}</span>
         </Button>
       ) : (
-        <CaretSortIcon className="absolute right-3 top-1/2 -translate-y-1/2 ml-2 size-4 shrink-0 opacity-50" />
+        <>
+          {shortcutDisplay ? (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 ">
+              <div className="flex items-center justify-center gap-1">
+                <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
+                  {shortcutDisplay}
+                </div>
+                <CaretSortIcon className="size-3 shrink-0 opacity-50" />
+              </div>
+            </div>
+          ) : (
+            <CaretSortIcon className="absolute right-3 top-1/2 -translate-y-1/2 ml-2 size-4 shrink-0 opacity-50" />
+          )}
+        </>
       )}
     </div>
   );

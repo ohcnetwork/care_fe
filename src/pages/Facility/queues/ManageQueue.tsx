@@ -156,7 +156,6 @@ export function ManageQueuePage({
                 <ManageQueueFinishedTab
                   facilityId={facilityId}
                   queueId={queueId}
-                  subQueues={activeSubQueues}
                 />
               ),
             },

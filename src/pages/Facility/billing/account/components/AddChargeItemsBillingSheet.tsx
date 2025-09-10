@@ -32,12 +32,14 @@ import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPr
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 
 interface AddChargeItemsBillingSheetProps {
   open: boolean;
@@ -70,6 +72,9 @@ export default function AddChargeItemsBillingSheet({
   const [selectedDefinitionId, setSelectedDefinitionId] = useState<
     string | null
   >(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  useFacilityShortcuts("chargeItem-billing-sheet");
+  const getShortcutDisplay = useShortcutDisplays(["facility"]);
 
   const { data: chargeItemDefinitions, isLoading } = useQuery({
     queryKey: ["chargeItemDefinitions", search],
@@ -89,6 +94,10 @@ export default function AddChargeItemsBillingSheet({
       setSelectedItems([]);
       onOpenChange(false);
       toast.success(t("charge_items_added_successfully"));
+      setIsSubmitting(false);
+    },
+    onError: () => {
+      setIsSubmitting(false);
     },
   });
 
@@ -128,13 +137,16 @@ export default function AddChargeItemsBillingSheet({
       ),
     );
   };
-
   const handleSubmit = () => {
+    if (isPending || isSubmitting) {
+      return;
+    }
     if (selectedItems.length === 0) {
       toast.error(t("please_select_at_least_one_item"));
       return;
     }
 
+    setIsSubmitting(true);
     applyChargeItems({
       requests: selectedItems.map(
         ({ charge_item_definition_object: _discard, ...charge_item }) =>
@@ -315,6 +327,10 @@ export default function AddChargeItemsBillingSheet({
                 isLoading={isLoading}
                 noOptionsMessage={t("no_charge_item_definitions_found")}
                 disabled={disabled}
+                shortcutId="select-chargeItem-billing-sheet"
+                shortcutDisplay={getShortcutDisplay(
+                  "select-chargeItem-billing-sheet",
+                )}
               />
             </div>
 
@@ -323,11 +339,29 @@ export default function AddChargeItemsBillingSheet({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={isPending}
+                data-shortcut-id={open ? "cancel-action" : undefined}
               >
                 {t("cancel")}
+                <div className="text-xs flex items-center justify-center w-9 h-6 rounded-md border border-gray-200">
+                  {getShortcutDisplay("cancel-action")}
+                </div>
               </Button>
-              <Button onClick={handleSubmit} disabled={isPending || disabled}>
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSubmit();
+                }}
+                disabled={isPending || selectedItems.length === 0 || disabled}
+                data-shortcut-id={
+                  open ? "submit-charge-items-billing-sheet" : undefined
+                }
+                className="flex flex-row items-center gap-2 justify-between"
+              >
                 {t("add_items")}
+                <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200">
+                  {getShortcutDisplay("submit-charge-items-billing-sheet")}
+                </div>
               </Button>
             </div>
           </div>

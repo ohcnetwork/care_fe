@@ -7,7 +7,6 @@ import {
   CreditCard,
   FileCheck,
   FileText,
-  MoreHorizontal,
   Wallet,
 } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
@@ -38,8 +37,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -61,10 +58,9 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import dayjs from "@/Utils/dayjs";
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
+import { formatPatientAddress } from "@/components/Patient/utils";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
@@ -86,6 +82,10 @@ import {
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import facilityApi from "@/types/facility/facilityApi";
+import dayjs from "@/Utils/dayjs";
+import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 
 const paymentMethodMap: Record<
   PaymentReconciliationPaymentMethod,
@@ -120,10 +120,14 @@ export function InvoiceShow({
   const [selectedStatus, setSelectedStatus] = useState<InvoiceStatus | null>(
     null,
   );
+  const [isAddChargeItemSheetOpen, setIsAddChargeItemSheetOpen] =
+    useState(false);
   const [activeTab, setActiveTab] = useState<
     "payment_history" | "invoice_activity"
   >("payment_history");
   const queryClient = useQueryClient();
+  useFacilityShortcuts("invoice-show");
+  const getShortcutDisplay = useShortcutDisplays(["facility"]);
 
   const activeTabStyle =
     "border-b-2 border-primary font-medium text-primary-900";
@@ -292,7 +296,9 @@ export function InvoiceShow({
 
   const alertButtonText = sourceUrl?.includes("medication_dispense")
     ? t("medication_dispense_invoice_alert")
-    : t("service_request_invoice_alert");
+    : sourceUrl?.includes("services_requests")
+      ? t("service_request_invoice_alert")
+      : t("appointment_invoice_alert");
 
   if (isLoading) {
     return <TableSkeleton count={5} />;
@@ -305,8 +311,14 @@ export function InvoiceShow({
           <h2 className="text-2xl font-bold">{t("invoice_not_found")}</h2>
           <p className="mt-2 text-gray-600">{t("invoice_may_not_exist")}</p>
           <Button asChild className="mt-4">
-            <Link href={`/facility/${facilityId}/billing/invoices`}>
+            <Link
+              href={`/facility/${facilityId}/billing/invoices`}
+              data-shortcut-id="go-back"
+            >
               {t("back_to_invoices")}
+              <div className="text-xs flex items-center justify-center w-10 h-6 rounded-md border border-gray-200">
+                {getShortcutDisplay("go-back")}
+              </div>
             </Link>
           </Button>
         </div>
@@ -322,14 +334,19 @@ export function InvoiceShow({
             variant="outline"
             className="border-gray-400 gap-1"
             onClick={() => goBack()}
+            data-shortcut-id="go-back"
           >
             <CareIcon icon="l-arrow-left" className="size-4" />
             <span className="text-gray-950 font-medium">{t("back")}</span>
+            <div className="text-xs flex items-center justify-center w-9 h-6 rounded-md border border-gray-200">
+              {getShortcutDisplay("go-back")}
+            </div>
           </Button>
         </div>
         <div className="flex gap-2">
           {invoice?.status === InvoiceStatus.draft && (
             <Button
+              data-shortcut-id="issue-invoice"
               variant="outline_primary"
               className="w-full flex flex-row justify-stretch items-center"
               onClick={() => handleStatusChange(InvoiceStatus.issued)}
@@ -337,10 +354,14 @@ export function InvoiceShow({
             >
               <CareIcon icon="l-check" className="size-5" />
               {t("issue_invoice")}
+              <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
+                {getShortcutDisplay("issue-invoice")}
+              </div>
             </Button>
           )}
           {invoice?.status === InvoiceStatus.issued && (
             <Button
+              data-shortcut-id="mark-as-balanced"
               variant="outline_primary"
               className="w-full flex flex-row justify-stretch items-center"
               onClick={() => handleStatusChange(InvoiceStatus.balanced)}
@@ -348,12 +369,21 @@ export function InvoiceShow({
             >
               <CareIcon icon="l-wallet" className="mr-1" />
               {t("mark_as_balanced")}
+              <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
+                {getShortcutDisplay("mark-as-balanced")}
+              </div>
             </Button>
           )}
           {invoice.status === InvoiceStatus.issued && (
-            <Button onClick={() => setIsPaymentSheetOpen(true)}>
+            <Button
+              data-shortcut-id="record-payment"
+              onClick={() => setIsPaymentSheetOpen(true)}
+            >
               <CareIcon icon="l-plus" className="mr-2 size-4" />
               {t("record_payment")}
+              <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
+                {getShortcutDisplay("record-payment")}
+              </div>
             </Button>
           )}
         </div>
@@ -373,6 +403,7 @@ export function InvoiceShow({
             <div className="flex flex-row gap-2">
               {invoice.status === InvoiceStatus.draft && (
                 <Button
+                  data-shortcut-id="edit-invoice-items"
                   variant="outline"
                   className="border-gray-400 gap-1"
                   onClick={() => {
@@ -382,18 +413,25 @@ export function InvoiceShow({
                 >
                   <CareIcon icon="l-edit" className="size-4" />
                   {t("edit_items")}
+                  <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
+                    {getShortcutDisplay("edit-invoice-items")}
+                  </div>
                 </Button>
               )}
               <Button
                 variant="outline"
                 asChild
                 className="border-gray-400 gap-1"
+                data-shortcut-id="print-invoice"
               >
                 <Link
                   href={`/facility/${facilityId}/billing/invoice/${invoiceId}/print`}
                 >
                   <CareIcon icon="l-print" className="size-4" />
                   {t("print")}
+                  <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
+                    {getShortcutDisplay("print-invoice")}
+                  </div>
                 </Link>
               </Button>
               {canEdit && (
@@ -472,9 +510,18 @@ export function InvoiceShow({
                     <p className="font-semibold text-gray-950 text-base ml-2">
                       {invoice.account.patient.name}
                     </p>
-                    <p className="font-medium text-gray-700 text-sm whitespace-pre-wrap ml-2">
-                      {invoice.account.patient.address}
-                    </p>
+                    <div className="flex gap-1 font-medium text-gray-700 text-sm ml-2">
+                      {t("address")}:{" "}
+                      <p className="font-medium text-gray-700 text-sm whitespace-pre-wrap ml-2">
+                        {formatPatientAddress(
+                          invoice.account.patient.address,
+                        ) || (
+                          <span className="text-gray-500">
+                            {t("no_address_provided")}
+                          </span>
+                        )}
+                      </p>
+                    </div>
                     <p className="font-medium text-gray-700 text-sm ml-2">
                       {t("phone")}:{" "}
                       {formatPhoneNumberIntl(
@@ -692,48 +739,38 @@ export function InvoiceShow({
                             </TableCell>
                             {invoice.status === InvoiceStatus.draft && (
                               <TableCell className="text-center">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8"
-                                    >
-                                      <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>
-                                      {t("actions")}
-                                    </DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                      onClick={() => {
-                                        setIsEditDialogOpen(true);
-                                        // Pass only this item to edit
-                                        setSelectedChargeItems([item]);
-                                      }}
-                                    >
-                                      <CareIcon
-                                        icon="l-edit"
-                                        className="mr-2 size-4"
-                                      />
-                                      <span>{t("edit")}</span>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        setChargeItemToRemove(item.id)
-                                      }
-                                      className="text-destructive"
-                                    >
-                                      <CareIcon
-                                        icon="l-trash"
-                                        className="mr-2 size-4"
-                                      />
-                                      <span>{t("remove")}</span>
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
+                                <div className="flex items-center justify-center gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={() => {
+                                      setIsEditDialogOpen(true);
+                                      // Pass only this item to edit
+                                      setSelectedChargeItems([item]);
+                                    }}
+                                    title={t("edit")}
+                                  >
+                                    <CareIcon
+                                      icon="l-edit"
+                                      className="h-4 w-4"
+                                    />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-destructive hover:text-destructive"
+                                    onClick={() =>
+                                      setChargeItemToRemove(item.id)
+                                    }
+                                    title={t("remove")}
+                                  >
+                                    <CareIcon
+                                      icon="l-trash"
+                                      className="h-4 w-4"
+                                    />
+                                  </Button>
+                                </div>
                               </TableCell>
                             )}
                           </TableRow>
@@ -752,13 +789,20 @@ export function InvoiceShow({
                     facilityId={facilityId}
                     invoiceId={invoiceId}
                     accountId={invoice.account.id}
+                    open={isAddChargeItemSheetOpen}
+                    setOpen={setIsAddChargeItemSheetOpen}
                     trigger={
                       <Button
+                        data-shortcut-id="add-charge-item"
                         variant="ghost"
                         className="w-full border border-gray-400 text-gray-950 font-semibold text-sm shadow-sm"
+                        disabled={isAddChargeItemSheetOpen}
                       >
                         <CareIcon icon="l-plus" className="mr-2 size-4" />
                         {t("add_charge_item")}
+                        <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
+                          {getShortcutDisplay("add-charge-item")}
+                        </div>
                       </Button>
                     }
                   />
@@ -1066,13 +1110,28 @@ export function InvoiceShow({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogCancel
+              data-shortcut-id={
+                chargeItemToRemove !== null ? "cancel-action" : undefined
+              }
+            >
+              {t("cancel")}
+              <div className="text-xs flex items-center justify-center w-9 h-6 rounded-md border border-gray-200">
+                {getShortcutDisplay("cancel-action")}
+              </div>
+            </AlertDialogCancel>
             <AlertDialogAction
               className={cn(buttonVariants({ variant: "destructive" }))}
               onClick={handleRemoveChargeItem}
               disabled={isRemoving}
+              data-shortcut-id={
+                chargeItemToRemove !== null ? "submit-action" : undefined
+              }
             >
               {isRemoving ? t("removing_with_dots") : t("remove")}
+              <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200">
+                {getShortcutDisplay("submit-action")}
+              </div>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1099,9 +1158,17 @@ export function InvoiceShow({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogCancel
+              data-shortcut-id={reasonDialogOpen ? "cancel-action" : undefined}
+            >
+              {t("cancel")}
+              <div className="text-xs flex items-center justify-center w-9 h-6 rounded-md border border-gray-200">
+                {getShortcutDisplay("cancel-action")}
+              </div>
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDialogSubmit}
+              id="confirm-invoice-status-change"
               className={cn(
                 buttonVariants({
                   variant:
@@ -1110,8 +1177,12 @@ export function InvoiceShow({
                       : "destructive",
                 }),
               )}
+              data-shortcut-id={reasonDialogOpen ? "submit-action" : undefined}
             >
               {t("confirm")}
+              <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200">
+                {getShortcutDisplay("submit-action")}
+              </div>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

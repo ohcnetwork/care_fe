@@ -1,6 +1,7 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
+import { Metrics } from "@/types/base/condition/condition";
 import {
   ChargeItemDefinitionBase,
   ChargeItemDefinitionCreate,
@@ -29,5 +30,11 @@ export default {
     method: HttpMethod.PUT,
     TRes: Type<ChargeItemDefinitionRead>(),
     TBody: Type<ChargeItemDefinitionCreate>(),
+  },
+  listMetrics: {
+    // TODO: To be changed to /api/v1/charge_item_definition/metrics/ when BE is ready
+    path: "/api/v1/observation_definition/metrics/",
+    method: HttpMethod.GET,
+    TRes: Type<Metrics[]>(),
   },
 } as const;

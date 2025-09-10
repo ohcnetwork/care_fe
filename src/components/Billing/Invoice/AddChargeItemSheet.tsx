@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -29,8 +29,10 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
+import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import AddChargeItemsBillingSheet from "@/pages/Facility/billing/account/components/AddChargeItemsBillingSheet";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import accountApi from "@/types/billing/account/accountApi";
@@ -41,6 +43,8 @@ interface AddChargeItemSheetProps {
   facilityId: string;
   invoiceId: string;
   accountId: string;
+  open: boolean;
+  setOpen: (open: boolean) => void;
   trigger?: React.ReactNode;
 }
 
@@ -48,10 +52,11 @@ export default function AddChargeItemSheet({
   facilityId,
   invoiceId,
   accountId,
+  open,
+  setOpen,
   trigger,
 }: AddChargeItemSheetProps) {
   const { t } = useTranslation();
-  const [open, setOpen] = React.useState(false);
   const [selectedItems, setSelectedItems] = React.useState<Set<string>>(
     new Set(),
   );
@@ -61,6 +66,8 @@ export default function AddChargeItemSheet({
     limit: 10,
     disableCache: true,
   });
+  useFacilityShortcuts("chargeItem-sheet");
+  const getShortcutDisplay = useShortcutDisplays(["facility"]);
 
   // Get account information to extract patient ID
   const { data: account } = useQuery({
@@ -120,7 +127,7 @@ export default function AddChargeItemSheet({
   );
 
   // select all by default
-  React.useEffect(() => {
+  useEffect(() => {
     if (items.length > 0) {
       setSelectedItems(new Set(items.map((item) => item.id)));
     }
@@ -147,7 +154,11 @@ export default function AddChargeItemSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        {trigger || <Button variant="outline">{t("add_charge_item")}</Button>}
+        {trigger || (
+          <Button data-shortcut-id="add-charge-item" variant="outline">
+            {t("add_charge_item")}
+          </Button>
+        )}
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-3xl">
         <SheetHeader>
@@ -167,10 +178,14 @@ export default function AddChargeItemSheet({
             <Button
               variant="outline"
               size="sm"
+              data-shortcut-id="other-charge-items"
               onClick={() => setIsAddChargeItemsOpen(true)}
             >
               <PlusIcon className="size-4 mr-2" />
-              {t("add_charge_items")}
+              {t("other_charge_items")}
+              <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
+                {getShortcutDisplay("other-charge-items")}
+              </div>
             </Button>
           </div>
 
@@ -239,16 +254,31 @@ export default function AddChargeItemSheet({
           <Pagination totalCount={response?.count || 0} />
         </div>
         <SheetFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button
+            data-shortcut-id={open ? "cancel-action" : undefined}
+            variant="outline"
+            onClick={() => setOpen(false)}
+            disabled={isAddChargeItemsOpen}
+          >
             {t("cancel")}
+            <div className="text-xs flex items-center justify-center w-9 h-6 rounded-md border border-gray-200">
+              {getShortcutDisplay("cancel-action")}
+            </div>
           </Button>
           <Button
+            data-shortcut-id={open ? "submit-action" : undefined}
             onClick={() =>
               attachItems({ charge_items: Array.from(selectedItems) })
             }
-            disabled={selectedItems.size === 0 || isPending}
+            disabled={
+              selectedItems.size === 0 || isPending || isAddChargeItemsOpen
+            }
+            className="flex flex-row items-center gap-2 justify-between"
           >
-            {t("add_selected_items")}
+            <span>{t("add_selected_items")}</span>
+            <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200">
+              {getShortcutDisplay("submit-action")}
+            </div>
           </Button>
         </SheetFooter>
       </SheetContent>

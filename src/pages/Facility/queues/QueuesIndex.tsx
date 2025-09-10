@@ -46,6 +46,7 @@ import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 import { dateQueryString } from "@/Utils/utils";
+import dayjs from "dayjs";
 import { Link } from "raviger";
 import QueueFormSheet from "./QueueFormSheet";
 import SubQueueFormSheet from "./SubQueueFormSheet";
@@ -288,6 +289,7 @@ export default function QueuesIndex({
 
   const queues = queuesResponse?.results || [];
   const subQueues = subQueuesResponse?.results || [];
+  const isPast = dayjs(qParams.date).isBefore(dayjs(), "day");
 
   return (
     <Page title={t("token_queues")} hideTitleOnPage>
@@ -335,8 +337,9 @@ export default function QueuesIndex({
               facilityId={facilityId}
               resourceType={resourceType}
               resourceId={effectiveResourceId}
+              initialDate={qParams.date}
               trigger={
-                <Button size="sm" className="font-bold">
+                <Button size="sm" className="font-bold" disabled={isPast}>
                   <Plus className="h-4 w-4 mr-2" />
                   {t("create_queue")}
                 </Button>
@@ -363,8 +366,9 @@ export default function QueuesIndex({
                     facilityId={facilityId}
                     resourceType={resourceType}
                     resourceId={effectiveResourceId}
+                    initialDate={qParams.date}
                     trigger={
-                      <Button>
+                      <Button disabled={isPast}>
                         <Plus className="h-4 w-4 mr-2" />
                         {t("create_first_queue")}
                       </Button>

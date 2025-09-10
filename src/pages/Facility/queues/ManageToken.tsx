@@ -25,8 +25,12 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import Page from "@/components/Common/Page";
 
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { TokenCard } from "@/pages/Facility/queues/TokenCard";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { renderTokenNumber, TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
+import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
 import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
 
@@ -113,6 +117,10 @@ export default function ManageToken({
   tokenId,
 }: ManageTokenProps) {
   const { t } = useTranslation();
+  const { facility, isFacilityLoading } = useCurrentFacility();
+
+  useFacilityShortcuts();
+  const getShortcutDisplay = useShortcutDisplays();
 
   const {
     data: token,
@@ -129,9 +137,9 @@ export default function ManageToken({
     }),
   });
 
-  if (isLoading) {
+  if (isLoading || isFacilityLoading) {
     return (
-      <Page title={t("loading")}>
+      <Page title={t("loading")} hideTitleOnPage={true}>
         <LoadingSkeleton />
       </Page>
     );
@@ -185,7 +193,9 @@ export default function ManageToken({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem>{t("cancel_token")}</DropdownMenuItem>
-                <DropdownMenuItem>{t("print_token")}</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => print()}>
+                  {t("print_token")}
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -226,41 +236,50 @@ export default function ManageToken({
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="grid grid-cols-4 gap-4">
-          {token.patient && (
+        <div className="grid md:grid-cols-2 grid-cols gap-4 ">
+          <div id="section-to-print" className="print:w-[400px] print:pt-4">
+            <TokenCard token={token} facility={facility!} />
+          </div>
+
+          {/* Action Buttons */}
+          <div className="grid md:grid-cols-1 grid-cols-2 grid-row-1 gap-4 items-center justify-center">
+            {token.patient && (
+              <Button
+                data-shortcut-id="patient-home"
+                variant="outline"
+                className="h-24 flex flex-col items-center justify-center gap-2 relative"
+                asChild
+              >
+                <Link
+                  href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                    {
+                      phone_number: token.patient.phone_number,
+                      year_of_birth: token.patient.year_of_birth.toString(),
+                      partial_id: token.patient.id.slice(0, 5),
+                    },
+                  ).toString()}`}
+                >
+                  <div className="absolute top-2 right-2 text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
+                    {getShortcutDisplay("patient-home")}
+                  </div>
+                  <Clipboard className="size-6" />
+                  <span className="text-sm">{t("patient_home")}</span>
+                </Link>
+              </Button>
+            )}
             <Button
+              data-shortcut-id="print-token"
               variant="outline"
               className="h-24 flex flex-col items-center justify-center gap-2 relative"
-              asChild
+              onClick={() => print()}
             >
-              <Link
-                href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
-                  {
-                    phone_number: token.patient.phone_number,
-                    year_of_birth: token.patient.year_of_birth.toString(),
-                    partial_id: token.patient.id.slice(0, 5),
-                  },
-                ).toString()}`}
-              >
-                <div className="absolute top-2 right-2 text-xs text-muted-foreground">
-                  H
-                </div>
-                <Clipboard className="size-6" />
-                <span className="text-sm">{t("patient_home")}</span>
-              </Link>
+              <div className="absolute top-2 right-2 text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
+                {getShortcutDisplay("print-token")}
+              </div>
+              <Printer className="size-6" />
+              <span className="text-sm">{t("print_token")}</span>
             </Button>
-          )}
-          <Button
-            variant="outline"
-            className="h-24 flex flex-col items-center justify-center gap-2 relative"
-          >
-            <div className="absolute top-2 right-2 text-xs text-muted-foreground">
-              P
-            </div>
-            <Printer className="size-6" />
-            <span className="text-sm">{t("print_token")}</span>
-          </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

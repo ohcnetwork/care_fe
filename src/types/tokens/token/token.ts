@@ -1,14 +1,19 @@
 import { PatientRead } from "@/types/emr/patient/patient";
-import { SchedulableResourceType } from "@/types/scheduling/schedule";
+import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
+import { LocationList } from "@/types/location/location";
+import {
+  Appointment,
+  SchedulableResourceType,
+} from "@/types/scheduling/schedule";
 import { TokenCategoryRead } from "@/types/tokens/tokenCategory/tokenCategory";
 import { TokenQueueRead } from "@/types/tokens/tokenQueue/tokenQueue";
 import { TokenSubQueueRead } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum TokenStatus {
   UNFULFILLED = "UNFULFILLED",
   CREATED = "CREATED",
   IN_PROGRESS = "IN_PROGRESS",
-  COMPLETED = "COMPLETED",
   FULFILLED = "FULFILLED",
   CANCELLED = "CANCELLED",
   ENTERED_IN_ERROR = "ENTERED_IN_ERROR",
@@ -46,6 +51,25 @@ export interface TokenRead extends Token {
   status: TokenStatus;
   queue: TokenQueueRead;
 }
+
+export type TokenRetrieve = TokenRead & {
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
+  booking?: Appointment;
+} & (
+    | {
+        resource_type: SchedulableResourceType.Practitioner;
+        resource: UserReadMinimal;
+      }
+    | {
+        resource_type: SchedulableResourceType.Location;
+        resource: LocationList;
+      }
+    | {
+        resource_type: SchedulableResourceType.HealthcareService;
+        resource: HealthcareServiceReadSpec;
+      }
+  );
 
 export function renderTokenNumber(token: TokenRead) {
   return `${token.category.shorthand}-${token.number.toString().padStart(3, "0")}`;

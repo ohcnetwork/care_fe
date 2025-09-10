@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePreferredServicePointCategory } from "@/pages/Facility/queues/usePreferredServicePointCategory";
+import { getTokenQueueStatusCount } from "@/pages/Facility/queues/utils";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import {
   renderTokenNumber,
@@ -203,6 +204,13 @@ function WaitingTokensColumn({
 }) {
   const { ref, inView } = useInView();
 
+  const { data: summary } = useQuery({
+    queryKey: ["token-queue-summary", facilityId, queueId],
+    queryFn: query(tokenQueueApi.summary, {
+      pathParams: { facility_id: facilityId, id: queueId },
+    }),
+  });
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: [
@@ -241,9 +249,11 @@ function WaitingTokensColumn({
     <QueueColumn
       title={t("waiting")}
       count={
-        <Badge size="sm" variant="blue">
-          {data?.pages[0]?.count ?? 0}
-        </Badge>
+        summary && (
+          <Badge size="sm" variant="blue">
+            {getTokenQueueStatusCount(summary, TokenStatus.CREATED)}
+          </Badge>
+        )
       }
     >
       <div className="flex flex-col gap-4">
@@ -292,13 +302,22 @@ function InServiceTokensColumn({
 }) {
   const { t } = useTranslation();
 
+  const { data: summary } = useQuery({
+    queryKey: ["token-queue-summary", facilityId, queueId],
+    queryFn: query(tokenQueueApi.summary, {
+      pathParams: { facility_id: facilityId, id: queueId },
+    }),
+  });
+
   return (
     <QueueColumn
       title={t("in_service")}
       count={
-        <Badge size="sm" variant="green">
-          {/* {data.count} */}111
-        </Badge>
+        summary && (
+          <Badge size="sm" variant="green">
+            {getTokenQueueStatusCount(summary, TokenStatus.IN_PROGRESS)}
+          </Badge>
+        )
       }
     >
       <div className="flex flex-col gap-4">
@@ -409,6 +428,9 @@ function InServiceColumnOptions({
             queueId,
             { status: TokenStatus.FULFILLED },
           ],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["token-queue-summary", facilityId, queueId],
         });
         setShowCompleteAllDialog(false);
       },
@@ -599,6 +621,9 @@ function WaitingTokenOptions({
           { status: TokenStatus.CANCELLED },
         ],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["token-queue-summary", facilityId, queueId],
+      });
       setShowCancelDialog(false);
     },
   });
@@ -696,6 +721,9 @@ function InServiceTokenOptions({
           queueId,
           { status: TokenStatus.CREATED },
         ],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["token-queue-summary", facilityId, queueId],
       });
       setShowCancelDialog(false);
       setShowCompleteDialog(false);
@@ -879,6 +907,9 @@ function CallNextPatientButton({
           queueId,
           { status: TokenStatus.CREATED },
         ],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["token-queue-summary", facilityId, queueId],
       });
     },
   });

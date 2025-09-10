@@ -43,7 +43,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
+import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
 import mutate from "@/Utils/request/mutate";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
   PaymentReconciliationCreate,
@@ -63,6 +65,7 @@ interface PaymentReconciliationSheetProps {
   invoice?: InvoiceRead;
   accountId: string;
   onSuccess?: () => void;
+  isCreditNote?: boolean;
 }
 
 // Add schema before the component
@@ -98,6 +101,7 @@ const formSchema = z
     disposition: z.string().optional(),
     note: z.string().optional(),
     account: z.string(),
+    is_credit_note: z.boolean().optional(),
   })
   .refine((data) => Number(data.tendered_amount) >= Number(data.amount), {
     message: t("tender_amount_cannot_be_less_than_payment_amount"),
@@ -111,11 +115,14 @@ export function PaymentReconciliationSheet({
   invoice,
   accountId,
   onSuccess,
+  isCreditNote = false,
 }: PaymentReconciliationSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [tenderAmount, setTenderAmount] = useState<string>("0");
   const [returnedAmount, setReturnedAmount] = useState<string>("0");
+  useFacilityShortcuts("payment-reconciliation-sheet");
+  const getShortcutDisplay = useShortcutDisplays(["facility"]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -136,6 +143,7 @@ export function PaymentReconciliationSheet({
       disposition: "",
       note: "",
       account: accountId,
+      is_credit_note: isCreditNote,
     },
   });
 
@@ -216,6 +224,7 @@ export function PaymentReconciliationSheet({
       amount: Number(data.amount).toFixed(2),
       tendered_amount: Number(data.tendered_amount).toFixed(2),
       returned_amount: Number(data.returned_amount).toFixed(2),
+      is_credit_note: isCreditNote,
     };
     submitPayment(submissionData);
   });
@@ -264,7 +273,7 @@ export function PaymentReconciliationSheet({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger ref={field.ref}>
                           <SelectValue
                             placeholder={t("select_payment_method")}
                           />
@@ -314,7 +323,7 @@ export function PaymentReconciliationSheet({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger ref={field.ref}>
                           <SelectValue
                             placeholder={t("select_reconciliation_type")}
                           />
@@ -349,7 +358,12 @@ export function PaymentReconciliationSheet({
                       <MonetaryAmountInput
                         {...field}
                         value={field.value || ""}
-                        onChange={(e) => field.onChange(e.target.value)}
+                        onChange={(e) => {
+                          field.onChange(e.target.value);
+                          if (isCreditNote) {
+                            setTenderAmount(e.target.value);
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -357,7 +371,7 @@ export function PaymentReconciliationSheet({
                 )}
               />
 
-              {isCashPayment && (
+              {isCashPayment && !isCreditNote && (
                 <>
                   <FormField
                     control={form.control}
@@ -464,7 +478,11 @@ export function PaymentReconciliationSheet({
             </div>
 
             <SheetFooter>
-              <Button type="submit" disabled={isPending}>
+              <Button
+                type="submit"
+                disabled={isPending}
+                data-shortcut-id="submit-action"
+              >
                 {isPending ? (
                   <>
                     <CareIcon
@@ -476,6 +494,9 @@ export function PaymentReconciliationSheet({
                 ) : (
                   t("record_payment")
                 )}
+                <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200">
+                  {getShortcutDisplay("submit-action")}
+                </div>
               </Button>
             </SheetFooter>
           </form>

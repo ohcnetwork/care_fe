@@ -37,6 +37,7 @@ import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
+import dayjs from "dayjs";
 
 const createQueueFormSchema = z.object({
   name: z.string().min(1, "Queue name is required"),
@@ -63,6 +64,7 @@ interface QueueFormSheetProps {
   queueId?: string; // If provided, we're in edit mode
   trigger?: React.ReactNode;
   onSuccess?: () => void;
+  initialDate?: Date;
 }
 
 export default function QueueFormSheet({
@@ -72,6 +74,7 @@ export default function QueueFormSheet({
   queueId,
   trigger,
   onSuccess,
+  initialDate,
 }: QueueFormSheetProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -85,7 +88,7 @@ export default function QueueFormSheet({
     ),
     defaultValues: {
       name: "",
-      date: new Date(),
+      date: initialDate,
       set_is_primary: false,
     },
   });
@@ -115,11 +118,11 @@ export default function QueueFormSheet({
     if (!isOpen) {
       form.reset({
         name: "",
-        date: new Date(),
+        date: initialDate,
         set_is_primary: false,
       });
     }
-  }, [isOpen, form]);
+  }, [isOpen, form, initialDate]);
 
   const { mutate: createQueue, isPending: isCreating } = useMutation({
     mutationFn: mutate(tokenQueueApi.create, {
@@ -247,6 +250,9 @@ export default function QueueFormSheet({
                         <DatePicker
                           date={field.value}
                           onChange={field.onChange}
+                          disabled={(date) =>
+                            dayjs(date).isBefore(dayjs(), "day")
+                          }
                         />
                       </FormControl>
                       <FormMessage />

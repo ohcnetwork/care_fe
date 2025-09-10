@@ -186,7 +186,7 @@ function ProductKnowledgeFormContent({
         product_type: existingData.product_type,
         status: existingData.status,
         alternate_identifier: existingData.alternate_identifier || "",
-        category: existingData.category.slug,
+        category: existingData.category?.slug,
         code: existingData.code?.code ? existingData.code : null,
         base_unit: existingData.base_unit?.code ? existingData.base_unit : null,
         names: existingData.names || [],
@@ -407,7 +407,7 @@ function ProductKnowledgeFormContent({
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger ref={field.ref}>
                               <SelectValue
                                 placeholder={t("select_product_type")}
                               />
@@ -510,7 +510,7 @@ function ProductKnowledgeFormContent({
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger ref={field.ref}>
                               <SelectValue placeholder={t("status")} />
                             </SelectTrigger>
                           </FormControl>
@@ -595,7 +595,7 @@ function ProductKnowledgeFormContent({
                                     defaultValue={field.value}
                                   >
                                     <FormControl>
-                                      <SelectTrigger>
+                                      <SelectTrigger ref={field.ref}>
                                         <SelectValue
                                           placeholder={t("select_name_type")}
                                         />
@@ -769,7 +769,7 @@ function ProductKnowledgeFormContent({
                                     }}
                                   >
                                     <FormControl>
-                                      <SelectTrigger>
+                                      <SelectTrigger ref={field.ref}>
                                         <SelectValue
                                           placeholder={t(
                                             "duration_unit_placeholder",
