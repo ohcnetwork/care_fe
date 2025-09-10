@@ -1,4 +1,4 @@
-import { format, formatDate, isBefore, isSameDay, isValid } from "date-fns";
+import { format, isBefore, isSameDay, isValid } from "date-fns";
 import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -334,12 +334,12 @@ export const SelectedDateBadge = ({
             {[selected.from, selected.to].map((date, index) => (
               <span key={date.toISOString() + index}>
                 {index > 0 && "-"}
-                <span>{formatDate(date, "d MMM yy")}</span>
+                <span>{format(date, "d MMM yy")}</span>
               </span>
             ))}
           </span>
         ) : presentDate ? (
-          <span>{formatDate(presentDate, "d MMM yyyy")}</span>
+          <span>{format(presentDate, "d MMM yyyy")}</span>
         ) : (
           <></>
         )}
