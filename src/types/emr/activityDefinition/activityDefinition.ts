@@ -3,6 +3,7 @@ import { ResourceCategoryRead } from "@/types/base/resourceCategory/resourceCate
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
+import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
 import { LocationList } from "@/types/location/location";
 
 export enum Status {
@@ -53,6 +54,7 @@ export interface ActivityDefinitionCreateSpec
   observation_result_requirements: string[];
   locations: string[];
   category: string;
+  healthcare_service: string | null;
 }
 
 export interface ActivityDefinitionUpdateSpec
@@ -63,6 +65,7 @@ export interface ActivityDefinitionUpdateSpec
   observation_result_requirements: string[];
   locations: string[];
   category: string;
+  healthcare_service: string | null;
 }
 
 export interface ActivityDefinitionReadSpec extends BaseActivityDefinitionSpec {
@@ -72,4 +75,5 @@ export interface ActivityDefinitionReadSpec extends BaseActivityDefinitionSpec {
   observation_result_requirements: ObservationDefinitionReadSpec[];
   locations: LocationList[];
   category: ResourceCategoryRead;
+  healthcare_service: HealthcareServiceReadSpec;
 }

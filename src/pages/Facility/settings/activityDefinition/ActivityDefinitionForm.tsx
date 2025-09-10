@@ -31,17 +31,19 @@ import { Textarea } from "@/components/ui/textarea";
 import Page from "@/components/Common/Page";
 import RequirementsSelector from "@/components/Common/RequirementsSelector";
 import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
+import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
 import LocationMultiSelect from "@/components/Location/LocationMultiSelect";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
+
+import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
-import { ChargeItemDefinitionForm } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionForm";
 import ObservationDefinitionForm from "@/pages/Facility/settings/observationDefinition/ObservationDefinitionForm";
 import { CreateSpecimenDefinition } from "@/pages/Facility/settings/specimen-definitions/CreateSpecimenDefinition";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
-import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import {
   type ActivityDefinitionCreateSpec,
   type ActivityDefinitionReadSpec,
@@ -65,6 +67,7 @@ const formSchema = z.object({
   status: z.nativeEnum(Status),
   classification: z.nativeEnum(Classification),
   kind: z.nativeEnum(Kind),
+  healthcare_service: z.string().nullable(),
   code: z.object({
     code: z.string().min(1, "Code is required"),
     display: z.string().min(1, "Display name is required"),
@@ -131,26 +134,7 @@ const formSchema = z.object({
     )
     .default([]),
   charge_item_definitions: z
-    .array(
-      z.object({
-        value: z.string(),
-        label: z.string(),
-        details: z.array(
-          z
-            .object({
-              label: z.string(),
-              value: z
-                .string()
-                .optional()
-                .transform((v) => v ?? undefined),
-            })
-            .transform((obj) => ({
-              ...obj,
-              value: obj.value ?? undefined,
-            })),
-        ),
-      }),
-    )
+    .array(z.custom<ChargeItemDefinitionBase>())
     .default([]),
   locations: z.array(z.string()).default([]),
   category: z.string(),
@@ -225,7 +209,6 @@ function ActivityDefinitionFormContent({
   const isEditMode = Boolean(activityDefinitionSlug);
   const [specimenSearch, setSpecimenSearch] = React.useState("");
   const [observationSearch, setObservationSearch] = React.useState("");
-  const [chargeItemSearch, setChargeItemSearch] = React.useState("");
   const { data: specimenDefinitions, isLoading: isLoadingSpecimens } = useQuery(
     {
       queryKey: ["specimenDefinitions", facilityId, specimenSearch],
@@ -255,20 +238,6 @@ function ActivityDefinitionFormContent({
       ),
     });
 
-  const {
-    data: chargeItemDefinitions,
-    isLoading: isLoadingChargeItemDefinitions,
-  } = useQuery({
-    queryKey: ["chargeItemDefinitions", facilityId, chargeItemSearch],
-    queryFn: query.debounced(chargeItemDefinitionApi.listChargeItemDefinition, {
-      pathParams: { facilityId },
-      queryParams: {
-        limit: 100,
-        title: chargeItemSearch,
-      },
-    }),
-  });
-
   const { data: locations, isLoading: isLoadingLocations } = useQuery({
     queryKey: ["locations", facilityId],
     queryFn: query.debounced(locationApi.list, {
@@ -295,6 +264,7 @@ function ActivityDefinitionFormContent({
             code: existingData.code,
             body_site: existingData.body_site,
             diagnostic_report_codes: existingData.diagnostic_report_codes || [],
+            healthcare_service: existingData.healthcare_service?.id || null,
             specimen_requirements:
               existingData.specimen_requirements?.map((s) => ({
                 value: s.slug,
@@ -351,25 +321,7 @@ function ActivityDefinitionFormContent({
                   },
                 ],
               })) || [],
-            charge_item_definitions:
-              existingData.charge_item_definitions?.map((c) => ({
-                value: c.slug,
-                label: c.title,
-                details: [
-                  {
-                    label: t("status"),
-                    value: t(c.status) ?? undefined,
-                  },
-                  {
-                    label: t("description"),
-                    value: c.description ?? undefined,
-                  },
-                  {
-                    label: t("purpose"),
-                    value: c.purpose ?? undefined,
-                  },
-                ],
-              })) || [],
+            charge_item_definitions: existingData.charge_item_definitions || [],
             locations: existingData.locations?.map((l) => l.id) || [],
             category: existingData.category?.slug || "",
           }
@@ -451,7 +403,7 @@ function ActivityDefinitionFormContent({
         (item) => item.value,
       ),
       charge_item_definitions: data.charge_item_definitions.map(
-        (item) => item.value,
+        (item) => item.slug,
       ),
     };
 
@@ -465,6 +417,13 @@ function ActivityDefinitionFormContent({
       );
     }
   }
+
+  React.useEffect(() => {
+    console.log(
+      "form.watch('charge_item_definitions')",
+      form.watch("charge_item_definitions"),
+    );
+  }, [form.watch("charge_item_definitions")]);
 
   return (
     <Page
@@ -914,48 +873,37 @@ function ActivityDefinitionFormContent({
                   <div className="rounded-lg border border-gray-200 shadow-sm p-4">
                     <FormLabel>{t("charge_item_definitions")}</FormLabel>
                     <div className="mt-2">
-                      <RequirementsSelector
-                        title={t("select_charge_item_definitions")}
-                        description={t(
-                          "select_or_create_charge_item_definitions",
-                        )}
-                        allowDuplicate={true}
+                      <ResourceDefinitionCategoryPicker<ChargeItemDefinitionBase>
+                        facilityId={facilityId}
                         value={form.watch("charge_item_definitions") || []}
-                        onChange={(values) =>
-                          form.setValue("charge_item_definitions", values)
-                        }
-                        options={
-                          chargeItemDefinitions?.results.map((chargeDef) => ({
-                            label: chargeDef.title,
-                            value: chargeDef.slug,
-                            details: [
-                              {
-                                label: t("status"),
-                                value: t(chargeDef.status) ?? undefined,
-                              },
-                              {
-                                label: t("description"),
-                                value: chargeDef.description ?? undefined,
-                              },
-                              {
-                                label: t("purpose"),
-                                value: chargeDef.purpose ?? undefined,
-                              },
-                            ],
-                          })) || []
-                        }
-                        isLoading={isLoadingChargeItemDefinitions}
+                        onValueChange={(selectedDef) => {
+                          if (!selectedDef) {
+                            form.setValue("charge_item_definitions", []);
+                            return;
+                          }
+                          const defs = Array.isArray(selectedDef)
+                            ? selectedDef
+                            : [selectedDef];
+                          form.setValue("charge_item_definitions", defs);
+                        }}
+                        allowMultiple
                         placeholder={t("select_charge_item_definitions")}
-                        onSearch={setChargeItemSearch}
-                        canCreate={true}
-                        createForm={(onSuccess) => (
-                          <div className="py-2">
-                            <ChargeItemDefinitionForm
-                              facilityId={facilityId}
-                              onSuccess={onSuccess}
-                            />
-                          </div>
-                        )}
+                        className="w-full"
+                        resourceType={
+                          ResourceCategoryResourceType.charge_item_definition
+                        }
+                        listDefinitions={{
+                          queryFn:
+                            chargeItemDefinitionApi.listChargeItemDefinition,
+                          pathParams: { facilityId },
+                        }}
+                        translations={{
+                          searchPlaceholder: "search_charge_item_definitions",
+                          selectPlaceholder: "select_charge_item_definition",
+                          noResultsFound:
+                            "no_charge_item_definitions_found_for",
+                          noItemsFound: "no_charge_item_definitions_found",
+                        }}
                       />
                     </div>
                   </div>
