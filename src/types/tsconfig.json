@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "./dist",
+    "rootDir": "../../src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "noEmit": false,
+    "isolatedModules": true,
+    "baseUrl": "../../src",
+    "paths": {
+      "@/*": ["./*"],
+      "@careConfig": ["./care.config.ts"]
+    }
+  },
+  "include": ["**/*.ts", "!**/*Api.ts"],
+  "exclude": [
+    "**/*Api.ts",
+    "**/dist/**",
+    "**/node_modules/**",
+    "dist/**",
+    "node_modules/**"
+  ]
+}

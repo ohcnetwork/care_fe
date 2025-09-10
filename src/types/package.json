@@ -1,0 +1,40 @@
+{
+  "name": "@care/types",
+  "version": "1.0.0",
+  "description": "TypeScript type definitions for Care application",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "!dist/**/*Api.*",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "typescript",
+    "types",
+    "care",
+    "healthcare"
+  ],
+  "author": "Open Healthcare Network Contributors",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:ohcnetwork/care_fe.git",
+    "directory": "src/types"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

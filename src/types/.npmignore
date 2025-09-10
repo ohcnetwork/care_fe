@@ -1,0 +1,30 @@
+# Exclude API files
+**/*Api.ts
+**/*Api.d.ts
+**/*Api.js
+
+# Exclude dist folder (will be generated during build)
+dist/
+
+# Exclude node_modules
+node_modules/
+
+# Exclude source maps
+**/*.d.ts.map
+
+# Exclude TypeScript config
+tsconfig.json
+
+# Exclude development files
+*.log
+.DS_Store
+.vscode/
+.idea/
+
+# Exclude test files
+**/*.test.ts
+**/*.spec.ts
+**/__tests__/
+
+# Exclude build artifacts
+*.tsbuildinfo
