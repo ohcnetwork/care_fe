@@ -95,9 +95,9 @@ import {
 
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { AppointmentSlotPicker } from "@/pages/Appointments/components/AppointmentSlotPicker";
+import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
-import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
-import { AppointmentTokenCard } from "./components/AppointmentTokenCard";
 
 interface Props {
   appointmentId: string;
@@ -197,8 +197,9 @@ export default function AppointmentDetail(props: Props) {
                   id="section-to-print"
                   className="print:w-[400px] print:pt-4 mx-4"
                 >
-                  <AppointmentTokenCard
+                  <TokenCard
                     appointment={appointment}
+                    token={appointment.token}
                     facility={facility}
                   />
                 </div>
