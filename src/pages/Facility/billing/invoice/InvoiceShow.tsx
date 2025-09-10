@@ -337,7 +337,7 @@ export function InvoiceShow({
             <span>{t("back")}</span>
           </BackButton>
         </div>
-        <div className="flex gap-2 max-w-full overflow-x-auto">
+        <div className="flex gap-2 flex-col sm:flex-row w-full sm:w-auto">
           {invoice?.status === InvoiceStatus.draft && (
             <Button
               data-shortcut-id="issue-invoice"

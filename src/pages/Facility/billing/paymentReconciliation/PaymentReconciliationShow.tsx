@@ -332,7 +332,7 @@ export function PaymentReconciliationShow({
                   </div>
                 </div>
 
-                <div className="mt-4 flex justify-end gap-2">
+                <div className="mt-4 flex justify-end flex-col sm:flex-row gap-2">
                   <Button variant="outline" size="sm" asChild>
                     <Link
                       href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice.id}`}
