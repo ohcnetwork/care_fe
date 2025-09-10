@@ -325,6 +325,10 @@ export function CreateInvoicePage({
           {} as Record<string, boolean>,
         ),
       );
+      form.setValue(
+        "charge_items",
+        chargeItems.map((item) => item.id),
+      );
       hasInitializedSelections.current = true;
     }
   }, [chargeItems]);
@@ -661,9 +665,7 @@ export function CreateInvoicePage({
           <Button
             data-shortcut-id="add-charge-items-create-invoice"
             onClick={() => setIsAddChargeItemsOpen(true)}
-          >
-            Add Charge Items
-          </Button>
+          />
         </div>
       )}
 

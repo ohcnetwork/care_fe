@@ -8,7 +8,6 @@ import {
   CreditCard,
   FileCheck,
   FileText,
-  MoreHorizontal,
   Wallet,
 } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
@@ -39,8 +38,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -414,12 +411,16 @@ export function InvoiceShow({
                 variant="outline"
                 asChild
                 className="border-gray-400 gap-1"
+                data-shortcut-id="print-invoice"
               >
                 <Link
                   href={`/facility/${facilityId}/billing/invoice/${invoiceId}/print`}
                 >
                   <CareIcon icon="l-print" className="size-4" />
                   {t("print")}
+                  <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
+                    {getShortcutDisplay("print-invoice")}
+                  </div>
                 </Link>
               </Button>
               {canEdit && (
@@ -727,48 +728,38 @@ export function InvoiceShow({
                             </TableCell>
                             {invoice.status === InvoiceStatus.draft && (
                               <TableCell className="text-center">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8"
-                                    >
-                                      <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>
-                                      {t("actions")}
-                                    </DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                      onClick={() => {
-                                        setIsEditDialogOpen(true);
-                                        // Pass only this item to edit
-                                        setSelectedChargeItems([item]);
-                                      }}
-                                    >
-                                      <CareIcon
-                                        icon="l-edit"
-                                        className="mr-2 size-4"
-                                      />
-                                      <span>{t("edit")}</span>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        setChargeItemToRemove(item.id)
-                                      }
-                                      className="text-destructive"
-                                    >
-                                      <CareIcon
-                                        icon="l-trash"
-                                        className="mr-2 size-4"
-                                      />
-                                      <span>{t("remove")}</span>
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
+                                <div className="flex items-center justify-center gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={() => {
+                                      setIsEditDialogOpen(true);
+                                      // Pass only this item to edit
+                                      setSelectedChargeItems([item]);
+                                    }}
+                                    title={t("edit")}
+                                  >
+                                    <CareIcon
+                                      icon="l-edit"
+                                      className="h-4 w-4"
+                                    />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-destructive hover:text-destructive"
+                                    onClick={() =>
+                                      setChargeItemToRemove(item.id)
+                                    }
+                                    title={t("remove")}
+                                  >
+                                    <CareIcon
+                                      icon="l-trash"
+                                      className="h-4 w-4"
+                                    />
+                                  </Button>
+                                </div>
                               </TableCell>
                             )}
                           </TableRow>

@@ -203,6 +203,13 @@
       "description": "Add Charge Items",
       "when": "always",
       "subContext": "charge-items-table"
+    },
+    {
+      "key": "p",
+      "action": "print-invoice",
+      "description": "Print Invoice",
+      "when": "always",
+      "subContext": "invoice-show"
     }
   ],
   "encounter": [

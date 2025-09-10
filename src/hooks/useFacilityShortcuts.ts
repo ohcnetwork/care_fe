@@ -135,6 +135,10 @@ export function useFacilityShortcuts(subContext?: string) {
         id: "add-charge-items-table",
         handler: shortcutActionHandler("add-charge-items-table"),
       },
+      {
+        id: "print-invoice",
+        handler: shortcutActionHandler("print-invoice"),
+      },
       // Generic action handlers
       {
         id: "cancel-action",
