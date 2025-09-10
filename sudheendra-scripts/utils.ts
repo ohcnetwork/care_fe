@@ -136,6 +136,9 @@ export interface BaseConfig {
   sheetName?: string;
   batchSize?: number;
   maxWorkers?: number;
+  enableTokenAuth?: boolean;
+  care_access_token?: string;
+  care_refresh_token?: string;
 }
 
 // Utility function to create slug from name
@@ -179,26 +182,127 @@ export const getLogger = () => {
   };
 };
 
-const CARE_API_URL = process.env.REACT_CARE_API_URL ?? "http://127.0.0.1:8000";
+/**
+ * Login function to get bearer tokens
+ * @param apiBaseUrl - The base URL for the API
+ * @returns Object containing access and refresh tokens
+ */
+export const loginAndGetTokens = async (
+  apiBaseUrl: string,
+): Promise<{ care_access_token: string; care_refresh_token: string }> => {
+  const response = await fetch(`${apiBaseUrl}/api/v1/auth/login/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      username: process.env.USERNAME,
+      password: process.env.PASSWORD,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to login: ${response.statusText}\n${await response.text()}`,
+    );
+  }
+
+  const data = await response.json();
+
+  // Handle MFA case - not supported in scripts
+  if (data.temp_token) {
+    throw new Error("MFA authentication is not supported in scripts");
+  }
+
+  // Extract tokens from response
+  if (!data.access || !data.refresh) {
+    throw new Error("Invalid login response: missing access or refresh token");
+  }
+
+  return {
+    care_access_token: data.access,
+    care_refresh_token: data.refresh,
+  };
+};
+
+/**
+ * Generate authentication headers based on config
+ * @param config - The configuration object
+ * @returns Authorization header value
+ */
+export const getAuthHeaders = (config: BaseConfig): Record<string, string> => {
+  if (config.enableTokenAuth && config.care_access_token) {
+    return {
+      Authorization: `Bearer ${config.care_access_token}`,
+    };
+  } else {
+    return {
+      Authorization: `Basic ${Buffer.from(`${process.env.USERNAME}:${process.env.PASSWORD}`).toString("base64")}`,
+    };
+  }
+};
+
+/**
+ * Ensure authentication tokens are available when token auth is enabled
+ * @param config - The configuration object
+ * @returns Updated config with tokens if needed
+ */
+export const ensureAuthentication = async (
+  config: BaseConfig,
+): Promise<BaseConfig> => {
+  if (!config.enableTokenAuth) {
+    return config;
+  }
+
+  // If tokens are already available, return the config as is
+  if (config.care_access_token && config.care_refresh_token) {
+    return config;
+  }
+
+  // Login to get tokens
+  const logger = getLogger();
+  logger(
+    colorize(
+      "Token authentication enabled but tokens not found. Logging in...",
+      0,
+    ),
+  );
+
+  try {
+    const tokens = await loginAndGetTokens(config.apiBaseUrl);
+    logger(colorize("Successfully obtained authentication tokens", 0));
+
+    return {
+      ...config,
+      care_access_token: tokens.care_access_token,
+      care_refresh_token: tokens.care_refresh_token,
+    };
+  } catch (error) {
+    logger(colorize(`Failed to obtain authentication tokens: ${error}`, 1));
+    throw error;
+  }
+};
 
 /**
  * Make a request to the CARE API
  * @param url - The URL to make the request to
  * @param method - The method to use for the request
+ * @param config - The configuration object for authentication
  * @param body - The body of the request
  * @returns The response from the request
  */
 export const request = async (
   url: string,
   method: "GET" | "POST" | "PUT" | "DELETE",
+  config: BaseConfig,
   body?: Record<string, unknown>,
 ) => {
-  const response = await fetch(`${CARE_API_URL}${url}`, {
+  const response = await fetch(`${config.apiBaseUrl}${url}`, {
     method,
     body: JSON.stringify(body),
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Basic ${Buffer.from(`${process.env.USERNAME}:${process.env.PASSWORD}`).toString("base64")}`,
+      ...getAuthHeaders(config),
     },
   });
 
@@ -461,7 +565,7 @@ export async function makeApiCall(
     method,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Basic ${Buffer.from(`${process.env.USERNAME}:${process.env.PASSWORD}`).toString("base64")}`,
+      ...getAuthHeaders(config),
     },
     body: JSON.stringify({ datapoints: [data] }),
   });
@@ -687,6 +791,9 @@ export const DEFAULT_CONFIG = {
   sheetName: "Sheet1",
   batchSize: 100,
   maxWorkers: 4,
+  enableTokenAuth: process.env.ENABLE_TOKEN_AUTH === "true" || false,
+  care_access_token: process.env.CARE_ACCESS_TOKEN,
+  care_refresh_token: process.env.CARE_REFRESH_TOKEN,
 };
 
 // CLI argument parser

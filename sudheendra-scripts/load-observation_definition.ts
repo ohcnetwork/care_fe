@@ -7,6 +7,8 @@ import {
   type BaseConfig,
   DEFAULT_CONFIG,
   colorize,
+  ensureAuthentication,
+  getAuthHeaders,
   getLogger,
   makeBatchApiCall,
   mergeConfigWithCli,
@@ -310,13 +312,16 @@ function validateObservationDefinition(
 /**
  * API call
  */
-async function upsertObservationDefinition(data: ParsedObservationDefinition) {
-  const apiUrl = `${CONFIG.apiBaseUrl}/api/v1/observation_definition/upsert/`;
+async function upsertObservationDefinition(
+  data: ParsedObservationDefinition,
+  config: BaseConfig,
+) {
+  const apiUrl = `${config.apiBaseUrl}/api/v1/observation_definition/upsert/`;
   const response = await fetch(apiUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Basic ${Buffer.from(`${process.env.USERNAME}:${process.env.PASSWORD}`).toString("base64")}`,
+      ...getAuthHeaders(config),
     },
     body: JSON.stringify({ datapoints: [data] }),
   });
@@ -388,12 +393,15 @@ async function upsertObservationDefinition(data: ParsedObservationDefinition) {
 async function main(configOverride?: Partial<typeof CONFIG>) {
   // If configOverride is provided, don't merge CLI args (called programmatically)
   // Otherwise, merge CLI args (called from command line)
-  const finalConfig = configOverride
+  let finalConfig = configOverride
     ? { ...CONFIG, ...configOverride }
     : mergeConfigWithCli(CONFIG, configOverride);
 
   try {
     logger(colorize("Starting observation definition loader...", 0));
+
+    // Ensure authentication tokens are available if token auth is enabled
+    finalConfig = await ensureAuthentication(finalConfig);
 
     if (!finalConfig.inputFile || !fs.existsSync(finalConfig.inputFile)) {
       throw new Error(

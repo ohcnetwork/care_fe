@@ -1,13 +1,18 @@
 import dotenv from "dotenv";
 
 import { RoleCreate } from "@/types/emr/role/role";
-import { batchRequest } from "sudheendra-scripts/utils";
+import {
+  batchRequest,
+  DEFAULT_CONFIG,
+  ensureAuthentication,
+  getAuthHeaders,
+  type BaseConfig,
+} from "sudheendra-scripts/utils";
 
 dotenv.config({ path: [".env.local", ".env"] });
 
 const GOOGLE_SHEET_ID = "1nihZMLqvssW_jl4zubHrj4bgI6xJGUNuiENDjvEooFY";
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=role%20permissions`;
-const API_BASE_URL = process.env.REACT_CARE_API_URL;
 
 const fetchRolePermissionsCsv = async () => {
   const response = await fetch(CSV_URL, {
@@ -88,14 +93,14 @@ async function parseRolePermissionsCsv(content: string) {
   return roles;
 }
 
-async function createRoles(datapoints: RoleCreate[]) {
-  const url = `${API_BASE_URL}/api/v1/role/upsert/`;
+async function createRoles(datapoints: RoleCreate[], config: BaseConfig) {
+  const url = `${config.apiBaseUrl}/api/v1/role/upsert/`;
 
   const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Basic ${Buffer.from(`${process.env.USERNAME}:${process.env.PASSWORD}`).toString("base64")}`,
+      ...getAuthHeaders(config),
     },
     body: JSON.stringify({ datapoints }),
   });
@@ -825,9 +830,19 @@ function checkRoles(role: RoleCreate) {
 }
 
 async function main() {
+  // Create config for authentication
+  let config: BaseConfig = {
+    ...DEFAULT_CONFIG,
+    inputFile: "", // Not used for this script
+    outputFile: "", // Not used for this script
+  };
+
+  // Ensure authentication tokens are available if token auth is enabled
+  config = await ensureAuthentication(config);
+
   const csvContent = await fetchRolePermissionsCsv();
   const roles = await parseRolePermissionsCsv(csvContent);
-  await batchRequest(roles, createRoles);
+  await batchRequest(roles, (datapoints) => createRoles(datapoints, config));
 }
 
 main();

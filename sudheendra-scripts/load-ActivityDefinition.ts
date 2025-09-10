@@ -13,6 +13,8 @@ import {
   DEFAULT_CONFIG,
   type ProcessedRow,
   colorize,
+  ensureAuthentication,
+  getAuthHeaders,
   getLogger,
   loadData,
   makeApiCall,
@@ -70,15 +72,18 @@ function parseCode(
 }
 
 // Function to lookup missing codes using ValueSet API
-async function lookupCode(searchTerm: string): Promise<Code | null> {
+async function lookupCode(
+  searchTerm: string,
+  config: BaseConfig,
+): Promise<Code | null> {
   try {
     const response = await fetch(
-      `${CONFIG.apiBaseUrl}/api/v1/valueset/activity-definition-procedure-code/expand/`,
+      `${config.apiBaseUrl}/api/v1/valueset/activity-definition-procedure-code/expand/`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Basic ${Buffer.from(`${process.env.USERNAME}:${process.env.PASSWORD}`).toString("base64")}`,
+          ...getAuthHeaders(config),
         },
         body: JSON.stringify({
           count: 10,
@@ -132,6 +137,7 @@ const CONFIG: BaseConfig & { outputDir: string } = {
 // Function to process CSV data
 async function processCsvData(
   rows: Record<string, string>[],
+  config: BaseConfig,
 ): Promise<ActivityData[]> {
   const results: ActivityData[] = [];
 
@@ -147,7 +153,7 @@ async function processCsvData(
     // If code is missing but we have a title, try to lookup the code
     if (!code && row.title) {
       logger(colorize(`Looking up code for activity: ${row.title}`, 2));
-      code = await lookupCode(row.title);
+      code = await lookupCode(row.title, config);
       if (code) {
         logger(
           colorize(
@@ -286,10 +292,14 @@ async function upsertActivityDefinition(data: ActivityData): Promise<any> {
 
 // Main function
 async function main(configOverride?: Partial<typeof CONFIG>) {
-  const finalConfig = mergeConfigWithCli(CONFIG, configOverride);
+  let finalConfig = mergeConfigWithCli(CONFIG, configOverride);
 
   try {
     logger(colorize("Starting activity definition loader...", 0));
+
+    // Ensure authentication tokens are available if token auth is enabled
+    const authenticatedConfig = await ensureAuthentication(finalConfig);
+    finalConfig = { ...finalConfig, ...authenticatedConfig };
 
     // Step 0: Create output directory if it doesn't exist
     const outputDir = finalConfig.outputDir;
@@ -343,7 +353,7 @@ async function main(configOverride?: Partial<typeof CONFIG>) {
 
     // Process data
     logger(colorize("Processing data...", 0));
-    let processedData = await processCsvData(csvRows);
+    let processedData = await processCsvData(csvRows, finalConfig);
 
     // Remove duplicates
     processedData = removeDuplicates(processedData);
