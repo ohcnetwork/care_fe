@@ -9,13 +9,14 @@ import encounterApi from "@/types/emr/encounter/encounterApi";
 import { BatchSubmissionResult } from "@/types/questionnaire/batch";
 import { AppointmentRead } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
-import { TokenStatus } from "@/types/tokens/token/token";
+import { renderTokenNumber, TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
 import { NonEmptyArray } from "@/Utils/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TFunction } from "i18next";
-import { PlayIcon } from "lucide-react";
+import { ExternalLinkIcon, PlayIcon } from "lucide-react";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -193,9 +194,18 @@ export const AppointmentEncounterHeader = ({
   return (
     <div className="flex justify-center gap-4 border border-gray-200 rounded-md p-2 bg-white w-full items-center mb-2">
       {encounter.appointment?.token && (
-        <span>
-          {t("token_number")}: {encounter.appointment.token.number}
-        </span>
+        <Button asChild variant="outline">
+          <Link
+            href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/appointments/${encounter.appointment.id}`}
+          >
+            <span className="flex items-center gap-3">
+              <span className="font-mono font-semibold">
+                {renderTokenNumber(encounter.appointment.token)}
+              </span>
+              <ExternalLinkIcon className="size-4" />
+            </span>
+          </Link>
+        </Button>
       )}
 
       {encounter.status !== "in_progress" &&

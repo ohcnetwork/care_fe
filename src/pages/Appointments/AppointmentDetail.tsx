@@ -13,7 +13,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, differenceInYears, format, isBefore } from "date-fns";
-import { BanIcon, EyeIcon, Loader2 } from "lucide-react";
+import { BanIcon, ExternalLinkIcon, EyeIcon, Loader2 } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -90,6 +90,8 @@ import {
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
+import { renderTokenNumber } from "@/types/tokens/token/token";
+import { Link } from "raviger";
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
 
 interface Props {
@@ -189,8 +191,20 @@ export default function AppointmentDetail(props: Props) {
                   {t("token_no")}
                 </p>
                 <span className="mt-2 text-6xl font-bold tracking-tight">
-                  {appointment.token.number}
+                  {renderTokenNumber(appointment.token)}
                 </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-2 flex"
+                  asChild
+                >
+                  <Link
+                    href={`/facility/${facility.id}/queues/${appointment.token?.queue.id}/practitioner/${appointment.user.id}`}
+                  >
+                    {t("open")} <ExternalLinkIcon className="size-4" />
+                  </Link>
+                </Button>
               </Card>
             ) : (
               <div className="h-56 md:mx-4 border-2 border-dashed border-gray-300 bg-gray-50 rounded flex flex-col items-center justify-center text-center">
