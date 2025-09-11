@@ -15,17 +15,11 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
-import { ObservationWithUser } from "@/types/emr/observation";
-import patientApi from "@/types/emr/patient/patientApi";
-
-interface PaginatedResponse<T> {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: T[];
-}
-
+import { ObservationListRead } from "@/types/emr/observation/observation";
+import observationApi from "@/types/emr/observation/observationApi";
+import { useTranslation } from "react-i18next";
 interface ObservationHistoryTableProps {
   patientId: string;
   encounterId: string;
@@ -50,9 +44,9 @@ export const ObservationHistoryTable = ({
   codes,
 }: ObservationHistoryTableProps) => {
   const { ref, inView } = useInView();
-
+  const { t } = useTranslation();
   const { data, isLoading, hasNextPage, fetchNextPage } = useInfiniteQuery<
-    PaginatedResponse<ObservationWithUser>
+    PaginatedResponse<ObservationListRead>
   >({
     queryKey: [
       "infinite-observations",
@@ -60,7 +54,7 @@ export const ObservationHistoryTable = ({
       codes.map((c) => c.code).join(","),
     ],
     queryFn: async ({ pageParam = 0 }) => {
-      const response = await query(patientApi.listObservations, {
+      const response = await query(observationApi.list, {
         pathParams: { patientId },
         queryParams: {
           encounter: encounterId,
@@ -69,7 +63,7 @@ export const ObservationHistoryTable = ({
           offset: String(pageParam),
         },
       })({ signal: new AbortController().signal });
-      return response as PaginatedResponse<ObservationWithUser>;
+      return response;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
@@ -97,7 +91,7 @@ export const ObservationHistoryTable = ({
   if (!data?.pages[0]?.results.length) {
     return (
       <div className="flex h-[200px] items-center justify-center text-gray-500">
-        No data available
+        {t("no_data_available")}
       </div>
     );
   }
@@ -107,17 +101,17 @@ export const ObservationHistoryTable = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Time</TableHead>
-            <TableHead>Code</TableHead>
-            <TableHead>Value</TableHead>
-            <TableHead>Entered By</TableHead>
-            <TableHead>Notes</TableHead>
+            <TableHead>{t("time")}</TableHead>
+            <TableHead>{t("code")}</TableHead>
+            <TableHead>{t("value")}</TableHead>
+            <TableHead>{t("entered_by")}</TableHead>
+            <TableHead>{t("notes")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {data?.pages.map((page, _pageIndex) =>
-            page.results.map((observation) => {
-              const name = `${observation.data_entered_by.first_name} ${observation.data_entered_by.last_name}`;
+            page.results.map((observation: ObservationListRead) => {
+              const name = `${observation.data_entered_by?.first_name} ${observation.data_entered_by?.last_name}`;
 
               return (
                 <TableRow key={observation.id}>
@@ -125,13 +119,10 @@ export const ObservationHistoryTable = ({
                     {formatDate(observation.effective_datetime)}
                   </TableCell>
                   <TableCell>
-                    {codes.find((c) => c.code === observation.main_code.code)
-                      ?.display || observation.main_code.code}
+                    {codes.find((c) => c.code === observation.main_code?.code)
+                      ?.display || observation.main_code?.code}
                   </TableCell>
-                  <TableCell>
-                    {observation.value.value_quantity?.value?.toFixed(2) ||
-                      observation.value.value}
-                  </TableCell>
+                  <TableCell>{observation.value.value}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Avatar name={name} className="size-6" />

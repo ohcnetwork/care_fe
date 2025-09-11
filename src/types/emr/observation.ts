@@ -9,7 +9,6 @@ export interface ObservationValue {
     value: number;
   };
 }
-
 export interface Observation {
   id: string;
   status: "final" | "preliminary" | "amended" | "cancelled";

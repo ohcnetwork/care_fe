@@ -1,9 +1,5 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
-import {
-  Observation,
-  ObservationAnalyzeResponse,
-} from "@/types/emr/observation";
 import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -66,18 +62,6 @@ export default {
     path: "/api/v1/patient/{patientId}/questionnaire_response/{responseId}/",
     method: HttpMethod.GET,
     TRes: Type<QuestionnaireResponse>(),
-  },
-
-  // Observations
-  listObservations: {
-    path: "/api/v1/patient/{patientId}/observation/",
-    method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<Observation>>(),
-  },
-  observationsAnalyse: {
-    path: "/api/v1/patient/{patientId}/observation/analyse/",
-    method: HttpMethod.POST,
-    TRes: Type<ObservationAnalyzeResponse>(),
   },
 
   // User Management

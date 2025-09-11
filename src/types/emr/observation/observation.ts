@@ -71,10 +71,13 @@ export interface ObservationBase {
   component?: ObservationComponent[];
 }
 
-export interface ObservationRead extends ObservationBase {
+export interface ObservationListRead extends ObservationBase {
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
   data_entered_by?: UserReadMinimal | null;
+}
+
+export interface ObservationRead extends ObservationListRead {
   observation_definition?: ObservationDefinitionReadSpec | null;
 }
 
@@ -89,4 +92,18 @@ export interface ObservationFromDefinitionCreate {
   observation_definition?: string;
   observation_id?: string;
   observation: Partial<ObservationCreate>;
+}
+
+export interface ObservationAnalyzeRequest {
+  codes: Code[];
+  page_size?: number;
+}
+
+export interface ObservationAnalyzeGroup {
+  code: Code;
+  results: ObservationListRead[];
+}
+
+export interface ObservationAnalyzeResponse {
+  results: ObservationAnalyzeGroup[];
 }
