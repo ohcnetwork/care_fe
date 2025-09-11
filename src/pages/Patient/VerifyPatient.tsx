@@ -13,7 +13,12 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 
 import {
   CardGridSkeleton,
@@ -180,52 +185,61 @@ export default function VerifyPatient() {
                     facilityId={facilityId}
                     patientName={patientData.name}
                     trigger={
-                      <div
+                      <Card
                         data-shortcut-id="create-encounter"
-                        className="group relative h-[120px] overflow-hidden border border-gray-200 rounded-lg bg-gray-50 p-0 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                        className="group relative shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
                       >
-                        <ShortcutBadge
-                          actionId="create-encounter"
-                          position="top-right"
-                        />
-                        <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-3">
-                          <div className="flex size-12 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
+                        <CardContent className="h-[80px] overflow-hidden rounded-lg bg-gray-100 m-1 flex items-center justify-center">
+                          <ShortcutBadge
+                            actionId="create-encounter"
+                            position="top-right"
+                            className="m-1"
+                          />
+
+                          <div className="flex size-12 mt-6 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
                             <CareIcon
                               icon="l-heartbeat"
                               className="size-6 text-orange-500"
                             />
                           </div>
-                          <span className="text-sm font-medium text-gray-800 text-center">
+                        </CardContent>
+                        <CardFooter className="p-0">
+                          <span className="text-sm w-full py-1 font-semibold text-gray-800 text-center">
                             {t("create_encounter")}
                           </span>
-                        </div>
-                      </div>
+                        </CardFooter>
+                      </Card>
                     }
                   />
                 )}
 
                 {canWriteAppointment && (
-                  <Link
-                    href={`/facility/${facilityId}/patient/${patientData.id}/book-appointment`}
-                    data-shortcut-id="schedule-appointment"
-                    className="group relative h-[120px] overflow-hidden border border-gray-200 rounded-lg bg-gray-50 p-0 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer block"
-                  >
-                    <ShortcutBadge
-                      actionId="schedule-appointment"
-                      position="top-right"
-                    />
-                    <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-3">
-                      <div className="flex size-12 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
-                        <CareIcon
-                          icon="l-stethoscope"
-                          className="size-6 text-purple-500"
+                  <Card className="group relative shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer">
+                    <Link
+                      href={`/facility/${facilityId}/patient/${patientData.id}/book-appointment`}
+                      data-shortcut-id="schedule-appointment"
+                    >
+                      <CardContent className="h-[80px] overflow-hidden rounded-lg bg-gray-100 m-1 flex items-center justify-center">
+                        <ShortcutBadge
+                          actionId="schedule-appointment"
+                          position="top-right"
+                          className="m-1"
                         />
-                      </div>
-                      <span className="text-sm font-medium text-gray-800 text-center">
-                        {t("schedule_appointment")}
-                      </span>
-                    </div>
-                  </Link>
+
+                        <div className="flex size-12 mt-6 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
+                          <CareIcon
+                            icon="l-stethoscope"
+                            className="size-6 text-purple-500"
+                          />
+                        </div>
+                      </CardContent>
+                      <CardFooter className="p-0">
+                        <span className="text-sm w-full py-1 font-semibold text-gray-800 text-center">
+                          {t("schedule_appointment")}
+                        </span>
+                      </CardFooter>
+                    </Link>
+                  </Card>
                 )}
 
                 {canCreateToken && (
@@ -233,23 +247,27 @@ export default function VerifyPatient() {
                     patient={patientData}
                     facilityId={facilityId}
                     trigger={
-                      <div
+                      <Card
                         data-shortcut-id="generate-token"
-                        className="group relative h-[120px] overflow-hidden border border-gray-200 rounded-lg bg-gray-50 p-0 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                        className="group relative shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
                       >
-                        <ShortcutBadge
-                          actionId="generate-token"
-                          position="top-right"
-                        />
-                        <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-3">
-                          <div className="flex size-12 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
+                        <CardContent className="h-[80px] overflow-hidden rounded-lg bg-gray-100 m-1 flex items-center justify-center">
+                          <ShortcutBadge
+                            actionId="generate-token"
+                            position="top-right"
+                            className="m-1"
+                          />
+
+                          <div className="flex size-12 mt-6 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
                             <Printer className="size-6 text-gray-500" />
                           </div>
-                          <span className="text-sm font-medium text-gray-800 text-center">
+                        </CardContent>
+                        <CardFooter className="p-0">
+                          <span className="text-sm w-full py-1 font-semibold text-gray-800 text-center">
                             {t("generate_token")}
                           </span>
-                        </div>
-                      </div>
+                        </CardFooter>
+                      </Card>
                     }
                   />
                 )}
