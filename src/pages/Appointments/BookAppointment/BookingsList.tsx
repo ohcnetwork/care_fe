@@ -1,17 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  differenceInMinutes,
-  format,
-  isFuture,
-  isPast,
-  isToday,
-} from "date-fns";
+import { differenceInMinutes, format } from "date-fns";
 import { CalendarDays } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import query from "@/Utils/request/query";
-import { Appointment, AppointmentStatus } from "@/types/scheduling/schedule";
+import {
+  Appointment,
+  AppointmentCancelledStatuses,
+  AppointmentStatus,
+} from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
 import {
@@ -68,7 +66,12 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="upcoming" className="space-y-4 overflow-x-scroll">
-            <TodayBookings patientId={patientId} facilityId={facilityId} />
+            <BookingListContent
+              patientId={patientId}
+              facilityId={facilityId}
+              dateFrom={dateQueryString(new Date())}
+              dateTo={dateQueryString(new Date())}
+            />
             <span className="text-lg font-semibold text-gray-950 mb-4">
               {t("next")}
             </span>
@@ -83,9 +86,7 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
               patientId={patientId}
               facilityId={facilityId}
               dateTo={dateQueryString(new Date())}
-              status={
-                AppointmentNonCancelledStatuses as unknown as AppointmentStatus[]
-              }
+              status={AppointmentNonCancelledStatuses}
             />
           </TabsContent>
           <TabsContent
@@ -95,7 +96,7 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              status={["cancelled", "entered_in_error", "rescheduled"]}
+              status={AppointmentCancelledStatuses}
             />
           </TabsContent>
         </div>
@@ -123,10 +124,7 @@ const AppointmentCard = ({
         <div className="flex flex-row gap-6">
           <div className="flex flex-col">
             <span className="font-medium text-gray-950">
-              {format(
-                new Date(appointment.token_slot.start_datetime),
-                "EEE, dd MMM",
-              )}
+              {format(appointment.token_slot.start_datetime, "EEE, dd MMM")}
             </span>
             <span className="text-sm text-gray-600 font-medium">
               {appointment.token_slot.availability.name}
@@ -134,18 +132,14 @@ const AppointmentCard = ({
           </div>
           <div className="flex flex-col">
             <span className="font-medium text-gray-950">
-              {format(
-                new Date(appointment.token_slot.start_datetime),
-                "hh:mm a",
-              )}{" "}
-              -{" "}
-              {format(new Date(appointment.token_slot.end_datetime), "hh:mm a")}
+              {format(appointment.token_slot.start_datetime, "hh:mm a")} -{" "}
+              {format(appointment.token_slot.end_datetime, "hh:mm a")}
             </span>
             <span className="text-sm text-gray-600 font-medium">
               {t("duration")}:{" "}
               {differenceInMinutes(
-                new Date(appointment.token_slot.end_datetime),
-                new Date(appointment.token_slot.start_datetime),
+                appointment.token_slot.end_datetime,
+                appointment.token_slot.start_datetime,
               )}{" "}
               {t("minutes")}
             </span>
@@ -227,7 +221,7 @@ const AppointmentTable = ({
                 <div className="flex flex-col">
                   <span className="font-medium text-gray-950">
                     {format(
-                      new Date(appointment.token_slot.start_datetime),
+                      appointment.token_slot.start_datetime,
                       "EEE, dd MMM",
                     )}
                   </span>
@@ -241,21 +235,14 @@ const AppointmentTable = ({
             <TableCell>
               <div className="flex flex-col">
                 <span className="font-medium text-gray-950">
-                  {format(
-                    new Date(appointment.token_slot.start_datetime),
-                    "hh:mm a",
-                  )}{" "}
-                  -{" "}
-                  {format(
-                    new Date(appointment.token_slot.end_datetime),
-                    "hh:mm a",
-                  )}
+                  {format(appointment.token_slot.start_datetime, "hh:mm a")} -{" "}
+                  {format(appointment.token_slot.end_datetime, "hh:mm a")}
                 </span>
                 <span className="text-sm text-gray-600 font-medium">
                   {t("duration")}:{" "}
                   {differenceInMinutes(
-                    new Date(appointment.token_slot.end_datetime),
-                    new Date(appointment.token_slot.start_datetime),
+                    appointment.token_slot.end_datetime,
+                    appointment.token_slot.start_datetime,
                   )}{" "}
                   {t("minutes")}
                 </span>
@@ -316,12 +303,12 @@ const BookingListContent = ({
   facilityId: string;
   dateFrom?: string;
   dateTo?: string;
-  status?: AppointmentStatus[];
+  status?: readonly AppointmentStatus[];
   isUpcoming?: boolean;
 }) => {
   const { t } = useTranslation();
   const { data: appointments, isLoading } = useQuery({
-    queryKey: ["book-appointment", patientId, dateFrom, dateTo],
+    queryKey: ["patient-appointments", patientId, dateFrom, dateTo],
     queryFn: query(scheduleApi.appointments.getAppointments, {
       pathParams: { patientId },
       queryParams: {
@@ -337,24 +324,18 @@ const BookingListContent = ({
     ? []
     : appointments.results.filter((appointment) => {
         const appointmentDate = new Date(appointment.token_slot.start_datetime);
+        if (
+          dateFrom &&
+          dateTo &&
+          appointmentDate > new Date(dateFrom) &&
+          appointmentDate < new Date(dateTo)
+        )
+          return true;
+        if (dateTo && appointmentDate < new Date(dateTo)) return true;
+        if (dateFrom && appointmentDate > new Date(dateFrom)) return true;
 
-        if (isToday(appointmentDate)) {
-          return false;
-        }
-
-        if (dateFrom && isPast(appointmentDate)) {
-          return false;
-        }
-
-        if (dateTo && isFuture(appointmentDate)) {
-          return false;
-        }
-
-        if (status?.length && !status.includes(appointment.status)) {
-          return false;
-        }
-
-        return true;
+        if (status && status.includes(appointment.status)) return true;
+        return false;
       });
 
   if (isLoading) {
@@ -389,56 +370,6 @@ const BookingListContent = ({
       </div>
       <div className="sm:hidden">
         {filteredAppointments.map((appointment) => (
-          <AppointmentCard
-            key={appointment.id}
-            appointment={appointment}
-            patientId={patientId}
-            facilityId={facilityId}
-            appointmentId={appointment.id}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const TodayBookings = ({
-  patientId,
-  facilityId,
-}: {
-  patientId: string;
-  facilityId: string;
-}) => {
-  const { t } = useTranslation();
-  const { data: appointments } = useQuery({
-    queryKey: ["book-appointment", patientId, dateQueryString(new Date())],
-    queryFn: query(scheduleApi.appointments.getAppointments, {
-      pathParams: { patientId },
-      queryParams: {
-        limit: 100,
-        date_after: dateQueryString(new Date()),
-      },
-    }),
-  });
-  const todayAppointments = appointments?.results.filter((appointment) =>
-    isToday(new Date(appointment.token_slot.start_datetime)),
-  );
-  if (!todayAppointments || todayAppointments.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="w-full">
-      <span className="font-semibold text-gray-950 mb-4">{t("today")}</span>
-      <div className="hidden sm:block">
-        <AppointmentTable
-          appointments={todayAppointments}
-          facilityId={facilityId}
-          patientId={patientId}
-        />
-      </div>
-      <div className="sm:hidden">
-        {todayAppointments.map((appointment) => (
           <AppointmentCard
             key={appointment.id}
             appointment={appointment}
