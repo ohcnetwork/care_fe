@@ -13,8 +13,14 @@ import {
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, differenceInYears, format, isBefore } from "date-fns";
-import { BanIcon, EyeIcon, Loader2, PrinterIcon } from "lucide-react";
-import { navigate } from "raviger";
+import {
+  BanIcon,
+  ExternalLinkIcon,
+  EyeIcon,
+  Loader2,
+  PrinterIcon,
+} from "lucide-react";
+import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -96,8 +102,8 @@ import {
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { AppointmentSlotPicker } from "@/pages/Appointments/components/AppointmentSlotPicker";
-import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
+import { TokenCard } from "./components/AppointmentTokenCard";
 
 interface Props {
   appointmentId: string;
@@ -203,7 +209,14 @@ export default function AppointmentDetail(props: Props) {
                     facility={facility}
                   />
                 </div>
-                <div className="pt-3 mx-4 flex justify-end">
+                <div className="pt-3 mx-4 flex gap-2 justify-end">
+                  <Button variant="outline" asChild>
+                    <Link
+                      href={`/facility/${facility.id}/queues/${appointment.token?.queue.id}/practitioner/${appointment.user.id}`}
+                    >
+                      {t("open")} <ExternalLinkIcon className="size-4" />
+                    </Link>
+                  </Button>
                   <Button
                     data-shortcut-id="print-token"
                     variant="outline"

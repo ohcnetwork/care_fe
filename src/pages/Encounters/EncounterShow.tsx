@@ -42,6 +42,7 @@ import {
   PatientHeader,
 } from "@/pages/Facility/services/serviceRequests/PatientHeader";
 import { PLUGIN_Component } from "@/PluginEngine";
+import { AppointmentEncounterHeader } from "./AppointmentEncounterHeader";
 import { EncounterDiagnosticReportsTab } from "./tabs/diagnostic-reports";
 import { EncounterNotesTab } from "./tabs/notes";
 import { EncounterServiceRequestTab } from "./tabs/service-requests";
@@ -66,6 +67,7 @@ export const EncounterShow = (props: Props) => {
     patient,
     isPatientLoading,
     canWriteSelectedEncounter,
+    canWritePrimaryEncounter,
   } = useEncounter();
 
   useSidebarAutoCollapse({ restore: false });
@@ -182,6 +184,15 @@ export const EncounterShow = (props: Props) => {
       className="block md:px-1 -mt-4"
       hideTitleOnPage
     >
+      {primaryEncounter &&
+        primaryEncounter.appointment?.id &&
+        canWritePrimaryEncounter && (
+          <AppointmentEncounterHeader
+            appointment={primaryEncounter.appointment}
+            encounter={primaryEncounter}
+          />
+        )}
+
       <div className="flex flex-col gap-2">
         <PatientHeader
           patient={patient}
