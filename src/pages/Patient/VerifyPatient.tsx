@@ -1,5 +1,12 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { AlertCircle, Printer, PrinterIcon } from "lucide-react";
+import {
+  AlertCircle,
+  Printer,
+  PrinterIcon,
+  SettingsIcon,
+  SquareActivity,
+  Stethoscope,
+} from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -32,9 +39,9 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
-import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { usePermissions } from "@/context/PermissionContext";
 
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { PatientHoverCard } from "@/pages/Facility/services/serviceRequests/PatientHoverCard";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -141,41 +148,52 @@ export default function VerifyPatient() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="space-y-6 lg:col-span-2">
-              <div className="space-y-6">
-                {/* Patient Information Header */}
+              <div className="">
                 <Card className="bg-white shadow-sm">
                   <CardHeader className="pb-4">
                     <div className="space-y-4">
-                      {/* Patient Details */}
                       <PatientHoverCard
                         patient={patientData}
                         facilityId={facilityId || ""}
                       />
-
-                      {/* Patient Tags */}
+                    </div>
+                  </CardHeader>
+                </Card>
+                <Card className="bg-white shadow-sm mx-10 rounded-t-none">
+                  <CardHeader className="p-2">
+                    <div className="flex items-center justify-between gap-2">
                       <div className="flex flex-wrap items-center gap-2">
                         {patientData.instance_tags.map((t) => (
                           <Badge key={t.id} variant="outline">
                             {getTagHierarchyDisplay(t)}
                           </Badge>
                         ))}
-                        <TagAssignmentSheet
-                          entityType={TagResource.PATIENT}
-                          entityId={patientData.id}
-                          currentTags={patientData.instance_tags}
-                          onUpdate={() => {
-                            queryClient.invalidateQueries({
-                              queryKey: ["patient", patientData.id],
-                            });
-                          }}
-                          canWrite={true}
-                        />
                       </div>
+                      <TagAssignmentSheet
+                        entityType={TagResource.PATIENT}
+                        entityId={patientData.id}
+                        currentTags={patientData.instance_tags}
+                        onUpdate={() => {
+                          queryClient.invalidateQueries({
+                            queryKey: ["patient", patientData.id],
+                          });
+                        }}
+                        canWrite={true}
+                        trigger={
+                          <Button variant="ghost">
+                            <SettingsIcon
+                              className=" text-gray-950"
+                              strokeWidth={1.5}
+                            />
+                            <span className="font-semibold underline">
+                              {t("manage_tags")}
+                            </span>
+                          </Button>
+                        }
+                      />
                     </div>
                   </CardHeader>
                 </Card>
-
-                {/* Action Cards */}
               </div>
 
               <div className="grid gap-4 grid-cols-2  lg:grid-cols-3">
@@ -197,14 +215,11 @@ export default function VerifyPatient() {
                           />
 
                           <div className="flex size-12 mt-6 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
-                            <CareIcon
-                              icon="l-heartbeat"
-                              className="size-6 text-orange-500"
-                            />
+                            <SquareActivity className="size-6 text-orange-500" />
                           </div>
                         </CardContent>
                         <CardFooter className="p-0">
-                          <span className="text-sm w-full py-1 font-semibold text-gray-800 text-center">
+                          <span className="text-sm w-full py-1.5 font-semibold text-gray-800 text-center">
                             {t("create_encounter")}
                           </span>
                         </CardFooter>
@@ -227,14 +242,11 @@ export default function VerifyPatient() {
                         />
 
                         <div className="flex size-12 mt-6 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
-                          <CareIcon
-                            icon="l-stethoscope"
-                            className="size-6 text-purple-500"
-                          />
+                          <Stethoscope className="size-6 text-purple-500" />
                         </div>
                       </CardContent>
                       <CardFooter className="p-0">
-                        <span className="text-sm w-full py-1 font-semibold text-gray-800 text-center">
+                        <span className="text-sm w-full py-1.5 font-semibold text-gray-800 text-center">
                           {t("schedule_appointment")}
                         </span>
                       </CardFooter>
@@ -263,7 +275,7 @@ export default function VerifyPatient() {
                           </div>
                         </CardContent>
                         <CardFooter className="p-0">
-                          <span className="text-sm w-full py-1 font-semibold text-gray-800 text-center">
+                          <span className="text-sm w-full py-1.5 font-semibold text-gray-800 text-center">
                             {t("generate_token")}
                           </span>
                         </CardFooter>
@@ -284,7 +296,6 @@ export default function VerifyPatient() {
               />
             </div>
 
-            {/* Right Side - Token Information */}
             <div className="space-y-4">
               {isTokenLoading ? (
                 <Card className="bg-white shadow-sm h-full">
@@ -303,7 +314,6 @@ export default function VerifyPatient() {
                   <Card className="bg-white shadow-sm h-full">
                     <CardHeader className="p-4 h-full">
                       <div className="space-y-3q flex flex-col h-full justify-between">
-                        {/* Compact Token Display */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="flex size-8 items-center justify-center rounded-lg bg-orange-100">
@@ -329,7 +339,6 @@ export default function VerifyPatient() {
                           </Badge>
                         </div>
 
-                        {/* Action Buttons */}
                         <div className="flex gap-2">
                           <Button
                             data-shortcut-id="print-token"
@@ -349,7 +358,6 @@ export default function VerifyPatient() {
                 )
               )}
 
-              {/* Hidden Full Token Card for Printing */}
               {tokenData && (
                 <div
                   id="section-to-print"
