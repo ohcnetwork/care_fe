@@ -3,6 +3,7 @@ import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
   addDays,
+  differenceInDays,
   format,
   formatDate,
   isToday,
@@ -94,7 +95,6 @@ import { usePermissions } from "@/context/PermissionContext";
 import {
   formatSlotTimeRange,
   groupSlotsByAvailability,
-  isDateRangeValid,
 } from "@/pages/Appointments/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
@@ -689,9 +689,8 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
           <Button
             variant="primary"
-            disabled={isDateRangeValid(qParams.date_from, qParams.date_to)}
+            disabled={differenceInDays(qParams.date_from, qParams.date_to) > 31}
             onClick={() => {
-              console.log(selectedTags);
               const queryString = new URLSearchParams({
                 ...qParams,
                 tags: selectedTags.map((tag) => tag.id).join(","),

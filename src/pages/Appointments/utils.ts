@@ -130,13 +130,3 @@ export const formatSlotTimeRange = (slot: {
     "h:mm a",
   )}`;
 };
-
-export const isDateRangeValid = (date_from: string, date_to: string) => {
-  if (!date_from || !date_to) return false;
-  const startDate = new Date(date_from);
-  const endDate = new Date(date_to);
-  const diffInDays = Math.ceil(
-    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
-  );
-  return diffInDays >= 31;
-};
