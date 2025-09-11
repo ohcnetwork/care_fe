@@ -94,6 +94,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import {
   formatSlotTimeRange,
   groupSlotsByAvailability,
+  isDateRangeValid,
 } from "@/pages/Appointments/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
@@ -685,7 +686,24 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 items-center">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <Button
+            variant="primary"
+            disabled={isDateRangeValid(qParams.date_from, qParams.date_to)}
+            onClick={() => {
+              console.log(selectedTags);
+              const queryString = new URLSearchParams({
+                ...qParams,
+                tags: selectedTags.map((tag) => tag.id).join(","),
+              }).toString();
+              navigate(
+                `/facility/${facilityId}/appointments/print?${queryString}`,
+              );
+            }}
+          >
+            <CareIcon icon="l-print" className="text-lg" />
+            {t("print")}
+          </Button>
           <PatientEncounterOrIdentifierFilter
             onSelect={(patientId) => updateQuery({ patient: patientId })}
             placeholder={t("search_patients")}
