@@ -8,16 +8,20 @@ import { formatName, formatPatientAge } from "@/Utils/utils";
 import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import { FacilityRead } from "@/types/facility/facility";
 import { Appointment } from "@/types/scheduling/schedule";
-import { renderTokenNumber } from "@/types/tokens/token/token";
+import { TokenRead, renderTokenNumber } from "@/types/tokens/token/token";
+
 interface Props {
   id?: string;
-  appointment: Appointment;
+  token: TokenRead;
   facility: FacilityRead;
+  appointment?: Appointment;
 }
 
-const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
-  const { patient } = appointment;
+const TokenCard = ({ id, token, facility, appointment }: Props) => {
   const { t } = useTranslation();
+
+  // Get patient from token or appointment
+  const patient = token.patient || appointment?.patient;
 
   return (
     <Card
@@ -48,11 +52,13 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
         <div className="mt-4 flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <Label>{t("name")}</Label>
-            <p className="font-semibold break-words">{patient.name}</p>
-            <p className="text-sm text-gray-600 font-medium">
-              {formatPatientAge(patient, true)},{" "}
-              {t(`GENDER__${patient.gender}`)}
-            </p>
+            <p className="font-semibold break-words">{patient?.name || "--"}</p>
+            {patient && (
+              <p className="text-sm text-gray-600 font-medium">
+                {formatPatientAge(patient, true)},{" "}
+                {t(`GENDER__${patient.gender}`)}
+              </p>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -61,28 +67,32 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
                 {t("token_no")}
               </Label>
               <p className="text-2xl font-bold leading-none">
-                {renderTokenNumber(appointment.token!)}
+                {renderTokenNumber(token)}
               </p>
             </div>
           </div>
         </div>
         <div className="mt-4 flex justify-between items-start gap-4">
           <div className="space-y-2 flex-1 min-w-0">
-            <div>
-              <Label>{t("practitioner", { count: 1 })}:</Label>
-              <p className="text-sm font-semibold break-words">
-                {formatName(appointment.user)}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-600">
-                {formatAppointmentSlotTime(appointment)}
-              </p>
-            </div>
+            {appointment && (
+              <>
+                <div>
+                  <Label>{t("practitioner", { count: 1 })}:</Label>
+                  <p className="text-sm font-semibold break-words">
+                    {formatName(appointment.user)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-600">
+                    {formatAppointmentSlotTime(appointment)}
+                  </p>
+                </div>
+              </>
+            )}
           </div>
 
           <div>
-            <QRCodeSVG size={64} value={patient.id} />
+            <QRCodeSVG size={64} value={patient?.id || ""} />
           </div>
         </div>
       </div>
@@ -90,4 +100,4 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
   );
 };
 
-export { AppointmentTokenCard };
+export { TokenCard };

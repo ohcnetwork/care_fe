@@ -13,8 +13,14 @@ import {
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, differenceInYears, format, isBefore } from "date-fns";
-import { BanIcon, EyeIcon, Loader2, PrinterIcon } from "lucide-react";
-import { navigate } from "raviger";
+import {
+  BanIcon,
+  ExternalLinkIcon,
+  EyeIcon,
+  Loader2,
+  PrinterIcon,
+} from "lucide-react";
+import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -83,6 +89,7 @@ import {
   AppointmentFinalStatuses,
   AppointmentRead,
   AppointmentUpdateRequest,
+  SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import mutate from "@/Utils/request/mutate";
@@ -95,9 +102,10 @@ import {
 
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
+import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
-import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
-import { AppointmentTokenCard } from "./components/AppointmentTokenCard";
+import { AppointmentDateSelection } from "./BookAppointment/AppointmentDateSelection";
 
 interface Props {
   appointmentId: string;
@@ -197,12 +205,20 @@ export default function AppointmentDetail(props: Props) {
                   id="section-to-print"
                   className="print:w-[400px] print:pt-4 mx-4"
                 >
-                  <AppointmentTokenCard
+                  <TokenCard
                     appointment={appointment}
+                    token={appointment.token}
                     facility={facility}
                   />
                 </div>
-                <div className="pt-3 mx-4 flex justify-end">
+                <div className="pt-3 mx-4 flex gap-2 justify-end">
+                  <Button variant="outline" asChild>
+                    <Link
+                      href={`/facility/${facility.id}/queues/${appointment.token?.queue.id}/practitioner/${appointment.user.id}`}
+                    >
+                      {t("open")} <ExternalLinkIcon className="size-4" />
+                    </Link>
+                  </Button>
                   <Button
                     data-shortcut-id="print-token"
                     variant="outline"
@@ -210,9 +226,11 @@ export default function AppointmentDetail(props: Props) {
                   >
                     <PrinterIcon className="size-4 mr-2" />
                     {t("print")}
-                    <div className="size-5 rounded-md border border-gray-200">
-                      {getShortcutDisplay("print-token")}
-                    </div>
+                    {getShortcutDisplay("print-token") && (
+                      <div className="size-5 rounded-md border border-gray-200">
+                        {getShortcutDisplay("print-token")}
+                      </div>
+                    )}
                   </Button>
                 </div>
               </>
@@ -499,7 +517,7 @@ const AppointmentDetails = ({
           </div>
           <div className="text-sm">
             <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
-              <p className="font-medium">{t("tags")}</p>
+              <p className="font-medium">{t("tags", { count: 2 })}</p>
               <TagAssignmentSheet
                 entityType="appointment"
                 entityId={appointment.id}
@@ -688,8 +706,8 @@ const AppointmentActions = ({
     appointment.user,
   );
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
-
   const currentStatus = appointment.status;
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Allow check-in/start consultation as long as the appointment is before 24 hours ahead of slot's start time
   const canCheckIn = isBefore(
@@ -914,7 +932,9 @@ const AppointmentActions = ({
                 <div className="mt-6">
                   <div className="text-sm">
                     <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
-                      <Label className="font-medium">{t("tags")}</Label>
+                      <Label className="font-medium">
+                        {t("tags", { count: 2 })}
+                      </Label>
                       <TagAssignmentSheet
                         entityType="appointment"
                         entityId={appointment.id}
@@ -957,13 +977,25 @@ const AppointmentActions = ({
                       onSelect={(user) => user && setSelectedPractitioner(user)}
                     />
                   </div>
-                  <AppointmentSlotPicker
-                    facilityId={facilityId}
-                    resourceId={selectedPractitioner?.id}
-                    selectedSlotId={selectedSlotId}
-                    onSlotSelect={setSelectedSlotId}
-                    currentAppointment={appointment}
-                  />
+                  <div className="space-y-4">
+                    <AppointmentDateSelection
+                      facilityId={facilityId}
+                      resourceId={selectedPractitioner?.id}
+                      resourceType={SchedulableResourceType.Practitioner}
+                      currentAppointment={appointment}
+                      setSelectedDate={setSelectedDate}
+                      selectedDate={selectedDate}
+                    />
+                    <AppointmentSlotPicker
+                      selectedDate={selectedDate}
+                      facilityId={facilityId}
+                      resourceId={selectedPractitioner?.id}
+                      resourceType={SchedulableResourceType.Practitioner}
+                      selectedSlotId={selectedSlotId}
+                      onSlotSelect={setSelectedSlotId}
+                      currentAppointment={appointment}
+                    />
+                  </div>
 
                   <div className="flex justify-end gap-2 mt-6">
                     <Button

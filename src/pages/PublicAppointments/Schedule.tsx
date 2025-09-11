@@ -25,7 +25,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString, formatName } from "@/Utils/utils";
-import { TokenSlotButton } from "@/pages/Appointments/components/AppointmentSlotPicker";
+import { TokenSlotButton } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";

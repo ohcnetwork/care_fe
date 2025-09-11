@@ -334,6 +334,7 @@ function ActivityDefinitionFormContent({
             derived_from_uri: null,
             body_site: null,
             diagnostic_report_codes: [],
+            healthcare_service: null,
             category: categorySlug || "",
           },
   });
@@ -419,11 +420,10 @@ function ActivityDefinitionFormContent({
   }
 
   React.useEffect(() => {
-    console.log(
-      "form.watch('charge_item_definitions')",
-      form.watch("charge_item_definitions"),
-    );
-  }, [form.watch("charge_item_definitions")]);
+    console.log("form.getValues()", form.getValues());
+    //log errors on submit
+    console.log("form.formState.errors", form.formState.errors);
+  }, [form.getValues(), form.formState.errors]);
 
   return (
     <Page

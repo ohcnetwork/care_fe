@@ -20,6 +20,24 @@
       "when": "always"
     },
     {
+      "key": "t",
+      "action": "generate-token",
+      "description": "Generate Token",
+      "when": "always"
+    },
+    {
+      "key": "e",
+      "action": "create-encounter",
+      "description": "Create Encounter",
+      "when": "canCreate"
+    },
+    {
+      "key": "a",
+      "action": "schedule-appointment",
+      "description": "Schedule Appointment",
+      "when": "canCreate"
+    },
+    {
       "key": "shift+?",
       "action": "show-shortcuts",
       "description": "Show Keyboard Shortcuts",
