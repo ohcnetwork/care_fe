@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React from "react";
+import { PlusIcon } from "lucide-react";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -28,16 +29,22 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import AddChargeItemsBillingSheet from "@/pages/Facility/billing/account/components/AddChargeItemsBillingSheet";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 
 interface AddChargeItemSheetProps {
   facilityId: string;
   invoiceId: string;
   accountId: string;
+  open: boolean;
+  setOpen: (open: boolean) => void;
   trigger?: React.ReactNode;
 }
 
@@ -45,27 +52,39 @@ export default function AddChargeItemSheet({
   facilityId,
   invoiceId,
   accountId,
+  open,
+  setOpen,
   trigger,
 }: AddChargeItemSheetProps) {
   const { t } = useTranslation();
-  const [open, setOpen] = React.useState(false);
   const [selectedItems, setSelectedItems] = React.useState<Set<string>>(
     new Set(),
   );
+  const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = React.useState(false);
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 10,
     disableCache: true,
   });
+  useFacilityShortcuts("chargeItem-sheet");
+
+  // Get account information to extract patient ID
+  const { data: account } = useQuery({
+    queryKey: ["account", accountId],
+    queryFn: query(accountApi.retrieveAccount, {
+      pathParams: { facilityId, accountId },
+    }),
+    enabled: !!facilityId && !!accountId && open,
+  });
+
+  const handleChargeItemsAdded = () => {
+    queryClient.invalidateQueries({
+      queryKey: ["charge-items", qParams],
+    });
+  };
 
   const getBaseComponent = (item: ChargeItemRead) => {
     return item.unit_price_components?.find(
-      (c) => c.monetary_component_type === MonetaryComponentType.base,
-    );
-  };
-
-  const getTotalComponent = (item: ChargeItemRead) => {
-    return item.total_price_components?.find(
       (c) => c.monetary_component_type === MonetaryComponentType.base,
     );
   };
@@ -78,7 +97,7 @@ export default function AddChargeItemSheet({
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         account: accountId,
-        search: qParams.search,
+        title: qParams.search,
         status: "billable",
       },
     }),
@@ -101,7 +120,17 @@ export default function AddChargeItemSheet({
     },
   });
 
-  const items = (response?.results as ChargeItemRead[]) || [];
+  const items = React.useMemo(
+    () => (response?.results as ChargeItemRead[]) || [],
+    [response?.results],
+  );
+
+  // select all by default
+  useEffect(() => {
+    if (items.length > 0) {
+      setSelectedItems(new Set(items.map((item) => item.id)));
+    }
+  }, [items]);
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -124,7 +153,11 @@ export default function AddChargeItemSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        {trigger || <Button variant="outline">{t("add_charge_item")}</Button>}
+        {trigger || (
+          <Button data-shortcut-id="add-charge-item" variant="outline">
+            {t("add_charge_item")}
+          </Button>
+        )}
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-3xl">
         <SheetHeader>
@@ -132,14 +165,26 @@ export default function AddChargeItemSheet({
         </SheetHeader>
 
         <div className="mt-6">
-          <Input
-            placeholder={t("search_charge_items")}
-            value={qParams.search || ""}
-            onChange={(e) =>
-              updateQuery({ search: e.target.value || undefined })
-            }
-            className="max-w-xs mb-4"
-          />
+          <div className="flex justify-between items-center mb-2">
+            <Input
+              placeholder={t("search_charge_items")}
+              value={qParams.search || ""}
+              onChange={(e) =>
+                updateQuery({ search: e.target.value || undefined })
+              }
+              className="max-w-xs"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              data-shortcut-id="other-charge-items"
+              onClick={() => setIsAddChargeItemsOpen(true)}
+            >
+              <PlusIcon className="size-4 mr-2" />
+              {t("other_charge_items")}
+              <ShortcutBadge actionId="other-charge-items" />
+            </Button>
+          </div>
 
           {isLoading ? (
             <TableSkeleton count={5} />
@@ -162,7 +207,7 @@ export default function AddChargeItemSheet({
                       <TableHead>{t("item")}</TableHead>
                       <TableHead>{t("quantity")}</TableHead>
                       <TableHead>{t("unit_price")}</TableHead>
-                      <TableHead>{t("amount")}</TableHead>
+                      <TableHead>{t("total")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -192,9 +237,7 @@ export default function AddChargeItemSheet({
                             />
                           </TableCell>
                           <TableCell>
-                            <MonetaryDisplay
-                              amount={getTotalComponent(item)?.amount || "0"}
-                            />
+                            <MonetaryDisplay amount={item.total_price} />
                           </TableCell>
                         </TableRow>
                       ))
@@ -208,19 +251,40 @@ export default function AddChargeItemSheet({
           <Pagination totalCount={response?.count || 0} />
         </div>
         <SheetFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button
+            data-shortcut-id={open ? "cancel-action" : undefined}
+            variant="outline"
+            onClick={() => setOpen(false)}
+            disabled={isAddChargeItemsOpen}
+          >
             {t("cancel")}
+            <ShortcutBadge actionId="cancel-action" />
           </Button>
           <Button
+            data-shortcut-id={open ? "submit-action" : undefined}
             onClick={() =>
               attachItems({ charge_items: Array.from(selectedItems) })
             }
-            disabled={selectedItems.size === 0 || isPending}
+            disabled={
+              selectedItems.size === 0 || isPending || isAddChargeItemsOpen
+            }
+            className="flex flex-row items-center gap-2 justify-between"
           >
-            {t("add_selected_items")}
+            <span>{t("add_selected_items")}</span>
+            <ShortcutBadge actionId="submit-action" className="bg-white" />
           </Button>
         </SheetFooter>
       </SheetContent>
+
+      {account?.patient && (
+        <AddChargeItemsBillingSheet
+          open={isAddChargeItemsOpen}
+          onOpenChange={setIsAddChargeItemsOpen}
+          facilityId={facilityId}
+          patientId={account.patient.id}
+          onChargeItemsAdded={handleChargeItemsAdded}
+        />
+      )}
     </Sheet>
   );
 }

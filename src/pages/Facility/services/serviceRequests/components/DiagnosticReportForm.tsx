@@ -80,7 +80,7 @@ interface DiagnosticReportFormProps {
   diagnosticReports: DiagnosticReportRead[];
   activityDefinition?: {
     diagnostic_report_codes?: Code[];
-    category?: string;
+    classification?: string;
     specimen_requirements?: SpecimenDefinitionRead[];
   };
   specimens: SpecimenRead[];
@@ -133,7 +133,7 @@ export function DiagnosticReportForm({
     index: number;
   } | null>(null);
 
-  const isImagingReport = activityDefinition?.category === "imaging";
+  const isImagingReport = activityDefinition?.classification === "imaging";
 
   // Get the latest report if any exists
   const latestReport =
@@ -688,7 +688,7 @@ export function DiagnosticReportForm({
               return {
                 ...(obsData.id
                   ? { observation_id: obsData.id }
-                  : { observation_definition: definitionId }),
+                  : { observation_definition: observationDefinition?.slug }),
                 observation: {
                   status: ObservationStatus.FINAL,
                   subject_type: "patient",

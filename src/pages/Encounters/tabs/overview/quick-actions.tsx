@@ -12,13 +12,18 @@ import {
   StethoscopeIcon,
 } from "@/CAREUI/icons/CustomIcons";
 
+import { KeyboardShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+
 import { useEncounterShortcutDisplays } from "@/hooks/useEncounterShortcuts";
 
 export const QuickActions = (props: React.ComponentProps<"div">) => {
   const { t } = useTranslation();
   const getShortcutDisplay = useEncounterShortcutDisplays();
   return (
-    <div {...props} className={cn("flex gap-3", props.className)}>
+    <div
+      {...props}
+      className={cn("grid grid-cols-2 sm:grid-cols-4 gap-3", props.className)}
+    >
       <QuickAction
         icon={<AllergyIcon className="size-8 text-yellow-700" />}
         title={t("allergy")}
@@ -64,13 +69,7 @@ const QuickAction = ({
       className="flex-1 flex flex-col gap-1.25 p-1 pb-2 rounded-lg shadow bg-white"
     >
       <div className="relative flex py-3 rounded-t-lg rounded-b-xl bg-gray-100">
-        {shortcut && (
-          <div className="flex items-center justify-center absolute top-1 right-1 size-5 bg-gradient-to-b from-white to gray-500/20 rounded-md border border-gray-200">
-            <span className="font-medium text-xs text-gray-700">
-              {shortcut}
-            </span>
-          </div>
-        )}
+        <KeyboardShortcutBadge shortcut={shortcut} position="top-right" />
         <div className="rounded-xl bg-white p-2 size-12 shadow mx-auto">
           {icon}
         </div>

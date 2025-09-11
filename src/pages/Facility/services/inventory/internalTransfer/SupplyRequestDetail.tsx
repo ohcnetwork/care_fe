@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { MoreVertical } from "lucide-react";
+import { ArrowLeft, MoreVertical } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import React, { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -298,7 +298,10 @@ export default function SupplyRequestDetail({
     <div className="max-w-5xl container mx-auto">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-4">
-          <BackButton to={backUrl} />
+          <BackButton to={backUrl}>
+            <ArrowLeft />
+            <span>{t("back")}</span>
+          </BackButton>
         </div>
 
         <div className="flex justify-between items-center gap-1">
@@ -386,8 +389,7 @@ export default function SupplyRequestDetail({
                 {t("requested_quantity")}
               </p>
               <p className="font-semibold text-lg">
-                {supplyRequest.quantity}{" "}
-                {supplyRequest.item?.definitional?.dosage_form?.display}
+                {supplyRequest.quantity} {supplyRequest.item?.base_unit.display}
               </p>
             </div>
             <div>
@@ -463,11 +465,10 @@ export default function SupplyRequestDetail({
                     </TableCell>
                     <TableCell className="font-medium text-gray-950">
                       {delivery.supplied_item_quantity}{" "}
-                      {delivery.supplied_item?.product_knowledge.definitional
-                        ?.dosage_form?.display ||
+                      {delivery.supplied_item?.product_knowledge.base_unit
+                        .display ||
                         delivery.supplied_inventory_item?.product
-                          ?.product_knowledge.definitional?.dosage_form
-                          ?.display}
+                          ?.product_knowledge.base_unit.display}
                     </TableCell>
                     <TableCell className="font-medium text-gray-950">
                       {delivery.supplied_inventory_item?.product?.batch

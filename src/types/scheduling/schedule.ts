@@ -3,13 +3,31 @@ import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
 import { Badge } from "@/components/ui/badge";
 
 import { Time } from "@/Utils/types";
+import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
+import { TokenRead } from "@/types/tokens/token/token";
 import { UserReadMinimal } from "@/types/user/user";
 
-export type ScheduleSlotType = "appointment" | "open" | "closed";
+export enum AvailabilitySlotType {
+  Appointment = "appointment",
+  Open = "open",
+  Closed = "closed",
+}
+
+export enum SchedulableResourceType {
+  Practitioner = "practitioner",
+  Location = "location",
+  HealthcareService = "healthcare_service",
+}
+
+export const SCHEDULABLE_RESOURCE_TYPE_COLORS = {
+  practitioner: "blue",
+  location: "green",
+  healthcare_service: "yellow",
+} as const satisfies Record<SchedulableResourceType, string>;
 
 export interface AvailabilityDateTime {
   day_of_week: DayOfWeek;
@@ -25,6 +43,9 @@ export interface ScheduleTemplate {
   availabilities: ScheduleAvailability[];
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
+  charge_item_definition: ChargeItemDefinitionRead;
+  revisit_charge_item_definition: ChargeItemDefinitionRead;
+  revisit_allowed_days: number;
 }
 
 type ScheduleAvailabilityBase = {
@@ -33,25 +54,30 @@ type ScheduleAvailabilityBase = {
   availability: AvailabilityDateTime[];
 } & (
   | {
-      slot_type: "appointment";
+      slot_type: AvailabilitySlotType.Appointment;
       slot_size_in_minutes: number;
       tokens_per_slot: number;
     }
   | {
-      slot_type: "open" | "closed";
+      slot_type: AvailabilitySlotType.Open | AvailabilitySlotType.Closed;
       slot_size_in_minutes: null;
       tokens_per_slot: null;
     }
 );
 
 export interface ScheduleTemplateCreateRequest {
-  user: string;
   name: string;
   valid_from: string; // datetime
   valid_to: string; // datetime
   availabilities: ScheduleAvailabilityBase[];
+  resource_type: SchedulableResourceType;
+  resource_id: string;
 }
-
+export interface ScheduleTemplateSetChargeItemDefinitionRequest {
+  charge_item_definition: string;
+  re_visit_allowed_days: number;
+  re_visit_charge_item_definition: string | null;
+}
 export interface ScheduleTemplateUpdateRequest {
   name: string;
   valid_from: string;
@@ -74,7 +100,8 @@ export interface ScheduleException {
 }
 
 export interface ScheduleExceptionCreateRequest {
-  user: string; // user's id
+  resource_type: SchedulableResourceType;
+  resource_id: string;
   reason: string;
   valid_from: string;
   valid_to: string;
@@ -100,7 +127,8 @@ export interface GetSlotsForDayResponse {
 export interface AvailabilityHeatmapRequest {
   from_date: string;
   to_date: string;
-  user: string;
+  resource_type: SchedulableResourceType;
+  resource_id: string;
 }
 
 export interface AvailabilityHeatmapResponse {
@@ -173,6 +201,7 @@ export interface Appointment {
   user: UserReadMinimal;
   booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
   facility: FacilityBareMinimum;
+  token: TokenRead | null;
 }
 
 export interface AppointmentRead extends Appointment {

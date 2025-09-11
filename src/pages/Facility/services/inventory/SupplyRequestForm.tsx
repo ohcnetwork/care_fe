@@ -140,7 +140,7 @@ export default function SupplyRequestForm({
     queryFn: query.debounced(productKnowledgeApi.listProductKnowledge, {
       queryParams: {
         facility: facilityId,
-        search: searchItem,
+        name: searchItem,
         status: "active",
       },
     }),
@@ -409,7 +409,7 @@ export default function SupplyRequestForm({
                             defaultValue={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger ref={field.ref}>
                                 <SelectValue placeholder={t("select_status")} />
                               </SelectTrigger>
                             </FormControl>
@@ -541,7 +541,10 @@ export default function SupplyRequestForm({
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="border border-gray-400">
+                            <SelectTrigger
+                              className="border border-gray-400"
+                              ref={field.ref}
+                            >
                               <SelectValue placeholder={t("select_intent")} />
                             </SelectTrigger>
                           </FormControl>

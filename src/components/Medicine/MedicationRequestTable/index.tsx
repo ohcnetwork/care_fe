@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Loading from "@/components/Common/Loading";
 import { AdministrationTab } from "@/components/Medicine/MedicationAdministration/AdministrationTab";
+import { DispenseHistory } from "@/components/Medicine/MedicationRequestTable/DispenseHistory";
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 import { MedicationStatementList } from "@/components/Patient/MedicationStatementList";
 
@@ -144,6 +145,12 @@ export default function MedicationRequestTable() {
               >
                 {t("medicine_administration")}
               </TabsTrigger>
+              <TabsTrigger
+                value="dispense_history"
+                className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+              >
+                {t("dispense_history")}
+              </TabsTrigger>
             </TabsList>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
@@ -264,6 +271,15 @@ export default function MedicationRequestTable() {
               encounterId={encounterId}
               canWrite={canWrite}
               canAccess={canAccess}
+            />
+          </TabsContent>
+
+          <TabsContent value="dispense_history">
+            <DispenseHistory
+              patientId={patientId}
+              encounterId={encounterId}
+              canAccess={canAccess}
+              facilityId={facilityId}
             />
           </TabsContent>
         </Tabs>

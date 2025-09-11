@@ -4,14 +4,13 @@ import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
+import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
-import { PatientHeader } from "@/pages/Facility/services/serviceRequests/components/PatientHeader";
 import patientApi from "@/types/emr/patient/patientApi";
 
 import MedicationDispenseList from "./MedicationDispenseList";
@@ -60,9 +59,13 @@ export default function PrescriptionsView({
         </Button>
       </div>
       {patientData && (
-        <Card className="mb-4 p-4 rounded-none shadow-none bg-gray-100">
-          <PatientHeader patient={patientData} facilityId={facilityId} />
-        </Card>
+        <PatientHeader
+          patient={patientData}
+          facilityId={facilityId}
+          locationId={locationId}
+          showViewDispenseButton
+          className="p-2 rounded-none shadow-none bg-gray-100"
+        />
       )}
       <Tabs
         value={tab}
@@ -71,6 +74,7 @@ export default function PrescriptionsView({
             `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${patientId}/${value}`,
           )
         }
+        className="mt-4"
       >
         <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
           <TabsTrigger

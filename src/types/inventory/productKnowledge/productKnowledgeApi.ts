@@ -13,7 +13,7 @@ export default {
     TRes: Type<PaginatedResponse<ProductKnowledgeBase>>(),
   },
   retrieveProductKnowledge: {
-    path: "/api/v1/product_knowledge/{productKnowledgeId}/",
+    path: "/api/v1/product_knowledge/{slug}/",
     method: HttpMethod.GET,
     TRes: Type<ProductKnowledgeBase>(),
   },
@@ -24,7 +24,7 @@ export default {
     TBody: Type<ProductKnowledgeCreate>(),
   },
   updateProductKnowledge: {
-    path: "/api/v1/product_knowledge/{productKnowledgeId}/",
+    path: "/api/v1/product_knowledge/{slug}/",
     method: HttpMethod.PUT,
     TRes: Type<ProductKnowledgeBase>(),
     TBody: Type<ProductKnowledgeUpdate>(),

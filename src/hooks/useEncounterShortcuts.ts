@@ -8,7 +8,10 @@ import {
 } from "@/hooks/useKeyboardShortcuts";
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
-import { formatKeyboardShortcut } from "@/Utils/formatKeyboardShortcut";
+import {
+  formatKeyboardShortcut,
+  useShortcutDisplays,
+} from "@/Utils/keyboardShortcutUtils";
 import shortcutsConfig from "@/config/keyboardShortcuts.json";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
@@ -193,36 +196,27 @@ function formatKeyDisplay(key: string): string {
 export function useEncounterShortcutDisplays() {
   const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
 
-  return useMemo(() => {
-    const getDisplay = (actionId: string): string | undefined => {
-      // Find shortcut by action in the config
-      const config = shortcutsConfig as ShortcutsConfig;
-      const allShortcuts = [...config.global, ...config.encounter];
-
-      const shortcut = allShortcuts.find((s) => s.action === actionId);
-      if (shortcut) {
-        return formatKeyDisplay(shortcut.key);
-      }
-
-      // Handle dynamic questionnaire shortcuts
+  const dynamicResolver = useCallback(
+    (actionId: string): string | undefined => {
       if (actionId.startsWith("questionnaire-")) {
         const slug = actionId.replace("questionnaire-", "");
         const index = (questionnaireOptions?.results || []).findIndex(
           (q) => q.slug === slug,
         );
         if (index !== -1 && index < 9) {
+          const config = shortcutsConfig as ShortcutsConfig;
           const questionnaireShortcut = config.encounter.find(
             (s) => s.action === `questionnaire-${index + 1}`,
           );
           if (questionnaireShortcut) {
-            return formatKeyDisplay(questionnaireShortcut.key);
+            return formatKeyboardShortcut(questionnaireShortcut.key);
           }
         }
       }
-
       return undefined;
-    };
+    },
+    [questionnaireOptions],
+  );
 
-    return getDisplay;
-  }, [questionnaireOptions]);
+  return useShortcutDisplays(["encounter"], dynamicResolver);
 }

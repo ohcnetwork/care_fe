@@ -5,26 +5,26 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { NavigationLink, NavMain } from "@/components/ui/sidebar/nav-main";
 
-import { UserFacilityModel } from "@/components/Users/models";
-
 import { useCareApps } from "@/hooks/useCareApps";
 
 import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { FacilityBareMinimum } from "@/types/facility/facility";
+import careConfig from "@careConfig";
 
 interface FacilityNavProps {
-  selectedFacility: UserFacilityModel | null;
+  selectedFacility: FacilityBareMinimum | null;
 }
 
 function generateFacilityLinks(
-  selectedFacility: UserFacilityModel | null,
+  selectedFacility: FacilityBareMinimum | null,
   t: TFunction,
   permissions: {
     canViewAppointments: boolean;
     canListEncounters: boolean;
-    canCreateAppointment: boolean;
+    canWriteAppointment: boolean;
     canCreateEncounter: boolean;
     canViewEncounter: boolean;
   },
@@ -32,7 +32,10 @@ function generateFacilityLinks(
 ) {
   if (!selectedFacility) return [];
 
+  const encounterClasses = careConfig.encounterClasses;
+
   const baseUrl = `/facility/${selectedFacility.id}`;
+
   const links: NavigationLink[] = [
     {
       name: t("overview"),
@@ -46,11 +49,17 @@ function generateFacilityLinks(
       visibility: permissions.canViewAppointments,
     },
     {
+      name: t("queues"),
+      url: `${baseUrl}/queues`,
+      icon: <CareIcon icon="d-calendar" />,
+      visibility: permissions.canViewAppointments,
+    },
+    {
       name: t("patients"),
       url: `${baseUrl}/patients`,
       icon: <CareIcon icon="d-patient" />,
       visibility:
-        permissions.canCreateAppointment ||
+        permissions.canWriteAppointment ||
         permissions.canListEncounters ||
         permissions.canCreateEncounter,
       children: [
@@ -59,9 +68,16 @@ function generateFacilityLinks(
           url: `${baseUrl}/patients`,
         },
         {
-          name: t("encounters"),
-          url: `${baseUrl}/encounters/patients`,
+          name: t("all_encounters"),
+          url: `${baseUrl}/encounters/patients/all`,
+          visibility: encounterClasses.length > 1,
         },
+        ...encounterClasses.map((encounterClass) => ({
+          name: t(`encounter_class_encounters`, {
+            encounterClassName: t(`encounter_class__${encounterClass}`),
+          }),
+          url: `${baseUrl}/encounters/patients/${encounterClass}`,
+        })),
         {
           name: t("locations"),
           url: `${baseUrl}/encounters/locations`,
@@ -155,6 +171,10 @@ function generateFacilityLinks(
           name: t("product"),
           url: `${baseUrl}/settings/product`,
         },
+        {
+          name: t("token_category"),
+          url: `${baseUrl}/settings/token_category`,
+        },
         // {
         //   name: t("patient_identifier_config"),
         //   url: `${baseUrl}/settings/patient_identifier_config`,
@@ -193,14 +213,14 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
   const {
     canViewAppointments,
     canListEncounters,
-    canCreateAppointment,
+    canWriteAppointment,
     canCreateEncounter,
     canViewEncounter,
   } = getPermissions(hasPermission, facility?.permissions ?? []);
   const permissions = {
     canViewAppointments,
     canListEncounters,
-    canCreateAppointment,
+    canWriteAppointment,
     canCreateEncounter,
     canViewEncounter,
   };

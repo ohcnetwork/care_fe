@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -20,51 +18,31 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
-import { getPermissions } from "@/common/Permissions";
-
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
-import { usePermissions } from "@/context/PermissionContext";
+import useFilters from "@/hooks/useFilters";
 import { APPOINTMENT_STATUS_COLORS } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApi";
+import scheduleApi from "@/types/scheduling/scheduleApi";
 
 export const Appointments = (props: PatientProps) => {
   const { patientData, facilityId } = props;
   const patientId = patientData.id;
   const { t } = useTranslation();
-  const { hasPermission } = usePermissions();
-  const { canViewAppointments, canCreateAppointment } = getPermissions(
-    hasPermission,
-    patientData.permissions,
-  );
-  const { goBack } = useAppHistory();
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["patient-appointments", patientId],
-    queryFn: query(
-      facilityId
-        ? scheduleApis.appointments.list
-        : scheduleApis.appointments.getAppointments,
-      {
-        pathParams: { facilityId: facilityId ?? "", patientId },
-        queryParams: {
-          patient: patientId,
-          limit: 100,
-          ordering: "-token_slot__start_datetime",
-        },
-      },
-    ),
+  const { qParams, Pagination, resultsPerPage } = useFilters({
+    disableCache: true,
   });
 
-  useEffect(() => {
-    if (!canViewAppointments) {
-      toast.error(t("no_permission_to_view_page"));
-      goBack(`/facility/${facilityId}/patient/${patientId}`);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canViewAppointments]);
+  const { data, isLoading } = useQuery({
+    queryKey: ["patient-appointments", patientId, qParams],
+    queryFn: query(scheduleApi.appointments.getAppointments, {
+      pathParams: { patientId },
+      queryParams: {
+        limit: resultsPerPage,
+        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+      },
+    }),
+  });
 
   const appointments = data?.results;
 
@@ -74,7 +52,7 @@ export const Appointments = (props: PatientProps) => {
         <h2 className="text-2xl font-semibold leading-tight text-center sm:text-left">
           {t("appointments")}
         </h2>
-        {canCreateAppointment && facilityId && (
+        {facilityId && (
           <Button variant="outline_primary" asChild>
             <Link
               href={`/facility/${facilityId}/patient/${patientId}/book-appointment`}
@@ -160,6 +138,9 @@ export const Appointments = (props: PatientProps) => {
             )}
           </TableBody>
         </Table>
+        {/* add pagination */}
+
+        <Pagination totalCount={data?.count ?? 0} />
       </div>
     </div>
   );

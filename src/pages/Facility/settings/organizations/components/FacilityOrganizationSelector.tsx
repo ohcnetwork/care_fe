@@ -1,6 +1,6 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { Building, ChevronDown, ChevronRight, Loader2, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -112,17 +112,20 @@ export default function FacilityOrganizationSelector(
     setFacilityOrgSearch("");
   };
 
-  const handleConfirmSelection = (org: FacilityOrganizationRead) => {
-    if (!selectedOrganizations.includes(org)) {
-      const newSelection = [...selectedOrganizations, org];
-      setSelectedOrganizations(newSelection);
-      onChange(newSelection.map((org) => org.id));
-      setAlreadySelected(true);
-    }
-    setCurrentSelection(null);
-    setNavigationLevels([]);
-    setOpen(false);
-  };
+  const handleConfirmSelection = useCallback(
+    (org: FacilityOrganizationRead) => {
+      if (!selectedOrganizations.includes(org)) {
+        const newSelection = [...selectedOrganizations, org];
+        setSelectedOrganizations(newSelection);
+        onChange(newSelection.map((org) => org.id));
+        setAlreadySelected(true);
+      }
+      setCurrentSelection(null);
+      setNavigationLevels([]);
+      setOpen(false);
+    },
+    [selectedOrganizations, onChange],
+  );
 
   const handleRemoveOrganization = (index: number) => {
     const newSelection = selectedOrganizations.filter((_, i) => i !== index);
@@ -148,13 +151,51 @@ export default function FacilityOrganizationSelector(
     }
   };
 
-  const getCurrentLevelOrganizations = () => {
+  const getCurrentLevelOrganizations = useCallback(() => {
     if (navigationLevels.length === 0) {
       return rootOrganizations?.results || [];
     }
     const lastQuery = organizationQueries[navigationLevels.length - 1];
     return lastQuery?.data?.results || [];
-  };
+  }, [navigationLevels, rootOrganizations, organizationQueries]);
+
+  // Auto-select when there's only one organization available
+  useEffect(() => {
+    const availableOrganizations = getCurrentLevelOrganizations();
+
+    // Only auto-select if:
+    // 1. We're at the root level (no navigation levels)
+    // 2. There's exactly one organization
+    // 3. No search is active
+    // 4. No organizations are currently selected
+    // 5. Not loading
+    if (
+      navigationLevels.length === 0 &&
+      availableOrganizations.length === 1 &&
+      !facilityOrgSearch &&
+      selectedOrganizations.length === 0 &&
+      !isLoadingRoot
+    ) {
+      const singleOrg = availableOrganizations[0];
+
+      // Check if this organization is already selected in currentOrganizations prop
+      const isAlreadyInCurrent = currentOrganizations?.find(
+        (org) => org.id === singleOrg.id,
+      );
+
+      if (!isAlreadyInCurrent) {
+        handleConfirmSelection(singleOrg);
+      }
+    }
+  }, [
+    getCurrentLevelOrganizations,
+    handleConfirmSelection,
+    navigationLevels,
+    facilityOrgSearch,
+    selectedOrganizations,
+    isLoadingRoot,
+    currentOrganizations,
+  ]);
 
   const renderNavigationPath = () => {
     return (

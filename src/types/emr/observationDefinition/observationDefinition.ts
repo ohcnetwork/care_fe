@@ -1,4 +1,5 @@
 import { Code } from "@/types/base/code/code";
+import { QualifiedRange } from "@/types/base/qualifiedRange/qualifiedRange";
 
 export enum QuestionType {
   boolean = "boolean",
@@ -14,6 +15,7 @@ export interface ObservationDefinitionComponentSpec {
   code: Code;
   permitted_data_type: QuestionType;
   permitted_unit: Code;
+  qualified_ranges: QualifiedRange[];
 }
 
 export const OBSERVATION_DEFINITION_CATEGORY = [
@@ -42,6 +44,7 @@ export interface BaseObservationDefinitionSpec {
   method: Code | null;
   permitted_unit: Code | null;
   derived_from_uri?: string;
+  qualified_ranges: QualifiedRange[];
 }
 
 export interface ObservationDefinitionCreateSpec
