@@ -10,9 +10,10 @@ import { main as loadObservations } from "./load-observation_definition.js";
 import { main as loadSpecimens } from "./load-specimenDefinition.js";
 import {
   type BaseConfig,
-  DEFAULT_CONFIG,
   type ProcessedRow,
   colorize,
+  createScriptConfig,
+  ensureActivityDefinitionCategories,
   ensureAuthentication,
   getAuthHeaders,
   getLogger,
@@ -27,30 +28,36 @@ import {
   writeOutputCsv,
 } from "./utils.js";
 
+import { Code } from "@/types/base/code/code";
+import {
+  ActivityDefinitionCreateSpec,
+  Classification,
+  Kind,
+  Status,
+} from "@/types/emr/activityDefinition/activityDefinition";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const logger = getLogger();
 
-interface Code {
-  system: string;
-  code: string;
-  display: string;
-}
-
 interface ActivityData {
   title: string;
   slug: string;
   description: string;
-  status: string;
-  category: string;
-  kind: string;
+  usage: string;
+  status: Status;
+  classification: Classification;
+  kind: Kind;
+  category: string; // Category slug for creation
   observation_slugs: string[];
   specimen_slugs: string[];
   charge_item_slugs: string[];
   diagnostic_report_loinc_codes: Code[];
   code?: Code;
   body_site?: Code;
+  derived_from_uri?: string;
+  locations?: string[];
 }
 
 // Helper function to parse code objects
@@ -121,17 +128,11 @@ async function lookupCode(
   }
 }
 
-// Configuration
-const CONFIG: BaseConfig & { outputDir: string } = {
+// Script-specific configuration defaults
+const SCRIPT_DEFAULTS = {
   inputFile: path.join(__dirname, "ActivityDefinition.csv"),
-  outputDir: path.join(__dirname, "output"),
   outputFile: path.join(__dirname, "output", "ActivityDefinitions-output.csv"),
-  facilityId: DEFAULT_CONFIG.facilityId,
-  apiBaseUrl: DEFAULT_CONFIG.apiBaseUrl,
-  parser: DEFAULT_CONFIG.parser,
-  sheetName: DEFAULT_CONFIG.sheetName,
-  batchSize: DEFAULT_CONFIG.batchSize,
-  maxWorkers: DEFAULT_CONFIG.maxWorkers,
+  outputDir: path.join(__dirname, "output"),
 };
 
 // Function to process CSV data
@@ -198,9 +199,12 @@ async function processCsvData(
       title: row.title,
       slug: row.slug,
       description: row.description,
-      status: row.status || "active",
-      category: row.category.toLowerCase() || "laboratory",
-      kind: "service_request",
+      usage: row.usage || "",
+      status: (row.status as Status) || Status.active,
+      classification:
+        (row.classification as Classification) || Classification.laboratory,
+      kind: Kind.service_request,
+      category: row.category || "laboratory",
       observation_slugs: row.observation_slugs
         ? row.observation_slugs
             .split(";")
@@ -222,6 +226,13 @@ async function processCsvData(
       diagnostic_report_loinc_codes: diagnosticReportCodes,
       code: code || undefined,
       body_site: bodySite || undefined,
+      derived_from_uri: row.derived_from_uri || undefined,
+      locations: row.locations
+        ? row.locations
+            .split(";")
+            .map((s: string) => s.trim())
+            .filter((s: string) => s)
+        : [],
     });
   }
 
@@ -267,32 +278,51 @@ function checkDependencies(
 }
 
 // Function to upsert activity definition
-async function upsertActivityDefinition(data: ActivityData): Promise<any> {
-  const activityData = {
+async function upsertActivityDefinition(
+  data: ActivityData,
+  config: BaseConfig,
+): Promise<any> {
+  const activityData: ActivityDefinitionCreateSpec = {
     title: data.title,
     slug: data.slug,
     description: data.description,
+    usage: data.usage,
     status: data.status,
-    category: data.category,
+    classification: data.classification,
     kind: data.kind,
-    observation_slugs: data.observation_slugs,
-    specimen_slugs: data.specimen_slugs,
-    charge_item_slugs: data.charge_item_slugs,
-    diagnostic_report_loinc_codes: data.diagnostic_report_loinc_codes,
-    code: data.code,
-    body_site: data.body_site,
+    facility: config.facilityId,
+    category: data.category,
+    specimen_requirements: data.specimen_slugs,
+    charge_item_definitions: data.charge_item_slugs,
+    observation_result_requirements: data.observation_slugs,
+    locations: data.locations || [],
+    diagnostic_report_codes: data.diagnostic_report_loinc_codes,
+    code: data.code!,
+    body_site: data.body_site || null,
+    derived_from_uri: data.derived_from_uri || null,
   };
 
   return await makeApiCall(
-    `/api/v1/facility/${CONFIG.facilityId}/activity_definition/upsert/`,
+    `/api/v1/facility/${config.facilityId}/activity_definition/upsert/`,
     activityData,
-    CONFIG,
+    config,
   );
 }
 
 // Main function
-async function main(configOverride?: Partial<typeof CONFIG>) {
-  let finalConfig = mergeConfigWithCli(CONFIG, configOverride);
+async function main(configOverride?: Partial<BaseConfig>) {
+  let finalConfig = configOverride
+    ? createScriptConfig(
+        SCRIPT_DEFAULTS.inputFile,
+        SCRIPT_DEFAULTS.outputFile,
+        configOverride,
+      )
+    : mergeConfigWithCli(
+        createScriptConfig(
+          SCRIPT_DEFAULTS.inputFile,
+          SCRIPT_DEFAULTS.outputFile,
+        ),
+      );
 
   try {
     logger(colorize("Starting activity definition loader...", 0));
@@ -302,7 +332,7 @@ async function main(configOverride?: Partial<typeof CONFIG>) {
     finalConfig = { ...finalConfig, ...authenticatedConfig };
 
     // Step 0: Create output directory if it doesn't exist
-    const outputDir = finalConfig.outputDir;
+    const outputDir = SCRIPT_DEFAULTS.outputDir;
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
@@ -314,31 +344,43 @@ async function main(configOverride?: Partial<typeof CONFIG>) {
     logger(colorize("Loading charge items...", 2));
     const chargeItemResults = await loadChargeItems({
       inputFile: path.join(__dirname, "ChargeItemDefinition.csv"),
-      outputFile: path.join(finalConfig.outputDir, "ChargeItems-output.csv"),
+      outputFile: path.join(outputDir, "ChargeItems-output.csv"),
       facilityId: finalConfig.facilityId,
       apiBaseUrl: finalConfig.apiBaseUrl,
+      parser: finalConfig.parser,
+      googleSheetId: finalConfig.googleSheetId,
+      sheetName: finalConfig.sheetName,
     });
 
     // Load specimens
     logger(colorize("Loading specimens...", 2));
     const specimenResults = await loadSpecimens({
       inputFile: path.join(__dirname, "SpecimenDefinition.csv"),
-      outputFile: path.join(finalConfig.outputDir, "Specimens-output.csv"),
+      outputFile: path.join(outputDir, "Specimens-output.csv"),
       facilityId: finalConfig.facilityId,
       apiBaseUrl: finalConfig.apiBaseUrl,
+      parser: finalConfig.parser,
+      googleSheetId: finalConfig.googleSheetId,
+      sheetName: finalConfig.sheetName,
     });
 
     // Load observations
     logger(colorize("Loading observations...", 2));
     const observationResults = await loadObservations({
       inputFile: path.join(__dirname, "ObservationDefinition.csv"),
-      outputFile: path.join(finalConfig.outputDir, "Observations-output.csv"),
+      outputFile: path.join(outputDir, "Observations-output.csv"),
       facilityId: finalConfig.facilityId,
       apiBaseUrl: finalConfig.apiBaseUrl,
+      parser: finalConfig.parser,
+      googleSheetId: finalConfig.googleSheetId,
+      sheetName: finalConfig.sheetName,
     });
 
-    // Step 2: Check if input file exists
-    if (!fs.existsSync(finalConfig.inputFile)) {
+    // Step 2: Check if input file exists (only for local parser)
+    if (
+      finalConfig.parser === "local" &&
+      !fs.existsSync(finalConfig.inputFile)
+    ) {
       throw new Error(`Input file not found: ${finalConfig.inputFile}`);
     }
 
@@ -350,6 +392,10 @@ async function main(configOverride?: Partial<typeof CONFIG>) {
     if (csvRows.length === 0) {
       throw new Error("No valid rows found in CSV file");
     }
+
+    // Step 4: Ensure categories exist
+    logger(colorize("Ensuring categories exist...", 0));
+    await ensureActivityDefinitionCategories(csvRows, finalConfig);
 
     // Process data
     logger(colorize("Processing data...", 0));
@@ -394,32 +440,27 @@ async function main(configOverride?: Partial<typeof CONFIG>) {
     logger(colorize("Upserting activity definitions...", 0));
     const results = await makeBatchApiCall(
       `/api/v1/facility/${finalConfig.facilityId}/activity_definition/upsert/`,
-      validActivities.map((item) => ({
-        title: item.title,
-        slug: item.slug,
-        description: item.description,
-        status: item.status,
-        category: item.category,
-        kind: item.kind,
-        observation_result_requirements:
-          item.observation_slugs.length > 0
-            ? item.observation_slugs.length
-            : undefined,
-        specimen_requirements:
-          item.specimen_slugs.length > 0
-            ? item.specimen_slugs.length
-            : undefined,
-        charge_item_definitions:
-          item.charge_item_slugs.length > 0
-            ? item.charge_item_slugs.length
-            : undefined,
-        diagnostic_report_codes:
-          item.diagnostic_report_loinc_codes.length > 0
-            ? item.diagnostic_report_loinc_codes.length
-            : undefined,
-        code: item.code,
-        body_site: item.body_site,
-      })),
+      validActivities.map(
+        (item): ActivityDefinitionCreateSpec => ({
+          title: item.title,
+          slug: item.slug,
+          description: item.description,
+          usage: item.usage,
+          status: item.status,
+          classification: item.classification,
+          kind: item.kind,
+          facility: finalConfig.facilityId,
+          category: item.category,
+          specimen_requirements: item.specimen_slugs,
+          charge_item_definitions: item.charge_item_slugs,
+          observation_result_requirements: item.observation_slugs,
+          locations: item.locations || [],
+          diagnostic_report_codes: item.diagnostic_report_loinc_codes,
+          code: item.code!,
+          body_site: item.body_site || null,
+          derived_from_uri: item.derived_from_uri || null,
+        }),
+      ),
       finalConfig,
     );
 
@@ -467,4 +508,4 @@ if (require.main === module) {
   main();
 }
 
-export { loadData, main, processCsvData, upsertActivityDefinition };
+export { main, processCsvData, upsertActivityDefinition };

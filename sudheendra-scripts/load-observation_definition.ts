@@ -5,30 +5,33 @@ import { fileURLToPath } from "url";
 
 import {
   type BaseConfig,
-  DEFAULT_CONFIG,
   colorize,
+  createScriptConfig,
   ensureAuthentication,
   getAuthHeaders,
   getLogger,
+  loadData,
   makeBatchApiCall,
   mergeConfigWithCli,
   parseCliArgs,
   showCliHelp,
 } from "./utils.js";
 
+import { Code } from "@/types/base/code/code";
+import {
+  OBSERVATION_DEFINITION_STATUS,
+  ObservationDefinitionCreateSpec,
+  ObservationDefinitionStatus,
+  QuestionType,
+} from "@/types/emr/observationDefinition/observationDefinition";
+
 /**
  * Types & Enums
  */
-interface Code {
-  system: string;
-  code: string;
-  display: string;
-}
-
 interface ObservationDefinitionComponentSpec {
   code: Code;
-  permitted_data_type: string;
-  permitted_unit?: Code;
+  permitted_data_type: QuestionType;
+  permitted_unit: Code;
 }
 
 interface CSVRow {
@@ -58,18 +61,17 @@ interface CSVRow {
 interface ParsedObservationDefinition {
   slug: string;
   title: string;
-  status: string;
+  status: ObservationDefinitionStatus;
   description: string;
   category: string;
   code: Code;
-  permitted_data_type: string;
+  permitted_data_type: QuestionType;
   component: ObservationDefinitionComponentSpec[];
   body_site?: Code | null;
   method?: Code | null;
   permitted_unit?: Code | null;
   derived_from_uri?: string;
   facility: string;
-  qualified_value?: string;
 }
 
 interface ProcessedRow {
@@ -79,23 +81,7 @@ interface ProcessedRow {
   Errors?: string;
 }
 
-const OBSERVATION_DEFINITION_STATUS = [
-  "draft",
-  "active",
-  "retired",
-  "unknown",
-] as const;
-const OBSERVATION_DEFINITION_CATEGORY = [
-  "social_history",
-  "vital_signs",
-  "imaging",
-  "laboratory",
-  "procedure",
-  "survey",
-  "exam",
-  "therapy",
-  "activity",
-] as const;
+// Remove duplicate constants - they're imported from types now
 
 /**
  * Config
@@ -106,15 +92,10 @@ const __dirname = path.dirname(__filename);
 
 const logger = getLogger();
 
-const CONFIG: BaseConfig = {
+// Script-specific configuration defaults
+const SCRIPT_DEFAULTS = {
   inputFile: path.join(__dirname, "observation_definitions.csv"),
   outputFile: path.join(__dirname, "observations-output.csv"),
-  facilityId: DEFAULT_CONFIG.facilityId,
-  apiBaseUrl: DEFAULT_CONFIG.apiBaseUrl,
-  parser: DEFAULT_CONFIG.parser,
-  sheetName: DEFAULT_CONFIG.sheetName,
-  batchSize: DEFAULT_CONFIG.batchSize,
-  maxWorkers: DEFAULT_CONFIG.maxWorkers,
 };
 
 /**
@@ -263,15 +244,11 @@ function csvRowToObservationDefinition(
   );
 
   const status = OBSERVATION_DEFINITION_STATUS.includes(
-    row.status as (typeof OBSERVATION_DEFINITION_STATUS)[number],
+    row.status as ObservationDefinitionStatus,
   )
-    ? row.status
-    : "active";
-  const category = OBSERVATION_DEFINITION_CATEGORY.includes(
-    row.category as (typeof OBSERVATION_DEFINITION_CATEGORY)[number],
-  )
-    ? row.category
-    : "laboratory";
+    ? (row.status as ObservationDefinitionStatus)
+    : ("active" as ObservationDefinitionStatus);
+  const category = row.category || "laboratory";
 
   return {
     slug: row.slug,
@@ -280,7 +257,8 @@ function csvRowToObservationDefinition(
     description: row.description,
     category,
     code,
-    permitted_data_type: row.permitted_data_type || "string",
+    permitted_data_type:
+      (row.permitted_data_type as QuestionType) || QuestionType.string,
     component: parseComponents(row.component),
     body_site: bodySite,
     method,
@@ -390,12 +368,21 @@ async function upsertObservationDefinition(
 /**
  * Main script
  */
-async function main(configOverride?: Partial<typeof CONFIG>) {
+async function main(configOverride?: Partial<BaseConfig>) {
   // If configOverride is provided, don't merge CLI args (called programmatically)
   // Otherwise, merge CLI args (called from command line)
   let finalConfig = configOverride
-    ? { ...CONFIG, ...configOverride }
-    : mergeConfigWithCli(CONFIG, configOverride);
+    ? createScriptConfig(
+        SCRIPT_DEFAULTS.inputFile,
+        SCRIPT_DEFAULTS.outputFile,
+        configOverride,
+      )
+    : mergeConfigWithCli(
+        createScriptConfig(
+          SCRIPT_DEFAULTS.inputFile,
+          SCRIPT_DEFAULTS.outputFile,
+        ),
+      );
 
   try {
     logger(colorize("Starting observation definition loader...", 0));
@@ -403,15 +390,13 @@ async function main(configOverride?: Partial<typeof CONFIG>) {
     // Ensure authentication tokens are available if token auth is enabled
     finalConfig = await ensureAuthentication(finalConfig);
 
-    if (!finalConfig.inputFile || !fs.existsSync(finalConfig.inputFile)) {
-      throw new Error(
-        `Input file not found or path is invalid: ${finalConfig.inputFile}`,
-      );
-    }
+    // Load data using the shared loadData function
+    const rawRows = await loadData(finalConfig);
+    if (rawRows.length === 0)
+      throw new Error("No valid rows found in CSV file");
 
-    const csvContent = fs.readFileSync(finalConfig.inputFile, "utf-8");
-    const rows = parseCSV(csvContent);
-    if (rows.length === 0) throw new Error("No valid rows found in CSV file");
+    // Convert generic rows to typed CSVRow objects
+    const rows: CSVRow[] = rawRows.map((row) => row as unknown as CSVRow);
 
     logger(colorize(`Processing ${rows.length} observation definitions...`, 0));
 
@@ -440,7 +425,23 @@ async function main(configOverride?: Partial<typeof CONFIG>) {
     logger(colorize("Upserting observation definitions...", 0));
     const results = await makeBatchApiCall(
       `/api/v1/observation_definition/upsert/`,
-      validDefinitions,
+      validDefinitions.map(
+        (def): ObservationDefinitionCreateSpec => ({
+          slug: def.slug,
+          title: def.title,
+          status: def.status,
+          description: def.description,
+          category: def.category,
+          code: def.code,
+          permitted_data_type: def.permitted_data_type,
+          component: def.component,
+          body_site: def.body_site || null,
+          method: def.method || null,
+          permitted_unit: def.permitted_unit || null,
+          derived_from_uri: def.derived_from_uri,
+          facility: def.facility,
+        }),
+      ),
       finalConfig,
     );
 

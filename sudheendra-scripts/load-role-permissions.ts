@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import { RoleCreate } from "@/types/emr/role/role";
 import {
   batchRequest,
-  DEFAULT_CONFIG,
+  createScriptConfig,
   ensureAuthentication,
   getAuthHeaders,
   type BaseConfig,
@@ -829,13 +829,11 @@ function checkRoles(role: RoleCreate) {
   console.log(`Removed permissions for ${role.name}:`, removedPermissions);
 }
 
-async function main() {
+async function main(configOverride?: Partial<BaseConfig>) {
   // Create config for authentication
-  let config: BaseConfig = {
-    ...DEFAULT_CONFIG,
-    inputFile: "", // Not used for this script
-    outputFile: "", // Not used for this script
-  };
+  let config: BaseConfig = configOverride
+    ? createScriptConfig("", "", configOverride) // No input/output files for this script
+    : createScriptConfig("", "");
 
   // Ensure authentication tokens are available if token auth is enabled
   config = await ensureAuthentication(config);

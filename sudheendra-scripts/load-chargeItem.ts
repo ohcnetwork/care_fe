@@ -6,10 +6,12 @@ dotenv.config({ path: [".env.local", ".env"] });
 
 import {
   type BaseConfig,
-  DEFAULT_CONFIG,
   type ProcessedRow,
   colorize,
+  createScriptConfig,
   createSlug,
+  ensureAuthentication,
+  ensureChargeItemCategories,
   getLogger,
   loadData,
   makeApiCall,
@@ -23,6 +25,10 @@ import {
 } from "./utils.js";
 
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import {
+  ChargeItemDefinitionCreate,
+  ChargeItemDefinitionStatus,
+} from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,18 +40,15 @@ interface ChargeItemData {
   basePrice: number;
   slug: string;
   taxRate?: string;
+  category: string;
+  description?: string;
+  status: ChargeItemDefinitionStatus;
 }
 
-// Configuration
-const CONFIG: BaseConfig = {
+// Script-specific configuration defaults
+const SCRIPT_DEFAULTS = {
   inputFile: path.join(__dirname, "services.csv"),
   outputFile: path.join(__dirname, "services-output.csv"),
-  facilityId: DEFAULT_CONFIG.facilityId,
-  apiBaseUrl: DEFAULT_CONFIG.apiBaseUrl,
-  parser: DEFAULT_CONFIG.parser,
-  sheetName: DEFAULT_CONFIG.sheetName,
-  batchSize: DEFAULT_CONFIG.batchSize,
-  maxWorkers: DEFAULT_CONFIG.maxWorkers,
 };
 
 // Tax component helper function
@@ -91,17 +94,26 @@ function processCsvData(rows: Record<string, string>[]): ChargeItemData[] {
       basePrice: isNaN(basePrice) ? 0 : basePrice,
       slug: slug,
       taxRate: taxRate,
+      category: row.category || "service",
+      description: row.description || `Service: ${row.Service}`,
+      status:
+        (row.status as ChargeItemDefinitionStatus) ||
+        ChargeItemDefinitionStatus.active,
     };
   });
 }
 
 // Function to upsert charge item definition
-async function upsertChargeItemDefinition(data: ChargeItemData): Promise<any> {
-  const chargeItemData = {
+async function upsertChargeItemDefinition(
+  data: ChargeItemData,
+  config: BaseConfig,
+): Promise<any> {
+  const chargeItemData: ChargeItemDefinitionCreate = {
     title: data.title,
     slug: data.slug,
-    status: "active",
-    description: `Service: ${data.title}`,
+    status: data.status,
+    description: data.description,
+    category: data.category,
     price_components: [
       {
         monetary_component_type: MonetaryComponentType.base,
@@ -112,9 +124,9 @@ async function upsertChargeItemDefinition(data: ChargeItemData): Promise<any> {
   };
 
   return await makeApiCall(
-    `/api/v1/facility/${CONFIG.facilityId}/charge_item_definition/upsert/`,
+    `/api/v1/facility/${config.facilityId}/charge_item_definition/upsert/`,
     chargeItemData,
-    CONFIG,
+    config,
   );
 }
 
@@ -208,15 +220,28 @@ function normalizeTitle(title: string) {
 }
 
 // Main function
-async function main(configOverride?: Partial<typeof CONFIG>) {
+async function main(configOverride?: Partial<BaseConfig>) {
   // If configOverride is provided, don't merge CLI args (called programmatically)
   // Otherwise, merge CLI args (called from command line)
-  const finalConfig = configOverride
-    ? { ...CONFIG, ...configOverride }
-    : mergeConfigWithCli(CONFIG, configOverride);
+  let finalConfig = configOverride
+    ? createScriptConfig(
+        SCRIPT_DEFAULTS.inputFile,
+        SCRIPT_DEFAULTS.outputFile,
+        configOverride,
+      )
+    : mergeConfigWithCli(
+        createScriptConfig(
+          SCRIPT_DEFAULTS.inputFile,
+          SCRIPT_DEFAULTS.outputFile,
+        ),
+      );
 
   try {
     logger(colorize("Starting charge item definition loader...", 0));
+
+    // Ensure authentication tokens are available if token auth is enabled
+    const authenticatedConfig = await ensureAuthentication(finalConfig);
+    finalConfig = { ...finalConfig, ...authenticatedConfig };
 
     // Load CSV data
     logger(colorize("Loading data...", 0));
@@ -224,6 +249,20 @@ async function main(configOverride?: Partial<typeof CONFIG>) {
 
     if (csvRows.length === 0) {
       throw new Error("No valid rows found in CSV file");
+    }
+
+    // Ensure categories exist
+    logger(colorize("Ensuring categories exist...", 0));
+    const { successful, failed } = await ensureChargeItemCategories(
+      csvRows,
+      finalConfig,
+    );
+    if (failed.length > 0) {
+      logger(colorize("Failed to create categories:", 1));
+      failed.forEach((category) => {
+        logger(colorize(`- ${category}`, 1));
+      });
+      throw new Error("Failed to create categories");
     }
 
     // Process data
@@ -246,13 +285,14 @@ async function main(configOverride?: Partial<typeof CONFIG>) {
     logger(colorize("Upserting charge item definitions...", 0));
     const results = await makeBatchApiCall(
       `/api/v1/facility/${finalConfig.facilityId}/charge_item_definition/upsert/`,
-      processedData.map((item) => {
+      processedData.map((item): ChargeItemDefinitionCreate => {
         const normalizedTitle = normalizeTitle(item.title);
         return {
           title: normalizedTitle,
           slug: item.slug,
-          status: "active",
-          description: normalizedTitle,
+          status: item.status,
+          description: item.description,
+          category: item.category,
           price_components: [
             {
               monetary_component_type: MonetaryComponentType.base,
@@ -301,4 +341,4 @@ if (require.main === module) {
   main();
 }
 
-export { loadData, main, processCsvData, upsertChargeItemDefinition };
+export { main, processCsvData, upsertChargeItemDefinition };

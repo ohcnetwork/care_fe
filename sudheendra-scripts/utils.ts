@@ -3,6 +3,12 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import {
+  ResourceCategoryCreate,
+  ResourceCategoryResourceType,
+  ResourceCategorySubType,
+} from "@/types/base/resourceCategory/resourceCategory";
+
 dotenv.config({ path: [".env.local", ".env"] });
 
 const __filename = fileURLToPath(import.meta.url);
@@ -148,7 +154,8 @@ export function createSlug(name: string): string {
     .replace(/[^a-z0-9\s_-]/g, "") // Keep letters, numbers, spaces, underscores, and hyphens
     .replace(/\s+/g, "-") // Replace spaces with hyphens
     .replace(/-+/g, "-") // Replace multiple hyphens with single
-    .trim();
+    .trim()
+    .slice(0, 25);
 }
 
 /**
@@ -899,4 +906,146 @@ export function mergeConfig<T extends BaseConfig>(
   override?: Partial<T>,
 ): T {
   return { ...defaultConfig, ...override };
+}
+
+// Helper to create config for specific scripts with proper defaults
+export function createScriptConfig(
+  inputFile: string,
+  outputFile: string,
+  overrides?: Partial<BaseConfig>,
+): BaseConfig {
+  return {
+    ...DEFAULT_CONFIG,
+    inputFile,
+    outputFile,
+    ...overrides,
+  };
+}
+
+// Category management functions
+
+/**
+ * Extract unique categories from data rows
+ * @param rows - Array of data rows
+ * @param categoryField - Field name containing category data
+ * @returns Array of unique category names
+ */
+export function extractUniqueCategories(
+  rows: Record<string, string>[],
+  categoryField: string = "category",
+): string[] {
+  const categories = new Set<string>();
+
+  for (const row of rows) {
+    const category = row[categoryField];
+    if (category && category.trim()) {
+      categories.add(category.trim());
+    }
+  }
+
+  return Array.from(categories);
+}
+
+/**
+ * Create resource categories via API
+ * @param categories - Array of category names to create
+ * @param resourceType - Type of resource these categories are for
+ * @param config - Configuration for API calls
+ * @returns Object with successful and failed category slugs
+ */
+export async function createResourceCategories(
+  categories: string[],
+  resourceType: ResourceCategoryResourceType,
+  config: BaseConfig,
+): Promise<{ successful: string[]; failed: string[] }> {
+  const logger = getLogger();
+
+  logger(
+    colorize(
+      `Creating ${categories.length} resource categories for ${resourceType}...`,
+      0,
+    ),
+  );
+
+  const categoryData: ResourceCategoryCreate[] = categories.map((category) => ({
+    title: category,
+    slug: createSlug(category),
+    description: `Auto-generated category for ${category}`,
+    resource_type: resourceType,
+    resource_sub_type: ResourceCategorySubType.other,
+  }));
+
+  // Use batch API call to create categories
+  const results = await makeBatchApiCall(
+    `/api/v1/facility/${config.facilityId}/resource_category/upsert/`,
+    categoryData,
+    config,
+  );
+
+  const successful = results.filter((r) => r.success).map((r) => r.item.slug);
+  const failed = results.filter((r) => !r.success).map((r) => r.item.slug);
+
+  logger(
+    colorize(
+      `Categories created - Success: ${successful.length}, Failed: ${failed.length}`,
+      0,
+    ),
+  );
+
+  if (failed.length > 0) {
+    logger(colorize("Failed categories:", 1));
+    results
+      .filter((r) => !r.success)
+      .forEach((r) => {
+        const errorMessage =
+          r.error?.errorText || r.error?.message || "Unknown error";
+        logger(colorize(`- ${r.item.title}: ${errorMessage}`, 1));
+      });
+  }
+
+  return { successful, failed };
+}
+
+/**
+ * Ensure categories exist for activity definitions
+ * @param rows - Data rows containing category information
+ * @param config - Configuration for API calls
+ * @returns Object with successful and failed category slugs
+ */
+export async function ensureActivityDefinitionCategories(
+  rows: Record<string, string>[],
+  config: BaseConfig,
+): Promise<{ successful: string[]; failed: string[] }> {
+  const categories = extractUniqueCategories(rows, "category");
+  if (categories.length === 0) {
+    return { successful: [], failed: [] };
+  }
+
+  return await createResourceCategories(
+    categories,
+    ResourceCategoryResourceType.activity_definition,
+    config,
+  );
+}
+
+/**
+ * Ensure categories exist for charge item definitions
+ * @param rows - Data rows containing category information
+ * @param config - Configuration for API calls
+ * @returns Object with successful and failed category slugs
+ */
+export async function ensureChargeItemCategories(
+  rows: Record<string, string>[],
+  config: BaseConfig,
+): Promise<{ successful: string[]; failed: string[] }> {
+  const categories = extractUniqueCategories(rows, "category");
+  if (categories.length === 0) {
+    return { successful: [], failed: [] };
+  }
+
+  return await createResourceCategories(
+    categories,
+    ResourceCategoryResourceType.charge_item_definition,
+    config,
+  );
 }

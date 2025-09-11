@@ -1,6 +1,7 @@
 import path from "path";
 import { fileURLToPath } from "url";
 
+import { Code } from "@/types/base/code/code";
 import {
   Preference,
   SpecimenDefinitionCreate,
@@ -8,9 +9,9 @@ import {
 } from "@/types/emr/specimenDefinition/specimenDefinition.js";
 import {
   type BaseConfig,
-  DEFAULT_CONFIG,
   type ProcessedRow,
   colorize,
+  createScriptConfig,
   getLogger,
   loadData,
   makeApiCall,
@@ -28,16 +29,10 @@ const __dirname = path.dirname(__filename);
 
 const logger = getLogger();
 
-// Configuration
-const CONFIG: BaseConfig = {
+// Script-specific configuration defaults
+const SCRIPT_DEFAULTS = {
   inputFile: path.join(__dirname, "SpecimenDefinition.csv"),
   outputFile: path.join(__dirname, "specimens-output.csv"),
-  facilityId: DEFAULT_CONFIG.facilityId,
-  apiBaseUrl: DEFAULT_CONFIG.apiBaseUrl,
-  parser: DEFAULT_CONFIG.parser,
-  sheetName: DEFAULT_CONFIG.sheetName,
-  batchSize: DEFAULT_CONFIG.batchSize,
-  maxWorkers: DEFAULT_CONFIG.maxWorkers,
 };
 
 // Function to process CSV data
@@ -48,7 +43,11 @@ function processCsvData(
     const minimumVolume = parseFloat(row.container_minimumvolume || "0");
 
     // Helper function to create Code object only if all fields are present
-    const createCode = (code: string, system: string, display: string) => {
+    const createCode = (
+      code: string,
+      system: string,
+      display: string,
+    ): Code | undefined => {
       if (code && system && display) {
         return { code, system, display };
       }
@@ -141,6 +140,7 @@ function processCsvData(
 // Function to upsert specimen definition
 async function upsertSpecimenDefinition(
   data: SpecimenDefinitionCreate,
+  config: BaseConfig,
 ): Promise<any> {
   const specimenData = {
     title: data.title,
@@ -159,19 +159,28 @@ async function upsertSpecimenDefinition(
   };
 
   return await makeApiCall(
-    `/api/v1/facility/${CONFIG.facilityId}/specimen_definition/upsert/`,
+    `/api/v1/facility/${config.facilityId}/specimen_definition/upsert/`,
     specimenData,
-    CONFIG,
+    config,
   );
 }
 
 // Main function
-async function main(configOverride?: Partial<typeof CONFIG>) {
+async function main(configOverride?: Partial<BaseConfig>) {
   // If configOverride is provided, don't merge CLI args (called programmatically)
   // Otherwise, merge CLI args (called from command line)
   const finalConfig = configOverride
-    ? { ...CONFIG, ...configOverride }
-    : mergeConfigWithCli(CONFIG, configOverride);
+    ? createScriptConfig(
+        SCRIPT_DEFAULTS.inputFile,
+        SCRIPT_DEFAULTS.outputFile,
+        configOverride,
+      )
+    : mergeConfigWithCli(
+        createScriptConfig(
+          SCRIPT_DEFAULTS.inputFile,
+          SCRIPT_DEFAULTS.outputFile,
+        ),
+      );
 
   try {
     logger(colorize("Starting specimen definition loader...", 0));
@@ -240,4 +249,4 @@ if (require.main === module) {
   main();
 }
 
-export { loadData, main, processCsvData, upsertSpecimenDefinition };
+export { main, processCsvData, upsertSpecimenDefinition };
