@@ -257,7 +257,7 @@ export function ResourceCategoryList({
                 baseTitle={baseTitle}
               />
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-x-2 gap-2">
               <Button
                 variant="outline"
                 onClick={handleCreateCategory}
@@ -269,8 +269,9 @@ export function ResourceCategoryList({
               {onCreateItem && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div>
+                    <div className="w-full sm:w-auto">
                       <Button
+                        className="w-full sm:w-auto"
                         onClick={onCreateItem}
                         disabled={!isLeafCategory || false}
                       >
