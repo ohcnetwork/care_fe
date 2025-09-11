@@ -190,9 +190,9 @@ export function ChargeItemsTable({
               charge_item_status: value === "all" ? undefined : value,
             })
           }
-          className="max-sm:hidden"
+          className="max-sm:hidden w-2/3 md:w-full overflow-x-auto"
         >
-          <TabsList>
+          <TabsList className="overflow-x-auto">
             <TabsTrigger value="all">{t("all")}</TabsTrigger>
             {Object.values(ChargeItemStatus).map((status) => (
               <TabsTrigger key={status} value={status}>

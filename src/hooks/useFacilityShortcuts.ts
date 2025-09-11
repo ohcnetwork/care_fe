@@ -1,11 +1,17 @@
 import { useNavigate } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 
-import { PERMISSION_CREATE_PATIENT } from "@/common/Permissions";
+import {
+  PERMISSION_CREATE_ENCOUNTER,
+  PERMISSION_CREATE_PATIENT,
+} from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { FacilityAction, FacilityActionId } from "@/types/shortcuts";
-import { shortcutActionHandler } from "@/Utils/keyboardShortcutUtils";
+import {
+  shortcutActionHandler,
+  shortcutActionHandlers,
+} from "@/Utils/keyboardShortcutUtils";
 import { useKeyboardShortcuts } from "./useKeyboardShortcuts";
 
 export function useFacilityShortcuts(subContext?: string) {
@@ -26,10 +32,11 @@ export function useFacilityShortcuts(subContext?: string) {
         requiresFacility: true,
         permission: PERMISSION_CREATE_PATIENT,
       },
-      // Generic shortcut handlers - just add the ID here!
-      // To add new shortcuts: just add the ID to this array and add data-shortcut-id to the element
-      { id: "patient-home", handler: shortcutActionHandler("patient-home") },
-      { id: "print-token", handler: shortcutActionHandler("print-token") },
+      {
+        id: "create-encounter",
+        handler: shortcutActionHandler("create-encounter"),
+        permission: PERMISSION_CREATE_ENCOUNTER,
+      },
       {
         id: "edit-invoice-items",
         handler: shortcutActionHandler("edit-invoice-items"),
@@ -139,6 +146,14 @@ export function useFacilityShortcuts(subContext?: string) {
         id: "print-charge-items",
         handler: shortcutActionHandler("print-charge-items"),
       },
+      // if you dont need permission checks just add bellow
+      ...shortcutActionHandlers([
+        "patient-home",
+        "print-token",
+        "generate-token",
+        "schedule-appointment",
+      ]),
+
       // Generic action handlers
       {
         id: "cancel-action",

@@ -508,9 +508,6 @@ export function ResourceDefinitionCategoryPicker<T extends BaseDefinition>({
                         )}
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <div className="flex-shrink-0">
-                            <Folder className="h-5 w-5 text-gray-500" />
-                          </div>
                           <div className="min-w-0 flex-1">
                             <div className="font-medium text-sm truncate">
                               {definition.title}

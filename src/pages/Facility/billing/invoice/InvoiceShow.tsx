@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
+  ArrowLeft,
   BadgeCheck,
   BanknoteArrowDownIcon,
   Building2,
@@ -56,9 +57,8 @@ import {
 import AddChargeItemSheet from "@/components/Billing/Invoice/AddChargeItemSheet";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
+import BackButton from "@/components/Common/BackButton";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
@@ -136,7 +136,6 @@ export function InvoiceShow({
   const tableHeadClass = "border-r border-gray-200 font-semibold text-center";
   const tableCellClass =
     "border-r border-gray-200 font-medium text-gray-950 text-sm";
-  const { goBack } = useAppHistory();
 
   // Fetch facility data for available components
   const { data: facilityData } = useQuery({
@@ -328,27 +327,18 @@ export function InvoiceShow({
 
   return (
     <div className="space-y-8 relative">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between flex-col sm:flex-row gap-4 sm:items-center">
         <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            className="border-gray-400 gap-1"
-            onClick={() => goBack()}
-            data-shortcut-id="go-back"
-          >
-            <CareIcon icon="l-arrow-left" className="size-4" />
-            <span className="text-gray-950 font-medium">{t("back")}</span>
-            <div className="text-xs flex items-center justify-center w-9 h-6 rounded-md border border-gray-200">
-              {getShortcutDisplay("go-back")}
-            </div>
-          </Button>
+          <BackButton>
+            <ArrowLeft />
+            <span>{t("back")}</span>
+          </BackButton>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-col sm:flex-row w-full sm:w-auto">
           {invoice?.status === InvoiceStatus.draft && (
             <Button
               data-shortcut-id="issue-invoice"
               variant="outline_primary"
-              className="w-full flex flex-row justify-stretch items-center"
               onClick={() => handleStatusChange(InvoiceStatus.issued)}
               disabled={isUpdatingInvoice}
             >
@@ -363,7 +353,6 @@ export function InvoiceShow({
             <Button
               data-shortcut-id="mark-as-balanced"
               variant="outline_primary"
-              className="w-full flex flex-row justify-stretch items-center"
               onClick={() => handleStatusChange(InvoiceStatus.balanced)}
               disabled={isUpdatingInvoice}
             >
@@ -390,8 +379,8 @@ export function InvoiceShow({
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="md:col-span-2">
-          <div className="flex flex-row justify-between items-center mb-4">
+        <div className="md:col-span-2 overflow-x-auto">
+          <div className="flex sm:flex-row flex-col sm:items-center gap-4 justify-between items-start mb-4">
             <div className="flex flex-row items-center gap-2">
               <span className="font-semibold text-gray-950 text-base">
                 {t("invoice")}: {invoice.number}
