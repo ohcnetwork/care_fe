@@ -1,15 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  BadgeCheck,
-  Bed,
-  Building2,
-  Calendar,
-  Clock,
-  Eye,
-  MapPin,
-  Sparkles,
-  User,
-} from "lucide-react";
+import { AlarmClockIcon, Calendar, Eye, User } from "lucide-react";
 import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -22,6 +12,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -30,9 +21,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
+import { cn } from "@/lib/utils";
 import {
+  ENCOUNTER_CLASS_ICONS,
+  ENCOUNTER_CLASSES_COLORS,
+  ENCOUNTER_STATUS_COLORS,
+  ENCOUNTER_STATUS_ICONS,
   EncounterRead,
-  completedEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import query from "@/Utils/request/query";
@@ -50,13 +45,13 @@ interface TimelineEncounterCardProps {
   permissions: string[];
   facilityId?: string;
   isLast?: boolean;
+  isFirst?: boolean;
 }
 
 function TimelineEncounterCard({
   encounter,
   permissions,
   facilityId,
-  isLast,
 }: TimelineEncounterCardProps) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -67,238 +62,122 @@ function TimelineEncounterCard({
   const [isHovered, setIsHovered] = useState(false);
 
   const canAccess = canViewEncounter || canViewPatients;
-  const isCompleted = completedEncounterStatus.includes(encounter.status);
 
-  // Determine encounter class display
-  const getEncounterClassDisplay = () => {
-    switch (encounter.encounter_class) {
-      case "imp":
-        return {
-          label: "Inpatient",
-          icon: Bed,
-          color: "bg-green-50 text-green-800 border-green-300",
-        };
-      case "amb":
-        return {
-          label: "Ambulatory (OP)",
-          icon: Building2,
-          color: "bg-orange-50 text-orange-800 border-orange-300",
-        };
-      default:
-        return {
-          label: t(`encounter_class__${encounter.encounter_class}`),
-          icon: Building2,
-          color: "bg-gray-50 text-gray-800 border-gray-300",
-        };
-    }
+  const ClassIcon = ENCOUNTER_CLASS_ICONS[encounter.encounter_class];
+  const StatusIcon = ENCOUNTER_STATUS_ICONS[encounter.status];
+
+  const getComponentColor = (color: string) => {
+    const colorMap = {
+      blue: "bg-blue-200 text-blue-700 border-blue-500",
+      yellow: "bg-yellow-200 text-yellow-700 border-yellow-500",
+      orange: "bg-orange-200 text-orange-700 border-orange-500",
+      green: "bg-green-200 text-green-700 border-green-500",
+      red: "bg-red-200 text-red-700 border-red-500",
+      gray: "bg-gray-200 text-gray-700 border-gray-500",
+      primary: "bg-primary-200 text-primary-700 border-primary-500",
+      destructive:
+        "bg-destructive-200 text-destructive-700 border-destructive-500",
+      secondary: "bg-secondary-200 text-secondary-700 border-secondary-500",
+    };
+
+    return colorMap[color as keyof typeof colorMap] || colorMap.gray;
   };
 
-  const encounterClassInfo = getEncounterClassDisplay();
-  const ClassIcon = encounterClassInfo.icon;
-
   return (
-    <div className="flex gap-3 mb-3 group">
-      {/* Enhanced Timeline indicator with proper connection */}
-      <div className="flex flex-col items-center">
-        {/* Timeline connector from previous item */}
-        {!isLast && (
-          <div className="w-0.5 h-4 bg-gradient-to-b from-gray-300 to-gray-200 mb-1" />
-        )}
+    <div className="flex items-stretch gap-3 py-4 group">
+      <div className="w-[36px] flex flex-col items-center self-stretch">
+        <div className="hidden" />
 
         <div
-          className={`relative p-2 rounded-full border-2 transition-all duration-200 ${
-            isCompleted
-              ? "border-green-400 bg-green-100 shadow-green-100"
-              : "border-blue-400 bg-blue-100 shadow-blue-100"
-          } group-hover:scale-105 group-hover:shadow-md`}
+          className={cn(
+            "relative p-2 rounded-full border-2 transition-all duration-200 mt-6 group-hover:scale-105 group-hover:shadow-md",
+            getComponentColor(ENCOUNTER_STATUS_COLORS[encounter.status]),
+          )}
           role="img"
-          aria-label={
-            isCompleted ? "Completed encounter" : "In-progress encounter"
-          }
+          aria-label={t(`encounter_status__${encounter.status}`)}
         >
-          {isCompleted ? (
-            <BadgeCheck className="size-3 text-white drop-shadow-sm" />
-          ) : (
-            <Sparkles className="size-3 text-white drop-shadow-sm" />
-          )}
-          {/* Subtle pulse for in-progress */}
-          {!isCompleted && (
-            <div className="absolute inset-0 rounded-full border-2 border-blue-400 animate-ping opacity-20" />
-          )}
+          <StatusIcon
+            className={cn(
+              "size-4",
+              getComponentColor(ENCOUNTER_STATUS_COLORS[encounter.status]),
+            )}
+          />
         </div>
 
-        {/* Timeline connector to next item */}
-        {!isLast && (
-          <div className="w-0.5 h-4 bg-gradient-to-b from-gray-200 to-gray-300 mt-1" />
-        )}
+        <div className="hidden" />
       </div>
 
-      {/* Clickable Encounter card */}
-      {canAccess ? (
-        <Link
-          href={
-            facilityId
-              ? `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`
-              : `/organization/organizationId/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`
-          }
-          className="flex-1"
-        >
-          <Card
-            className={`transition-all duration-200 cursor-pointer ${
-              isHovered
-                ? "shadow-md border-gray-200"
-                : "shadow-sm border-gray-100"
-            } hover:shadow-md hover:border-gray-200 hover:scale-[1.01]`}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-          >
-            <CardContent className="p-4">
-              {/* Compact header with status */}
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Badge
-                    className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium transition-all duration-200 ${encounterClassInfo.color} group-hover:scale-105`}
-                  >
-                    <ClassIcon className="size-3" />
-                    {encounterClassInfo.label}
-                  </Badge>
-                  <Badge
-                    className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium transition-all duration-200 ${
-                      isCompleted
-                        ? "bg-green-50 text-green-700 border-green-200"
-                        : "bg-purple-50 text-purple-700 border-purple-200"
-                    } group-hover:scale-105`}
-                  >
-                    {isCompleted ? (
-                      <BadgeCheck className="size-3" />
-                    ) : (
-                      <Sparkles className="size-3" />
-                    )}
-                    {isCompleted ? t("completed") : t("in_progress")}
-                  </Badge>
-                </div>
+      <Card
+        className={`flex-1 transition-all duration-200 ${
+          isHovered ? "shadow-md border-gray-200" : "shadow-sm border-gray-100"
+        }`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <CardContent className="p-5">
+          <div className="mb-4 flex items-center gap-3">
+            <Badge
+              variant={ENCOUNTER_CLASSES_COLORS[encounter.encounter_class]}
+              size="sm"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-medium"
+            >
+              <ClassIcon className="size-4" />
+              {t(`encounter_class__${encounter.encounter_class}`)}
+            </Badge>
+            <Badge
+              variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
+              size="sm"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-medium"
+            >
+              <StatusIcon className="size-4" />
+              {t(`encounter_status__${encounter.status}`)}
+            </Badge>
+          </div>
 
-                {/* View indicator */}
-                <div className="flex items-center gap-1 text-xs text-gray-500 group-hover:text-blue-600 transition-colors duration-200">
-                  <Eye className="size-3" />
-                  <span>{t("view_encounter")}</span>
-                </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <div className="text-gray-600 flex items-center gap-1.5">
+                {t("start_date")}
               </div>
-
-              {/* Compact details in single row */}
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="size-3.5 text-gray-500" />
-                    <span className="text-gray-600">{t("start_date")}:</span>
-                    <span className="font-medium text-gray-900">
-                      {encounter.period.start
-                        ? formatDateTime(encounter.period.start)
-                        : t("not_started")}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="size-3.5 text-gray-500" />
-                    <span className="text-gray-600">{t("priority")}:</span>
-                    <div className="flex items-center gap-1">
-                      <div
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          encounter.priority.toLowerCase() === "urgent"
-                            ? "bg-red-500"
-                            : encounter.priority.toLowerCase() === "high"
-                              ? "bg-orange-500"
-                              : encounter.priority.toLowerCase() === "medium"
-                                ? "bg-yellow-500"
-                                : "bg-green-500"
-                        }`}
-                      />
-                      <span className="font-medium text-gray-900">
-                        {t(
-                          `encounter_priority__${encounter.priority.toLowerCase()}`,
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 text-gray-600">
-                  <MapPin className="size-3.5" />
-                  <span className="text-xs">{encounter.facility.name}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-      ) : (
-        <Card className="flex-1 shadow-sm border-gray-100 opacity-75">
-          <CardContent className="p-4">
-            {/* Same content but without click functionality */}
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Badge
-                  className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium ${encounterClassInfo.color}`}
-                >
-                  <ClassIcon className="size-3" />
-                  {encounterClassInfo.label}
-                </Badge>
-                <Badge
-                  className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium ${
-                    isCompleted
-                      ? "bg-green-50 text-green-700 border-green-200"
-                      : "bg-purple-50 text-purple-700 border-purple-200"
-                  }`}
-                >
-                  {isCompleted ? (
-                    <BadgeCheck className="size-3" />
-                  ) : (
-                    <Sparkles className="size-3" />
-                  )}
-                  {isCompleted ? t("completed") : t("in_progress")}
-                </Badge>
+              <div className="mt-1 text-lg font-semibold text-gray-900">
+                {encounter.period.start
+                  ? formatDateTime(encounter.period.start)
+                  : t("not_started")}
               </div>
             </div>
-
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="size-3.5 text-gray-500" />
-                  <span className="text-gray-600">{t("start_date")}:</span>
-                  <span className="font-medium text-gray-900">
-                    {encounter.period.start
-                      ? formatDateTime(encounter.period.start)
-                      : t("not_started")}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Clock className="size-3.5 text-gray-500" />
-                  <span className="text-gray-600">{t("priority")}:</span>
-                  <div className="flex items-center gap-1">
-                    <div
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        encounter.priority.toLowerCase() === "urgent"
-                          ? "bg-red-500"
-                          : encounter.priority.toLowerCase() === "high"
-                            ? "bg-orange-500"
-                            : encounter.priority.toLowerCase() === "medium"
-                              ? "bg-yellow-500"
-                              : "bg-green-500"
-                      }`}
-                    />
-                    <span className="font-medium text-gray-900">
-                      {t(
-                        `encounter_priority__${encounter.priority.toLowerCase()}`,
-                      )}
-                    </span>
-                  </div>
-                </div>
+            <div>
+              <div className="text-gray-600 flex items-center gap-1.5">
+                {t("priority")}{" "}
+                <AlarmClockIcon className="size-5 text-orange-500" />
               </div>
-              <div className="flex items-center gap-1.5 text-gray-600">
-                <MapPin className="size-3.5" />
-                <span className="text-xs">{encounter.facility.name}</span>
+              <div className="mt-1 text-lg font-semibold text-gray-900">
+                {t(`encounter_priority__${encounter.priority.toLowerCase()}`)}
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        </CardContent>
+        <CardFooter className="p-1">
+          <div className="bg-gray-100 p-4 rounded-b-lg w-full">
+            {canAccess ? (
+              <Button asChild variant="outline" className="px-4">
+                <Link
+                  href={
+                    facilityId
+                      ? `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`
+                      : `/organization/organizationId/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`
+                  }
+                >
+                  <Eye className="mr-2 size-4" /> {t("view_encounter")}
+                </Link>
+              </Button>
+            ) : (
+              <Button variant="outline" className="px-4" disabled>
+                <Eye className="mr-2 size-4" /> {t("view_encounter")}
+              </Button>
+            )}
+          </div>
+        </CardFooter>
+      </Card>
     </div>
   );
 }
@@ -312,11 +191,10 @@ export default function PatientHomeEncounters({
   const { t } = useTranslation();
 
   const { data: encounters, isLoading: encounterLoading } = useQuery({
-    queryKey: ["encounters", "live", patientId],
+    queryKey: ["encounters", patientId],
     queryFn: query(encounterApi.list, {
       queryParams: {
         patient: patientId,
-        live: false,
       },
       silent: true,
     }),
@@ -344,13 +222,11 @@ export default function PatientHomeEncounters({
         <CardContent className="space-y-3">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="flex gap-3">
-              {/* Enhanced Timeline skeleton */}
               <div className="flex flex-col items-center">
                 {i > 0 && <Skeleton className="w-0.5 h-4 mb-1" />}
                 <Skeleton className="w-8 h-8 rounded-full" />
                 {i < 2 && <Skeleton className="w-0.5 h-4 mt-1" />}
               </div>
-              {/* Card skeleton */}
               <div className="flex-1 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex gap-2">
@@ -375,70 +251,49 @@ export default function PatientHomeEncounters({
   }
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="pb-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <div className="p-1.5 bg-blue-100 rounded-lg">
-            <Calendar className="size-4 text-blue-600" />
-          </div>
-          {t("active_encounters")}
-          {encounters?.results && encounters.results.length > 0 && (
-            <Badge variant="secondary" className="ml-auto text-xs">
-              {encounters.results.length}{" "}
-              {encounters.results.length === 1
-                ? t("encounter")
-                : t("encounters")}
-            </Badge>
-          )}
-        </CardTitle>
-        <CardDescription className="text-sm text-gray-600">
-          {t("view_and_manage_patient_encounters")}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="p-4">
-        {encounters?.results && encounters.results.length > 0 ? (
-          <div className="space-y-0">
-            {encounters.results.map((encounter, index) => (
-              <TimelineEncounterCard
-                encounter={encounter}
-                key={encounter.id}
-                permissions={facilityPermissions}
-                facilityId={
-                  encounter.facility.id === facilityId ? facilityId : undefined
-                }
-                isLast={index === encounters.results.length - 1}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center p-8 text-center">
-            <div className="relative">
-              <div className="rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 p-4 mb-4 shadow-md">
-                <CareIcon
-                  icon="l-folder-open"
-                  className="size-8 text-blue-600"
-                />
-              </div>
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs font-bold">!</span>
-              </div>
+    <>
+      {encounters?.results && encounters.results.length > 0 ? (
+        <div className="relative pb-6">
+          <div className="absolute left-[17px] top-12 bottom-2 w-0.5 bg-gray-200" />
+          <div className="absolute left-[17px] bottom-2 h-0.5 w-7 -translate-x-[13px] bg-gray-200 rounded" />
+          {encounters.results.map((encounter, index) => (
+            <TimelineEncounterCard
+              encounter={encounter}
+              key={encounter.id}
+              permissions={facilityPermissions}
+              facilityId={
+                encounter.facility.id === facilityId ? facilityId : undefined
+              }
+              isLast={index === encounters.results.length - 1}
+              isFirst={index === 0}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <div className="relative">
+            <div className="rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 p-4 mb-4 shadow-md">
+              <CareIcon icon="l-folder-open" className="size-8 text-blue-600" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-              {t("no_active_encounters_found")}
-            </h3>
-            <p className="text-gray-600 mb-4 text-sm max-w-md">
-              {t("create_a_new_encounter_to_get_started")}
-            </p>
-            <Button
-              size="sm"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
-            >
-              <User className="size-3 mr-1.5" />
-              {t("create_encounter")}
-            </Button>
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+              <span className="text-white text-xs font-bold">!</span>
+            </div>
           </div>
-        )}
-      </CardContent>
-    </Card>
+          <h3 className="text-lg font-semibold text-gray-900 mb-1">
+            {t("no_active_encounters_found")}
+          </h3>
+          <p className="text-gray-600 mb-4 text-sm max-w-md">
+            {t("create_a_new_encounter_to_get_started")}
+          </p>
+          <Button
+            size="sm"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+          >
+            <User className="size-3 mr-1.5" />
+            {t("create_encounter")}
+          </Button>
+        </div>
+      )}
+    </>
   );
 }

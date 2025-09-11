@@ -134,44 +134,136 @@ export default function VerifyPatient() {
         </Alert>
       ) : patientData ? (
         <div className="space-y-6">
-          {/* Main Layout: Left side (patient info + actions) and Right side (token) */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Side - Patient Information and Actions */}
             <div className="space-y-6 lg:col-span-2">
-              {/* Patient Information Header */}
-              <Card className="bg-white shadow-sm">
-                <CardHeader className="pb-4">
-                  <div className="space-y-4">
-                    {/* Patient Details */}
-                    <PatientHoverCard
-                      patient={patientData}
-                      facilityId={facilityId || ""}
-                    />
-
-                    {/* Patient Tags */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      {patientData.instance_tags.map((t) => (
-                        <Badge key={t.id} variant="outline">
-                          {getTagHierarchyDisplay(t)}
-                        </Badge>
-                      ))}
-                      <TagAssignmentSheet
-                        entityType={TagResource.PATIENT}
-                        entityId={patientData.id}
-                        currentTags={patientData.instance_tags}
-                        onUpdate={() => {
-                          queryClient.invalidateQueries({
-                            queryKey: ["patient", patientData.id],
-                          });
-                        }}
-                        canWrite={true}
+              <div className="space-y-6">
+                {/* Patient Information Header */}
+                <Card className="bg-white shadow-sm">
+                  <CardHeader className="pb-4">
+                    <div className="space-y-4">
+                      {/* Patient Details */}
+                      <PatientHoverCard
+                        patient={patientData}
+                        facilityId={facilityId || ""}
                       />
-                    </div>
-                  </div>
-                </CardHeader>
-              </Card>
 
-              {/* Action Cards */}
+                      {/* Patient Tags */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        {patientData.instance_tags.map((t) => (
+                          <Badge key={t.id} variant="outline">
+                            {getTagHierarchyDisplay(t)}
+                          </Badge>
+                        ))}
+                        <TagAssignmentSheet
+                          entityType={TagResource.PATIENT}
+                          entityId={patientData.id}
+                          currentTags={patientData.instance_tags}
+                          onUpdate={() => {
+                            queryClient.invalidateQueries({
+                              queryKey: ["patient", patientData.id],
+                            });
+                          }}
+                          canWrite={true}
+                        />
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+
+                {/* Action Cards */}
+              </div>
+
+              <div className="grid gap-4 grid-cols-2  lg:grid-cols-3">
+                {canCreateEncounter && (
+                  <CreateEncounterForm
+                    patientId={patientData.id}
+                    facilityId={facilityId}
+                    patientName={patientData.name}
+                    trigger={
+                      <div
+                        data-shortcut-id="create-encounter"
+                        className="group relative h-[120px] overflow-hidden border border-gray-200 rounded-lg bg-gray-50 p-0 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                      >
+                        <ShortcutBadge
+                          actionId="create-encounter"
+                          position="top-right"
+                        />
+                        <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-3">
+                          <div className="flex size-12 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
+                            <CareIcon
+                              icon="l-heartbeat"
+                              className="size-6 text-orange-500"
+                            />
+                          </div>
+                          <span className="text-sm font-medium text-gray-800 text-center">
+                            {t("create_encounter")}
+                          </span>
+                        </div>
+                      </div>
+                    }
+                  />
+                )}
+
+                {canWriteAppointment && (
+                  <Link
+                    href={`/facility/${facilityId}/patient/${patientData.id}/book-appointment`}
+                    data-shortcut-id="schedule-appointment"
+                    className="group relative h-[120px] overflow-hidden border border-gray-200 rounded-lg bg-gray-50 p-0 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer block"
+                  >
+                    <ShortcutBadge
+                      actionId="schedule-appointment"
+                      position="top-right"
+                    />
+                    <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-3">
+                      <div className="flex size-12 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
+                        <CareIcon
+                          icon="l-stethoscope"
+                          className="size-6 text-purple-500"
+                        />
+                      </div>
+                      <span className="text-sm font-medium text-gray-800 text-center">
+                        {t("schedule_appointment")}
+                      </span>
+                    </div>
+                  </Link>
+                )}
+
+                {canCreateToken && (
+                  <CreateTokenForm
+                    patient={patientData}
+                    facilityId={facilityId}
+                    trigger={
+                      <div
+                        data-shortcut-id="generate-token"
+                        className="group relative h-[120px] overflow-hidden border border-gray-200 rounded-lg bg-gray-50 p-0 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                      >
+                        <ShortcutBadge
+                          actionId="generate-token"
+                          position="top-right"
+                        />
+                        <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-3">
+                          <div className="flex size-12 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
+                            <Printer className="size-6 text-gray-500" />
+                          </div>
+                          <span className="text-sm font-medium text-gray-800 text-center">
+                            {t("generate_token")}
+                          </span>
+                        </div>
+                      </div>
+                    }
+                  />
+                )}
+              </div>
+
+              <PatientHomeTabs
+                patientId={patientData.id}
+                facilityId={facilityId}
+                facilityPermissions={facility?.permissions ?? []}
+                canListEncounters={canListEncounters}
+                canWriteAppointment={canWriteAppointment}
+                canCreateToken={canCreateToken}
+                patientData={patientData}
+              />
             </div>
 
             {/* Right Side - Token Information */}
@@ -250,97 +342,6 @@ export default function VerifyPatient() {
               )}
             </div>
           </div>
-          <div className="grid gap-4 grid-cols-2  lg:grid-cols-5">
-            {canCreateEncounter && (
-              <CreateEncounterForm
-                patientId={patientData.id}
-                facilityId={facilityId}
-                patientName={patientData.name}
-                trigger={
-                  <div
-                    data-shortcut-id="create-encounter"
-                    className="group relative h-[120px] overflow-hidden border border-gray-200 rounded-lg bg-gray-50 p-0 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
-                  >
-                    <ShortcutBadge
-                      actionId="create-encounter"
-                      position="top-right"
-                    />
-                    <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-3">
-                      <div className="flex size-12 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
-                        <CareIcon
-                          icon="l-heartbeat"
-                          className="size-6 text-orange-500"
-                        />
-                      </div>
-                      <span className="text-sm font-medium text-gray-800 text-center">
-                        {t("create_encounter")}
-                      </span>
-                    </div>
-                  </div>
-                }
-              />
-            )}
-
-            {canWriteAppointment && (
-              <Link
-                href={`/facility/${facilityId}/patient/${patientData.id}/book-appointment`}
-                data-shortcut-id="schedule-appointment"
-                className="group relative h-[120px] overflow-hidden border border-gray-200 rounded-lg bg-gray-50 p-0 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer block"
-              >
-                <ShortcutBadge
-                  actionId="schedule-appointment"
-                  position="top-right"
-                />
-                <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-3">
-                  <div className="flex size-12 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
-                    <CareIcon
-                      icon="l-stethoscope"
-                      className="size-6 text-purple-500"
-                    />
-                  </div>
-                  <span className="text-sm font-medium text-gray-800 text-center">
-                    {t("schedule_appointment")}
-                  </span>
-                </div>
-              </Link>
-            )}
-
-            {canCreateToken && (
-              <CreateTokenForm
-                patient={patientData}
-                facilityId={facilityId}
-                trigger={
-                  <div
-                    data-shortcut-id="generate-token"
-                    className="group relative h-[120px] overflow-hidden border border-gray-200 rounded-lg bg-gray-50 p-0 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
-                  >
-                    <ShortcutBadge
-                      actionId="generate-token"
-                      position="top-right"
-                    />
-                    <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-3">
-                      <div className="flex size-12 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
-                        <Printer className="size-6 text-gray-500" />
-                      </div>
-                      <span className="text-sm font-medium text-gray-800 text-center">
-                        {t("generate_token")}
-                      </span>
-                    </div>
-                  </div>
-                }
-              />
-            )}
-          </div>
-          {/* Patient Tabs - Full Width */}
-          <PatientHomeTabs
-            patientId={patientData.id}
-            facilityId={facilityId}
-            facilityPermissions={facility?.permissions ?? []}
-            canListEncounters={canListEncounters}
-            canWriteAppointment={canWriteAppointment}
-            canCreateToken={canCreateToken}
-            patientData={patientData}
-          />
         </div>
       ) : (
         isError && (
