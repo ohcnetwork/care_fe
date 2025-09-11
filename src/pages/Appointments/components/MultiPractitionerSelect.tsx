@@ -37,7 +37,6 @@ interface MultiPractitionerSelectorProps {
   selected: UserReadMinimal[] | null;
   onSelect: (users: UserReadMinimal[] | null) => void;
   facilityId: string;
-  clearSelection?: string;
 }
 
 const MULTI_SELECT_SHOW_LIMIT = 5;
@@ -46,7 +45,6 @@ export const MultiPractitionerSelector = ({
   facilityId,
   selected,
   onSelect,
-  clearSelection,
 }: MultiPractitionerSelectorProps) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -125,20 +123,6 @@ export const MultiPractitionerSelector = ({
                 {isFetching ? t("searching") : t("no_results")}
               </CommandEmpty>
               <CommandGroup>
-                {clearSelection && (
-                  <CommandItem
-                    value="all"
-                    onSelect={() => {
-                      onSelect(null);
-                    }}
-                    className="cursor-pointer w-full"
-                  >
-                    <div className="w-full flex items-start">
-                      <span>{clearSelection}</span>
-                      {!selected && <CheckIcon className="ml-auto" />}
-                    </div>
-                  </CommandItem>
-                )}
                 {selected && selected.length > 0 && (
                   <h3 className="mt-1 mx-2 text-sm font-medium">
                     {t("selected")}
@@ -149,7 +133,9 @@ export const MultiPractitionerSelector = ({
                     key={user.id}
                     value={getItemValue(user)}
                     onSelect={() => {
-                      onSelect(selected.filter((s) => s.id !== user.id));
+                      if (selected.length > 1) {
+                        onSelect(selected.filter((s) => s.id !== user.id));
+                      }
                     }}
                     className="cursor-pointer w-full"
                   >
@@ -170,7 +156,7 @@ export const MultiPractitionerSelector = ({
                           {user.username}
                         </span>
                       </div>
-                      <XIcon className="ml-auto" />
+                      {selected.length > 1 && <XIcon className="ml-auto" />}
                     </div>
                   </CommandItem>
                 ))}

@@ -345,32 +345,12 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
   });
 
   const schedulableUserResources = schedulableUsersQuery.data?.users;
-  const practitionerIds = qParams.practitioners?.split(",") ?? [];
+  const practitionerIds = qParams.practitioners?.split(",") ?? [authUser.id];
   const practitioners = schedulableUserResources?.filter((r) =>
     practitionerIds.includes(r.id),
   );
 
   useEffect(() => {
-    // trigger this effect only when there are no query params already applied, and once the query is loaded
-    if (
-      Object.keys(qParams).length !== 0 ||
-      (practitionerFilterEnabled && schedulableUsersQuery.isLoading)
-    ) {
-      return;
-    }
-
-    // Sets the practitioner filter to the current user if they are in the list of
-    // schedulable users and no practitioner was selected.
-    if (
-      !qParams.practitioners &&
-      practitionerFilterEnabled &&
-      schedulableUsersQuery.data?.users.some(
-        (r) => r.username === authUser.username,
-      )
-    ) {
-      qParams.practitioners = authUser.id;
-    }
-
     // Set default date range if no dates are present
     if (!qParams.date_from && !qParams.date_to) {
       const today = new Date();
@@ -481,7 +461,6 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                     });
                   }
                 }}
-                clearSelection={t("show_all")}
               />
             </div>
           )}
@@ -730,7 +709,9 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 statusGroup={statusGroup}
                 slot={slot?.id}
                 resourceType={resourceType}
-                resourceIds={resourceId ?? (qParams.practitioners || null)}
+                resourceIds={
+                  resourceId ?? (qParams.practitioners || authUser.id)
+                }
                 date_from={qParams.date_from}
                 date_to={qParams.date_to}
                 canViewAppointments={canViewAppointments}
@@ -825,6 +806,7 @@ function AppointmentColumn(props: {
       const currentOffset = allPages.length * 10;
       return currentOffset < lastPage.count ? currentOffset : null;
     },
+    enabled: !!props.resourceIds,
   });
 
   const appointments =
