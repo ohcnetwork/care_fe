@@ -3,6 +3,7 @@ import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
   addDays,
+  differenceInDays,
   format,
   formatDate,
   isToday,
@@ -109,6 +110,8 @@ import {
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserReadMinimal } from "@/types/user/user";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { MultiPractitionerSelector } from "./components/MultiPractitionerSelect";
 
 interface DateRangeDisplayProps {
@@ -315,6 +318,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
     limit: 15,
   });
 
+  useFacilityShortcuts("charge-items-table");
   const practitionerFilterEnabled =
     resourceType === SchedulableResourceType.Practitioner && !resourceId;
 
@@ -685,7 +689,27 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 items-center">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <Button
+            variant="primary"
+            data-shortcut-id="print-button"
+            disabled={
+              differenceInDays(qParams.date_to, qParams.date_from) >= 31
+            }
+            onClick={() => {
+              const queryString = new URLSearchParams({
+                ...qParams,
+                tags: selectedTags.map((tag) => tag.id).join(","),
+              }).toString();
+              navigate(
+                `/facility/${facilityId}/appointments/print?${queryString}`,
+              );
+            }}
+          >
+            <CareIcon icon="l-print" className="text-lg" />
+            {t("print")}
+            <ShortcutBadge actionId="print-button" className="bg-white" />
+          </Button>
           <PatientEncounterOrIdentifierFilter
             onSelect={(patientId) => updateQuery({ patient: patientId })}
             placeholder={t("search_patients")}
@@ -1086,7 +1110,10 @@ function AppointmentRow(props: {
             <TabsList>
               {getStatusGroups(t).map((group) => {
                 return (
-                  <TabsTrigger key={group.label} value={group.label}>
+                  <TabsTrigger
+                    key={group.label}
+                    value={group.statuses.join(",")}
+                  >
                     {group.label}
                   </TabsTrigger>
                 );
@@ -1106,7 +1133,7 @@ function AppointmentRow(props: {
             </SelectTrigger>
             <SelectContent>
               {getStatusGroups(t).map((group) => (
-                <SelectItem key={group.label} value={group.label}>
+                <SelectItem key={group.label} value={group.statuses.join(",")}>
                   <div className="flex items-center">{group.label}</div>
                 </SelectItem>
               ))}

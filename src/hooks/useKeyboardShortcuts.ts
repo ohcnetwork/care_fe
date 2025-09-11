@@ -185,6 +185,7 @@ export function useKeyboardShortcuts(
 
   const prefixActiveRef = useRef<string | null>(null);
   const [activePrefix, setActivePrefix] = useState<string | null>(null);
+  const [isOptionPressed, setIsOptionPressed] = useState<boolean>(false);
 
   // Reset prefix states after timeout
   useEffect(() => {
@@ -199,6 +200,11 @@ export function useKeyboardShortcuts(
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
+      // Track Option/Alt key state
+      if (event.altKey !== isOptionPressed) {
+        setIsOptionPressed(event.altKey);
+      }
+
       // Skip if typing in input fields (unless explicitly allowed)
       const target = event.target as HTMLElement;
       const isInputField =
@@ -277,18 +283,40 @@ export function useKeyboardShortcuts(
         }
       }
     },
-    [categorizedShortcuts, handlers, matchesKeyCombo],
+    [categorizedShortcuts, handlers, matchesKeyCombo, isOptionPressed],
   );
+
+  const handleKeyUp = useCallback(
+    (event: KeyboardEvent) => {
+      // Track Option/Alt key state
+      if (event.altKey !== isOptionPressed) {
+        setIsOptionPressed(event.altKey);
+      }
+    },
+    [isOptionPressed],
+  );
+
+  const handleWindowBlur = useCallback(() => {
+    // Reset Option key state when window loses focus
+    setIsOptionPressed(false);
+  }, []);
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
+    document.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("blur", handleWindowBlur);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("blur", handleWindowBlur);
+    };
+  }, [handleKeyDown, handleKeyUp, handleWindowBlur]);
 
   return {
     shortcuts: shortcuts.filter((shortcut) =>
       evaluateWhenCondition(shortcut.when),
     ),
     activePrefix,
+    isOptionPressed,
   };
 }

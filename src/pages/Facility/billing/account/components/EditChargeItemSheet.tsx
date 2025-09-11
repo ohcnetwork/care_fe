@@ -52,6 +52,7 @@ import {
   MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
 const formSchema = z.object({
@@ -466,9 +467,7 @@ export function EditChargeItemSheet({
                       data-shortcut-id={isOpen ? "cancel-action" : undefined}
                     >
                       {t("cancel")}
-                      <div className="text-xs flex items-center justify-center w-9 h-6 rounded-md border border-gray-200 ml-2">
-                        {getShortcutDisplay("cancel-action")}
-                      </div>
+                      <ShortcutBadge actionId="cancel-action" />
                     </Button>
                   </SheetClose>
                   <Button
@@ -477,9 +476,10 @@ export function EditChargeItemSheet({
                     data-shortcut-id={isOpen ? "submit-action" : undefined}
                   >
                     {isPending ? t("saving") : t("save")}
-                    <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200 ml-2">
-                      {getShortcutDisplay("submit-action")}
-                    </div>
+                    <ShortcutBadge
+                      actionId="submit-action"
+                      className="bg-white"
+                    />
                   </Button>
                 </SheetFooter>
               </form>

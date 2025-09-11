@@ -19,11 +19,11 @@ import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import patientApi from "@/types/emr/patient/patientApi";
 
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import {
   PatientDeceasedInfo,
   PatientHeader,
-} from "@/pages/Facility/services/serviceRequests/PatientHeader";
+} from "@/components/Patient/PatientHeader";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
 export const PatientHome = (props: {
   facilityId?: string;

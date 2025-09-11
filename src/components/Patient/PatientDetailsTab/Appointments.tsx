@@ -27,7 +27,7 @@ import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import useFilters from "@/hooks/useFilters";
 import { APPOINTMENT_STATUS_COLORS } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApi";
+import scheduleApi from "@/types/scheduling/scheduleApi";
 import { MoreVertical } from "lucide-react";
 
 export const Appointments = (props: PatientProps) => {
@@ -41,14 +41,11 @@ export const Appointments = (props: PatientProps) => {
 
   const { data, isLoading } = useQuery({
     queryKey: ["patient-appointments", patientId, qParams],
-    queryFn: query(scheduleApis.appointments.getAppointments, {
+    queryFn: query(scheduleApi.appointments.getAppointments, {
       pathParams: { patientId },
       queryParams: {
-        facility: facilityId,
-        patient: patientId,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        ordering: "-token_slot__start_datetime",
       },
     }),
   });

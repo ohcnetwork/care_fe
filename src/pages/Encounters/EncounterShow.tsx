@@ -35,13 +35,12 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import { entriesOf } from "@/Utils/utils";
 
 import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
-import { Button } from "@/components/ui/button";
-import { CommandShortcut } from "@/components/ui/command";
 import {
   PatientDeceasedInfo,
   PatientHeader,
-} from "@/pages/Facility/services/serviceRequests/PatientHeader";
-import { PLUGIN_Component } from "@/PluginEngine";
+} from "@/components/Patient/PatientHeader";
+import { Button } from "@/components/ui/button";
+import { CommandShortcut } from "@/components/ui/command";
 import { AppointmentEncounterHeader } from "./AppointmentEncounterHeader";
 import { EncounterDiagnosticReportsTab } from "./tabs/diagnostic-reports";
 import { EncounterNotesTab } from "./tabs/notes";
@@ -202,12 +201,6 @@ export const EncounterShow = (props: Props) => {
             <>
               {canWriteSelectedEncounter && selectedEncounter && (
                 <div className="flex flex-col items-end justify-center gap-4">
-                  <PLUGIN_Component
-                    __name="PatientInfoCardQuickActions"
-                    encounter={selectedEncounter}
-                    className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
-                  />
-
                   <EncounterCommandDialog
                     encounter={selectedEncounter}
                     open={actionsOpen}

@@ -14,6 +14,7 @@ export default function BackButton({ to, ...props }: BackButtonProps) {
   return (
     <Button
       variant="outline"
+      data-shortcut-id="go-back"
       onClick={() => {
         if (to) {
           navigate(to);

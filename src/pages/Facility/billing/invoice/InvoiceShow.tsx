@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
+  ArrowLeft,
   BadgeCheck,
   BanknoteArrowDownIcon,
   Building2,
@@ -56,9 +57,8 @@ import {
 import AddChargeItemSheet from "@/components/Billing/Invoice/AddChargeItemSheet";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
+import BackButton from "@/components/Common/BackButton";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
@@ -83,7 +83,7 @@ import {
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import facilityApi from "@/types/facility/facilityApi";
 import dayjs from "@/Utils/dayjs";
-import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
@@ -127,7 +127,6 @@ export function InvoiceShow({
   >("payment_history");
   const queryClient = useQueryClient();
   useFacilityShortcuts("invoice-show");
-  const getShortcutDisplay = useShortcutDisplays(["facility"]);
 
   const activeTabStyle =
     "border-b-2 border-primary font-medium text-primary-900";
@@ -136,7 +135,6 @@ export function InvoiceShow({
   const tableHeadClass = "border-r border-gray-200 font-semibold text-center";
   const tableCellClass =
     "border-r border-gray-200 font-medium text-gray-950 text-sm";
-  const { goBack } = useAppHistory();
 
   // Fetch facility data for available components
   const { data: facilityData } = useQuery({
@@ -316,9 +314,6 @@ export function InvoiceShow({
               data-shortcut-id="go-back"
             >
               {t("back_to_invoices")}
-              <div className="text-xs flex items-center justify-center w-10 h-6 rounded-md border border-gray-200">
-                {getShortcutDisplay("go-back")}
-              </div>
             </Link>
           </Button>
         </div>
@@ -328,50 +323,36 @@ export function InvoiceShow({
 
   return (
     <div className="space-y-8 relative">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between flex-col sm:flex-row gap-4 sm:items-center">
         <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            className="border-gray-400 gap-1"
-            onClick={() => goBack()}
-            data-shortcut-id="go-back"
-          >
-            <CareIcon icon="l-arrow-left" className="size-4" />
-            <span className="text-gray-950 font-medium">{t("back")}</span>
-            <div className="text-xs flex items-center justify-center w-9 h-6 rounded-md border border-gray-200">
-              {getShortcutDisplay("go-back")}
-            </div>
-          </Button>
+          <BackButton>
+            <ArrowLeft />
+            <span>{t("back")}</span>
+          </BackButton>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-col sm:flex-row w-full sm:w-auto">
           {invoice?.status === InvoiceStatus.draft && (
             <Button
               data-shortcut-id="issue-invoice"
               variant="outline_primary"
-              className="w-full flex flex-row justify-stretch items-center"
               onClick={() => handleStatusChange(InvoiceStatus.issued)}
               disabled={isUpdatingInvoice}
             >
               <CareIcon icon="l-check" className="size-5" />
               {t("issue_invoice")}
-              <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                {getShortcutDisplay("issue-invoice")}
-              </div>
+              <ShortcutBadge actionId="issue-invoice" />
             </Button>
           )}
           {invoice?.status === InvoiceStatus.issued && (
             <Button
               data-shortcut-id="mark-as-balanced"
               variant="outline_primary"
-              className="w-full flex flex-row justify-stretch items-center"
               onClick={() => handleStatusChange(InvoiceStatus.balanced)}
               disabled={isUpdatingInvoice}
             >
               <CareIcon icon="l-wallet" className="mr-1" />
               {t("mark_as_balanced")}
-              <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                {getShortcutDisplay("mark-as-balanced")}
-              </div>
+              <ShortcutBadge actionId="mark-as-balanced" />
             </Button>
           )}
           {invoice.status === InvoiceStatus.issued && (
@@ -381,17 +362,15 @@ export function InvoiceShow({
             >
               <CareIcon icon="l-plus" className="mr-2 size-4" />
               {t("record_payment")}
-              <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                {getShortcutDisplay("record-payment")}
-              </div>
+              <ShortcutBadge actionId="record-payment" />
             </Button>
           )}
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="md:col-span-2">
-          <div className="flex flex-row justify-between items-center mb-4">
+        <div className="md:col-span-2 overflow-x-auto">
+          <div className="flex sm:flex-row flex-col sm:items-center gap-4 justify-between items-start mb-4">
             <div className="flex flex-row items-center gap-2">
               <span className="font-semibold text-gray-950 text-base">
                 {t("invoice")}: {invoice.number}
@@ -413,9 +392,7 @@ export function InvoiceShow({
                 >
                   <CareIcon icon="l-edit" className="size-4" />
                   {t("edit_items")}
-                  <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                    {getShortcutDisplay("edit-invoice-items")}
-                  </div>
+                  <ShortcutBadge actionId="edit-invoice-items" />
                 </Button>
               )}
               <Button
@@ -429,9 +406,7 @@ export function InvoiceShow({
                 >
                   <CareIcon icon="l-print" className="size-4" />
                   {t("print")}
-                  <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                    {getShortcutDisplay("print-invoice")}
-                  </div>
+                  <ShortcutBadge actionId="print-invoice" />
                 </Link>
               </Button>
               {canEdit && (
@@ -793,16 +768,14 @@ export function InvoiceShow({
                     setOpen={setIsAddChargeItemSheetOpen}
                     trigger={
                       <Button
-                        data-shortcut-id="add-charge-item"
+                        data-shortcut-id="add-charge-items-invoice"
                         variant="ghost"
                         className="w-full border border-gray-400 text-gray-950 font-semibold text-sm shadow-sm"
                         disabled={isAddChargeItemSheetOpen}
                       >
                         <CareIcon icon="l-plus" className="mr-2 size-4" />
                         {t("add_charge_item")}
-                        <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                          {getShortcutDisplay("add-charge-item")}
-                        </div>
+                        <ShortcutBadge actionId="add-charge-items-invoice" />
                       </Button>
                     }
                   />
@@ -1116,9 +1089,7 @@ export function InvoiceShow({
               }
             >
               {t("cancel")}
-              <div className="text-xs flex items-center justify-center w-9 h-6 rounded-md border border-gray-200">
-                {getShortcutDisplay("cancel-action")}
-              </div>
+              <ShortcutBadge actionId="cancel-action" />
             </AlertDialogCancel>
             <AlertDialogAction
               className={cn(buttonVariants({ variant: "destructive" }))}
@@ -1129,9 +1100,7 @@ export function InvoiceShow({
               }
             >
               {isRemoving ? t("removing_with_dots") : t("remove")}
-              <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200">
-                {getShortcutDisplay("submit-action")}
-              </div>
+              <ShortcutBadge actionId="submit-action" />
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1162,9 +1131,7 @@ export function InvoiceShow({
               data-shortcut-id={reasonDialogOpen ? "cancel-action" : undefined}
             >
               {t("cancel")}
-              <div className="text-xs flex items-center justify-center w-9 h-6 rounded-md border border-gray-200">
-                {getShortcutDisplay("cancel-action")}
-              </div>
+              <ShortcutBadge actionId="cancel-action" />
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDialogSubmit}
@@ -1180,9 +1147,7 @@ export function InvoiceShow({
               data-shortcut-id={reasonDialogOpen ? "submit-action" : undefined}
             >
               {t("confirm")}
-              <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200">
-                {getShortcutDisplay("submit-action")}
-              </div>
+              <ShortcutBadge actionId="submit-action" />
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

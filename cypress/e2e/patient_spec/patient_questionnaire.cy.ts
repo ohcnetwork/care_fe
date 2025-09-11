@@ -77,7 +77,12 @@ describe("All combination of questionnaire submissions", () => {
     cy.visit("/");
     facilityCreation.selectFirstRandomFacility();
     cy.getFacilityIdAndNavigate("encounters/patients");
-    cy.get("button").contains("In Progress").first().click();
+    cy.intercept("GET", "**/api/v1/encounter/**").as("getEncounters");
+    cy.get("button").contains("Filter").click();
+    cy.get('[role="menuitem"]').contains("Status").click();
+    cy.get("div").contains("In Progress").click();
+    cy.get("body").type("{esc}");
+    cy.wait("@getEncounters").its("response.statusCode").should("eq", 200);
     cy.get("button").contains("View Encounter").first().click();
     cy.get("button").contains("Update Details").click();
     cy.get("div[role='dialog']").within(() => {

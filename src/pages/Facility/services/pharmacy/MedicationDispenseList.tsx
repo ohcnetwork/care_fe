@@ -256,6 +256,7 @@ export default function MedicationDispenseList({
       <div className="mb-4 flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <FilterTabs
+            className="overflow-x-auto w-full"
             value={qParams.status || "active"}
             onValueChange={(value) => updateQuery({ status: value })}
             options={Object.values(MEDICATION_REQUEST_STATUS)}

@@ -89,6 +89,7 @@ import {
   AppointmentFinalStatuses,
   AppointmentRead,
   AppointmentUpdateRequest,
+  SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import mutate from "@/Utils/request/mutate";
@@ -101,9 +102,10 @@ import {
 
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
-import { AppointmentSlotPicker } from "@/pages/Appointments/components/AppointmentSlotPicker";
-import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
-import { TokenCard } from "./components/AppointmentTokenCard";
+import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
+import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { AppointmentDateSelection } from "./BookAppointment/AppointmentDateSelection";
 
 interface Props {
   appointmentId: string;
@@ -116,7 +118,6 @@ export default function AppointmentDetail(props: Props) {
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
   useFacilityShortcuts();
-  const getShortcutDisplay = useShortcutDisplays();
   const { canViewAppointments, canWriteAppointment } = getPermissions(
     hasPermission,
     facility?.permissions ?? [],
@@ -224,11 +225,7 @@ export default function AppointmentDetail(props: Props) {
                   >
                     <PrinterIcon className="size-4 mr-2" />
                     {t("print")}
-                    {getShortcutDisplay("print-token") && (
-                      <div className="size-5 rounded-md border border-gray-200">
-                        {getShortcutDisplay("print-token")}
-                      </div>
-                    )}
+                    <ShortcutBadge actionId="print-token" />
                   </Button>
                 </div>
               </>
@@ -515,7 +512,7 @@ const AppointmentDetails = ({
           </div>
           <div className="text-sm">
             <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
-              <p className="font-medium">{t("tags")}</p>
+              <p className="font-medium">{t("tags", { count: 2 })}</p>
               <TagAssignmentSheet
                 entityType="appointment"
                 entityId={appointment.id}
@@ -704,8 +701,8 @@ const AppointmentActions = ({
     appointment.user,
   );
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
-
   const currentStatus = appointment.status;
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Allow check-in/start consultation as long as the appointment is before 24 hours ahead of slot's start time
   const canCheckIn = isBefore(
@@ -930,7 +927,9 @@ const AppointmentActions = ({
                 <div className="mt-6">
                   <div className="text-sm">
                     <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
-                      <Label className="font-medium">{t("tags")}</Label>
+                      <Label className="font-medium">
+                        {t("tags", { count: 2 })}
+                      </Label>
                       <TagAssignmentSheet
                         entityType="appointment"
                         entityId={appointment.id}
@@ -973,13 +972,25 @@ const AppointmentActions = ({
                       onSelect={(user) => user && setSelectedPractitioner(user)}
                     />
                   </div>
-                  <AppointmentSlotPicker
-                    facilityId={facilityId}
-                    resourceId={selectedPractitioner?.id}
-                    selectedSlotId={selectedSlotId}
-                    onSlotSelect={setSelectedSlotId}
-                    currentAppointment={appointment}
-                  />
+                  <div className="space-y-4">
+                    <AppointmentDateSelection
+                      facilityId={facilityId}
+                      resourceId={selectedPractitioner?.id}
+                      resourceType={SchedulableResourceType.Practitioner}
+                      currentAppointment={appointment}
+                      setSelectedDate={setSelectedDate}
+                      selectedDate={selectedDate}
+                    />
+                    <AppointmentSlotPicker
+                      selectedDate={selectedDate}
+                      facilityId={facilityId}
+                      resourceId={selectedPractitioner?.id}
+                      resourceType={SchedulableResourceType.Practitioner}
+                      selectedSlotId={selectedSlotId}
+                      onSlotSelect={setSelectedSlotId}
+                      currentAppointment={appointment}
+                    />
+                  </div>
 
                   <div className="flex justify-end gap-2 mt-6">
                     <Button

@@ -1,4 +1,5 @@
 import { Avatar } from "@/components/Common/Avatar";
+import { PatientInfoHoverCard } from "@/components/Patient/PatientInfoHoverCard";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   Popover,
@@ -10,7 +11,6 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import { formatPatientAge } from "@/Utils/utils";
 import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { PatientInfoHoverCard } from "./PatientInfoHoverCard";
 
 interface PatientHoverCardProps {
   patient: PatientRead;

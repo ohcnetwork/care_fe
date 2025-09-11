@@ -1,5 +1,3 @@
-import { Separator } from "@radix-ui/react-separator";
-import { format } from "date-fns";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -12,10 +10,8 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 
 import {
@@ -25,6 +21,7 @@ import {
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
+import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 
 export interface EncounterInfoCardProps {
   encounter: EncounterRead;
@@ -36,6 +33,12 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
   const { t } = useTranslation();
 
   const { encounter, facilityId, hideBorder = false } = props;
+
+  // Get encounter tags and handle overflow
+  const encounterTags = encounter.tags || [];
+  const visibleTags = encounterTags.slice(0, 2); // Show first 2 tags
+  const remainingCount = encounterTags.length - 2;
+
   return (
     <Card
       data-cy={`encounter-card-${encounter.id}`}
@@ -46,57 +49,80 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
         hideBorder && "border-none shadow-none",
       )}
     >
-      <CardHeader className="space-y-1 pb-2">
-        <div className="flex items-center justify-between">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0 flex-1">
-            <CardTitle className="text-lg font-semibold">
+      <CardHeader className="bg-gray-100 px-4 pt-2 pb-1">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-semibold text-gray-700 truncate">
               {encounter.patient.name}
-            </CardTitle>
-            {encounter.patient.deceased_datetime && (
-              <Badge
-                variant="destructive"
-                className="py-0 border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
-              >
-                <h3 className="text-xs font-medium">{t("deceased")}</h3>
-              </Badge>
-            )}
+            </h3>
+            <p className="text-sm text-gray-600">
+              {formatPatientAge(encounter.patient, true)},{" "}
+              {t(`GENDER__${encounter.patient.gender}`)}
+            </p>
           </div>
+          {encounter.patient.deceased_datetime && (
+            <Badge variant="destructive">{t("deceased")}</Badge>
+          )}
+          <Badge
+            data-cy="encounter-status-badge"
+            variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
+          >
+            {t(`encounter_status__${encounter.status}`)}
+          </Badge>
         </div>
-        <CardDescription className="flex items-center">
-          <CareIcon icon="l-clock" className="mr-2 size-4" />
-          {encounter.period.start &&
-            format(new Date(encounter.period.start), "PPp")}
-        </CardDescription>
       </CardHeader>
-      <CardContent className="grow pb-3">
-        <div className="flex flex-col justify-between h-full space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge
-              data-cy="encounter-status-badge"
-              variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
-            >
-              {t(`encounter_status__${encounter.status}`)}
-            </Badge>
+      <CardContent className="px-4 py-2 pt-2 bg-white space-y-1">
+        <div className="flex items-center text-gray-600 mb-1">
+          <CareIcon icon="l-clock" className="mr-1 size-3" />
+          <span className="text-xs text-gray-700">
+            {encounter.period.start && formatDateTime(encounter.period.start)}
+            {encounter.period.end &&
+              ` - ${formatDateTime(encounter.period.end)}`}
+          </span>
+        </div>
+        {/* Encounter Class and Priority Tags */}
+        <div className="flex flex-wrap gap-1">
+          {encounter.encounter_class && (
             <Badge
               variant={ENCOUNTER_CLASSES_COLORS[encounter.encounter_class]}
+              className="text-xs"
             >
               {t(`encounter_class__${encounter.encounter_class}`)}
             </Badge>
-            <Badge variant={ENCOUNTER_PRIORITY_COLORS[encounter.priority]}>
+          )}
+          {encounter.priority && (
+            <Badge
+              variant={ENCOUNTER_PRIORITY_COLORS[encounter.priority]}
+              className="text-xs"
+            >
               {t(`encounter_priority__${encounter.priority}`)}
             </Badge>
-            {encounter.tags?.map((tag) => (
-              <Badge variant="outline" key={tag.id}>
+          )}
+        </div>
+
+        {/* Tags Section */}
+        {encounterTags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {visibleTags.map((tag) => (
+              <Badge
+                key={tag.id}
+                variant="outline"
+                className="bg-gray-100 text-gray-700 border-gray-200 px-2 py-1 text-xs"
+              >
                 {getTagHierarchyDisplay(tag)}
               </Badge>
             ))}
+            {remainingCount > 0 && (
+              <Badge className="bg-gray-100 text-gray-700 border-gray-200 px-2 py-1 text-xs">
+                +{remainingCount}
+                {t("more")}
+              </Badge>
+            )}
           </div>
-          <div>
-            <Separator />
-          </div>
-        </div>
+        )}
       </CardContent>
-      <CardFooter className="flex flex-col sm:flex-row justify-between gap-1 items-center py-2 px-2 bg-gray-50">
+
+      <CardFooter className="flex justify-end items-center px-4 py-2 space-x-4">
         <Link
           href={
             encounter.status === "completed"
@@ -107,34 +133,22 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
                 }).toString()}`
               : `/facility/${facilityId}/patient/${encounter.patient.id}`
           }
-          className="w-full"
+          className="text-gray-700 underline hover:text-gray-900 text-sm font-medium"
         >
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center justify-center gap-1 px-1 py-2 w-full h-9"
-            title={t("view_patient")}
-          >
-            <CareIcon icon="l-user" className="size-2 flex-shrink-0" />
-            <span className="leading-none truncate">
-              {encounter.status === "completed"
-                ? t("patient_home")
-                : t("view_patient")}
-            </span>
-          </Button>
+          {encounter.status === "completed"
+            ? t("patient_home")
+            : t("view_patient")}
         </Link>
         <Link
           href={`/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
-          className="w-full"
         >
           <Button
             variant="outline"
             size="sm"
-            className="flex items-center justify-center gap-1 px-1 py-2 w-full h-9"
+            className="border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-sm"
             title={t("view_encounter")}
           >
-            <CareIcon icon="l-notes" className="size-2 flex-shrink-0" />
-            <span className="leading-none truncate">{t("view_encounter")}</span>
+            {t("view_encounter")}
           </Button>
         </Link>
       </CardFooter>

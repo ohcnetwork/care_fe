@@ -2,6 +2,7 @@ import { useMemo } from "react";
 
 import shortcutsConfig from "@/config/keyboardShortcuts.json";
 
+import { useIsMobile } from "@/hooks/use-mobile";
 import { isAppleDevice } from "./utils";
 
 /**
@@ -71,8 +72,14 @@ export function useShortcutDisplays(
   contexts?: ShortcutContext[],
   dynamicResolver?: (actionId: string) => string | undefined,
 ) {
+  const isMobile = useIsMobile();
+
   return useMemo(() => {
     const getDisplay = (actionId: string): string | undefined => {
+      if (isMobile) {
+        return undefined;
+      }
+
       const searchContexts =
         contexts || (Object.keys(shortcutsConfig) as ShortcutContext[]);
 
@@ -93,7 +100,7 @@ export function useShortcutDisplays(
     };
 
     return getDisplay;
-  }, [contexts, dynamicResolver]);
+  }, [contexts, dynamicResolver, isMobile]);
 }
 
 // Debounce map to prevent multiple rapid clicks

@@ -196,12 +196,12 @@ function ObservationDefinitionFormContent({
             method: existingData.method || null,
             permitted_unit: existingData.permitted_unit || null,
             component:
-              existingData.component.map((c) => ({
+              existingData.component?.map((c) => ({
                 ...c,
-                qualified_ranges: c.qualified_ranges.map((range, index) => ({
+                qualified_ranges: c.qualified_ranges?.map((range, index) => ({
                   ...range,
                   id: index,
-                  conditions: range.conditions,
+                  conditions: range?.conditions,
                   _interpretation_type:
                     range?.ranges?.length > 0
                       ? InterpretationType.ranges
@@ -212,7 +212,7 @@ function ObservationDefinitionFormContent({
               existingData.qualified_ranges?.map((range, index) => ({
                 ...range,
                 id: index,
-                conditions: range.conditions,
+                conditions: range?.conditions,
                 _interpretation_type:
                   range?.ranges?.length > 0
                     ? InterpretationType.ranges

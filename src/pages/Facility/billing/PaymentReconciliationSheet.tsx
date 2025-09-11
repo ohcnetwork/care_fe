@@ -43,8 +43,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
-import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
-import mutate from "@/Utils/request/mutate";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
@@ -57,6 +55,8 @@ import {
   PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import mutate from "@/Utils/request/mutate";
 
 interface PaymentReconciliationSheetProps {
   open: boolean;
@@ -122,7 +122,6 @@ export function PaymentReconciliationSheet({
   const [tenderAmount, setTenderAmount] = useState<string>("0");
   const [returnedAmount, setReturnedAmount] = useState<string>("0");
   useFacilityShortcuts("payment-reconciliation-sheet");
-  const getShortcutDisplay = useShortcutDisplays(["facility"]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -494,9 +493,7 @@ export function PaymentReconciliationSheet({
                 ) : (
                   t("record_payment")
                 )}
-                <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200">
-                  {getShortcutDisplay("submit-action")}
-                </div>
+                <ShortcutBadge actionId="submit-action" className="bg-white" />
               </Button>
             </SheetFooter>
           </form>
