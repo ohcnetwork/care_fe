@@ -1067,7 +1067,10 @@ function AppointmentRow(props: {
             <TabsList>
               {getStatusGroups(t).map((group) => {
                 return (
-                  <TabsTrigger key={group.label} value={group.label}>
+                  <TabsTrigger
+                    key={group.label}
+                    value={group.statuses.join(",")}
+                  >
                     {group.label}
                   </TabsTrigger>
                 );
