@@ -689,7 +689,9 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
           <Button
             variant="primary"
-            disabled={differenceInDays(qParams.date_from, qParams.date_to) > 31}
+            disabled={
+              differenceInDays(qParams.date_to, qParams.date_from) >= 31
+            }
             onClick={() => {
               const queryString = new URLSearchParams({
                 ...qParams,
