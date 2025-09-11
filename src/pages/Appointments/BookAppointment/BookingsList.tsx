@@ -1,5 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { differenceInMinutes, format } from "date-fns";
+import {
+  addDays,
+  compareAsc,
+  differenceInMinutes,
+  endOfDay,
+  format,
+  isAfter,
+  isBefore,
+  startOfDay,
+  subDays,
+} from "date-fns";
 import { CalendarDays } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -66,6 +76,9 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="upcoming" className="space-y-4 overflow-x-scroll">
+            <span className="text-lg font-semibold text-gray-950 mb-4">
+              {t("today")}
+            </span>
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
@@ -78,14 +91,14 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              dateFrom={dateQueryString(new Date())}
+              dateFrom={dateQueryString(addDays(new Date(), 1))}
             />
           </TabsContent>
           <TabsContent value="past" className="space-y-4 overflow-x-scroll">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              dateTo={dateQueryString(new Date())}
+              dateTo={dateQueryString(subDays(new Date(), 1))}
               status={AppointmentNonCancelledStatuses}
             />
           </TabsContent>
@@ -304,7 +317,6 @@ const BookingListContent = ({
   dateFrom?: string;
   dateTo?: string;
   status?: readonly AppointmentStatus[];
-  isUpcoming?: boolean;
 }) => {
   const { t } = useTranslation();
   const { data: appointments, isLoading } = useQuery({
@@ -320,23 +332,22 @@ const BookingListContent = ({
     }),
   });
 
-  const filteredAppointments: Appointment[] = !appointments?.results
-    ? []
-    : appointments.results.filter((appointment) => {
-        const appointmentDate = new Date(appointment.token_slot.start_datetime);
-        if (
-          dateFrom &&
-          dateTo &&
-          appointmentDate > new Date(dateFrom) &&
-          appointmentDate < new Date(dateTo)
-        )
-          return true;
-        if (dateTo && appointmentDate < new Date(dateTo)) return true;
-        if (dateFrom && appointmentDate > new Date(dateFrom)) return true;
-
-        if (status && status.includes(appointment.status)) return true;
-        return false;
-      });
+  const filteredAppointments =
+    appointments?.results
+      .filter((appointment) => status?.includes(appointment.status) ?? true)
+      .filter((appointment) =>
+        dateFrom
+          ? isAfter(appointment.token_slot.start_datetime, startOfDay(dateFrom))
+          : true,
+      )
+      .filter((appointment) =>
+        dateTo
+          ? isBefore(appointment.token_slot.start_datetime, endOfDay(dateTo))
+          : true,
+      )
+      .sort((a, b) =>
+        compareAsc(a.token_slot.start_datetime, b.token_slot.start_datetime),
+      ) ?? [];
 
   if (isLoading) {
     return (
