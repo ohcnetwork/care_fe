@@ -97,6 +97,7 @@ async function buildProductKnowledges(datapoints: Datapoints) {
         names: [],
         storage_guidelines: [],
         base_unit: baseUnit,
+        category: "medicines",
       }) as ProductKnowledgeCreate,
   );
 
@@ -177,6 +178,7 @@ async function buildChargeItemDefinitions(datapoints: Datapoints) {
               },
               ...getTaxComponents(datapoint),
             ],
+            category: "medication",
           } satisfies ChargeItemDefinitionCreate,
         ];
       }),
@@ -301,7 +303,7 @@ async function buildInventoryItems(
 
 async function main() {
   const csvContent = await fetchCsvFromGoogleSheet(GOOGLE_SHEET_ID, SHEET_NAME);
-  let datapoints = transformCsvToObjects(csvContent, HEADERS_MAP).slice(0, 100);
+  let datapoints = transformCsvToObjects(csvContent, HEADERS_MAP).slice(0, 10);
 
   // cleanup: exclude rows without item names
   datapoints = datapoints.filter((row) => row.item !== "");

@@ -283,6 +283,8 @@ export const ensureAuthentication = async (
   }
 };
 
+const CARE_API_URL = process.env.REACT_CARE_API_URL ?? "http://127.0.0.1:8000";
+
 /**
  * Make a request to the CARE API
  * @param url - The URL to make the request to
@@ -294,15 +296,14 @@ export const ensureAuthentication = async (
 export const request = async (
   url: string,
   method: "GET" | "POST" | "PUT" | "DELETE",
-  config: BaseConfig,
   body?: Record<string, unknown>,
 ) => {
-  const response = await fetch(`${config.apiBaseUrl}${url}`, {
+  const response = await fetch(`${CARE_API_URL}${url}`, {
     method,
     body: JSON.stringify(body),
     headers: {
       "Content-Type": "application/json",
-      ...getAuthHeaders(config),
+      Authorization: `Basic ${Buffer.from(`${process.env.USERNAME}:${process.env.PASSWORD}`).toString("base64")}`,
     },
   });
 
