@@ -5,6 +5,9 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -42,7 +45,7 @@ import query from "@/Utils/request/query";
 import { useQueryClient } from "@tanstack/react-query";
 export default function VerifyPatient() {
   const queryClient = useQueryClient();
-
+  useFacilityShortcuts();
   const { t } = useTranslation();
   const [qParams] = useQueryParams();
   const { phone_number, year_of_birth, partial_id, queue_id, token_id } =
@@ -227,6 +230,7 @@ export default function VerifyPatient() {
                           >
                             <PrinterIcon className="size-3 mr-1" />
                             {t("print")}
+                            <ShortcutBadge actionId="print-token" />
                           </Button>
                         </div>
                       </div>
@@ -253,10 +257,14 @@ export default function VerifyPatient() {
                 facilityId={facilityId}
                 patientName={patientData.name}
                 trigger={
-                  <div className="group relative h-[120px] overflow-hidden border border-gray-200 rounded-lg bg-gray-50 p-0 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer">
-                    <div className="absolute top-2 right-2 text-xs text-gray-400 font-medium">
-                      E
-                    </div>
+                  <div
+                    data-shortcut-id="create-encounter"
+                    className="group relative h-[120px] overflow-hidden border border-gray-200 rounded-lg bg-gray-50 p-0 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                  >
+                    <ShortcutBadge
+                      actionId="create-encounter"
+                      position="top-right"
+                    />
                     <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-3">
                       <div className="flex size-12 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
                         <CareIcon
@@ -276,11 +284,13 @@ export default function VerifyPatient() {
             {canWriteAppointment && (
               <Link
                 href={`/facility/${facilityId}/patient/${patientData.id}/book-appointment`}
+                data-shortcut-id="schedule-appointment"
                 className="group relative h-[120px] overflow-hidden border border-gray-200 rounded-lg bg-gray-50 p-0 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer block"
               >
-                <div className="absolute top-2 right-2 text-xs text-gray-400 font-medium">
-                  A
-                </div>
+                <ShortcutBadge
+                  actionId="schedule-appointment"
+                  position="top-right"
+                />
                 <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-3">
                   <div className="flex size-12 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
                     <CareIcon
@@ -300,10 +310,14 @@ export default function VerifyPatient() {
                 patient={patientData}
                 facilityId={facilityId}
                 trigger={
-                  <div className="group relative h-[120px] overflow-hidden border border-gray-200 rounded-lg bg-gray-50 p-0 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer">
-                    <div className="absolute top-2 right-2 text-xs text-gray-400 font-medium">
-                      T
-                    </div>
+                  <div
+                    data-shortcut-id="generate-token"
+                    className="group relative h-[120px] overflow-hidden border border-gray-200 rounded-lg bg-gray-50 p-0 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                  >
+                    <ShortcutBadge
+                      actionId="generate-token"
+                      position="top-right"
+                    />
                     <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-3">
                       <div className="flex size-12 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
                         <Printer className="size-6 text-gray-500" />
