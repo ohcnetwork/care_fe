@@ -29,15 +29,15 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
-import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import AddChargeItemsBillingSheet from "@/pages/Facility/billing/account/components/AddChargeItemsBillingSheet";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 
 interface AddChargeItemSheetProps {
   facilityId: string;
@@ -67,7 +67,6 @@ export default function AddChargeItemSheet({
     disableCache: true,
   });
   useFacilityShortcuts("chargeItem-sheet");
-  const getShortcutDisplay = useShortcutDisplays(["facility"]);
 
   // Get account information to extract patient ID
   const { data: account } = useQuery({
@@ -183,9 +182,7 @@ export default function AddChargeItemSheet({
             >
               <PlusIcon className="size-4 mr-2" />
               {t("other_charge_items")}
-              <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                {getShortcutDisplay("other-charge-items")}
-              </div>
+              <ShortcutBadge actionId="other-charge-items" />
             </Button>
           </div>
 
@@ -261,9 +258,7 @@ export default function AddChargeItemSheet({
             disabled={isAddChargeItemsOpen}
           >
             {t("cancel")}
-            <div className="text-xs flex items-center justify-center w-9 h-6 rounded-md border border-gray-200">
-              {getShortcutDisplay("cancel-action")}
-            </div>
+            <ShortcutBadge actionId="cancel-action" />
           </Button>
           <Button
             data-shortcut-id={open ? "submit-action" : undefined}
@@ -276,9 +271,7 @@ export default function AddChargeItemSheet({
             className="flex flex-row items-center gap-2 justify-between"
           >
             <span>{t("add_selected_items")}</span>
-            <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200">
-              {getShortcutDisplay("submit-action")}
-            </div>
+            <ShortcutBadge actionId="submit-action" className="bg-white" />
           </Button>
         </SheetFooter>
       </SheetContent>

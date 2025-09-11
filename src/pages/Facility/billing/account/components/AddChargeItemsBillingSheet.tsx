@@ -37,6 +37,7 @@ import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/cha
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -342,9 +343,7 @@ export default function AddChargeItemsBillingSheet({
                 data-shortcut-id={open ? "cancel-action" : undefined}
               >
                 {t("cancel")}
-                <div className="text-xs flex items-center justify-center w-9 h-6 rounded-md border border-gray-200">
-                  {getShortcutDisplay("cancel-action")}
-                </div>
+                <ShortcutBadge actionId="cancel-action" />
               </Button>
               <Button
                 onClick={(e) => {
@@ -359,9 +358,7 @@ export default function AddChargeItemsBillingSheet({
                 className="flex flex-row items-center gap-2 justify-between"
               >
                 {t("add_items")}
-                <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200">
-                  {getShortcutDisplay("submit-charge-items-billing-sheet")}
-                </div>
+                <ShortcutBadge actionId="submit-charge-items-billing-sheet" />
               </Button>
             </div>
           </div>

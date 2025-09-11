@@ -28,8 +28,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
-import mutate from "@/Utils/request/mutate";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
@@ -38,6 +36,8 @@ import {
   ChargeItemUpdate,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import mutate from "@/Utils/request/mutate";
 
 interface EditInvoiceTableProps {
   facilityId: string;
@@ -94,7 +94,6 @@ export function EditInvoiceTable({
 }: EditInvoiceTableProps) {
   const { t } = useTranslation();
   useFacilityShortcuts("edit-invoiceTable");
-  const getShortcutDisplay = useShortcutDisplays(["facility"]);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -320,11 +319,7 @@ export function EditInvoiceTable({
             data-shortcut-id={enableShortcut ? "cancel-action" : undefined}
           >
             {t("cancel")}
-            {enableShortcut && (
-              <div className="text-xs flex items-center justify-center w-9 h-6 rounded-md border border-gray-200">
-                {getShortcutDisplay("cancel-action")}
-              </div>
-            )}
+            {enableShortcut && <ShortcutBadge actionId="cancel-action" />}
           </Button>
           <Button
             type="submit"
@@ -333,9 +328,7 @@ export function EditInvoiceTable({
           >
             {isPending ? t("saving") : t("save")}
             {enableShortcut && (
-              <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200">
-                {getShortcutDisplay("submit-action")}
-              </div>
+              <ShortcutBadge actionId="submit-action" className="bg-white" />
             )}
           </Button>
         </div>

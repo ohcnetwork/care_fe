@@ -104,7 +104,7 @@ import { formatPatientAddress } from "@/components/Patient/utils";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
-import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { AppointmentDateSelection } from "./BookAppointment/AppointmentDateSelection";
 
 interface Props {
@@ -118,7 +118,6 @@ export default function AppointmentDetail(props: Props) {
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
   useFacilityShortcuts();
-  const getShortcutDisplay = useShortcutDisplays();
   const { canViewAppointments, canWriteAppointment } = getPermissions(
     hasPermission,
     facility?.permissions ?? [],
@@ -226,11 +225,7 @@ export default function AppointmentDetail(props: Props) {
                   >
                     <PrinterIcon className="size-4 mr-2" />
                     {t("print")}
-                    {getShortcutDisplay("print-token") && (
-                      <div className="size-5 rounded-md border border-gray-200">
-                        {getShortcutDisplay("print-token")}
-                      </div>
-                    )}
+                    <ShortcutBadge actionId="print-token" />
                   </Button>
                 </div>
               </>

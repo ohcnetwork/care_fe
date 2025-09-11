@@ -135,16 +135,12 @@ export function useFacilityShortcuts(subContext?: string) {
         handler: shortcutActionHandler("edit-invoice-item"),
       },
       {
-        id: "add-charge-items-table",
-        handler: shortcutActionHandler("add-charge-items-table"),
-      },
-      {
         id: "print-invoice",
         handler: shortcutActionHandler("print-invoice"),
       },
       {
-        id: "print-charge-items",
-        handler: shortcutActionHandler("print-charge-items"),
+        id: "print-button",
+        handler: shortcutActionHandler("print-button"),
       },
       // if you dont need permission checks just add bellow
       ...shortcutActionHandlers([

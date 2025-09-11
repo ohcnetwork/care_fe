@@ -25,7 +25,7 @@ import {
   PaymentReconciliationStatus,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
-import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
@@ -65,8 +65,7 @@ export function PaymentReconciliationShow({
   const { goBack } = useAppHistory();
   const queryClient = useQueryClient();
 
-  useFacilityShortcuts("payment-reconciliation-show");
-  const getShortcutDisplay = useShortcutDisplays(["facility"]);
+  useFacilityShortcuts();
 
   const { data: payment, isLoading } = useQuery({
     queryKey: ["paymentReconciliation", paymentReconciliationId],
@@ -137,13 +136,11 @@ export function PaymentReconciliationShow({
         <Button variant="outline" asChild>
           <Link
             href={`/facility/${facilityId}/billing/payments/${paymentReconciliationId}/print`}
-            data-shortcut-id="print-payment-receipt"
+            data-shortcut-id="print-button"
           >
             <CareIcon icon="l-print" className="mr-2 size-4" />
             {t("print_receipt")}
-            <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-2">
-              {getShortcutDisplay("print-payment-receipt")}
-            </div>
+            <ShortcutBadge actionId="print-button" />
           </Link>
         </Button>
       </div>
@@ -307,9 +304,6 @@ export function PaymentReconciliationShow({
                         data-shortcut-id="view-invoice-payment"
                       >
                         {t("view_invoice")}
-                        <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-2">
-                          {getShortcutDisplay("view-invoice-payment")}
-                        </div>
                       </Link>
                       <Badge variant="outline">
                         {payment.target_invoice.status}
@@ -340,21 +334,15 @@ export function PaymentReconciliationShow({
                     >
                       <CareIcon icon="l-eye" className="mr-2 size-4" />
                       {t("view_invoice")}
-                      <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-2">
-                        {getShortcutDisplay("view-invoice-payment")}
-                      </div>
+                      <ShortcutBadge actionId="view-invoice-payment" />
                     </Link>
                   </Button>
                   <Button variant="outline" size="sm" asChild>
                     <Link
                       href={`/facility/${facilityId}/billing/invoice/${payment.target_invoice.id}/print`}
-                      data-shortcut-id="print-payment-receipt"
                     >
                       <CareIcon icon="l-print" className="mr-2 size-4" />
                       {t("print_invoice")}
-                      <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-2">
-                        {getShortcutDisplay("print-payment-receipt")}
-                      </div>
                     </Link>
                   </Button>
                 </div>
@@ -404,14 +392,11 @@ export function PaymentReconciliationShow({
                 <Button className="w-full" variant="outline" asChild>
                   <Link
                     href={`/facility/${facilityId}/billing/payments/${paymentReconciliationId}/print`}
-                    data-shortcut-id="print-payment-receipt"
                     className="flex items-center w-full relative"
                   >
                     <CareIcon icon="l-print" className="mr-2 size-4" />
                     {t("print_receipt")}
-                    <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-auto">
-                      {getShortcutDisplay("print-payment-receipt")}
-                    </div>
+                    <ShortcutBadge actionId="print-button" />
                   </Link>
                 </Button>
                 {payment.target_invoice && (
@@ -423,9 +408,7 @@ export function PaymentReconciliationShow({
                     >
                       <CareIcon icon="l-eye" className="mr-2 size-4" />
                       {t("view_invoice")}
-                      <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-auto">
-                        {getShortcutDisplay("view-invoice-payment")}
-                      </div>
+                      <ShortcutBadge actionId="view-invoice-payment" />
                     </Link>
                   </Button>
                 )}
@@ -447,9 +430,7 @@ export function PaymentReconciliationShow({
                       >
                         <CareIcon icon="l-ban" className="mr-2 size-4" />
                         {t("mark_as_cancelled")}
-                        <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-auto">
-                          {getShortcutDisplay("mark-payment-cancelled")}
-                        </div>
+                        <ShortcutBadge actionId="mark-payment-cancelled" />
                       </Button>
                       <Button
                         className="w-full flex items-center relative"
@@ -469,9 +450,7 @@ export function PaymentReconciliationShow({
                           className="mr-2 size-4"
                         />
                         {t("mark_as_entered_in_error")}
-                        <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-auto">
-                          {getShortcutDisplay("mark-payment-error")}
-                        </div>
+                        <ShortcutBadge actionId="mark-payment-error" />
                       </Button>
                     </>
                   )}
@@ -485,9 +464,7 @@ export function PaymentReconciliationShow({
                 >
                   <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
                   {t("back_to_payments")}
-                  <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-auto">
-                    {getShortcutDisplay("go-back")}
-                  </div>
+                  <ShortcutBadge actionId="go-back" />
                 </Button>
               </div>
             </CardContent>

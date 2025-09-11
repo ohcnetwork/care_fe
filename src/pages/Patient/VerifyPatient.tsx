@@ -230,7 +230,7 @@ export default function VerifyPatient() {
                           >
                             <PrinterIcon className="size-3 mr-1" />
                             {t("print")}
-                            <ShortcutBadge actionId="print-token" />
+                            <ShortcutBadge actionId="print-token" alwaysShow />
                           </Button>
                         </div>
                       </div>
@@ -264,6 +264,7 @@ export default function VerifyPatient() {
                     <ShortcutBadge
                       actionId="create-encounter"
                       position="top-right"
+                      alwaysShow
                     />
                     <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-3">
                       <div className="flex size-12 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
@@ -290,6 +291,7 @@ export default function VerifyPatient() {
                 <ShortcutBadge
                   actionId="schedule-appointment"
                   position="top-right"
+                  alwaysShow
                 />
                 <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-3">
                   <div className="flex size-12 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
@@ -317,6 +319,7 @@ export default function VerifyPatient() {
                     <ShortcutBadge
                       actionId="generate-token"
                       position="top-right"
+                      alwaysShow
                     />
                     <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-3">
                       <div className="flex size-12 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">

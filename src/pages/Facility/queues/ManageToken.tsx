@@ -30,7 +30,7 @@ import { TokenCard } from "@/pages/Facility/queues/TokenCard";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { renderTokenNumber, TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
-import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
 
@@ -120,7 +120,6 @@ export default function ManageToken({
   const { facility, isFacilityLoading } = useCurrentFacility();
 
   useFacilityShortcuts();
-  const getShortcutDisplay = useShortcutDisplays();
 
   const {
     data: token,
@@ -259,9 +258,7 @@ export default function ManageToken({
                     },
                   ).toString()}`}
                 >
-                  <div className="absolute top-2 right-2 text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                    {getShortcutDisplay("patient-home")}
-                  </div>
+                  <ShortcutBadge actionId="patient-home" />
                   <Clipboard className="size-6" />
                   <span className="text-sm">{t("patient_home")}</span>
                 </Link>
@@ -273,9 +270,7 @@ export default function ManageToken({
               className="h-24 flex flex-col items-center justify-center gap-2 relative"
               onClick={() => print()}
             >
-              <div className="absolute top-2 right-2 text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                {getShortcutDisplay("print-token")}
-              </div>
+              <ShortcutBadge actionId="print-token" />
               <Printer className="size-6" />
               <span className="text-sm">{t("print_token")}</span>
             </Button>

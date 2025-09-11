@@ -38,7 +38,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
-import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -63,6 +62,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet";
 
 const ITEMS_PER_PAGE = 10;
@@ -149,8 +149,7 @@ export function CreateInvoicePage({
   const queryClient = useQueryClient();
   const hasInitializedSelections = useRef(false);
 
-  useFacilityShortcuts("create-invoice");
-  const getShortcutDisplay = useShortcutDisplays(["facility"]);
+  useFacilityShortcuts();
   const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>(
     () => {
       if (!preSelectedChargeItems) return {};
@@ -402,9 +401,10 @@ export function CreateInvoicePage({
                 >
                   <PlusIcon className="size-4 mr-2" />
                   {t("add_charge_items")}
-                  <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200 ml-2">
-                    {getShortcutDisplay("add-charge-items-create-invoice")}
-                  </div>
+                  <ShortcutBadge
+                    actionId="add-charge-items-create-invoice"
+                    alwaysShow
+                  />
                 </Button>
               )}
             </div>
@@ -617,9 +617,7 @@ export function CreateInvoicePage({
               data-shortcut-id="cancel-action"
             >
               <span className="underline">{t("cancel")}</span>
-              <div className="text-xs flex items-center justify-center w-9 h-6 rounded-md border border-gray-200">
-                {getShortcutDisplay("cancel-action")}
-              </div>
+              <ShortcutBadge actionId="cancel-action" />
             </Button>
             {showDispenseNowButton && (
               <Button
@@ -651,9 +649,7 @@ export function CreateInvoicePage({
                   {t("create_invoice")}
                 </div>
               )}
-              <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200">
-                {getShortcutDisplay("submit-action")}
-              </div>
+              <ShortcutBadge actionId="submit-action" className="bg-white" />
             </Button>
           </div>
         </form>

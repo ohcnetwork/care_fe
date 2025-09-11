@@ -13,7 +13,6 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
-import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -61,6 +60,7 @@ import {
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import query from "@/Utils/request/query";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./AddChargeItemsBillingSheet";
 import EditChargeItemSheet from "./EditChargeItemSheet";
 
@@ -113,8 +113,7 @@ export function ChargeItemsTable({
   const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = useState(false);
 
   // Register shortcuts for this table
-  useFacilityShortcuts("charge-items-table");
-  const getShortcutDisplay = useShortcutDisplays(["facility"]);
+  useFacilityShortcuts();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
@@ -228,25 +227,21 @@ export function ChargeItemsTable({
             variant="outline"
             onClick={() => navigate(`../${accountId}/charge_items/print`)}
             className="w-full sm:w-auto"
-            data-shortcut-id="print-charge-items"
+            data-shortcut-id="print-button"
           >
             <PrinterIcon className="size-4 mr-2" />
             {t("print_charge_items")}
-            <div className="text-xs flex items-center justify-center size-6 rounded-md border border-gray-200 ml-2">
-              {getShortcutDisplay("print-charge-items")}
-            </div>
+            <ShortcutBadge actionId="print-button" />
           </Button>
           <Button
             variant="outline"
             onClick={() => setIsAddChargeItemsOpen(true)}
             className="w-full sm:w-auto"
-            data-shortcut-id="add-charge-items-table"
+            data-shortcut-id="add-charge-item"
           >
             <PlusIcon className="size-4 mr-2" />
             {t("add_charge_items")}
-            <div className="text-xs flex items-center justify-center size-6 rounded-md border border-gray-200 ml-2">
-              {getShortcutDisplay("add-charge-items-table")}
-            </div>
+            <ShortcutBadge actionId="add-charge-item" />
           </Button>
         </div>
       </div>

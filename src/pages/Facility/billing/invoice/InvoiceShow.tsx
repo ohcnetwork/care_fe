@@ -83,7 +83,7 @@ import {
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import facilityApi from "@/types/facility/facilityApi";
 import dayjs from "@/Utils/dayjs";
-import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
@@ -127,7 +127,6 @@ export function InvoiceShow({
   >("payment_history");
   const queryClient = useQueryClient();
   useFacilityShortcuts("invoice-show");
-  const getShortcutDisplay = useShortcutDisplays(["facility"]);
 
   const activeTabStyle =
     "border-b-2 border-primary font-medium text-primary-900";
@@ -315,9 +314,6 @@ export function InvoiceShow({
               data-shortcut-id="go-back"
             >
               {t("back_to_invoices")}
-              <div className="text-xs flex items-center justify-center w-10 h-6 rounded-md border border-gray-200">
-                {getShortcutDisplay("go-back")}
-              </div>
             </Link>
           </Button>
         </div>
@@ -344,9 +340,7 @@ export function InvoiceShow({
             >
               <CareIcon icon="l-check" className="size-5" />
               {t("issue_invoice")}
-              <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                {getShortcutDisplay("issue-invoice")}
-              </div>
+              <ShortcutBadge actionId="issue-invoice" />
             </Button>
           )}
           {invoice?.status === InvoiceStatus.issued && (
@@ -358,9 +352,7 @@ export function InvoiceShow({
             >
               <CareIcon icon="l-wallet" className="mr-1" />
               {t("mark_as_balanced")}
-              <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                {getShortcutDisplay("mark-as-balanced")}
-              </div>
+              <ShortcutBadge actionId="mark-as-balanced" />
             </Button>
           )}
           {invoice.status === InvoiceStatus.issued && (
@@ -370,9 +362,7 @@ export function InvoiceShow({
             >
               <CareIcon icon="l-plus" className="mr-2 size-4" />
               {t("record_payment")}
-              <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                {getShortcutDisplay("record-payment")}
-              </div>
+              <ShortcutBadge actionId="record-payment" />
             </Button>
           )}
         </div>
@@ -402,9 +392,7 @@ export function InvoiceShow({
                 >
                   <CareIcon icon="l-edit" className="size-4" />
                   {t("edit_items")}
-                  <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                    {getShortcutDisplay("edit-invoice-items")}
-                  </div>
+                  <ShortcutBadge actionId="edit-invoice-items" />
                 </Button>
               )}
               <Button
@@ -418,9 +406,7 @@ export function InvoiceShow({
                 >
                   <CareIcon icon="l-print" className="size-4" />
                   {t("print")}
-                  <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                    {getShortcutDisplay("print-invoice")}
-                  </div>
+                  <ShortcutBadge actionId="print-invoice" />
                 </Link>
               </Button>
               {canEdit && (
@@ -789,9 +775,7 @@ export function InvoiceShow({
                       >
                         <CareIcon icon="l-plus" className="mr-2 size-4" />
                         {t("add_charge_item")}
-                        <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                          {getShortcutDisplay("add-charge-item")}
-                        </div>
+                        <ShortcutBadge actionId="add-charge-item" />
                       </Button>
                     }
                   />
@@ -1105,9 +1089,7 @@ export function InvoiceShow({
               }
             >
               {t("cancel")}
-              <div className="text-xs flex items-center justify-center w-9 h-6 rounded-md border border-gray-200">
-                {getShortcutDisplay("cancel-action")}
-              </div>
+              <ShortcutBadge actionId="cancel-action" />
             </AlertDialogCancel>
             <AlertDialogAction
               className={cn(buttonVariants({ variant: "destructive" }))}
@@ -1118,9 +1100,7 @@ export function InvoiceShow({
               }
             >
               {isRemoving ? t("removing_with_dots") : t("remove")}
-              <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200">
-                {getShortcutDisplay("submit-action")}
-              </div>
+              <ShortcutBadge actionId="submit-action" />
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1151,9 +1131,7 @@ export function InvoiceShow({
               data-shortcut-id={reasonDialogOpen ? "cancel-action" : undefined}
             >
               {t("cancel")}
-              <div className="text-xs flex items-center justify-center w-9 h-6 rounded-md border border-gray-200">
-                {getShortcutDisplay("cancel-action")}
-              </div>
+              <ShortcutBadge actionId="cancel-action" />
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDialogSubmit}
@@ -1169,9 +1147,7 @@ export function InvoiceShow({
               data-shortcut-id={reasonDialogOpen ? "submit-action" : undefined}
             >
               {t("confirm")}
-              <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200">
-                {getShortcutDisplay("submit-action")}
-              </div>
+              <ShortcutBadge actionId="submit-action" />
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

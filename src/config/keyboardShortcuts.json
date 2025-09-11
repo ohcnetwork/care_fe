@@ -54,8 +54,7 @@
       "key": "a",
       "action": "add-charge-item",
       "description": "Add Charge Item",
-      "when": "always",
-      "subContext": "invoice-show"
+      "when": "always"
     },
     {
       "key": "i",
@@ -85,7 +84,7 @@
       "when": "always"
     },
     {
-      "key": "enter",
+      "key": "shift+enter",
       "action": "submit-action",
       "description": "Submit Current Action",
       "when": "always"
@@ -161,13 +160,6 @@
       "subContext": "account-show"
     },
     {
-      "key": "a",
-      "action": "add-charge-items-create-invoice",
-      "description": "Add Charge Items",
-      "when": "always",
-      "subContext": "create-invoice"
-    },
-    {
       "key": "enter",
       "action": "submit-charge-items-billing-sheet",
       "description": "Submit Charge Items",
@@ -184,29 +176,25 @@
       "key": "v",
       "action": "view-invoice-payment",
       "description": "View Invoice",
-      "when": "always",
-      "subContext": "payment-reconciliation-show"
+      "when": "always"
     },
     {
       "key": "c",
       "action": "mark-payment-cancelled",
       "description": "Mark as Cancelled",
-      "when": "always",
-      "subContext": "payment-reconciliation-show"
+      "when": "always"
     },
     {
       "key": "e",
       "action": "mark-payment-error",
       "description": "Mark as Entered in Error",
-      "when": "always",
-      "subContext": "payment-reconciliation-show"
+      "when": "always"
     },
     {
       "key": "p",
       "action": "print-payment-receipt",
       "description": "Print Receipt",
-      "when": "always",
-      "subContext": "payment-reconciliation-show"
+      "when": "always"
     },
     {
       "key": "e",
@@ -216,18 +204,10 @@
       "subContext": "edit-charge-item-sheet"
     },
     {
-      "key": "a",
-      "action": "add-charge-items-table",
-      "description": "Add Charge Items",
-      "when": "always",
-      "subContext": "charge-items-table"
-    },
-    {
       "key": "p",
-      "action": "print-charge-items",
-      "description": "Print Charge Items",
-      "when": "always",
-      "subContext": "charge-items-table"
+      "action": "print-button",
+      "description": "Print anything",
+      "when": "always"
     },
     {
       "key": "p",
