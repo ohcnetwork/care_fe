@@ -13,6 +13,7 @@ import {
   type ProcessedRow,
   colorize,
   createScriptConfig,
+  createSlug,
   ensureActivityDefinitionCategories,
   ensureAuthentication,
   getAuthHeaders,
@@ -204,7 +205,7 @@ async function processCsvData(
       classification:
         (row.classification as Classification) || Classification.laboratory,
       kind: Kind.service_request,
-      category: row.category || "laboratory",
+      category: createSlug(row.category || "laboratory"),
       observation_slugs: row.observation_slugs
         ? row.observation_slugs
             .split(";")

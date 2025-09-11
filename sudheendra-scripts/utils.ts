@@ -14,6 +14,95 @@ dotenv.config({ path: [".env.local", ".env"] });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+export function normalizeTitle(title: string) {
+  // Clean up the title first
+  let cleaned = title
+    // Remove extra spaces
+    .replace(/\s+/g, " ")
+    // Fix spacing around punctuation
+    .replace(/\s*\/\s*/g, "/")
+    .replace(/\s*\(\s*/g, " (")
+    .replace(/\s*\)\s*/g, ") ")
+    .replace(/\s*,\s*/g, ", ")
+    .replace(/\s*\.\s*/g, ". ")
+    .replace(/\s*-\s*/g, "-")
+    .replace(/\s*\+\s*/g, "+")
+    // Trim extra spaces
+    .trim();
+
+  // Split by spaces and normalize each word
+  const words = cleaned.split(/\s+/);
+
+  return (
+    words
+      .map((word) => {
+        // Handle special cases for common abbreviations/acronyms
+        const upperWord = word.toUpperCase();
+        if (
+          [
+            "X",
+            "RAY",
+            "AP",
+            "LAT",
+            "CT",
+            "MRI",
+            "ECG",
+            "EKG",
+            "IV",
+            "OP",
+            "IP",
+            "ICU",
+            "OPD",
+            "IPD",
+          ].includes(upperWord)
+        ) {
+          return upperWord;
+        }
+
+        // Handle words with punctuation (like parentheses)
+        if (
+          word.includes("(") ||
+          word.includes(")") ||
+          word.includes("/") ||
+          word.includes(",")
+        ) {
+          // Split by punctuation, capitalize each part, then rejoin
+          return word.replace(/([a-zA-Z]+)/g, (match) => {
+            const upperMatch = match.toUpperCase();
+            if (
+              [
+                "X",
+                "RAY",
+                "AP",
+                "LAT",
+                "CT",
+                "MRI",
+                "ECG",
+                "EKG",
+                "IV",
+                "OP",
+                "IP",
+                "ICU",
+                "OPD",
+                "IPD",
+              ].includes(upperMatch)
+            ) {
+              return upperMatch;
+            }
+            return match.charAt(0).toUpperCase() + match.slice(1).toLowerCase();
+          });
+        }
+
+        // Regular word capitalization
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      })
+      .join(" ")
+      // Final cleanup - remove double spaces that might have been introduced
+      .replace(/\s+/g, " ")
+      .trim()
+  );
+}
+
 /**
  * Although same as `Objects.keys(...)`, this provides better type-safety.
  */
@@ -793,7 +882,7 @@ export type parserType = "local" | "google-sheets";
 
 // Common configuration defaults
 export const DEFAULT_CONFIG = {
-  facilityId: process.env.FACILITY_ID || "db12139b-aac0-4f07-a6ac-1d7629390a99",
+  facilityId: process.env.FACILITY_ID || "65d56e42-c49f-4501-915f-c93d8b7bde58",
   apiBaseUrl: process.env.API_BASE_URL || "http://localhost:8000",
   parser: "local" as parserType,
   sheetName: "Sheet1",
@@ -957,7 +1046,11 @@ export async function createResourceCategories(
   categories: string[],
   resourceType: ResourceCategoryResourceType,
   config: BaseConfig,
-): Promise<{ successful: string[]; failed: string[] }> {
+): Promise<{
+  successful: string[];
+  failed: string[];
+  categoryData: ResourceCategoryCreate[];
+}> {
   const logger = getLogger();
 
   logger(
@@ -968,7 +1061,7 @@ export async function createResourceCategories(
   );
 
   const categoryData: ResourceCategoryCreate[] = categories.map((category) => ({
-    title: category,
+    title: normalizeTitle(category),
     slug: createSlug(category),
     description: `Auto-generated category for ${category}`,
     resource_type: resourceType,
@@ -1003,7 +1096,7 @@ export async function createResourceCategories(
       });
   }
 
-  return { successful, failed };
+  return { successful, failed, categoryData };
 }
 
 /**
@@ -1015,10 +1108,14 @@ export async function createResourceCategories(
 export async function ensureActivityDefinitionCategories(
   rows: Record<string, string>[],
   config: BaseConfig,
-): Promise<{ successful: string[]; failed: string[] }> {
+): Promise<{
+  successful: string[];
+  failed: string[];
+  categoryData: ResourceCategoryCreate[];
+}> {
   const categories = extractUniqueCategories(rows, "category");
   if (categories.length === 0) {
-    return { successful: [], failed: [] };
+    return { successful: [], failed: [], categoryData: [] };
   }
 
   return await createResourceCategories(
@@ -1037,10 +1134,14 @@ export async function ensureActivityDefinitionCategories(
 export async function ensureChargeItemCategories(
   rows: Record<string, string>[],
   config: BaseConfig,
-): Promise<{ successful: string[]; failed: string[] }> {
+): Promise<{
+  successful: string[];
+  failed: string[];
+  categoryData: ResourceCategoryCreate[];
+}> {
   const categories = extractUniqueCategories(rows, "category");
   if (categories.length === 0) {
-    return { successful: [], failed: [] };
+    return { successful: [], failed: [], categoryData: [] };
   }
 
   return await createResourceCategories(

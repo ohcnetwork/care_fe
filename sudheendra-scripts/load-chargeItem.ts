@@ -17,6 +17,7 @@ import {
   makeApiCall,
   makeBatchApiCall,
   mergeConfigWithCli,
+  normalizeTitle,
   parseCliArgs,
   processApiResults,
   removeDuplicates,
@@ -94,7 +95,7 @@ function processCsvData(rows: Record<string, string>[]): ChargeItemData[] {
       basePrice: isNaN(basePrice) ? 0 : basePrice,
       slug: slug,
       taxRate: taxRate,
-      category: row.category || "service",
+      category: createSlug(row.category || "service"),
       description: row.description || `Service: ${row.Service}`,
       status:
         (row.status as ChargeItemDefinitionStatus) ||
@@ -129,96 +130,6 @@ async function upsertChargeItemDefinition(
     config,
   );
 }
-
-function normalizeTitle(title: string) {
-  // Clean up the title first
-  let cleaned = title
-    // Remove extra spaces
-    .replace(/\s+/g, " ")
-    // Fix spacing around punctuation
-    .replace(/\s*\/\s*/g, "/")
-    .replace(/\s*\(\s*/g, " (")
-    .replace(/\s*\)\s*/g, ") ")
-    .replace(/\s*,\s*/g, ", ")
-    .replace(/\s*\.\s*/g, ". ")
-    .replace(/\s*-\s*/g, "-")
-    .replace(/\s*\+\s*/g, "+")
-    // Trim extra spaces
-    .trim();
-
-  // Split by spaces and normalize each word
-  const words = cleaned.split(/\s+/);
-
-  return (
-    words
-      .map((word) => {
-        // Handle special cases for common abbreviations/acronyms
-        const upperWord = word.toUpperCase();
-        if (
-          [
-            "X",
-            "RAY",
-            "AP",
-            "LAT",
-            "CT",
-            "MRI",
-            "ECG",
-            "EKG",
-            "IV",
-            "OP",
-            "IP",
-            "ICU",
-            "OPD",
-            "IPD",
-          ].includes(upperWord)
-        ) {
-          return upperWord;
-        }
-
-        // Handle words with punctuation (like parentheses)
-        if (
-          word.includes("(") ||
-          word.includes(")") ||
-          word.includes("/") ||
-          word.includes(",")
-        ) {
-          // Split by punctuation, capitalize each part, then rejoin
-          return word.replace(/([a-zA-Z]+)/g, (match) => {
-            const upperMatch = match.toUpperCase();
-            if (
-              [
-                "X",
-                "RAY",
-                "AP",
-                "LAT",
-                "CT",
-                "MRI",
-                "ECG",
-                "EKG",
-                "IV",
-                "OP",
-                "IP",
-                "ICU",
-                "OPD",
-                "IPD",
-              ].includes(upperMatch)
-            ) {
-              return upperMatch;
-            }
-            return match.charAt(0).toUpperCase() + match.slice(1).toLowerCase();
-          });
-        }
-
-        // Regular word capitalization
-        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-      })
-      .join(" ")
-      // Final cleanup - remove double spaces that might have been introduced
-      .replace(/\s+/g, " ")
-      .trim()
-  );
-}
-
 // Main function
 async function main(configOverride?: Partial<BaseConfig>) {
   // If configOverride is provided, don't merge CLI args (called programmatically)
@@ -253,10 +164,8 @@ async function main(configOverride?: Partial<BaseConfig>) {
 
     // Ensure categories exist
     logger(colorize("Ensuring categories exist...", 0));
-    const { successful, failed } = await ensureChargeItemCategories(
-      csvRows,
-      finalConfig,
-    );
+    const { successful, failed, categoryData } =
+      await ensureChargeItemCategories(csvRows, finalConfig);
     if (failed.length > 0) {
       logger(colorize("Failed to create categories:", 1));
       failed.forEach((category) => {
