@@ -311,7 +311,7 @@ export default function VerifyPatient() {
                 </Card>
               ) : (
                 tokenData && (
-                  <Card className="bg-white shadow-sm h-full">
+                  <Card className="bg-white shadow-sm h-36">
                     <CardHeader className="p-4 h-full">
                       <div className="space-y-3q flex flex-col h-full justify-between">
                         <div className="flex items-center justify-between">
