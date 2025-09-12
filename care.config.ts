@@ -163,7 +163,7 @@ const careConfig = {
     ),
   },
 
-  i18nUrl: env.REACT_I18N_URL,
+  i18nUrl: env.REACT_CUSTOM_REMOTE_I18N_URL,
 } as const;
 
 export default careConfig;
