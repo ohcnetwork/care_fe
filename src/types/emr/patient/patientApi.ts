@@ -1,6 +1,5 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
-import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import { UserReadMinimal } from "@/types/user/user";
 
 import {
@@ -50,18 +49,6 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<PatientRead>(),
     TBody: Type<PatientSearchRetrieveRequest>(),
-  },
-
-  // Questionnaire Responses
-  getQuestionnaireResponses: {
-    path: "/api/v1/patient/{patientId}/questionnaire_response/",
-    method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<QuestionnaireResponse>>(),
-  },
-  getQuestionnaireResponse: {
-    path: "/api/v1/patient/{patientId}/questionnaire_response/{responseId}/",
-    method: HttpMethod.GET,
-    TRes: Type<QuestionnaireResponse>(),
   },
 
   // User Management

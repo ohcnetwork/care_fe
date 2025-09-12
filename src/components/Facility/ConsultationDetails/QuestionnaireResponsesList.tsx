@@ -31,10 +31,10 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, properCase } from "@/Utils/utils";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-import patientApi from "@/types/emr/patient/patientApi";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
+import questionnaireResponseApi from "@/types/questionnaire/questionnaireResponseApi";
 
 interface Props {
   encounter?: EncounterRead;
@@ -493,7 +493,7 @@ export default function QuestionnaireResponsesList({
 
   const { data: questionnarieResponses, isLoading } = useQuery({
     queryKey: ["questionnaireResponses", patientId, qParams],
-    queryFn: query.paginated(patientApi.getQuestionnaireResponses, {
+    queryFn: query.paginated(questionnaireResponseApi.list, {
       pathParams: { patientId },
       queryParams: {
         ...(!isPrintPreview && {
