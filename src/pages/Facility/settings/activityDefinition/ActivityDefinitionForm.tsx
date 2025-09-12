@@ -26,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
 import Page from "@/components/Common/Page";
@@ -37,7 +36,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
-import { ChargeItemDefinitionForm } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionForm";
+import { CreateChargeItemDefinition } from "@/pages/Facility/settings/chargeItemDefinitions/CreateChargeItemDefinition";
 import ObservationDefinitionForm from "@/pages/Facility/settings/observationDefinition/ObservationDefinitionForm";
 import { CreateSpecimenDefinition } from "@/pages/Facility/settings/specimen-definitions/CreateSpecimenDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
@@ -914,15 +913,10 @@ function ActivityDefinitionFormContent({
                         onSearch={setChargeItemSearch}
                         canCreate={true}
                         createForm={(onSuccess) => (
-                          <div className="py-2 space-y-4 px-4">
-                            <SheetTitle>
-                              {t("create_charge_item_definition")}
-                            </SheetTitle>
-                            <ChargeItemDefinitionForm
-                              facilityId={facilityId}
-                              onSuccess={onSuccess}
-                            />
-                          </div>
+                          <CreateChargeItemDefinition
+                            facilityId={facilityId}
+                            onSuccess={onSuccess}
+                          />
                         )}
                       />
                     </div>
