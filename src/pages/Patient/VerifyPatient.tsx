@@ -1,8 +1,8 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   AlertCircle,
+  Download,
   Printer,
-  PrinterIcon,
   SettingsIcon,
   SquareActivity,
   Stethoscope,
@@ -14,8 +14,6 @@ import { toast } from "sonner";
 
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -50,11 +48,13 @@ import {
   getTagHierarchyDisplay,
   TagResource,
 } from "@/types/emr/tagConfig/tagConfig";
-import { TokenStatus } from "@/types/tokens/token/token";
+import { renderTokenNumber } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { saveElementAsImage } from "@/Utils/utils";
 import { useQueryClient } from "@tanstack/react-query";
+
 export default function VerifyPatient() {
   const queryClient = useQueryClient();
   useFacilityShortcuts("patient-home");
@@ -110,22 +110,6 @@ export default function VerifyPatient() {
       });
     }
   }, [phone_number, year_of_birth, partial_id, verifyPatient]);
-
-  // Helper function to get status display
-  const getStatusDisplay = (status: TokenStatus) => {
-    switch (status) {
-      case TokenStatus.CREATED:
-        return { text: t("waiting"), variant: "secondary" as const };
-      case TokenStatus.IN_PROGRESS:
-        return { text: t("in_progress"), variant: "default" as const };
-      case TokenStatus.FULFILLED:
-        return { text: t("completed"), variant: "default" as const };
-      case TokenStatus.CANCELLED:
-        return { text: t("cancelled"), variant: "destructive" as const };
-      default:
-        return { text: status, variant: "secondary" as const };
-    }
-  };
 
   if (isVerifyingPatient || !facility) {
     return (
@@ -297,7 +281,7 @@ export default function VerifyPatient() {
             </div>
 
             <div className="space-y-4">
-              {isTokenLoading ? (
+              {isTokenLoading && (
                 <Card className="bg-white shadow-sm h-full">
                   <CardHeader className="p-4">
                     <div className="flex items-center gap-3">
@@ -309,61 +293,62 @@ export default function VerifyPatient() {
                     </div>
                   </CardHeader>
                 </Card>
-              ) : (
-                tokenData && (
-                  <Card className="bg-white shadow-sm h-36">
-                    <CardHeader className="p-4 h-full">
-                      <div className="space-y-3q flex flex-col h-full justify-between">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="flex size-8 items-center justify-center rounded-lg bg-orange-100">
-                              <CareIcon
-                                icon="l-circle"
-                                className="size-4 text-orange-600"
-                              />
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">
-                                {tokenData.number}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {t("token")}
-                              </p>
-                            </div>
-                          </div>
-                          <Badge
-                            variant="secondary"
-                            className="bg-orange-100 text-orange-800 border-orange-200 text-xs"
-                          >
-                            {getStatusDisplay(tokenData.status).text}
-                          </Badge>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <Button
-                            data-shortcut-id="print-token"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => print()}
-                            className="flex-1"
-                          >
-                            <PrinterIcon className="size-3 mr-1" />
-                            {t("print")}
-                            <ShortcutBadge actionId="print-token" alwaysShow />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                  </Card>
-                )
               )}
 
               {tokenData && (
-                <div
-                  id="section-to-print"
-                  className="hidden print:block print:w-[400px] print:pt-4"
-                >
-                  <TokenCard token={tokenData} facility={facility} />
+                <Card className="bg-white shadow-sm p-1">
+                  <CardHeader className="bg-gray-100 font-semibold text-lg p-2 rounded-t-lg">
+                    {t("queue")}
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <Link
+                        href={`/facility/${facilityId}/queues/${tokenData.queue.id}`}
+                        className="font-semibold text-lg underline"
+                      >
+                        {tokenData.queue.name}
+                      </Link>
+
+                      <span className="text-lg text-gray-700 p-2">
+                        {t("token")}: {renderTokenNumber(tokenData)}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {tokenData && (
+                <div>
+                  <div
+                    id="section-to-print"
+                    className="print:block print:w-[400px] print:pt-4"
+                  >
+                    <TokenCard token={tokenData} facility={facility} />
+                  </div>
+
+                  <div className="mt-4 flex justify-end gap-2">
+                    <Button
+                      data-shortcut-id="print-token"
+                      variant="ghost"
+                      onClick={() =>
+                        saveElementAsImage("section-to-print", "token-card.png")
+                      }
+                      className="underline font-semibold text-base"
+                    >
+                      <Download className="size-5" />
+                      {t("download")}
+                    </Button>
+                    <Button
+                      data-shortcut-id="print-token"
+                      variant="outline"
+                      onClick={() => print()}
+                      className="font-semibold text-base"
+                    >
+                      <Printer className="size-5" />
+                      {t("print_token")}
+                      <ShortcutBadge actionId="print-token" />
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
