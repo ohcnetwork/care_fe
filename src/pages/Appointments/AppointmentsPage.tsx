@@ -673,8 +673,8 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
           {activeTab === "list" && (
             <Button
-              variant="primary"
               data-shortcut-id="print-button"
+              variant="outline"
               disabled={
                 !qParams.date_from ||
                 differenceInDays(
@@ -683,13 +683,9 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 ) >= 31
               }
               onClick={() => {
-                const queryString = new URLSearchParams({
-                  ...qParams,
-                  tags: selectedTags.map((tag) => tag.id).join(","),
-                }).toString();
-                navigate(
-                  `/facility/${facilityId}/appointments/print?${queryString}`,
-                );
+                navigate(`/facility/${facilityId}/appointments/print`, {
+                  query: qParams,
+                });
               }}
             >
               <CareIcon icon="l-print" className="text-lg" />
