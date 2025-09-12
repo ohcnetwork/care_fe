@@ -30,6 +30,7 @@ import {
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
+import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
@@ -134,17 +135,41 @@ function TimelineEncounterCard({
             </Badge>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid sm:flex sm:flex-wrap sm:justify-between gap-4">
             <div>
-              <div className="text-gray-600 flex items-center gap-1.5">
-                {t("start_date")}
+              <div className="text-gray-600">{t("facility")}</div>
+              <div className="mt-1 text-lg font-semibold text-gray-900">
+                {encounter.facility.name}
               </div>
+            </div>
+
+            <div>
+              <div className="text-gray-600">{t("start_date")}</div>
               <div className="mt-1 text-lg font-semibold text-gray-900">
                 {encounter.period.start
                   ? formatDateTime(encounter.period.start)
                   : t("not_started")}
               </div>
             </div>
+
+            {encounter.period.end && (
+              <div>
+                <div className="text-gray-600">{t("end_date")}</div>
+                <div className="mt-1 text-lg font-semibold text-gray-900">
+                  {formatDateTime(encounter.period.end)}
+                </div>
+              </div>
+            )}
+
+            {encounter.external_identifier && (
+              <div>
+                <div className="text-gray-600">{t("external_id")}</div>
+                <div className="mt-1 text-lg font-semibold text-gray-900">
+                  {encounter.external_identifier}
+                </div>
+              </div>
+            )}
+
             <div>
               <div className="text-gray-600 flex items-center gap-1.5">
                 {t("priority")}{" "}
@@ -155,6 +180,18 @@ function TimelineEncounterCard({
               </div>
             </div>
           </div>
+
+          {encounter.tags.length > 0 && (
+            <div className="w-full mx-3 sm:w-auto">
+              <div className="flex flex-wrap gap-2">
+                {encounter.tags.map((tag) => (
+                  <Badge variant="outline" key={tag.id}>
+                    {getTagHierarchyDisplay(tag)}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
         <CardFooter className="p-1">
           <div className="bg-gray-100 p-4 rounded-b-lg w-full">
