@@ -135,16 +135,16 @@ export function useFacilityShortcuts(subContext?: string) {
         handler: shortcutActionHandler("edit-invoice-item"),
       },
       {
-        id: "add-charge-items-table",
-        handler: shortcutActionHandler("add-charge-items-table"),
-      },
-      {
         id: "print-invoice",
         handler: shortcutActionHandler("print-invoice"),
       },
       {
-        id: "print-charge-items",
-        handler: shortcutActionHandler("print-charge-items"),
+        id: "print-button",
+        handler: shortcutActionHandler("print-button"),
+      },
+      {
+        id: "print-token",
+        handler: shortcutActionHandler("print-token"),
       },
       // if you dont need permission checks just add bellow
       ...shortcutActionHandlers([
@@ -152,6 +152,7 @@ export function useFacilityShortcuts(subContext?: string) {
         "print-token",
         "generate-token",
         "schedule-appointment",
+        "add-charge-items-invoice",
       ]),
 
       // Generic action handlers

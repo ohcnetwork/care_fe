@@ -45,7 +45,7 @@ import query from "@/Utils/request/query";
 import { useQueryClient } from "@tanstack/react-query";
 export default function VerifyPatient() {
   const queryClient = useQueryClient();
-  useFacilityShortcuts();
+  useFacilityShortcuts("patient-home");
   const { t } = useTranslation();
   const [qParams] = useQueryParams();
   const { phone_number, year_of_birth, partial_id, queue_id, token_id } =
@@ -230,7 +230,7 @@ export default function VerifyPatient() {
                           >
                             <PrinterIcon className="size-3 mr-1" />
                             {t("print")}
-                            <ShortcutBadge actionId="print-token" />
+                            <ShortcutBadge actionId="print-token" alwaysShow />
                           </Button>
                         </div>
                       </div>
@@ -264,6 +264,7 @@ export default function VerifyPatient() {
                     <ShortcutBadge
                       actionId="create-encounter"
                       position="top-right"
+                      alwaysShow
                     />
                     <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-3">
                       <div className="flex size-12 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
@@ -290,6 +291,7 @@ export default function VerifyPatient() {
                 <ShortcutBadge
                   actionId="schedule-appointment"
                   position="top-right"
+                  alwaysShow
                 />
                 <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-3">
                   <div className="flex size-12 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">
@@ -317,6 +319,7 @@ export default function VerifyPatient() {
                     <ShortcutBadge
                       actionId="generate-token"
                       position="top-right"
+                      alwaysShow
                     />
                     <div className="w-full h-full p-4 flex flex-col items-center justify-center gap-3">
                       <div className="flex size-12 items-center justify-center rounded-lg bg-white shadow-sm group-hover:shadow-md transition-shadow">

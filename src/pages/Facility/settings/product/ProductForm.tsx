@@ -235,7 +235,7 @@ export function ProductFormContent({
         ? {
             status: existingData.status,
             product_knowledge: existingData.product_knowledge.slug,
-            charge_item_definition: existingData.charge_item_definition?.id,
+            charge_item_definition: existingData.charge_item_definition?.slug,
             batch: existingData.batch || undefined,
             expiration_date: existingData.expiration_date
               ? new Date(existingData.expiration_date)
@@ -440,13 +440,13 @@ export function ProductFormContent({
                         options={mergeAutocompleteOptions(
                           chargeItemDefinitionOptions.map((cid) => ({
                             label: cid.title,
-                            value: cid.id,
+                            value: cid.slug,
                           })),
                           field.value
                             ? {
                                 label:
                                   chargeItemDefinitionOptions.find(
-                                    (cid) => cid.id === field.value,
+                                    (cid) => cid.slug === field.value,
                                   )?.title || "",
                                 value: field.value,
                               }

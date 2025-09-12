@@ -67,8 +67,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
-import ConsumableSelector from "./ConsumableSelector";
 
 interface SelectedLocation {
   id: string;
@@ -146,7 +146,6 @@ export default function DispenseConsumableDrawer({
   const [isLocationWarningOpen, setIsLocationWarningOpen] = useState(false);
   const [productKnowledgeInventoriesMap, setProductKnowledgeInventoriesMap] =
     useState<Record<string, InventoryRead[] | undefined>>({});
-  const [search, setSearch] = useState("");
 
   const formSchema = useMemo(() => createFormSchema(), []);
 
@@ -520,8 +519,8 @@ export default function DispenseConsumableDrawer({
                     title={t("no_consumables_added_yet")}
                     description={t("add_items_to_dispense_now_no_invoice")}
                     action={
-                      <ConsumableSelector
-                        onProductSelect={(product) => {
+                      <ProductKnowledgeSelect
+                        onChange={(product) => {
                           append({
                             reference_id: crypto.randomUUID(),
                             productKnowledge: product,
@@ -540,10 +539,8 @@ export default function DispenseConsumableDrawer({
                             ...prev,
                           }));
                         }}
-                        search={search}
-                        onSearchChange={setSearch}
                         className="text-primary-800 border-primary-600"
-                        popoverWidth="auto"
+                        placeholder={t("add_item")}
                       />
                     }
                   />
@@ -967,8 +964,8 @@ export default function DispenseConsumableDrawer({
 
                     {/* Consumable Selection */}
                     <div className="my-4">
-                      <ConsumableSelector
-                        onProductSelect={(product) => {
+                      <ProductKnowledgeSelect
+                        onChange={(product) => {
                           append({
                             reference_id: crypto.randomUUID(),
                             productKnowledge: product,
@@ -987,9 +984,8 @@ export default function DispenseConsumableDrawer({
                             ...prev,
                           }));
                         }}
-                        search={search}
-                        onSearchChange={setSearch}
                         className="text-primary-800 border-primary-600"
+                        placeholder={t("add_item")}
                       />
                     </div>
                   </>

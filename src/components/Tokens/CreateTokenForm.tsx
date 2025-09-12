@@ -46,6 +46,7 @@ import query from "@/Utils/request/query";
 import { PatientRead } from "@/types/emr/patient/patient";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import { UserReadMinimal } from "@/types/user/user";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 interface Props {
   patient?: PatientRead;
@@ -395,6 +396,7 @@ export default function CreateTokenForm({
                   form.reset();
                 }}
                 className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
+                data-shortcut-id="cancel-action"
               >
                 {t("cancel")}
               </Button>
@@ -406,8 +408,10 @@ export default function CreateTokenForm({
                   !form.watch("resourceId") ||
                   !form.watch("categoryId")
                 }
+                data-shortcut-id="submit-action"
               >
                 {isPending ? t("creating") : t("create_token")}
+                <ShortcutBadge actionId="submit-action" className="bg-white" />
               </Button>
             </div>
           </form>

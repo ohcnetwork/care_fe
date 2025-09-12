@@ -189,11 +189,13 @@ function ActivityDefinitionTableRow({
 interface ActivityDefinitionListProps {
   facilityId: string;
   categorySlug: string;
+  setAllowCategoryCreate: (allow: boolean) => void;
 }
 
 export function ActivityDefinitionList({
   facilityId,
   categorySlug,
+  setAllowCategoryCreate,
 }: ActivityDefinitionListProps) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
@@ -231,6 +233,17 @@ export function ActivityDefinitionList({
   });
 
   const activityDefinitions = activityDefinitionsResponse?.results || [];
+
+  useEffect(() => {
+    if (!qParams.search && qParams.page === "1") {
+      setAllowCategoryCreate(!activityDefinitionsResponse?.count);
+    }
+  }, [
+    activityDefinitionsResponse?.count,
+    setAllowCategoryCreate,
+    qParams.search,
+    qParams.page,
+  ]);
 
   return (
     <TooltipProvider>

@@ -44,7 +44,7 @@ interface CategoryBreadcrumb {
 }
 
 // Generic interface for any definition type
-interface BaseDefinition {
+export interface BaseCategoryPickerDefinition {
   id: string;
   slug: string;
   title: string;
@@ -52,7 +52,7 @@ interface BaseDefinition {
   category?: ResourceCategoryParent;
 }
 
-interface ResourceDefinitionCategoryPickerProps<T extends BaseDefinition> {
+interface ResourceDefinitionCategoryPickerProps<T> {
   facilityId: string;
   value?: T | T[]; // definition object(s)
   onValueChange: (value: T | T[] | undefined) => void;
@@ -78,9 +78,11 @@ interface ResourceDefinitionCategoryPickerProps<T extends BaseDefinition> {
     noResultsFound: string;
     noItemsFound: string;
   };
+  // Optional mapper function to transform API response to BaseDefinition
+  mapper?: (item: T) => BaseCategoryPickerDefinition;
 }
 
-export function ResourceDefinitionCategoryPicker<T extends BaseDefinition>({
+export function ResourceDefinitionCategoryPicker<T>({
   facilityId,
   value,
   onValueChange,
@@ -91,6 +93,7 @@ export function ResourceDefinitionCategoryPicker<T extends BaseDefinition>({
   listDefinitions,
   translations,
   allowMultiple = false,
+  mapper,
 }: ResourceDefinitionCategoryPickerProps<T>) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -136,12 +139,15 @@ export function ResourceDefinitionCategoryPicker<T extends BaseDefinition>({
     [categoriesResponse?.results],
   );
 
-  const definitions = useMemo(
-    () => definitionsResponse?.results || [],
-    [definitionsResponse?.results],
-  );
+  const definitions = useMemo(() => {
+    const results = definitionsResponse?.results || [];
+    return mapper
+      ? results.map(mapper)
+      : (results as BaseCategoryPickerDefinition[]);
+  }, [definitionsResponse?.results, mapper]);
 
-  const selectedDefinition = value && !Array.isArray(value) ? value : null;
+  const selectedDefinition =
+    value && !Array.isArray(value) ? mapper!(value) : null;
 
   const isLoading = isLoadingCategories || isLoadingDefinitions;
 
@@ -160,12 +166,12 @@ export function ResourceDefinitionCategoryPicker<T extends BaseDefinition>({
     resetSearch();
   };
 
-  const handleDefinitionSelect = (definition: T) => {
+  const handleDefinitionSelect = (definition: BaseCategoryPickerDefinition) => {
     if (allowMultiple) {
       const currentValues = Array.isArray(value) ? value : value ? [value] : [];
       onValueChange([...currentValues, definition] as T[]);
     } else {
-      onValueChange(definition);
+      onValueChange(definition as T);
     }
     setOpen(false);
     resetSearch();
@@ -196,12 +202,12 @@ export function ResourceDefinitionCategoryPicker<T extends BaseDefinition>({
     resetSearch();
   };
 
-  const handleRemoveDefinition = (def: T) => {
+  const handleRemoveDefinition = (def: BaseCategoryPickerDefinition) => {
     if (!Array.isArray(value)) return;
-    onValueChange(value.filter((d) => d.slug !== def.slug));
+    onValueChange(value.filter((d: T) => mapper!(d).slug !== def.slug));
   };
 
-  const getFullPath = (definition: T) => {
+  const getFullPath = (definition: BaseCategoryPickerDefinition) => {
     const pathParts = [];
     if (definition.category) {
       let current: ResourceCategoryParent | undefined = definition.category;
@@ -533,7 +539,7 @@ export function ResourceDefinitionCategoryPicker<T extends BaseDefinition>({
                         </div>
                         {value &&
                           !Array.isArray(value) &&
-                          value.slug === definition.slug && (
+                          mapper!(value).slug === definition.slug && (
                             <Check className="h-4 w-4 text-gray-700" />
                           )}
                       </CommandItem>
@@ -548,7 +554,7 @@ export function ResourceDefinitionCategoryPicker<T extends BaseDefinition>({
         <div className="space-y-2">
           {Array.isArray(value) && value.length > 0 && (
             <div className="flex flex-col gap-2">
-              {value.map((def) => {
+              {value.map(mapper!).map((def) => {
                 if (!def) return null;
                 return (
                   <div

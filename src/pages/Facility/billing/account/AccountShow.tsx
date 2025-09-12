@@ -36,7 +36,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
-import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
@@ -53,6 +52,7 @@ import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import AccountSheet from "./AccountSheet";
 import BedChargeItemsTable from "./components/BedChargeItemsTable";
@@ -100,7 +100,6 @@ export function AccountShow({
   const [{ encounterId }] = useQueryParams();
 
   useFacilityShortcuts("account-show");
-  const getShortcutDisplay = useShortcutDisplays(["facility"]);
 
   const { data: account, isLoading } = useQuery({
     queryKey: ["account", accountId],
@@ -245,9 +244,7 @@ export function AccountShow({
                   >
                     <CareIcon icon="l-check" className="size-5" />
                     <span className="underline">{t("settle_close")}</span>
-                    <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                      {getShortcutDisplay("settle-close-account")}
-                    </div>
+                    <ShortcutBadge actionId="settle-close-account" />
                   </Button>
                 )}
               {account.status === AccountStatus.active &&
@@ -270,9 +267,7 @@ export function AccountShow({
                     >
                       <CareIcon icon="l-plus" className="mr-2 size-4" />
                       {t("create_invoice")}
-                      <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                        {getShortcutDisplay("create-invoice")}
-                      </div>
+                      <ShortcutBadge actionId="create-invoice" />
                     </Button>
 
                     <div className="flex gap-2">
@@ -293,9 +288,10 @@ export function AccountShow({
                       >
                         <CareIcon icon="l-plus" className="size-4" />
                         {t("record_payment")}
-                        <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                          {getShortcutDisplay("record-payment-account")}
-                        </div>
+                        <ShortcutBadge
+                          actionId="record-payment-account"
+                          className="bg-white"
+                        />
                       </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -468,9 +464,7 @@ export function AccountShow({
                 className="size-5 stroke-gray-450 stroke-1"
               />
               {t("edit")}
-              <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                {getShortcutDisplay("edit-account")}
-              </div>
+              <ShortcutBadge actionId="edit-account" />
             </Button>
           </div>
         </div>
@@ -569,27 +563,21 @@ export function AccountShow({
               className="border-b-2 px-6 py-2 text-sm font-medium data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 rounded-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent data-[state=active]:font-semibold text-gray-600"
             >
               {t("invoices")}
-              <div className="text-xs flex items-center justify-center ml-1 w-10 h-6 rounded-md border border-gray-200 bg-gray-50">
-                {getShortcutDisplay("switch-to-invoices-tab")}
-              </div>
+              <ShortcutBadge actionId="switch-to-invoices-tab" />
             </TabsTrigger>
             <TabsTrigger
               value="charge_items"
               className="border-b-2 px-6 py-2 text-sm font-medium data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 rounded-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent data-[state=active]:font-semibold text-gray-600"
             >
               {t("charge_items")}
-              <div className="text-xs flex items-center justify-center ml-1 w-10 h-6 rounded-md border border-gray-200 bg-gray-50">
-                {getShortcutDisplay("switch-to-charge-items-tab")}
-              </div>
+              <ShortcutBadge actionId="switch-to-charge-items-tab" />
             </TabsTrigger>
             <TabsTrigger
               value="payments"
               className="border-b-2 px-6 py-2 text-sm font-medium data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 rounded-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent text-gray-600"
             >
               {t("payments")}
-              <div className="text-xs flex items-center justify-center ml-1 w-10 h-6 rounded-md border border-gray-200 bg-gray-50">
-                {getShortcutDisplay("switch-to-payments-tab")}
-              </div>
+              <ShortcutBadge actionId="switch-to-payments-tab" />
             </TabsTrigger>
             {encounterId && (
               <TabsTrigger
@@ -597,9 +585,7 @@ export function AccountShow({
                 className="border-b-2 px-6 py-2 text-sm font-medium data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 rounded-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent text-gray-600"
               >
                 {t("bed_charge_items")}
-                <div className="text-xs flex items-center justify-center ml-1 w-10 h-6 rounded-md border border-gray-200 bg-gray-50">
-                  {getShortcutDisplay("switch-to-bed-associations-tab")}
-                </div>
+                <ShortcutBadge actionId="switch-to-bed-associations-tab" />
               </TabsTrigger>
             )}
           </TabsList>

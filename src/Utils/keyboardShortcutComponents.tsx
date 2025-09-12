@@ -1,3 +1,4 @@
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { cn } from "@/lib/utils";
 import { useShortcutDisplays } from "./keyboardShortcutUtils";
 
@@ -5,6 +6,7 @@ interface KeyboardShortcutBadgeProps {
   shortcut: string | undefined;
   className?: string;
   position?: "top-right" | "bottom-right" | "top-left" | "bottom-left";
+  alwaysShow?: boolean;
 }
 
 /**
@@ -15,8 +17,11 @@ export function KeyboardShortcutBadge({
   shortcut,
   className,
   position,
+  alwaysShow = true,
 }: KeyboardShortcutBadgeProps) {
-  if (!shortcut) return null;
+  const { isOptionPressed } = useKeyboardShortcuts([], {}, {});
+
+  if (!shortcut || (!alwaysShow && !isOptionPressed)) return null;
 
   const positionClasses = {
     "top-right": "absolute top-1 right-1",
@@ -47,18 +52,24 @@ export function ShortcutBadge({
   actionId,
   className,
   position,
+  alwaysShow = true,
 }: {
   actionId: string;
   className?: string;
   position?: "top-right" | "bottom-right" | "top-left" | "bottom-left";
+  alwaysShow?: boolean;
 }) {
   const getShortcutDisplay = useShortcutDisplays();
+  const { isOptionPressed } = useKeyboardShortcuts([], {}, {});
 
   return (
     <KeyboardShortcutBadge
-      shortcut={getShortcutDisplay(actionId)}
+      shortcut={
+        alwaysShow || isOptionPressed ? getShortcutDisplay(actionId) : undefined
+      }
       className={className}
       position={position}
+      alwaysShow={alwaysShow}
     />
   );
 }
