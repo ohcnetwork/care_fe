@@ -162,6 +162,8 @@ const careConfig = {
       false,
     ),
   },
+
+  i18nUrl: env.REACT_I18N_URL,
 } as const;
 
 export default careConfig;

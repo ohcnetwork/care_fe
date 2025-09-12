@@ -26,6 +26,53 @@ i18n
   .use(LanguageDetector)
   .use(
     resourcesToBackend((language, namespace, callback) => {
+      if (namespace === DEFAULT_NAMESPACE && careConfig.i18nUrl) {
+        const remoteUrl = `${careConfig.i18nUrl}/${language}.json`;
+        const localUrl = `/locale/${language}.json`;
+        Promise.all([
+          fetch(remoteUrl)
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .catch((error) => {
+              console.warn(
+                `Failed to load remote translations: ${remoteUrl}`,
+                error,
+              );
+              return {};
+            }),
+          fetch(localUrl)
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .catch((error) => {
+              console.warn(
+                `Failed to load local fallback translations: ${localUrl}`,
+                error,
+              );
+              return {};
+            }),
+        ])
+          .then(([remoteResources, localResources]) => {
+            const merged = { ...localResources, ...remoteResources };
+            callback(null, merged);
+          })
+          .catch((error) => {
+            console.error(
+              `Failed to prepare translations for ${language}/${namespace}:`,
+              error,
+            );
+            callback(error, null);
+          });
+        return;
+      }
+
       const baseUrl = namespaceToUrl(namespace)?.replace(/\/$/, "");
 
       if (!baseUrl && namespace !== DEFAULT_NAMESPACE) {
