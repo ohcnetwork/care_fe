@@ -1,5 +1,5 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { PaginatedResponse, UpsertRequest } from "@/Utils/request/types";
 
 import {
   ResourceCategoryCreate,
@@ -29,6 +29,13 @@ export default {
     method: HttpMethod.PUT,
     TRes: Type<ResourceCategoryRead>(),
     TBody: Type<ResourceCategoryUpdate>(),
+  },
+  upsert: {
+    path: "/api/v1/facility/{facilityId}/resource_category/upsert/",
+    method: HttpMethod.POST,
+    TRes: Type<ResourceCategoryRead>(),
+    TBody:
+      Type<UpsertRequest<ResourceCategoryCreate, ResourceCategoryUpdate>>(),
   },
   delete: {
     path: "/api/v1/facility/{facilityId}/resource_category/{slug}/",

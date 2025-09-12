@@ -3,12 +3,12 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import { Code } from "@/types/base/code/code";
 import {
   ResourceCategoryCreate,
   ResourceCategoryResourceType,
   ResourceCategorySubType,
 } from "@/types/base/resourceCategory/resourceCategory";
-import { Code } from "../src/types/base/code/code";
 
 dotenv.config({ path: [".env.local", ".env"] });
 
@@ -239,17 +239,14 @@ export interface BaseConfig {
 
 // Utility function to create slug from name
 export function createSlug(name: string): string {
-  let slug = name
+  return name
     .toLowerCase()
     .replace(/[^a-z0-9\s_-]/g, "") // Keep letters, numbers, spaces, underscores, and hyphens
     .replace(/\s+/g, "-") // Replace spaces with hyphens
     .replace(/-+/g, "-") // Replace multiple hyphens with single
     .trim()
-    .slice(0, 20);
-  if (slug.length < 5) {
-    slug += "-category";
-  }
-  return slug;
+    .slice(0, 20)
+    .padEnd(5, "-");
 }
 
 /**
@@ -394,11 +391,12 @@ const CARE_API_URL = process.env.REACT_CARE_API_URL ?? "http://127.0.0.1:8000";
  * @param body - The body of the request
  * @returns The response from the request
  */
-export const request = async (
+export const request = async <TResponse = unknown>(
   url: string,
   method: "GET" | "POST" | "PUT" | "DELETE",
   body?: Record<string, unknown>,
-) => {
+  canRetry = true,
+): Promise<TResponse> => {
   const response = await fetch(`${CARE_API_URL}${url}`, {
     method,
     body: JSON.stringify(body),
@@ -409,6 +407,9 @@ export const request = async (
   });
 
   if (!response.ok) {
+    if (canRetry) {
+      return request(url, method, body, false);
+    }
     throw new Error(
       `Failed to make request to ${url}: ${response.statusText}\n${await response.text()}`,
     );
@@ -417,7 +418,7 @@ export const request = async (
   return response.json();
 };
 
-const CARE_API_WORKERS = parseInt(process.env.CARE_API_WORKERS ?? "4");
+const CARE_API_WORKERS = parseInt(process.env.CARE_API_WORKERS ?? "2");
 
 /**
  * Batch a request to the CARE API

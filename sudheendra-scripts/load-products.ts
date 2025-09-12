@@ -12,6 +12,12 @@ import {
 
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
+  ResourceCategoryCreate,
+  ResourceCategoryRead,
+  ResourceCategoryResourceType,
+  ResourceCategorySubType,
+} from "@/types/base/resourceCategory/resourceCategory";
+import {
   ChargeItemDefinitionBase,
   ChargeItemDefinitionCreate,
   ChargeItemDefinitionStatus,
@@ -69,13 +75,51 @@ const BASE_UNIT = {
 
 type Datapoints = Record<keyof typeof HEADERS_MAP, string>[];
 
+async function ensureResourceCategories() {
+  const datapoints = [
+    {
+      title: "Medicines",
+      slug: "pk-medicines",
+      resource_type: ResourceCategoryResourceType.product_knowledge,
+      resource_sub_type: ResourceCategorySubType.other,
+    },
+    {
+      title: "Consumables",
+      slug: "pk-consumables",
+      resource_type: ResourceCategoryResourceType.product_knowledge,
+      resource_sub_type: ResourceCategorySubType.other,
+    },
+    {
+      title: "Medications",
+      slug: "cid-medications",
+      resource_type: ResourceCategoryResourceType.charge_item_definition,
+      resource_sub_type: ResourceCategorySubType.other,
+    },
+    {
+      title: "Consumables",
+      slug: "cid-consumables",
+      resource_type: ResourceCategoryResourceType.charge_item_definition,
+      resource_sub_type: ResourceCategorySubType.other,
+    },
+  ] as ResourceCategoryCreate[];
+
+  const results = await request(
+    `/api/v1/facility/${FACILITY_ID}/resource_category/upsert/`,
+    "POST",
+    { datapoints },
+  );
+
+  return results as ResourceCategoryRead[];
+}
+
 async function buildProductKnowledges(datapoints: Datapoints) {
   const productKnowledges = Object.entries(
     Object.fromEntries(
       datapoints.map((datapoint) => {
         return [
-          datapoint.item,
+          createSlug(datapoint.item),
           {
+            name: datapoint.item,
             hsnCode: datapoint.hsnCode,
             baseUnit:
               +datapoint.sellingPrice < +datapoint.purchasePrice
@@ -86,19 +130,19 @@ async function buildProductKnowledges(datapoints: Datapoints) {
       }),
     ),
   ).map(
-    ([item, { hsnCode, baseUnit }]) =>
+    ([item, { name, hsnCode, baseUnit }]) =>
       ({
-        name: item,
+        name,
         slug: createSlug(item),
         alternate_identifier: hsnCode,
-        facility: FACILITY_ID,
+        facility: FACILITY_ID!,
         product_type: ProductKnowledgeType.medication,
         status: ProductKnowledgeStatus.active,
         names: [],
         storage_guidelines: [],
         base_unit: baseUnit,
-        category: "medicines",
-      }) as ProductKnowledgeCreate,
+        category: "pk-medicines",
+      }) satisfies ProductKnowledgeCreate,
   );
 
   logger(`Creating ${productKnowledges.length} product knowledges`);
@@ -115,9 +159,9 @@ async function buildProductKnowledges(datapoints: Datapoints) {
       );
 
       const results = await request(
-        "/api/v1/product_knowledge/upsert/",
+        "/api/v1/product_knowledge/",
         "POST",
-        { datapoints },
+        datapoints[0],
       );
 
       logger(
@@ -127,8 +171,9 @@ async function buildProductKnowledges(datapoints: Datapoints) {
         ),
       );
 
-      return results as ProductKnowledgeBase[];
+      return [results] as ProductKnowledgeBase[];
     },
+    1,
   );
 }
 
@@ -178,7 +223,7 @@ async function buildChargeItemDefinitions(datapoints: Datapoints) {
               },
               ...getTaxComponents(datapoint),
             ],
-            category: "medication",
+            category: "cid-medications",
           } satisfies ChargeItemDefinitionCreate,
         ];
       }),
@@ -267,8 +312,8 @@ async function buildInventoryItems(
       ...datapoint,
       product: products.find(
         (product) =>
-          product.product_knowledge.name === datapoint.item &&
-          product.batch?.lot_number === datapoint.batchNumber,
+          product.charge_item_definition.slug ===
+          createSlug(`${datapoint.item}-${datapoint.batchNumber}`),
       ),
     })),
     async (products, { offset, batchSize }) => {
@@ -278,16 +323,18 @@ async function buildInventoryItems(
       );
 
       const results = await request(`/api/v1/supply_delivery/upsert/`, "POST", {
-        datapoints: products.map(
-          (datapoint) =>
-            ({
-              supplied_item_quantity: +datapoint.quantity,
-              supplied_item: datapoint.product!.id,
-              destination: LOCATION_ID,
-              status: SupplyDeliveryStatus.completed,
-              supplied_item_type: SupplyDeliveryType.product,
-            }) as SupplyDeliveryUpsert,
-        ),
+        datapoints: products.map((datapoint) => {
+          if (!datapoint.product) {
+            console.log({ datapoint, products });
+          }
+          return {
+            supplied_item_quantity: +datapoint.quantity,
+            supplied_item: datapoint.product!.id,
+            destination: LOCATION_ID,
+            status: SupplyDeliveryStatus.completed,
+            supplied_item_type: SupplyDeliveryType.product,
+          } as SupplyDeliveryUpsert;
+        }),
       });
 
       logger(
@@ -298,17 +345,31 @@ async function buildInventoryItems(
       );
       return results as SupplyDeliveryBase[];
     },
+    undefined,
+    1,
   );
 }
 
 async function main() {
   const csvContent = await fetchCsvFromGoogleSheet(GOOGLE_SHEET_ID, SHEET_NAME);
-  let datapoints = transformCsvToObjects(csvContent, HEADERS_MAP).slice(0, 10);
+  let datapoints = transformCsvToObjects(csvContent, HEADERS_MAP);
 
-  // cleanup: exclude rows without item names
-  datapoints = datapoints.filter((row) => row.item !== "");
+  // cleanup: exclude rows without items without required fields
+  datapoints = datapoints.filter((row) =>
+    [
+      row.item,
+      row.batchNumber,
+      row.purchasePrice,
+      row.sellingPrice,
+      row.quantity,
+      row.taxRate,
+    ].every((v) => v !== ""),
+  );
 
   logger(`Found ${datapoints.length} products to be created`);
+
+  const resourceCategories = await ensureResourceCategories();
+  logger(`Created ${resourceCategories.length} resource categories`);
 
   const productKnowledges = await buildProductKnowledges(datapoints);
   logger(`Created ${productKnowledges.length} product knowledges`);
