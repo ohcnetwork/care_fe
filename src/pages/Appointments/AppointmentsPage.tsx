@@ -715,13 +715,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 statusGroup={statusGroup}
                 slot={slot?.id}
                 resourceType={resourceType}
-                resourceIds={
-                  resourceId
-                    ? [resourceId]
-                    : qParams.practitioners
-                      ? qParams.practitioners.split(",")
-                      : [authUser.id]
-                }
+                resourceIds={resourceId ? [resourceId] : practitionerIds}
                 date_from={qParams.date_from}
                 date_to={qParams.date_to}
                 canViewAppointments={canViewAppointments}
@@ -747,13 +741,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
           tags={selectedTags.map((tag) => tag.id)}
           patient={qParams.patient}
           resourceType={resourceType}
-          resourceIds={
-            resourceId
-              ? [resourceId]
-              : qParams.practitioners
-                ? qParams.practitioners.split(",")
-                : [authUser.id]
-          }
+          resourceIds={resourceId ? [resourceId] : practitionerIds}
         />
       )}
     </Page>
