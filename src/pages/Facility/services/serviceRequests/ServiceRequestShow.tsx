@@ -417,69 +417,89 @@ export default function ServiceRequestShow({
                   )}
                 </div>
               )}
-              {request.status !== Status.completed && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      data-cy="invoice-actions-button"
-                      className="border-gray-400 px-2"
-                    >
-                      <CareIcon icon="l-ellipsis-v" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild className="text-primary-900">
+              {request.status !== Status.completed &&
+                request.status !== Status.entered_in_error && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
                       <Button
-                        variant="ghost"
-                        onClick={() =>
-                          updateServiceRequest({
-                            status: Status.entered_in_error,
-                          })
-                        }
-                        disabled={isUpdatingServiceRequest}
-                        className="w-full flex flex-row self-center"
+                        variant="outline"
+                        data-cy="invoice-actions-button"
+                        className="border-gray-400 px-2"
                       >
-                        <CareIcon
-                          icon="l-exclamation-circle"
-                          className="mr-1"
-                        />
-                        <span>{t("mark_as_entered_in_error")}</span>
+                        <CareIcon icon="l-ellipsis-v" />
                       </Button>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="text-primary-900">
-                      <Button
-                        variant="ghost"
-                        onClick={() =>
-                          updateServiceRequest({
-                            status: Status.on_hold,
-                          })
-                        }
-                        className="w-full flex flex-row justify-stretch items-center"
-                        disabled={isUpdatingServiceRequest}
-                      >
-                        <CareIcon icon="l-pause" className="mr-1" />
-                        {t("mark_as_on_hold")}
-                      </Button>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="text-primary-900">
-                      <Button
-                        variant="ghost"
-                        onClick={() =>
-                          updateServiceRequest({
-                            status: Status.revoked,
-                          })
-                        }
-                        disabled={isUpdatingServiceRequest}
-                        className="w-full flex flex-row justify-stretch items-center"
-                      >
-                        <CareIcon icon="l-ban" className="mr-1" />
-                        {t("mark_as_revoked")}
-                      </Button>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild className="text-primary-900">
+                        <Button
+                          variant="ghost"
+                          onClick={() =>
+                            updateServiceRequest({
+                              status: Status.entered_in_error,
+                            })
+                          }
+                          disabled={isUpdatingServiceRequest}
+                          className="w-full flex flex-row self-center"
+                        >
+                          <CareIcon
+                            icon="l-exclamation-circle"
+                            className="mr-1"
+                          />
+                          <span>{t("mark_as_entered_in_error")}</span>
+                        </Button>
+                      </DropdownMenuItem>
+                      {request.status !== Status.on_hold && (
+                        <DropdownMenuItem asChild className="text-primary-900">
+                          <Button
+                            variant="ghost"
+                            onClick={() =>
+                              updateServiceRequest({
+                                status: Status.on_hold,
+                              })
+                            }
+                            className="w-full flex flex-row justify-stretch items-center"
+                            disabled={isUpdatingServiceRequest}
+                          >
+                            <CareIcon icon="l-pause" className="mr-1" />
+                            {t("mark_as_on_hold")}
+                          </Button>
+                        </DropdownMenuItem>
+                      )}
+                      {request.status === Status.on_hold && (
+                        <DropdownMenuItem asChild className="text-primary-900">
+                          <Button
+                            variant="ghost"
+                            onClick={() =>
+                              updateServiceRequest({
+                                status: Status.active,
+                              })
+                            }
+                            className="w-full flex flex-row justify-stretch items-center"
+                            disabled={isUpdatingServiceRequest}
+                          >
+                            <CareIcon icon="l-play" className="mr-1" />
+                            {t("mark_as_active")}
+                          </Button>
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem asChild className="text-primary-900">
+                        <Button
+                          variant="ghost"
+                          onClick={() =>
+                            updateServiceRequest({
+                              status: Status.revoked,
+                            })
+                          }
+                          disabled={isUpdatingServiceRequest}
+                          className="w-full flex flex-row justify-stretch items-center"
+                        >
+                          <CareIcon icon="l-ban" className="mr-1" />
+                          {t("mark_as_revoked")}
+                        </Button>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
 
               {isMobile && (
                 <WorkflowProgress request={request} variant="sheet" />
