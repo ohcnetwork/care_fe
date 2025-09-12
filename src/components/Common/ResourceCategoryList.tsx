@@ -262,6 +262,7 @@ export function ResourceCategoryList({
                 variant="outline"
                 onClick={handleCreateCategory}
                 disabled={isLeafCategory && !allowCategoryCreate}
+                className="w-full sm:w-auto"
               >
                 <CareIcon icon="l-folder-plus" className="mr-2" />
                 {t("add_category")}
