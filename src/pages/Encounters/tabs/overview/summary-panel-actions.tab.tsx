@@ -69,7 +69,7 @@ export const SummaryPanelActionsTab = () => {
             encounter={selectedEncounter}
             className={cn(
               buttonVariants({ variant: "outline" }),
-              "justify-start sm:@sm:justify-center sm:@sm:flex-1",
+              "justify-start sm:@sm:justify-center sm:@sm:flex-1 w-full",
             )}
           />
         )}

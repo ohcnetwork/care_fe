@@ -232,7 +232,7 @@ export default function AvatarEditModal({
     <Dialog
       open={open}
       onOpenChange={(open) => {
-        if (!open) onOpenChange(false);
+        if (!open) closeModal();
         else onOpenChange(open);
       }}
     >
@@ -396,7 +396,7 @@ export default function AvatarEditModal({
                         />
                         {t("upload_an_image")}
                         <input
-                          title="changeFile"
+                          title={t("change_file")}
                           type="file"
                           accept="image/*"
                           className="hidden"
