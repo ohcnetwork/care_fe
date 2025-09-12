@@ -381,6 +381,8 @@ export const ensureAuthentication = async (
   }
 };
 
+export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 const CARE_API_URL = process.env.REACT_CARE_API_URL ?? "http://127.0.0.1:8000";
 
 /**
@@ -408,6 +410,7 @@ export const request = async <TResponse = unknown>(
 
   if (!response.ok) {
     if (canRetry) {
+      await sleep(1000);
       return request(url, method, body, false);
     }
     throw new Error(
