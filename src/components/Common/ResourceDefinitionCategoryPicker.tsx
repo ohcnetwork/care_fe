@@ -35,6 +35,7 @@ import {
   ResourceCategoryResourceType,
 } from "@/types/base/resourceCategory/resourceCategory";
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
+import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
 import query from "@/Utils/request/query";
 import { stringifyNestedObject } from "@/Utils/utils";
 
@@ -50,6 +51,7 @@ export interface BaseCategoryPickerDefinition {
   title: string;
   description?: string;
   category?: ResourceCategoryParent;
+  product_type?: ProductKnowledgeType;
 }
 
 interface ResourceDefinitionCategoryPickerProps<T> {
@@ -515,8 +517,14 @@ export function ResourceDefinitionCategoryPicker<T>({
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <div className="min-w-0 flex-1">
-                            <div className="font-medium text-sm truncate">
+                            <div className="font-medium text-sm truncate flex items-center justify-between gap-2">
                               {definition.title}
+
+                              {definition.product_type && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {t(definition.product_type)}
+                                </Badge>
+                              )}
                             </div>
                             {definition.description && (
                               <div className="text-xs text-gray-500 truncate mt-0.5">

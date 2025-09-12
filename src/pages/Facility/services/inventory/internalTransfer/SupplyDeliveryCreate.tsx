@@ -10,7 +10,6 @@ import { z } from "zod";
 
 import { cn } from "@/lib/utils";
 
-import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -32,6 +31,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 
 import Page from "@/components/Common/Page";
 
@@ -39,9 +39,10 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import Autocomplete from "@/components/ui/autocomplete";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
-import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
+import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import {
   SupplyDeliveryCondition,
   SupplyDeliveryStatus,
@@ -54,7 +55,11 @@ import locationApi from "@/types/location/locationApi";
 const supplyDeliveryItemSchema = z.object({
   supplied_inventory_item: z.string().min(1, "Inventory item is required"),
   supplied_item_quantity: z.number().min(1, "Quantity must be at least 1"),
-  product_knowledge: z.string().min(1, "Product knowledge is required"),
+  product_knowledge: z
+    .custom<ProductKnowledgeBase>()
+    .refine((data) => data?.slug, {
+      message: "Item is required",
+    }),
 });
 
 const createFormSchema = z.object({
@@ -94,27 +99,10 @@ export default function SupplyDeliveryCreate({
   const returnPath = `/facility/${facilityId}/locations/${locationId}/internal_transfers/to_dispatch`;
 
   const queryClient = useQueryClient();
-  const [searchProductKnowledge, setSearchProductKnowledge] = useState("");
   const [searchInventoryItem, setSearchInventoryItem] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
 
-  const { data: productKnowledge, isLoading: isLoadingProductKnowledge } =
-    useQuery({
-      queryKey: ["productKnowledge", facilityId, searchProductKnowledge],
-      queryFn: query.debounced(productKnowledgeApi.listProductKnowledge, {
-        queryParams: {
-          facility: facilityId,
-          name: searchProductKnowledge,
-          status: "active",
-        },
-      }),
-    });
-
-  const productKnowledgeOptions =
-    productKnowledge?.results.map((product) => ({
-      label: product.name,
-      value: product.id,
-    })) || [];
+  // Removed in favor of ProductKnowledgeSelect
 
   const { data: inventoryItems, isLoading: isLoadingInventoryItems } = useQuery(
     {
@@ -310,23 +298,19 @@ export default function SupplyDeliveryCreate({
                               render={({ field }) => (
                                 <FormItem>
                                   <FormControl>
-                                    <Autocomplete
-                                      options={productKnowledgeOptions}
-                                      value={field.value || ""}
-                                      onChange={(value) => {
-                                        field.onChange(value);
+                                    <ProductKnowledgeSelect
+                                      value={field.value}
+                                      onChange={(product) => {
+                                        field.onChange(product);
                                         // Reset inventory item when product changes
                                         form.setValue(
                                           `items.${index}.supplied_inventory_item`,
                                           "",
                                         );
-                                        setSearchInventoryItem(value);
+                                        setSearchInventoryItem(product.id);
                                       }}
-                                      isLoading={isLoadingProductKnowledge}
-                                      onSearch={setSearchProductKnowledge}
                                       placeholder={t("select_product")}
-                                      inputPlaceholder={t("search_product")}
-                                      noOptionsMessage={t("no_products_found")}
+                                      className="w-full"
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -409,7 +393,7 @@ export default function SupplyDeliveryCreate({
                   variant="outline"
                   onClick={() =>
                     append({
-                      product_knowledge: "",
+                      product_knowledge: {} as ProductKnowledgeBase,
                       supplied_inventory_item: "",
                       supplied_item_quantity: 1,
                     })

@@ -6,7 +6,6 @@ import {
   Eye,
   Info,
   MoreVertical,
-  PlusIcon,
   Shuffle,
 } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
@@ -22,14 +21,6 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -78,6 +69,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 
 import ComboboxQuantityInput from "@/components/Common/ComboboxQuantityInput";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
@@ -137,7 +129,6 @@ import patientApi from "@/types/emr/patient/patientApi";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
-import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 
 interface Props {
   patientId: string;
@@ -708,8 +699,6 @@ export default function MedicationBillForm({ patientId }: Props) {
   const [extractedChargeItems, setExtractedChargeItems] = useState<
     ChargeItemRead[]
   >([]);
-  const [search, setSearch] = useState("");
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<
     ProductKnowledgeBase | undefined
   >();
@@ -853,19 +842,6 @@ export default function MedicationBillForm({ patientId }: Props) {
 
   // Group medications by time periods
   const groupedMedications = groupItemsByTime(medications);
-
-  const { data: productKnowledges, isFetching: isProductLoading } = useQuery({
-    queryKey: ["productKnowledge", "medication", search],
-    queryFn: query.debounced(productKnowledgeApi.listProductKnowledge, {
-      queryParams: {
-        facility: facilityId,
-        limit: 100,
-        offset: 0,
-        name: search,
-        status: "active",
-      },
-    }),
-  });
 
   useEffect(() => {
     form.reset({ items: [] }); // Reset form with empty items array
@@ -2233,74 +2209,15 @@ export default function MedicationBillForm({ patientId }: Props) {
                   })()}
                   <TableRow className="bg-white rounded-lg shadow-sm">
                     <TableCell colSpan={12} className="p-0 rounded-lg">
-                      {isSearchOpen ? (
-                        <Command className="w-full rounded-none border-none">
-                          <CommandInput
-                            placeholder={t("search_products")}
-                            onValueChange={setSearch}
-                            value={search}
-                            className="h-12 border-none ring-0"
-                            onKeyDown={(e) => {
-                              if (e.key === "Escape") {
-                                setIsSearchOpen(false);
-                                setSearch("");
-                              }
-                            }}
-                          />
-                          <CommandList className="max-h-[300px] overflow-auto">
-                            <CommandEmpty>
-                              {search.length < 3 ? (
-                                <p className="p-4 text-sm text-gray-500">
-                                  {t("min_char_length_error", {
-                                    min_length: 3,
-                                  })}
-                                </p>
-                              ) : isProductLoading ? (
-                                <p className="p-4 text-sm text-gray-500">
-                                  {t("searching")}
-                                </p>
-                              ) : (
-                                <p className="p-4 text-sm text-gray-500">
-                                  {t("no_results_found")}
-                                </p>
-                              )}
-                            </CommandEmpty>
-                            <CommandGroup>
-                              {productKnowledges?.results?.map(
-                                (productKnowledge) => (
-                                  <CommandItem
-                                    key={productKnowledge.id}
-                                    value={productKnowledge.name}
-                                    onSelect={() => {
-                                      setSelectedProduct(productKnowledge);
-                                      setIsAddMedicationSheetOpen(true);
-                                      setIsSearchOpen(false);
-                                      setSearch("");
-                                    }}
-                                    className="cursor-pointer"
-                                  >
-                                    <div className="flex flex-col">
-                                      <span className="font-medium">
-                                        {productKnowledge.name}
-                                      </span>
-                                    </div>
-                                  </CommandItem>
-                                ),
-                              )}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full h-12 flex items-center justify-center gap-2 hover:bg-gray-100 rounded-lg"
-                          onClick={() => setIsSearchOpen(true)}
-                        >
-                          <PlusIcon className="h-6 w-6" />
-                          <span>{t("add_medication")}</span>
-                        </Button>
-                      )}
+                      <ProductKnowledgeSelect
+                        value={undefined}
+                        onChange={(product) => {
+                          setSelectedProduct(product);
+                          setIsAddMedicationSheetOpen(true);
+                        }}
+                        placeholder={t("add_medication")}
+                        className="w-full"
+                      />
                     </TableCell>
                   </TableRow>
                 </TableBody>
