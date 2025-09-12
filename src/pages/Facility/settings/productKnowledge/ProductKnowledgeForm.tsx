@@ -390,7 +390,7 @@ function ProductKnowledgeFormContent({
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger ref={field.ref}>
                               <SelectValue
                                 placeholder={t("select_product_type")}
                               />
@@ -472,7 +472,7 @@ function ProductKnowledgeFormContent({
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger ref={field.ref}>
                               <SelectValue placeholder={t("status")} />
                             </SelectTrigger>
                           </FormControl>
@@ -557,7 +557,7 @@ function ProductKnowledgeFormContent({
                                     defaultValue={field.value}
                                   >
                                     <FormControl>
-                                      <SelectTrigger>
+                                      <SelectTrigger ref={field.ref}>
                                         <SelectValue
                                           placeholder={t("select_name_type")}
                                         />
@@ -731,7 +731,7 @@ function ProductKnowledgeFormContent({
                                     }}
                                   >
                                     <FormControl>
-                                      <SelectTrigger>
+                                      <SelectTrigger ref={field.ref}>
                                         <SelectValue
                                           placeholder={t(
                                             "duration_unit_placeholder",

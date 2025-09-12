@@ -76,9 +76,11 @@ const AlignmentInput = ({
         <FormItem>
           <FormLabel>{t("alignment")}</FormLabel>
           <Select value={field.value} onValueChange={field.onChange}>
-            <SelectTrigger>
-              <SelectValue placeholder={t("alignment")} />
-            </SelectTrigger>
+            <FormControl>
+              <SelectTrigger ref={field.ref}>
+                <SelectValue placeholder={t("alignment")} />
+              </SelectTrigger>
+            </FormControl>
             <SelectContent>
               {HEADER_ALIGNMENT_OPTIONS.map((option) => (
                 <SelectItem key={option.id} value={option.id}>
