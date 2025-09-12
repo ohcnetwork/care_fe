@@ -111,6 +111,7 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { NonEmptyArray } from "@/Utils/types";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { MultiPractitionerSelector } from "./components/MultiPractitionerSelect";
 
@@ -351,7 +352,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
   const practitionerIds = qParams.practitioners?.split(",") ?? [authUser.id];
   const practitioners = schedulableUserResources?.filter((r) =>
     practitionerIds.includes(r.id),
-  );
+  ) as NonEmptyArray<UserReadMinimal>;
 
   useEffect(() => {
     // Set default date range if no dates are present
@@ -377,7 +378,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
       updateQuery({ ...qParams });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schedulableUsersQuery.isLoading]);
+  }, [qParams.date_from, qParams.date_to]);
 
   // Enabled only if filtered by a practitioner and a single day
   const slotsFilterEnabled =
@@ -450,16 +451,16 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
               </Label>
               <MultiPractitionerSelector
                 facilityId={facilityId}
-                selected={practitioners ?? null}
-                onSelect={(users: UserReadMinimal[] | null) => {
+                selected={practitioners}
+                onSelect={(users) => {
                   if (users) {
                     updateQuery({
-                      practitioners: users.map((user) => user.id).join(","),
+                      practitioners: users.map((user) => user.id),
                       slot: null,
                     });
                   } else {
                     updateQuery({
-                      practitioners: null,
+                      practitioners: [],
                       slot: null,
                     });
                   }
@@ -715,7 +716,11 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 slot={slot?.id}
                 resourceType={resourceType}
                 resourceIds={
-                  resourceId ?? (qParams.practitioners || authUser.id)
+                  resourceId
+                    ? [resourceId]
+                    : qParams.practitioners
+                      ? qParams.practitioners.split(",")
+                      : [authUser.id]
                 }
                 date_from={qParams.date_from}
                 date_to={qParams.date_to}
@@ -741,6 +746,14 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
           Pagination={Pagination}
           tags={selectedTags.map((tag) => tag.id)}
           patient={qParams.patient}
+          resourceType={resourceType}
+          resourceIds={
+            resourceId
+              ? [resourceId]
+              : qParams.practitioners
+                ? qParams.practitioners.split(",")
+                : [authUser.id]
+          }
         />
       )}
     </Page>
@@ -756,7 +769,7 @@ function AppointmentColumn(props: {
   canViewAppointments: boolean;
   patient?: string;
   resourceType: SchedulableResourceType;
-  resourceIds: string | null;
+  resourceIds: NonEmptyArray<string>;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -777,7 +790,7 @@ function AppointmentColumn(props: {
       selectedStatuses.length === 0
         ? props.statusGroup.statuses
         : selectedStatuses,
-      props.resourceIds,
+      props.resourceIds.join(","),
       props.slot,
       props.date_from,
       props.date_to,
@@ -797,7 +810,7 @@ function AppointmentColumn(props: {
           limit: 10,
           slot: props.slot,
           resource_type: props.resourceType,
-          resource_ids: props.resourceIds ?? undefined,
+          resource_ids: props.resourceIds.join(","),
           date_after: props.date_from,
           date_before: props.date_to,
           ordering: "token_slot__start_datetime",
@@ -1037,12 +1050,14 @@ function AppointmentRow(props: {
   updateQuery: (filter: FilterState) => void;
   resultsPerPage: number;
   slot: string | null;
-  status: string | null;
+  status: AppointmentStatus;
   date_from: string | null;
   date_to: string | null;
   canViewAppointments: boolean;
   tags?: string[];
   patient?: string;
+  resourceType: SchedulableResourceType;
+  resourceIds: NonEmptyArray<string>;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -1073,9 +1088,15 @@ function AppointmentRow(props: {
         offset: ((props.page ?? 1) - 1) * props.resultsPerPage,
         ordering: "token_slot__start_datetime",
         patient: props.patient,
+        resource_type: props.resourceType,
+        resource_ids: props.resourceIds.join(","),
       },
     }),
-    enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
+    enabled:
+      !!props.resourceIds &&
+      !!props.date_from &&
+      !!props.date_to &&
+      props.canViewAppointments,
   });
 
   const appointments = data?.results ?? [];

@@ -28,14 +28,15 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 import { UserReadMinimal } from "@/types/user/user";
+import query from "@/Utils/request/query";
+import { NonEmptyArray } from "@/Utils/types";
+import { formatName } from "@/Utils/utils";
 
 interface MultiPractitionerSelectorProps {
-  selected: UserReadMinimal[] | null;
-  onSelect: (users: UserReadMinimal[] | null) => void;
+  selected: NonEmptyArray<UserReadMinimal>;
+  onSelect: (users: NonEmptyArray<UserReadMinimal>) => void;
   facilityId: string;
 }
 
@@ -66,6 +67,8 @@ export const MultiPractitionerSelector = ({
   const getItemValue = (user: UserReadMinimal) => {
     return `${formatName(user)} ${user.username}`;
   };
+
+  const hasMultiple = selected && selected.length > 1;
 
   return (
     <div className="flex items-center gap-2">
@@ -133,8 +136,12 @@ export const MultiPractitionerSelector = ({
                     key={user.id}
                     value={getItemValue(user)}
                     onSelect={() => {
-                      if (selected.length > 1) {
-                        onSelect(selected.filter((s) => s.id !== user.id));
+                      if (hasMultiple) {
+                        onSelect(
+                          selected.filter(
+                            (s) => s.id !== user.id,
+                          ) as NonEmptyArray<UserReadMinimal>,
+                        );
                       }
                     }}
                     className="cursor-pointer w-full"
@@ -156,7 +163,7 @@ export const MultiPractitionerSelector = ({
                           {user.username}
                         </span>
                       </div>
-                      {selected.length > 1 && <XIcon className="ml-auto" />}
+                      {hasMultiple && <XIcon className="ml-auto" />}
                     </div>
                   </CommandItem>
                 ))}
