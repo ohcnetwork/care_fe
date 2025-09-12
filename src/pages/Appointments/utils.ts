@@ -14,6 +14,7 @@ import { dateQueryString, getMonthStartAndEnd } from "@/Utils/utils";
 import {
   Appointment,
   AvailabilityHeatmapResponse,
+  SchedulableResourceType,
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -77,7 +78,8 @@ export const useAvailabilityHeatmap = ({
     body: {
       // voluntarily coalesce to empty string since we know query would be
       // enabled only if userId is present
-      user: userId ?? "",
+      resource_type: SchedulableResourceType.Practitioner,
+      resource_id: userId ?? "",
       from_date: fromDate,
       to_date: toDate,
     },

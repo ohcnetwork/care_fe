@@ -284,7 +284,7 @@ function HealthcareServiceFormContent({
                           onValueChange={field.onChange}
                           value={field.value}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger ref={field.ref}>
                             <SelectValue
                               placeholder={t("select_internal_type")}
                             />
@@ -346,7 +346,7 @@ function HealthcareServiceFormContent({
                             );
                             return {
                               value: locationId,
-                              label: location?.name || locationId,
+                              label: location?.name || "locationId",
                               details: [],
                             };
                           })}

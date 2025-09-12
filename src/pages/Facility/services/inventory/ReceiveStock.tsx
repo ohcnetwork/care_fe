@@ -467,7 +467,7 @@ function AddItemForm({
                 setOpen(false);
               }}
               enabled={open}
-              productKnowledgeId={currentEntry._product_knowledge?.id || ""}
+              productKnowledgeSlug={currentEntry._product_knowledge?.slug || ""}
             />
           </div>
         </ScrollArea>

@@ -10,7 +10,7 @@ import { z } from "zod";
 
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -21,11 +21,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -151,7 +146,7 @@ export function ProductFormContent({
   facilityId,
   productId,
   existingData,
-  productKnowledgeId,
+  slug,
   containerClassName,
   onSuccess = () => navigate(`/facility/${facilityId}/settings/product`),
   onCancel = () => navigate(`/facility/${facilityId}/settings/product`),
@@ -162,7 +157,7 @@ export function ProductFormContent({
   facilityId: string;
   productId?: string;
   existingData?: ProductRead;
-  productKnowledgeId?: string;
+  slug?: string;
   containerClassName?: string;
   onSuccess?: (product: ProductRead) => void;
   onCancel?: () => void;
@@ -190,13 +185,16 @@ export function ProductFormContent({
   });
 
   const { data: existingProductKnowledge } = useQuery({
-    queryKey: ["productKnowledge", productKnowledgeId],
+    queryKey: ["productKnowledge", slug],
     queryFn: query(productKnowledgeApi.retrieveProductKnowledge, {
       pathParams: {
-        productKnowledgeId: productKnowledgeId!,
+        slug: slug!,
+      },
+      queryParams: {
+        facility: facilityId,
       },
     }),
-    enabled: !!productKnowledgeId && enabled,
+    enabled: !!slug && enabled,
   });
 
   // Add selected product knowledge to the product knowledge list if it's not already there
@@ -236,8 +234,8 @@ export function ProductFormContent({
       isEditMode && existingData
         ? {
             status: existingData.status,
-            product_knowledge: existingData.product_knowledge.id,
-            charge_item_definition: existingData.charge_item_definition?.id,
+            product_knowledge: existingData.product_knowledge.slug,
+            charge_item_definition: existingData.charge_item_definition?.slug,
             batch: existingData.batch || undefined,
             expiration_date: existingData.expiration_date
               ? new Date(existingData.expiration_date)
@@ -245,7 +243,7 @@ export function ProductFormContent({
           }
         : {
             status: ProductStatusOptions.active,
-            product_knowledge: productKnowledgeId,
+            product_knowledge: slug,
           },
   });
 
@@ -334,7 +332,7 @@ export function ProductFormContent({
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger ref={field.ref}>
                         <SelectValue placeholder={t("select_status")} />
                       </SelectTrigger>
                     </FormControl>
@@ -405,27 +403,11 @@ export function ProductFormContent({
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel aria-required>{t("expiration_date")}</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button variant={"outline"}>
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>{t("pick_a_date")}</span>
-                          )}
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value || undefined}
-                        onSelect={field.onChange}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <DatePicker
+                    date={field.value}
+                    onChange={field.onChange}
+                    className="w-full"
+                  />
                   <FormDescription>
                     {t("expiration_date_description")}
                   </FormDescription>
@@ -458,13 +440,13 @@ export function ProductFormContent({
                         options={mergeAutocompleteOptions(
                           chargeItemDefinitionOptions.map((cid) => ({
                             label: cid.title,
-                            value: cid.id,
+                            value: cid.slug,
                           })),
                           field.value
                             ? {
                                 label:
                                   chargeItemDefinitionOptions.find(
-                                    (cid) => cid.id === field.value,
+                                    (cid) => cid.slug === field.value,
                                   )?.title || "",
                                 value: field.value,
                               }
@@ -510,7 +492,7 @@ export function ProductFormContent({
                               setCreateCidOpen(false);
                               form.setValue(
                                 "charge_item_definition",
-                                chargeItemDefinition.id,
+                                chargeItemDefinition.slug,
                               );
                             }}
                             onCancel={() => setCreateCidOpen(false)}

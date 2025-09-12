@@ -79,7 +79,7 @@ interface DiagnosticReportFormProps {
   diagnosticReports: DiagnosticReportRead[];
   activityDefinition?: {
     diagnostic_report_codes?: Code[];
-    category?: string;
+    classification?: string;
     specimen_requirements?: SpecimenDefinitionRead[];
   };
   specimens: SpecimenRead[];
@@ -129,7 +129,7 @@ export function DiagnosticReportForm({
   const [conclusion, setConclusion] = useState<string>("");
   const queryClient = useQueryClient();
 
-  const isImagingReport = activityDefinition?.category === "imaging";
+  const isImagingReport = activityDefinition?.classification === "imaging";
 
   // Get the latest report if any exists
   const latestReport =
@@ -557,106 +557,6 @@ export function DiagnosticReportForm({
     }
   }
 
-  function formatObservationData(
-    obsData: ObservationValue,
-    definitionId: string,
-  ) {
-    const observationDefinition = observationDefinitions.find(
-      (def) => def.id === definitionId,
-    );
-
-    // If it's a component-based observation (like blood pressure), we should check if components have values
-    const hasComponents =
-      observationDefinition?.component &&
-      observationDefinition.component.length > 0;
-    const hasComponentValues =
-      hasComponents &&
-      Object.values(obsData.components).some(
-        (comp) => comp.value.trim() !== "",
-      );
-
-    // For observations marked for deletion, always include them if they have an ID
-    const isMarkedForDeletion =
-      obsData.status === ObservationStatus.ENTERED_IN_ERROR && obsData.id;
-
-    // For regular observations, skip if no value is entered
-    // For component-based observations, check component values
-    // But always include observations marked for deletion
-    if (!isMarkedForDeletion) {
-      if (!hasComponents && !obsData.value.trim()) {
-        return null;
-      }
-
-      if (hasComponents && !hasComponentValues) {
-        return null;
-      }
-    }
-
-    const value: QuestionnaireSubmitResultValue = {
-      value: obsData.value,
-    };
-
-    if (obsData.unit && observationDefinition?.permitted_unit) {
-      value.unit = {
-        code: obsData.unit,
-        system: observationDefinition.permitted_unit.system,
-        display: observationDefinition.permitted_unit.display || obsData.unit,
-      };
-    }
-
-    // Create observation components if they exist and have values
-    const components: ObservationComponent[] = [];
-
-    if (hasComponents && observationDefinition) {
-      observationDefinition.component.forEach(
-        (componentDef: ObservationDefinitionComponentSpec) => {
-          const componentCode = componentDef.code.code;
-          const componentData = obsData.components[componentCode];
-
-          if (componentData && componentData.value.trim()) {
-            const componentValue: QuestionnaireSubmitResultValue = {
-              value: componentData.value,
-            };
-
-            if (componentData.unit && componentDef.permitted_unit) {
-              componentValue.unit = {
-                code: componentData.unit,
-                system: componentDef.permitted_unit.system,
-                display:
-                  componentDef.permitted_unit.display || componentData.unit,
-              };
-            }
-
-            components.push({
-              code: componentDef.code,
-              value: componentValue,
-              interpretation: componentData.isNormal ? "normal" : "abnormal",
-            });
-          }
-        },
-      );
-    }
-
-    return {
-      ...(obsData.id
-        ? { observation_id: obsData.id }
-        : { observation_definition: definitionId }),
-      observation: {
-        status:
-          obsData.status === ObservationStatus.ENTERED_IN_ERROR
-            ? ObservationStatus.ENTERED_IN_ERROR
-            : ObservationStatus.FINAL,
-        subject_type: "patient",
-        value_type: observationDefinition?.permitted_data_type || "float",
-        effective_datetime: new Date().toISOString(),
-        value,
-        encounter: null,
-        interpretation: obsData.isNormal ? "normal" : "abnormal",
-        component: components.length > 0 ? components : undefined,
-      },
-    };
-  }
-
   function handleSubmit() {
     if (!hasReport) {
       // First create a report if none exists
@@ -696,7 +596,107 @@ export function DiagnosticReportForm({
         Object.entries(observations)
           .flatMap(([definitionId, obsList]) =>
             obsList.map((obsData) => {
-              return formatObservationData(obsData, definitionId);
+              const observationDefinition = observationDefinitions.find(
+                (def) => def.id === definitionId,
+              );
+
+              // If it's a component-based observation (like blood pressure), we should check if components have values
+              const hasComponents =
+                observationDefinition?.component &&
+                observationDefinition.component.length > 0;
+              const hasComponentValues =
+                hasComponents &&
+                Object.values(obsData.components).some(
+                  (comp) => comp.value.trim() !== "",
+                );
+
+              // For observations marked for deletion, always include them if they have an ID
+              const isMarkedForDeletion =
+                obsData.status === ObservationStatus.ENTERED_IN_ERROR &&
+                obsData.id;
+
+              // For regular observations, skip if no value is entered
+              // For component-based observations, check component values
+              // But always include observations marked for deletion
+              if (!isMarkedForDeletion) {
+                if (!hasComponents && !obsData.value.trim()) {
+                  return null;
+                }
+
+                if (hasComponents && !hasComponentValues) {
+                  return null;
+                }
+              }
+
+              const value: QuestionnaireSubmitResultValue = {
+                value: obsData.value,
+              };
+
+              if (obsData.unit && observationDefinition?.permitted_unit) {
+                value.unit = {
+                  code: obsData.unit,
+                  system: observationDefinition.permitted_unit.system,
+                  display:
+                    observationDefinition.permitted_unit.display ||
+                    obsData.unit,
+                };
+              }
+
+              // Create observation components if they exist and have values
+              const components: ObservationComponent[] = [];
+
+              if (hasComponents && observationDefinition) {
+                observationDefinition.component.forEach(
+                  (componentDef: ObservationDefinitionComponentSpec) => {
+                    const componentCode = componentDef.code.code;
+                    const componentData = obsData.components[componentCode];
+
+                    if (componentData && componentData.value.trim()) {
+                      const componentValue: QuestionnaireSubmitResultValue = {
+                        value: componentData.value,
+                      };
+
+                      if (componentData.unit && componentDef.permitted_unit) {
+                        componentValue.unit = {
+                          code: componentData.unit,
+                          system: componentDef.permitted_unit.system,
+                          display:
+                            componentDef.permitted_unit.display ||
+                            componentData.unit,
+                        };
+                      }
+
+                      components.push({
+                        code: componentDef.code,
+                        value: componentValue,
+                        interpretation: componentData.isNormal
+                          ? "normal"
+                          : "abnormal",
+                      });
+                    }
+                  },
+                );
+              }
+
+              return {
+                ...(obsData.id
+                  ? { observation_id: obsData.id }
+                  : { observation_definition: observationDefinition?.slug }),
+                observation: {
+                  status:
+                    obsData.status === ObservationStatus.ENTERED_IN_ERROR
+                      ? ObservationStatus.ENTERED_IN_ERROR
+                      : ObservationStatus.FINAL,
+                  subject_type: "patient",
+                  value_type:
+                    observationDefinition?.permitted_data_type || "float",
+                  effective_datetime: new Date().toISOString(),
+                  value,
+                  encounter: null,
+                  interpretation: obsData.isNormal ? "normal" : "abnormal",
+                  component: components.length > 0 ? components : undefined,
+                },
+              };
             }),
           )
           .filter(Boolean) as ObservationFromDefinitionCreate[];
@@ -761,126 +761,6 @@ export function DiagnosticReportForm({
               ],
       };
     });
-  }
-
-  function renderObservationInput(
-    definition: ObservationDefinitionReadSpec,
-    observationData: ObservationValue,
-    index: number,
-    numObservations: number,
-  ) {
-    const hasComponents =
-      definition.component && definition.component.length > 0;
-    const isErrored =
-      observationData.status === ObservationStatus.ENTERED_IN_ERROR;
-    return (
-      <div
-        key={index}
-        className={cn(
-          "space-y-1 bg-gray-200/50 p-4 rounded-lg",
-          isErrored && "bg-gray-100",
-        )}
-      >
-        <div className="flex justify-between items-center">
-          <Label className="text-sm font-semibold text-gray-950">
-            {t("observation") + " " + (index + 1)}
-          </Label>
-          {isErrored ? (
-            <span className="text-sm text-red-500">
-              {t("marked_for_deletion")}
-            </span>
-          ) : (
-            numObservations > 1 && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-2"
-                onClick={() => handleDeleteObservation(definition.id, index)}
-                disabled={isErrored}
-              >
-                <Trash2 className="size-4" />
-              </Button>
-            )
-          )}
-        </div>
-
-        {/* For blood pressure and similar observations with components, we may or may not need to show the main value field */}
-        {(!hasComponents || definition.permitted_data_type !== "quantity") && (
-          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 items-stretch sm:items-center">
-            {definition.permitted_unit && (
-              <div className="w-full sm:w-32">
-                <Label className="text-sm font-medium mb-1 block text-gray-700">
-                  {t("unit")}
-                </Label>
-                <Select
-                  value={observationData.unit}
-                  onValueChange={(unit) =>
-                    handleUnitChange(definition.id, index, unit)
-                  }
-                  disabled={isErrored || disableEdit}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={t("unit")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={definition.permitted_unit.code}>
-                      {definition.permitted_unit.display ||
-                        definition.permitted_unit.code}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            <div className="flex-1">
-              <Label className="text-sm font-medium mb-1 block text-gray-700">
-                {t("result")}
-              </Label>
-              <Input
-                value={observationData.value}
-                onChange={(e) =>
-                  handleValueChange(definition.id, index, e.target.value)
-                }
-                placeholder={t("result_value")}
-                type={
-                  definition.permitted_data_type === "decimal" ||
-                  definition.permitted_data_type === "integer"
-                    ? "number"
-                    : "text"
-                }
-                disabled={isErrored || disableEdit}
-              />
-            </div>
-
-            <div className="flex items-center space-x-2 sm:pt-6">
-              <Checkbox
-                id={`abnormal-checkbox-${definition.id}-${index}`}
-                checked={!observationData.isNormal}
-                onCheckedChange={(checked) =>
-                  handleNormalChange(
-                    definition.id,
-                    index,
-                    !checked, // isNormal is the opposite of checked (isAbnormal)
-                  )
-                }
-                disabled={isErrored || disableEdit}
-              />
-              <Label
-                htmlFor={`abnormal-checkbox-${definition.id}-${index}`}
-                className="text-sm font-medium text-gray-700 cursor-pointer"
-              >
-                {t("abnormal")}
-              </Label>
-            </div>
-          </div>
-        )}
-
-        {/* Render component inputs for multi-component observations */}
-        {hasComponents &&
-          renderComponentInputs(definition, observationData, index)}
-      </div>
-    );
   }
 
   // Helper to render component inputs for multi-component observations like blood pressure
@@ -1127,14 +1007,150 @@ export function DiagnosticReportForm({
                               </Label>
                             </div>
 
-                            {observationsList.map((observationData, index) =>
-                              renderObservationInput(
-                                definition,
-                                observationData,
-                                index,
-                                observationsList.length,
-                              ),
-                            )}
+                            {observationsList.map((observationData, index) => {
+                              const hasComponents =
+                                definition.component &&
+                                definition.component.length > 0;
+                              const isErrored =
+                                observationData.status ===
+                                ObservationStatus.ENTERED_IN_ERROR;
+                              return (
+                                <div
+                                  key={index}
+                                  className={cn(
+                                    "space-y-1 bg-gray-200/50 p-4 rounded-lg",
+                                    isErrored && "bg-gray-100",
+                                  )}
+                                >
+                                  <div className="flex justify-between items-center">
+                                    <Label className="text-sm font-semibold text-gray-950">
+                                      {t("observation") + " " + (index + 1)}
+                                    </Label>
+                                    {isErrored ? (
+                                      <span className="text-sm text-red-500">
+                                        {t("marked_for_deletion")}
+                                      </span>
+                                    ) : (
+                                      observationsList.length > 1 &&
+                                      !disableEdit && (
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
+                                          className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-2"
+                                          onClick={() =>
+                                            handleDeleteObservation(
+                                              definition.id,
+                                              index,
+                                            )
+                                          }
+                                          disabled={isErrored}
+                                        >
+                                          <Trash2 className="size-4" />
+                                        </Button>
+                                      )
+                                    )}
+                                  </div>
+
+                                  {/* For blood pressure and similar observations with components, we may or may not need to show the main value field */}
+                                  {!hasComponents && (
+                                    <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 items-stretch sm:items-center">
+                                      {definition.permitted_unit && (
+                                        <div className="w-full sm:w-32">
+                                          <Label className="text-sm font-medium mb-1 block text-gray-700">
+                                            {t("unit")}
+                                          </Label>
+                                          <Select
+                                            value={observationData.unit}
+                                            onValueChange={(unit) =>
+                                              handleUnitChange(
+                                                definition.id,
+                                                index,
+                                                unit,
+                                              )
+                                            }
+                                            disabled={isErrored || disableEdit}
+                                          >
+                                            <SelectTrigger className="w-full">
+                                              <SelectValue
+                                                placeholder={t("unit")}
+                                              />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              <SelectItem
+                                                value={
+                                                  definition.permitted_unit.code
+                                                }
+                                              >
+                                                {definition.permitted_unit
+                                                  .display ||
+                                                  definition.permitted_unit
+                                                    .code}
+                                              </SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
+                                      )}
+
+                                      <div className="flex-1">
+                                        <Label className="text-sm font-medium mb-1 block text-gray-700">
+                                          {t("result")}
+                                        </Label>
+                                        <Input
+                                          value={observationData.value}
+                                          onChange={(e) =>
+                                            handleValueChange(
+                                              definition.id,
+                                              index,
+                                              e.target.value,
+                                            )
+                                          }
+                                          placeholder={t("result_value")}
+                                          type={
+                                            definition.permitted_data_type ===
+                                              "decimal" ||
+                                            definition.permitted_data_type ===
+                                              "integer"
+                                              ? "number"
+                                              : "text"
+                                          }
+                                          disabled={isErrored || disableEdit}
+                                        />
+                                      </div>
+
+                                      <div className="flex items-center space-x-2 sm:pt-6">
+                                        <Checkbox
+                                          id={`abnormal-checkbox-${definition.id}-${index}`}
+                                          checked={!observationData.isNormal}
+                                          onCheckedChange={(checked) =>
+                                            handleNormalChange(
+                                              definition.id,
+                                              index,
+                                              !checked, // isNormal is the opposite of checked (isAbnormal)
+                                            )
+                                          }
+                                          disabled={isErrored || disableEdit}
+                                        />
+                                        <Label
+                                          htmlFor={`abnormal-checkbox-${definition.id}-${index}`}
+                                          className="text-sm font-medium text-gray-700 cursor-pointer"
+                                        >
+                                          {t("abnormal")}
+                                        </Label>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Render component inputs for multi-component observations */}
+                                  {hasComponents &&
+                                    renderComponentInputs(
+                                      definition,
+                                      observationData,
+                                      index,
+                                    )}
+                                </div>
+                              );
+                            })}
 
                             {/* Add button for multiple observations */}
                             <Button
@@ -1144,7 +1160,6 @@ export function DiagnosticReportForm({
                               onClick={() => {
                                 setObservations((prev) => {
                                   const currentList = prev[definition.id] || [];
-
                                   return {
                                     ...prev,
                                     [definition.id]: [

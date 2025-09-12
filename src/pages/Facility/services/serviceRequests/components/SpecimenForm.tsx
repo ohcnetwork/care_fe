@@ -72,7 +72,7 @@ export function SpecimenForm({
       >;
     }
   >({
-    specimen_definition: specimenDefinition.id,
+    specimen_definition: specimenDefinition.slug,
     specimen: {
       status: SpecimenStatus.available,
       specimen_type: specimenDefinition.type_collected,

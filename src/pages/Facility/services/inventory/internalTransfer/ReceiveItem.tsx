@@ -352,19 +352,22 @@ export default function ReceiveItem({
       </Label>
       <div className="text-lg font-bold mt-1">
         {delivery.supplied_item_quantity}{" "}
-        {delivery.supplied_item?.product_knowledge.definitional?.dosage_form
-          .display || t("units")}
+        {delivery.supplied_item?.product_knowledge.base_unit.display ||
+          delivery.supplied_inventory_item?.product.product_knowledge.base_unit
+            .display ||
+          t("units")}
       </div>
 
-      {delivery.supplied_item_quantity !==
-        delivery.supply_request?.quantity && (
-        <div className="flex items-center gap-2 text-yellow-900 text-sm mt-2 bg-yellow-50 rounded-md p-1">
-          <AlertTriangleIcon className="w-4 h-4" />
-          <span>
-            {t("received_quantity_is_different_from_requested_quantity")}
-          </span>
-        </div>
-      )}
+      {delivery.supply_request &&
+        delivery.supplied_item_quantity !==
+          delivery.supply_request?.quantity && (
+          <div className="flex items-center gap-2 text-yellow-900 text-sm mt-2 bg-yellow-50 rounded-md p-1">
+            <AlertTriangleIcon className="w-4 h-4" />
+            <span>
+              {t("received_quantity_is_different_from_requested_quantity")}
+            </span>
+          </div>
+        )}
     </div>
   );
 
@@ -462,8 +465,11 @@ export default function ReceiveItem({
                 </Label>
                 <div className="text-normal font-semibold">
                   {delivery.supplied_item_quantity}{" "}
-                  {delivery.supplied_item?.product_knowledge.definitional
-                    ?.dosage_form.display || t("units")}
+                  {delivery.supplied_item?.product_knowledge.base_unit
+                    .display ||
+                    delivery.supplied_inventory_item?.product.product_knowledge
+                      .base_unit.display ||
+                    t("units")}
                 </div>
               </div>
 
@@ -810,8 +816,11 @@ export default function ReceiveItem({
                 </Label>
                 <div className="font-semibold text-gray-950 text-normal">
                   {delivery.supply_request.quantity}{" "}
-                  {delivery.supplied_item?.product_knowledge.definitional
-                    ?.dosage_form.display || t("units")}
+                  {delivery.supplied_item?.product_knowledge.base_unit
+                    .display ||
+                    delivery.supplied_inventory_item?.product.product_knowledge
+                      .base_unit.display ||
+                    t("units")}
                 </div>
               </div>
               <div>

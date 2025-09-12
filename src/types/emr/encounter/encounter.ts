@@ -1,9 +1,9 @@
 import {
   Ambulance,
+  BadgeCheck,
   Ban,
   BedDouble,
   Calendar,
-  Check,
   CirclePause,
   CircleX,
   FileQuestion,
@@ -23,6 +23,7 @@ import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationAssociationStatus } from "@/types/location/association";
 import { LocationList } from "@/types/location/location";
+import { AppointmentRead } from "@/types/scheduling/schedule";
 import { UserReadMinimal } from "@/types/user/user";
 
 export const ENCOUNTER_ADMIT_SOURCE = [
@@ -147,7 +148,7 @@ export const ENCOUNTER_STATUS_ICONS = {
   planned: Calendar,
   in_progress: LoaderCircle,
   discharged: Home,
-  completed: Check,
+  completed: BadgeCheck,
   cancelled: CircleX,
   on_hold: CirclePause,
   discontinued: CircleX,
@@ -243,6 +244,7 @@ export interface EncounterRead
   permissions: string[];
   care_team: CareTeamResponse[];
   tags: TagConfig[];
+  appointment: AppointmentRead | null;
 }
 
 export interface EncounterCreate extends Omit<EncounterBase, "id"> {

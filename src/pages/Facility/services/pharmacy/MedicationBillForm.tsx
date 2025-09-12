@@ -6,7 +6,6 @@ import {
   Eye,
   Info,
   MoreVertical,
-  PlusIcon,
   Shuffle,
 } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
@@ -22,14 +21,6 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -78,6 +69,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 
 import ComboboxQuantityInput from "@/components/Common/ComboboxQuantityInput";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
@@ -93,9 +85,9 @@ import useFilters from "@/hooks/useFilters";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
-import { PatientHeader } from "@/pages/Facility/services/serviceRequests/components/PatientHeader";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import batchApi from "@/types/base/batch/batchApi";
 import { Code } from "@/types/base/code/code";
@@ -137,7 +129,6 @@ import patientApi from "@/types/emr/patient/patientApi";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
-import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 
 interface Props {
   patientId: string;
@@ -158,6 +149,15 @@ function convertDurationToDays(value: number, unit: string): number {
     default:
       return value;
   }
+}
+
+enum TimeGroup {
+  Today = "today",
+  Yesterday = "yesterday",
+  ThisWeek = "thisWeek",
+  ThisMonth = "thisMonth",
+  ThisYear = "thisYear",
+  Older = "older",
 }
 
 const formSchema = z.object({
@@ -227,7 +227,6 @@ const AddMedicationSheet = ({
       as_needed_for: undefined,
     });
   const [showDosageDialog, setShowDosageDialog] = useState(false);
-  const unitDisabled = !!selectedProduct?.definitional?.dosage_form;
 
   // Update local state when the sheet opens or when editing a different item
   useEffect(() => {
@@ -235,13 +234,13 @@ const AddMedicationSheet = ({
       setLocalDosageInstruction(existingDosageInstructions);
     } else if (open) {
       resetForm();
-      if (selectedProduct?.definitional?.dosage_form) {
+      if (selectedProduct?.base_unit) {
         handleUpdateDosageInstruction({
           dose_and_rate: {
             type: "ordered",
             dose_quantity: {
               value: 0,
-              unit: selectedProduct.definitional.dosage_form,
+              unit: selectedProduct.base_unit,
             },
           },
         });
@@ -390,7 +389,6 @@ const AddMedicationSheet = ({
                                         });
                                       }
                                     }}
-                                    unitDisabled={unitDisabled}
                                   />
                                 </div>
                                 <Button
@@ -426,7 +424,6 @@ const AddMedicationSheet = ({
                                   });
                                   setShowDosageDialog(false);
                                 }}
-                                unitDisabled={unitDisabled}
                               />
                             </PopoverContent>
                           </Popover>
@@ -702,8 +699,6 @@ export default function MedicationBillForm({ patientId }: Props) {
   const [extractedChargeItems, setExtractedChargeItems] = useState<
     ChargeItemRead[]
   >([]);
-  const [search, setSearch] = useState("");
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<
     ProductKnowledgeBase | undefined
   >();
@@ -828,6 +823,7 @@ export default function MedicationBillForm({ patientId }: Props) {
             limit: 100,
             product_knowledge: productKnowledgeId,
             net_content_gt: 0,
+            include_children: true,
           },
         })({ signal: new AbortController().signal });
 
@@ -847,30 +843,17 @@ export default function MedicationBillForm({ patientId }: Props) {
   // Group medications by time periods
   const groupedMedications = groupItemsByTime(medications);
 
-  const { data: productKnowledges, isFetching: isProductLoading } = useQuery({
-    queryKey: ["productKnowledge", "medication", search],
-    queryFn: query.debounced(productKnowledgeApi.listProductKnowledge, {
-      queryParams: {
-        facility: facilityId,
-        limit: 100,
-        offset: 0,
-        name: search,
-        status: "active",
-      },
-    }),
-  });
-
   useEffect(() => {
     form.reset({ items: [] }); // Reset form with empty items array
 
     // Process medications in order: today, yesterday, this week, this month, this year, older
     const orderedGroups = [
-      { key: "today", medications: groupedMedications.today },
-      { key: "yesterday", medications: groupedMedications.yesterday },
-      { key: "thisWeek", medications: groupedMedications.thisWeek },
-      { key: "thisMonth", medications: groupedMedications.thisMonth },
-      { key: "thisYear", medications: groupedMedications.thisYear },
-      { key: "older", medications: groupedMedications.older },
+      { key: TimeGroup.Today, medications: groupedMedications.today },
+      { key: TimeGroup.Yesterday, medications: groupedMedications.yesterday },
+      { key: TimeGroup.ThisWeek, medications: groupedMedications.thisWeek },
+      { key: TimeGroup.ThisMonth, medications: groupedMedications.thisMonth },
+      { key: TimeGroup.ThisYear, medications: groupedMedications.thisYear },
+      { key: TimeGroup.Older, medications: groupedMedications.older },
     ];
 
     orderedGroups.forEach(({ key, medications: groupMedications }) => {
@@ -986,8 +969,14 @@ export default function MedicationBillForm({ patientId }: Props) {
       const chargeItems = extractChargeItemsFromBatchResponse(
         response as unknown as ChargeItemBatchResponse,
       );
-      setExtractedChargeItems(chargeItems);
-      setIsInvoiceSheetOpen(true);
+      if (chargeItems.length === 0) {
+        navigate(
+          `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation?payment_status=unpaid`,
+        );
+      } else {
+        setIsInvoiceSheetOpen(true);
+        setExtractedChargeItems(chargeItems);
+      }
     },
     onError: (error) => {
       try {
@@ -1023,10 +1012,10 @@ export default function MedicationBillForm({ patientId }: Props) {
       };
 
     const priceComponents =
-      inventory.product.charge_item_definition.price_components;
+      inventory.product.charge_item_definition?.price_components;
 
     // Get base price
-    const baseComponent = priceComponents.find(
+    const baseComponent = priceComponents?.find(
       (component) =>
         component.monetary_component_type === MonetaryComponentType.base,
     );
@@ -1268,8 +1257,14 @@ export default function MedicationBillForm({ patientId }: Props) {
         </div>
 
         {patient && (
-          <div className="mb-4 p-4 rounded-none shadow-none bg-gray-100">
-            <PatientHeader patient={patient} facilityId={facilityId} />
+          <div className="mb-4 rounded-none shadow-none bg-gray-100">
+            <PatientHeader
+              patient={patient}
+              facilityId={facilityId}
+              locationId={locationId}
+              showViewPrescriptionsButton={true}
+              showViewDispenseButton={true}
+            />
           </div>
         )}
 
@@ -1365,12 +1360,12 @@ export default function MedicationBillForm({ patientId }: Props) {
                     );
 
                     const orderedGroups = [
-                      { key: "today", label: t("today") },
-                      { key: "yesterday", label: t("yesterday") },
-                      { key: "thisWeek", label: t("this_week") },
-                      { key: "thisMonth", label: t("this_month") },
-                      { key: "thisYear", label: t("this_year") },
-                      { key: "older", label: t("older") },
+                      { key: TimeGroup.Today, label: t("today") },
+                      { key: TimeGroup.Yesterday, label: t("yesterday") },
+                      { key: TimeGroup.ThisWeek, label: t("this_week") },
+                      { key: TimeGroup.ThisMonth, label: t("this_month") },
+                      { key: TimeGroup.ThisYear, label: t("this_year") },
+                      { key: TimeGroup.Older, label: t("older") },
                     ];
 
                     return orderedGroups.map(({ key, label }) => {
@@ -1777,8 +1772,23 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                           {
                                                             selectedInventory?.net_content
                                                           }{" "}
-                                                          {t("units")}
+                                                          {
+                                                            selectedInventory
+                                                              ?.product
+                                                              .product_knowledge
+                                                              .base_unit.display
+                                                          }
                                                         </Badge>
+                                                        {selectedInventory
+                                                          ?.location.id !==
+                                                          locationId && (
+                                                          <Badge variant="secondary">
+                                                            {
+                                                              selectedInventory
+                                                                ?.location.name
+                                                            }
+                                                          </Badge>
+                                                        )}
                                                       </div>
                                                     );
                                                   },
@@ -1856,7 +1866,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                       checked={isSelected}
                                                       className="mr-2"
                                                     />
-                                                    <div className="flex-1 flex items-center justify-between">
+                                                    <div className="flex-1 flex items-center justify-between gap-1">
                                                       <span>
                                                         {"Lot #" +
                                                           inv.product.batch
@@ -1873,8 +1883,18 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                         className="ml-2"
                                                       >
                                                         {inv.net_content}{" "}
-                                                        {t("units")}
+                                                        {
+                                                          inv.product
+                                                            ?.product_knowledge
+                                                            .base_unit.display
+                                                        }
                                                       </Badge>
+                                                      {inv?.location.id !==
+                                                        locationId && (
+                                                        <Badge variant="secondary">
+                                                          {inv?.location.name}
+                                                        </Badge>
+                                                      )}
                                                     </div>
                                                   </div>
                                                 );
@@ -2066,7 +2086,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                                           key={lot.selectedInventoryId}
                                           className="py-2.5 text-gray-950 font-normal text-base"
                                         >
-                                          {selectedInventory.product.charge_item_definition.price_components
+                                          {selectedInventory.product.charge_item_definition?.price_components
                                             .filter(
                                               (c) =>
                                                 c.monetary_component_type ===
@@ -2189,74 +2209,15 @@ export default function MedicationBillForm({ patientId }: Props) {
                   })()}
                   <TableRow className="bg-white rounded-lg shadow-sm">
                     <TableCell colSpan={12} className="p-0 rounded-lg">
-                      {isSearchOpen ? (
-                        <Command className="w-full rounded-none border-none">
-                          <CommandInput
-                            placeholder={t("search_products")}
-                            onValueChange={setSearch}
-                            value={search}
-                            className="h-12 border-none ring-0"
-                            onKeyDown={(e) => {
-                              if (e.key === "Escape") {
-                                setIsSearchOpen(false);
-                                setSearch("");
-                              }
-                            }}
-                          />
-                          <CommandList className="max-h-[300px] overflow-auto">
-                            <CommandEmpty>
-                              {search.length < 3 ? (
-                                <p className="p-4 text-sm text-gray-500">
-                                  {t("min_char_length_error", {
-                                    min_length: 3,
-                                  })}
-                                </p>
-                              ) : isProductLoading ? (
-                                <p className="p-4 text-sm text-gray-500">
-                                  {t("searching")}
-                                </p>
-                              ) : (
-                                <p className="p-4 text-sm text-gray-500">
-                                  {t("no_results_found")}
-                                </p>
-                              )}
-                            </CommandEmpty>
-                            <CommandGroup>
-                              {productKnowledges?.results?.map(
-                                (productKnowledge) => (
-                                  <CommandItem
-                                    key={productKnowledge.id}
-                                    value={productKnowledge.name}
-                                    onSelect={() => {
-                                      setSelectedProduct(productKnowledge);
-                                      setIsAddMedicationSheetOpen(true);
-                                      setIsSearchOpen(false);
-                                      setSearch("");
-                                    }}
-                                    className="cursor-pointer"
-                                  >
-                                    <div className="flex flex-col">
-                                      <span className="font-medium">
-                                        {productKnowledge.name}
-                                      </span>
-                                    </div>
-                                  </CommandItem>
-                                ),
-                              )}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full h-12 flex items-center justify-center gap-2 hover:bg-gray-100 rounded-lg"
-                          onClick={() => setIsSearchOpen(true)}
-                        >
-                          <PlusIcon className="h-6 w-6" />
-                          <span>{t("add_medication")}</span>
-                        </Button>
-                      )}
+                      <ProductKnowledgeSelect
+                        value={undefined}
+                        onChange={(product) => {
+                          setSelectedProduct(product);
+                          setIsAddMedicationSheetOpen(true);
+                        }}
+                        placeholder={t("add_medication")}
+                        className="w-full"
+                      />
                     </TableCell>
                   </TableRow>
                 </TableBody>
@@ -2279,7 +2240,9 @@ export default function MedicationBillForm({ patientId }: Props) {
               );
             }}
             sourceUrl={`/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation`}
-            redirectInNewTab={false}
+            locationId={locationId}
+            patientId={patientId}
+            showDispenseNowButton={true}
           />
         )}
 
@@ -2572,13 +2535,11 @@ interface DosageDialogProps {
   onChange?: (
     value?: MedicationRequestDosageInstruction["dose_and_rate"],
   ) => void;
-  unitDisabled?: boolean;
 }
 
 const DosageDialog: React.FC<DosageDialogProps> = ({
   dosageRange,
   onChange,
-  unitDisabled,
 }) => {
   const { t } = useTranslation();
 
@@ -2603,7 +2564,6 @@ const DosageDialog: React.FC<DosageDialogProps> = ({
               }));
             }
           }}
-          unitDisabled={unitDisabled}
         />
       </div>
       <div>
@@ -2622,7 +2582,6 @@ const DosageDialog: React.FC<DosageDialogProps> = ({
               }));
             }
           }}
-          unitDisabled={unitDisabled}
         />
       </div>
       <div className="flex justify-end gap-2">

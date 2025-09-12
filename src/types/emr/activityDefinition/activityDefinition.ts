@@ -1,7 +1,9 @@
 import { Code } from "@/types/base/code/code";
+import { ResourceCategoryRead } from "@/types/base/resourceCategory/resourceCategory";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
+import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
 import { LocationList } from "@/types/location/location";
 
 export enum Status {
@@ -18,7 +20,7 @@ export const ACTIVITY_DEFINITION_STATUS_COLORS = {
   unknown: "outline",
 } as const satisfies Record<Status, string>;
 
-export enum Category {
+export enum Classification {
   laboratory = "laboratory",
   imaging = "imaging",
   surgical_procedure = "surgical_procedure",
@@ -37,7 +39,7 @@ export interface BaseActivityDefinitionSpec {
   status: Status;
   description: string;
   usage: string;
-  category: Category;
+  classification: Classification;
   kind: Kind;
   code: Code;
   body_site: Code | null;
@@ -51,15 +53,19 @@ export interface ActivityDefinitionCreateSpec
   charge_item_definitions: string[];
   observation_result_requirements: string[];
   locations: string[];
+  category: string;
+  healthcare_service: string | null;
 }
 
 export interface ActivityDefinitionUpdateSpec
-  extends BaseActivityDefinitionSpec {
+  extends Omit<BaseActivityDefinitionSpec, "category"> {
   facility: string;
   specimen_requirements: string[];
   charge_item_definitions: string[];
   observation_result_requirements: string[];
   locations: string[];
+  category: string;
+  healthcare_service: string | null;
 }
 
 export interface ActivityDefinitionReadSpec extends BaseActivityDefinitionSpec {
@@ -68,4 +74,6 @@ export interface ActivityDefinitionReadSpec extends BaseActivityDefinitionSpec {
   charge_item_definitions: ChargeItemDefinitionRead[];
   observation_result_requirements: ObservationDefinitionReadSpec[];
   locations: LocationList[];
+  category: ResourceCategoryRead;
+  healthcare_service: HealthcareServiceReadSpec;
 }
