@@ -13,6 +13,7 @@ import {
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   SUPPLY_DELIVERY_STATUS_COLORS,
   SupplyDeliveryRead,
@@ -37,14 +38,12 @@ export default function SupplyDeliveryTableForRequest({
 
   if (deliveries.length === 0) {
     return (
-      <div className="flex items-center justify-center p-4 bg-white rounded-md">
-        <p className="text-base text-gray-800 font-medium">
-          {t("no_deliveries_dispatched_for_this_supply_request", {
-            action:
-              mode === "external" ? t("purchase_order") : t("stock_request"),
-          })}
-        </p>
-      </div>
+      <EmptyState
+        title={t("no_deliveries_dispatched_for_this_supply_request", {
+          action:
+            mode === "external" ? t("purchase_order") : t("stock_request"),
+        })}
+      />
     );
   }
 
