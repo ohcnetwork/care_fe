@@ -14,6 +14,7 @@ import {
   makeBatchApiCall,
   mergeConfigWithCli,
   parseCliArgs,
+  parseCode,
   showCliHelp,
 } from "./utils.js";
 
@@ -180,25 +181,6 @@ function parseCSV(csvContent: string): CSVRow[] {
 /**
  * Mapping helpers
  */
-function parseCode(
-  system?: string,
-  code?: string,
-  display?: string,
-): Code | null {
-  if (!system || !code) return null;
-  let cleanCode = code.trim();
-  if (cleanCode.includes(".")) {
-    if (cleanCode.endsWith(".0")) {
-      cleanCode = cleanCode.slice(0, -2);
-    }
-  }
-  return {
-    system: system.trim(),
-    code: cleanCode,
-    display: display?.trim() || cleanCode,
-  };
-}
-
 function parseComponents(
   componentStr: string,
 ): ObservationDefinitionComponentSpec[] {

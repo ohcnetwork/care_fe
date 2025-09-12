@@ -12,6 +12,7 @@ import {
   type ProcessedRow,
   colorize,
   createScriptConfig,
+  ensureAuthentication,
   getLogger,
   loadData,
   makeApiCall,
@@ -120,8 +121,15 @@ function processCsvData(
       preference: (row.preference as Preference) || Preference.preferred,
       ...(container && { container }),
       ...(row.requirement && { requirement: row.requirement }),
-      ...(retentionTime && { retention_time: retentionTime }),
-      single_use: row.single_use === "true" || false,
+      retention_time: {
+        value: 24,
+        unit: {
+          code: "h",
+          display: "hours",
+          system: "http://unitsofmeasure.org",
+        },
+      },
+      single_use: row.single_use === "true" || true,
     };
 
     return {
@@ -169,7 +177,7 @@ async function upsertSpecimenDefinition(
 async function main(configOverride?: Partial<BaseConfig>) {
   // If configOverride is provided, don't merge CLI args (called programmatically)
   // Otherwise, merge CLI args (called from command line)
-  const finalConfig = configOverride
+  let finalConfig = configOverride
     ? createScriptConfig(
         SCRIPT_DEFAULTS.inputFile,
         SCRIPT_DEFAULTS.outputFile,
@@ -184,6 +192,10 @@ async function main(configOverride?: Partial<BaseConfig>) {
 
   try {
     logger(colorize("Starting specimen definition loader...", 0));
+
+    // Ensure authentication tokens are available if token auth is enabled
+    const authenticatedConfig = await ensureAuthentication(finalConfig);
+    finalConfig = { ...finalConfig, ...authenticatedConfig };
 
     // Load CSV data
     logger(colorize("Loading data...", 0));

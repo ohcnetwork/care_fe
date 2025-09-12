@@ -23,6 +23,7 @@ import {
   makeBatchApiCall,
   mergeConfigWithCli,
   parseCliArgs,
+  parseCode,
   processApiResults,
   removeDuplicates,
   showCliHelp,
@@ -59,24 +60,6 @@ interface ActivityData {
   body_site?: Code;
   derived_from_uri?: string;
   locations?: string[];
-}
-
-// Helper function to parse code objects
-function parseCode(
-  system?: string,
-  code?: string,
-  display?: string,
-): Code | null {
-  if (!system || !code) return null;
-  let cleanCode = code.trim();
-  if (cleanCode.includes(".") && cleanCode.endsWith(".0")) {
-    cleanCode = cleanCode.slice(0, -2);
-  }
-  return {
-    system: system.trim(),
-    code: cleanCode,
-    display: display?.trim() || cleanCode,
-  };
 }
 
 // Function to lookup missing codes using ValueSet API
@@ -154,7 +137,8 @@ async function processCsvData(
 
     // If code is missing but we have a title, try to lookup the code
     if (!code && row.title) {
-      logger(colorize(`Looking up code for activity: ${row.title}`, 2));
+      //skip row
+      /* logger(colorize(`Looking up code for activity: ${row.title}`, 2));
       code = await lookupCode(row.title, config);
       if (code) {
         logger(
@@ -165,7 +149,7 @@ async function processCsvData(
         );
       } else {
         logger(colorize(`No code found for "${row.title}"`, 1));
-      }
+      } */
     }
 
     // Parse diagnostic report LOINC codes as Code objects
@@ -187,14 +171,19 @@ async function processCsvData(
           });
         } else {
           // Default to LOINC system if no system specified
-          diagnosticReportCodes.push({
-            system: "http://loinc.org",
-            code: codeStr,
-            display: codeStr,
-          });
+          const code = parseCode("http://loinc.org", codeStr, codeStr);
+          if (code) {
+            diagnosticReportCodes.push({
+              system: code.system,
+              code: code.code,
+              display: code.display,
+            });
+          }
         }
       }
     }
+    // filter out rows with no code
+    rows = rows.filter((r) => r.code);
 
     results.push({
       title: row.title,
@@ -211,18 +200,21 @@ async function processCsvData(
             .split(";")
             .map((s: string) => s.trim())
             .filter((s: string) => s)
+            .map((s: string) => createSlug(s))
         : [],
       specimen_slugs: row.specimen_slugs
         ? row.specimen_slugs
             .split(";")
             .map((s: string) => s.trim())
             .filter((s: string) => s)
+            .map((s: string) => createSlug(s))
         : [],
       charge_item_slugs: row.charge_item_slugs
         ? row.charge_item_slugs
             .split(";")
             .map((s: string) => s.trim())
             .filter((s: string) => s)
+            .map((s: string) => createSlug(s))
         : [],
       diagnostic_report_loinc_codes: diagnosticReportCodes,
       code: code || undefined,
@@ -344,6 +336,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
     // Load charge items
     logger(colorize("Loading charge items...", 2));
     const chargeItemResults = await loadChargeItems({
+      ...authenticatedConfig,
       inputFile: path.join(__dirname, "ChargeItemDefinition.csv"),
       outputFile: path.join(outputDir, "ChargeItems-output.csv"),
       facilityId: finalConfig.facilityId,
@@ -356,6 +349,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
     // Load specimens
     logger(colorize("Loading specimens...", 2));
     const specimenResults = await loadSpecimens({
+      ...authenticatedConfig,
       inputFile: path.join(__dirname, "SpecimenDefinition.csv"),
       outputFile: path.join(outputDir, "Specimens-output.csv"),
       facilityId: finalConfig.facilityId,
@@ -368,6 +362,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
     // Load observations
     logger(colorize("Loading observations...", 2));
     const observationResults = await loadObservations({
+      ...authenticatedConfig,
       inputFile: path.join(__dirname, "ObservationDefinition.csv"),
       outputFile: path.join(outputDir, "Observations-output.csv"),
       facilityId: finalConfig.facilityId,
@@ -442,7 +437,9 @@ async function main(configOverride?: Partial<BaseConfig>) {
     const results = await makeBatchApiCall(
       `/api/v1/facility/${finalConfig.facilityId}/activity_definition/upsert/`,
       validActivities.map(
-        (item): ActivityDefinitionCreateSpec => ({
+        (
+          item,
+        ): ActivityDefinitionCreateSpec & { healthcare_service: null } => ({
           title: item.title,
           slug: item.slug,
           description: item.description,
@@ -460,6 +457,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
           code: item.code!,
           body_site: item.body_site || null,
           derived_from_uri: item.derived_from_uri || null,
+          healthcare_service: null,
         }),
       ),
       finalConfig,

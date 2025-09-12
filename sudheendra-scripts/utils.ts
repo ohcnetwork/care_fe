@@ -8,6 +8,7 @@ import {
   ResourceCategoryResourceType,
   ResourceCategorySubType,
 } from "@/types/base/resourceCategory/resourceCategory";
+import { Code } from "../src/types/base/code/code";
 
 dotenv.config({ path: [".env.local", ".env"] });
 
@@ -238,13 +239,17 @@ export interface BaseConfig {
 
 // Utility function to create slug from name
 export function createSlug(name: string): string {
-  return name
+  let slug = name
     .toLowerCase()
     .replace(/[^a-z0-9\s_-]/g, "") // Keep letters, numbers, spaces, underscores, and hyphens
     .replace(/\s+/g, "-") // Replace spaces with hyphens
     .replace(/-+/g, "-") // Replace multiple hyphens with single
     .trim()
-    .slice(0, 25);
+    .slice(0, 20);
+  if (slug.length < 5) {
+    slug += "-category";
+  }
+  return slug;
 }
 
 /**
@@ -853,7 +858,7 @@ export function processApiResults<T>(
       .filter((r) => !r.success)
       .forEach((r) => {
         const errorMessage = formatError(r.error);
-        console.log(`- ${r.item.title || r.item.slug}: ${errorMessage}`);
+        // console.log(`- ${r.item.title || r.item.slug}: ${errorMessage}`);
       });
   }
 
@@ -863,7 +868,7 @@ export function processApiResults<T>(
 // Function to handle "already exists" errors in catch blocks
 export function handleApiError(error: any, item: any): ApiResult {
   if (error.isAlreadyExists) {
-    console.log(`Already exists: ${item.title || item.slug} (${item.slug})`);
+    //console.log(`Already exists: ${item.title || item.slug} (${item.slug})`);
     return {
       success: true,
       data: { message: "Already exists" },
@@ -882,7 +887,7 @@ export type parserType = "local" | "google-sheets";
 
 // Common configuration defaults
 export const DEFAULT_CONFIG = {
-  facilityId: process.env.FACILITY_ID || "65d56e42-c49f-4501-915f-c93d8b7bde58",
+  facilityId: process.env.FACILITY_ID || "ffcdfe5a-094f-4adf-b1e3-c8fa6fc03d96",
   apiBaseUrl: process.env.API_BASE_URL || "http://localhost:8000",
   parser: "local" as parserType,
   sheetName: "Sheet1",
@@ -1149,4 +1154,27 @@ export async function ensureChargeItemCategories(
     ResourceCategoryResourceType.charge_item_definition,
     config,
   );
+}
+
+export function parseCode(
+  system?: string,
+  code?: string,
+  display?: string,
+): Code | null {
+  if (!system || !code) return null;
+  let cleanCode = code.trim();
+  if (cleanCode.includes(".")) {
+    if (cleanCode.endsWith(".0")) {
+      cleanCode = cleanCode.slice(0, -2);
+    } else {
+      //ensure it matches ^\d{1,8}-\d$
+      //42342.0-6 => 42342-6
+      cleanCode = cleanCode.replace(".0", "");
+    }
+  }
+  return {
+    system: system.trim(),
+    code: cleanCode,
+    display: display?.trim() || cleanCode,
+  };
 }
