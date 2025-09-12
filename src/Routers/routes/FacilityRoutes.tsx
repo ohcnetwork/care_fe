@@ -56,21 +56,31 @@ const FacilityRoutes: AppRoutes = {
     />
   ),
 
-  "/facility/:facilityId/patient/:patientId/diagnostic_reports/:diagnosticReportId":
-    ({ facilityId, patientId, diagnosticReportId }) => (
+  ...[
+    "/facility/:facilityId/patient/:patientId/diagnostic_reports/:diagnosticReportId",
+    "/organization/organizationId/patient/:patientId/diagnostic_reports/:diagnosticReportId",
+  ].reduce((acc: AppRoutes, path) => {
+    acc[path] = ({ facilityId, patientId, diagnosticReportId }) => (
       <DiagnosticReportView
         patientId={patientId}
         facilityId={facilityId}
         diagnosticReportId={diagnosticReportId}
       />
-    ),
-  "/facility/:facilityId/patient/:patientId/diagnostic_reports/:diagnosticReportId/print":
-    ({ patientId, diagnosticReportId }) => (
+    );
+    return acc;
+  }, {}),
+  ...[
+    "/facility/:facilityId/patient/:patientId/diagnostic_reports/:diagnosticReportId/print",
+    "/organization/organizationId/patient/:patientId/diagnostic_reports/:diagnosticReportId/print",
+  ].reduce((acc: AppRoutes, path) => {
+    acc[path] = ({ patientId, diagnosticReportId }) => (
       <DiagnosticReportPrint
         patientId={patientId}
         diagnosticReportId={diagnosticReportId}
       />
-    ),
+    );
+    return acc;
+  }, {}),
   "/facility/:facilityId/billing/accounts": ({ facilityId }) => (
     <AccountList facilityId={facilityId} />
   ),

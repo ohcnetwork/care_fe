@@ -2,7 +2,12 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+function Input({
+  className,
+  type,
+  inputMode,
+  ...props
+}: React.ComponentProps<"input">) {
   return (
     <input
       data-slot="input"
@@ -12,6 +17,16 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
         className,
       )}
       {...props}
+      inputMode={inputMode}
+      {...(type === "number" &&
+        inputMode === "numeric" && {
+          onBeforeInput: (e) => {
+            const inputEvent = e.nativeEvent as InputEvent;
+            if (inputEvent.data === ".") {
+              e.preventDefault();
+            }
+          },
+        })}
       onFocus={(e) => {
         if (type === "date") {
           e.target.showPicker();

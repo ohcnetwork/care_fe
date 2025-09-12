@@ -38,24 +38,6 @@ import {
 } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
-const tagConfigSchema = z.object({
-  slug: z.string().min(1, "Slug is required"),
-  display: z.string().min(1, "Display name is required"),
-  category: z.nativeEnum(TagCategory, {
-    required_error: "Category is required",
-  }),
-  description: z.string().optional(),
-  priority: z.number().min(0, "Priority must be non-negative"),
-  status: z.nativeEnum(TagStatus, {
-    required_error: "Status is required",
-  }),
-  resource: z.nativeEnum(TagResource, {
-    required_error: "Resource is required",
-  }),
-});
-
-type TagConfigFormValues = z.infer<typeof tagConfigSchema>;
-
 interface TagConfigFormProps {
   configId?: string;
   parentId?: string;
@@ -73,6 +55,24 @@ export default function TagConfigForm({
   const queryClient = useQueryClient();
   const isEditing = Boolean(configId);
   const isCreatingChild = Boolean(parentId);
+
+  const tagConfigSchema = z.object({
+    slug: z.string().trim().min(1, t("field_required")),
+    display: z.string().trim().min(1, t("field_required")),
+    category: z.nativeEnum(TagCategory, {
+      required_error: t("field_required"),
+    }),
+    description: z.string().trim().optional(),
+    priority: z.number().min(0, t("priority_non_negative")),
+    status: z.nativeEnum(TagStatus, {
+      required_error: t("field_required"),
+    }),
+    resource: z.nativeEnum(TagResource, {
+      required_error: t("field_required"),
+    }),
+  });
+
+  type TagConfigFormValues = z.infer<typeof tagConfigSchema>;
 
   // Fetch parent tag data when creating a child
   const { data: parentTag } = useQuery({
@@ -252,7 +252,7 @@ export default function TagConfigForm({
                 disabled={isLoading}
               >
                 <FormControl>
-                  <SelectTrigger className="capitalize">
+                  <SelectTrigger className="capitalize" ref={field.ref}>
                     <SelectValue placeholder={t("select_category")}>
                       {t(field.value)}
                     </SelectValue>
@@ -283,7 +283,7 @@ export default function TagConfigForm({
                 disabled={isLoading || isEditing}
               >
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger ref={field.ref}>
                     <SelectValue placeholder={t("select_resource")}>
                       {t(field.value)}
                     </SelectValue>
@@ -336,7 +336,7 @@ export default function TagConfigForm({
                 disabled={isLoading}
               >
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger ref={field.ref}>
                     <SelectValue placeholder={t("select_status")}>
                       {t(field.value)}
                     </SelectValue>
