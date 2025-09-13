@@ -147,7 +147,7 @@ export function AppointmentQuestion({
     <div className="space-y-4">
       <div>
         <div className="mb-4 mt-2">
-          <Label className="mb-2">{t("tags")}</Label>
+          <Label className="mb-2">{t("tags", { count: 2 })}</Label>
           <TagSelectorPopover
             selected={selectedTags}
             onChange={(tags) => {
