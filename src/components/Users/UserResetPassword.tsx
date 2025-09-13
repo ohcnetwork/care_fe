@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -22,8 +22,8 @@ import { PasswordInput } from "@/components/ui/input-password";
 import { ValidationHelper } from "@/components/Users/UserFormValidations";
 import { UpdatePasswordForm } from "@/components/Users/models";
 
+import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import authApi from "@/types/auth/authApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 export default function UserResetPassword({
@@ -59,12 +59,12 @@ export default function UserResetPassword({
       path: ["new_password_2"],
     })
     .refine((values) => values.new_password_1 !== values.old_password, {
-      message: t("new_password_same_as_old"),
+      message: t("new_password_same_as_old_plain"),
       path: ["new_password_1"],
     });
 
   const form = useForm({
-    mode: "onSubmit",
+    mode: "onChange",
     resolver: zodResolver(PasswordSchema),
     defaultValues: {
       old_password: "",
@@ -72,8 +72,8 @@ export default function UserResetPassword({
       new_password_2: "",
     },
   });
-  const { mutate: updatePassword, isPending } = useMutation({
-    mutationFn: mutate(authApi.updatePassword),
+  const { mutate: resetPassword, isPending } = useMutation({
+    mutationFn: mutate(routes.updatePassword),
     onSuccess: () => {
       toast.success(t("password_updated"));
       form.reset();
@@ -88,13 +88,8 @@ export default function UserResetPassword({
       username: userData.username,
       new_password: formData.new_password_1,
     };
-    updatePassword(form);
+    resetPassword(form);
   };
-
-  const allFieldsFilled =
-    form.watch("old_password") &&
-    form.watch("new_password_1") &&
-    form.watch("new_password_2");
 
   return (
     <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:px-6 sm:py-6">
@@ -231,7 +226,7 @@ export default function UserResetPassword({
               </Button>
               <Button
                 type="submit"
-                disabled={!allFieldsFilled || isPending}
+                disabled={!form.formState.isValid || isPending}
                 variant="primary"
               >
                 {isPending && (
