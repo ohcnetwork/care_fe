@@ -59,11 +59,12 @@ export default function UserResetPassword({
       path: ["new_password_2"],
     })
     .refine((values) => values.new_password_1 !== values.old_password, {
-      message: t("new_password_same_as_old"),
+      message: t("new_password_same_as_old_plain"),
       path: ["new_password_1"],
     });
 
   const form = useForm({
+    mode: "onChange",
     resolver: zodResolver(PasswordSchema),
     defaultValues: {
       old_password: "",
@@ -225,7 +226,7 @@ export default function UserResetPassword({
               </Button>
               <Button
                 type="submit"
-                disabled={!form.formState.isDirty || isPending}
+                disabled={!form.formState.isValid || isPending}
                 variant="primary"
               >
                 {isPending && (
