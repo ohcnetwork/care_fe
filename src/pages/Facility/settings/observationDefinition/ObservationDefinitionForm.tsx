@@ -228,8 +228,6 @@ function ObservationDefinitionFormContent({
           },
   });
 
-  console.log(form.formState.errors);
-
   React.useEffect(() => {
     if (isEditMode) return;
 
