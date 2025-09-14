@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
+import { useRef } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
@@ -34,7 +35,6 @@ import {
   ValuesetFormType,
 } from "@/types/valueset/valueset";
 
-import { useRef } from "react";
 import { CodingField } from "./CodingField";
 import { ValueSetPreview } from "./ValueSetPreview";
 
@@ -393,6 +393,7 @@ export function ValueSetForm({
             valueset={form.watch()}
             trigger={
               <Button
+                type="button"
                 variant="outline_primary"
                 onClickCapture={(e) => {
                   const values = form.getValues();
