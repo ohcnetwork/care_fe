@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
-import { useRef } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
@@ -383,8 +382,6 @@ export function ValueSetForm({
     },
   });
 
-  const didFocusOnceRef = useRef(false);
-
   return (
     <Form {...form}>
       <div className="flex justify-end">
@@ -395,20 +392,13 @@ export function ValueSetForm({
               <Button
                 type="button"
                 variant="outline_primary"
-                onClickCapture={(e) => {
-                  const values = form.getValues();
-                  const parsed = valuesetFormSchema.safeParse(values);
-                  if (!parsed.success) {
+                onClick={(e) => {
+                  if (!form.formState.isValid) {
                     e.preventDefault();
                     e.stopPropagation();
-                    if (!didFocusOnceRef.current) {
-                      void form.trigger(undefined, { shouldFocus: true });
-                      didFocusOnceRef.current = true;
-                    } else {
-                      void form.trigger();
-                    }
-                    return;
+                    void form.trigger(undefined, { shouldFocus: true });
                   }
+                  form.handleSubmit(() => {})();
                 }}
               >
                 <CareIcon icon={"l-eye"} className="size-4" />
