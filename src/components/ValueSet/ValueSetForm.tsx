@@ -34,6 +34,7 @@ import {
   ValuesetFormType,
 } from "@/types/valueset/valueset";
 
+import { useRef } from "react";
 import { CodingField } from "./CodingField";
 import { ValueSetPreview } from "./ValueSetPreview";
 
@@ -382,6 +383,8 @@ export function ValueSetForm({
     },
   });
 
+  const didFocusOnceRef = useRef(false);
+
   return (
     <Form {...form}>
       <div className="flex justify-end">
@@ -397,12 +400,14 @@ export function ValueSetForm({
                   if (!parsed.success) {
                     e.preventDefault();
                     e.stopPropagation();
-                    void form.trigger(undefined, { shouldFocus: true });
+                    if (!didFocusOnceRef.current) {
+                      void form.trigger(undefined, { shouldFocus: true });
+                      didFocusOnceRef.current = true;
+                    } else {
+                      void form.trigger();
+                    }
                     return;
                   }
-                }}
-                onClick={async () => {
-                  await form.trigger();
                 }}
               >
                 <CareIcon icon={"l-eye"} className="size-4" />
