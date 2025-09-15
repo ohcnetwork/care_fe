@@ -1,6 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -9,14 +7,6 @@ import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
   Form,
   FormControl,
   FormField,
@@ -24,11 +14,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -45,12 +30,9 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
+import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 
-import useBreakpoints from "@/hooks/useBreakpoints";
-
-import query from "@/Utils/request/query";
 import {
   SubstitutionReason,
   SubstitutionType,
@@ -60,7 +42,6 @@ import {
   getSubstitutionTypeDisplay,
 } from "@/types/emr/medicationDispense/medicationDispense";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
-import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 
 interface SubstitutionSheetProps {
   open: boolean;
@@ -82,7 +63,7 @@ interface SubstitutionSheetProps {
 }
 
 const substitutionSchema = z.object({
-  substitutedProductKnowledge: z.any().refine((val) => val?.id, {
+  substitutedProductKnowledge: z.any().refine((val) => val?.slug, {
     message: "Product selection is required",
   }),
   type: z.nativeEnum(SubstitutionType),
@@ -97,15 +78,12 @@ export function SubstitutionSheet({
   originalProductKnowledge,
   currentSubstitution,
   onSave,
-  facilityId,
+  facilityId: _facilityId,
 }: SubstitutionSheetProps) {
   const { t } = useTranslation();
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedSubstitute, setSelectedSubstitute] = useState<
     ProductKnowledgeBase | undefined
   >(currentSubstitution?.substitutedProductKnowledge);
-  const [productPopoverOpen, setProductPopoverOpen] = useState(false);
-  const isMobile = useBreakpoints({ default: true, sm: false });
 
   const form = useForm<SubstitutionFormValues>({
     resolver: zodResolver(substitutionSchema),
@@ -126,9 +104,7 @@ export function SubstitutionSheet({
         reason: currentSubstitution?.reason,
       });
       setSelectedSubstitute(currentSubstitution?.substitutedProductKnowledge);
-      setSearchTerm(
-        currentSubstitution?.substitutedProductKnowledge?.name || "",
-      );
+      // No need to set search term anymore
     }
   }, [open, currentSubstitution, form]);
 
@@ -139,20 +115,7 @@ export function SubstitutionSheet({
     });
   }, [selectedSubstitute, form]);
 
-  const { data: productKnowledges, isLoading: isProductLoading } = useQuery({
-    queryKey: ["productKnowledge", "medication", searchTerm, facilityId],
-    queryFn: query.debounced(productKnowledgeApi.listProductKnowledge, {
-      queryParams: {
-        facility: facilityId,
-        limit: 20,
-        offset: 0,
-        name: searchTerm,
-        product_type: "medication",
-        status: "active",
-      },
-    }),
-    enabled: searchTerm.length >= 3,
-  });
+  // Removed query in favor of ProductKnowledgeSelect
 
   const onSubmit = (values: SubstitutionFormValues) => {
     if (!values.substitutedProductKnowledge) return;
@@ -166,82 +129,11 @@ export function SubstitutionSheet({
 
   const handleProductSelect = (product: ProductKnowledgeBase) => {
     setSelectedSubstitute(product);
-    setSearchTerm(product.name);
-    setProductPopoverOpen(false);
   };
 
-  const handlePopoverOpenChange = (isOpen: boolean) => {
-    setProductPopoverOpen(isOpen);
-    if (!isOpen) {
-      setSearchTerm(selectedSubstitute?.name || "");
-    }
-  };
+  // Removed in favor of ProductKnowledgeSelect
 
-  const renderProductSelector = (className?: string) => {
-    return (
-      <Command className={className}>
-        <div className="flex flex-col px-3 py-2 border-b sticky top-0 bg-white z-10">
-          <span className="font-semibold text-base text-gray-900">
-            {t("search_substitute_medications")}
-          </span>
-          <span className="text-sm text-gray-500 mt-0.5">
-            {t("type_at_least_3_characters_to_search")}
-          </span>
-        </div>
-        <div className="flex items-center border-b px-3 sticky top-[48px] bg-white z-10">
-          <CommandInput
-            placeholder={t("search_products")}
-            onValueChange={setSearchTerm}
-            value={searchTerm}
-            className="border-none focus:ring-0"
-          />
-        </div>
-        <CommandList
-          className="max-h-[calc(100vh-20rem)]"
-          onWheel={(e) => e.stopPropagation()}
-        >
-          <CommandEmpty>
-            {isProductLoading ? (
-              <div className="flex items-center justify-center py-6">
-                <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
-                <span className="ml-2 text-sm text-gray-500">
-                  {t("searching")}
-                </span>
-              </div>
-            ) : searchTerm.length < 3 ? (
-              <div className="text-center py-6">
-                <p className="text-sm text-gray-500">
-                  {t("type_at_least_3_characters_to_search")}
-                </p>
-              </div>
-            ) : (
-              <div className="text-center py-6">
-                <p className="text-sm font-medium">{t("no_products_found")}</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {t("try_different_search_terms")}
-                </p>
-              </div>
-            )}
-          </CommandEmpty>
-          <CommandGroup>
-            {!isProductLoading &&
-              productKnowledges?.results?.map((product) => (
-                <CommandItem
-                  key={product.id}
-                  value={product.name}
-                  onSelect={() => handleProductSelect(product)}
-                  className="flex items-center justify-between cursor-pointer"
-                >
-                  <div className="flex items-center">
-                    <span>{product.name}</span>
-                  </div>
-                </CommandItem>
-              ))}
-          </CommandGroup>
-        </CommandList>
-      </Command>
-    );
-  };
+  // Removed in favor of ProductKnowledgeSelect
 
   if (!originalProductKnowledge) return null;
 
@@ -287,64 +179,12 @@ export function SubstitutionSheet({
                     </FormLabel>
 
                     <div className="space-y-3">
-                      {/* Product Selector Button */}
-                      {isMobile ? (
-                        <>
-                          <Sheet
-                            open={productPopoverOpen}
-                            onOpenChange={setProductPopoverOpen}
-                          >
-                            <SheetTrigger asChild>
-                              <Button
-                                variant="outline"
-                                role="combobox"
-                                aria-expanded={productPopoverOpen}
-                                className="w-full justify-between h-12 border border-gray-300"
-                                type="button"
-                              >
-                                <span className="truncate text-left">
-                                  {selectedSubstitute
-                                    ? selectedSubstitute.name
-                                    : t("search_and_select_product")}
-                                </span>
-                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                              </Button>
-                            </SheetTrigger>
-                            <SheetContent className="p-0" side="bottom">
-                              {renderProductSelector("mb-12")}
-                            </SheetContent>
-                          </Sheet>
-                        </>
-                      ) : (
-                        <Popover
-                          open={productPopoverOpen}
-                          onOpenChange={handlePopoverOpenChange}
-                        >
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              aria-expanded={productPopoverOpen}
-                              className="w-full justify-between h-12 border border-gray-300"
-                              type="button"
-                            >
-                              <span className="truncate text-left">
-                                {selectedSubstitute
-                                  ? selectedSubstitute.name
-                                  : t("search_and_select_product")}
-                              </span>
-                              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent
-                            align="start"
-                            sideOffset={4}
-                            className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-auto"
-                          >
-                            {renderProductSelector()}
-                          </PopoverContent>
-                        </Popover>
-                      )}
+                      <ProductKnowledgeSelect
+                        value={selectedSubstitute}
+                        onChange={handleProductSelect}
+                        placeholder={t("search_substitute_medications")}
+                        className="w-full"
+                      />
                     </div>
                     <FormMessage />
                   </FormItem>

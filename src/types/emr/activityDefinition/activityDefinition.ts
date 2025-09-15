@@ -1,5 +1,6 @@
 import { Code } from "@/types/base/code/code";
 import { ResourceCategoryRead } from "@/types/base/resourceCategory/resourceCategory";
+import { SlugConfig } from "@/types/base/slug/slugConfig";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
@@ -44,10 +45,12 @@ export interface BaseActivityDefinitionSpec {
   code: Code;
   body_site: Code | null;
   diagnostic_report_codes: Code[];
+  slug_config: SlugConfig;
 }
 
 export interface ActivityDefinitionCreateSpec
-  extends Omit<BaseActivityDefinitionSpec, "id"> {
+  extends Omit<BaseActivityDefinitionSpec, "id" | "slug_config" | "slug"> {
+  slug_value: string;
   facility: string;
   specimen_requirements: string[];
   charge_item_definitions: string[];
@@ -58,7 +61,11 @@ export interface ActivityDefinitionCreateSpec
 }
 
 export interface ActivityDefinitionUpdateSpec
-  extends Omit<BaseActivityDefinitionSpec, "category"> {
+  extends Omit<
+    BaseActivityDefinitionSpec,
+    "category" | "slug_config" | "slug"
+  > {
+  slug_value: string;
   facility: string;
   specimen_requirements: string[];
   charge_item_definitions: string[];

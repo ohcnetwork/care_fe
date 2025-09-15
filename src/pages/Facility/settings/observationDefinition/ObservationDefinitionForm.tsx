@@ -53,7 +53,7 @@ import { ObservationInterpretation } from "./ObservationInterpretation";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  slug: z.string().min(1, "Slug is required"),
+  slug_value: z.string().min(1, "Slug is required"),
   description: z.string().min(1, "Description is required"),
   status: z.enum(OBSERVATION_DEFINITION_STATUS),
   category: z.enum(OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]]),
@@ -186,7 +186,7 @@ function ObservationDefinitionFormContent({
       isEditMode && existingData
         ? {
             title: existingData.title,
-            slug: existingData.slug,
+            slug_value: existingData.slug_config.slug_value,
             description: existingData.description,
             status: existingData.status,
             category: existingData.category,
@@ -196,12 +196,12 @@ function ObservationDefinitionFormContent({
             method: existingData.method || null,
             permitted_unit: existingData.permitted_unit || null,
             component:
-              existingData.component.map((c) => ({
+              existingData.component?.map((c) => ({
                 ...c,
-                qualified_ranges: c.qualified_ranges.map((range, index) => ({
+                qualified_ranges: c.qualified_ranges?.map((range, index) => ({
                   ...range,
                   id: index,
-                  conditions: range.conditions,
+                  conditions: range?.conditions,
                   _interpretation_type:
                     range?.ranges?.length > 0
                       ? InterpretationType.ranges
@@ -212,7 +212,7 @@ function ObservationDefinitionFormContent({
               existingData.qualified_ranges?.map((range, index) => ({
                 ...range,
                 id: index,
-                conditions: range.conditions,
+                conditions: range?.conditions,
                 _interpretation_type:
                   range?.ranges?.length > 0
                     ? InterpretationType.ranges
@@ -233,7 +233,7 @@ function ObservationDefinitionFormContent({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug", generateSlug(value.title || ""), {
+        form.setValue("slug_value", generateSlug(value.title || ""), {
           shouldValidate: true,
         });
       }
@@ -338,7 +338,7 @@ function ObservationDefinitionFormContent({
 
                   <FormField
                     control={form.control}
-                    name="slug"
+                    name="slug_value"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel aria-required>{t("slug")}</FormLabel>

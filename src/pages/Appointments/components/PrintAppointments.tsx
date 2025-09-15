@@ -19,11 +19,12 @@ import {
 import Loading from "@/components/Common/Loading";
 
 import query from "@/Utils/request/query";
-import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import {
   APPOINTMENT_STATUS_COLORS,
+  nameFromAppointment,
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -178,7 +179,7 @@ export function PrintAppointments({
                       </div>
                     </TableCell>
                     <TableCell className="p-2 align-top">
-                      {formatName(appointment.user)}
+                      {nameFromAppointment(appointment)}
                     </TableCell>
                     <TableCell className="p-2 align-top">
                       {formatDateTime(

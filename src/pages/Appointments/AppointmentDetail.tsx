@@ -90,6 +90,7 @@ import {
   AppointmentRead,
   AppointmentUpdateRequest,
   SchedulableResourceType,
+  nameFromAppointment,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import mutate from "@/Utils/request/mutate";
@@ -212,8 +213,10 @@ export default function AppointmentDetail(props: Props) {
                 </div>
                 <div className="pt-3 mx-4 flex gap-2 justify-end">
                   <Button variant="outline" asChild>
+                    {/* TODO: Re-verify if this is a correct link */}
+
                     <Link
-                      href={`/facility/${facility.id}/queues/${appointment.token?.queue.id}/practitioner/${appointment.user.id}`}
+                      href={`/facility/${facility.id}/queues/${appointment.token?.queue.id}/practitioner/${appointment.resource.id}`}
                     >
                       {t("open")} <ExternalLinkIcon className="size-4" />
                     </Link>
@@ -430,7 +433,6 @@ const AppointmentDetails = ({
   appointment: AppointmentRead;
   facility: FacilityRead;
 }) => {
-  const { user } = appointment;
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -659,7 +661,7 @@ const AppointmentDetails = ({
         <CardContent className="space-y-4">
           <div className="grid gap-2">
             <div className="text-sm">
-              <p className="font-medium">{formatName(user)}</p>
+              <p className="font-medium">{nameFromAppointment(appointment)}</p>
             </div>
             <Separator />
             <div className="text-sm">
@@ -697,9 +699,13 @@ const AppointmentActions = ({
   const [isRescheduleReasonOpen, setIsRescheduleReasonOpen] = useState(false);
   const [newNote, setNewVisitReason] = useState(appointment.note);
   const [oldNote, setRescheduleReason] = useState(appointment.note);
-  const [selectedPractitioner, setSelectedPractitioner] = useState(
-    appointment.user,
-  );
+  // TODO: We should also allow rescheduling to a location or healthcare service
+  const initalPractitioner =
+    appointment.resource_type === SchedulableResourceType.Practitioner
+      ? appointment.resource
+      : null;
+  const [selectedPractitioner, setSelectedPractitioner] =
+    useState(initalPractitioner);
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
   const currentStatus = appointment.status;
   const [selectedDate, setSelectedDate] = useState(new Date());

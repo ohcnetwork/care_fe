@@ -51,7 +51,7 @@ import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryA
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  slug: z.string().min(1, "Slug is required"),
+  slug_value: z.string().min(1, "Slug is required"),
   description: z.string().optional(),
   resource_sub_type: z.nativeEnum(ResourceCategorySubType),
 });
@@ -83,7 +83,7 @@ export function ResourceCategoryForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
-      slug: "",
+      slug_value: "",
       description: "",
       resource_sub_type: ResourceCategorySubType.other,
     },
@@ -103,7 +103,7 @@ export function ResourceCategoryForm({
     if (categoryData) {
       form.reset({
         title: categoryData.title,
-        slug: categoryData.slug,
+        slug_value: categoryData.slug_config.slug_value,
         description: categoryData.description || "",
         resource_sub_type: categoryData.resource_sub_type,
       });
@@ -116,7 +116,7 @@ export function ResourceCategoryForm({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug", generateSlug(value.title || ""), {
+        form.setValue("slug_value", generateSlug(value.title || ""), {
           shouldValidate: true,
         });
       }
@@ -163,7 +163,7 @@ export function ResourceCategoryForm({
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const payload: ResourceCategoryCreate | ResourceCategoryUpdate = {
       title: values.title,
-      slug: values.slug,
+      slug_value: values.slug_value,
       description: values.description || undefined,
       parent: parentCategorySlug || undefined,
       resource_type: resourceType,
@@ -219,7 +219,7 @@ export function ResourceCategoryForm({
                         field.onChange(e);
                         if (!isEditing) {
                           form.setValue(
-                            "slug",
+                            "slug_value",
                             generateSlug(e.target.value || ""),
                             {
                               shouldValidate: true,
@@ -236,7 +236,7 @@ export function ResourceCategoryForm({
 
             <FormField
               control={form.control}
-              name="slug"
+              name="slug_value"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t("slug")}</FormLabel>

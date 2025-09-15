@@ -768,14 +768,14 @@ export function InvoiceShow({
                     setOpen={setIsAddChargeItemSheetOpen}
                     trigger={
                       <Button
-                        data-shortcut-id="add-charge-item"
+                        data-shortcut-id="add-charge-items-invoice"
                         variant="ghost"
                         className="w-full border border-gray-400 text-gray-950 font-semibold text-sm shadow-sm"
                         disabled={isAddChargeItemSheetOpen}
                       >
                         <CareIcon icon="l-plus" className="mr-2 size-4" />
                         {t("add_charge_item")}
-                        <ShortcutBadge actionId="add-charge-item" />
+                        <ShortcutBadge actionId="add-charge-items-invoice" />
                       </Button>
                     }
                   />

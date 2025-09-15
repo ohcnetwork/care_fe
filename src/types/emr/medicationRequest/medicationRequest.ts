@@ -1,5 +1,8 @@
 import { Code } from "@/types/base/code/code";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
+import {
+  PrescriptionCreate,
+  PrescriptionRead,
+} from "@/types/emr/prescription/prescription";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { UserReadMinimal } from "@/types/user/user";
@@ -217,6 +220,10 @@ export interface MedicationRequest {
   requester: UserReadMinimal;
 }
 
+export interface MedicationRequestCreate extends MedicationRequest {
+  create_prescription?: PrescriptionCreate;
+}
+
 export interface MedicationRequestRequest
   extends Omit<MedicationRequest, "requester"> {
   requester?: string;
@@ -257,11 +264,11 @@ export interface MedicationRequestRead {
   inventory_items_internal?: InventoryRead[];
   dispense_status?: MedicationRequestDispenseStatus;
   requester?: UserReadMinimal;
+  prescription?: PrescriptionRead;
 }
 
 export interface MedicationRequestSummary {
-  encounter: EncounterRead;
-  priority: MedicationPriority;
+  prescription: PrescriptionRead;
   count: number;
 }
 
@@ -629,7 +636,10 @@ export function parseMedicationStringToRequest(
 }
 
 export function displayMedicationName(
-  medication?: MedicationRequest | MedicationRequestRead,
+  medication?:
+    | MedicationRequest
+    | MedicationRequestRead
+    | MedicationRequestCreate,
 ): string {
   if (!medication) {
     return "";

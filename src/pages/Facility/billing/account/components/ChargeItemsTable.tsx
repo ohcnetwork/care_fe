@@ -113,7 +113,7 @@ export function ChargeItemsTable({
   const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = useState(false);
 
   // Register shortcuts for this table
-  useFacilityShortcuts();
+  useFacilityShortcuts("charge-items-table");
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,

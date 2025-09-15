@@ -60,7 +60,7 @@ import locationApi from "@/types/location/locationApi";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  slug: z.string().min(1, "Slug is required"),
+  slug_value: z.string().min(1, "Slug is required"),
   description: z.string().min(1, "Description is required"),
   usage: z.string().min(1, "Usage is required"),
   derived_from_uri: z.string().nullable(),
@@ -254,7 +254,7 @@ function ActivityDefinitionFormContent({
       isEditMode && existingData
         ? {
             title: existingData.title,
-            slug: existingData.slug,
+            slug_value: existingData.slug_config.slug_value,
             description: existingData.description,
             usage: existingData.usage,
             derived_from_uri: existingData.derived_from_uri,
@@ -345,7 +345,7 @@ function ActivityDefinitionFormContent({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug", generateSlug(value.title || ""), {
+        form.setValue("slug_value", generateSlug(value.title || ""), {
           shouldValidate: true,
         });
       }
@@ -476,7 +476,7 @@ function ActivityDefinitionFormContent({
 
                   <FormField
                     control={form.control}
-                    name="slug"
+                    name="slug_value"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>

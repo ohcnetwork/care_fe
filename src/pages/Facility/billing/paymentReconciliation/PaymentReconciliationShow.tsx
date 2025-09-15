@@ -65,7 +65,7 @@ export function PaymentReconciliationShow({
   const { goBack } = useAppHistory();
   const queryClient = useQueryClient();
 
-  useFacilityShortcuts();
+  useFacilityShortcuts("general");
 
   const { data: payment, isLoading } = useQuery({
     queryKey: ["paymentReconciliation", paymentReconciliationId],

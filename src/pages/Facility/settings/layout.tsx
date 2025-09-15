@@ -25,6 +25,7 @@ import { GeneralSettings } from "./general/general";
 import HealthcareServiceForm from "./healthcareService/HealthcareServiceForm";
 import HealthcareServiceList from "./healthcareService/HealthcareServiceList";
 import HealthcareServiceShow from "./healthcareService/HealthcareServiceShow";
+import LocationImport from "./locations/LocationImport";
 import LocationSettings from "./locations/LocationSettings";
 import ObservationDefinitionForm from "./observationDefinition/ObservationDefinitionForm";
 import ObservationDefinitionList from "./observationDefinition/ObservationDefinitionList";
@@ -55,6 +56,7 @@ const getRoutes = (facilityId: string) => ({
     <FacilityOrganizationList organizationId={id} currentTab={tab} />
   ),
   "/locations": () => <LocationSettings facilityId={facilityId} />,
+  "/locations/import": () => <LocationImport facilityId={facilityId} />,
   "/locations/:id": ({ id }: { id: string }) => (
     <LocationSettings facilityId={facilityId} locationId={id} />
   ),

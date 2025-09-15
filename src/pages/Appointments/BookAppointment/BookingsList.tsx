@@ -19,6 +19,8 @@ import {
   Appointment,
   AppointmentCancelledStatuses,
   AppointmentStatus,
+  nameFromAppointment,
+  SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
@@ -161,14 +163,17 @@ const AppointmentCard = ({
         <div className="px-2 py-1 rounded-sm bg-gray-50">
           <div className="flex flex-col gap-2">
             <div className="flex flex-row gap-2">
-              <Avatar
-                className="size-8 rounded-full border border-white shadow-sm"
-                name={formatName(appointment.user)}
-                imageUrl={appointment.user.profile_picture_url}
-              />
+              {appointment.resource_type ===
+                SchedulableResourceType.Practitioner && (
+                <Avatar
+                  className="size-8 rounded-full border border-white shadow-sm"
+                  name={formatName(appointment.resource, true)}
+                  imageUrl={appointment.resource.profile_picture_url}
+                />
+              )}
               <div className="flex items-center justify-center gap-2">
                 <span className="text-sm font-medium text-gray-950">
-                  {formatName(appointment.user)}
+                  {nameFromAppointment(appointment)}
                 </span>
               </div>
             </div>
@@ -266,14 +271,17 @@ const AppointmentTable = ({
               <div className="px-2 py-1">
                 <div className="flex flex-col gap-2">
                   <div className="flex flex-row gap-2">
-                    <Avatar
-                      className="size-8 rounded-full border border-white shadow-sm"
-                      name={formatName(appointment.user)}
-                      imageUrl={appointment.user.profile_picture_url}
-                    />
+                    {appointment.resource_type ===
+                      SchedulableResourceType.Practitioner && (
+                      <Avatar
+                        className="size-8 rounded-full border border-white shadow-sm"
+                        name={formatName(appointment.resource)}
+                        imageUrl={appointment.resource.profile_picture_url}
+                      />
+                    )}
                     <div className="flex items-center justify-center gap-2">
                       <span className="text-sm font-medium text-gray-950">
-                        {formatName(appointment.user)}
+                        {nameFromAppointment(appointment)}
                       </span>
                     </div>
                   </div>

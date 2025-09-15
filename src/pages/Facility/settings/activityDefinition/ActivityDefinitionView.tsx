@@ -101,6 +101,7 @@ export default function ActivityDefinitionView({
       facility: facilityId,
       category: definition.category.slug,
       healthcare_service: definition.healthcare_service?.id || null,
+      slug_value: definition.slug_config.slug_value,
     });
   };
 

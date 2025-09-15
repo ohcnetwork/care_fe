@@ -12,7 +12,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { FilterSelect } from "@/components/ui/filter-select";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,19 +29,17 @@ import {
 
 import useFilters from "@/hooks/useFilters";
 
-import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_CLASS_ICONS,
   EncounterClass,
 } from "@/types/emr/encounter/encounter";
-import {
-  MEDICATION_PRIORITY_COLORS,
-  MedicationPriority,
-  MedicationRequestSummary,
-} from "@/types/emr/medicationRequest/medicationRequest";
+import { MedicationRequestSummary } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import { PRESCRIPTION_STATUS_STYLES } from "@/types/emr/prescription/prescription";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
 const BILLING_STATUS_OPTIONS = {
   pending: {
@@ -109,7 +106,6 @@ export default function MedicationRequestList({
       pathParams: { facilityId },
       queryParams: {
         patient: qParams.search,
-        priority: qParams.priority,
         encounter_class: qParams.encounter_class,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
@@ -207,13 +203,6 @@ export default function MedicationRequestList({
               )}
             </TabsList>
           </Tabs>
-          <FilterSelect
-            value={qParams.priority || ""}
-            onValueChange={(value) => updateQuery({ priority: value })}
-            options={Object.values(MedicationPriority)}
-            label="priority"
-            onClear={() => updateQuery({ priority: undefined })}
-          />
         </div>
         <div className="w-full lg:max-w-sm">
           <Input
@@ -234,8 +223,9 @@ export default function MedicationRequestList({
             <TableHeader>
               <TableRow>
                 <TableHead>{t("patient_name")}</TableHead>
-                <TableHead>{t("priority")}</TableHead>
+                <TableHead>{t("status")}</TableHead>
                 <TableHead>{t("category")}</TableHead>
+                <TableHead>{t("by")}</TableHead>
                 <TableHead>{t("total_medicines")}</TableHead>
                 <TableHead>{t("action")}</TableHead>
               </TableRow>
@@ -250,29 +240,40 @@ export default function MedicationRequestList({
               ) : (
                 prescriptionQueue?.results?.map(
                   (item: MedicationRequestSummary) => (
-                    <TableRow key={item.encounter.id}>
+                    <TableRow key={item.prescription.id}>
                       <TableCell className="font-semibold">
-                        {item.encounter.patient.name}
+                        {item.prescription.encounter.patient.name}
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant={MEDICATION_PRIORITY_COLORS[item.priority]}
+                          variant={
+                            PRESCRIPTION_STATUS_STYLES[item.prescription.status]
+                          }
                         >
-                          {t(item.priority)}
+                          {t(
+                            `prescription_status__${item.prescription.status}`,
+                          )}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <Badge
                           variant={
                             ENCOUNTER_CLASSES_COLORS[
-                              item.encounter.encounter_class
+                              item.prescription.encounter.encounter_class
                             ]
                           }
                         >
                           {t(
-                            `encounter_class__${item.encounter.encounter_class}`,
+                            `encounter_class__${item.prescription.encounter.encounter_class}`,
                           )}
                         </Badge>
+                      </TableCell>
+
+                      <TableCell className="text-sm">
+                        {formatName(item.prescription.prescribed_by)}
+                        <div className="text-xs text-gray-500">
+                          {formatDateTime(item.prescription.created_date)}
+                        </div>
                       </TableCell>
                       <TableCell>{item.count}</TableCell>
                       <TableCell>
@@ -281,7 +282,7 @@ export default function MedicationRequestList({
                           className="font-semibold"
                           onClick={() => {
                             navigate(
-                              `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}${qParams.billing_status === "partial" ? "/partial" : ""}`,
+                              `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.prescription.encounter.patient.id}${qParams.billing_status === "partial" ? "/partial" : ""}`,
                             );
                           }}
                         >

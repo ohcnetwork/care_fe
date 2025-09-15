@@ -106,10 +106,14 @@ import {
   AppointmentStatus,
   SchedulableResourceType,
   TokenSlot,
+  nameFromAppointment,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserReadMinimal } from "@/types/user/user";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { NonEmptyArray } from "@/Utils/types";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { MultiPractitionerSelector } from "./components/MultiPractitionerSelect";
 
 interface DateRangeDisplayProps {
@@ -316,6 +320,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
     limit: 15,
   });
 
+  useFacilityShortcuts("charge-items-table");
   const practitionerFilterEnabled =
     resourceType === SchedulableResourceType.Practitioner && !resourceId;
 
@@ -345,32 +350,12 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
   });
 
   const schedulableUserResources = schedulableUsersQuery.data?.users;
-  const practitionerIds = qParams.practitioners?.split(",") ?? [];
+  const practitionerIds = qParams.practitioners?.split(",") ?? [authUser.id];
   const practitioners = schedulableUserResources?.filter((r) =>
     practitionerIds.includes(r.id),
-  );
+  ) as NonEmptyArray<UserReadMinimal>;
 
   useEffect(() => {
-    // trigger this effect only when there are no query params already applied, and once the query is loaded
-    if (
-      Object.keys(qParams).length !== 0 ||
-      (practitionerFilterEnabled && schedulableUsersQuery.isLoading)
-    ) {
-      return;
-    }
-
-    // Sets the practitioner filter to the current user if they are in the list of
-    // schedulable users and no practitioner was selected.
-    if (
-      !qParams.practitioners &&
-      practitionerFilterEnabled &&
-      schedulableUsersQuery.data?.users.some(
-        (r) => r.username === authUser.username,
-      )
-    ) {
-      qParams.practitioners = authUser.id;
-    }
-
     // Set default date range if no dates are present
     if (!qParams.date_from && !qParams.date_to) {
       const today = new Date();
@@ -394,7 +379,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
       updateQuery({ ...qParams });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schedulableUsersQuery.isLoading]);
+  }, [qParams.date_from, qParams.date_to]);
 
   // Enabled only if filtered by a practitioner and a single day
   const slotsFilterEnabled =
@@ -467,21 +452,20 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
               </Label>
               <MultiPractitionerSelector
                 facilityId={facilityId}
-                selected={practitioners ?? null}
-                onSelect={(users: UserReadMinimal[] | null) => {
+                selected={practitioners}
+                onSelect={(users) => {
                   if (users) {
                     updateQuery({
-                      practitioners: users.map((user) => user.id).join(","),
+                      practitioners: users.map((user) => user.id),
                       slot: null,
                     });
                   } else {
                     updateQuery({
-                      practitioners: null,
+                      practitioners: [],
                       slot: null,
                     });
                   }
                 }}
-                clearSelection={t("show_all")}
               />
             </div>
           )}
@@ -689,6 +673,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
           <Button
             variant="primary"
+            data-shortcut-id="print-button"
             disabled={
               differenceInDays(qParams.date_to, qParams.date_from) >= 31
             }
@@ -704,6 +689,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
           >
             <CareIcon icon="l-print" className="text-lg" />
             {t("print")}
+            <ShortcutBadge actionId="print-button" className="bg-white" />
           </Button>
           <PatientEncounterOrIdentifierFilter
             onSelect={(patientId) => updateQuery({ patient: patientId })}
@@ -730,7 +716,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 statusGroup={statusGroup}
                 slot={slot?.id}
                 resourceType={resourceType}
-                resourceIds={resourceId ?? (qParams.practitioners || null)}
+                resourceIds={resourceId ? [resourceId] : practitionerIds}
                 date_from={qParams.date_from}
                 date_to={qParams.date_to}
                 canViewAppointments={canViewAppointments}
@@ -755,6 +741,8 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
           Pagination={Pagination}
           tags={selectedTags.map((tag) => tag.id)}
           patient={qParams.patient}
+          resourceType={resourceType}
+          resourceIds={resourceId ? [resourceId] : practitionerIds}
         />
       )}
     </Page>
@@ -770,7 +758,7 @@ function AppointmentColumn(props: {
   canViewAppointments: boolean;
   patient?: string;
   resourceType: SchedulableResourceType;
-  resourceIds: string | null;
+  resourceIds: NonEmptyArray<string>;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -791,7 +779,7 @@ function AppointmentColumn(props: {
       selectedStatuses.length === 0
         ? props.statusGroup.statuses
         : selectedStatuses,
-      props.resourceIds,
+      props.resourceIds.join(","),
       props.slot,
       props.date_from,
       props.date_to,
@@ -811,7 +799,7 @@ function AppointmentColumn(props: {
           limit: 10,
           slot: props.slot,
           resource_type: props.resourceType,
-          resource_ids: props.resourceIds ?? undefined,
+          resource_ids: props.resourceIds.join(","),
           date_after: props.date_from,
           date_before: props.date_to,
           ordering: "token_slot__start_datetime",
@@ -825,6 +813,7 @@ function AppointmentColumn(props: {
       const currentOffset = allPages.length * 10;
       return currentOffset < lastPage.count ? currentOffset : null;
     },
+    enabled: !!props.resourceIds,
   });
 
   const appointments =
@@ -994,18 +983,18 @@ function AppointmentCard({
           <div className="flex items-center justify-center">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Avatar
-                  name={formatName(appointment.user)}
-                  imageUrl={appointment.user.profile_picture_url}
-                  className="size-14 rounded-r-none"
-                />
+                {appointment.resource_type ===
+                  SchedulableResourceType.Practitioner && (
+                  <Avatar
+                    name={formatName(appointment.resource)}
+                    imageUrl={appointment.resource.profile_picture_url}
+                    className="size-14 rounded-r-none"
+                  />
+                )}
               </TooltipTrigger>
               <TooltipContent className="flex flex-col gap-0">
                 <span className="text-sm font-medium">
-                  {formatName(appointment.user)}
-                </span>
-                <span className="text-xs text-gray-300 truncate">
-                  {appointment.user.username}
+                  {nameFromAppointment(appointment)}
                 </span>
               </TooltipContent>
             </Tooltip>
@@ -1050,12 +1039,14 @@ function AppointmentRow(props: {
   updateQuery: (filter: FilterState) => void;
   resultsPerPage: number;
   slot: string | null;
-  status: string | null;
+  status: AppointmentStatus;
   date_from: string | null;
   date_to: string | null;
   canViewAppointments: boolean;
   tags?: string[];
   patient?: string;
+  resourceType: SchedulableResourceType;
+  resourceIds: NonEmptyArray<string>;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -1086,9 +1077,15 @@ function AppointmentRow(props: {
         offset: ((props.page ?? 1) - 1) * props.resultsPerPage,
         ordering: "token_slot__start_datetime",
         patient: props.patient,
+        resource_type: props.resourceType,
+        resource_ids: props.resourceIds.join(","),
       },
     }),
-    enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
+    enabled:
+      !!props.resourceIds &&
+      !!props.date_from &&
+      !!props.date_to &&
+      props.canViewAppointments,
   });
 
   const appointments = data?.results ?? [];
@@ -1105,7 +1102,10 @@ function AppointmentRow(props: {
             <TabsList>
               {getStatusGroups(t).map((group) => {
                 return (
-                  <TabsTrigger key={group.label} value={group.label}>
+                  <TabsTrigger
+                    key={group.label}
+                    value={group.statuses.join(",")}
+                  >
                     {group.label}
                   </TabsTrigger>
                 );
@@ -1125,7 +1125,7 @@ function AppointmentRow(props: {
             </SelectTrigger>
             <SelectContent>
               {getStatusGroups(t).map((group) => (
-                <SelectItem key={group.label} value={group.label}>
+                <SelectItem key={group.label} value={group.statuses.join(",")}>
                   <div className="flex items-center">{group.label}</div>
                 </SelectItem>
               ))}
@@ -1203,7 +1203,7 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
       </TableCell>
       {/* TODO: Replace with relevant information */}
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        {formatName(appointment.user)}
+        {nameFromAppointment(appointment)}
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
         {t(appointment.status)}

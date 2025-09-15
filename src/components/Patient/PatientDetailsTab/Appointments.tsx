@@ -7,6 +7,12 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Table,
   TableBody,
   TableCell,
@@ -15,14 +21,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { Avatar } from "@/components/Common/Avatar";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 
 import query from "@/Utils/request/query";
-import { formatDateTime, formatName } from "@/Utils/utils";
+import { formatDateTime } from "@/Utils/utils";
 import useFilters from "@/hooks/useFilters";
 import { APPOINTMENT_STATUS_COLORS } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
+import { MoreVertical } from "lucide-react";
 
 export const Appointments = (props: PatientProps) => {
   const { patientData, facilityId } = props;
@@ -45,6 +51,9 @@ export const Appointments = (props: PatientProps) => {
   });
 
   const appointments = data?.results;
+  const page = qParams.page ?? 1;
+  const startIndex = (page - 1) * resultsPerPage;
+  const totalColumns = facilityId ? 6 : 4;
 
   return (
     <div className="mt-4 px-3 md:px-0">
@@ -65,80 +74,105 @@ export const Appointments = (props: PatientProps) => {
         )}
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white">
-        <Table>
+      <div className="">
+        <Table className="text-sm">
           <TableHeader>
-            <TableRow>
-              <TableHead>{t("appointment_type")}</TableHead>
-              <TableHead>{t("date_and_time")}</TableHead>
-              <TableHead>{t("booked_by")}</TableHead>
-              <TableHead>{t("status")}</TableHead>
-              {facilityId && (
-                <TableHead className="text-right">{t("actions")}</TableHead>
-              )}
+            <TableRow className="bg-gray-200 !border-b-10 border-gray-50">
+              <TableHead className="w-10 rounded-tl-md text-center border-r-2 border-gray-50">
+                #
+              </TableHead>
+              <TableHead className="text-left border-r-2 border-gray-50">
+                {t("appointment_type")}
+              </TableHead>
+              <TableHead className="text-center border-r-2 border-gray-50">
+                {t("date_and_time")}
+              </TableHead>
+              <TableHead className="text-center border-r-2 border-gray-50">
+                {t("status")}
+              </TableHead>
+              <TableHead className="text-center rounded-tr-md">
+                {t("settings")}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-4">
+                <TableCell colSpan={totalColumns} className="text-center py-4">
                   {t("loading")}
                 </TableCell>
               </TableRow>
             ) : appointments && appointments.length ? (
-              appointments.map((appointment) => (
-                <TableRow key={appointment.id}>
-                  <TableCell className="font-medium">
-                    {appointment.token_slot.availability.name}
-                  </TableCell>
-                  <TableCell>
-                    {formatDateTime(appointment.token_slot.start_datetime)}
-                  </TableCell>
-                  <TableCell>
-                    {appointment.booked_by ? (
-                      <div className="flex items-center gap-2">
-                        <Avatar
-                          imageUrl={appointment.booked_by?.profile_picture_url}
-                          name={formatName(appointment.booked_by, true)}
-                          className="size-6 rounded-full"
-                        />
-                        <span>{formatName(appointment.booked_by)}</span>
-                      </div>
-                    ) : (
-                      <span className="text-gray-500">{t("self_booked")}</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={APPOINTMENT_STATUS_COLORS[appointment.status]}
-                    >
-                      {t(appointment.status)}
-                    </Badge>
-                  </TableCell>
-                  {facilityId && (
-                    <TableCell className="text-right">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link
-                          href={`/facility/${facilityId}/patient/${patientData.id}/appointments/${appointment.id}`}
-                        >
-                          <CareIcon icon="l-eye" className="mr-1" />
-                          {t("view")}
-                        </Link>
-                      </Button>
+              [...appointments, ...appointments, ...appointments].map(
+                (appointment, index) => (
+                  <TableRow
+                    key={appointment.id}
+                    className="border-b-10 border-gray-50 bg-white"
+                  >
+                    <TableCell className="rounded-l-md p-4 text-center text-muted-foreground border-r-2 border-gray-50">
+                      {startIndex + index + 1}
                     </TableCell>
-                  )}
-                </TableRow>
-              ))
+                    <TableCell className="p-4 text-center font-medium flex items-center justify-between border-r-2 border-gray-50">
+                      <Link
+                        href={`/facility/${facilityId}/patient/${patientData.id}/appointments/${appointment.id}`}
+                        className="underline-offset-2 hover:underline"
+                      >
+                        {appointment.token_slot.availability.name}
+                      </Link>
+                      {facilityId && (
+                        <Button variant="outline" asChild>
+                          <Link
+                            href={`/facility/${facilityId}/patient/${patientData.id}/appointments/${appointment.id}`}
+                          >
+                            {t("view_details")}
+                          </Link>
+                        </Button>
+                      )}
+                    </TableCell>
+
+                    <TableCell className="p-4 text-center border-r-2 border-gray-50">
+                      {formatDateTime(appointment.token_slot.start_datetime)}
+                    </TableCell>
+                    <TableCell className="p-4 text-center border-r-2 border-gray-50">
+                      <Badge
+                        variant={APPOINTMENT_STATUS_COLORS[appointment.status]}
+                      >
+                        {t(appointment.status)}
+                      </Badge>
+                    </TableCell>
+
+                    <TableCell className="rounded-r-md p-4 text-center">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="size-4 text-muted-foreground" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {facilityId && (
+                            <DropdownMenuItem>
+                              <Link
+                                href={`/facility/${facilityId}/patient/${patientData.id}/appointments/${appointment.id}`}
+                              >
+                                {t("view")}
+                              </Link>
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ),
+              )
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-4">
+                <TableCell colSpan={totalColumns} className="text-center py-4">
                   {t("no_appointments")}
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
-        {/* add pagination */}
 
         <Pagination totalCount={data?.count ?? 0} />
       </div>

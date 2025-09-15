@@ -346,7 +346,7 @@ function HealthcareServiceFormContent({
                             );
                             return {
                               value: locationId,
-                              label: location?.name || locationId,
+                              label: location?.name || "locationId",
                               details: [],
                             };
                           })}

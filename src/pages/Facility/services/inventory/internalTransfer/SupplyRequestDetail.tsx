@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { formatDate } from "date-fns";
 import { ArrowLeft, MoreVertical } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import React, { useState } from "react";
@@ -15,27 +14,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 import BackButton from "@/components/Common/BackButton";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+
+import SupplyDeliveryTableForRequest from "./SupplyDeliveryTableForRequest";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { makeUrl } from "@/Utils/request/utils";
-import {
-  SUPPLY_DELIVERY_STATUS_COLORS,
-  SupplyDeliveryRead,
-} from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import {
   SUPPLY_REQUEST_PRIORITY_COLORS,
@@ -428,111 +416,11 @@ export default function SupplyRequestDetail({
         <h2 className="text-base font-semibold mb-1">
           {t("deliveries")} ({deliveries.length})
         </h2>
-        {deliveriesLoading ? (
-          <TableSkeleton count={5} />
-        ) : deliveries.length > 0 ? (
-          <div className="overflow-hidden rounded-md border-2 border-white shadow-md">
-            <Table className="rounded-md">
-              <TableHeader className="bg-gray-100 text-gray-700 text-sm">
-                <TableRow className="divide-x">
-                  <TableHead className="text-gray-700">
-                    {t("item_received")}
-                  </TableHead>
-                  <TableHead className="text-gray-700">
-                    {t("quantity_received")}
-                  </TableHead>
-                  <TableHead className="text-gray-700">{t("lot")}</TableHead>
-                  <TableHead className="text-gray-700">{t("expiry")}</TableHead>
-                  <TableHead className="text-gray-700">
-                    {t("condition")}
-                  </TableHead>
-                  <TableHead className="text-gray-700">
-                    {t("delivered_by")}
-                  </TableHead>
-                  <TableHead className="text-gray-700">{t("status")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody className="bg-white text-base">
-                {deliveries.map((delivery: SupplyDeliveryRead) => (
-                  <TableRow
-                    key={delivery.id}
-                    className="hover:bg-gray-50 divide-x"
-                  >
-                    <TableCell className="font-semibold text-gray-950">
-                      {delivery.supplied_item?.product_knowledge.name ||
-                        delivery.supplied_inventory_item?.product
-                          ?.product_knowledge.name}
-                    </TableCell>
-                    <TableCell className="font-medium text-gray-950">
-                      {delivery.supplied_item_quantity}{" "}
-                      {delivery.supplied_item?.product_knowledge.base_unit
-                        .display ||
-                        delivery.supplied_inventory_item?.product
-                          ?.product_knowledge.base_unit.display}
-                    </TableCell>
-                    <TableCell className="font-medium text-gray-950">
-                      {delivery.supplied_inventory_item?.product?.batch
-                        ?.lot_number ||
-                        delivery.supplied_item?.batch?.lot_number ||
-                        "-"}
-                    </TableCell>
-                    <TableCell className="font-medium text-gray-950">
-                      {delivery.supplied_inventory_item?.product
-                        ?.expiration_date
-                        ? formatDate(
-                            new Date(
-                              delivery.supplied_inventory_item.product.expiration_date,
-                            ),
-                            "dd/MM/yyyy",
-                          )
-                        : delivery.supplied_item?.expiration_date
-                          ? formatDate(
-                              new Date(delivery.supplied_item.expiration_date),
-                              "dd/MM/yyyy",
-                            )
-                          : "-"}
-                    </TableCell>
-                    <TableCell>
-                      {delivery.supplied_item_condition && (
-                        <Badge
-                          variant={
-                            delivery.supplied_item_condition === "damaged"
-                              ? "destructive"
-                              : "secondary"
-                          }
-                          className="capitalize"
-                        >
-                          {t(delivery.supplied_item_condition)}
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium text-gray-950">
-                      {delivery.origin?.name || delivery.supplier?.name || "-"}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={SUPPLY_DELIVERY_STATUS_COLORS[delivery.status]}
-                      >
-                        {t(delivery.status)}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center p-4 bg-white rounded-md">
-            <p className="text-base text-gray-800 font-medium">
-              {t("no_deliveries_dispatched_for_this_supply_request", {
-                action:
-                  mode === "external"
-                    ? t("purchase_order")
-                    : t("stock_request"),
-              })}
-            </p>
-          </div>
-        )}
+        <SupplyDeliveryTableForRequest
+          deliveries={deliveries}
+          isLoading={deliveriesLoading}
+          mode={mode}
+        />
       </div>
       <ConfirmActionDialog
         open={dialog.open}

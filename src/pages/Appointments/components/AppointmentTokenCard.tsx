@@ -4,10 +4,10 @@ import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
-import { formatName, formatPatientAge } from "@/Utils/utils";
+import { formatPatientAge } from "@/Utils/utils";
 import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import { FacilityRead } from "@/types/facility/facility";
-import { Appointment } from "@/types/scheduling/schedule";
+import { Appointment, nameFromAppointment } from "@/types/scheduling/schedule";
 import { TokenRead, renderTokenNumber } from "@/types/tokens/token/token";
 
 interface Props {
@@ -79,7 +79,7 @@ const TokenCard = ({ id, token, facility, appointment }: Props) => {
                 <div>
                   <Label>{t("practitioner", { count: 1 })}:</Label>
                   <p className="text-sm font-semibold break-words">
-                    {formatName(appointment.user)}
+                    {nameFromAppointment(appointment)}
                   </p>
                 </div>
                 <div>

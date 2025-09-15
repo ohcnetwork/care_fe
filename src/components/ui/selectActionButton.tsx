@@ -87,10 +87,6 @@ function SelectActionButton<T = string>({
     }
   };
 
-  console.log("current option", currentOption);
-  console.log(selectedValue, "selectedValue");
-  console.log(persistKey, "persist");
-
   // If there's only one option, render a simple button
   if (options.length === 1) {
     const option = options[0];

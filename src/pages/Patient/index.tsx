@@ -15,11 +15,11 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   APPOINTMENT_STATUS_COLORS,
   Appointment,
+  nameFromAppointment,
 } from "@/types/scheduling/schedule";
 
 import AppointmentDialog from "./components/AppointmentDialog";
@@ -91,12 +91,10 @@ function PatientIndex() {
           <CardTitle>
             <div className="flex flex-col">
               <span className="text-xs font-medium">
-                {t("practitioner", { count: 1 })}:{" "}
+                {t(appointment.resource_type, { count: 1 })}:{" "}
               </span>
               <span className="text-sm">
-                {appointment?.user
-                  ? formatName(appointment.user)
-                  : "Resource from BE"}
+                {nameFromAppointment(appointment)}
               </span>
             </div>
           </CardTitle>

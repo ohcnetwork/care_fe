@@ -149,7 +149,7 @@ export function CreateInvoicePage({
   const queryClient = useQueryClient();
   const hasInitializedSelections = useRef(false);
 
-  useFacilityShortcuts();
+  useFacilityShortcuts("billing");
   const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>(
     () => {
       if (!preSelectedChargeItems) return {};
@@ -171,7 +171,7 @@ export function CreateInvoicePage({
     resolver: zodResolver(formSchema),
     defaultValues: {
       status: InvoiceStatus.draft,
-      payment_terms: "",
+      payment_terms: import.meta.env.REACT_DEFAULT_PAYMENT_TERMS || "",
       note: "",
       charge_items: preSelectedChargeItems?.map((item) => item.id) || [],
     },
@@ -330,7 +330,7 @@ export function CreateInvoicePage({
       );
       hasInitializedSelections.current = true;
     }
-  }, [chargeItems]);
+  }, [chargeItems, form]);
 
   return (
     <div className="container mx-auto md:px-4 pb-6">
@@ -339,6 +339,7 @@ export function CreateInvoicePage({
           <Link
             href={`/facility/${facilityId}/billing/account/${accountId}`}
             className="text-xs text-gray-500 hover:text-gray-700"
+            data-shortcut-id="go-back"
           >
             ← {t("back_to_account")}
           </Link>
@@ -398,13 +399,11 @@ export function CreateInvoicePage({
                   type="button"
                   variant="outline"
                   onClick={() => setIsAddChargeItemsOpen(true)}
+                  data-shortcut-id="add-charge-item"
                 >
                   <PlusIcon className="size-4 mr-2" />
                   {t("add_charge_items")}
-                  <ShortcutBadge
-                    actionId="add-charge-items-create-invoice"
-                    alwaysShow
-                  />
+                  <ShortcutBadge actionId="add-charge-item" />
                 </Button>
               )}
             </div>
@@ -614,10 +613,9 @@ export function CreateInvoicePage({
               className="text-base font-semibold"
               onClick={() => window.history.back()}
               disabled={createMutation.isPending}
-              data-shortcut-id="cancel-action"
+              data-shortcut-id="go-back"
             >
               <span className="underline">{t("cancel")}</span>
-              <ShortcutBadge actionId="cancel-action" />
             </Button>
             {showDispenseNowButton && (
               <Button

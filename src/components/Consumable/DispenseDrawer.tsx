@@ -67,8 +67,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
-import ConsumableSelector from "./ConsumableSelector";
 
 interface SelectedLocation {
   id: string;
@@ -115,7 +115,7 @@ const createFormSchema = () =>
 
 type FormValues = z.infer<ReturnType<typeof createFormSchema>>;
 
-export default function DispenseConsumableDrawer({
+export default function DispenseDrawer({
   open,
   onOpenChange,
   patientId: _patientId,
@@ -146,7 +146,6 @@ export default function DispenseConsumableDrawer({
   const [isLocationWarningOpen, setIsLocationWarningOpen] = useState(false);
   const [productKnowledgeInventoriesMap, setProductKnowledgeInventoriesMap] =
     useState<Record<string, InventoryRead[] | undefined>>({});
-  const [search, setSearch] = useState("");
 
   const formSchema = useMemo(() => createFormSchema(), []);
 
@@ -214,7 +213,7 @@ export default function DispenseConsumableDrawer({
   const { mutate: dispense, isPending } = useMutation({
     mutationFn: mutate(batchApi.batchRequest),
     onSuccess: () => {
-      toast.success(t("consumables_dispensed_successfully"));
+      toast.success(t("items_dispensed_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["inventory", currentLocation.id],
       });
@@ -387,7 +386,7 @@ export default function DispenseConsumableDrawer({
             dosage_instruction: [],
             encounter: encounterId,
             location: currentLocation.id,
-            authorizing_prescription: null,
+            authorizing_request: null,
             item: selectedInventory.id,
             quantity: lot.quantity,
             days_supply: 1,
@@ -469,7 +468,7 @@ export default function DispenseConsumableDrawer({
           <div className="absolute inset-x-0 top-0 h-2 w-16 mx-auto rounded-3xl bg-gray-300 mt-2" />
           <SheetHeader className="max-w-4xl mx-auto w-full py-5 flex flex-row justify-between items-center pt-7">
             <SheetTitle className="text-xl font-semibold m-0">
-              {t("dispense_consumable")}
+              {t("dispense")}
             </SheetTitle>
             <Button
               variant="outline"
@@ -517,11 +516,11 @@ export default function DispenseConsumableDrawer({
                 {fields.length === 0 ? (
                   <EmptyState
                     icon="l-syringe"
-                    title={t("no_consumables_added_yet")}
+                    title={t("no_items_added_yet")}
                     description={t("add_items_to_dispense_now_no_invoice")}
                     action={
-                      <ConsumableSelector
-                        onProductSelect={(product) => {
+                      <ProductKnowledgeSelect
+                        onChange={(product) => {
                           append({
                             reference_id: crypto.randomUUID(),
                             productKnowledge: product,
@@ -540,10 +539,8 @@ export default function DispenseConsumableDrawer({
                             ...prev,
                           }));
                         }}
-                        search={search}
-                        onSearchChange={setSearch}
                         className="text-primary-800 border-primary-600"
-                        popoverWidth="auto"
+                        placeholder={t("add_item")}
                       />
                     }
                   />
@@ -582,7 +579,7 @@ export default function DispenseConsumableDrawer({
                             />
                           </TableHead>
                           <TableHead className="bg-gray-100 text-gray-700">
-                            {t("consumable")}
+                            {t("items")}
                           </TableHead>
                           <TableHead className="bg-gray-100 text-gray-700">
                             {t("select_lot")}
@@ -965,10 +962,9 @@ export default function DispenseConsumableDrawer({
                       </TableBody>
                     </Table>
 
-                    {/* Consumable Selection */}
                     <div className="my-4">
-                      <ConsumableSelector
-                        onProductSelect={(product) => {
+                      <ProductKnowledgeSelect
+                        onChange={(product) => {
                           append({
                             reference_id: crypto.randomUUID(),
                             productKnowledge: product,
@@ -987,9 +983,8 @@ export default function DispenseConsumableDrawer({
                             ...prev,
                           }));
                         }}
-                        search={search}
-                        onSearchChange={setSearch}
                         className="text-primary-800 border-primary-600"
+                        placeholder={t("add_item")}
                       />
                     </div>
                   </>
@@ -1038,7 +1033,7 @@ export default function DispenseConsumableDrawer({
             <DialogTitle>{t("change_location_confirm")}</DialogTitle>
             <DialogDescription className="text-gray-700 mt-2">
               <Trans
-                i18nKey="consumables_added_current_location_warning"
+                i18nKey="items_added_current_location_warning"
                 components={{ strong: <strong className="font-semibold" /> }}
                 values={{ location: selectedLocation.path }}
               />
