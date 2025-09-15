@@ -24,16 +24,16 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
@@ -177,12 +177,12 @@ export function ResourceDefinitionCategoryPicker<T>({
 
   const { data: favoritesResponse } = useQuery({
     queryKey: ["favorites", resourceType, facilityId],
-    queryFn:
+    queryFn: () =>
       enableFavorites && favoritesConfig
         ? query(favoritesConfig.listFavorites.queryFn, {
             pathParams: { facilityId },
           })
-        : undefined,
+        : Promise.resolve(null),
     enabled: enableFavorites && !!favoritesConfig,
   });
 
@@ -379,8 +379,8 @@ export function ResourceDefinitionCategoryPicker<T>({
           placeholder={t(translations.searchPlaceholder)}
           value={searchQuery}
           onValueChange={setSearchQuery}
-          className="pl-9 h-9 border-0 focus:ring-0"
-          autoFocus={isMobile}
+          className="h-9 border-0 focus:ring-0 text-base md:text-sm"
+          autoFocus
         />
       </div>
     </div>
@@ -680,7 +680,7 @@ export function ResourceDefinitionCategoryPicker<T>({
   return (
     <div className="space-y-2">
       {isMobile ? (
-        <Sheet
+        <Drawer
           open={open}
           onOpenChange={(newOpen) => {
             setOpen(newOpen);
@@ -690,7 +690,7 @@ export function ResourceDefinitionCategoryPicker<T>({
             setActiveTab("search");
           }}
         >
-          <SheetTrigger asChild>
+          <DrawerTrigger asChild>
             <Button
               variant="outline"
               role="combobox"
@@ -715,19 +715,12 @@ export function ResourceDefinitionCategoryPicker<T>({
                 )}
               />
             </Button>
-          </SheetTrigger>
+          </DrawerTrigger>
 
-          <SheetContent
-            side="bottom"
-            aria-describedby={undefined}
-            className="h-[80vh] px-0 pt-2 pb-0 rounded-t-3xl [&>button]:hidden"
-          >
-            <SheetTitle className="sr-only">
+          <DrawerContent>
+            <DrawerTitle className="sr-only">
               {t(translations.selectPlaceholder) || t("select_item")}
-            </SheetTitle>
-
-            <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
-
+            </DrawerTitle>
             <div className="px-4 py-3 border-b">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -782,8 +775,8 @@ export function ResourceDefinitionCategoryPicker<T>({
             ) : (
               <div className="h-full">{renderMainContent()}</div>
             )}
-          </SheetContent>
-        </Sheet>
+          </DrawerContent>
+        </Drawer>
       ) : (
         <Popover
           open={open}

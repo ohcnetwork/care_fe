@@ -26,6 +26,7 @@ import {
 } from "@/components/Common/SkeletonLoading";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import CreateTokenForm from "@/components/Tokens/CreateTokenForm";
+import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import PatientHomeTabs from "./home/PatientHomeTabs";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -195,11 +196,16 @@ export default function VerifyPatient() {
                 )}
 
                 {canWriteAppointment && (
-                  <QuickAction
-                    icon={<Stethoscope className="text-purple-500" />}
-                    title={t("schedule_appointment")}
-                    shortcut={getShortcutDisplay("schedule-appointment")}
-                    href={`/facility/${facilityId}/patient/${patientData.id}/book-appointment`}
+                  <BookAppointmentSheet
+                    patientId={patientData.id}
+                    facilityId={facilityId}
+                    trigger={
+                      <QuickAction
+                        icon={<Stethoscope className="text-purple-500" />}
+                        title={t("schedule_appointment")}
+                        shortcut={getShortcutDisplay("schedule-appointment")}
+                      />
+                    }
                   />
                 )}
 

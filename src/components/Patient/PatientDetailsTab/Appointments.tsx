@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -22,6 +21,7 @@ import {
 } from "@/components/ui/table";
 
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
+import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
@@ -29,6 +29,7 @@ import useFilters from "@/hooks/useFilters";
 import { APPOINTMENT_STATUS_COLORS } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 import { MoreVertical } from "lucide-react";
+import { Link } from "raviger";
 
 export const Appointments = (props: PatientProps) => {
   const { patientData, facilityId } = props;
@@ -62,15 +63,19 @@ export const Appointments = (props: PatientProps) => {
           {t("appointments")}
         </h2>
         {facilityId && (
-          <Button variant="outline_primary" asChild>
-            <Link
-              href={`/facility/${facilityId}/patient/${patientId}/book-appointment`}
-              className="flex items-center justify-center w-full sm:w-auto"
-            >
-              <CareIcon icon="l-plus" className="mr-2" />
-              {t("schedule_appointment")}
-            </Link>
-          </Button>
+          <BookAppointmentSheet
+            patientId={patientId}
+            facilityId={facilityId}
+            trigger={
+              <Button
+                variant="outline_primary"
+                className="flex items-center justify-center w-full sm:w-auto"
+              >
+                <CareIcon icon="l-plus" className="mr-2" />
+                {t("schedule_appointment")}
+              </Button>
+            }
+          />
         )}
       </div>
 

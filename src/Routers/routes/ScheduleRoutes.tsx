@@ -1,7 +1,6 @@
 import { AppRoutes } from "@/Routers/AppRouter";
 import AppointmentDetail from "@/pages/Appointments/AppointmentDetail";
 import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
-import BookAppointment from "@/pages/Appointments/BookAppointment/BookAppointment";
 import { PrintAppointments } from "@/pages/Appointments/components/PrintAppointments";
 import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
 import ManageToken from "@/pages/Facility/queues/ManageToken";
@@ -19,11 +18,6 @@ const ScheduleRoutes: AppRoutes = {
       resourceType={SchedulableResourceType.Practitioner}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/book-appointment": ({
-    patientId,
-    facilityId,
-  }) => <BookAppointment patientId={patientId} facilityId={facilityId} />,
-
   "/facility/:facilityId/patient/:patientId/appointments/:appointmentId": ({
     appointmentId,
   }) => <AppointmentDetail appointmentId={appointmentId} />,

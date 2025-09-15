@@ -24,6 +24,7 @@ import {
   PatientHeader,
 } from "@/components/Patient/PatientHeader";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
 export const PatientHome = (props: {
   facilityId?: string;
@@ -73,13 +74,13 @@ export const PatientHome = (props: {
       options={
         <>
           {facilityId && canWriteAppointment && (
-            <Button asChild variant="primary">
-              <Link
-                href={`/facility/${facilityId}/patient/${id}/book-appointment`}
-              >
-                {t("schedule_appointment")}
-              </Link>
-            </Button>
+            <BookAppointmentSheet
+              patientId={id}
+              facilityId={facilityId}
+              trigger={
+                <Button variant="primary">{t("schedule_appointment")}</Button>
+              }
+            />
           )}
         </>
       }

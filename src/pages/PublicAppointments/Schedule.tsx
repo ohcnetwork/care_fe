@@ -29,7 +29,11 @@ import { TokenSlotButton } from "@/pages/Appointments/BookAppointment/Appointmen
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import { Appointment, TokenSlot } from "@/types/scheduling/schedule";
+import {
+  Appointment,
+  SchedulableResourceType,
+  TokenSlot,
+} from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface AppointmentsProps {
@@ -109,7 +113,8 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     queryFn: query(PublicAppointmentApi.getSlotsForDay, {
       body: {
         facility: facilityId,
-        user: staffId,
+        resource_type: SchedulableResourceType.Practitioner,
+        resource_id: staffId,
         day: dateQueryString(selectedDate),
       },
       headers: {
