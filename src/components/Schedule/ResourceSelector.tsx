@@ -24,13 +24,11 @@ interface ResourceSelectorProps {
   facilityId: string;
   selectedResource: ScheduleResourceFormState;
   setSelectedResource: (resource: ScheduleResourceFormState) => void;
-  onChange: (resourceId: string) => void;
 }
 export const ResourceSelector = ({
   facilityId,
   selectedResource,
   setSelectedResource,
-  onChange,
 }: ResourceSelectorProps) => {
   return (
     <>
@@ -44,7 +42,6 @@ export const ResourceSelector = ({
               resource: user,
               resource_type: selectedResource.resource_type,
             });
-            onChange(user?.id || "");
           }}
         />
       )}
@@ -57,7 +54,6 @@ export const ResourceSelector = ({
               resource: location,
               resource_type: selectedResource.resource_type,
             });
-            onChange(location.id);
           }}
           value={selectedResource.resource}
         />
@@ -73,7 +69,6 @@ export const ResourceSelector = ({
               resource: service,
               resource_type: selectedResource.resource_type,
             });
-            onChange(service?.id || "");
           }}
         />
       )}

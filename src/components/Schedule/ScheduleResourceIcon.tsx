@@ -28,16 +28,19 @@ export const ScheduleResourceIcon = ({
     const IconComponent = LocationTypeIcons[resource.resource.form];
     return <IconComponent className="size-14" />;
   }
-  type DuoToneIconName = keyof typeof duoToneIcons;
-  const getIconName = (name: string): DuoToneIconName =>
-    `d-${name}` as DuoToneIconName;
-  return (
-    <CareIcon
-      icon={
-        resource.resource.styling_metadata?.careIcon
-          ? getIconName(resource.resource.styling_metadata.careIcon)
-          : "d-health-worker"
-      }
-    />
-  );
+  if (resource.resource_type === SchedulableResourceType.HealthcareService) {
+    type DuoToneIconName = keyof typeof duoToneIcons;
+    const getIconName = (name: string): DuoToneIconName =>
+      `d-${name}` as DuoToneIconName;
+    return (
+      <CareIcon
+        icon={
+          resource.resource.styling_metadata?.careIcon
+            ? getIconName(resource.resource.styling_metadata.careIcon)
+            : "d-health-worker"
+        }
+      />
+    );
+  }
+  return null;
 };

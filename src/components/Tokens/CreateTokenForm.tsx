@@ -270,8 +270,10 @@ export default function CreateTokenForm({
                         <ResourceSelector
                           selectedResource={selectedResource}
                           facilityId={facilityId}
-                          setSelectedResource={setSelectedResource}
-                          onChange={field.onChange}
+                          setSelectedResource={(resource) => {
+                            setSelectedResource(resource);
+                            field.onChange(resource.resource?.id || "");
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -356,7 +358,6 @@ export default function CreateTokenForm({
                 type="submit"
                 disabled={
                   isPending ||
-                  !selectedResource.resource_type ||
                   !form.watch("resourceId") ||
                   !form.watch("categoryId")
                 }

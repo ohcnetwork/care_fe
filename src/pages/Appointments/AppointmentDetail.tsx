@@ -697,8 +697,6 @@ const AppointmentActions = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  // TODO: We should also allow rescheduling to a location or healthcare service
-
   const [selectedResource, setSelectedResource] =
     useState<ScheduleResourceFormState>(appointment);
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
@@ -1004,7 +1002,6 @@ const AppointmentActions = ({
                         selectedResource={selectedResource}
                         facilityId={facilityId}
                         setSelectedResource={setSelectedResource}
-                        onChange={setResourceId}
                       />
                     </div>
                   </div>

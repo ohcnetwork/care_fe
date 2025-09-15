@@ -12,7 +12,6 @@ import {
 import RadioInput from "@/components/ui/RadioInput";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
-import { useState } from "react";
 
 interface AppointmentFormSectionProps {
   facilityId: string;
@@ -20,27 +19,23 @@ interface AppointmentFormSectionProps {
   setSelectedTags: (tags: TagConfig[]) => void;
   reason: string;
   setReason: (reason: string) => void;
-  setResourceId: (resourceId: string) => void;
   setSelectedResourceType: (resourceType: SchedulableResourceType) => void;
   selectedResourceType: SchedulableResourceType;
+  selectedResource: ScheduleResourceFormState;
+  setSelectedResource: (resource: ScheduleResourceFormState) => void;
 }
 export const AppointmentFormSection = ({
   facilityId,
-  setResourceId,
   selectedTags,
   setSelectedTags,
   reason,
   setReason,
   setSelectedResourceType,
   selectedResourceType,
+  selectedResource,
+  setSelectedResource,
 }: AppointmentFormSectionProps) => {
   const { t } = useTranslation();
-
-  const [selectedResource, setSelectedResource] =
-    useState<ScheduleResourceFormState>({
-      resource: null,
-      resource_type: selectedResourceType,
-    });
 
   return (
     <div className="flex flex-col gap-8 p-4 w-114 bg-white shadow rounded-lg">
@@ -56,7 +51,6 @@ export const AppointmentFormSection = ({
           value={selectedResourceType}
           onValueChange={(value: SchedulableResourceType) => {
             setSelectedResourceType(value);
-            setResourceId("");
             setSelectedResource({
               resource: null,
               resource_type: value,
@@ -72,7 +66,6 @@ export const AppointmentFormSection = ({
           facilityId={facilityId}
           setSelectedResource={setSelectedResource}
           selectedResource={selectedResource}
-          onChange={setResourceId}
         />
       </div>
 
