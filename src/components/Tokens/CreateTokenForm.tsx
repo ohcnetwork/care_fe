@@ -29,10 +29,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { dateQueryString } from "@/Utils/utils";
 
-import { LocationSearch } from "@/components/Location/LocationSearch";
-import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
-import { HealthcareServiceSelector } from "@/pages/Facility/services/HealthcareServiceSelector";
-
 import { cn } from "@/lib/utils";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
 import { LocationList } from "@/types/location/location";
@@ -43,6 +39,7 @@ import tokenCategoryApi from "@/types/tokens/tokenCategory/tokenCategoryApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
+import { ResourceSelector } from "@/components/Schedule/ResourceSelector";
 import { PatientRead } from "@/types/emr/patient/patient";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import { UserReadMinimal } from "@/types/user/user";
@@ -271,56 +268,20 @@ export default function CreateTokenForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        {selectedResourceType ===
-                          SchedulableResourceType.Practitioner &&
-                          t("practitioner")}
-                        {selectedResourceType ===
-                          SchedulableResourceType.Location && t("location")}
-                        {selectedResourceType ===
-                          SchedulableResourceType.HealthcareService &&
-                          t("healthcare_service")}
+                        {t(`schedulable_resource__${selectedResourceType}`)}
                       </FormLabel>
                       <FormControl>
-                        <div>
-                          {selectedResourceType ===
-                            SchedulableResourceType.Practitioner && (
-                            <PractitionerSelector
-                              facilityId={facilityId}
-                              selected={selectedUser}
-                              onSelect={(user) => {
-                                setSelectedUser(user);
-                                const resourceId = user?.id || "";
-                                field.onChange(resourceId);
-                              }}
-                            />
-                          )}
-
-                          {selectedResourceType ===
-                            SchedulableResourceType.Location && (
-                            <LocationSearch
-                              facilityId={facilityId}
-                              onSelect={(location) => {
-                                setSelectedLocation(location);
-                                const resourceId = location.id;
-                                field.onChange(resourceId);
-                              }}
-                              value={selectedLocation}
-                            />
-                          )}
-
-                          {selectedResourceType ===
-                            SchedulableResourceType.HealthcareService && (
-                            <HealthcareServiceSelector
-                              facilityId={facilityId}
-                              selected={selectedService}
-                              onSelect={(service) => {
-                                setSelectedService(service);
-                                const resourceId = service?.id || "";
-                                field.onChange(resourceId);
-                              }}
-                            />
-                          )}
-                        </div>
+                        <ResourceSelector
+                          selectedResourceType={selectedResourceType}
+                          facilityId={facilityId}
+                          setSelectedUser={setSelectedUser}
+                          setSelectedLocation={setSelectedLocation}
+                          setSelectedService={setSelectedService}
+                          selectedLocation={selectedLocation}
+                          selectedService={selectedService}
+                          selectedUser={selectedUser}
+                          onChange={field.onChange}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

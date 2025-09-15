@@ -41,7 +41,7 @@ export const AppointmentDateSelection = ({
     <div className="flex flex-col gap-3 md:min-w-121 lg:w-full">
       {!resourceId ? (
         <span className="text-gray-950 font-medium">
-          {t("choose_practitioner")}
+          {t("choose_resource")}
         </span>
       ) : (
         <h4 className="sm:hidden">{t("select_date")}</h4>
@@ -98,8 +98,9 @@ const DateColumn = ({
 
   const heatmapQuery = useAvailabilityHeatmap({
     facilityId,
-    userId: resourceId,
+    resourceId,
     month: selectedMonth,
+    resourceType,
   });
 
   const slotsTodayQuery = useQuery({

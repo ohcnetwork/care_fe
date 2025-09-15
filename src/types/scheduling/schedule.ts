@@ -195,6 +195,20 @@ export type AppointmentCancelledStatus =
 
 export type AppointmentStatus = (typeof AppointmentStatuses)[number];
 
+export type ScheduleResource =
+  | {
+      resource: UserReadMinimal;
+      resource_type: SchedulableResourceType.Practitioner;
+    }
+  | {
+      resource: LocationList;
+      resource_type: SchedulableResourceType.Location;
+    }
+  | {
+      resource: HealthcareServiceReadSpec;
+      resource_type: SchedulableResourceType.HealthcareService;
+    };
+
 export type Appointment = {
   id: string;
   token_slot: TokenSlot;
@@ -205,20 +219,7 @@ export type Appointment = {
   booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
   facility: FacilityBareMinimum;
   token: TokenRead | null;
-} & (
-  | {
-      resource_type: SchedulableResourceType.Practitioner;
-      resource: UserReadMinimal;
-    }
-  | {
-      resource_type: SchedulableResourceType.Location;
-      resource: LocationList;
-    }
-  | {
-      resource_type: SchedulableResourceType.HealthcareService;
-      resource: HealthcareServiceReadSpec;
-    }
-);
+} & ScheduleResource;
 
 export type AppointmentRead = Appointment & {
   tags: TagConfig[];
@@ -270,7 +271,7 @@ export const storeUserInLocalStorage = (user: UserReadMinimal) => {
   localStorage.setItem("user", JSON.stringify(user));
 };
 
-export const nameFromAppointment = (appointment: Appointment) => {
+export const nameFromAppointment = (appointment: ScheduleResource) => {
   switch (appointment.resource_type) {
     case SchedulableResourceType.Practitioner:
       return formatName(appointment.resource);

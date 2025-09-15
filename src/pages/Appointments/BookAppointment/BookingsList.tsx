@@ -40,9 +40,8 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { Avatar } from "@/components/Common/Avatar";
-
-import { dateQueryString, formatName } from "@/Utils/utils";
+import { dateQueryString } from "@/Utils/utils";
+import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import { AppointmentNonCancelledStatuses } from "@/types/scheduling/schedule";
 
 interface BookingsListProps {
@@ -165,10 +164,9 @@ const AppointmentCard = ({
             <div className="flex flex-row gap-2">
               {appointment.resource_type ===
                 SchedulableResourceType.Practitioner && (
-                <Avatar
-                  className="size-8 rounded-full border border-white shadow-sm"
-                  name={formatName(appointment.resource, true)}
-                  imageUrl={appointment.resource.profile_picture_url}
+                <ScheduleResourceIcon
+                  resource={appointment}
+                  className="size-8"
                 />
               )}
               <div className="flex items-center justify-center gap-2">
@@ -273,10 +271,9 @@ const AppointmentTable = ({
                   <div className="flex flex-row gap-2">
                     {appointment.resource_type ===
                       SchedulableResourceType.Practitioner && (
-                      <Avatar
-                        className="size-8 rounded-full border border-white shadow-sm"
-                        name={formatName(appointment.resource)}
-                        imageUrl={appointment.resource.profile_picture_url}
+                      <ScheduleResourceIcon
+                        resource={appointment}
+                        className="size-8"
                       />
                     )}
                     <div className="flex items-center justify-center gap-2">
@@ -328,12 +325,13 @@ const BookingListContent = ({
 }) => {
   const { t } = useTranslation();
   const { data: appointments, isLoading } = useQuery({
-    queryKey: ["patient-appointments", patientId, dateFrom, dateTo],
+    queryKey: ["patient-appointments", patientId, dateFrom, dateTo, facilityId],
     queryFn: query(scheduleApi.appointments.getAppointments, {
       pathParams: { patientId },
       queryParams: {
         limit: 100,
         date_after: dateFrom,
+        facility: facilityId,
         date_before: dateTo,
         status: status?.join(","),
       },

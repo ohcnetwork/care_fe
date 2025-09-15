@@ -67,7 +67,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import {
@@ -88,7 +87,6 @@ import { useView } from "@/Utils/useView";
 import {
   dateQueryString,
   formatDateTime,
-  formatName,
   formatPatientAge,
 } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
@@ -100,19 +98,20 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import {
-  APPOINTMENT_STATUS_COLORS,
   Appointment,
+  APPOINTMENT_STATUS_COLORS,
   AppointmentRead,
   AppointmentStatus,
+  nameFromAppointment,
   SchedulableResourceType,
   TokenSlot,
-  nameFromAppointment,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { NonEmptyArray } from "@/Utils/types";
+import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { MultiPractitionerSelector } from "./components/MultiPractitionerSelect";
 
@@ -983,17 +982,16 @@ function AppointmentCard({
           <div className="flex items-center justify-center">
             <Tooltip>
               <TooltipTrigger asChild>
-                {appointment.resource_type ===
-                  SchedulableResourceType.Practitioner && (
-                  <Avatar
-                    name={formatName(appointment.resource)}
-                    imageUrl={appointment.resource.profile_picture_url}
-                    className="size-14 rounded-r-none"
-                  />
-                )}
+                <ScheduleResourceIcon
+                  resource={appointment}
+                  className="size-14 rounded-r-none"
+                />
               </TooltipTrigger>
-              <TooltipContent className="flex flex-col gap-0">
+              <TooltipContent className="flex flex-col gap-0 bg-red-500">
                 <span className="text-sm font-medium">
+                  {nameFromAppointment(appointment)}
+                </span>
+                <span className="text-xs text-gray-300 truncate">
                   {nameFromAppointment(appointment)}
                 </span>
               </TooltipContent>
