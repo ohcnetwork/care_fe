@@ -7,10 +7,8 @@ import { useInView } from "react-intersection-observer";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   HoverCard,
@@ -162,7 +160,6 @@ interface Props {
 const EncounterHistoryList = ({ onSelect }: Props) => {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
-  const [showFilters, setShowFilters] = useState(false);
 
   const [status, setStatus] = useState<string>();
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
@@ -307,15 +304,6 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             <h2 className="text-xs font-medium text-gray-600 uppercase">
               {t("other_encounters")}
             </h2>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setShowFilters(!showFilters)}
-              className={cn(showFilters && "bg-gray-100")}
-              title={t("toggle_filters")}
-            >
-              <CareIcon icon="l-filter" className="size-4" />
-            </Button>
           </div>
 
           {/* Filters */}
