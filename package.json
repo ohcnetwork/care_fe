@@ -219,9 +219,5 @@
     "public/locale/*.json": [
       "npm run sort-locales"
     ]
-  },
-  "engines": {
-    "node": ">=22.9.0"
-  },
-  "packageManager": "npm@11.3.0"
+  }
 }

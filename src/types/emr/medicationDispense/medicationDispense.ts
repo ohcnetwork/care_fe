@@ -176,7 +176,7 @@ export interface MedicationDispenseCreate
   extends Omit<MedicationDispenseBase, "id"> {
   encounter: string;
   location?: string;
-  authorizing_prescription: string | null;
+  authorizing_request: string | null;
   item: string;
   quantity: number;
   days_supply: number;

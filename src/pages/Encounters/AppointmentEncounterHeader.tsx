@@ -3,10 +3,10 @@ import {
   SelectActionButton,
   SelectActionOption,
 } from "@/components/ui/selectActionButton";
+import { BatchRequestResponse } from "@/types/base/batch/batch";
 import batchApi from "@/types/base/batch/batchApi";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
-import { BatchSubmissionResult } from "@/types/questionnaire/batch";
 import { AppointmentRead } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 import { renderTokenNumber, TokenStatus } from "@/types/tokens/token/token";
@@ -66,7 +66,7 @@ export const AppointmentEncounterHeader = ({
   const { mutate: batchRequest, isPending: isBatchRequestPending } =
     useMutation({
       mutationFn: mutate(batchApi.batchRequest),
-      onSuccess: (results: { results: BatchSubmissionResult[] }) => {
+      onSuccess: (results: BatchRequestResponse) => {
         queryClient.invalidateQueries({
           queryKey: ["encounter", encounter.id],
         });

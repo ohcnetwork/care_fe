@@ -19,11 +19,16 @@ import {
 import Loading from "@/components/Common/Loading";
 
 import query from "@/Utils/request/query";
-import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import {
+  dateQueryString,
+  formatDateTime,
+  formatPatientAge,
+} from "@/Utils/utils";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import {
   APPOINTMENT_STATUS_COLORS,
+  nameFromAppointment,
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -63,7 +68,7 @@ export function PrintAppointments({
         slot: qParams.slot,
         user: qParams.practitioners ?? undefined,
         date_after: qParams.date_from,
-        date_before: qParams.date_to,
+        date_before: qParams.date_to ?? dateQueryString(new Date()),
         tags: qParams.tags,
         resource_type: resourceType,
         resource_ids: qParams.practitioners ?? undefined,
@@ -140,9 +145,9 @@ export function PrintAppointments({
         <div className="mt-6 border-t border-gray-200 pt-6">
           {/* Appointments Table */}
           <div className="overflow-x-auto">
-            <Table className="w-full">
+            <Table className="w-full border">
               <TableHeader>
-                <TableRow>
+                <TableRow className="divide-x">
                   <TableHead className="p-2 font-medium text-gray-500">
                     {t("patient")}
                   </TableHead>
@@ -165,8 +170,8 @@ export function PrintAppointments({
               </TableHeader>
               <TableBody>
                 {appointments.map((appointment) => (
-                  <TableRow key={appointment.id} className="border-b">
-                    <TableCell className="p-2 align-top">
+                  <TableRow key={appointment.id} className="border-b divide-x">
+                    <TableCell className="p-2 align-top break-words whitespace-normal">
                       <div>
                         <p className="font-medium">
                           {appointment.patient.name}
@@ -177,8 +182,8 @@ export function PrintAppointments({
                         </p>
                       </div>
                     </TableCell>
-                    <TableCell className="p-2 align-top">
-                      {formatName(appointment.user)}
+                    <TableCell className="p-2 align-top break-words whitespace-normal">
+                      {nameFromAppointment(appointment)}
                     </TableCell>
                     <TableCell className="p-2 align-top">
                       {formatDateTime(

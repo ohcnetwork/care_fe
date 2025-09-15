@@ -25,25 +25,25 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
       className={cn("grid grid-cols-2 sm:grid-cols-4 gap-3", props.className)}
     >
       <QuickAction
-        icon={<AllergyIcon className="size-8 text-yellow-700" />}
+        icon={<AllergyIcon className="text-yellow-700" />}
         title={t("allergy")}
         shortcut={getShortcutDisplay("add-allergy")}
         href={`questionnaire/allergy_intolerance`}
       />
       <QuickAction
-        icon={<ChillIcon className="size-8 text-pink-700" />}
+        icon={<ChillIcon className="text-pink-700" />}
         title={t("symptoms")}
         shortcut={getShortcutDisplay("add-symptoms")}
         href={`questionnaire/symptom`}
       />
       <QuickAction
-        icon={<StethoscopeIcon className="size-8 text-blue-800" />}
+        icon={<StethoscopeIcon className="text-blue-800" />}
         title={t("diagnosis")}
         shortcut={getShortcutDisplay("add-diagnosis")}
         href={`questionnaire/diagnosis`}
       />
       <QuickAction
-        icon={<HealthWorkerIcon className="size-8 text-teal-700" />}
+        icon={<HealthWorkerIcon className="text-teal-700" />}
         title={t("forms")}
         shortcut={getShortcutDisplay("add-questionnaire")}
         href={`questionnaire`}
@@ -51,33 +51,49 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
     </div>
   );
 };
-
-const QuickAction = ({
+// function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+export function QuickAction({
   icon,
   title,
   shortcut,
   href,
+  ...props
 }: {
   icon: React.ReactNode;
   title: string;
   shortcut?: string;
-  href: string;
-}) => {
-  return (
-    <Link
-      href={href}
-      className="flex-1 flex flex-col gap-1.25 p-1 pb-2 rounded-lg shadow bg-white"
-    >
-      <div className="relative flex py-3 rounded-t-lg rounded-b-xl bg-gray-100">
+  href?: string;
+  props?: React.ComponentProps<"div">;
+}) {
+  const content = (
+    <>
+      <div className="relative flex md:py-3 py-0 rounded-t-lg rounded-b-xl md:bg-gray-100 bg-white">
         <KeyboardShortcutBadge shortcut={shortcut} position="top-right" />
-        <div className="rounded-xl bg-white p-2 size-12 shadow mx-auto">
+        <div className="rounded-xl bg-white md:shadow shadow-none mx-auto items-center flex p-2">
           {icon}
         </div>
       </div>
       <div className="flex items-center gap-1 justify-center">
-        <PlusIcon className="size-4" />
+        <PlusIcon className="size-4 md:block hidden" />
         <span className="text-sm font-semibold">{title}</span>
       </div>
-    </Link>
+    </>
   );
-};
+
+  const className =
+    "flex-1 flex flex-row md:flex-col gap-1.25 p-1 pb-2 rounded-lg shadow bg-white";
+
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button className={className} {...props}>
+      {content}
+    </button>
+  );
+}

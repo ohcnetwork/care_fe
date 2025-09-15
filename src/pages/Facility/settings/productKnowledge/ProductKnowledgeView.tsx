@@ -142,10 +142,6 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
               <p className="font-medium">{t(product.product_type)}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">{t("slug")}</p>
-              <p className="text-gray-700">{product.slug}</p>
-            </div>
-            <div>
               <p className="text-sm text-gray-500">
                 {t("product_knowledge_alternate_identifier")}
               </p>

@@ -24,8 +24,10 @@ import { AppointmentFormSection } from "./AppointmentFormSection";
 
 export const BookAppointmentDetails = ({
   patientId,
+  onSuccess,
 }: {
   patientId: string;
+  onSuccess?: () => void;
 }) => {
   const { t } = useTranslation();
   const [resourceId, setResourceId] = useState<string>();
@@ -51,6 +53,7 @@ export const BookAppointmentDetails = ({
     }),
     onSuccess: (data: Appointment) => {
       toast.success(t("appointment_created_successfully"));
+      onSuccess?.();
       navigate(
         `/facility/${facilityId}/patient/${patientId}/appointments/${data.id}`,
       );

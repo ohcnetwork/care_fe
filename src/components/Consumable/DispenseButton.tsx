@@ -5,9 +5,9 @@ import { LocationSelectorDialog } from "@/components/ui/sidebar/facility/locatio
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { LocationList } from "@/types/location/location";
 
-import DispenseConsumableDrawer from "./DispenseConsumableDrawer";
+import DispenseDrawer from "./DispenseDrawer";
 
-export const DispenseConsumableButton = ({
+export const DispenseButton = ({
   open,
   setOpen,
 }: {
@@ -48,7 +48,7 @@ export const DispenseConsumableButton = ({
       />
 
       {location && selectedEncounter && (
-        <DispenseConsumableDrawer
+        <DispenseDrawer
           open={showDrawer}
           onOpenChange={(isOpen: boolean) => {
             setShowDrawer(isOpen);

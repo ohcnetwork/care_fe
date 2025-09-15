@@ -2,6 +2,12 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -10,6 +16,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePreferredServicePointCategory } from "@/pages/Facility/queues/usePreferredServicePointCategory";
 import { getTokenQueueStatusCount } from "@/pages/Facility/queues/utils";
@@ -39,6 +46,7 @@ import {
   MoreHorizontal,
   RotateCcw,
   SettingsIcon,
+  UserCheck,
   X,
 } from "lucide-react";
 import { Link } from "raviger";
@@ -59,11 +67,18 @@ export function ManageQueueOngoingTab({
   queueId,
   subQueues,
   resourceType,
+  resourceId,
 }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex space-x-4 overflow-x-auto w-full">
-        <WaitingTokensColumn facilityId={facilityId} queueId={queueId} />
+        <WaitingTokensColumn
+          facilityId={facilityId}
+          queueId={queueId}
+          resourceType={resourceType}
+          resourceId={resourceId}
+          subQueues={subQueues}
+        />
         <InServiceTokensColumn
           facilityId={facilityId}
           queueId={queueId}
@@ -198,9 +213,15 @@ function SubQueueColumn({
 function WaitingTokensColumn({
   facilityId,
   queueId,
+  resourceType,
+  resourceId,
+  subQueues,
 }: {
   facilityId: string;
   queueId: string;
+  resourceType: SchedulableResourceType;
+  resourceId: string;
+  subQueues: TokenSubQueueRead[];
 }) {
   const { ref, inView } = useInView();
 
@@ -271,6 +292,9 @@ function WaitingTokensColumn({
                     token={token}
                     facilityId={facilityId}
                     queueId={queueId}
+                    _resourceType={resourceType}
+                    _resourceId={resourceId}
+                    subQueues={subQueues}
                   />
                 }
               />
@@ -583,18 +607,98 @@ function TokenCompleteConfirmDialog({
   );
 }
 
+function AssignToServicePointDialog({
+  open,
+  onOpenChange,
+  token,
+  subQueues,
+  onConfirm,
+  isLoading,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  token: TokenRead;
+  subQueues: TokenSubQueueRead[];
+  onConfirm: (subQueueId: string) => void;
+  isLoading: boolean;
+}) {
+  const { t } = useTranslation();
+  const [selectedSubQueueId, setSelectedSubQueueId] = useState<string>("");
+
+  const handleConfirm = () => {
+    if (selectedSubQueueId) {
+      onConfirm(selectedSubQueueId);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>{t("select_service_point")}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            {t("choose_service_point_to_call_patient", {
+              patientName: token.patient?.name,
+              tokenNumber: renderTokenNumber(token),
+            })}
+          </p>
+          <RadioGroup
+            value={selectedSubQueueId}
+            onValueChange={setSelectedSubQueueId}
+            className="space-y-3"
+          >
+            {subQueues.map((subQueue) => (
+              <div
+                key={subQueue.id}
+                className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+              >
+                <RadioGroupItem value={subQueue.id} id={subQueue.id} />
+                <label
+                  htmlFor={subQueue.id}
+                  className="flex-1 text-sm font-medium cursor-pointer"
+                >
+                  {subQueue.name}
+                </label>
+              </div>
+            ))}
+          </RadioGroup>
+        </div>
+        <div className="flex">
+          <Button
+            onClick={handleConfirm}
+            className="w-full"
+            disabled={!selectedSubQueueId || isLoading}
+          >
+            <UserCheck className="size-4 mr-2" />
+            {t("call_patient")}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function WaitingTokenOptions({
   token,
   facilityId,
   queueId,
+  _resourceType,
+  _resourceId,
+  subQueues,
 }: {
   token: TokenRead;
   facilityId: string;
   queueId: string;
+  _resourceType: SchedulableResourceType;
+  _resourceId: string;
+  subQueues: TokenSubQueueRead[];
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showAssignDialog, setShowAssignDialog] = useState(false);
 
   const { mutate: updateToken, isPending: isUpdating } = useMutation({
     mutationFn: mutate(tokenApi.update, {
@@ -624,7 +728,16 @@ function WaitingTokenOptions({
       queryClient.invalidateQueries({
         queryKey: ["token-queue-summary", facilityId, queueId],
       });
+      queryClient.invalidateQueries({
+        queryKey: [
+          "infinite-tokens",
+          facilityId,
+          queueId,
+          { status: TokenStatus.IN_PROGRESS },
+        ],
+      });
       setShowCancelDialog(false);
+      setShowAssignDialog(false);
     },
   });
 
@@ -632,6 +745,14 @@ function WaitingTokenOptions({
     updateToken({
       status: TokenStatus.CANCELLED,
       note: token.note,
+    });
+  };
+
+  const handleAssignToServicePoint = (subQueueId: string) => {
+    updateToken({
+      status: TokenStatus.IN_PROGRESS,
+      note: token.note,
+      sub_queue: subQueueId,
     });
   };
 
@@ -645,6 +766,13 @@ function WaitingTokenOptions({
           <MoreHorizontal className="size-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={() => setShowAssignDialog(true)}
+            disabled={isUpdating}
+          >
+            <UserCheck className="size-4" />
+            {t("assign_to_service_point")}
+          </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
             onClick={() => setShowCancelDialog(true)}
@@ -661,6 +789,15 @@ function WaitingTokenOptions({
         onOpenChange={setShowCancelDialog}
         token={token}
         onConfirm={handleCancelToken}
+        isLoading={isUpdating}
+      />
+
+      <AssignToServicePointDialog
+        open={showAssignDialog}
+        onOpenChange={setShowAssignDialog}
+        token={token}
+        subQueues={subQueues}
+        onConfirm={handleAssignToServicePoint}
         isLoading={isUpdating}
       />
     </>

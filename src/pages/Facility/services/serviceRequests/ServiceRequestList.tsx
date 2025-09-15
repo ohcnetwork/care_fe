@@ -29,6 +29,7 @@ import ServiceRequestTable from "@/components/ServiceRequest/ServiceRequestTable
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import PatientEncounterOrIdentifierFilter from "@/components/Patient/PatientEncounterOrIdentifierFilter";
 import {
   Priority,
   SERVICE_REQUEST_PRIORITY_COLORS,
@@ -210,6 +211,7 @@ export default function ServiceRequestList({
         status: qParams.status,
         priority: qParams.priority,
         ordering: "-created_date",
+        patient: qParams.patient,
       },
     }),
   });
@@ -282,6 +284,12 @@ export default function ServiceRequestList({
               </div>
             </div>
             <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full sm:w-auto">
+              <PatientEncounterOrIdentifierFilter
+                onSelect={(patientId) => updateQuery({ patient: patientId })}
+                placeholder={t("filter_by_identifier")}
+                className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+                patientId={qParams.patient}
+              />
               <div className="flex-1 sm:flex-initial sm:w-auto">
                 <FilterSelect
                   value={qParams.priority || ""}

@@ -19,7 +19,6 @@ export function PatientHeader({
   isPatientPage = false,
   locationId,
   showViewPrescriptionsButton = false,
-  showViewDispenseButton = false,
 }: {
   patient: PatientRead;
   facilityId?: string;
@@ -28,7 +27,6 @@ export function PatientHeader({
   isPatientPage?: boolean;
   locationId?: string;
   showViewPrescriptionsButton?: boolean;
-  showViewDispenseButton?: boolean;
 }) {
   const { t } = useTranslation();
 
@@ -89,18 +87,6 @@ export function PatientHeader({
                 >
                   <div className="text-gray-500 text-xs flex items-center gap-1">
                     {t("view_prescriptions")}
-                  </div>
-                </Link>
-              </Button>
-            )}
-            {showViewDispenseButton && (
-              <Button variant="outline" size="sm" asChild className="w-full">
-                <Link
-                  href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patient.id}/preparation`}
-                  basePath="/"
-                >
-                  <div className="text-gray-500 text-xs flex items-center gap-1">
-                    {t("view_dispenses")}
                   </div>
                 </Link>
               </Button>

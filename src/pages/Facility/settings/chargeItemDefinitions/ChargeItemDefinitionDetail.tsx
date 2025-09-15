@@ -67,6 +67,7 @@ export function ChargeItemDefinitionDetail({
       ...chargeItemDefinition,
       status: ChargeItemDefinitionStatus.retired,
       category: chargeItemDefinition.category.slug,
+      slug_value: chargeItemDefinition.slug_config.slug_value,
     });
   };
 
@@ -143,7 +144,7 @@ export function ChargeItemDefinitionDetail({
     <Page title={chargeItemDefinition.title}>
       <div className="container mx-auto">
         <div className="mb-4">
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-2 justify-between">
             <div>
               <div className="mt-2 flex items-center gap-2">
                 <Badge

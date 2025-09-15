@@ -199,15 +199,18 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     />
   ),
 
-  "/medication_requests/patient/:patientId/pending": ({
+  "/medication_requests/patient/:patientId/prescription/:prescriptionId": ({
     patientId,
+    prescriptionId,
   }: {
     patientId: string;
+    prescriptionId: string;
   }) => (
     <PrescriptionsView
       facilityId={facilityId}
       patientId={patientId}
       tab={PharmacyMedicationTab.PENDING}
+      prescriptionId={prescriptionId}
     />
   ),
   "/medication_requests/patient/:patientId/print": ({
@@ -216,17 +219,6 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     patientId: string;
   }) => (
     <PrintPharmacyPrescription facilityId={facilityId} patientId={patientId} />
-  ),
-  "/medication_requests/patient/:patientId/partial": ({
-    patientId,
-  }: {
-    patientId: string;
-  }) => (
-    <PrescriptionsView
-      facilityId={facilityId}
-      patientId={patientId}
-      tab={PharmacyMedicationTab.PARTIAL}
-    />
   ),
 
   "/medication_dispense/patient/:patientId/:status": ({

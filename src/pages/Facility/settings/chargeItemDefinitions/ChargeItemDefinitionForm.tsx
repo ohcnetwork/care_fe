@@ -288,7 +288,7 @@ export function ChargeItemDefinitionForm({
   // Main form schema
   const formSchema = z.object({
     title: z.string().min(1, { message: t("field_required") }),
-    slug: z
+    slug_value: z
       .string()
       .min(1, { message: t("field_required") })
       .regex(/^[a-z0-9-]+$/, {
@@ -327,15 +327,15 @@ export function ChargeItemDefinitionForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: initialData?.title || "",
-      slug: initialData?.slug || "",
+      slug_value: initialData?.slug_config.slug_value || "",
       status: initialData?.status || ChargeItemDefinitionStatus.active,
       description: initialData?.description,
       purpose: initialData?.purpose,
       derived_from_uri: initialData?.derived_from_uri,
-      category: categorySlug,
+      category: isUpdate ? initialData?.category.slug : categorySlug,
       price_components: initialData?.price_components.map((component) => ({
         ...mapPriceComponent(component),
-        conditions: component.conditions,
+        conditions: component.conditions || [],
       })) || [
         {
           monetary_component_type: MonetaryComponentType.base,
@@ -351,7 +351,7 @@ export function ChargeItemDefinitionForm({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug", generateSlug(value.title || ""), {
+        form.setValue("slug_value", generateSlug(value.title || ""), {
           shouldValidate: true,
         });
       }
@@ -379,6 +379,9 @@ export function ChargeItemDefinitionForm({
     onSuccess: (chargeItemDefinition: ChargeItemDefinitionRead) => {
       queryClient.invalidateQueries({ queryKey: ["chargeItemDefinitions"] });
       onSuccess?.(chargeItemDefinition);
+    },
+    onError: (error) => {
+      console.error("Mutation failed:", error);
     },
   });
 
@@ -441,6 +444,7 @@ export function ChargeItemDefinitionForm({
           factor: component.factor != null ? component.factor : undefined,
           amount:
             component.factor != null ? undefined : String(component.amount),
+          conditions: component.conditions || [],
         },
       ];
     } else {
@@ -555,7 +559,7 @@ export function ChargeItemDefinitionForm({
 
               <FormField
                 control={form.control}
-                name="slug"
+                name="slug_value"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel aria-required>{t("slug")}</FormLabel>
@@ -836,7 +840,7 @@ export function ChargeItemDefinitionForm({
           >
             {t("cancel")}
           </Button>
-          <Button disabled={isPending}>
+          <Button type="submit" disabled={isPending}>
             {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

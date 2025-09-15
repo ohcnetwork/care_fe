@@ -4,7 +4,6 @@ import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 
@@ -23,12 +22,13 @@ interface Props {
   facilityId: string;
   patientId: string;
   tab?: PharmacyMedicationTab;
+  prescriptionId: string;
 }
 
 export default function PrescriptionsView({
   facilityId,
   patientId,
-  tab,
+  prescriptionId,
 }: Props) {
   const { t } = useTranslation();
   const { locationId } = useCurrentLocation();
@@ -63,53 +63,16 @@ export default function PrescriptionsView({
           patient={patientData}
           facilityId={facilityId}
           locationId={locationId}
-          showViewDispenseButton
           className="p-2 rounded-none shadow-none bg-gray-100"
         />
       )}
-      <Tabs
-        value={tab}
-        onValueChange={(value) =>
-          navigate(
-            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${patientId}/${value}`,
-          )
-        }
-        className="mt-4"
-      >
-        <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
-          <TabsTrigger
-            value="pending"
-            id="user-card-view"
-            className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-          >
-            <span>{t("billing_pending")}</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="partial"
-            id="user-card-view"
-            className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-          >
-            <span>{t("partially_billed")}</span>
-          </TabsTrigger>
-        </TabsList>
-
-        <div>
-          <TabsContent value="pending" className="p-2">
-            <MedicationDispenseList
-              facilityId={facilityId}
-              patientId={patientId}
-              partial={false}
-            />
-          </TabsContent>
-          <TabsContent value="partial" className="p-2">
-            <MedicationDispenseList
-              facilityId={facilityId}
-              patientId={patientId}
-              partial={true}
-            />
-          </TabsContent>
-        </div>
-      </Tabs>
+      <div className="mt-4">
+        <MedicationDispenseList
+          facilityId={facilityId}
+          patientId={patientId}
+          prescriptionId={prescriptionId}
+        />
+      </div>
     </Page>
   );
 }

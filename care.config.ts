@@ -158,6 +158,8 @@ const careConfig = {
           )
         : undefined,
 
+    defaultGeoOrganization: env.REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG,
+
     minimalPatientRegistration: boolean(
       "REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION",
       false,
