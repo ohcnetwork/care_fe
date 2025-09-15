@@ -83,16 +83,10 @@ export interface ObservationRead extends ObservationListRead {
 
 export type ObservationCreate = Omit<ObservationBase, "id">;
 
-export interface ObservationUpdate {
-  observation_id: string;
-  observation: Partial<ObservationCreate>;
-}
-
-export interface ObservationFromDefinitionCreate {
-  observation_definition?: string;
-  observation_id?: string;
-  observation: Partial<ObservationCreate>;
-}
+export type ObservationUpsert = Omit<
+  ObservationBase,
+  "id" | "encounter" | "subject_type"
+>;
 
 export interface ObservationAnalyzeRequest {
   codes: Code[];
@@ -103,7 +97,29 @@ export interface ObservationAnalyzeGroup {
   code: Code;
   results: ObservationListRead[];
 }
-
 export interface ObservationAnalyzeResponse {
   results: ObservationAnalyzeGroup[];
 }
+
+export interface ObservationUpsertRequest {
+  observation: ObservationUpsert;
+  observation_id: string | null;
+  observation_definition: string | null;
+}
+
+export interface ObservationBatchUpsertRequest {
+  observations: ObservationUpsertRequest[];
+}
+
+export interface ObservationBatchUpsertResponse {
+  message: string;
+}
+
+export type ObservationPlotConfig = {
+  id: string;
+  name: string;
+  groups: {
+    title: string;
+    codes: Code[];
+  }[];
+}[];

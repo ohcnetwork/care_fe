@@ -37,16 +37,6 @@ import { Code } from "@/types/base/code/code";
 
 import observationApi from "@/types/emr/observation/observationApi";
 import { ObservationHistoryTable } from "./ObservationHistoryTable";
-
-export type ObservationPlotConfig = {
-  id: string;
-  name: string;
-  groups: {
-    title: string;
-    codes: Code[];
-  }[];
-}[];
-
 interface CodeGroup {
   codes: Code[];
   title: string;

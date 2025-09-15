@@ -470,7 +470,7 @@ export default function QuestionnaireEditor({
           questions: [],
           slug: "",
           tags: [],
-        } as QuestionnaireRead;
+        };
       }
       return null;
     },
@@ -810,7 +810,8 @@ export default function QuestionnaireEditor({
     setQuestionnaire({
       ...form.getValues(),
       ...mappedData,
-    } as QuestionnaireRead);
+    });
+
     form.reset({
       title: mappedData.title || "",
       slug: mappedData.slug || "",

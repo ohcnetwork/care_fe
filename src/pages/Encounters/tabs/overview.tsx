@@ -3,12 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import { ObservationPlotConfig } from "@/components/Common/Charts/ObservationChart";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 import { VitalsList } from "@/components/Patient/vitals/list";
+import { ObservationPlotConfig } from "@/types/emr/observation/observation";
 
 import { ClinicalHistoryOverview } from "@/pages/Encounters/tabs/overview/clinical-history-overview";
 import { QuickActions } from "@/pages/Encounters/tabs/overview/quick-actions";

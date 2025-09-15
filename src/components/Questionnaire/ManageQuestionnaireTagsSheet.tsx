@@ -179,12 +179,11 @@ export default function ManageQuestionnaireTagsSheet({ form, trigger }: Props) {
 
   const { mutate: createTag, isPending: isCreating } = useMutation({
     mutationFn: mutate(questionnaireApi.tags.create),
-    onSuccess: (data: unknown) => {
-      const tagData = data as QuestionnaireTagRead;
+    onSuccess: (data: QuestionnaireTagRead) => {
       queryClient.invalidateQueries({
         queryKey: ["questionnaireTags"],
       });
-      setSelectedTags((current) => [...current, tagData]);
+      setSelectedTags((current) => [...current, data]);
       setNewTagName("");
       setNewTagSlug("");
       setIsCreateOpen(false);

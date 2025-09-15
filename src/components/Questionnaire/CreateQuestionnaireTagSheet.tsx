@@ -37,15 +37,14 @@ export default function CreateQuestionnaireTagSheet({
 
   const { mutate: createTag, isPending: isCreating } = useMutation({
     mutationFn: mutate(questionnaireApi.tags.create),
-    onSuccess: (data: unknown) => {
-      const tagData = data as QuestionnaireTagRead;
+    onSuccess: (data: QuestionnaireTagRead) => {
       queryClient.invalidateQueries({
         queryKey: ["questionnaireTags"],
       });
       setNewTagName("");
       setNewTagSlug("");
       setOpen(false);
-      onTagCreated?.(tagData);
+      onTagCreated?.(data);
       toast.success(t("tag_created_successfully"));
     },
   });
