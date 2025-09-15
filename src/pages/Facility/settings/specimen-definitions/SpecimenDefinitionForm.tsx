@@ -294,7 +294,7 @@ export function SpecimenDefinitionForm({
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder={t("select_status")} />
                           </SelectTrigger>
                         </FormControl>
@@ -510,7 +510,7 @@ export function SpecimenDefinitionForm({
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder={t("select_preference")} />
                           </SelectTrigger>
                         </FormControl>
