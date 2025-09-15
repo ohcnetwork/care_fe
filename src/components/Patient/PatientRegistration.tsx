@@ -771,6 +771,12 @@ const AdditionalDetailsContent = ({
               <Input
                 {...field}
                 placeholder={t("enter_pincode")}
+                onChange={(e) => {
+                  const value = e.target.value
+                    ? Number(e.target.value)
+                    : undefined;
+                  field.onChange(value);
+                }}
                 type="number"
                 inputMode="numeric"
                 pattern="[0-9]*"

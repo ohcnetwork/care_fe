@@ -128,7 +128,7 @@ export default function GovtOrganizationSelector({
   useEffect(() => {
     if (selected && selected.length > 0) {
       let currentOrg = selected[0];
-      if (currentOrg.level_cache === 0) {
+      if (currentOrg?.level_cache === 0) {
         setSelectedLevels(selected);
       } else {
         const levels: Organization[] = [];
