@@ -374,7 +374,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
                   // TODO: disable button if basic info not fille
                 >
                   <CheckIcon />
-                  {t("register_patient")}
+                  {patientId ? t("update") : t("register_patient")}
                   <ShortcutBadge
                     actionId="submit-action"
                     className="bg-gray-200"
