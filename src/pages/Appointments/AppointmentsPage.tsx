@@ -61,11 +61,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -112,6 +107,11 @@ import { UserReadMinimal } from "@/types/user/user";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { NonEmptyArray } from "@/Utils/types";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { MultiPractitionerSelector } from "./components/MultiPractitionerSelect";
 
@@ -981,17 +981,17 @@ function AppointmentCard({
         <div className="flex">
           <div className="flex items-center justify-center">
             <Tooltip>
-              <TooltipTrigger asChild>
-                <ScheduleResourceIcon
-                  resource={appointment}
-                  className="size-14 rounded-r-none"
-                />
+              <TooltipTrigger>
+                {appointment.resource_type ===
+                  SchedulableResourceType.Practitioner && (
+                  <ScheduleResourceIcon
+                    resource={appointment}
+                    className="size-14 rounded-r-none"
+                  />
+                )}
               </TooltipTrigger>
-              <TooltipContent className="flex flex-col gap-0 bg-red-500">
+              <TooltipContent className="flex flex-col gap-0">
                 <span className="text-sm font-medium">
-                  {nameFromAppointment(appointment)}
-                </span>
-                <span className="text-xs text-gray-300 truncate">
                   {nameFromAppointment(appointment)}
                 </span>
               </TooltipContent>

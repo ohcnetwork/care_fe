@@ -72,6 +72,7 @@ export const PractitionerSelector = ({
                   resource_type: SchedulableResourceType.Practitioner,
                   resource: selected,
                 }}
+                className="size-6 rounded-full"
               />
               <span>
                 {nameFromAppointment({

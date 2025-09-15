@@ -5,13 +5,13 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
-import { ResourceSelector } from "@/components/Schedule/ResourceSelector";
+import {
+  ResourceSelector,
+  ScheduleResourceFormState,
+} from "@/components/Schedule/ResourceSelector";
 import RadioInput from "@/components/ui/RadioInput";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
-import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
-import { LocationList } from "@/types/location/location";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
-import { UserReadMinimal } from "@/types/user/user";
 import { useState } from "react";
 
 interface AppointmentFormSectionProps {
@@ -36,14 +36,11 @@ export const AppointmentFormSection = ({
 }: AppointmentFormSectionProps) => {
   const { t } = useTranslation();
 
-  const [selectedUser, setSelectedUser] = useState<UserReadMinimal | null>(
-    null,
-  );
-  const [selectedLocation, setSelectedLocation] = useState<LocationList | null>(
-    null,
-  );
-  const [selectedService, setSelectedService] =
-    useState<HealthcareServiceReadSpec | null>(null);
+  const [selectedResource, setSelectedResource] =
+    useState<ScheduleResourceFormState>({
+      resource: null,
+      resource_type: selectedResourceType,
+    });
 
   return (
     <div className="flex flex-col gap-8 p-4 w-114 bg-white shadow rounded-lg">
@@ -60,9 +57,10 @@ export const AppointmentFormSection = ({
           onValueChange={(value: SchedulableResourceType) => {
             setSelectedResourceType(value);
             setResourceId("");
-            setSelectedUser(null);
-            setSelectedLocation(null);
-            setSelectedService(null);
+            setSelectedResource({
+              resource: null,
+              resource_type: value,
+            });
           }}
         />
       </div>
@@ -71,14 +69,9 @@ export const AppointmentFormSection = ({
           {t(`schedulable_resource__${selectedResourceType}`)}
         </Label>
         <ResourceSelector
-          selectedResourceType={selectedResourceType}
           facilityId={facilityId}
-          setSelectedUser={setSelectedUser}
-          setSelectedLocation={setSelectedLocation}
-          setSelectedService={setSelectedService}
-          selectedLocation={selectedLocation}
-          selectedService={selectedService}
-          selectedUser={selectedUser}
+          setSelectedResource={setSelectedResource}
+          selectedResource={selectedResource}
           onChange={setResourceId}
         />
       </div>

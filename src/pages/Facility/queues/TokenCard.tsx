@@ -81,7 +81,7 @@ const TokenCard = ({ id, token, facility }: Props) => {
               <div>
                 <Label>{t("location")}:</Label>
                 <p className="text-sm font-semibold break-words">
-                  {buildLocationHierarchy(token.resource, " > ")}
+                  {buildLocationHierarchy(token.resource).join(" > ")}
                 </p>
                 {token.resource.description && (
                   <p className="text-xs text-gray-600 break-words">

@@ -166,7 +166,7 @@ const AppointmentCard = ({
                 SchedulableResourceType.Practitioner && (
                 <ScheduleResourceIcon
                   resource={appointment}
-                  className="size-8"
+                  className="size-8 rounded-full"
                 />
               )}
               <div className="flex items-center justify-center gap-2">
@@ -273,7 +273,7 @@ const AppointmentTable = ({
                       SchedulableResourceType.Practitioner && (
                       <ScheduleResourceIcon
                         resource={appointment}
-                        className="size-8"
+                        className="size-8 rounded-full"
                       />
                     )}
                     <div className="flex items-center justify-center gap-2">

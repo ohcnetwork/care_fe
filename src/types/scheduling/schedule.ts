@@ -195,19 +195,25 @@ export type AppointmentCancelledStatus =
 
 export type AppointmentStatus = (typeof AppointmentStatuses)[number];
 
+type LocationResource = {
+  resource: LocationList;
+  resource_type: SchedulableResourceType.Location;
+};
+
+type UserResource = {
+  resource: UserReadMinimal;
+  resource_type: SchedulableResourceType.Practitioner;
+};
+
+type HealthcareServiceResource = {
+  resource: HealthcareServiceReadSpec;
+  resource_type: SchedulableResourceType.HealthcareService;
+};
+
 export type ScheduleResource =
-  | {
-      resource: UserReadMinimal;
-      resource_type: SchedulableResourceType.Practitioner;
-    }
-  | {
-      resource: LocationList;
-      resource_type: SchedulableResourceType.Location;
-    }
-  | {
-      resource: HealthcareServiceReadSpec;
-      resource_type: SchedulableResourceType.HealthcareService;
-    };
+  | UserResource
+  | LocationResource
+  | HealthcareServiceResource;
 
 export type Appointment = {
   id: string;
@@ -276,7 +282,7 @@ export const nameFromAppointment = (appointment: ScheduleResource) => {
     case SchedulableResourceType.Practitioner:
       return formatName(appointment.resource);
     case SchedulableResourceType.Location:
-      return buildLocationHierarchy(appointment.resource, " > ");
+      return buildLocationHierarchy(appointment.resource).join(" > ");
     case SchedulableResourceType.HealthcareService:
       return appointment.resource.name;
     default:

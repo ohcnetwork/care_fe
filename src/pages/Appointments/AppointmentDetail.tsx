@@ -101,14 +101,14 @@ import {
 } from "@/Utils/utils";
 
 import { formatPatientAddress } from "@/components/Patient/utils";
-import { ResourceSelector } from "@/components/Schedule/ResourceSelector";
+import {
+  ResourceSelector,
+  ScheduleResourceFormState,
+} from "@/components/Schedule/ResourceSelector";
 import RadioInput from "@/components/ui/RadioInput";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
-import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
-import { LocationList } from "@/types/location/location";
-import { UserReadMinimal } from "@/types/user/user";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { AppointmentDateSelection } from "./BookAppointment/AppointmentDateSelection";
 
@@ -697,34 +697,16 @@ const AppointmentActions = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const initalPractitioner =
-    appointment.resource_type === SchedulableResourceType.Practitioner
-      ? appointment.resource
-      : null;
-  const initalLocation =
-    appointment.resource_type === SchedulableResourceType.Location
-      ? appointment.resource
-      : null;
-  const initalService =
-    appointment.resource_type === SchedulableResourceType.HealthcareService
-      ? appointment.resource
-      : null;
   // TODO: We should also allow rescheduling to a location or healthcare service
+
+  const [selectedResource, setSelectedResource] =
+    useState<ScheduleResourceFormState>(appointment);
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const [isRescheduleReasonOpen, setIsRescheduleReasonOpen] = useState(false);
   const [newNote, setNewVisitReason] = useState(appointment.note);
   const [oldNote, setRescheduleReason] = useState(appointment.note);
-  const [selectedUser, setSelectedUser] = useState<UserReadMinimal | null>(
-    initalPractitioner,
-  );
-  const [selectedResourceType, setSelectedResourceType] =
-    useState<SchedulableResourceType>(appointment.resource_type);
+
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
-  const [selectedLocation, setSelectedLocation] = useState<LocationList | null>(
-    initalLocation,
-  );
-  const [selectedService, setSelectedService] =
-    useState<HealthcareServiceReadSpec | null>(initalService);
 
   const [resourceId, setResourceId] = useState<string>();
   const currentStatus = appointment.status;
@@ -1002,29 +984,26 @@ const AppointmentActions = ({
                             value: type,
                           }),
                         )}
-                        value={selectedResourceType}
+                        value={selectedResource.resource_type}
                         onValueChange={(value: SchedulableResourceType) => {
-                          setSelectedResourceType(value);
+                          setSelectedResource({
+                            resource: null,
+                            resource_type: value,
+                          });
                           setResourceId("");
-                          setSelectedUser(null);
-                          setSelectedLocation(null);
-                          setSelectedService(null);
                         }}
                       />
                     </div>
                     <div className="flex flex-col">
                       <Label className="mb-2 text-sm font-medium text-gray-950">
-                        {t(`schedulable_resource__${selectedResourceType}`)}
+                        {t(
+                          `schedulable_resource__${selectedResource.resource_type}`,
+                        )}
                       </Label>
                       <ResourceSelector
-                        selectedResourceType={selectedResourceType}
+                        selectedResource={selectedResource}
                         facilityId={facilityId}
-                        setSelectedUser={setSelectedUser}
-                        setSelectedLocation={setSelectedLocation}
-                        setSelectedService={setSelectedService}
-                        selectedLocation={selectedLocation}
-                        selectedService={selectedService}
-                        selectedUser={selectedUser}
+                        setSelectedResource={setSelectedResource}
                         onChange={setResourceId}
                       />
                     </div>
@@ -1033,7 +1012,7 @@ const AppointmentActions = ({
                     <AppointmentDateSelection
                       facilityId={facilityId}
                       resourceId={resourceId}
-                      resourceType={selectedResourceType}
+                      resourceType={selectedResource.resource_type}
                       currentAppointment={appointment}
                       setSelectedDate={setSelectedDate}
                       selectedDate={selectedDate}
@@ -1042,7 +1021,7 @@ const AppointmentActions = ({
                       selectedDate={selectedDate}
                       facilityId={facilityId}
                       resourceId={resourceId}
-                      resourceType={selectedResourceType}
+                      resourceType={selectedResource.resource_type}
                       selectedSlotId={selectedSlotId}
                       onSlotSelect={setSelectedSlotId}
                       currentAppointment={appointment}

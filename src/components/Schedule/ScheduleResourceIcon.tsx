@@ -1,7 +1,6 @@
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import duoToneIcons from "@/CAREUI/icons/DuoTonePaths.json";
 import { Avatar } from "@/components/Common/Avatar";
-import { cn } from "@/lib/utils";
 import { LocationTypeIcons } from "@/types/location/location";
 import {
   SchedulableResourceType,
@@ -21,7 +20,7 @@ export const ScheduleResourceIcon = ({
       <Avatar
         name={formatName(resource.resource)}
         imageUrl={resource.resource.profile_picture_url}
-        className={cn("size-6 rounded-full", className)}
+        className={className}
       />
     );
   }

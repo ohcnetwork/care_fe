@@ -6,58 +6,73 @@ import { LocationList } from "@/types/location/location";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { UserReadMinimal } from "@/types/user/user";
 
+export type ScheduleResourceFormState =
+  | {
+      resource: UserReadMinimal | null;
+      resource_type: SchedulableResourceType.Practitioner;
+    }
+  | {
+      resource: LocationList | null;
+      resource_type: SchedulableResourceType.Location;
+    }
+  | {
+      resource: HealthcareServiceReadSpec | null;
+      resource_type: SchedulableResourceType.HealthcareService;
+    };
+
 interface ResourceSelectorProps {
-  selectedResourceType: SchedulableResourceType;
   facilityId: string;
-  selectedUser: UserReadMinimal | null;
-  selectedLocation: LocationList | null;
-  selectedService: HealthcareServiceReadSpec | null;
-  setSelectedUser: (user: UserReadMinimal | null) => void;
-  setSelectedLocation: (location: LocationList | null) => void;
-  setSelectedService: (service: HealthcareServiceReadSpec | null) => void;
+  selectedResource: ScheduleResourceFormState;
+  setSelectedResource: (resource: ScheduleResourceFormState) => void;
   onChange: (resourceId: string) => void;
 }
 export const ResourceSelector = ({
-  selectedResourceType,
   facilityId,
-  selectedUser,
-  selectedLocation,
-  selectedService,
-  setSelectedUser,
-  setSelectedLocation,
-  setSelectedService,
+  selectedResource,
+  setSelectedResource,
   onChange,
 }: ResourceSelectorProps) => {
   return (
     <>
-      {selectedResourceType === SchedulableResourceType.Practitioner && (
+      {selectedResource.resource_type ===
+        SchedulableResourceType.Practitioner && (
         <PractitionerSelector
           facilityId={facilityId}
-          selected={selectedUser}
+          selected={selectedResource.resource}
           onSelect={(user) => {
-            setSelectedUser(user);
+            setSelectedResource({
+              resource: user,
+              resource_type: selectedResource.resource_type,
+            });
             onChange(user?.id || "");
           }}
         />
       )}
 
-      {selectedResourceType === SchedulableResourceType.Location && (
+      {selectedResource.resource_type === SchedulableResourceType.Location && (
         <LocationSearch
           facilityId={facilityId}
           onSelect={(location) => {
-            setSelectedLocation(location);
+            setSelectedResource({
+              resource: location,
+              resource_type: selectedResource.resource_type,
+            });
             onChange(location.id);
           }}
-          value={selectedLocation}
+          value={selectedResource.resource}
         />
       )}
 
-      {selectedResourceType === SchedulableResourceType.HealthcareService && (
+      {selectedResource.resource_type ===
+        SchedulableResourceType.HealthcareService && (
         <HealthcareServiceSelector
           facilityId={facilityId}
-          selected={selectedService}
+          selected={selectedResource.resource}
           onSelect={(service) => {
-            setSelectedService(service);
+            setSelectedResource({
+              resource: service,
+              resource_type: selectedResource.resource_type,
+            });
             onChange(service?.id || "");
           }}
         />
