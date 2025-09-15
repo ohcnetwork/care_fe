@@ -20,7 +20,6 @@ import {
   AppointmentCancelledStatuses,
   AppointmentStatus,
   nameFromAppointment,
-  SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
@@ -162,13 +161,7 @@ const AppointmentCard = ({
         <div className="px-2 py-1 rounded-sm bg-gray-50">
           <div className="flex flex-col gap-2">
             <div className="flex flex-row gap-2">
-              {appointment.resource_type ===
-                SchedulableResourceType.Practitioner && (
-                <ScheduleResourceIcon
-                  resource={appointment}
-                  className="size-8 rounded-full"
-                />
-              )}
+              <ScheduleResourceIcon resource={appointment} />
               <div className="flex items-center justify-center gap-2">
                 <span className="text-sm font-medium text-gray-950">
                   {nameFromAppointment(appointment)}
@@ -269,13 +262,7 @@ const AppointmentTable = ({
               <div className="px-2 py-1">
                 <div className="flex flex-col gap-2">
                   <div className="flex flex-row gap-2">
-                    {appointment.resource_type ===
-                      SchedulableResourceType.Practitioner && (
-                      <ScheduleResourceIcon
-                        resource={appointment}
-                        className="size-8 rounded-full"
-                      />
-                    )}
+                    <ScheduleResourceIcon resource={appointment} />
                     <div className="flex items-center justify-center gap-2">
                       <span className="text-sm font-medium text-gray-950">
                         {nameFromAppointment(appointment)}
