@@ -88,7 +88,6 @@ import {
   AppointmentFinalStatuses,
   AppointmentRead,
   AppointmentUpdateRequest,
-  SchedulableResourceType,
   nameFromAppointment,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -105,7 +104,6 @@ import {
   ResourceSelector,
   ScheduleResourceFormState,
 } from "@/components/Schedule/ResourceSelector";
-import RadioInput from "@/components/ui/RadioInput";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
@@ -970,26 +968,6 @@ const AppointmentActions = ({
                     onChange={(e) => setNewVisitReason(e.target.value)}
                   />
                   <div className="my-4 space-y-4">
-                    <div className="flex flex-col">
-                      <Label className="mb-2 text-sm font-medium text-gray-950">
-                        {t("select_resource_type")}
-                      </Label>
-                      <RadioInput
-                        options={Object.values(SchedulableResourceType).map(
-                          (type) => ({
-                            label: t(`resource_type__${type}`),
-                            value: type,
-                          }),
-                        )}
-                        value={selectedResource.resource_type}
-                        onValueChange={(value: SchedulableResourceType) => {
-                          setSelectedResource({
-                            resource: null,
-                            resource_type: value,
-                          });
-                        }}
-                      />
-                    </div>
                     <div className="flex flex-col">
                       <Label className="mb-2 text-sm font-medium text-gray-950">
                         {t(
