@@ -155,6 +155,7 @@ export function RenderDateFilter({
                 }
               }}
               className="w-full"
+              showYearSwitcher={false}
               styles={{
                 day: {
                   width: "2.5rem",
