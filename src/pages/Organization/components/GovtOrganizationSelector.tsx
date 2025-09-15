@@ -110,7 +110,7 @@ export default function GovtOrganizationSelector({
   requiredDepth,
   ...props
 }: GovtOrganizationSelectorProps) {
-  const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const [selectedLevels, setSelectedLevels] = useState(selected || []);
 
   useEffect(() => {
     // Needs the child-most level to be selected to be valid
