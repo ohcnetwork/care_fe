@@ -545,7 +545,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
               onOperationChange={handleOperationChange}
               onClearAll={handleClearAll}
               onClearFilter={handleClearFilter}
-              className="flex flex-row mt-2"
+              className="flex sm:flex-row mt-2 sm:items-center"
               triggerButtonClassName="self-start sm:self-center h-9"
               clearAllButtonClassName="self-center"
               selectedBarClassName="h-9"
