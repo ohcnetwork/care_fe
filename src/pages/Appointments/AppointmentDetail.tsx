@@ -706,7 +706,6 @@ const AppointmentActions = ({
 
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
-  const [resourceId, setResourceId] = useState<string>();
   const currentStatus = appointment.status;
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -988,7 +987,6 @@ const AppointmentActions = ({
                             resource: null,
                             resource_type: value,
                           });
-                          setResourceId("");
                         }}
                       />
                     </div>
@@ -1008,7 +1006,7 @@ const AppointmentActions = ({
                   <div className="space-y-4">
                     <AppointmentDateSelection
                       facilityId={facilityId}
-                      resourceId={resourceId}
+                      resourceId={selectedResource.resource?.id}
                       resourceType={selectedResource.resource_type}
                       currentAppointment={appointment}
                       setSelectedDate={setSelectedDate}
@@ -1017,7 +1015,7 @@ const AppointmentActions = ({
                     <AppointmentSlotPicker
                       selectedDate={selectedDate}
                       facilityId={facilityId}
-                      resourceId={resourceId}
+                      resourceId={selectedResource.resource?.id}
                       resourceType={selectedResource.resource_type}
                       selectedSlotId={selectedSlotId}
                       onSlotSelect={setSelectedSlotId}
