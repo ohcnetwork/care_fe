@@ -35,8 +35,9 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import { entriesOf } from "@/Utils/utils";
 
 import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { CommandShortcut } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 import {
   PatientDeceasedInfo,
   PatientHeader,
@@ -194,7 +195,10 @@ export const EncounterShow = (props: Props) => {
                   <PLUGIN_Component
                     __name="PatientInfoCardQuickActions"
                     encounter={selectedEncounter}
-                    className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
+                    className={cn(
+                      buttonVariants({ variant: "primary_gradient" }),
+                      "text-base font-semibold rounded-md w-full",
+                    )}
                   />
 
                   <EncounterCommandDialog
