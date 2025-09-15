@@ -41,6 +41,7 @@ import {
   PatientDeceasedInfo,
   PatientHeader,
 } from "@/pages/Facility/services/serviceRequests/PatientHeader";
+import { PLUGIN_Component } from "@/PluginEngine";
 import { EncounterDiagnosticReportsTab } from "./tabs/diagnostic-reports";
 import { EncounterNotesTab } from "./tabs/notes";
 import { EncounterServiceRequestTab } from "./tabs/service-requests";
@@ -189,7 +190,13 @@ export const EncounterShow = (props: Props) => {
           actions={
             <>
               {canWriteSelectedEncounter && selectedEncounter && (
-                <div className="flex flex-col items-end justify-center gap-4">
+                <div className="flex max-md:flex-col items-end justify-center gap-4">
+                  <PLUGIN_Component
+                    __name="PatientInfoCardQuickActions"
+                    encounter={selectedEncounter}
+                    className="w-full lg:w-auto bg-primary-700 text-white hover:bg-primary-600"
+                  />
+
                   <EncounterCommandDialog
                     encounter={selectedEncounter}
                     open={actionsOpen}
