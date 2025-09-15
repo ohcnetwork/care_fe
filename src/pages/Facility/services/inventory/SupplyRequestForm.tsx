@@ -10,7 +10,6 @@ import { z } from "zod";
 
 import { cn } from "@/lib/utils";
 
-import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -39,6 +38,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
@@ -48,7 +48,8 @@ import useAppHistory from "@/hooks/useAppHistory";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
+import Autocomplete from "@/components/ui/autocomplete";
+import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import {
   SupplyRequestCategory,
   SupplyRequestIntent,
@@ -62,7 +63,9 @@ import locationApi from "@/types/location/locationApi";
 import organizationApi from "@/types/organization/organizationApi";
 
 const supplyRequestItemSchema = z.object({
-  item: z.string().min(1, "Item is required"),
+  item: z.custom<ProductKnowledgeBase>().refine((data) => data?.slug, {
+    message: "Item is required",
+  }),
   quantity: z.number().min(1, "Quantity must be at least 1"),
 });
 
@@ -131,26 +134,10 @@ export default function SupplyRequestForm({
     : `/facility/${facilityId}/locations/${locationId}/internal_transfers/to_receive`;
 
   const queryClient = useQueryClient();
-  const [searchItem, setSearchItem] = useState("");
   const [supplierSearchQuery, setSupplierSearchQuery] = useState("");
   const [searchDeliveryFrom, setSearchDeliveryFrom] = useState("");
 
-  const { data: products, isLoading: isLoadingProducts } = useQuery({
-    queryKey: ["productKnowledge", facilityId, searchItem],
-    queryFn: query.debounced(productKnowledgeApi.listProductKnowledge, {
-      queryParams: {
-        facility: facilityId,
-        name: searchItem,
-        status: "active",
-      },
-    }),
-  });
-
-  const productOptions =
-    products?.results.map((product) => ({
-      label: product.name,
-      value: product.id,
-    })) || [];
+  // Removed in favor of ProductKnowledgeSelect
 
   const { data: availableSuppliers } = useQuery({
     queryKey: ["organizations", supplierSearchQuery],
@@ -212,7 +199,7 @@ export default function SupplyRequestForm({
       requests: [
         {
           quantity: 1,
-          item: "",
+          item: {},
         },
       ],
       supplier: "",
@@ -232,13 +219,17 @@ export default function SupplyRequestForm({
         requests: [
           {
             quantity: existingData.quantity,
-            item: existingData.item.id,
+            item: existingData.item,
           },
         ],
         supplier: existingData.supplier?.id || "",
       });
     }
   }, [isEditMode, existingData]);
+
+  useEffect(() => {
+    console.log(form.getValues());
+  }, [form.getValues()]);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -307,7 +298,7 @@ export default function SupplyRequestForm({
         deliver_from: data.deliver_from || undefined,
         deliver_to: data.deliver_to,
         quantity: request.quantity,
-        item: request.item,
+        item: request.item.id,
         id: supplyRequestId || undefined,
         supplier: data.supplier || undefined,
       })),
@@ -367,7 +358,7 @@ export default function SupplyRequestForm({
                           onChange={field.onChange}
                           isLoading={
                             isExternalMode
-                              ? isLoadingProducts
+                              ? false
                               : isLoadingDeliveryFromLocations
                           }
                           onSearch={
@@ -597,15 +588,13 @@ export default function SupplyRequestForm({
                               render={({ field }) => (
                                 <FormItem>
                                   <FormControl>
-                                    <Autocomplete
-                                      options={productOptions}
-                                      value={field.value || ""}
-                                      onChange={field.onChange}
-                                      isLoading={isLoadingProducts}
-                                      onSearch={setSearchItem}
+                                    <ProductKnowledgeSelect
+                                      value={field.value}
+                                      onChange={(product) =>
+                                        field.onChange(product)
+                                      }
                                       placeholder={t("select_product")}
-                                      inputPlaceholder={t("search_product")}
-                                      noOptionsMessage={t("no_products_found")}
+                                      className="w-full"
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -659,7 +648,7 @@ export default function SupplyRequestForm({
                   onClick={() =>
                     append({
                       quantity: 1,
-                      item: "",
+                      item: {} as ProductKnowledgeBase,
                     })
                   }
                   className="mt-4"

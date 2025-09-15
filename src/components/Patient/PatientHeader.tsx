@@ -3,21 +3,13 @@ import { Trans, useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
-import { Avatar } from "@/components/Common/Avatar";
-
-import { formatPatientAge } from "@/Utils/utils";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { PatientHoverCard } from "@/pages/Facility/services/serviceRequests/PatientHoverCard";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import dayjs from "dayjs";
-import { ChevronDown } from "lucide-react";
-import { PatientInfoHoverCard } from "./PatientInfoHoverCard";
+import { Link } from "raviger";
 
 export function PatientHeader({
   patient,
@@ -25,12 +17,18 @@ export function PatientHeader({
   actions,
   className,
   isPatientPage = false,
+  locationId,
+  showViewPrescriptionsButton = false,
+  showViewDispenseButton = false,
 }: {
   patient: PatientRead;
   facilityId?: string;
   actions?: React.ReactNode;
   className?: string;
   isPatientPage?: boolean;
+  locationId?: string;
+  showViewPrescriptionsButton?: boolean;
+  showViewDispenseButton?: boolean;
 }) {
   const { t } = useTranslation();
 
@@ -42,44 +40,11 @@ export function PatientHeader({
       )}
     >
       <div className="flex flex-col md:flex-row gap-4 xl:gap-8 xl:items-center">
-        <Drawer>
-          <DrawerTrigger
-            disabled={isPatientPage}
-            className="lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background "
-          >
-            <PatientInfoHoverCardTigger
-              patient={patient}
-              disabled={isPatientPage}
-            />
-          </DrawerTrigger>
-          <DrawerContent className="flex flex-col p-4 gap-4">
-            <PatientInfoHoverCard
-              patient={patient}
-              facilityId={facilityId || ""}
-            />
-          </DrawerContent>
-        </Drawer>
-        <Popover>
-          <PopoverTrigger
-            disabled={isPatientPage}
-            className="hidden lg:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-10 focus-visible:ring-offset-background"
-          >
-            <PatientInfoHoverCardTigger
-              patient={patient}
-              disabled={isPatientPage}
-            />
-          </PopoverTrigger>
-          <PopoverContent
-            className="flex flex-col border border-gray-200 shadow-lg p-4 rounded-md gap-4 w-100"
-            side="bottom"
-            align="start"
-          >
-            <PatientInfoHoverCard
-              patient={patient}
-              facilityId={facilityId || ""}
-            />
-          </PopoverContent>
-        </Popover>
+        <PatientHoverCard
+          patient={patient}
+          facilityId={facilityId}
+          disabled={isPatientPage}
+        />
         <div className="flex flex-wrap xl:gap-5 gap-2">
           {patient.instance_identifiers?.map((identifier) => (
             <div
@@ -114,52 +79,39 @@ export function PatientHeader({
             </div>
           )}
         </div>
+        {locationId && (
+          <div className="flex md:flex-row flex-col items-center gap-2">
+            {showViewPrescriptionsButton && (
+              <Button variant="outline" size="sm" asChild className="w-full">
+                <Link
+                  href={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${patient.id}/pending`}
+                  basePath="/"
+                >
+                  <div className="text-gray-500 text-xs flex items-center gap-1">
+                    {t("view_prescriptions")}
+                  </div>
+                </Link>
+              </Button>
+            )}
+            {showViewDispenseButton && (
+              <Button variant="outline" size="sm" asChild className="w-full">
+                <Link
+                  href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patient.id}/preparation`}
+                  basePath="/"
+                >
+                  <div className="text-gray-500 text-xs flex items-center gap-1">
+                    {t("view_dispenses")}
+                  </div>
+                </Link>
+              </Button>
+            )}
+          </div>
+        )}
       </div>
       {actions}
     </Card>
   );
 }
-
-const PatientInfoHoverCardTigger = ({
-  patient,
-  disabled = false,
-}: {
-  patient: PatientRead;
-  disabled?: boolean;
-}) => {
-  const { t } = useTranslation();
-
-  return (
-    <div
-      data-slot="patient-info-hover-card-trigger"
-      className={cn(
-        "flex w-fit gap-3 items-center rounded-md ",
-        !disabled && "hover:bg-gray-50 active:bg-gray-50 cursor-pointer",
-      )}
-    >
-      <div className="size-12">
-        <Avatar name={patient.name} />
-      </div>
-
-      <div className="flex flex-col">
-        <div className="flex flex-row gap-2 items-center">
-          <h5
-            className={cn(
-              "text-lg font-semibold whitespace-nowrap",
-              !disabled && "underline",
-            )}
-          >
-            {patient.name}
-          </h5>
-          {!disabled && <ChevronDown size={16} />}
-        </div>
-        <span className="flex flex-start text-gray-700">
-          {formatPatientAge(patient, true)}, {t(`GENDER__${patient.gender}`)}
-        </span>
-      </div>
-    </div>
-  );
-};
 
 export const PatientDeceasedInfo = ({ patient }: { patient: PatientRead }) => {
   const { t } = useTranslation();

@@ -9,8 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
+import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
-import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
 import patientApi from "@/types/emr/patient/patientApi";
 
 import MedicationDispenseList from "./MedicationDispenseList";
@@ -62,6 +62,8 @@ export default function PrescriptionsView({
         <PatientHeader
           patient={patientData}
           facilityId={facilityId}
+          locationId={locationId}
+          showViewDispenseButton
           className="p-2 rounded-none shadow-none bg-gray-100"
         />
       )}

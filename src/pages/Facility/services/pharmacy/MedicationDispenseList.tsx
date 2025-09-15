@@ -5,8 +5,6 @@ import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { groupItemsByTime } from "@/lib/time";
-
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
@@ -49,6 +47,13 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
+import { formatDateTime, formatName } from "@/Utils/utils";
+import { cn } from "@/lib/utils";
+import {
+  GroupedPrescription,
+  PRESCRIPTION_STATUS_STYLES,
+  PrescriptionRead,
+} from "@/types/emr/prescription/prescription";
 import { DispensedItemsSheet } from "./MedicationBillForm";
 
 interface MedicationTableProps {
@@ -97,7 +102,12 @@ function MedicationTable({
             return (
               <TableRow
                 key={medication.id}
-                className="hover:bg-gray-50 divide-x"
+                className={cn(
+                  "hover:bg-gray-50 divide-x",
+                  medication.requested_product
+                    ? "hover:bg-gray-50"
+                    : "bg-gray-200",
+                )}
               >
                 <TableCell className="font-semibold text-gray-950 flex items-center gap-2">
                   {displayMedicationName(medication)}
@@ -226,13 +236,20 @@ export default function MedicationDispenseList({
   });
 
   const medications = response?.results || [];
-  const medicationsWithProduct = medications.filter(
-    (med) => med.requested_product,
-  );
-  const otherMedications = medications.filter((med) => !med.requested_product);
 
-  // Group pharmacy medications by time periods
-  const groupedPharmacyMedications = groupItemsByTime(medicationsWithProduct);
+  const groupedByPrescription = medications.reduce((acc, medication) => {
+    const prescriptionId = medication.prescription?.id;
+    if (prescriptionId && !acc[prescriptionId]) {
+      acc[prescriptionId] = {
+        requests: [],
+        prescription: medication.prescription as PrescriptionRead,
+      };
+    }
+    if (prescriptionId) {
+      acc[prescriptionId].requests.push(medication);
+    }
+    return acc;
+  }, {} as GroupedPrescription);
 
   const { mutate: updateMedicationRequest } = useMutation({
     mutationFn: (medication: MedicationRequestRead) => {
@@ -256,6 +273,7 @@ export default function MedicationDispenseList({
       <div className="mb-4 flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <FilterTabs
+            className="overflow-x-auto w-full"
             value={qParams.status || "active"}
             onValueChange={(value) => updateQuery({ status: value })}
             options={Object.values(MEDICATION_REQUEST_STATUS)}
@@ -295,7 +313,7 @@ export default function MedicationDispenseList({
                       dispense_status: partial ? "partial" : "",
                       dispense_status_isnull: !partial,
                       type:
-                        medicationsWithProduct.length > 0
+                        Object.keys(groupedByPrescription).length > 0
                           ? "pharmacy"
                           : "other",
                     },
@@ -314,7 +332,7 @@ export default function MedicationDispenseList({
               }
               className="w-full sm:w-auto"
             >
-              {medicationsWithProduct.length > 0
+              {Object.keys(groupedByPrescription).length > 0
                 ? t("start_billing")
                 : t("add_new_medications")}
               <ArrowRightIcon className="size-4" />
@@ -333,21 +351,54 @@ export default function MedicationDispenseList({
         />
       ) : (
         <div className="space-y-8">
-          {medicationsWithProduct.length > 0 && (
+          {Object.keys(groupedByPrescription).length > 0 && (
             <div className="space-y-2">
               <h2 className="text-lg font-semibold text-gray-900">
                 {t("pharmacy_medications")}
               </h2>
 
               <div className="space-y-6">
-                {/* Today */}
-                {groupedPharmacyMedications.today.length > 0 && (
-                  <div className="space-y-2">
-                    <h3 className="text-base font-medium text-gray-800">
-                      {t("today")}
-                    </h3>
+                {Object.keys(groupedByPrescription).map((prescriptionId) => (
+                  <div key={prescriptionId}>
+                    <div className="text-base flex justify-between font-medium text-gray-800 space-x-2 bg-white rounded-t border-gray-300">
+                      <div className="flex items-center gap-2 px-2 py-1">
+                        <span className="text-gray-900">
+                          {t("prescription")}
+                        </span>
+                        <span className="text-gray-700">
+                          {formatDateTime(
+                            groupedByPrescription[prescriptionId].prescription
+                              .created_date,
+                          )}
+                        </span>
+                        <span className="text-gray-500">{t("by")}</span>
+                        <span className="text-gray-900">
+                          {formatName(
+                            groupedByPrescription[prescriptionId].prescription
+                              .prescribed_by,
+                          )}
+                        </span>
+                      </div>
+                      <div className="px-2 py-1">
+                        <Badge
+                          variant={
+                            PRESCRIPTION_STATUS_STYLES[
+                              groupedByPrescription[prescriptionId].prescription
+                                .status
+                            ]
+                          }
+                        >
+                          {t(
+                            groupedByPrescription[prescriptionId].prescription
+                              .status,
+                          )}
+                        </Badge>
+                      </div>
+                    </div>
                     <MedicationTable
-                      medications={groupedPharmacyMedications.today}
+                      medications={
+                        groupedByPrescription[prescriptionId].requests
+                      }
                       setDispensedMedicationId={
                         partial ? setDispensedMedicationId : undefined
                       }
@@ -356,109 +407,11 @@ export default function MedicationDispenseList({
                       }
                     />
                   </div>
-                )}
-
-                {/* Yesterday */}
-                {groupedPharmacyMedications.yesterday.length > 0 && (
-                  <div className="space-y-2">
-                    <h3 className="text-base font-medium text-gray-800">
-                      {t("yesterday")}
-                    </h3>
-                    <MedicationTable
-                      medications={groupedPharmacyMedications.yesterday}
-                      setDispensedMedicationId={
-                        partial ? setDispensedMedicationId : undefined
-                      }
-                      setMedicationToMarkComplete={
-                        partial ? setMedicationToMarkComplete : undefined
-                      }
-                    />
-                  </div>
-                )}
-
-                {/* This Week */}
-                {groupedPharmacyMedications.thisWeek.length > 0 && (
-                  <div className="space-y-2">
-                    <h3 className="text-base font-medium text-gray-800">
-                      {t("this_week")}
-                    </h3>
-                    <MedicationTable
-                      medications={groupedPharmacyMedications.thisWeek}
-                      setDispensedMedicationId={
-                        partial ? setDispensedMedicationId : undefined
-                      }
-                      setMedicationToMarkComplete={
-                        partial ? setMedicationToMarkComplete : undefined
-                      }
-                    />
-                  </div>
-                )}
-
-                {/* This Month */}
-                {groupedPharmacyMedications.thisMonth.length > 0 && (
-                  <div className="space-y-2">
-                    <h3 className="text-base font-medium text-gray-800">
-                      {t("this_month")}
-                    </h3>
-                    <MedicationTable
-                      medications={groupedPharmacyMedications.thisMonth}
-                      setDispensedMedicationId={
-                        partial ? setDispensedMedicationId : undefined
-                      }
-                      setMedicationToMarkComplete={
-                        partial ? setMedicationToMarkComplete : undefined
-                      }
-                    />
-                  </div>
-                )}
-
-                {/* This Year */}
-                {groupedPharmacyMedications.thisYear.length > 0 && (
-                  <div className="space-y-2">
-                    <h3 className="text-base font-medium text-gray-800">
-                      {t("this_year")}
-                    </h3>
-                    <MedicationTable
-                      medications={groupedPharmacyMedications.thisYear}
-                      setDispensedMedicationId={
-                        partial ? setDispensedMedicationId : undefined
-                      }
-                      setMedicationToMarkComplete={
-                        partial ? setMedicationToMarkComplete : undefined
-                      }
-                    />
-                  </div>
-                )}
-
-                {/* Older */}
-                {groupedPharmacyMedications.older.length > 0 && (
-                  <div className="space-y-2">
-                    <h3 className="text-base font-medium text-gray-800">
-                      {t("older")}
-                    </h3>
-                    <MedicationTable
-                      medications={groupedPharmacyMedications.older}
-                      setDispensedMedicationId={
-                        partial ? setDispensedMedicationId : undefined
-                      }
-                      setMedicationToMarkComplete={
-                        partial ? setMedicationToMarkComplete : undefined
-                      }
-                    />
-                  </div>
-                )}
+                ))}
               </div>
             </div>
           )}
 
-          {!partial && otherMedications.length > 0 && (
-            <div className="space-y-2">
-              <h2 className="text-lg font-semibold text-gray-900">
-                {t("other_medications")}
-              </h2>
-              <MedicationTable medications={otherMedications} />
-            </div>
-          )}
           <div className="mt-4">
             <Pagination totalCount={response?.count || 0} />
           </div>

@@ -21,7 +21,7 @@ import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocat
 import { MedicationDispenseStatus } from "@/types/emr/medicationDispense/medicationDispense";
 import patientApi from "@/types/emr/patient/patientApi";
 
-import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
+import { PatientHeader } from "@/components/Patient/PatientHeader";
 import DispensedMedicationList from "./DispensedMedicationList";
 
 interface Props {
@@ -94,7 +94,12 @@ export default function DispensesView({
       </div>
       {patientData && (
         <Card className="mb-4 p-4 rounded-none shadow-none bg-gray-100">
-          <PatientHeader patient={patientData} facilityId={facilityId} />
+          <PatientHeader
+            patient={patientData}
+            facilityId={facilityId}
+            locationId={locationId}
+            showViewPrescriptionsButton
+          />
         </Card>
       )}
       <Tabs
