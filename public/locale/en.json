@@ -1419,6 +1419,8 @@
   "deceased_details": "Deceased Details",
   "deceased_disclaimer": "Please provide the date and time of death for record-keeping purposes. This information is handled with utmost sensitivity and respect.",
   "deceased_status": "Deceased Status",
+  "mark_as_deceased": "Mark as deceased",
+  "use_only_if_patient_has_passed_away_before_registration": "Use only if the patient has passed away before registration.",
   "decimal": "Decimal",
   "decision": "Decision",
   "declined": "Declined",
