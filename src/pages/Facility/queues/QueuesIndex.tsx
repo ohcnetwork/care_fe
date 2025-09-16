@@ -46,6 +46,7 @@ import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 import { dateQueryString } from "@/Utils/utils";
+import { toDate } from "date-fns";
 import dayjs from "dayjs";
 import { Link } from "raviger";
 import QueueFormSheet from "./QueueFormSheet";
@@ -173,7 +174,7 @@ function SubQueueCard({
   const { t } = useTranslation();
 
   return (
-    <Card className="hover:shadow-md transition-all bg-gray-50 duration-200 border-gray-200 shadow-none rounded-sm border-gray-200">
+    <Card className="hover:shadow-md transition-all bg-gray-50 duration-200 border-gray-200 shadow-none rounded-sm">
       <CardContent className="py-1 px-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 flex-1">
@@ -337,7 +338,7 @@ export default function QueuesIndex({
               facilityId={facilityId}
               resourceType={resourceType}
               resourceId={effectiveResourceId}
-              initialDate={qParams.date}
+              initialDate={toDate(qParams.date)}
               trigger={
                 <Button size="sm" className="font-bold" disabled={isPast}>
                   <Plus className="h-4 w-4 mr-2" />
