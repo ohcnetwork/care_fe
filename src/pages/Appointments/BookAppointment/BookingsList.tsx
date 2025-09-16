@@ -208,7 +208,7 @@ const AppointmentTable = ({
             {t("time")}
           </TableHead>
           <TableHead className="w-30 border-y bg-gray-100 text-gray-700 text-sm">
-            {t("practitioner")}
+            {t("resource")}
           </TableHead>
           <TableHead className="w-14 border-y bg-gray-100 hidden xl:table-cell text-gray-700 text-sm">
             {t("status")}
