@@ -21,14 +21,13 @@ import ServiceRequestTable from "@/components/ServiceRequest/ServiceRequestTable
 
 import useFilters from "@/hooks/useFilters";
 
-import query from "@/Utils/request/query";
-import useBreakpoints from "@/hooks/useBreakpoints";
 import PatientEncounterOrIdentifierFilter from "@/components/Patient/PatientEncounterOrIdentifierFilter";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { tagFilter } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import { createFilterConfig } from "@/components/ui/multi-filter/utils/Utils";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import {
   Priority,
   SERVICE_REQUEST_PRIORITY_COLORS,
@@ -173,66 +172,6 @@ function ServiceRequestCard({
   );
 }
 
-function FilterSelect({
-  value,
-  onValueChange,
-  options,
-  isStatus,
-  onClear,
-}: {
-  value: string;
-  onValueChange: (value: string | undefined) => void;
-  options: string[];
-  isStatus?: boolean;
-  onClear: () => void;
-}) {
-  const { t } = useTranslation();
-
-  return (
-    <div className="flex overflow-hidden rounded-lg border">
-      <Select
-        value={value}
-        onValueChange={(newValue) => onValueChange(newValue || undefined)}
-      >
-        <SelectTrigger className="border-0 hover:bg-transparent focus:ring-0 focus:ring-offset-0">
-          <div className="flex items-center gap-2">
-            <CareIcon icon="l-filter" className="size-4" />
-            {!value ? null : (
-              <>
-                <span>{isStatus ? t("status") : t("priority")}</span>
-                {isStatus && <span className="text-gray-500">{t("is")}</span>}
-                <span>{t(value)}</span>
-              </>
-            )}
-            {!value && (
-              <span className="text-gray-500">
-                {isStatus ? t("status") : t("priority")}
-              </span>
-            )}
-          </div>
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((option) => (
-            <SelectItem key={option} value={option}>
-              {t(option)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      {value && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClear}
-          className="h-auto border-l px-2 hover:bg-transparent"
-        >
-          <X className="size-4" />
-        </Button>
-      )}
-    </div>
-  );
-}
-
 export default function ServiceRequestList({
   facilityId,
   locationId,
@@ -322,11 +261,6 @@ export default function ServiceRequestList({
   });
 
   const serviceRequests = response?.results || [];
-
-  const handleClearPriority = () => {
-    updateQuery({ priority: undefined });
-  };
-
   const maxVisibleTabs = useBreakpoints({ default: 3, md: 4 });
 
   return (
