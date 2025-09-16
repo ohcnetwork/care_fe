@@ -37,11 +37,13 @@ import { useEffect, useState } from "react";
 type PrintAppointmentsProps = {
   facilityId: string;
   resourceType: SchedulableResourceType;
+  resourceId?: string;
 };
 
 export function PrintAppointments({
   facilityId,
   resourceType,
+  resourceId,
 }: PrintAppointmentsProps) {
   const { t } = useTranslation();
   const [qParams] = useQueryParams();
@@ -71,7 +73,7 @@ export function PrintAppointments({
         date_before: qParams.date_to ?? dateQueryString(new Date()),
         tags: qParams.tags,
         resource_type: resourceType,
-        resource_ids: qParams.practitioners ?? undefined,
+        resource_ids: qParams.practitioners ?? resourceId,
         ordering: "token_slot__start_datetime",
         patient: qParams.patient,
       },
