@@ -411,18 +411,19 @@ export default function QueuesIndex({
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <ManageServicePointSheet
-                  facilityId={facilityId}
-                  resourceType={resourceType}
-                  resourceId={effectiveResourceId}
-                  subQueuesResponse={subQueues}
-                  subQueuesLoading={subQueuesLoading}
-                  trigger={
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <Settings className="size-4" />
-                    </Button>
-                  }
-                />
+                {subQueues.length > 0 && (
+                  <ManageServicePointSheet
+                    facilityId={facilityId}
+                    resourceType={resourceType}
+                    resourceId={effectiveResourceId}
+                    subQueues={subQueues}
+                    trigger={
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <Settings className="size-4" />
+                      </Button>
+                    }
+                  />
+                )}
                 <SubQueueFormSheet
                   facilityId={facilityId}
                   resourceType={resourceType}

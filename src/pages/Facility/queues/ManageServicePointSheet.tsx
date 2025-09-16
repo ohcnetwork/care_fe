@@ -19,9 +19,7 @@ import {
   TokenSubQueueStatus,
 } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
 
-import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { Card, CardContent } from "@/components/ui/card";
-import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import RadioInput from "@/components/ui/RadioInput";
@@ -38,8 +36,7 @@ interface ManageServicePointSheetProps {
   resourceType: SchedulableResourceType;
   resourceId: string;
   trigger?: React.ReactNode;
-  subQueuesResponse?: TokenSubQueueRead[];
-  subQueuesLoading?: boolean;
+  subQueues: TokenSubQueueRead[];
   onSuccess?: () => void;
 }
 
@@ -48,14 +45,11 @@ export default function ManageServicePointSheet({
   resourceType,
   resourceId,
   trigger,
-  subQueuesResponse,
-  subQueuesLoading,
+  subQueues,
   onSuccess,
 }: ManageServicePointSheetProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-
-  const subQueues = subQueuesResponse || [];
 
   const handleSuccess = () => {
     onSuccess?.();
@@ -94,40 +88,15 @@ export default function ManageServicePointSheet({
         </div>
 
         <ScrollArea className="h-[calc(100vh-12rem)] mt-4">
-          {subQueuesLoading ? (
-            <div className="space-y-3">
-              <CardListSkeleton count={4} />
-            </div>
-          ) : subQueues.length === 0 ? (
-            <EmptyState
-              icon="l-map-pin"
-              title={t("no_service_points_found")}
-              description={t("no_service_points_found_description")}
-              action={
-                <SubQueueFormSheet
-                  facilityId={facilityId}
-                  resourceType={resourceType}
-                  resourceId={resourceId}
-                  trigger={
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      {t("add_first_service_point")}
-                    </Button>
-                  }
-                />
-              }
-            />
-          ) : (
-            <div className="space-y-3">
-              {subQueues.map((subQueue) => (
-                <SubQueueCard
-                  key={subQueue.id}
-                  facilityId={facilityId}
-                  subQueue={subQueue}
-                />
-              ))}
-            </div>
-          )}
+          <div className="space-y-3">
+            {subQueues.map((subQueue) => (
+              <SubQueueCard
+                key={subQueue.id}
+                facilityId={facilityId}
+                subQueue={subQueue}
+              />
+            ))}
+          </div>
         </ScrollArea>
       </SheetContent>
     </Sheet>
