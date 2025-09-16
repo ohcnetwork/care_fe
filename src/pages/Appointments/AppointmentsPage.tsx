@@ -749,16 +749,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 ) >= 31
               }
               onClick={() => {
-                navigate(
-                  resourceType === SchedulableResourceType.HealthcareService
-                    ? `/facility/${facilityId}/services/${resourceId}/appointments/print`
-                    : resourceType === SchedulableResourceType.Location
-                      ? `/facility/${facilityId}/locations/${resourceId}/appointments/print`
-                      : `/facility/${facilityId}/appointments/print`,
-                  {
-                    query: qParams,
-                  },
-                );
+                navigate("appointments/print", { query: qParams });
               }}
             >
               <CareIcon icon="l-print" className="text-lg" />
