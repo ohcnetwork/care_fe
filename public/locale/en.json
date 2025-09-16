@@ -287,6 +287,7 @@
   "SRD__select_product_placeholder": "Select product",
   "SYSTEM__govt_org_type__block_panchayat": "Block Panchayat",
   "SYSTEM__govt_org_type__corporation": "Corporation",
+  "SYSTEM__govt_org_type__country": "Country",
   "SYSTEM__govt_org_type__default": "State",
   "SYSTEM__govt_org_type__district": "District",
   "SYSTEM__govt_org_type__district_panchayat": "District Panchayat",
