@@ -36,6 +36,7 @@ export interface LocationBase {
 
 export interface LocationDetail extends LocationBase {
   id: string;
+  has_children: boolean;
   organizations: FacilityOrganizationRead[];
   sort_index: number;
 }

@@ -5342,5 +5342,7 @@
   "you_need_at_least_a_location_to_create_an_assest": "You need at least a location to create an assest.",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "℞": "℞"
+  "℞": "℞",
+  "queue_of_resource": "{{resource}}'s Queue",
+  "primary_queue": "Primary Queue"
 }

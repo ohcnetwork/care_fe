@@ -82,7 +82,9 @@ function QueueRow({
         <div className="flex items-center gap-2 justify-between">
           <div className="flex items-center gap-2">
             <Link href={queueLink} className="font-medium underline">
-              {queue.name}
+              {queue.name === "System Generated"
+                ? t("primary_queue")
+                : queue.name}
             </Link>
             {queue.is_primary && (
               <Badge
