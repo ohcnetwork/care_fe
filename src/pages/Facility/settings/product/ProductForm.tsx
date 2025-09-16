@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useImperativeHandle, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -151,8 +151,8 @@ export function ProductFormContent({
   onSuccess = () => navigate(`/facility/${facilityId}/settings/product`),
   onCancel = () => navigate(`/facility/${facilityId}/settings/product`),
   disableButtons = false,
-  externalSubmitRef,
   enabled = true,
+  ref,
 }: {
   facilityId: string;
   productId?: string;
@@ -162,8 +162,10 @@ export function ProductFormContent({
   onSuccess?: (product: ProductRead) => void;
   onCancel?: () => void;
   disableButtons?: boolean;
-  externalSubmitRef?: React.RefObject<(() => void) | null>;
   enabled?: boolean;
+  ref?: React.RefObject<{
+    createNewProduct: () => void;
+  }>;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -275,6 +277,12 @@ export function ProductFormContent({
     },
   });
 
+  useImperativeHandle(ref, () => ({
+    createNewProduct: () => {
+      form.handleSubmit(onSubmit)();
+    },
+  }));
+
   const isPending = isCreating || isUpdating;
   function onSubmit(data: z.infer<typeof formSchema>) {
     // Format the data for API submission
@@ -306,15 +314,6 @@ export function ProductFormContent({
       createProduct(createPayload);
     }
   }
-
-  useEffect(() => {
-    if (externalSubmitRef) {
-      externalSubmitRef.current = () => {
-        form.handleSubmit(onSubmit)();
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [externalSubmitRef]);
 
   return (
     <Form {...form}>

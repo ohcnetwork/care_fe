@@ -1179,11 +1179,14 @@ export function InvoiceShow({
             </div>
             <div className="flex items-center bg-white rounded-r-lg p-2 pl-0">
               <Button
+                data-shortcut-id="navigate-to-source"
                 variant="primary"
                 onClick={() => navigate(sourceUrl)}
                 className="shadow ml-2"
               >
+                <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
                 {alertButtonText}
+                <ShortcutBadge actionId="navigate-to-source" />
               </Button>
             </div>
           </AlertTitle>

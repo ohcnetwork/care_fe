@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -56,6 +56,7 @@ import {
   MedicationDispenseUpsert,
 } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
+import { PillIcon } from "lucide-react";
 
 interface MedicationTableProps {
   facilityId: string;
@@ -289,7 +290,7 @@ export default function DispensedMedicationList({
     limit: 100,
     disableCache: true,
   });
-  const paymentFilter = (qParams.payment_status as "paid" | "unpaid") || "paid";
+  const paymentFilter = (qParams.payment_status as "paid" | "unpaid") || "all";
   const [billableChargeItems, setBillableChargeItems] = useState<
     ChargeItemRead[]
   >([]);
@@ -322,6 +323,13 @@ export default function DispensedMedicationList({
       },
     }),
   });
+
+  // set all medicines as selectedMedications
+  useEffect(() => {
+    if (response?.results) {
+      setSelectedMedications(response.results.map((med) => med.id));
+    }
+  }, [response?.results]);
 
   const { mutate: completeMedications, isPending } = useMutation({
     mutationFn: async ({ signal }: { signal: AbortSignal }) => {
@@ -376,14 +384,11 @@ export default function DispensedMedicationList({
   // Group medications by time periods
   const groupedMedications = groupItemsByTime(filteredMedications || []);
 
-  const billableItems =
-    paymentFilter === "unpaid"
-      ? filteredMedications
-          ?.filter((med) => {
-            return med.charge_item?.status === ChargeItemStatus.billable;
-          })
-          .map((med) => med.charge_item)
-      : [];
+  const billableItems = filteredMedications
+    ?.filter((med) => {
+      return med.charge_item?.status === ChargeItemStatus.billable;
+    })
+    .map((med) => med.charge_item);
 
   const handleSelectAll = () => {
     const allMedicationIds = filteredMedications?.map((med) => med.id) || [];
@@ -403,6 +408,15 @@ export default function DispensedMedicationList({
               {t("medications_dispense")}
             </h1>
             <div className="flex items-center gap-2">
+              <Button variant="outline" asChild className="w-full">
+                <Link
+                  href={`/facility/${facilityId}/locations/${locationId}/medication_requests/?patient_external_id=${patientId}`}
+                  basePath="/"
+                >
+                  <PillIcon className="size-4" />
+                  {t("prescriptions")}
+                </Link>
+              </Button>
               {status === MedicationDispenseStatus.preparation &&
                 billableItems &&
                 billableItems.length > 0 && (
@@ -444,6 +458,7 @@ export default function DispensedMedicationList({
           className="w-full"
         >
           <TabsList>
+            <TabsTrigger value="all">{t("all")}</TabsTrigger>
             <TabsTrigger value="paid">{t("paid")}</TabsTrigger>
             <TabsTrigger value="unpaid">{t("unpaid")}</TabsTrigger>
           </TabsList>

@@ -137,8 +137,6 @@ export default function SupplyRequestForm({
   const [supplierSearchQuery, setSupplierSearchQuery] = useState("");
   const [searchDeliveryFrom, setSearchDeliveryFrom] = useState("");
 
-  // Removed in favor of ProductKnowledgeSelect
-
   const { data: availableSuppliers } = useQuery({
     queryKey: ["organizations", supplierSearchQuery],
     queryFn: query.debounced(organizationApi.list, {
@@ -226,10 +224,6 @@ export default function SupplyRequestForm({
       });
     }
   }, [isEditMode, existingData]);
-
-  useEffect(() => {
-    console.log(form.getValues());
-  }, [form.getValues()]);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,

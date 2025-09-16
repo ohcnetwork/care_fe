@@ -56,7 +56,6 @@ import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefini
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 import { SpecimenDefinitionStatus } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
-import locationApi from "@/types/location/locationApi";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -136,7 +135,14 @@ const formSchema = z.object({
   charge_item_definitions: z
     .array(z.custom<ChargeItemDefinitionBase>())
     .default([]),
-  locations: z.array(z.string()).default([]),
+  locations: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+      }),
+    )
+    .default([]),
   category: z.string(),
 });
 
@@ -238,16 +244,6 @@ function ActivityDefinitionFormContent({
       ),
     });
 
-  const { data: locations, isLoading: isLoadingLocations } = useQuery({
-    queryKey: ["locations", facilityId],
-    queryFn: query.debounced(locationApi.list, {
-      pathParams: { facility_id: facilityId },
-      queryParams: {
-        limit: 100,
-      },
-    }),
-  });
-
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues:
@@ -321,8 +317,12 @@ function ActivityDefinitionFormContent({
                   },
                 ],
               })) || [],
+            locations:
+              existingData.locations?.map((l) => ({
+                id: l.id,
+                name: l.name,
+              })) || [],
             charge_item_definitions: existingData.charge_item_definitions || [],
-            locations: existingData.locations?.map((l) => l.id) || [],
             category: existingData.category?.slug || "",
           }
         : {
@@ -406,6 +406,7 @@ function ActivityDefinitionFormContent({
       charge_item_definitions: data.charge_item_definitions.map(
         (item) => item.slug,
       ),
+      locations: data.locations.map((loc) => loc.id),
     };
 
     if (isEditMode && activityDefinitionSlug) {
@@ -914,54 +915,34 @@ function ActivityDefinitionFormContent({
                       <RequirementsSelector
                         title={t("location_requirements")}
                         description={t("location_requirements_description")}
-                        value={(form.watch("locations") || []).map((id) => ({
-                          value: id,
-                          label:
-                            locations?.results.find((l) => l.id === id)?.name ||
-                            id,
+                        value={(form.watch("locations") || []).map((loc) => ({
+                          value: loc.id,
+                          label: loc.name,
                           details: [],
                         }))}
                         onChange={(values) =>
                           form.setValue(
                             "locations",
-                            values.map((v) => v.value),
+                            values.map((v) => ({
+                              id: v.value,
+                              name: v.label,
+                            })),
                           )
                         }
-                        options={
-                          locations?.results
-                            .filter((location) =>
-                              (form.watch("locations") || []).includes(
-                                location.id,
-                              ),
-                            )
-                            .map((location) => ({
-                              label: location.name,
-                              value: location.id,
-                              details: [
-                                {
-                                  label: t("type"),
-                                  value: t(`location_form__${location.form}`),
-                                },
-                                {
-                                  label: t("status"),
-                                  value: t(location.status),
-                                },
-                                {
-                                  label: t("description"),
-                                  value: location.description || undefined,
-                                },
-                              ],
-                            })) || []
-                        }
-                        isLoading={isLoadingLocations}
+                        options={[]}
+                        isLoading={false}
                         placeholder={t("select_locations")}
                         customSelector={
-                          <LocationMultiSelect
-                            facilityId={facilityId}
-                            value={form.watch("locations") || []}
-                            onChange={(values) =>
-                              form.setValue("locations", values)
-                            }
+                          <FormField
+                            control={form.control}
+                            name="locations"
+                            render={({ field }) => (
+                              <LocationMultiSelect
+                                facilityId={facilityId}
+                                value={field.value || []}
+                                onChange={field.onChange}
+                              />
+                            )}
                           />
                         }
                       />

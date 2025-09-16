@@ -180,6 +180,7 @@ export interface MedicationDispenseCreate
   item: string;
   quantity: number;
   days_supply: number;
+  fully_dispensed: boolean;
 }
 
 export interface MedicationDispenseUpsert

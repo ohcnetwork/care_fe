@@ -1,13 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-
-import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   encounterPriorityFilter,
@@ -16,22 +12,16 @@ import {
 } from "@/components/ui/multi-filter/filter-list";
 import MultiFilter from "@/components/ui/multi-filter/multi-filter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 
 import Page from "@/components/Common/Page";
-import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
-import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import PatientEncounterOrIdentifierFilter from "@/components/Patient/PatientEncounterOrIdentifierFilter";
 import { EncounterClass, EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
@@ -102,41 +92,6 @@ export function EncounterList({
     external_identifier,
     patient_filter,
   } = qParams;
-  const handleFieldChange = () => {
-    updateQuery({
-      status,
-      encounter_class: encounterClass,
-      priority,
-      name: undefined,
-      encounter_id: undefined,
-      external_identifier: undefined,
-      tags: qParams.tags,
-      patient_filter: undefined,
-    });
-  };
-
-  const handleSearch = useCallback(
-    (key: string, value: string) => {
-      updateQuery({
-        ...{
-          status,
-          encounter_class: encounterClass,
-          priority,
-          tags: qParams.tags,
-          patient: patient_filter,
-        },
-        [key]: value || undefined,
-      });
-    },
-    [
-      status,
-      encounterClass,
-      priority,
-      updateQuery,
-      qParams.tags,
-      patient_filter,
-    ],
-  );
 
   const { data: queryEncounters, isFetching } = useQuery({
     queryKey: ["encounters", facilityId, qParams, encounterClass],
@@ -165,29 +120,6 @@ export function EncounterList({
     }),
     enabled: !!encounter_id,
   });
-  const searchOptions = [
-    {
-      key: "name",
-      type: "text" as const,
-      placeholder: t("search_by_patient_name"),
-      value: name || "",
-      display: t("name"),
-    },
-    {
-      key: "encounter_id",
-      type: "text" as const,
-      placeholder: t("search_by_encounter_id"),
-      value: encounter_id || "",
-      display: t("encounter_id"),
-    },
-    {
-      key: "external_identifier",
-      type: "text" as const,
-      placeholder: t("search_by_external_id"),
-      value: external_identifier || "",
-      display: t("external_identifier"),
-    },
-  ];
 
   const encounters =
     propEncounters ||
@@ -247,48 +179,14 @@ export function EncounterList({
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      data-cy="search-encounter"
-                      variant="outline"
-                      className={cn(
-                        "min-w-32 justify-start text-gray-500 font-normal h-10 sm:w-auto w-full",
-                        (name || encounter_id || external_identifier) &&
-                          "bg-primary/10 text-primary font-medium hover:bg-primary/20",
-                      )}
-                    >
-                      <CareIcon icon="l-search" className="size-4" />
-                      {name || encounter_id || external_identifier ? (
-                        <span className="truncate">
-                          {name || encounter_id || external_identifier}
-                        </span>
-                      ) : (
-                        t("search")
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="w-[20rem] p-3 border-none"
-                    align="start"
-                    onEscapeKeyDown={(event) => event.preventDefault()}
-                  >
-                    <div className="space-y-4">
-                      <h4 className="font-medium leading-none">
-                        {t("search_encounters")}
-                      </h4>
-                      <SearchInput
-                        data-cy="encounter-search"
-                        options={searchOptions}
-                        onFieldChange={handleFieldChange}
-                        onSearch={handleSearch}
-                        className="w-full border-none shadow-none"
-                        autoFocus
-                      />
-                    </div>
-                  </PopoverContent>
-                </Popover>
-
+                <PatientEncounterOrIdentifierFilter
+                  onSelect={(patientId) =>
+                    updateQuery({ patient_filter: patientId })
+                  }
+                  placeholder={t("filter_by_identifier")}
+                  className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+                  patientId={qParams.patient_filter}
+                />
                 <MultiFilter
                   selectedFilters={selectedFilters}
                   onFilterChange={handleFilterChange}
@@ -298,14 +196,6 @@ export function EncounterList({
                   className="flex sm:flex-row flex-wrap sm:items-center"
                   triggerButtonClassName="self-start sm:self-center"
                   clearAllButtonClassName="self-center"
-                />
-                <PatientIdentifierFilter
-                  onSelect={(patientId) =>
-                    updateQuery({ patient_filter: patientId })
-                  }
-                  placeholder={t("filter_by_identifier")}
-                  className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
-                  patientId={qParams.patient_filter}
                 />
               </div>
             </div>

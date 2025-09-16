@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { CheckIcon, Plus, X } from "lucide-react";
 import { useNavigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -292,9 +292,9 @@ function AddItemForm({
 }) {
   const { t } = useTranslation();
   const [currentEntry, setCurrentEntry] = useState(entry);
-  const [productFormSubmit, setProductFormSubmit] = useState<
-    (() => void) | null
-  >(null);
+  const productSearchRef = useRef<{
+    createNewProduct: () => void;
+  }>({ createNewProduct: () => {} });
   const [isProductCreationInProgress, setIsProductCreationInProgress] =
     useState(false);
   const [activeTab, setActiveTab] = useState(
@@ -307,7 +307,6 @@ function AddItemForm({
 
   useEffect(() => {
     if (currentEntry.supplied_item && currentEntry.supplied_item.id) {
-      setProductFormSubmit(null);
       setIsProductCreationInProgress(false);
     }
   }, [currentEntry.supplied_item]);
@@ -315,9 +314,8 @@ function AddItemForm({
   if (!currentEntry) return null;
 
   const handleSave = () => {
-    if (productFormSubmit && isProductCreationInProgress) {
-      // If product creation is in progress, trigger the submit
-      productFormSubmit();
+    if (isProductCreationInProgress) {
+      productSearchRef.current?.createNewProduct?.();
     } else {
       onSuccess(currentEntry, index);
       setOpen(false);
@@ -443,31 +441,28 @@ function AddItemForm({
                     ...prev,
                     supplied_item: product,
                   }));
+                  setIsProductCreationInProgress(false);
                 } else {
                   setCurrentEntry((prev) => ({
                     ...prev,
                     supplied_item: null,
                   }));
+                  setIsProductCreationInProgress(true);
                 }
-                // Clear the submit function and creation state since product is now selected
-                setProductFormSubmit(null);
-                setIsProductCreationInProgress(false);
-              }}
-              onProductSubmit={(submitFn) => {
-                setProductFormSubmit(() => submitFn);
-                setIsProductCreationInProgress(true);
               }}
               onProductCreate={(product) => {
                 const updatedEntry = {
                   ...currentEntry,
                   supplied_item: product,
                 };
+                setIsProductCreationInProgress(false);
                 setCurrentEntry(updatedEntry);
                 onSuccess(updatedEntry, index);
                 setOpen(false);
               }}
               enabled={open}
               productKnowledgeSlug={currentEntry._product_knowledge?.slug || ""}
+              ref={productSearchRef}
             />
           </div>
         </ScrollArea>
@@ -483,8 +478,7 @@ function AddItemForm({
                 ? !currentEntry._product_knowledge
                 : !currentEntry.supply_request) ||
               (!isProductCreationInProgress && !currentEntry.supplied_item) ||
-              !currentEntry.supplied_item_quantity ||
-              (isProductCreationInProgress && !productFormSubmit)
+              !currentEntry.supplied_item_quantity
             }
           >
             <CheckIcon className="size-6" />

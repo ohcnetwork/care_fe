@@ -191,7 +191,7 @@ export function ResourceCategoryForm({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-[400px] sm:w-[540px]">
+      <SheetContent className="sm:max-w-md">
         <SheetHeader>
           <SheetTitle>
             {isEditing ? t("edit_category") : t("create_category")}

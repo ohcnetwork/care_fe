@@ -90,8 +90,8 @@ export function SubstitutionSheet({
     defaultValues: {
       substitutedProductKnowledge:
         currentSubstitution?.substitutedProductKnowledge || undefined,
-      type: currentSubstitution?.type,
-      reason: currentSubstitution?.reason,
+      type: currentSubstitution?.type || SubstitutionType.E,
+      reason: currentSubstitution?.reason || SubstitutionReason.OS,
     },
   });
 
@@ -100,8 +100,8 @@ export function SubstitutionSheet({
       form.reset({
         substitutedProductKnowledge:
           currentSubstitution?.substitutedProductKnowledge || undefined,
-        type: currentSubstitution?.type,
-        reason: currentSubstitution?.reason,
+        type: currentSubstitution?.type || SubstitutionType.E,
+        reason: currentSubstitution?.reason || SubstitutionReason.OS,
       });
       setSelectedSubstitute(currentSubstitution?.substitutedProductKnowledge);
       // No need to set search term anymore
@@ -114,8 +114,6 @@ export function SubstitutionSheet({
       shouldDirty: true,
     });
   }, [selectedSubstitute, form]);
-
-  // Removed query in favor of ProductKnowledgeSelect
 
   const onSubmit = (values: SubstitutionFormValues) => {
     if (!values.substitutedProductKnowledge) return;
@@ -130,10 +128,6 @@ export function SubstitutionSheet({
   const handleProductSelect = (product: ProductKnowledgeBase) => {
     setSelectedSubstitute(product);
   };
-
-  // Removed in favor of ProductKnowledgeSelect
-
-  // Removed in favor of ProductKnowledgeSelect
 
   if (!originalProductKnowledge) return null;
 

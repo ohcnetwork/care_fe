@@ -46,6 +46,7 @@ import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 import { dateQueryString } from "@/Utils/utils";
+import { startOfDay } from "date-fns";
 import dayjs from "dayjs";
 import { Link } from "raviger";
 import QueueFormSheet from "./QueueFormSheet";
@@ -337,7 +338,7 @@ export default function QueuesIndex({
               facilityId={facilityId}
               resourceType={resourceType}
               resourceId={effectiveResourceId}
-              initialDate={qParams.date}
+              initialDate={startOfDay(qParams.date)}
               trigger={
                 <Button size="sm" className="font-bold" disabled={isPast}>
                   <Plus className="h-4 w-4 mr-2" />
@@ -366,7 +367,7 @@ export default function QueuesIndex({
                     facilityId={facilityId}
                     resourceType={resourceType}
                     resourceId={effectiveResourceId}
-                    initialDate={qParams.date}
+                    initialDate={startOfDay(qParams.date)}
                     trigger={
                       <Button disabled={isPast}>
                         <Plus className="h-4 w-4 mr-2" />

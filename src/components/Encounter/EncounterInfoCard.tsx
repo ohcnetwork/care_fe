@@ -122,7 +122,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
         )}
       </CardContent>
 
-      <CardFooter className="flex justify-end items-center px-4 py-2 space-x-4">
+      <CardFooter className="flex justify-end items-center px-4 py-2 space-x-4 mt-auto">
         <Link
           href={`/facility/${facilityId}/patients/verify?${new URLSearchParams({
             phone_number: encounter.patient.phone_number,

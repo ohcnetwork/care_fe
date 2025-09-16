@@ -670,26 +670,28 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-          <Button
-            variant="primary"
-            data-shortcut-id="print-button"
-            disabled={
-              differenceInDays(qParams.date_to, qParams.date_from) >= 31
-            }
-            onClick={() => {
-              const queryString = new URLSearchParams({
-                ...qParams,
-                tags: selectedTags.map((tag) => tag.id).join(","),
-              }).toString();
-              navigate(
-                `/facility/${facilityId}/appointments/print?${queryString}`,
-              );
-            }}
-          >
-            <CareIcon icon="l-print" className="text-lg" />
-            {t("print")}
-            <ShortcutBadge actionId="print-button" className="bg-white" />
-          </Button>
+          {activeTab === "list" && (
+            <Button
+              data-shortcut-id="print-button"
+              variant="outline"
+              disabled={
+                !qParams.date_from ||
+                differenceInDays(
+                  qParams.date_to ?? new Date(),
+                  qParams.date_from,
+                ) >= 31
+              }
+              onClick={() => {
+                navigate(`/facility/${facilityId}/appointments/print`, {
+                  query: qParams,
+                });
+              }}
+            >
+              <CareIcon icon="l-print" className="text-lg" />
+              {t("print")}
+              <ShortcutBadge actionId="print-button" className="bg-white" />
+            </Button>
+          )}
           <PatientEncounterOrIdentifierFilter
             onSelect={(patientId) => updateQuery({ patient: patientId })}
             placeholder={t("search_patients")}

@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { ScanQrCode, X } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Hash, ScanQrCode } from "lucide-react";
 import { navigate } from "raviger";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -10,13 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FilterTabs } from "@/components/ui/filter-tabs";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
 
 import Page from "@/components/Common/Page";
 import {
@@ -29,6 +22,12 @@ import ServiceRequestTable from "@/components/ServiceRequest/ServiceRequestTable
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import PatientEncounterOrIdentifierFilter from "@/components/Patient/PatientEncounterOrIdentifierFilter";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+import { tagFilter } from "@/components/ui/multi-filter/filter-list";
+import MultiFilter from "@/components/ui/multi-filter/multi-filter";
+import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
+import { createFilterConfig } from "@/components/ui/multi-filter/utils/utils";
 import {
   Priority,
   SERVICE_REQUEST_PRIORITY_COLORS,
@@ -37,6 +36,7 @@ import {
   Status,
 } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import locationApi from "@/types/location/locationApi";
 
 function EmptyState() {
@@ -66,6 +66,7 @@ function ServiceRequestCard({
   locationId: string;
 }) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   return (
     <Card>
@@ -97,6 +98,58 @@ function ServiceRequestCard({
                   {request.code.display}
                 </div>
               )}
+              {/* Tags */}
+              <div className="mt-2 flex flex-wrap gap-1">
+                {request.tags && request.tags.length > 0 && (
+                  <>
+                    {request.tags.map((tag) => (
+                      <Badge
+                        key={tag.id}
+                        variant="secondary"
+                        className="text-xs"
+                      >
+                        {tag.display}
+                      </Badge>
+                    ))}
+                    <TagAssignmentSheet
+                      entityType="service_request"
+                      entityId={request.id}
+                      facilityId={facilityId}
+                      currentTags={request.tags}
+                      onUpdate={() => {
+                        queryClient.invalidateQueries({
+                          queryKey: ["serviceRequests", facilityId, locationId],
+                        });
+                      }}
+                      patientId={request.encounter.patient.id}
+                      trigger={
+                        <Button variant="outline" size="xs">
+                          <Hash className="size-3" /> {t("tags")}
+                        </Button>
+                      }
+                    />
+                  </>
+                )}
+                {(!request.tags || request.tags.length === 0) && (
+                  <TagAssignmentSheet
+                    entityType="service_request"
+                    entityId={request.id}
+                    facilityId={facilityId}
+                    currentTags={[]}
+                    onUpdate={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: ["serviceRequests", facilityId, locationId],
+                      });
+                    }}
+                    patientId={request.encounter.patient.id}
+                    trigger={
+                      <Button variant="outline" size="xs">
+                        <Hash className="size-3" /> {t("add_tags")}
+                      </Button>
+                    }
+                  />
+                )}
+              </div>
             </div>
           </div>
           <Button
@@ -117,66 +170,6 @@ function ServiceRequestCard({
   );
 }
 
-function FilterSelect({
-  value,
-  onValueChange,
-  options,
-  isStatus,
-  onClear,
-}: {
-  value: string;
-  onValueChange: (value: string | undefined) => void;
-  options: string[];
-  isStatus?: boolean;
-  onClear: () => void;
-}) {
-  const { t } = useTranslation();
-
-  return (
-    <div className="flex overflow-hidden rounded-lg border">
-      <Select
-        value={value}
-        onValueChange={(newValue) => onValueChange(newValue || undefined)}
-      >
-        <SelectTrigger className="border-0 hover:bg-transparent focus:ring-0 focus:ring-offset-0">
-          <div className="flex items-center gap-2">
-            <CareIcon icon="l-filter" className="size-4" />
-            {!value ? null : (
-              <>
-                <span>{isStatus ? t("status") : t("priority")}</span>
-                {isStatus && <span className="text-gray-500">{t("is")}</span>}
-                <span>{t(value)}</span>
-              </>
-            )}
-            {!value && (
-              <span className="text-gray-500">
-                {isStatus ? t("status") : t("priority")}
-              </span>
-            )}
-          </div>
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((option) => (
-            <SelectItem key={option} value={option}>
-              {t(option)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      {value && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClear}
-          className="h-auto border-l px-2 hover:bg-transparent"
-        >
-          <X className="size-4" />
-        </Button>
-      )}
-    </div>
-  );
-}
-
 export default function ServiceRequestList({
   facilityId,
   locationId,
@@ -190,6 +183,50 @@ export default function ServiceRequestList({
     disableCache: true,
   });
   const [isBarcodeOpen, setBarcodeOpen] = useState(false);
+
+  // Create filter configurations
+  const filters = useMemo(
+    () => [
+      tagFilter("tags", TagResource.SERVICE_REQUEST, "multi", "tags"),
+      createFilterConfig(
+        "priority",
+        "priority",
+        "command",
+        Object.values(Priority).map((p) => ({
+          value: p,
+          label: p,
+          color: SERVICE_REQUEST_PRIORITY_COLORS[p],
+        })),
+      ),
+    ],
+    [],
+  );
+
+  // Handle filter updates
+  const onFilterUpdate = (query: Record<string, unknown>) => {
+    // Update the query parameters based on filter changes
+    const updates: Record<string, unknown> = {};
+
+    if (query.tags) {
+      const tags = query.tags as TagConfig[];
+      updates.tags = tags.length > 0 ? tags.map((tag) => tag.id) : undefined;
+    }
+
+    if (query.priority) {
+      updates.priority = query.priority;
+    }
+
+    updateQuery(updates);
+  };
+
+  // Use the multi-filter state hook
+  const {
+    selectedFilters,
+    handleFilterChange,
+    handleOperationChange,
+    handleClearAll,
+    handleClearFilter,
+  } = useMultiFilterState(filters, onFilterUpdate);
 
   const { data: location } = useQuery({
     queryKey: ["location", facilityId, locationId],
@@ -209,16 +246,14 @@ export default function ServiceRequestList({
         title: qParams.search,
         status: qParams.status,
         priority: qParams.priority,
+        tags: qParams.tags,
         ordering: "-created_date",
+        patient: qParams.patient,
       },
     }),
   });
 
   const serviceRequests = response?.results || [];
-
-  const handleClearPriority = () => {
-    updateQuery({ priority: undefined });
-  };
 
   return (
     <Page title={t("service_requests")} hideTitleOnPage>
@@ -267,29 +302,25 @@ export default function ServiceRequestList({
 
           <div className="flex flex-col md:flex-row justify-between items-start gap-4">
             <div className="w-full md:w-auto">
-              <div className="relative w-full md:w-auto">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  <CareIcon icon="l-search" className="size-5" />
-                </span>
-                <Input
-                  placeholder={t("search_service_requests")}
-                  value={qParams.search || ""}
-                  onChange={(e) =>
-                    updateQuery({ search: e.target.value || undefined })
-                  }
-                  className="w-full md:w-[300px] pl-10"
-                />
-              </div>
+              <MultiFilter
+                selectedFilters={selectedFilters}
+                onFilterChange={handleFilterChange}
+                onOperationChange={handleOperationChange}
+                onClearAll={handleClearAll}
+                onClearFilter={handleClearFilter}
+                placeholder={t("filters")}
+                className="flex sm:flex-row flex-wrap sm:items-center"
+                triggerButtonClassName="self-start sm:self-center"
+                clearAllButtonClassName="self-center"
+              />
             </div>
             <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full sm:w-auto">
-              <div className="flex-1 sm:flex-initial sm:w-auto">
-                <FilterSelect
-                  value={qParams.priority || ""}
-                  onValueChange={(value) => updateQuery({ priority: value })}
-                  options={Object.values(Priority)}
-                  onClear={handleClearPriority}
-                />
-              </div>
+              <PatientEncounterOrIdentifierFilter
+                onSelect={(patientId) => updateQuery({ patient: patientId })}
+                placeholder={t("filter_by_identifier")}
+                className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+                patientId={qParams.patient}
+              />
             </div>
           </div>
         </div>

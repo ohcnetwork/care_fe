@@ -41,7 +41,6 @@ import {
   InternalType,
 } from "@/types/healthcareService/healthcareService";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
-import locationApi from "@/types/location/locationApi";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -58,7 +57,14 @@ const formSchema = z.object({
     .optional(),
   extra_details: z.string(),
   internal_type: z.nativeEnum(InternalType).optional(),
-  locations: z.array(z.string()).min(1, "At least one location is required"),
+  locations: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+      }),
+    )
+    .min(1, "At least one location is required"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -127,14 +133,6 @@ function HealthcareServiceFormContent({
   const queryClient = useQueryClient();
   const isEditMode = Boolean(healthcareServiceId);
 
-  const { data: locations } = useQuery({
-    queryKey: ["locations", facilityId],
-    queryFn: query(locationApi.list, {
-      pathParams: { facility_id: facilityId },
-      queryParams: { limit: 100 },
-    }),
-  });
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues:
@@ -145,7 +143,10 @@ function HealthcareServiceFormContent({
             styling_metadata: existingData.styling_metadata,
             extra_details: existingData.extra_details,
             internal_type: existingData.internal_type,
-            locations: existingData.locations.map((loc) => loc.id),
+            locations: existingData.locations.map((loc) => ({
+              id: loc.id,
+              name: loc.name,
+            })),
           }
         : {
             styling_metadata: { careIcon: "" },
@@ -198,12 +199,14 @@ function HealthcareServiceFormContent({
       updateHealthcareService({
         ...data,
         facility: facilityId,
+        locations: data.locations.map((loc) => loc.id),
       } as HealthcareServiceUpdateSpec);
     } else {
       const payload: HealthcareServiceCreateSpec = {
         ...data,
         facility: facilityId,
         styling_metadata,
+        locations: data.locations.map((loc) => loc.id),
       };
       createHealthcareService(payload);
     }
@@ -340,26 +343,20 @@ function HealthcareServiceFormContent({
                         <RequirementsSelector
                           title={t("location_requirements")}
                           description={t("location_requirements_description")}
-                          value={field.value.map((locationId) => {
-                            const location = locations?.results.find(
-                              (loc) => loc.id === locationId,
-                            );
-                            return {
-                              value: locationId,
-                              label: location?.name || "locationId",
-                              details: [],
-                            };
-                          })}
+                          value={field.value.map((location) => ({
+                            value: location.id,
+                            label: location.name,
+                            details: [],
+                          }))}
                           onChange={(values) => {
-                            field.onChange(values.map((item) => item.value));
+                            field.onChange(
+                              values.map((item) => ({
+                                id: item.value,
+                                name: item.label,
+                              })),
+                            );
                           }}
-                          options={
-                            locations?.results.map((location) => ({
-                              label: location.name,
-                              value: location.id,
-                              details: [],
-                            })) || []
-                          }
+                          options={[]}
                           isLoading={false}
                           placeholder={t("select_locations")}
                           customSelector={

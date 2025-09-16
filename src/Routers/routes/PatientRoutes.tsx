@@ -5,9 +5,9 @@ import Loading from "@/components/Common/Loading";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
 import PatientIndex from "@/components/Patient/PatientIndex";
-import PatientRegistration from "@/components/Patient/PatientRegistration";
 
 import { AppRoutes } from "@/Routers/AppRouter";
+import { PatientRegistration } from "@/components/Patient/PatientRegistration";
 import { ConsentDetailPage } from "@/pages/Encounters/ConsentDetail";
 import EncountersOverview from "@/pages/Encounters/EncountersOverview";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
@@ -83,16 +83,13 @@ const PatientRoutes: AppRoutes = {
 
   "/facility/:facilityId/patients/verify": () => <VerifyPatient />,
   "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
-  "/patient/:id/update": ({ id }) => <PatientRegistration patientId={id} />,
   ...patientTabs.reduce((acc: AppRoutes, tab) => {
     acc["/patient/:id/" + tab.route] = ({ id }) => (
       <PatientHome id={id} page={tab.route} />
     );
     return acc;
   }, {}),
-  "/facility/:facilityId/patient/create": ({ facilityId }) => (
-    <PatientRegistration facilityId={facilityId} />
-  ),
+  "/facility/:facilityId/patient/create": () => <PatientRegistration />,
   "/facility/:facilityId/patient/:id": ({ facilityId, id }) => (
     <PatientHome facilityId={facilityId} id={id} page="demography" />
   ),
@@ -103,8 +100,8 @@ const PatientRoutes: AppRoutes = {
     }) => <PatientHome facilityId={facilityId} id={id} page={tab.route} />;
     return acc;
   }, {}),
-  "/facility/:facilityId/patient/:id/update": ({ facilityId, id }) => (
-    <PatientRegistration facilityId={facilityId} patientId={id} />
+  "/facility/:facilityId/patient/:id/update": ({ id }) => (
+    <PatientRegistration patientId={id} />
   ),
   "/facility/:facilityId/patient/:patientId/drawings/new": ({ patientId }) => {
     return (

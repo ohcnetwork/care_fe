@@ -24,16 +24,16 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
@@ -58,6 +58,7 @@ interface CategoryBreadcrumb {
 export interface BaseCategoryPickerDefinition {
   id: string;
   slug: string;
+  slug_value?: string;
   title: string;
   description?: string;
   category?: ResourceCategoryParent;
@@ -177,19 +178,19 @@ export function ResourceDefinitionCategoryPicker<T>({
 
   const { data: favoritesResponse } = useQuery({
     queryKey: ["favorites", resourceType, facilityId],
-    queryFn:
+    queryFn: () =>
       enableFavorites && favoritesConfig
         ? query(favoritesConfig.listFavorites.queryFn, {
             pathParams: { facilityId },
           })
-        : undefined,
+        : Promise.resolve(null),
     enabled: enableFavorites && !!favoritesConfig,
   });
 
   const addFavoriteMutation = useMutation({
-    mutationFn: async (slug: string) => {
+    mutationFn: async (slugValue: string) => {
       const mutateFn = mutate(favoritesConfig!.addFavorite.queryFn, {
-        pathParams: { slug },
+        pathParams: { slug: slugValue },
       });
       return mutateFn({} as T);
     },
@@ -201,9 +202,9 @@ export function ResourceDefinitionCategoryPicker<T>({
   });
 
   const removeFavoriteMutation = useMutation({
-    mutationFn: async (slug: string) => {
+    mutationFn: async (slugValue: string) => {
       const mutateFn = mutate(favoritesConfig!.removeFavorite.queryFn, {
-        pathParams: { slug },
+        pathParams: { slug: slugValue },
       });
       return mutateFn({} as T);
     },
@@ -320,10 +321,12 @@ export function ResourceDefinitionCategoryPicker<T>({
       (f: BaseCategoryPickerDefinition) => f.slug === definition.slug,
     );
 
+    const slugValue = definition.slug_value || definition.slug;
+
     if (isFavorited) {
-      removeFavoriteMutation.mutate(definition.slug);
+      removeFavoriteMutation.mutate(slugValue);
     } else {
-      addFavoriteMutation.mutate(definition.slug);
+      addFavoriteMutation.mutate(slugValue);
     }
   };
 
@@ -374,13 +377,12 @@ export function ResourceDefinitionCategoryPicker<T>({
   const renderSearchInput = () => (
     <div className="px-3 py-2 border-b">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-500" />
         <CommandInput
           placeholder={t(translations.searchPlaceholder)}
           value={searchQuery}
           onValueChange={setSearchQuery}
-          className="pl-9 h-9 border-0 focus:ring-0"
-          autoFocus={isMobile}
+          className="h-9 border-0 focus:ring-0 text-base md:text-sm"
+          autoFocus
         />
       </div>
     </div>
@@ -547,9 +549,9 @@ export function ResourceDefinitionCategoryPicker<T>({
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className="min-w-0 flex-1">
             <div className="font-medium text-sm truncate flex items-center justify-between gap-2">
-              {definition.title}
+              <span className="truncate">{definition.title}</span>
               {definition.product_type && (
-                <Badge variant="secondary" className="text-xs truncate">
+                <Badge variant="secondary" className="text-xs flex-shrink-0">
                   {t(definition.product_type)}
                 </Badge>
               )}
@@ -612,7 +614,12 @@ export function ResourceDefinitionCategoryPicker<T>({
     ));
 
   const renderFavoritesContent = () => (
-    <div className={cn("overflow-auto", isMobile ? "h-full" : "max-h-[400px]")}>
+    <div
+      className={cn(
+        "overflow-auto min-h-0",
+        isMobile ? "flex-1" : "max-h-[35vh]",
+      )}
+    >
       {favorites.length === 0 ? (
         <div className="p-6 text-center text-gray-500">
           <Star className="size-8 mx-auto mb-2 opacity-50" />
@@ -665,7 +672,9 @@ export function ResourceDefinitionCategoryPicker<T>({
       {renderSearchInput()}
       {renderBreadcrumbs()}
       <CommandList
-        className={cn(isMobile ? "flex-1 overflow-auto" : "max-h-[35vh]")}
+        className={cn(
+          isMobile ? "flex-1 overflow-auto min-h-0" : "max-h-[35vh]",
+        )}
       >
         {renderEmptyState()}
         <CommandGroup>
@@ -680,7 +689,7 @@ export function ResourceDefinitionCategoryPicker<T>({
   return (
     <div className="space-y-2">
       {isMobile ? (
-        <Sheet
+        <Drawer
           open={open}
           onOpenChange={(newOpen) => {
             setOpen(newOpen);
@@ -690,7 +699,7 @@ export function ResourceDefinitionCategoryPicker<T>({
             setActiveTab("search");
           }}
         >
-          <SheetTrigger asChild>
+          <DrawerTrigger asChild>
             <Button
               variant="outline"
               role="combobox"
@@ -715,20 +724,13 @@ export function ResourceDefinitionCategoryPicker<T>({
                 )}
               />
             </Button>
-          </SheetTrigger>
+          </DrawerTrigger>
 
-          <SheetContent
-            side="bottom"
-            aria-describedby={undefined}
-            className="h-[80vh] px-0 pt-2 pb-0 rounded-t-3xl [&>button]:hidden"
-          >
-            <SheetTitle className="sr-only">
+          <DrawerContent className="flex flex-col max-h-[85vh]">
+            <DrawerTitle className="sr-only">
               {t(translations.selectPlaceholder) || t("select_item")}
-            </SheetTitle>
-
-            <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
-
-            <div className="px-4 py-3 border-b">
+            </DrawerTitle>
+            <div className="px-4 py-3 border-b flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Home className="size-4 text-gray-500" />
@@ -759,9 +761,9 @@ export function ResourceDefinitionCategoryPicker<T>({
               <Tabs
                 value={activeTab}
                 onValueChange={setActiveTab}
-                className="flex flex-col h-full"
+                className="flex flex-col flex-1 min-h-0"
               >
-                <div className="px-4 py-3 border-b">
+                <div className="px-4 py-3 border-b flex-shrink-0">
                   <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="search">{t("search")}</TabsTrigger>
                     <TabsTrigger value="favorites">
@@ -770,8 +772,8 @@ export function ResourceDefinitionCategoryPicker<T>({
                   </TabsList>
                 </div>
 
-                <div className="flex-1 overflow-hidden">
-                  <TabsContent value="search" className="h-full mt-0">
+                <div className="flex-1 min-h-0 overflow-hidden">
+                  <TabsContent value="search" className="h-full mt-0" autoFocus>
                     {renderMainContent()}
                   </TabsContent>
                   <TabsContent value="favorites" className="h-full mt-0">
@@ -780,10 +782,10 @@ export function ResourceDefinitionCategoryPicker<T>({
                 </div>
               </Tabs>
             ) : (
-              <div className="h-full">{renderMainContent()}</div>
+              <div className="flex-1 min-h-0">{renderMainContent()}</div>
             )}
-          </SheetContent>
-        </Sheet>
+          </DrawerContent>
+        </Drawer>
       ) : (
         <Popover
           open={open}
@@ -823,9 +825,8 @@ export function ResourceDefinitionCategoryPicker<T>({
 
           <PopoverContent
             className={cn(
-              "p-0 shadow-lg border-0",
-              "w-[var(--radix-popover-trigger-width)]",
-              enableFavorites ? "max-w-[70vw]" : "min-w-[420px] max-w-[600px]",
+              "p-0 shadow-lg border-0 w-[var(--radix-popover-trigger-width)] max-w-[80vw]",
+              enableFavorites ? "max-w-[70vw]" : "min-w-[420px]",
             )}
             align="start"
             sideOffset={4}
@@ -836,7 +837,7 @@ export function ResourceDefinitionCategoryPicker<T>({
               {/* Main content */}
               <div
                 className={cn(
-                  "flex flex-col",
+                  "flex flex-col min-w-0",
                   enableFavorites ? "flex-1" : "w-full",
                 )}
               >
@@ -873,7 +874,7 @@ export function ResourceDefinitionCategoryPicker<T>({
 
               {/* Favorites panel */}
               {enableFavorites && (
-                <div className="w-auto border-l border-gray-200">
+                <div className="min-w-80 w-auto border-l border-gray-200">
                   <div className="px-4 py-3 border-b bg-gray-50">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
