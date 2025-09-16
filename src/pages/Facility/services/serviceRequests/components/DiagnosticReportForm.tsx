@@ -618,7 +618,7 @@ export function DiagnosticReportForm({
               // For regular observations, skip if no value is entered
               // For component-based observations, check component values
               // But always include observations marked for deletion
-              if (!isMarkedForDeletion) {
+              if (!isMarkedForDeletion && !obsData.id) {
                 if (!hasComponents && !obsData.value.trim()) {
                   return null;
                 }
