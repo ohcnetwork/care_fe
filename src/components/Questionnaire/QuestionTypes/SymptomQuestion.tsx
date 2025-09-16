@@ -855,7 +855,9 @@ export function SymptomQuestion({
                 <TableHeader>
                   <TableRow className="bg-gray-50">
                     <TableHead className="w-[40%]">{t("symptom")}</TableHead>
-                    <TableHead className="text-center">{t("date")}</TableHead>
+                    <TableHead className="text-center">
+                      {t("onset_date")}
+                    </TableHead>
                     <TableHead className="text-center">{t("status")}</TableHead>
                     <TableHead className="text-center">
                       {t("severity")}

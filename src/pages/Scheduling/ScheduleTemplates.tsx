@@ -95,7 +95,7 @@ const ScheduleTemplateItem = ({
   });
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
-  const { canCreateChargeItemDefinition } = getPermissions(
+  const { canSetChargeItemDefinition } = getPermissions(
     hasPermission,
     facilityData?.permissions ?? [],
   );
@@ -138,7 +138,7 @@ const ScheduleTemplateItem = ({
         </div>
 
         <div className="flex gap-2">
-          {canCreateChargeItemDefinition && (
+          {canSetChargeItemDefinition && (
             <ScheduleChargeItemDefinitionSelector
               facilityId={facilityId}
               scheduleTemplate={template}
@@ -147,7 +147,7 @@ const ScheduleTemplateItem = ({
                   charge_item_definition: value.charge_item_definition_slug,
                   re_visit_allowed_days: value.re_visit_allowed_days || 0,
                   re_visit_charge_item_definition:
-                    value.re_visit_charge_item_definition_slug,
+                    value.re_visit_charge_item_definition_slug || null,
                 })
               }
             />

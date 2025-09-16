@@ -29,13 +29,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { dateQueryString } from "@/Utils/utils";
 
-import { LocationSearch } from "@/components/Location/LocationSearch";
-import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
-import { HealthcareServiceSelector } from "@/pages/Facility/services/HealthcareServiceSelector";
-
 import { cn } from "@/lib/utils";
-import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
-import { LocationList } from "@/types/location/location";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { TokenGenerateWithQueue, TokenRead } from "@/types/tokens/token/token";
 import { TokenCategoryRead } from "@/types/tokens/tokenCategory/tokenCategory";
@@ -43,39 +37,36 @@ import tokenCategoryApi from "@/types/tokens/tokenCategory/tokenCategoryApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
+import {
+  ResourceSelector,
+  ScheduleResourceFormState,
+} from "@/components/Schedule/ResourceSelector";
+import { PatientRead } from "@/types/emr/patient/patient";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
-import { UserReadMinimal } from "@/types/user/user";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 interface Props {
-  patientId?: string;
+  patient?: PatientRead;
   facilityId: string;
-  patientName?: string;
   trigger?: React.ReactNode;
   onSuccess?: () => void;
   disableRedirectOnSuccess?: boolean;
 }
 
 export default function CreateTokenForm({
-  patientId,
+  patient,
   facilityId,
-  patientName,
   trigger,
   onSuccess,
   disableRedirectOnSuccess = false,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const [selectedResourceType, setSelectedResourceType] =
-    useState<SchedulableResourceType>(SchedulableResourceType.Practitioner);
-
-  const [selectedUser, setSelectedUser] = useState<UserReadMinimal | null>(
-    null,
-  );
-  const [selectedLocation, setSelectedLocation] = useState<LocationList | null>(
-    null,
-  );
-  const [selectedService, setSelectedService] =
-    useState<HealthcareServiceReadSpec | null>(null);
+  const [selectedResource, setSelectedResource] =
+    useState<ScheduleResourceFormState>({
+      resource: null,
+      resource_type: SchedulableResourceType.Practitioner,
+    });
 
   const queryClient = useQueryClient();
   const { t } = useTranslation();
@@ -104,11 +95,11 @@ export default function CreateTokenForm({
   // Fetch available token categories
   const { data: categoriesResponse, isLoading: isLoadingCategories } = useQuery(
     {
-      queryKey: ["tokenCategories", facilityId, selectedResourceType],
+      queryKey: ["tokenCategories", facilityId, selectedResource.resource_type],
       queryFn: query(tokenCategoryApi.list, {
         pathParams: { facility_id: facilityId },
         queryParams: {
-          resource_type: selectedResourceType,
+          resource_type: selectedResource.resource_type,
         },
       }),
       enabled: isOpen,
@@ -125,14 +116,14 @@ export default function CreateTokenForm({
 
     if (categories?.length && !form.watch("categoryId")) {
       const options = categories.filter(
-        (category) => category.resource_type === selectedResourceType,
+        (category) => category.resource_type === selectedResource.resource_type,
       );
       form.setValue(
         "categoryId",
         options.find((category) => category.default)?.id ?? options[0].id,
       );
     }
-  }, [categories, form, selectedResourceType]);
+  }, [categories, form, selectedResource.resource_type]);
 
   const { mutate: createToken, isPending } = useMutation({
     mutationFn: mutate(tokenQueueApi.generateToken, {
@@ -147,20 +138,25 @@ export default function CreateTokenForm({
       });
       onSuccess?.();
       if (!disableRedirectOnSuccess) {
-        // facility/:facilityId/queues/:queueId/tokens/:tokenId
-        navigate(
-          `/facility/${facilityId}/queues/${data.queue.id}/tokens/${data.id}`,
-        );
+        navigate(`/facility/${facilityId}/patients/verify`, {
+          query: {
+            phone_number: patient?.phone_number,
+            year_of_birth: patient?.year_of_birth.toString(),
+            partial_id: patient?.id.slice(0, 5),
+            queue_id: data.queue.id,
+            token_id: data.id,
+          },
+        });
       }
     },
   });
 
   function onSubmit(data: z.infer<typeof tokenFormSchema>) {
     const tokenRequest: TokenGenerateWithQueue = {
-      patient: patientId,
+      patient: patient?.id,
       category: data.categoryId,
       note: data.note,
-      resource_type: selectedResourceType,
+      resource_type: selectedResource.resource_type,
       resource_id: data.resourceId,
       date: dateQueryString(new Date()),
     };
@@ -172,10 +168,10 @@ export default function CreateTokenForm({
     setIsOpen(open);
     if (!open) {
       // Reset all state when closing
-      setSelectedResourceType(SchedulableResourceType.Practitioner);
-      setSelectedUser(null);
-      setSelectedLocation(null);
-      setSelectedService(null);
+      setSelectedResource({
+        resource: null,
+        resource_type: SchedulableResourceType.Practitioner,
+      });
       form.reset();
     }
   };
@@ -197,10 +193,10 @@ export default function CreateTokenForm({
         <SheetHeader>
           <SheetTitle>{t("create_token")}</SheetTitle>
           <SheetDescription>
-            {patientName ? (
+            {patient?.name ? (
               <Trans
                 i18nKey="create_token_for_patient"
-                values={{ patientName }}
+                values={{ patientName: patient?.name }}
                 components={{
                   strong: <strong className="font-semibold text-gray-950" />,
                 }}
@@ -229,16 +225,16 @@ export default function CreateTokenForm({
                       variant="outline"
                       className={cn(
                         "h-auto min-h-16 w-full justify-start text-left",
-                        selectedResourceType === type &&
+                        selectedResource.resource_type === type &&
                           "ring-2 ring-primary text-primary bg-primary/5",
                       )}
                       onClick={() => {
-                        setSelectedResourceType(type);
+                        setSelectedResource({
+                          resource: null,
+                          resource_type: type,
+                        });
                         // Reset resource selection when type changes
                         form.setValue("resourceId", "");
-                        setSelectedUser(null);
-                        setSelectedLocation(null);
-                        setSelectedService(null);
                       }}
                     >
                       <div className="flex flex-col items-start">
@@ -266,56 +262,19 @@ export default function CreateTokenForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        {selectedResourceType ===
-                          SchedulableResourceType.Practitioner &&
-                          t("practitioner")}
-                        {selectedResourceType ===
-                          SchedulableResourceType.Location && t("location")}
-                        {selectedResourceType ===
-                          SchedulableResourceType.HealthcareService &&
-                          t("healthcare_service")}
+                        {t(
+                          `schedulable_resource__${selectedResource.resource_type}`,
+                        )}
                       </FormLabel>
                       <FormControl>
-                        <div>
-                          {selectedResourceType ===
-                            SchedulableResourceType.Practitioner && (
-                            <PractitionerSelector
-                              facilityId={facilityId}
-                              selected={selectedUser}
-                              onSelect={(user) => {
-                                setSelectedUser(user);
-                                const resourceId = user?.id || "";
-                                field.onChange(resourceId);
-                              }}
-                            />
-                          )}
-
-                          {selectedResourceType ===
-                            SchedulableResourceType.Location && (
-                            <LocationSearch
-                              facilityId={facilityId}
-                              onSelect={(location) => {
-                                setSelectedLocation(location);
-                                const resourceId = location.id;
-                                field.onChange(resourceId);
-                              }}
-                              value={selectedLocation}
-                            />
-                          )}
-
-                          {selectedResourceType ===
-                            SchedulableResourceType.HealthcareService && (
-                            <HealthcareServiceSelector
-                              facilityId={facilityId}
-                              selected={selectedService}
-                              onSelect={(service) => {
-                                setSelectedService(service);
-                                const resourceId = service?.id || "";
-                                field.onChange(resourceId);
-                              }}
-                            />
-                          )}
-                        </div>
+                        <ResourceSelector
+                          selectedResource={selectedResource}
+                          facilityId={facilityId}
+                          setSelectedResource={(resource) => {
+                            setSelectedResource(resource);
+                            field.onChange(resource.resource?.id || "");
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -391,6 +350,7 @@ export default function CreateTokenForm({
                   form.reset();
                 }}
                 className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
+                data-shortcut-id="cancel-action"
               >
                 {t("cancel")}
               </Button>
@@ -398,12 +358,13 @@ export default function CreateTokenForm({
                 type="submit"
                 disabled={
                   isPending ||
-                  !selectedResourceType ||
                   !form.watch("resourceId") ||
                   !form.watch("categoryId")
                 }
+                data-shortcut-id="submit-action"
               >
                 {isPending ? t("creating") : t("create_token")}
+                <ShortcutBadge actionId="submit-action" className="bg-white" />
               </Button>
             </div>
           </form>

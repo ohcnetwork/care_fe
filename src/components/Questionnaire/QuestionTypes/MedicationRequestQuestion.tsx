@@ -65,7 +65,7 @@ import {
   INACTIVE_MEDICATION_STATUSES,
   MEDICATION_REQUEST_INTENT,
   MEDICATION_REQUEST_TIMING_OPTIONS,
-  MedicationRequest,
+  MedicationRequestCreate,
   MedicationRequestDosageInstruction,
   MedicationRequestIntent,
   MedicationRequestRead,
@@ -76,6 +76,7 @@ import {
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
+import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
@@ -116,7 +117,7 @@ const MEDICATION_REQUEST_FIELDS = {
     required: true,
     validate: (value: unknown) => {
       const dosageInstruction =
-        value as MedicationRequest["dosage_instruction"][0];
+        value as MedicationRequestCreate["dosage_instruction"][0];
       return !!(
         dosageInstruction?.dose_and_rate?.dose_quantity ||
         dosageInstruction?.dose_and_rate?.dose_range
@@ -128,7 +129,7 @@ const MEDICATION_REQUEST_FIELDS = {
     required: true,
     validate: (value: unknown) => {
       const dosageInstruction =
-        value as MedicationRequest["dosage_instruction"][0];
+        value as MedicationRequestCreate["dosage_instruction"][0];
       return !!(
         dosageInstruction?.timing || dosageInstruction?.as_needed_boolean
       );
@@ -139,7 +140,7 @@ const MEDICATION_REQUEST_FIELDS = {
     required: false,
     validate: (value: unknown) => {
       const dosageInstruction =
-        value as MedicationRequest["dosage_instruction"][0];
+        value as MedicationRequestCreate["dosage_instruction"][0];
       if (dosageInstruction?.timing) {
         const duration = dosageInstruction.timing.repeat.bounds_duration;
         return !!(duration?.value && duration?.unit);
@@ -150,7 +151,7 @@ const MEDICATION_REQUEST_FIELDS = {
 } as const;
 
 export function validateMedicationRequestQuestion(
-  values: MedicationRequest[],
+  values: MedicationRequestCreate[],
   questionId: string,
 ): QuestionValidationError[] {
   return values.reduce((errors: QuestionValidationError[], value, index) => {
@@ -212,7 +213,14 @@ export function MedicationRequestQuestion({
   const currentUser = useAuthUser() as UserReadMinimal;
   const isPreview = patientId === "preview";
   const medications =
-    (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
+    (questionnaireResponse.values?.[0]?.value as MedicationRequestCreate[]) ||
+    [];
+
+  const [alternateIdentifier, _setAlternateIdentifier] = useState<string>(
+    `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
+  );
+
+  console.log("alternateIdentifier", alternateIdentifier);
 
   const { data: patientMedications } = useQuery({
     queryKey: ["medication_requests", patientId, encounterId],
@@ -256,11 +264,17 @@ export function MedicationRequestQuestion({
   const desktopLayout = useBreakpoints({ lg: true, default: false });
 
   const [newMedicationInSheet, setNewMedicationInSheet] =
-    useState<MedicationRequest | null>(null);
+    useState<MedicationRequestCreate | null>(null);
+
+  const createPrescriptionObject = {
+    status: PrescriptionStatus.active,
+    alternate_identifier: alternateIdentifier,
+  };
 
   const handleAddMedication = (medication: Code) => {
-    const initialDetails = {
+    const initialDetails: MedicationRequestCreate = {
       ...parseMedicationStringToRequest(currentUser, medication),
+      create_prescription: createPrescriptionObject,
       authored_on: new Date().toISOString(),
       requester: currentUser,
     };
@@ -281,6 +295,7 @@ export function MedicationRequestQuestion({
         undefined,
         productKnowledge,
       ),
+      create_prescription: createPrescriptionObject,
       authored_on: new Date().toISOString(),
       requester: currentUser,
     };
@@ -292,8 +307,11 @@ export function MedicationRequestQuestion({
     }
   };
 
-  const addNewMedication = (medication: MedicationRequest) => {
-    const newMedications: MedicationRequest[] = [...medications, medication];
+  const addNewMedication = (medication: MedicationRequestCreate) => {
+    const newMedications: MedicationRequestCreate[] = [
+      ...medications,
+      medication,
+    ];
 
     updateQuestionnaireResponseCB(
       [{ type: "medication_request", value: newMedications }],
@@ -320,22 +338,28 @@ export function MedicationRequestQuestion({
           requested_product,
           ...request
         } = record as MedicationRequestRead;
+        delete request.prescription;
+
         return {
           ...request,
           requested_product: requested_product?.id,
           requested_product_internal: requested_product,
           requester: request.requester || currentUser,
-        };
+          create_prescription: createPrescriptionObject,
+          medication: requested_product?.id ? null : request.medication,
+        } as MedicationRequestCreate;
       } else {
         const statement = record as MedicationStatementRead;
         return {
           ...parseMedicationStringToRequest(currentUser, statement.medication),
+          create_prescription: createPrescriptionObject,
           authored_on: new Date().toISOString(),
           note: statement.note,
-        } as MedicationRequest;
+          requester: currentUser,
+        } as MedicationRequestCreate;
       }
     });
-    const newMedications: MedicationRequest[] = [
+    const newMedications: MedicationRequestCreate[] = [
       ...medications,
       ...medicationRequests,
     ];
@@ -385,7 +409,7 @@ export function MedicationRequestQuestion({
 
   const handleUpdateMedication = (
     index: number,
-    updates: Partial<MedicationRequest>,
+    updates: Partial<MedicationRequestCreate>,
   ) => {
     const newMedications = medications.map((medication, i) =>
       i === index ? { ...medication, ...updates } : medication,
@@ -825,9 +849,9 @@ export function MedicationRequestQuestion({
 }
 
 interface MedicationRequestGridRowProps {
-  medication: MedicationRequest;
+  medication: MedicationRequestCreate;
   disabled?: boolean;
-  onUpdate?: (medication: Partial<MedicationRequest>) => void;
+  onUpdate?: (medication: Partial<MedicationRequestCreate>) => void;
   onRemove?: () => void;
   index: number;
   questionId: string;
@@ -1445,7 +1469,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
 };
 
 export const reverseFrequencyOption = (
-  option: MedicationRequest["dosage_instruction"][0]["timing"],
+  option: MedicationRequestCreate["dosage_instruction"][0]["timing"],
 ) => {
   return Object.entries(MEDICATION_REQUEST_TIMING_OPTIONS).find(
     ([key]) => key === option?.code?.code,

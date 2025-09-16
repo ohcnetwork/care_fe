@@ -1,45 +1,63 @@
-import { useMutation } from "@tanstack/react-query";
-import { AlertCircle, CalendarIcon, ExternalLink } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import {
+  AlertCircle,
+  Download,
+  Printer,
+  SettingsIcon,
+  SquareActivity,
+  Stethoscope,
+} from "lucide-react";
 import { Link, useQueryParams } from "raviger";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
-import { Avatar } from "@/components/Common/Avatar";
 import {
   CardGridSkeleton,
   CardListSkeleton,
 } from "@/components/Common/SkeletonLoading";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import CreateTokenForm from "@/components/Tokens/CreateTokenForm";
+import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import PatientHomeTabs from "./home/PatientHomeTabs";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
-import mutate from "@/Utils/request/mutate";
-import { formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+import { useEncounterShortcutDisplays } from "@/hooks/useEncounterShortcuts";
+import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
+import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
+import { PatientHoverCard } from "@/pages/Facility/services/serviceRequests/PatientHoverCard";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import patientApi from "@/types/emr/patient/patientApi";
+import {
+  getTagHierarchyDisplay,
+  TagResource,
+} from "@/types/emr/tagConfig/tagConfig";
+import { renderTokenNumber } from "@/types/tokens/token/token";
+import tokenApi from "@/types/tokens/token/tokenApi";
+import query from "@/Utils/request/query";
+import { saveElementAsImage } from "@/Utils/utils";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function VerifyPatient() {
+  const getShortcutDisplay = useEncounterShortcutDisplays();
+  const queryClient = useQueryClient();
+  useFacilityShortcuts("patient-home");
   const { t } = useTranslation();
   const [qParams] = useQueryParams();
-  const { phone_number, year_of_birth, partial_id } = qParams;
+  const { phone_number, year_of_birth, partial_id, queue_id, token_id } =
+    qParams;
   const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
   const { hasPermission } = usePermissions();
@@ -52,29 +70,29 @@ export default function VerifyPatient() {
   const canCreateToken = canWriteAppointment;
 
   const {
-    mutate: verifyPatient,
     data: patientData,
     isPending: isVerifyingPatient,
     isError,
-  } = useMutation({
-    mutationFn: mutate(patientApi.searchRetrieve),
-    onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string[] } };
-      errorData.errors.msg.forEach((er) => {
-        toast.error(er);
-      });
-    },
+  } = useQuery({
+    queryKey: ["patient-verify", phone_number, year_of_birth, partial_id],
+    queryFn: query(patientApi.searchRetrieve, {
+      body: { phone_number, year_of_birth, partial_id },
+    }),
+    enabled: !!(phone_number && year_of_birth && partial_id),
   });
 
-  useEffect(() => {
-    if (phone_number && year_of_birth && partial_id) {
-      verifyPatient({
-        phone_number,
-        year_of_birth,
-        partial_id,
-      });
-    }
-  }, [phone_number, year_of_birth, partial_id, verifyPatient]);
+  // Fetch token details if queue_id and token_id are provided
+  const { data: tokenData, isLoading: isTokenLoading } = useQuery({
+    queryKey: ["token", facilityId, queue_id, token_id],
+    queryFn: query(tokenApi.get, {
+      pathParams: {
+        facility_id: facilityId,
+        queue_id: queue_id!,
+        id: token_id!,
+      },
+    }),
+    enabled: !!(queue_id && token_id && facilityId),
+  });
 
   if (isVerifyingPatient || !facility) {
     return (
@@ -94,185 +112,191 @@ export default function VerifyPatient() {
           </AlertDescription>
         </Alert>
       ) : patientData ? (
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex flex-col justify-between gap-4 gap-y-2 md:flex-row">
-                <div className="flex flex-col gap-4 md:flex-row">
-                  <div className="flex flex-row gap-x-4">
-                    <div className="size-10 shrink-0 md:size-14">
-                      <Avatar
-                        className="size-10 font-semibold text-secondary-800 md:size-auto"
-                        name={patientData.name || "-"}
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="space-y-6 lg:col-span-2">
+              <div className="">
+                <Card className="bg-white shadow-sm">
+                  <CardHeader className="pb-4">
+                    <div className="space-y-4">
+                      <PatientHoverCard
+                        patient={patientData}
+                        facilityId={facilityId || ""}
                       />
                     </div>
-                    <div>
-                      <Link
-                        href={`/facility/${facility.id}/patient/${patientData.id}`}
-                        className="flex flex-col group"
-                      >
-                        <div className="flex items-center gap-2">
-                          <h1
-                            data-cy="verify-patient-name"
-                            className="text-xl font-bold capitalize text-gray-950 group-hover:text-primary transition-colors"
-                          >
-                            {patientData.name}
-                          </h1>
-                          <ExternalLink className="size-4 text-gray-400 group-hover:text-primary transition-colors" />
-                        </div>
-                        <h3 className="text-sm font-medium text-gray-600">
-                          {formatPatientAge(patientData, true)},{"  "}
-                          <span className="capitalize">
-                            {patientData.gender.replace("_", " ")}
-                          </span>
-                          {patientData.blood_group &&
-                            ", " + patientData.blood_group.replace("_", " ")}
-                        </h3>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardHeader>
-          </Card>
-
-          {(canWriteAppointment || canCreateEncounter || canCreateToken) && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("quick_actions")}</CardTitle>
-                <CardDescription>
-                  {canWriteAppointment && canCreateEncounter
-                    ? t("quick_actions_description")
-                    : canWriteAppointment
-                      ? t("quick_actions_description_create_appointment")
-                      : canCreateEncounter
-                        ? t("quick_actions_description_create_encounter")
-                        : ""}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-1 lg:grid-cols-3">
-                {canWriteAppointment && (
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="group relative h-[100px] md:h-[120px] overflow-hidden border-0 bg-linear-to-br from-blue-50 to-indigo-50 p-0 shadow-md hover:shadow-xl transition-all duration-300"
-                  >
-                    <Link
-                      href={`/facility/${facilityId}/patient/${patientData.id}/book-appointment`}
-                      className="p-4 md:p-6"
-                    >
-                      <div className="absolute inset-0 bg-linear-to-br from-primary/80 to-primary opacity-0 transition-opacity duration-300 group-hover:opacity-10" />
-                      <div className="relative flex w-full items-center gap-3 md:gap-4">
-                        <div className="flex size-10 md:size-12 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                          <CalendarIcon className="size-5 md:size-6 text-primary" />
-                        </div>
-                        <div className="flex flex-col items-start gap-0.5">
-                          <span className="text-base md:text-lg font-semibold text-gray-800 group-hover:text-primary transition-colors line-clamp-1">
-                            {t("schedule_appointment")}
-                          </span>
-                          <span className="text-xs md:text-sm text-gray-500 line-clamp-1">
-                            {t("book_a_new_appointment")}
-                          </span>
-                        </div>
-                        <CareIcon
-                          icon="l-arrow-right"
-                          className="ml-auto size-4 md:size-5 text-gray-400 transform translate-x-0 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100"
-                        />
+                  </CardHeader>
+                </Card>
+                <Card className="bg-white shadow-sm mx-10 rounded-t-none">
+                  <CardHeader className="p-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {patientData.instance_tags.map((t) => (
+                          <Badge key={t.id} variant="outline">
+                            {getTagHierarchyDisplay(t)}
+                          </Badge>
+                        ))}
                       </div>
-                    </Link>
-                  </Button>
-                )}
+                      <TagAssignmentSheet
+                        entityType={TagResource.PATIENT}
+                        entityId={patientData.id}
+                        currentTags={patientData.instance_tags}
+                        onUpdate={() => {
+                          queryClient.invalidateQueries({
+                            queryKey: [
+                              "patient-verify",
+                              phone_number,
+                              year_of_birth,
+                              partial_id,
+                            ],
+                          });
+                        }}
+                        canWrite={true}
+                        trigger={
+                          <Button variant="ghost">
+                            <SettingsIcon
+                              className=" text-gray-950"
+                              strokeWidth={1.5}
+                            />
+                            <span className="font-semibold underline">
+                              {t("manage_tags")}
+                            </span>
+                          </Button>
+                        }
+                      />
+                    </div>
+                  </CardHeader>
+                </Card>
+              </div>
 
+              <div className="grid gap-4 grid-cols-2  lg:grid-cols-3">
                 {canCreateEncounter && (
                   <CreateEncounterForm
                     patientId={patientData.id}
                     facilityId={facilityId}
                     patientName={patientData.name}
                     trigger={
-                      <Button
-                        variant="outline"
-                        data-cy="create-encounter-button"
-                        className="group relative h-[100px] md:h-[120px] overflow-hidden border-0 bg-linear-to-br from-emerald-50 to-teal-50 p-0 shadow-md hover:shadow-xl transition-all duration-300 justify-start"
-                      >
-                        <div className="w-full p-4 md:p-6">
-                          <div className="absolute inset-0 bg-linear-to-br from-primary/80 to-primary opacity-0 transition-opacity duration-300 group-hover:opacity-10" />
-                          <div className="relative flex w-full items-center gap-3 md:gap-4">
-                            <div className="flex size-10 md:size-12 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                              <CareIcon
-                                icon="l-stethoscope"
-                                className="size-5 md:size-6 text-primary"
-                              />
-                            </div>
-                            <div className="flex flex-col items-start gap-0.5">
-                              <span className="text-base md:text-lg font-semibold text-gray-800 group-hover:text-primary transition-colors line-clamp-1">
-                                {t("create_encounter")}
-                              </span>
-                              <span className="text-xs md:text-sm text-gray-500 line-clamp-1">
-                                {t("start_a_new_clinical_encounter")}
-                              </span>
-                            </div>
-                            <CareIcon
-                              icon="l-arrow-right"
-                              className="ml-auto size-4 md:size-5 text-gray-400 transform translate-x-0 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100"
-                            />
-                          </div>
-                        </div>
-                      </Button>
+                      <QuickAction
+                        icon={<SquareActivity className="text-orange-500" />}
+                        title={t("create_encounter")}
+                        shortcut={getShortcutDisplay("create-encounter")}
+                      />
+                    }
+                  />
+                )}
+
+                {canWriteAppointment && (
+                  <BookAppointmentSheet
+                    patientId={patientData.id}
+                    facilityId={facilityId}
+                    trigger={
+                      <QuickAction
+                        icon={<Stethoscope className="text-purple-500" />}
+                        title={t("schedule_appointment")}
+                        shortcut={getShortcutDisplay("schedule-appointment")}
+                      />
                     }
                   />
                 )}
 
                 {canCreateToken && (
                   <CreateTokenForm
-                    patientId={patientData.id}
+                    patient={patientData}
                     facilityId={facilityId}
-                    patientName={patientData.name}
                     trigger={
-                      <Button
-                        variant="outline"
-                        data-cy="create-token-button"
-                        className="group relative h-[100px] md:h-[120px] overflow-hidden border-0 bg-linear-to-br from-amber-50 to-orange-50 p-0 shadow-md hover:shadow-xl transition-all duration-300 justify-start"
-                      >
-                        <div className="w-full p-4 md:p-6">
-                          <div className="absolute inset-0 bg-linear-to-br from-primary/80 to-primary opacity-0 transition-opacity duration-300 group-hover:opacity-10" />
-                          <div className="relative flex w-full items-center gap-3 md:gap-4">
-                            <div className="flex size-10 md:size-12 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                              <CareIcon
-                                icon="l-ticket"
-                                className="size-5 md:size-6 text-primary"
-                              />
-                            </div>
-                            <div className="flex flex-col items-start gap-0.5">
-                              <span className="text-base md:text-lg font-semibold text-gray-800 group-hover:text-primary transition-colors line-clamp-1">
-                                {t("create_token")}
-                              </span>
-                              <span className="text-xs md:text-sm text-gray-500 line-clamp-1">
-                                {t("generate_a_new_token")}
-                              </span>
-                            </div>
-                            <CareIcon
-                              icon="l-arrow-right"
-                              className="ml-auto size-4 md:size-5 text-gray-400 transform translate-x-0 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100"
-                            />
-                          </div>
-                        </div>
-                      </Button>
+                      <QuickAction
+                        icon={<Printer className="text-gray-500" />}
+                        title={t("generate_token")}
+                        shortcut={getShortcutDisplay("generate-token")}
+                      />
                     }
                   />
                 )}
-              </CardContent>
-            </Card>
-          )}
+              </div>
 
-          <PatientHomeTabs
-            patientId={patientData.id}
-            facilityId={facilityId}
-            facilityPermissions={facility?.permissions ?? []}
-            canListEncounters={canListEncounters}
-            canWriteAppointment={canWriteAppointment}
-            canCreateToken={canCreateToken}
-            patientData={patientData}
-          />
+              <PatientHomeTabs
+                patientId={patientData.id}
+                facilityId={facilityId}
+                facilityPermissions={facility?.permissions ?? []}
+                canListEncounters={canListEncounters}
+                canWriteAppointment={canWriteAppointment}
+                canCreateToken={canCreateToken}
+                patientData={patientData}
+              />
+            </div>
+
+            <div className="space-y-4">
+              {isTokenLoading && (
+                <Card className="bg-white shadow-sm h-full">
+                  <CardHeader className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 bg-gray-200 rounded animate-pulse" />
+                      <div className="space-y-2">
+                        <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+                        <div className="h-3 w-16 bg-gray-200 rounded animate-pulse" />
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+              )}
+
+              {tokenData && (
+                <Card className="bg-white shadow-sm p-1">
+                  <CardHeader className="bg-gray-100 font-semibold text-lg p-2 rounded-t-lg">
+                    {t("queue")}
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <Link
+                        href={`/facility/${facilityId}/queues/${tokenData.queue.id}`}
+                        className="font-semibold text-lg underline"
+                      >
+                        {tokenData.queue.name}
+                      </Link>
+
+                      <span className="text-lg text-gray-700 p-2">
+                        {t("token")}: {renderTokenNumber(tokenData)}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {tokenData && (
+                <div>
+                  <div
+                    id="section-to-print"
+                    className="print:block print:w-[400px] print:pt-4"
+                  >
+                    <TokenCard token={tokenData} facility={facility} />
+                  </div>
+
+                  <div className="mt-4 flex justify-end gap-2">
+                    <Button
+                      data-shortcut-id="print-token"
+                      variant="ghost"
+                      onClick={() =>
+                        saveElementAsImage("section-to-print", "token-card.png")
+                      }
+                      className="underline font-semibold text-base"
+                    >
+                      <Download className="size-5" />
+                      {t("download")}
+                    </Button>
+                    <Button
+                      data-shortcut-id="print-token"
+                      variant="outline"
+                      onClick={() => print()}
+                      className="font-semibold text-base"
+                    >
+                      <Printer className="size-5" />
+                      {t("print_token")}
+                      <ShortcutBadge actionId="print-token" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       ) : (
         isError && (

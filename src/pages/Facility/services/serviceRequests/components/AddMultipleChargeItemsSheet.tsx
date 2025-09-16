@@ -41,17 +41,15 @@ import {
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
-import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
-import locationApi from "@/types/location/locationApi";
 
 interface AddMultipleChargeItemsSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   facilityId: string;
-  serviceRequestId: string;
+  serviceResourceId: string;
   serviceResourceType: ChargeItemServiceResource;
   encounterId?: string;
-  locationId?: string;
+  patientId?: string;
   onChargeItemsAdded: () => void;
   disabled?: boolean;
 }
@@ -65,10 +63,10 @@ export default function AddMultipleChargeItemsSheet({
   open,
   onOpenChange,
   facilityId,
-  serviceRequestId,
   serviceResourceType,
+  serviceResourceId,
   encounterId,
-  locationId,
+  patientId,
   onChargeItemsAdded,
   disabled,
 }: AddMultipleChargeItemsSheetProps) {
@@ -91,36 +89,7 @@ export default function AddMultipleChargeItemsSheet({
     enabled: open,
   });
 
-  // Conditional API calls based on service resource type
-  const { data: serviceRequestData } = useQuery({
-    queryKey: ["serviceRequest", serviceRequestId],
-    queryFn: query(serviceRequestApi.retrieveServiceRequest, {
-      pathParams: {
-        facilityId: facilityId,
-        serviceRequestId: serviceRequestId,
-      },
-    }),
-    enabled:
-      open && serviceResourceType === ChargeItemServiceResource.service_request,
-  });
-
-  const { data: locationData } = useQuery({
-    queryKey: ["location", locationId],
-    queryFn: query(locationApi.get, {
-      pathParams: {
-        facility_id: facilityId,
-        id: locationId || "",
-      },
-    }),
-    enabled:
-      open &&
-      serviceResourceType === ChargeItemServiceResource.bed_association &&
-      !!locationId,
-  });
-
   // Unified request data
-  const request = serviceRequestData || locationData;
-
   const { mutate: applyChargeItems, isPending } = useMutation({
     mutationFn: mutate(chargeItemApi.applyChargeItemDefinitions, {
       pathParams: { facilityId },
@@ -134,32 +103,27 @@ export default function AddMultipleChargeItemsSheet({
   });
 
   const handleSelectChargeItem = (value: string) => {
-    if (!value || !request) return;
+    if (!value) return;
     setSelectedDefinitionId(value);
   };
 
   useEffect(() => {
-    if (selectedDefinitionId && request) {
+    if (selectedDefinitionId) {
       const selectedCID = chargeItemDefinitions?.results.find(
         (cid) => cid.id === selectedDefinitionId,
       );
       if (!selectedCID) return;
 
-      // Determine encounter ID based on resource type
-      const finalEncounterId =
-        serviceResourceType === ChargeItemServiceResource.service_request
-          ? serviceRequestData?.encounter.id
-          : encounterId;
-
       setSelectedItems([
         ...selectedItems,
         {
           quantity: "1",
-          encounter: finalEncounterId,
+          encounter: encounterId,
+          patient: patientId,
           charge_item_definition: selectedCID.slug,
           charge_item_definition_object: selectedCID,
           service_resource: serviceResourceType as ChargeItemServiceResource,
-          service_resource_id: serviceRequestId,
+          service_resource_id: serviceResourceId,
         },
       ]);
       setSelectedDefinitionId(null);
@@ -167,9 +131,7 @@ export default function AddMultipleChargeItemsSheet({
   }, [
     selectedDefinitionId,
     chargeItemDefinitions,
-    request,
     serviceResourceType,
-    serviceRequestData,
     encounterId,
   ]);
 

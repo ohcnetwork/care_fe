@@ -79,6 +79,8 @@ export const PERMISSION_LIST_TEMPLATE = "can_list_template";
 export const PERMISSION_MANAGE_TEMPLATE = "can_manage_template";
 export const PERMISSION_CREATE_CHARGE_ITEM_DEFINITION =
   "can_create_charge_item_definition";
+export const PERMISSION_SET_CHARGE_ITEM_DEFINITION =
+  "can_set_charge_item_definition";
 
 export interface Permissions {
   // Patient Permissions
@@ -191,7 +193,7 @@ export interface Permissions {
   /** Permission slug: "can_manage_template" */
   canManageTemplate: boolean;
   /** Permission slug: "can_create_charge_item_definition" */
-  canCreateChargeItemDefinition: boolean;
+  canSetChargeItemDefinition: boolean;
 }
 
 export type HasPermissionFn = (
@@ -348,8 +350,8 @@ export function getPermissions(
     // Template
     canListTemplate: hasPermission(PERMISSION_LIST_TEMPLATE, permissions),
     canManageTemplate: hasPermission(PERMISSION_MANAGE_TEMPLATE, permissions),
-    canCreateChargeItemDefinition: hasPermission(
-      PERMISSION_CREATE_CHARGE_ITEM_DEFINITION,
+    canSetChargeItemDefinition: hasPermission(
+      PERMISSION_SET_CHARGE_ITEM_DEFINITION,
       permissions,
     ),
   };

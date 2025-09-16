@@ -5,6 +5,7 @@ import Page from "@/components/Common/Page";
 import { ResourceCategoryList } from "@/components/Common/ResourceCategoryList";
 import { ProductKnowledgeList as ProductKnowledgeListComponent } from "@/pages/Facility/settings/productKnowledge/ProductKnowledgeListComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
+import { useState } from "react";
 
 interface ProductKnowledgeListProps {
   facilityId: string;
@@ -16,6 +17,7 @@ export default function ProductKnowledgeList({
   categorySlug,
 }: ProductKnowledgeListProps) {
   const { t } = useTranslation();
+  const [allowCategoryCreate, setAllowCategoryCreate] = useState(false);
 
   const onNavigate = (slug: string) => {
     navigate(
@@ -32,6 +34,7 @@ export default function ProductKnowledgeList({
   return (
     <Page title={t("product_knowledge")} hideTitleOnPage>
       <ResourceCategoryList
+        allowCategoryCreate={allowCategoryCreate}
         facilityId={facilityId}
         categorySlug={categorySlug}
         resourceType={ResourceCategoryResourceType.product_knowledge}
@@ -47,6 +50,7 @@ export default function ProductKnowledgeList({
           <ProductKnowledgeListComponent
             facilityId={facilityId}
             categorySlug={categorySlug}
+            setAllowCategoryCreate={setAllowCategoryCreate}
           />
         )}
       </ResourceCategoryList>

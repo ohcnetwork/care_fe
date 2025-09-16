@@ -4,6 +4,7 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
 import { ScheduleHome } from "@/components/Schedule/ScheduleHome";
 import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
+import PrintAppointments from "@/pages/Appointments/components/PrintAppointments";
 import BedsList from "@/pages/Facility/locations/BedsList";
 import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
 import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
@@ -199,15 +200,18 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     />
   ),
 
-  "/medication_requests/patient/:patientId/pending": ({
+  "/medication_requests/patient/:patientId/prescription/:prescriptionId": ({
     patientId,
+    prescriptionId,
   }: {
     patientId: string;
+    prescriptionId: string;
   }) => (
     <PrescriptionsView
       facilityId={facilityId}
       patientId={patientId}
       tab={PharmacyMedicationTab.PENDING}
+      prescriptionId={prescriptionId}
     />
   ),
   "/medication_requests/patient/:patientId/print": ({
@@ -216,17 +220,6 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     patientId: string;
   }) => (
     <PrintPharmacyPrescription facilityId={facilityId} patientId={patientId} />
-  ),
-  "/medication_requests/patient/:patientId/partial": ({
-    patientId,
-  }: {
-    patientId: string;
-  }) => (
-    <PrescriptionsView
-      facilityId={facilityId}
-      patientId={patientId}
-      tab={PharmacyMedicationTab.PARTIAL}
-    />
   ),
 
   "/medication_dispense/patient/:patientId/:status": ({
@@ -261,6 +254,13 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   // Appointments
   "/appointments": () => (
     <AppointmentsPage
+      resourceType={SchedulableResourceType.Location}
+      resourceId={locationId}
+    />
+  ),
+  "/appointments/print": () => (
+    <PrintAppointments
+      facilityId={facilityId}
       resourceType={SchedulableResourceType.Location}
       resourceId={locationId}
     />

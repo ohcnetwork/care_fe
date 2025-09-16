@@ -1071,10 +1071,10 @@ export async function createResourceCategories(
 
   const categoryData: ResourceCategoryCreate[] = categories.map((category) => ({
     title: normalizeTitle(category),
-    slug: createSlug(category),
     description: `Auto-generated category for ${category}`,
     resource_type: resourceType,
     resource_sub_type: ResourceCategorySubType.other,
+    slug_value: createSlug(category),
   }));
 
   // Use batch API call to create categories

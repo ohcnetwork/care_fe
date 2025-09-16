@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, Info, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import Autocomplete from "@/components/ui/autocomplete";
+import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +22,9 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { TooltipComponent } from "@/components/ui/tooltip";
+import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
+import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
+import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 
 import UserSelector from "@/components/Common/UserSelector";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
@@ -30,8 +33,6 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import query from "@/Utils/request/query";
-import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
-import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import {
   ServiceRequestApplyActivityDefinitionSpec as BaseServiceRequestApplyActivityDefinitionSpec,
   Intent,
@@ -473,21 +474,11 @@ export function ServiceRequestQuestion({
     (questionnaireResponse.values?.[0]
       ?.value as unknown as ServiceRequestApplyActivityDefinitionSpec[]) || [],
   );
-  const [activityDefinitionSearch, setActivityDefinitionSearch] = useState("");
-
   const { data: locations } = useQuery({
     queryKey: ["locations", facilityId],
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: { limit: 100 },
-    }),
-  });
-
-  const { data: activityDefinitions } = useQuery({
-    queryKey: ["activity_definitions", facilityId, activityDefinitionSearch],
-    queryFn: query.debounced(activityDefinitionApi.listActivityDefinition, {
-      pathParams: { facilityId: facilityId },
-      queryParams: { limit: 100, title: activityDefinitionSearch },
     }),
   });
 
@@ -506,23 +497,22 @@ export function ServiceRequestQuestion({
   });
 
   useEffect(() => {
-    if (selectedActivityDefinition && selectedActivityDefinitionData) {
-      const selectedAD = activityDefinitions?.results.find(
-        (ad) => ad.slug === selectedActivityDefinition,
-      );
-      if (!selectedAD) return;
+    console.log("selectedActivityDefinition", selectedActivityDefinition);
+  }, [selectedActivityDefinition]);
 
+  useEffect(() => {
+    if (selectedActivityDefinition && selectedActivityDefinitionData) {
       const newServiceRequest: ServiceRequestApplyActivityDefinitionSpec = {
         service_request: {
-          title: selectedAD.title,
+          title: selectedActivityDefinitionData.title,
           status: Status.active,
           intent: Intent.order,
           priority: Priority.routine,
-          category: selectedAD.classification,
+          category: selectedActivityDefinitionData.classification,
           do_not_perform: false,
           note: null,
-          code: selectedAD.code,
-          body_site: selectedAD.body_site,
+          code: selectedActivityDefinitionData.code,
+          body_site: selectedActivityDefinitionData.body_site,
           occurance: null,
           patient_instruction: null,
           requester: currentUser,
@@ -540,7 +530,6 @@ export function ServiceRequestQuestion({
   }, [
     selectedActivityDefinition,
     selectedActivityDefinitionData,
-    activityDefinitions,
     encounterId,
     currentUser,
   ]);
@@ -656,16 +645,6 @@ export function ServiceRequestQuestion({
     });
   };
 
-  // Memoize activity definitions to match Autocomplete's expected format
-  const activityDefinitionOptions = useMemo(
-    () =>
-      activityDefinitions?.results.map((ad) => ({
-        label: ad.title,
-        value: ad.slug,
-      })) || [],
-    [activityDefinitions?.results],
-  );
-
   // Effect to sync service requests with questionnaire response
   useEffect(() => {
     const initialServiceRequests =
@@ -680,8 +659,14 @@ export function ServiceRequestQuestion({
     }
   }, [questionnaireResponse.values, serviceRequests]);
 
-  const handleActivityDefinitionSelect = (activityDefinitionSlug: string) => {
-    setSelectedActivityDefinition(activityDefinitionSlug);
+  const handleActivityDefinitionSelect = (
+    value:
+      | ActivityDefinitionReadSpec
+      | ActivityDefinitionReadSpec[]
+      | undefined,
+  ) => {
+    const def = Array.isArray(value) ? value[0] : value;
+    setSelectedActivityDefinition(def?.slug || null);
   };
 
   return (
@@ -738,16 +723,24 @@ export function ServiceRequestQuestion({
       )}
 
       <div className="space-y-2 w-full">
-        <Autocomplete
-          options={activityDefinitionOptions}
-          value={selectedActivityDefinition || ""}
-          onChange={(value) => handleActivityDefinitionSelect(value)}
-          onSearch={setActivityDefinitionSearch}
+        <ResourceDefinitionCategoryPicker<ActivityDefinitionReadSpec>
+          facilityId={facilityId}
+          value={selectedActivityDefinitionData || undefined}
+          onValueChange={handleActivityDefinitionSelect}
           placeholder={t("select_activity_definition")}
-          inputPlaceholder={t("search_activity_definitions")}
-          noOptionsMessage={t("no_activity_definitions_found")}
           disabled={disabled}
-          data-cy="activity-definition-select"
+          className="w-full"
+          resourceType={ResourceCategoryResourceType.activity_definition}
+          listDefinitions={{
+            queryFn: activityDefinitionApi.listActivityDefinition,
+            pathParams: { facilityId },
+          }}
+          translations={{
+            searchPlaceholder: "search_activity_definitions",
+            selectPlaceholder: "select_activity_definition",
+            noResultsFound: "no_activity_definitions_found_for",
+            noItemsFound: "no_activity_definitions_found",
+          }}
         />
       </div>
     </div>

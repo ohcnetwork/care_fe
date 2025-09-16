@@ -1,3 +1,4 @@
+import { SlugConfig } from "@/types/base/slug/slugConfig";
 import { UserReadMinimal } from "@/types/user/user";
 
 export enum ResourceCategoryResourceType {
@@ -33,6 +34,7 @@ export interface ResourceCategoryBase {
   slug: string;
   resource_type: ResourceCategoryResourceType;
   resource_sub_type: ResourceCategorySubType;
+  slug_config: SlugConfig;
 }
 
 export interface ResourceCategoryRead extends ResourceCategoryBase {
@@ -46,14 +48,14 @@ export interface ResourceCategoryCreate {
   title: string;
   description?: string;
   parent?: string;
-  slug: string;
+  slug_value: string;
   resource_type: ResourceCategoryResourceType;
   resource_sub_type: ResourceCategorySubType;
 }
 
 export interface ResourceCategoryUpdate {
   title: string;
-  slug: string;
+  slug_value: string;
   description?: string;
   parent?: string;
   resource_type: ResourceCategoryResourceType;

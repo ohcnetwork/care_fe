@@ -170,6 +170,7 @@ interface ResourceCategoryListProps {
   createItemLabel?: string;
   createItemIcon?: "l-plus" | "l-file" | "l-folder-plus";
   createItemTooltip?: string;
+  allowCategoryCreate?: boolean;
   children?: React.ReactNode;
 }
 
@@ -184,6 +185,7 @@ export function ResourceCategoryList({
   createItemLabel,
   createItemIcon = "l-plus",
   createItemTooltip,
+  allowCategoryCreate = false,
   children,
 }: ResourceCategoryListProps) {
   const { t } = useTranslation();
@@ -255,16 +257,22 @@ export function ResourceCategoryList({
                 baseTitle={baseTitle}
               />
             </div>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" onClick={handleCreateCategory}>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-x-2 gap-2">
+              <Button
+                variant="outline"
+                onClick={handleCreateCategory}
+                disabled={isLeafCategory && !allowCategoryCreate}
+                className="w-full sm:w-auto"
+              >
                 <CareIcon icon="l-folder-plus" className="mr-2" />
                 {t("add_category")}
               </Button>
               {onCreateItem && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div>
+                    <div className="w-full sm:w-auto">
                       <Button
+                        className="w-full sm:w-auto"
                         onClick={onCreateItem}
                         disabled={!isLeafCategory || false}
                       >

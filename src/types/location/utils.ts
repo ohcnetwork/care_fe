@@ -2,13 +2,9 @@ import { LocationList } from "@/types/location/location";
 /**
  * Builds a location hierarchy path from a location object with parent references
  * @param location - The location object to build hierarchy for
- * @param separator - The separator to use between location names (optional)
  * @returns Array of location names from root to leaf, or formatted string if separator provided
  */
-export function buildLocationHierarchy(
-  location: LocationList,
-  separator?: string,
-): string[] | string {
+export function buildLocationHierarchy(location: LocationList) {
   const hierarchy: string[] = [];
   let current: LocationList | undefined = location;
 
@@ -19,5 +15,5 @@ export function buildLocationHierarchy(
     current = current.parent;
   }
 
-  return separator ? hierarchy.join(separator) : hierarchy;
+  return hierarchy;
 }

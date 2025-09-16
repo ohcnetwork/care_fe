@@ -3,11 +3,15 @@ import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
 import { Badge } from "@/components/ui/badge";
 
 import { Time } from "@/Utils/types";
+import { formatName } from "@/Utils/utils";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
+import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
+import { LocationList } from "@/types/location/location";
+import { buildLocationHierarchy } from "@/types/location/utils";
 import { TokenRead } from "@/types/tokens/token/token";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -76,7 +80,7 @@ export interface ScheduleTemplateCreateRequest {
 export interface ScheduleTemplateSetChargeItemDefinitionRequest {
   charge_item_definition: string;
   re_visit_allowed_days: number;
-  re_visit_charge_item_definition?: string;
+  re_visit_charge_item_definition: string | null;
 }
 export interface ScheduleTemplateUpdateRequest {
   name: string;
@@ -191,26 +195,45 @@ export type AppointmentCancelledStatus =
 
 export type AppointmentStatus = (typeof AppointmentStatuses)[number];
 
-export interface Appointment {
+type LocationResource = {
+  resource: LocationList;
+  resource_type: SchedulableResourceType.Location;
+};
+
+type UserResource = {
+  resource: UserReadMinimal;
+  resource_type: SchedulableResourceType.Practitioner;
+};
+
+type HealthcareServiceResource = {
+  resource: HealthcareServiceReadSpec;
+  resource_type: SchedulableResourceType.HealthcareService;
+};
+
+export type ScheduleResource =
+  | UserResource
+  | LocationResource
+  | HealthcareServiceResource;
+
+export type Appointment = {
   id: string;
   token_slot: TokenSlot;
   patient: PatientRead;
   booked_on: string;
   status: AppointmentNonCancelledStatus;
   note: string;
-  user: UserReadMinimal;
   booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
   facility: FacilityBareMinimum;
   token: TokenRead | null;
-}
+} & ScheduleResource;
 
-export interface AppointmentRead extends Appointment {
+export type AppointmentRead = Appointment & {
   tags: TagConfig[];
   updated_by: UserReadMinimal | null;
   created_by: UserReadMinimal;
   modified_date: string;
   associated_encounter?: EncounterRead;
-}
+};
 
 export interface AppointmentCreateRequest {
   patient: string;
@@ -252,4 +275,17 @@ export const getUserFromLocalStorage = (): UserReadMinimal => {
 
 export const storeUserInLocalStorage = (user: UserReadMinimal) => {
   localStorage.setItem("user", JSON.stringify(user));
+};
+
+export const formatScheduleResourceName = (appointment: ScheduleResource) => {
+  switch (appointment.resource_type) {
+    case SchedulableResourceType.Practitioner:
+      return formatName(appointment.resource);
+    case SchedulableResourceType.Location:
+      return buildLocationHierarchy(appointment.resource).join(" > ");
+    case SchedulableResourceType.HealthcareService:
+      return appointment.resource.name;
+    default:
+      return "-";
+  }
 };

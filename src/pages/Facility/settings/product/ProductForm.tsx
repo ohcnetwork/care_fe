@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useImperativeHandle, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -151,8 +151,8 @@ export function ProductFormContent({
   onSuccess = () => navigate(`/facility/${facilityId}/settings/product`),
   onCancel = () => navigate(`/facility/${facilityId}/settings/product`),
   disableButtons = false,
-  externalSubmitRef,
   enabled = true,
+  ref,
 }: {
   facilityId: string;
   productId?: string;
@@ -162,8 +162,10 @@ export function ProductFormContent({
   onSuccess?: (product: ProductRead) => void;
   onCancel?: () => void;
   disableButtons?: boolean;
-  externalSubmitRef?: React.RefObject<(() => void) | null>;
   enabled?: boolean;
+  ref?: React.RefObject<{
+    createNewProduct: () => void;
+  }>;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -235,7 +237,7 @@ export function ProductFormContent({
         ? {
             status: existingData.status,
             product_knowledge: existingData.product_knowledge.slug,
-            charge_item_definition: existingData.charge_item_definition?.id,
+            charge_item_definition: existingData.charge_item_definition?.slug,
             batch: existingData.batch || undefined,
             expiration_date: existingData.expiration_date
               ? new Date(existingData.expiration_date)
@@ -275,6 +277,12 @@ export function ProductFormContent({
     },
   });
 
+  useImperativeHandle(ref, () => ({
+    createNewProduct: () => {
+      form.handleSubmit(onSubmit)();
+    },
+  }));
+
   const isPending = isCreating || isUpdating;
   function onSubmit(data: z.infer<typeof formSchema>) {
     // Format the data for API submission
@@ -307,15 +315,6 @@ export function ProductFormContent({
     }
   }
 
-  useEffect(() => {
-    if (externalSubmitRef) {
-      externalSubmitRef.current = () => {
-        form.handleSubmit(onSubmit)();
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [externalSubmitRef]);
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -332,7 +331,7 @@ export function ProductFormContent({
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger ref={field.ref}>
                         <SelectValue placeholder={t("select_status")} />
                       </SelectTrigger>
                     </FormControl>
@@ -354,7 +353,7 @@ export function ProductFormContent({
                 control={form.control}
                 name="product_knowledge"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel aria-required>
                       {t("product_knowledge")}
                     </FormLabel>
@@ -365,6 +364,7 @@ export function ProductFormContent({
                         )}
                         onChange={(selected) => field.onChange(selected.id)}
                         className="border-gray-200 font-normal text-gray-700"
+                        enableFavorites
                       />
                     </FormControl>
                     <FormDescription>
@@ -440,13 +440,13 @@ export function ProductFormContent({
                         options={mergeAutocompleteOptions(
                           chargeItemDefinitionOptions.map((cid) => ({
                             label: cid.title,
-                            value: cid.id,
+                            value: cid.slug,
                           })),
                           field.value
                             ? {
                                 label:
                                   chargeItemDefinitionOptions.find(
-                                    (cid) => cid.id === field.value,
+                                    (cid) => cid.slug === field.value,
                                   )?.title || "",
                                 value: field.value,
                               }

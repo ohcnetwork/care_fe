@@ -173,11 +173,13 @@ function ChargeItemTableRow({
 interface ChargeItemListProps {
   facilityId: string;
   categorySlug: string;
+  setAllowCategoryCreate: (allow: boolean) => void;
 }
 
 export function ChargeItemList({
   facilityId,
   categorySlug,
+  setAllowCategoryCreate,
 }: ChargeItemListProps) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
@@ -215,6 +217,17 @@ export function ChargeItemList({
     });
 
   const chargeItems = chargeItemsResponse?.results || [];
+
+  useEffect(() => {
+    if (!qParams.search && qParams.page === "1") {
+      setAllowCategoryCreate(!chargeItemsResponse?.count);
+    }
+  }, [
+    chargeItemsResponse?.count,
+    setAllowCategoryCreate,
+    qParams.search,
+    qParams.page,
+  ]);
 
   return (
     <TooltipProvider>

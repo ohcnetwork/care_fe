@@ -3,8 +3,9 @@ import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
 import { ResourceCategoryList } from "@/components/Common/ResourceCategoryList";
-import { ChargeItemList } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefanitionListComponent";
+import { ChargeItemList } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionListComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
+import { useState } from "react";
 
 interface ChargeItemDefinitionsListProps {
   facilityId: string;
@@ -16,6 +17,7 @@ export function ChargeItemDefinitionsList({
   categorySlug,
 }: ChargeItemDefinitionsListProps) {
   const { t } = useTranslation();
+  const [allowCategoryCreate, setAllowCategoryCreate] = useState(false);
 
   const onNavigate = (slug: string) => {
     navigate(
@@ -32,6 +34,7 @@ export function ChargeItemDefinitionsList({
   return (
     <Page title={t("charge_item_definitions")} hideTitleOnPage>
       <ResourceCategoryList
+        allowCategoryCreate={allowCategoryCreate}
         facilityId={facilityId}
         categorySlug={categorySlug}
         resourceType={ResourceCategoryResourceType.charge_item_definition}
@@ -46,7 +49,11 @@ export function ChargeItemDefinitionsList({
         )}
       >
         {categorySlug && (
-          <ChargeItemList facilityId={facilityId} categorySlug={categorySlug} />
+          <ChargeItemList
+            facilityId={facilityId}
+            categorySlug={categorySlug}
+            setAllowCategoryCreate={setAllowCategoryCreate}
+          />
         )}
       </ResourceCategoryList>
     </Page>

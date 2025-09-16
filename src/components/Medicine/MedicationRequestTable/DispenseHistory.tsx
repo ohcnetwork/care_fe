@@ -110,7 +110,7 @@ export function DispenseHistory({
                     : frequency?.display || "-"}
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
-                  {medication.charge_item.quantity || "-"}
+                  {medication.quantity || "-"}
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
                   {medication.location.name}

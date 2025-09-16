@@ -6,10 +6,13 @@ import {
   MoreHorizontal,
   PencilIcon,
   PlusIcon,
+  PrinterIcon,
 } from "lucide-react";
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,7 +46,6 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
-import query from "@/Utils/request/query";
 import {
   MonetaryComponent,
   MonetaryComponentType,
@@ -56,7 +58,9 @@ import {
   MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import query from "@/Utils/request/query";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./AddChargeItemsBillingSheet";
 import EditChargeItemSheet from "./EditChargeItemSheet";
 
@@ -107,6 +111,9 @@ export function ChargeItemsTable({
     {},
   );
   const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = useState(false);
+
+  // Register shortcuts for this table
+  useFacilityShortcuts("charge-items-table");
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
@@ -182,9 +189,9 @@ export function ChargeItemsTable({
               charge_item_status: value === "all" ? undefined : value,
             })
           }
-          className="max-sm:hidden"
+          className="max-sm:hidden w-2/3 md:w-full overflow-x-auto"
         >
-          <TabsList>
+          <TabsList className="overflow-x-auto">
             <TabsTrigger value="all">{t("all")}</TabsTrigger>
             {Object.values(ChargeItemStatus).map((status) => (
               <TabsTrigger key={status} value={status}>
@@ -215,14 +222,28 @@ export function ChargeItemsTable({
           </SelectContent>
         </Select>
 
-        <Button
-          variant="outline"
-          onClick={() => setIsAddChargeItemsOpen(true)}
-          className="w-full sm:w-auto"
-        >
-          <PlusIcon className="size-4 mr-2" />
-          {t("add_charge_items")}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => navigate(`../${accountId}/charge_items/print`)}
+            className="w-full sm:w-auto"
+            data-shortcut-id="print-button"
+          >
+            <PrinterIcon className="size-4 mr-2" />
+            {t("print_charge_items")}
+            <ShortcutBadge actionId="print-button" />
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setIsAddChargeItemsOpen(true)}
+            className="w-full sm:w-auto"
+            data-shortcut-id="add-charge-item"
+          >
+            <PlusIcon className="size-4 mr-2" />
+            {t("add_charge_items")}
+            <ShortcutBadge actionId="add-charge-item" />
+          </Button>
+        </div>
       </div>
       {isLoading ? (
         <TableSkeleton count={3} />

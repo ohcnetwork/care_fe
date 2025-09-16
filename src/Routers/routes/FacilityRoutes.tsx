@@ -3,10 +3,13 @@ import { Redirect } from "raviger";
 import FacilityUsers from "@/components/Facility/FacilityUsers";
 import ResourceCreate from "@/components/Resource/ResourceForm";
 
-import { AppRoutes } from "@/Routers/AppRouter";
+import { FacilityLayout } from "@/pages/Facility/FacilityLayout";
+
+import { AppRoutes, RouteParams } from "@/Routers/AppRouter";
 import AccountList from "@/pages/Facility/billing/account/AccountList";
 import AccountShow from "@/pages/Facility/billing/account/AccountShow";
 import CreateInvoicePage from "@/pages/Facility/billing/account/CreateInvoice";
+import { PrintChargeItems } from "@/pages/Facility/billing/account/components/PrintChargeItems";
 import InvoiceList from "@/pages/Facility/billing/invoice/InvoiceList";
 import InvoiceShow from "@/pages/Facility/billing/invoice/InvoiceShow";
 import PrintInvoice from "@/pages/Facility/billing/invoice/PrintInvoice";
@@ -106,6 +109,10 @@ const FacilityRoutes: AppRoutes = {
       tab="charge_items"
     />
   ),
+  "/facility/:facilityId/billing/account/:accountId/charge_items/print": ({
+    facilityId,
+    accountId,
+  }) => <PrintChargeItems facilityId={facilityId} accountId={accountId} />,
   "/facility/:facilityId/billing/account/:accountId/payments": ({
     facilityId,
     accountId,
@@ -160,4 +167,15 @@ const FacilityRoutes: AppRoutes = {
   ),
 };
 
-export default FacilityRoutes;
+const injectFacilityLayout = (routes: AppRoutes) => {
+  return Object.fromEntries(
+    Object.entries(routes).map(([key, value]) => [
+      key,
+      (args: RouteParams<string>) => (
+        <FacilityLayout>{value(args)}</FacilityLayout>
+      ),
+    ]),
+  );
+};
+
+export default injectFacilityLayout(FacilityRoutes);

@@ -72,6 +72,7 @@ export function SpecimenDefinitionDetail({
     updateSpecimenDefinition({
       ...specimenDefinition,
       status: SpecimenDefinitionStatus.retired,
+      slug_value: specimenDefinition.slug_config.slug_value,
     });
   };
 
@@ -183,10 +184,6 @@ export function SpecimenDefinitionDetail({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <p className="text-sm font-medium text-gray-400">{t("slug")}</p>
-              <p>{specimenDefinition.slug}</p>
-            </div>
             {specimenDefinition.derived_from_uri && (
               <div>
                 <p className="text-sm font-medium text-gray-400">

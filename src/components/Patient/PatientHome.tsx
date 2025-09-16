@@ -22,9 +22,10 @@ import patientApi from "@/types/emr/patient/patientApi";
 import {
   PatientDeceasedInfo,
   PatientHeader,
-} from "@/pages/Facility/services/serviceRequests/PatientHeader";
+} from "@/components/Patient/PatientHeader";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
-
 export const PatientHome = (props: {
   facilityId?: string;
   id: string;
@@ -34,7 +35,7 @@ export const PatientHome = (props: {
 
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-
+  useFacilityShortcuts();
   const { data: patientData, isLoading } = useQuery({
     queryKey: ["patient", id],
     queryFn: query(patientApi.getPatient, {
@@ -73,13 +74,13 @@ export const PatientHome = (props: {
       options={
         <>
           {facilityId && canWriteAppointment && (
-            <Button asChild variant="primary">
-              <Link
-                href={`/facility/${facilityId}/patient/${id}/book-appointment`}
-              >
-                {t("schedule_appointment")}
-              </Link>
-            </Button>
+            <BookAppointmentSheet
+              patientId={id}
+              facilityId={facilityId}
+              trigger={
+                <Button variant="primary">{t("schedule_appointment")}</Button>
+              }
+            />
           )}
         </>
       }

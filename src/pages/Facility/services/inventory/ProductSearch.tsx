@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Autocomplete from "@/components/ui/autocomplete";
@@ -19,10 +19,12 @@ interface ProductSelectProps {
   onChange: (value: ProductRead | null) => void;
   disabled?: boolean;
   className?: string;
-  onProductSubmit?: (submitFn: () => void) => void;
   onProductCreate?: (product: ProductRead) => void;
   productKnowledgeSlug?: string;
   enabled?: boolean;
+  ref?: React.RefObject<{
+    createNewProduct: () => void;
+  }>;
 }
 
 export function ProductSearch({
@@ -30,10 +32,10 @@ export function ProductSearch({
   facilityId,
   onChange,
   disabled,
-  onProductSubmit,
   onProductCreate,
   productKnowledgeSlug,
   enabled = true,
+  ref,
 }: ProductSelectProps) {
   const { t } = useTranslation();
 
@@ -41,8 +43,6 @@ export function ProductSearch({
   const [selectedProduct, setSelectedProduct] = useState<
     ProductRead | undefined
   >();
-  const productFormSubmitRef = useRef<(() => void) | null>(null);
-  const hasSetSubmitFunction = useRef(false);
 
   const { data: products, isFetching: isProductsFetching } = useQuery({
     queryKey: ["products", productKnowledgeSlug],
@@ -59,7 +59,6 @@ export function ProductSearch({
   useEffect(() => {
     if (selectedProduct) {
       setIsCreatingProduct(false);
-      hasSetSubmitFunction.current = false;
     }
   }, [selectedProduct]);
 
@@ -69,19 +68,8 @@ export function ProductSearch({
       setIsCreatingProduct(false);
     } else {
       setSelectedProduct(undefined);
-      hasSetSubmitFunction.current = false;
     }
   }, [value]);
-
-  // Only set up the submit function once when product creation starts
-  useEffect(() => {
-    if (isCreatingProduct && onProductSubmit && !hasSetSubmitFunction.current) {
-      hasSetSubmitFunction.current = true;
-      onProductSubmit(() => {
-        productFormSubmitRef.current?.();
-      });
-    }
-  }, [isCreatingProduct, onProductSubmit]);
 
   const options = mergeAutocompleteOptions(
     products?.results.map((product: ProductRead) => ({
@@ -149,20 +137,17 @@ export function ProductSearch({
           facilityId={facilityId}
           slug={productKnowledgeSlug}
           onSuccess={(product) => {
-            setIsCreatingProduct(false);
-            hasSetSubmitFunction.current = false;
             onChange(product);
             setSelectedProduct(product);
             onProductCreate?.(product);
           }}
           onCancel={() => {
             setIsCreatingProduct(false);
-            hasSetSubmitFunction.current = false;
             setSelectedProduct(undefined);
           }}
           disableButtons
-          externalSubmitRef={productFormSubmitRef}
           enabled={enabled && isCreatingProduct}
+          ref={ref}
         />
       )}
     </div>

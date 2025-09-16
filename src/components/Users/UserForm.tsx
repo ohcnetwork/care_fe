@@ -361,7 +361,7 @@ export default function UserForm({
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger data-cy="user-type-select">
+                    <SelectTrigger data-cy="user-type-select" ref={field.ref}>
                       <SelectValue placeholder={t("select_user_type")} />
                     </SelectTrigger>
                   </FormControl>
@@ -737,7 +737,7 @@ export default function UserForm({
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger data-cy="gender-select">
+                    <SelectTrigger data-cy="gender-select" ref={field.ref}>
                       <SelectValue placeholder={t("select_gender")} />
                     </SelectTrigger>
                   </FormControl>

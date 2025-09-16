@@ -36,6 +36,11 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
 import {
+  InterpretationType,
+  QualifiedRange,
+  qualifiedRangeSchema,
+} from "@/types/base/qualifiedRange/qualifiedRange";
+import {
   OBSERVATION_DEFINITION_CATEGORY,
   OBSERVATION_DEFINITION_STATUS,
   type ObservationDefinitionCreateSpec,
@@ -44,10 +49,11 @@ import {
   QuestionType,
 } from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
+import { ObservationInterpretation } from "./ObservationInterpretation";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  slug: z.string().min(1, "Slug is required"),
+  slug_value: z.string().min(1, "Slug is required"),
   description: z.string().min(1, "Description is required"),
   status: z.enum(OBSERVATION_DEFINITION_STATUS),
   category: z.enum(OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]]),
@@ -100,9 +106,11 @@ const formSchema = z.object({
           .refine((data) => data.code && data.display && data.system, {
             message: "Required",
           }),
+        qualified_ranges: qualifiedRangeSchema,
       }),
     )
     .default([]),
+  qualified_ranges: qualifiedRangeSchema,
 });
 
 export default function ObservationDefinitionForm({
@@ -178,7 +186,7 @@ function ObservationDefinitionFormContent({
       isEditMode && existingData
         ? {
             title: existingData.title,
-            slug: existingData.slug,
+            slug_value: existingData.slug_config.slug_value,
             description: existingData.description,
             status: existingData.status,
             category: existingData.category,
@@ -187,7 +195,29 @@ function ObservationDefinitionFormContent({
             body_site: existingData.body_site || null,
             method: existingData.method || null,
             permitted_unit: existingData.permitted_unit || null,
-            component: existingData.component || [],
+            component:
+              existingData.component?.map((c) => ({
+                ...c,
+                qualified_ranges: c.qualified_ranges?.map((range, index) => ({
+                  ...range,
+                  id: index,
+                  conditions: range?.conditions,
+                  _interpretation_type:
+                    range?.ranges?.length > 0
+                      ? InterpretationType.ranges
+                      : InterpretationType.valuesets,
+                })),
+              })) || [],
+            qualified_ranges:
+              existingData.qualified_ranges?.map((range, index) => ({
+                ...range,
+                id: index,
+                conditions: range?.conditions,
+                _interpretation_type:
+                  range?.ranges?.length > 0
+                    ? InterpretationType.ranges
+                    : InterpretationType.valuesets,
+              })) || [],
           }
         : {
             status: "active",
@@ -203,7 +233,7 @@ function ObservationDefinitionFormContent({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug", generateSlug(value.title || ""), {
+        form.setValue("slug_value", generateSlug(value.title || ""), {
           shouldValidate: true,
         });
       }
@@ -308,7 +338,7 @@ function ObservationDefinitionFormContent({
 
                   <FormField
                     control={form.control}
-                    name="slug"
+                    name="slug_value"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel aria-required>{t("slug")}</FormLabel>
@@ -358,7 +388,7 @@ function ObservationDefinitionFormContent({
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger ref={field.ref}>
                               <SelectValue placeholder={t("select_status")} />
                             </SelectTrigger>
                           </FormControl>
@@ -386,7 +416,7 @@ function ObservationDefinitionFormContent({
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger ref={field.ref}>
                               <SelectValue placeholder={t("select_category")} />
                             </SelectTrigger>
                           </FormControl>
@@ -417,7 +447,7 @@ function ObservationDefinitionFormContent({
                             defaultValue={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger ref={field.ref}>
                                 <SelectValue
                                   placeholder={t("select_data_type")}
                                 />
@@ -462,6 +492,23 @@ function ObservationDefinitionFormContent({
                 </div>
               </div>
             </div>
+
+            <FormField
+              control={form.control}
+              name="qualified_ranges"
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <ObservationInterpretation
+                      qualifiedRanges={field.value}
+                      setQualifiedRanges={(value: QualifiedRange[]) =>
+                        field.onChange(value)
+                      }
+                    />
+                  </FormItem>
+                );
+              }}
+            />
 
             {/* Additional Details Section */}
             <div className="rounded-lg border border-gray-200 bg-white p-4">
@@ -566,6 +613,7 @@ function ObservationDefinitionFormContent({
                               display: "",
                               system: "",
                             },
+                            qualified_ranges: [],
                           },
                         ]);
                       }}
@@ -601,6 +649,7 @@ function ObservationDefinitionFormContent({
                               display: "",
                               system: "",
                             },
+                            qualified_ranges: [],
                           },
                         ]);
                       }}
@@ -680,7 +729,7 @@ function ObservationDefinitionFormContent({
                                     defaultValue={field.value}
                                   >
                                     <FormControl>
-                                      <SelectTrigger>
+                                      <SelectTrigger ref={field.ref}>
                                         <SelectValue
                                           placeholder={t("select_data_type")}
                                         />
@@ -727,6 +776,23 @@ function ObservationDefinitionFormContent({
                               )}
                             />
                           </div>
+
+                          <FormField
+                            control={form.control}
+                            name={`component.${index}.qualified_ranges`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <ObservationInterpretation
+                                    qualifiedRanges={field.value}
+                                    setQualifiedRanges={(
+                                      value: QualifiedRange[],
+                                    ) => field.onChange(value)}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
                         </div>
                       </div>
                     ))}

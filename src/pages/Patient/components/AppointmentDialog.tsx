@@ -31,12 +31,13 @@ import { Label } from "@/components/ui/label";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import mutate from "@/Utils/request/mutate";
-import { formatName, formatPatientAge } from "@/Utils/utils";
+import { formatPatientAge } from "@/Utils/utils";
 import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
   AppointmentFinalStatuses,
+  formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 
 function AppointmentDialog({
@@ -56,8 +57,9 @@ function AppointmentDialog({
   const tokenData = patient?.tokenData;
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const handleRescheduleAppointment = (appointment: Appointment) => {
+    // TODO: I am pretty sure this is not correct
     navigate(
-      `/facility/${appointment.facility.id}/appointments/${appointment.user.id}/reschedule/${appointment.id}`,
+      `/facility/${appointment.facility.id}/appointments/${appointment.resource.id}/reschedule/${appointment.id}`,
     );
   };
   const { mutate: cancelAppointment, isPending } = useMutation({
@@ -87,9 +89,11 @@ function AppointmentDialog({
             </DialogDescription>
             <div className="flex flex-row justify-between">
               <div className="space-y-1">
-                <Label className="text-xs">{t("practitioner")}</Label>
+                <Label className="text-xs">
+                  {t(`schedulable_resource__${appointment.resource_type}`)}
+                </Label>
                 <p className="text-base font-semibold">
-                  {formatName(appointment.user)}
+                  {formatScheduleResourceName(appointment)}
                 </p>
                 <p className="text-sm font-semibold text-gray-600">
                   {formatAppointmentSlotTime(appointment)}
@@ -101,7 +105,7 @@ function AppointmentDialog({
                   {appointment.patient.name}
                 </p>
                 <p className="text-sm text-gray-600 font-medium">
-                  {formatPatientAge(appointment.patient as any, true)},{" "}
+                  {formatPatientAge(appointment.patient, true)},{" "}
                   {t(`GENDER__${appointment.patient.gender}`)}
                 </p>
               </div>
@@ -138,7 +142,8 @@ function AppointmentDialog({
                               "this_will_permanently_cancel_the_appointment_and_cannot_be_undone",
                               {
                                 date: formatAppointmentSlotTime(appointment),
-                                practitioner: formatName(appointment.user),
+                                resource:
+                                  formatScheduleResourceName(appointment),
                                 facility: appointment.facility.name,
                               },
                             )}

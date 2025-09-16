@@ -251,8 +251,7 @@ export function BedChargeItemsTable({
         }
         facilityId={facilityId}
         encounterId={encounterId}
-        locationId={addChargeItemState.locationId}
-        serviceRequestId={addChargeItemState.serviceRequestId}
+        serviceResourceId={addChargeItemState.locationId}
         serviceResourceType={ChargeItemServiceResource.bed_association}
         onChargeItemsAdded={() => {
           setAddChargeItemState({

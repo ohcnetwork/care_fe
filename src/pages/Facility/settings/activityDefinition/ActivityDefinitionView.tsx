@@ -100,6 +100,8 @@ export default function ActivityDefinitionView({
       diagnostic_report_codes: definition.diagnostic_report_codes || [],
       facility: facilityId,
       category: definition.category.slug,
+      healthcare_service: definition.healthcare_service?.id || null,
+      slug_value: definition.slug_config.slug_value,
     });
   };
 

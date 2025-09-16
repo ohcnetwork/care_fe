@@ -182,6 +182,7 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
                 setQParams={setQParams}
                 resourceId={resourceId}
                 facilityId={facilityId}
+                resourceType={resourceType}
               />
             </Popover>
           );
@@ -271,6 +272,7 @@ function DayDetailsPopover({
   setQParams,
   resourceId,
   facilityId,
+  resourceType,
 }: {
   date: Date;
   templates: ScheduleTemplate[];
@@ -278,12 +280,14 @@ function DayDetailsPopover({
   setQParams: (params: ScheduleHomeQueryParams) => void;
   resourceId: string;
   facilityId: string;
+  resourceType: SchedulableResourceType;
 }) {
   const { t } = useTranslation();
   const { data: heatmapData } = useAvailabilityHeatmap({
     facilityId,
-    userId: resourceId,
+    resourceId,
     month: date,
+    resourceType,
   });
   const bookedSlots = heatmapData?.[dateQueryString(date)]?.booked_slots ?? 0;
 
