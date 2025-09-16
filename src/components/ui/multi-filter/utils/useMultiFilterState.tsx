@@ -13,27 +13,39 @@ export default function useMultiFilterState(
   );
 
   // Extract initial values from query params
-  const getInitialValues = (): Record<string, FilterValues> => {
-    if (!queryParams) return {};
+  const getInitialValues = (): {
+    filterValues: Record<string, FilterValues>;
+    operationValues: Record<string, string>;
+  } => {
+    if (!queryParams) return { filterValues: {}, operationValues: {} };
 
-    const initialValues: Record<string, FilterValues> = {};
+    const filterValues: Record<string, FilterValues> = {};
+    const operationValues: Record<string, string> = {};
 
     filters.forEach((filter) => {
       const queryValue = queryParams[filter.key];
       if (queryValue) {
         if (Array.isArray(queryValue)) {
-          initialValues[filter.key] = queryValue;
+          filterValues[filter.key] = queryValue;
         } else if (typeof queryValue === "string") {
-          initialValues[filter.key] = [queryValue];
+          filterValues[filter.key] = [queryValue];
         } else if (typeof queryValue === "object") {
-          initialValues[filter.key] = queryValue as FilterValues;
+          filterValues[filter.key] = queryValue as FilterValues;
         } else if (queryValue !== null && queryValue !== undefined) {
-          initialValues[filter.key] = [String(queryValue)];
+          filterValues[filter.key] = [String(queryValue)];
+        }
+      }
+
+      // Extract operation values
+      if (filter.operationKey) {
+        const operationValue = queryParams[filter.operationKey];
+        if (operationValue && typeof operationValue === "string") {
+          operationValues[filter.key] = operationValue;
         }
       }
     });
 
-    return initialValues;
+    return { filterValues, operationValues };
   };
 
   const [selectedFilters, setSelectedFilters] = useState<
@@ -66,8 +78,8 @@ export default function useMultiFilterState(
       JSON.stringify(queryParams) !== JSON.stringify(lastQueryParams.current);
     if (!paramsChanged) return;
 
-    const initialValues = getInitialValues();
-    const hasValues = Object.keys(initialValues).length > 0;
+    const { filterValues, operationValues } = getInitialValues();
+    const hasValues = Object.keys(filterValues).length > 0;
 
     if (hasValues) {
       lastQueryParams.current = queryParams;
@@ -75,16 +87,27 @@ export default function useMultiFilterState(
       setSelectedFilters((prev) => {
         const newState = { ...prev };
 
-        Object.entries(initialValues).forEach(([key, value]) => {
+        // Initialize filters with values
+        Object.entries(filterValues).forEach(([key, value]) => {
           if (newState[key]) {
             const filter = newState[key].filter;
             const operations = filter.getOperations?.(value) ?? [];
+
+            let selectedOperation = null;
+            if (operationValues[key]) {
+              selectedOperation = operations.find(
+                (op) =>
+                  op.value === operationValues[key] ||
+                  op.label === operationValues[key],
+              );
+            }
+            selectedOperation = selectedOperation || operations[0] || null;
 
             newState[key] = {
               ...newState[key],
               selected: value,
               operation: {
-                selectedOperation: operations[0] || null,
+                selectedOperation,
                 availableOperations: operations,
               },
             };
