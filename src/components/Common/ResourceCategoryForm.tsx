@@ -51,7 +51,7 @@ import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryA
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  slug_value: z.string().min(1, "Slug is required"),
+  slug_value: z.string().min(5, "Slug should have atleast 5 characters"),
   description: z.string().optional(),
   resource_sub_type: z.nativeEnum(ResourceCategorySubType),
 });

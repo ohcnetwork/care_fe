@@ -4,6 +4,7 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
 import { ScheduleHome } from "@/components/Schedule/ScheduleHome";
 import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
+import PrintAppointments from "@/pages/Appointments/components/PrintAppointments";
 import BedsList from "@/pages/Facility/locations/BedsList";
 import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
 import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
@@ -253,6 +254,13 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   // Appointments
   "/appointments": () => (
     <AppointmentsPage
+      resourceType={SchedulableResourceType.Location}
+      resourceId={locationId}
+    />
+  ),
+  "/appointments/print": () => (
+    <PrintAppointments
+      facilityId={facilityId}
       resourceType={SchedulableResourceType.Location}
       resourceId={locationId}
     />

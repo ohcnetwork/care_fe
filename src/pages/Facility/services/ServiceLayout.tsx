@@ -1,6 +1,7 @@
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { ScheduleHome } from "@/components/Schedule/ScheduleHome";
 import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
+import PrintAppointments from "@/pages/Appointments/components/PrintAppointments";
 import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
 import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
@@ -29,6 +30,13 @@ const getRoutes = (facilityId: string, serviceId: string) => ({
   // Appointments
   "/appointments": () => (
     <AppointmentsPage
+      resourceType={SchedulableResourceType.HealthcareService}
+      resourceId={serviceId}
+    />
+  ),
+  "/appointments/print": () => (
+    <PrintAppointments
+      facilityId={facilityId}
       resourceType={SchedulableResourceType.HealthcareService}
       resourceId={serviceId}
     />

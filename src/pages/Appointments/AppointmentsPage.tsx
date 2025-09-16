@@ -749,9 +749,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 ) >= 31
               }
               onClick={() => {
-                navigate(`/facility/${facilityId}/appointments/print`, {
-                  query: qParams,
-                });
+                navigate("appointments/print", { query: qParams });
               }}
             >
               <CareIcon icon="l-print" className="text-lg" />
