@@ -3657,6 +3657,7 @@
   "primary_member_updated": "Primary member updated",
   "primary_ph_no": "Primary Ph No.",
   "primary_phone_no": "Primary ph. no.",
+  "primary_queue": "Primary Queue",
   "primary_treating_consultant": "Primary Treating Consultant",
   "primary_treating_doctor": "Primary Treating Doctor",
   "principal": "Principal",
@@ -3812,6 +3813,7 @@
   "queue_date": "Queue Date",
   "queue_is_required": "Please select a token queue",
   "queue_name": "Queue Name",
+  "queue_of_resource": "{{resource}}'s Queue",
   "queue_title": "Queue Title",
   "queue_updated_successfully": "Queue updated successfully",
   "queues": "Queues",
@@ -5342,7 +5344,5 @@
   "you_need_at_least_a_location_to_create_an_assest": "You need at least a location to create an assest.",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "℞": "℞",
-  "queue_of_resource": "{{resource}}'s Queue",
-  "primary_queue": "Primary Queue"
+  "℞": "℞"
 }
