@@ -30,7 +30,7 @@ interface LocationSearchProps {
   form?: LocationForm;
   onSelect: (location: LocationList) => void;
   disabled?: boolean;
-  value?: LocationList | null;
+  value: LocationList | null;
 }
 
 export function LocationSearch({

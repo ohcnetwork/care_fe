@@ -8,21 +8,33 @@ import query from "@/Utils/request/query";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import patientApi from "@/types/emr/patient/patientApi";
+import { groupMedicationsByPrescription } from "@/types/emr/prescription/prescription";
+import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 
 export const PrintPrescription = (props: {
   facilityId: string;
-  encounterId: string;
+  encounterId?: string;
   patientId: string;
+  prescriptionId?: string;
 }) => {
-  const { facilityId, encounterId, patientId } = props;
+  const { facilityId, encounterId, patientId, prescriptionId } = props;
   const { t } = useTranslation();
+
+  const { data: prescription, isLoading } = useQuery({
+    queryKey: ["prescription", patientId, prescriptionId],
+    queryFn: query(prescriptionApi.get, {
+      pathParams: { patientId, id: prescriptionId! },
+    }),
+    enabled: !!prescriptionId,
+  });
 
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(encounterApi.get, {
-      pathParams: { id: encounterId },
+      pathParams: { id: encounterId || prescription?.encounter?.id || "" },
       queryParams: { facility: facilityId },
     }),
+    enabled: !!encounterId || !!prescription?.encounter?.id,
   });
 
   const { data: patient, isLoading: patientLoading } = useQuery({
@@ -44,12 +56,17 @@ export const PrintPrescription = (props: {
       },
       pageSize: 100,
     }),
-    enabled: !!patientId,
+    enabled: !!patientId && !!encounterId && !!facilityId && !prescriptionId,
   });
 
-  if (medicationLoading || patientLoading) return <Loading />;
+  if (patientLoading || isLoading || medicationLoading) return <Loading />;
 
-  if (!encounter || !activeMedications?.results || !patient) {
+  if (
+    (!encounter && !prescription) ||
+    !patient ||
+    (!prescriptionId && !activeMedications?.results?.length) ||
+    (prescriptionId && !prescription)
+  ) {
     return (
       <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
         {t("no_medications_found_for_this_encounter")}
@@ -57,10 +74,16 @@ export const PrintPrescription = (props: {
     );
   }
 
+  const groupedByPrescription = groupMedicationsByPrescription(
+    prescription
+      ? prescription.medications || []
+      : activeMedications?.results || [],
+  );
+
   return (
     <PrescriptionPreview
       encounter={encounter}
-      medications={activeMedications.results}
+      prescriptions={groupedByPrescription}
       patient={patient}
     />
   );
