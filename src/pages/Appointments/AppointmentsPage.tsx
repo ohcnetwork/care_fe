@@ -1051,6 +1051,8 @@ function AppointmentRow(props: {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
 
+  console.log("practitioners", props.practitioners);
+
   const { data, isLoading } = useQuery({
     queryKey: [
       "appointments",
@@ -1145,9 +1147,13 @@ function AppointmentRow(props: {
                   <TableHead className="pl-8 font-semibold text-black text-xs">
                     {t("patient")}
                   </TableHead>
-                  <TableHead className="font-semibold text-black text-xs">
-                    {t("practitioner", { count: 1 })}
-                  </TableHead>
+                  {props.resourceType ===
+                    SchedulableResourceType.Practitioner && (
+                    <TableHead className="font-semibold text-black text-xs">
+                      {t("practitioner", { count: 1 })}
+                    </TableHead>
+                  )}
+
                   <TableHead className="font-semibold text-black text-xs">
                     {t("current_status")}
                   </TableHead>
@@ -1202,9 +1208,11 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
         </span>
       </TableCell>
       {/* TODO: Replace with relevant information */}
-      <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        {formatScheduleResourceName(appointment)}
-      </TableCell>
+      {appointment.resource_type === SchedulableResourceType.Practitioner && (
+        <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
+          {formatScheduleResourceName(appointment)}
+        </TableCell>
+      )}
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
         {t(appointment.status)}
       </TableCell>
