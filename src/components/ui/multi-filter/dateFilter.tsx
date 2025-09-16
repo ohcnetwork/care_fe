@@ -322,7 +322,9 @@ export const SelectedDateBadge = ({
   filter: FilterConfig;
   onFilterChange: (filterKey: string, values: FilterValues) => void;
 }) => {
-  if (!isValid(selected.from) && !isValid(selected.to)) return <></>;
+  const hasValidFrom = !!selected.from && isValid(selected.from);
+  const hasValidTo = !!selected.to && isValid(selected.to);
+  if (!hasValidFrom && !hasValidTo) return <></>;
   const isSameDate =
     selected.from && selected.to && isSameDay(selected.from, selected.to);
   const presentDate = isSameDate ? selected.from : selected.from || selected.to;

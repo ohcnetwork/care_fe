@@ -2,6 +2,7 @@ import { differenceInCalendarDays } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import * as React from "react";
 import {
+  DateRange,
   DayPicker,
   type DayPickerProps,
   labelNext,
@@ -456,7 +457,19 @@ function YearGrid({
   setNavView: React.Dispatch<React.SetStateAction<NavView>>;
   navView: NavView;
 } & React.HTMLAttributes<HTMLDivElement>) {
-  const { goToMonth, selected } = useDayPicker();
+  const { goToMonth, selected, dayPickerProps } = useDayPicker();
+  let selectedDate: Date | undefined;
+  switch (dayPickerProps.mode) {
+    case "single":
+      selectedDate = selected as Date | undefined;
+      break;
+    case "range":
+      selectedDate = (selected as DateRange | undefined)?.from;
+      break;
+    case "multiple":
+      selectedDate = (selected as Date[] | undefined)?.[0];
+      break;
+  }
 
   return (
     <div className={cn("grid grid-cols-4 gap-y-2", className)} {...props}>
@@ -490,7 +503,7 @@ function YearGrid({
                 goToMonth(
                   new Date(
                     displayYears.from + i,
-                    (selected as Date | undefined)?.getMonth() ?? 0,
+                    selectedDate?.getMonth() ?? 0,
                   ),
                 );
               }}
