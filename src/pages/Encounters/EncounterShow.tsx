@@ -190,7 +190,7 @@ export const EncounterShow = (props: Props) => {
           className="bg-white shadow-sm border-none rounded-sm"
           actions={
             <>
-              {canWriteSelectedEncounter && selectedEncounter && (
+              {selectedEncounter && (
                 <div className="flex max-md:flex-col items-end justify-center gap-4">
                   <PLUGIN_Component
                     __name="PatientInfoCardQuickActions"
@@ -201,23 +201,25 @@ export const EncounterShow = (props: Props) => {
                     )}
                   />
 
-                  <EncounterCommandDialog
-                    encounter={selectedEncounter}
-                    open={actionsOpen}
-                    onOpenChange={setActionsOpen}
-                    trigger={
-                      <Button
-                        variant="primary_gradient"
-                        onClick={() => setActionsOpen(true)}
-                        className="text-base font-semibold rounded-md w-full"
-                      >
-                        {t("encounter_actions")}
-                        <CommandShortcut className="text-white hidden md:inline">
-                          {getShortcutDisplay("open-command-dialog")}
-                        </CommandShortcut>
-                      </Button>
-                    }
-                  />
+                  {canWriteSelectedEncounter && (
+                    <EncounterCommandDialog
+                      encounter={selectedEncounter}
+                      open={actionsOpen}
+                      onOpenChange={setActionsOpen}
+                      trigger={
+                        <Button
+                          variant="primary_gradient"
+                          onClick={() => setActionsOpen(true)}
+                          className="text-base font-semibold rounded-md w-full"
+                        >
+                          {t("encounter_actions")}
+                          <CommandShortcut className="text-white hidden md:inline">
+                            {getShortcutDisplay("open-command-dialog")}
+                          </CommandShortcut>
+                        </Button>
+                      }
+                    />
+                  )}
                 </div>
               )}
             </>
