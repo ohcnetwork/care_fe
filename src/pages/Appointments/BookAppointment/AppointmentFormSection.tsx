@@ -1,9 +1,8 @@
 import { useTranslation } from "react-i18next";
 
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
-import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import {
   ResourceSelector,

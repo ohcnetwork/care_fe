@@ -1,10 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  ArrowUpRightSquare,
-  ChevronDown,
-  Hash,
-  NotepadText,
-} from "lucide-react";
+import { ArrowUpRightSquare, ChevronDown, NotepadText } from "lucide-react";
 import { navigate } from "raviger";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -342,19 +337,6 @@ export default function MedicationRequestList({
 
                     <TableCell>
                       <div className="flex flex-wrap gap-2">
-                        {item.tags && item.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
-                            {item.tags.map((tag) => (
-                              <Badge
-                                key={tag.id}
-                                variant="secondary"
-                                className="text-xs"
-                              >
-                                {getTagHierarchyDisplay(tag)}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
                         <TagAssignmentSheet
                           entityType="prescription"
                           entityId={item.id}
@@ -370,12 +352,21 @@ export default function MedicationRequestList({
                             });
                           }}
                           patientId={item.encounter.patient.id}
-                          trigger={
-                            <Button variant="outline" size="xs">
-                              <Hash className="size-4" /> {t("tags")}
-                            </Button>
-                          }
                         />
+                        {item.tags && item.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {item.tags.map((tag) => (
+                              <Badge
+                                key={tag.id}
+                                variant="outline"
+                                size="sm"
+                                className="text-xs"
+                              >
+                                {getTagHierarchyDisplay(tag)}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>

@@ -1,6 +1,8 @@
 import BackButton from "@/components/Common/BackButton";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
+import { useScheduleResource } from "@/components/Schedule/useScheduleResource";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,12 +24,16 @@ import { NavTabs } from "@/components/ui/nav-tabs";
 import { ManageQueueFinishedTab } from "@/pages/Facility/queues/ManageQueueFinishedTab";
 import { ManageQueueOngoingTab } from "@/pages/Facility/queues/ManageQueueOngoingTab";
 import QueueFormSheet from "@/pages/Facility/queues/QueueFormSheet";
-import { SchedulableResourceType } from "@/types/scheduling/schedule";
+import {
+  formatScheduleResourceName,
+  SchedulableResourceType,
+} from "@/types/scheduling/schedule";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import { TokenSubQueueRead } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
 import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
+import { formatDate } from "date-fns";
 import { ChevronLeft, Edit3, PowerOffIcon, SettingsIcon } from "lucide-react";
 import { useNavigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -53,6 +59,12 @@ export function ManageQueuePage({
 }: ManageQueuePageProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const resource = useScheduleResource({
+    resourceType,
+    resourceId,
+    facilityId,
+  });
 
   const { data: queue, isLoading: isQueueLoading } = useQuery({
     queryKey: ["queue", facilityId, queueId],
@@ -89,14 +101,48 @@ export function ManageQueuePage({
   }
 
   return (
-    <Page title={queue.name} hideTitleOnPage>
+    <Page
+      title={
+        resource
+          ? t("queue_of_resource", {
+              resource: formatScheduleResourceName(resource),
+            })
+          : queue.name
+      }
+      hideTitleOnPage
+    >
       <div className="flex flex-col gap-6">
         <div className="flex justify-between">
-          <div className="flex gap-3 items-center">
-            <BackButton size="icon">
+          <div className="flex gap-2 items-center">
+            <BackButton size="icon" variant="ghost">
               <ChevronLeft />
             </BackButton>
-            <h4 className="text-xl font-semibold">{queue.name}</h4>
+            {resource && (
+              <div className="flex items-center gap-2">
+                <ScheduleResourceIcon resource={resource} />
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-black">
+                      {t("queue_of_resource", {
+                        resource: formatScheduleResourceName(resource),
+                      })}
+                    </span>
+                    {queue.is_primary && (
+                      <Badge
+                        variant={queue.is_primary ? "primary" : "secondary"}
+                        className="text-xs"
+                      >
+                        {t("primary")}
+                      </Badge>
+                    )}
+                  </div>
+                  <span className="text-xs font-medium text-gray-500">
+                    {!queue.system_generated && `${queue.name} - `}
+                    {formatDate(queue.date, "dd MMM yyyy")}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
           <div className="flex gap-3">
             <DropdownMenu>

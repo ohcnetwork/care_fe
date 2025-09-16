@@ -32,6 +32,7 @@ interface ChargeItemsSectionProps {
   encounterId?: string;
   disableCreateChargeItems?: boolean;
   locationId?: string;
+  disableEdit?: boolean;
 }
 
 export function ChargeItemsSection({
@@ -43,6 +44,7 @@ export function ChargeItemsSection({
   encounterId,
   disableCreateChargeItems = false,
   locationId,
+  disableEdit = false,
 }: ChargeItemsSectionProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -92,28 +94,30 @@ export function ChargeItemsSection({
           <div className="flex items-center justify-between">
             <CardTitle>{t("charge_items")}</CardTitle>
             <div className="flex items-center gap-2">
-              {(chargeItems?.results ?? []).filter(
-                (chargeItem) => chargeItem.status === ChargeItemStatus.billable,
-              ).length > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setInvoiceSheetState({
-                      open: true,
-                      chargeItems:
-                        chargeItems?.results.filter(
-                          (chargeItem) =>
-                            chargeItem.status === ChargeItemStatus.billable,
-                        ) ?? [],
-                    })
-                  }
-                >
-                  <PlusIcon className="size-4 mr-2" />
-                  {t("create_invoice")}
-                </Button>
-              )}
-              {!disableCreateChargeItems && (
+              {!disableEdit &&
+                (chargeItems?.results ?? []).filter(
+                  (chargeItem) =>
+                    chargeItem.status === ChargeItemStatus.billable,
+                ).length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setInvoiceSheetState({
+                        open: true,
+                        chargeItems:
+                          chargeItems?.results.filter(
+                            (chargeItem) =>
+                              chargeItem.status === ChargeItemStatus.billable,
+                          ) ?? [],
+                      })
+                    }
+                  >
+                    <PlusIcon className="size-4 mr-2" />
+                    {t("create_invoice")}
+                  </Button>
+                )}
+              {!disableCreateChargeItems && !disableEdit && (
                 <Button
                   variant="outline"
                   size="sm"

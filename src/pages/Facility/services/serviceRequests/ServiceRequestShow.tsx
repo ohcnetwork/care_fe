@@ -40,8 +40,9 @@ import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
 import {
+  EDITABLE_SERVICE_REQUEST_STATUSES,
+  ServiceRequestUpdateSpec,
   Status,
-  toServiceRequestUpdateSpec,
 } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import {
@@ -132,20 +133,22 @@ export default function ServiceRequestShow({
     },
   });
 
-  const { mutate: markAsComplete } = useMutation({
-    mutationFn: () => {
-      if (!request) return Promise.reject("No request data");
-      return mutate(serviceRequestApi.updateServiceRequest, {
+  const { mutate: updateServiceRequest, isPending: isUpdatingServiceRequest } =
+    useMutation({
+      mutationFn: mutate(serviceRequestApi.updateServiceRequest, {
         pathParams: { facilityId, serviceRequestId },
-      })(toServiceRequestUpdateSpec(request, { status: Status.completed }));
-    },
-    onSuccess: () => {
-      toast.success(t("service_request_completed"));
-      queryClient.invalidateQueries({
-        queryKey: ["serviceRequest", facilityId, serviceRequestId],
-      });
-    },
-  });
+      }),
+      onSuccess: (data: ServiceRequestUpdateSpec) => {
+        if (data.status === Status.completed) {
+          toast.success(t("service_request_completed"));
+        } else {
+          toast.success(t("status_updated_successfully"));
+        }
+        queryClient.invalidateQueries({
+          queryKey: ["serviceRequest", facilityId, serviceRequestId],
+        });
+      },
+    });
 
   const createDraftSpecimen = (requirement: SpecimenDefinitionRead) => {
     const matchingSpecimens = request?.specimens.filter(
@@ -216,6 +219,10 @@ export default function ServiceRequestShow({
   if (!request || !activityDefinition) {
     return <div className="p-4">{t("error_loading_sq_or_ad")}</div>;
   }
+
+  const disableEdit = !EDITABLE_SERVICE_REQUEST_STATUSES.includes(
+    request?.status || Status.draft,
+  );
 
   function getExistingDraftSpecimen(
     specimenDefinitionSlug: string,
@@ -305,49 +312,147 @@ export default function ServiceRequestShow({
             </Button>
 
             <div className="flex items-end gap-2">
-              {request?.diagnostic_reports?.[0]?.status ===
-                DiagnosticReportStatus.final && (
+              {(!request?.activity_definition?.diagnostic_report_codes ||
+                request?.diagnostic_reports?.[0]?.status ===
+                  DiagnosticReportStatus.final) && (
                 <div className="flex items-center gap-2">
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        disabled={request.status === Status.completed}
-                        className="font-semibold border border-gray-400"
-                      >
-                        {t("mark_as_complete")}
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          {t("confirm_completion")}
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          {t("service_request_completion_confirmation")}
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => markAsComplete()}>
-                          {t("confirm")}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                  <Button
-                    variant="primary"
-                    className="font-semibold"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/patient/${request.encounter.patient.id}/diagnostic_reports/${request.diagnostic_reports[0].id}`,
-                      )
-                    }
-                  >
-                    {t("view_report")}
-                  </Button>
+                  {!disableEdit && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="font-semibold border border-gray-400"
+                        >
+                          {t("mark_as_complete")}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            {t("confirm_completion")}
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {t("service_request_completion_confirmation")}
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() =>
+                              updateServiceRequest({
+                                status: Status.completed,
+                              })
+                            }
+                          >
+                            {t("confirm")}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                  {request?.diagnostic_reports?.[0]?.status ===
+                    DiagnosticReportStatus.final && (
+                    <Button
+                      variant="primary"
+                      className="font-semibold"
+                      onClick={() =>
+                        navigate(
+                          `/facility/${facilityId}/patient/${request.encounter.patient.id}/diagnostic_reports/${request.diagnostic_reports[0].id}`,
+                        )
+                      }
+                    >
+                      {t("view_report")}
+                    </Button>
+                  )}
                 </div>
               )}
+              {request.status !== Status.completed &&
+                request.status !== Status.entered_in_error && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        data-cy="invoice-actions-button"
+                        className="border-gray-400 px-2"
+                      >
+                        <CareIcon icon="l-ellipsis-v" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {request.status !== Status.on_hold && (
+                        <DropdownMenuItem asChild className="text-primary-900">
+                          <Button
+                            variant="ghost"
+                            onClick={() =>
+                              updateServiceRequest({
+                                status: Status.on_hold,
+                              })
+                            }
+                            className="w-full flex flex-row justify-stretch items-center"
+                            disabled={isUpdatingServiceRequest}
+                          >
+                            <CareIcon icon="l-pause" className="mr-1" />
+                            {t("mark_as_on_hold")}
+                          </Button>
+                        </DropdownMenuItem>
+                      )}
+                      {request.status === Status.on_hold ||
+                        (request.status === Status.revoked && (
+                          <DropdownMenuItem
+                            asChild
+                            className="text-primary-900"
+                          >
+                            <Button
+                              variant="ghost"
+                              onClick={() =>
+                                updateServiceRequest({
+                                  status: Status.active,
+                                })
+                              }
+                              className="w-full flex flex-row justify-stretch items-center"
+                              disabled={isUpdatingServiceRequest}
+                            >
+                              <CareIcon icon="l-play" className="mr-1" />
+                              {t("mark_as_active")}
+                            </Button>
+                          </DropdownMenuItem>
+                        ))}
+                      <DropdownMenuItem asChild className="text-primary-900">
+                        <Button
+                          variant="ghost"
+                          onClick={() =>
+                            updateServiceRequest({
+                              status: Status.entered_in_error,
+                            })
+                          }
+                          disabled={isUpdatingServiceRequest}
+                          className="w-full flex flex-row self-center"
+                        >
+                          <CareIcon
+                            icon="l-exclamation-circle"
+                            className="mr-1"
+                          />
+                          <span>{t("mark_as_entered_in_error")}</span>
+                        </Button>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="text-primary-900">
+                        <Button
+                          variant="ghost"
+                          onClick={() =>
+                            updateServiceRequest({
+                              status: Status.revoked,
+                            })
+                          }
+                          disabled={isUpdatingServiceRequest}
+                          className="w-full flex flex-row justify-stretch items-center"
+                        >
+                          <CareIcon icon="l-ban" className="mr-1" />
+                          {t("mark_as_revoked")}
+                        </Button>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
 
               {isMobile && (
                 <WorkflowProgress request={request} variant="sheet" />
@@ -375,6 +480,7 @@ export default function ServiceRequestShow({
               sourceUrl={`/facility/${facilityId}${locationId ? `/locations/${locationId}` : ""}/services_requests/${serviceRequestId}`}
               locationId={locationId}
               patientId={request.encounter.patient.id}
+              disableEdit={disableEdit}
             />
           </div>
 
@@ -492,6 +598,7 @@ export default function ServiceRequestShow({
                     selectedSpecimenDefinition.slug,
                   )}
                   serviceRequestId={serviceRequestId}
+                  disableEdit={disableEdit}
                 />
               </CardContent>
             </Card>
@@ -537,6 +644,7 @@ export default function ServiceRequestShow({
                   diagnosticReports={diagnosticReports}
                   activityDefinition={activityDefinition}
                   specimens={request.specimens || []}
+                  disableEdit={disableEdit}
                 />
               )}
             </div>
@@ -548,6 +656,7 @@ export default function ServiceRequestShow({
               patientId={request.encounter.patient.id}
               serviceRequestId={serviceRequestId}
               diagnosticReports={diagnosticReports}
+              disableEdit={disableEdit}
             />
           )}
         </div>

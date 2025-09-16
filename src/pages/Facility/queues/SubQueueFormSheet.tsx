@@ -18,13 +18,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -33,6 +26,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import RadioInput from "@/components/ui/RadioInput";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import {
   TokenSubQueueStatus,
@@ -220,21 +214,17 @@ export default function SubQueueFormSheet({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("status")}</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("select_status")} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value={TokenSubQueueStatus.ACTIVE}>
-                          {t("active")}
-                        </SelectItem>
-                        <SelectItem value={TokenSubQueueStatus.INACTIVE}>
-                          {t("inactive")}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <RadioInput
+                      {...field}
+                      options={Object.values(TokenSubQueueStatus).map(
+                        (status) => ({
+                          label: t(status),
+                          value: status,
+                        }),
+                      )}
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}

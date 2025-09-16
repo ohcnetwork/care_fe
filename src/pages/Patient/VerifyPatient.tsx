@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   AlertCircle,
   Download,
@@ -8,9 +8,7 @@ import {
   Stethoscope,
 } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -48,7 +46,6 @@ import {
 } from "@/types/emr/tagConfig/tagConfig";
 import { renderTokenNumber } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
-import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { saveElementAsImage } from "@/Utils/utils";
 import { useQueryClient } from "@tanstack/react-query";
@@ -73,18 +70,15 @@ export default function VerifyPatient() {
   const canCreateToken = canWriteAppointment;
 
   const {
-    mutate: verifyPatient,
     data: patientData,
     isPending: isVerifyingPatient,
     isError,
-  } = useMutation({
-    mutationFn: mutate(patientApi.searchRetrieve),
-    onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string[] } };
-      errorData.errors.msg.forEach((er) => {
-        toast.error(er);
-      });
-    },
+  } = useQuery({
+    queryKey: ["patient-verify", phone_number, year_of_birth, partial_id],
+    queryFn: query(patientApi.searchRetrieve, {
+      body: { phone_number, year_of_birth, partial_id },
+    }),
+    enabled: !!(phone_number && year_of_birth && partial_id),
   });
 
   // Fetch token details if queue_id and token_id are provided
@@ -99,16 +93,6 @@ export default function VerifyPatient() {
     }),
     enabled: !!(queue_id && token_id && facilityId),
   });
-
-  useEffect(() => {
-    if (phone_number && year_of_birth && partial_id) {
-      verifyPatient({
-        phone_number,
-        year_of_birth,
-        partial_id,
-      });
-    }
-  }, [phone_number, year_of_birth, partial_id, verifyPatient]);
 
   if (isVerifyingPatient || !facility) {
     return (
@@ -158,7 +142,12 @@ export default function VerifyPatient() {
                         currentTags={patientData.instance_tags}
                         onUpdate={() => {
                           queryClient.invalidateQueries({
-                            queryKey: ["patient", patientData.id],
+                            queryKey: [
+                              "patient-verify",
+                              phone_number,
+                              year_of_birth,
+                              partial_id,
+                            ],
                           });
                         }}
                         canWrite={true}
