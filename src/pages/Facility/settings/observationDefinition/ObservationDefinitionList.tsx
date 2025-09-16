@@ -74,7 +74,7 @@ function ObservationDefinitionCard({
             size="sm"
             onClick={() =>
               navigate(
-                `/facility/${facilityId}/settings/observation_definitions/${definition.id}`,
+                `/facility/${facilityId}/settings/observation_definitions/${definition.slug}`,
               )
             }
           >
@@ -172,7 +172,7 @@ export default function ObservationDefinitionList({
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
                   options={OBSERVATION_DEFINITION_STATUS as unknown as string[]}
-                  label="status"
+                  label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
                 />
               </div>
@@ -181,7 +181,7 @@ export default function ObservationDefinitionList({
                   value={qParams.category || ""}
                   onValueChange={(value) => updateQuery({ category: value })}
                   options={OBSERVATION_DEFINITION_CATEGORY}
-                  label="category"
+                  label={t("category")}
                   onClear={() => updateQuery({ category: undefined })}
                 />
               </div>
@@ -211,7 +211,7 @@ export default function ObservationDefinitionList({
               {observationDefinitions.map(
                 (definition: ObservationDefinitionReadSpec) => (
                   <ObservationDefinitionCard
-                    key={definition.id}
+                    key={definition.slug}
                     definition={definition}
                     facilityId={facilityId}
                   />
@@ -234,7 +234,7 @@ export default function ObservationDefinitionList({
                   <TableBody className="bg-white">
                     {observationDefinitions.map(
                       (definition: ObservationDefinitionReadSpec) => (
-                        <TableRow key={definition.id} className="divide-x">
+                        <TableRow key={definition.slug} className="divide-x">
                           <TableCell className="font-medium">
                             {definition.title}
                           </TableCell>
@@ -259,7 +259,7 @@ export default function ObservationDefinitionList({
                               size="sm"
                               onClick={() =>
                                 navigate(
-                                  `/facility/${facilityId}/settings/observation_definitions/${definition.id}`,
+                                  `/facility/${facilityId}/settings/observation_definitions/${definition.slug}`,
                                 )
                               }
                             >

@@ -1,6 +1,7 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
+import { Metrics } from "@/types/base/condition/condition";
 import {
   ObservationDefinitionCreateSpec,
   ObservationDefinitionReadSpec,
@@ -13,7 +14,7 @@ export default {
     TRes: Type<PaginatedResponse<ObservationDefinitionReadSpec>>(),
   },
   retrieveObservationDefinition: {
-    path: "/api/v1/observation_definition/{observationDefinitionId}/",
+    path: "/api/v1/observation_definition/{observationSlug}/",
     method: HttpMethod.GET,
     TRes: Type<ObservationDefinitionReadSpec>(),
   },
@@ -23,8 +24,13 @@ export default {
     TRes: Type<ObservationDefinitionCreateSpec>(),
   },
   updateObservationDefinition: {
-    path: "/api/v1/observation_definition/{observationDefinitionId}/",
+    path: "/api/v1/observation_definition/{observationSlug}/",
     method: HttpMethod.PUT,
-    TRes: Type<ObservationDefinitionCreateSpec>(),
+    TRes: Type<ObservationDefinitionReadSpec>(),
+  },
+  getAllMetrics: {
+    path: "/api/v1/observation_definition/metrics/",
+    method: HttpMethod.GET,
+    TRes: Type<Metrics[]>(),
   },
 } as const;

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { MoreVertical, Printer } from "lucide-react";
+import { ArrowLeft, MoreVertical, Printer } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -19,8 +19,8 @@ import { FileListTable } from "@/components/Files/FileListTable";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
-import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
 import { ObservationHistorySheet } from "@/pages/Facility/services/serviceRequests/components/ObservationHistorySheet";
 import { DIAGNOSTIC_REPORT_STATUS_COLORS } from "@/types/emr/diagnosticReport/diagnosticReport";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
@@ -79,7 +79,10 @@ export default function DiagnosticReportView({
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="space-y-6 flex justify-between">
-        <BackButton />
+        <BackButton>
+          <ArrowLeft />
+          <span>{t("back")}</span>
+        </BackButton>
         <Button
           variant="outline"
           onClick={() =>

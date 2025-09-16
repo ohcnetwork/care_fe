@@ -1,10 +1,12 @@
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
-import { BatchRequestBody } from "@/types/base/batch/batch";
+import {
+  BatchRequestBody,
+  BatchRequestResponse,
+} from "@/types/base/batch/batch";
 import { Code } from "@/types/base/code/code";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { PlugConfig } from "@/types/plugConfig";
-import { BatchSubmissionResult } from "@/types/questionnaire/batch";
 import {
   CommentModel,
   CreateResourceRequest,
@@ -103,7 +105,7 @@ const routes = {
     path: "/api/v1/batch_requests/",
     method: "POST",
     TRes: Type<{
-      results: BatchSubmissionResult[];
+      results: BatchRequestResponse[];
     }>(),
     TBody: Type<BatchRequestBody>(),
   },
