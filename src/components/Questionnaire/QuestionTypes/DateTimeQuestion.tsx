@@ -1,18 +1,5 @@
-import { format } from "date-fns";
-import { useTranslation } from "react-i18next";
-
-import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 import type {
   QuestionnaireResponse,
@@ -37,11 +24,8 @@ export function DateTimeQuestion({
   updateQuestionnaireResponseCB,
   disabled,
   clearError,
-  classes,
   index,
 }: DateTimeQuestionProps) {
-  const { t } = useTranslation();
-
   const currentValue = questionnaireResponse.values[index]?.value
     ? new Date(questionnaireResponse.values[index].value as string)
     : undefined;
@@ -98,34 +82,16 @@ export function DateTimeQuestion({
   };
 
   return (
-    <div className="flex sm:gap-2 flex-wrap">
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className={cn(
-              "flex-1 justify-start text-left font-normal",
-              !currentValue && "text-gray-500",
-              classes,
-            )}
-            disabled={disabled}
-          >
-            <CareIcon icon="l-calender" className="mr-2 size-4" />
-            {currentValue ? format(currentValue, "PPP") : t("pick_a_date")}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={currentValue}
-            onSelect={handleSelect}
-            initialFocus
-          />
-        </PopoverContent>
-      </Popover>
+    <div className="flex flex-col sm:flex-row gap-2">
+      <DatePicker
+        date={currentValue}
+        onChange={handleSelect}
+        disablePicker={disabled}
+        className="flex-1"
+      />
       <Input
         type="time"
-        className="sm:w-[150px] border-t-0 sm:border-t border-gray-200"
+        className="sm:w-[150px] border-gray-200 sm:border-r-0 sm:ring-r-0 sm:focus-visible:ring-0 h-9 text-sm sm:text-base"
         value={formatTime(currentValue)}
         onChange={handleTimeChange}
         disabled={disabled || !currentValue}

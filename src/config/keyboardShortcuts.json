@@ -1,131 +1,445 @@
 {
-    "global": [
-      { "key": "escape",              "action": "close-dialog",
-                                      "description": "Close Dialog",
-                                      "when": "always" },
-      
-      { "key": "ctrl+k",              "action": "command-palette",
-                                      "description": "Open Command Palette",
-                                      "when": "always" },
-                                      
-      { "key": "?",                   "action": "show-shortcuts",
-                                      "description": "Show Keyboard Shortcuts",
-                                      "when": "always" }
-    ],
-    
-    "encounter": [
-      { "key": "a",                   "action": "add-allergy",
-                                      "description": "Add Allergy",
-                                      "when": "canEdit" },
-                                      
-      { "key": "s",                   "action": "add-symptoms", 
-                                      "description": "Add Symptoms",
-                                      "when": "canEdit" },
-                                      
-      { "key": "d",                   "action": "add-diagnosis",
-                                      "description": "Add Diagnosis", 
-                                      "when": "canEdit" },
-
-      { "key": "f",                   "action": "add-questionnaire",
-                                      "description": "New Questionnaire/Form",
-                                      "when": "canEdit && questionnairesEnabled" },
-                                      
-      { "key": "u e",                   "action": "update-encounter",
-                                      "description": "Update Encounter",
-                                      "when": "canEdit" },
-                                      
-      { "key": "h",                   "action": "clinical-history",
-                                      "description": "Clinical History",
-                                      "when": "always" },
-  
-      { "key": "g g",                 "action": "encounter-overview",
-                                      "description": "Go to Overview",
-                                      "when": "always" },
-                                      
-      { "key": "g p",                 "action": "plots",
-                                      "description": "Go to Plots",
-                                      "when": "always" },
-                                      
-      { "key": "g o",                 "action": "observations", 
-                                      "description": "Go to Observations",
-                                      "when": "always" },
-                                      
-      { "key": "g m",                 "action": "medicines",
-                                      "description": "Go to Medicines",
-                                      "when": "always" },
-                                      
-      { "key": "g f",                 "action": "files",
-                                      "description": "Go to Files",
-                                      "when": "always" },
-                                      
-      { "key": "g n",                 "action": "notes",
-                                      "description": "Go to Notes", 
-                                      "when": "always" },
-                                      
-      { "key": "g d",                 "action": "devices",
-                                      "description": "Go to Devices",
-                                      "when": "always" },
-                                      
-      { "key": "g c",                 "action": "consents",
-                                      "description": "Go to Consents",
-                                      "when": "always" },
-                                      
-      { "key": "g s",                 "action": "service-requests",
-                                      "description": "Go to Service Requests",
-                                      "when": "always" },
-                                      
-      { "key": "g r",                 "action": "diagnostic-reports",
-                                      "description": "Go to Diagnostic Reports", 
-                                      "when": "always" },
-                                      
-      { "key": "cmd+e",              "action": "open-command-dialog",
-                                      "description": "Open Command Dialog",
-                                      "when": "canEdit" },
-      { "key": "ctrl+e",             "action": "open-command-dialog",
-                                      "description": "Open Command Dialog",
-                                      "when": "canEdit" },
-
-      { "key": "q 1",                 "action": "questionnaire-1",
-                                      "description": "Questionnaire 1",
-                                      "when": "canEdit && questionnairesEnabled" },
-
-      { "key": "q 2",                 "action": "questionnaire-2",
-                                      "description": "Questionnaire 2",
-                                      "when": "canEdit && questionnairesEnabled" },
-
-      { "key": "q 3",                 "action": "questionnaire-3",
-                                      "description": "Questionnaire 3",
-                                      "when": "canEdit && questionnairesEnabled" },
-
-      { "key": "q 4",                 "action": "questionnaire-4",
-                                      "description": "Questionnaire 4",
-                                      "when": "canEdit && questionnairesEnabled" },
-
-      { "key": "q 5",                 "action": "questionnaire-5",
-                                      "description": "Questionnaire 5",
-                                      "when": "canEdit && questionnairesEnabled" },
-
-      { "key": "q 6",                 "action": "questionnaire-6",
-                                      "description": "Questionnaire 6",
-                                      "when": "canEdit && questionnairesEnabled" },
-
-      { "key": "q 7",                 "action": "questionnaire-7",
-                                      "description": "Questionnaire 7",
-                                      "when": "canEdit && questionnairesEnabled" },
-
-      { "key": "q 8",                 "action": "questionnaire-8",
-                                      "description": "Questionnaire 8",
-                                      "when": "canEdit && questionnairesEnabled" },
-
-      { "key": "q 9",                 "action": "questionnaire-9",
-                                      "description": "Questionnaire 9",
-                                      "when": "canEdit && questionnairesEnabled" },
-
-      { "key": "m c",                 "action": "mark-as-completed",
-                                      "description": "Mark as Completed",
-                                      "when": "canEdit" },
-     { "key": "l",                 "action": "assign-location",
-                                      "description": "Assign Location",
-                                      "when": "canEdit" }
-    ]
-  }
+  "global": [],
+  "facility": [
+    {
+      "key": "shift+p",
+      "action": "register-patient",
+      "description": "Register New Patient",
+      "when": "canCreate"
+    },
+    {
+      "key": "h",
+      "action": "patient-home",
+      "description": "Go to Patient Home",
+      "when": "always"
+    },
+    {
+      "key": "p",
+      "action": "print-token",
+      "description": "Print Token",
+      "when": "always",
+      "subContext": "patient-home"
+    },
+    {
+      "key": "t",
+      "action": "generate-token",
+      "description": "Generate Token",
+      "when": "always",
+      "subContext": "patient-home"
+    },
+    {
+      "key": "e",
+      "action": "create-encounter",
+      "description": "Create Encounter",
+      "when": "always",
+      "subContext": "patient-home"
+    },
+    {
+      "key": "a",
+      "action": "schedule-appointment",
+      "description": "Schedule Appointment",
+      "when": "always",
+      "subContext": "patient-home"
+    },
+    {
+      "key": "shift+?",
+      "action": "show-shortcuts",
+      "description": "Show Keyboard Shortcuts",
+      "when": "always"
+    },
+    {
+      "key": "e",
+      "action": "edit-invoice-items",
+      "description": "Edit Invoice Items",
+      "when": "always",
+      "subContext": "invoice-show"
+    },
+    {
+      "key": "a",
+      "action": "add-charge-item",
+      "description": "Add Charge Item",
+      "when": "always",
+      "subContext": "billing"
+    },
+    {
+      "key": "i",
+      "action": "issue-invoice",
+      "description": "Issue Invoice",
+      "when": "always",
+      "subContext": "invoice-show"
+    },
+    {
+      "key": "b",
+      "action": "mark-as-balanced",
+      "description": "Mark as Balanced",
+      "when": "always",
+      "subContext": "invoice-show"
+    },
+    {
+      "key": "r",
+      "action": "record-payment",
+      "description": "Record Payment",
+      "when": "always",
+      "subContext": "invoice-show"
+    },
+    {
+      "key": "esc",
+      "action": "cancel-action",
+      "description": "Cancel Current Action",
+      "when": "always"
+    },
+    {
+      "key": "shift+enter",
+      "action": "submit-action",
+      "description": "Submit Current Action",
+      "when": "always"
+    },
+    {
+      "key": "o",
+      "action": "other-charge-items",
+      "description": "Other Charge Items",
+      "when": "always",
+      "subContext": "chargeItem-sheet"
+    },
+        {
+      "key": "a",
+      "action": "add-charge-items",
+      "description": "add Charge Items in invoice",
+      "when": "always",
+      "subContext": "invoice-show"
+    },
+    {
+      "key": "arrowDown",
+      "action": "select-chargeItem-billing-sheet",
+      "description": "Select Charge Item Billing Sheet",
+      "when": "always",
+      "subContext": "chargeItem-billing-sheet"
+    },
+    {
+      "key": "s",
+      "action": "settle-close-account",
+      "description": "Settle and Close Account",
+      "when": "always",
+      "subContext": "account-show"
+    },
+    {
+      "key": "i",
+      "action": "create-invoice",
+      "description": "Create Invoice",
+      "when": "always",
+      "subContext": "account-show"
+    },
+    {
+      "key": "r",
+      "action": "record-payment-account",
+      "description": "Record Payment",
+      "when": "always",
+      "subContext": "account-show"
+    },
+    {
+      "key": "e",
+      "action": "edit-account",
+      "description": "Edit Account",
+      "when": "always",
+      "subContext": "account-show"
+    },
+    {
+      "key": "shift+1",
+      "action": "switch-to-invoices-tab",
+      "description": "Switch to Invoices Tab",
+      "when": "always",
+      "subContext": "account-show"
+    },
+    {
+      "key": "shift+2",
+      "action": "switch-to-charge-items-tab",
+      "description": "Switch to Charge Items Tab",
+      "when": "always",
+      "subContext": "account-show"
+    },
+    {
+      "key": "shift+3",
+      "action": "switch-to-payments-tab",
+      "description": "Switch to Payments Tab",
+      "when": "always",
+      "subContext": "account-show"
+    },
+    {
+      "key": "shift+4",
+      "action": "switch-to-bed-associations-tab",
+      "description": "Switch to Bed Associations Tab",
+      "when": "always",
+      "subContext": "account-show"
+    },
+    {
+      "key": "enter",
+      "action": "submit-charge-items-billing-sheet",
+      "description": "Submit Charge Items",
+      "when": "always",
+      "subContext": "chargeItem-billing-sheet"
+    },
+    {
+      "key": "arrowLeft",
+      "action": "go-back",
+      "description": "Go Back",
+      "when": "always"
+    },
+    {
+      "key": "v",
+      "action": "view-invoice-payment",
+      "description": "View Invoice",
+      "when": "always"
+    },
+    {
+      "key": "c",
+      "action": "mark-payment-cancelled",
+      "description": "Mark as Cancelled",
+      "when": "always"
+    },
+    {
+      "key": "e",
+      "action": "mark-payment-error",
+      "description": "Mark as Entered in Error",
+      "when": "always",
+      "subContext": "payment"
+    },
+    {
+      "key": "p",
+      "action": "print-payment-receipt",
+      "description": "Print Receipt",
+      "when": "always",
+      "subContext": "payment"
+    },
+    {
+      "key": "e",
+      "action": "edit-invoice-item",
+      "description": "Edit Invoice Item",
+      "when": "always",
+      "subContext": "edit-charge-item-sheet"
+    },
+    {
+      "key": "p",
+      "action": "print-button",
+      "description": "Print anything",
+      "when": "always",
+      "subContext": "general"
+    },
+    {
+      "key": "p",
+      "action": "print-button",
+      "description": "Print Charge Items",
+      "when": "always",
+      "subContext": "charge-items-table"
+    },
+    {
+      "key": "a",
+      "action": "add-charge-items-invoice",
+      "description": "Add Charge Items",
+      "when": "always",
+      "subContext": "invoice-show"
+    },
+    {
+      "key": "p",
+      "action": "print-invoice",
+      "description": "Print Invoice",
+      "when": "always",
+      "subContext": "invoice-show"
+    },
+    {
+      "key": "s",
+      "action": "navigate-to-source",
+      "description": "Navigate to Source",
+      "when": "always",
+      "subContext": "invoice-show"
+    },
+    {
+      "key": "d",
+      "action": "dispense-button",
+      "description": "Dispense Medication",
+      "when": "always"
+    },
+    {
+      "key": "b",
+      "action": "billing-action",
+      "description": "Any Billing related action",
+      "when": "always",
+      "subContext": "general"
+    }
+  ],
+  "encounter": [
+    {
+      "key": "a",
+      "action": "add-allergy",
+      "description": "Add Allergy",
+      "when": "canEdit"
+    },
+    {
+      "key": "s",
+      "action": "add-symptoms",
+      "description": "Add Symptoms",
+      "when": "canEdit"
+    },
+    {
+      "key": "d",
+      "action": "add-diagnosis",
+      "description": "Add Diagnosis",
+      "when": "canEdit"
+    },
+    {
+      "key": "f",
+      "action": "add-questionnaire",
+      "description": "New Questionnaire/Form",
+      "when": "canEdit && questionnairesEnabled"
+    },
+    {
+      "key": "u e",
+      "action": "update-encounter",
+      "description": "Update Encounter",
+      "when": "canEdit"
+    },
+    {
+      "key": "h",
+      "action": "clinical-history",
+      "description": "Clinical History",
+      "when": "always"
+    },
+    {
+      "key": "g g",
+      "action": "encounter-overview",
+      "description": "Go to Overview",
+      "when": "always"
+    },
+    {
+      "key": "g p",
+      "action": "plots",
+      "description": "Go to Plots",
+      "when": "always"
+    },
+    {
+      "key": "g o",
+      "action": "observations",
+      "description": "Go to Observations",
+      "when": "always"
+    },
+    {
+      "key": "g m",
+      "action": "medicines",
+      "description": "Go to Medicines",
+      "when": "always"
+    },
+    {
+      "key": "g f",
+      "action": "files",
+      "description": "Go to Files",
+      "when": "always"
+    },
+    {
+      "key": "g n",
+      "action": "notes",
+      "description": "Go to Notes",
+      "when": "always"
+    },
+    {
+      "key": "g d",
+      "action": "devices",
+      "description": "Go to Devices",
+      "when": "always"
+    },
+    {
+      "key": "g c",
+      "action": "consents",
+      "description": "Go to Consents",
+      "when": "always"
+    },
+    {
+      "key": "g s",
+      "action": "service-requests",
+      "description": "Go to Service Requests",
+      "when": "always"
+    },
+    {
+      "key": "g r",
+      "action": "diagnostic-reports",
+      "description": "Go to Diagnostic Reports",
+      "when": "always"
+    },
+    {
+      "key": "cmd+e",
+      "action": "open-command-dialog",
+      "description": "Open Command Dialog",
+      "when": "canEdit"
+    },
+    {
+      "key": "ctrl+e",
+      "action": "open-command-dialog",
+      "description": "Open Command Dialog",
+      "when": "canEdit"
+    },
+    {
+      "key": "q 1",
+      "action": "questionnaire-1",
+      "description": "Questionnaire 1",
+      "when": "canEdit && questionnairesEnabled"
+    },
+    {
+      "key": "q 2",
+      "action": "questionnaire-2",
+      "description": "Questionnaire 2",
+      "when": "canEdit && questionnairesEnabled"
+    },
+    {
+      "key": "q 3",
+      "action": "questionnaire-3",
+      "description": "Questionnaire 3",
+      "when": "canEdit && questionnairesEnabled"
+    },
+    {
+      "key": "q 4",
+      "action": "questionnaire-4",
+      "description": "Questionnaire 4",
+      "when": "canEdit && questionnairesEnabled"
+    },
+    {
+      "key": "q 5",
+      "action": "questionnaire-5",
+      "description": "Questionnaire 5",
+      "when": "canEdit && questionnairesEnabled"
+    },
+    {
+      "key": "q 6",
+      "action": "questionnaire-6",
+      "description": "Questionnaire 6",
+      "when": "canEdit && questionnairesEnabled"
+    },
+    {
+      "key": "q 7",
+      "action": "questionnaire-7",
+      "description": "Questionnaire 7",
+      "when": "canEdit && questionnairesEnabled"
+    },
+    {
+      "key": "q 8",
+      "action": "questionnaire-8",
+      "description": "Questionnaire 8",
+      "when": "canEdit && questionnairesEnabled"
+    },
+    {
+      "key": "q 9",
+      "action": "questionnaire-9",
+      "description": "Questionnaire 9",
+      "when": "canEdit && questionnairesEnabled"
+    },
+    {
+      "key": "m c",
+      "action": "mark-as-completed",
+      "description": "Mark as Completed",
+      "when": "canEdit"
+    },
+    {
+      "key": "l",
+      "action": "assign-location",
+      "description": "Assign Location",
+      "when": "canEdit"
+    }
+  ]
+}

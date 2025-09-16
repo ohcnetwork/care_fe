@@ -15,8 +15,8 @@ import { TOTPSetupDialog } from "@/components/Users/TOTPSetupDialog";
 
 import mutate from "@/Utils/request/mutate";
 import { HTTPError, StructuredError } from "@/Utils/request/types";
+import { BackupCodesResponse, TotpSetupResponse } from "@/types/auth/auth";
 import authApi from "@/types/auth/authApi";
-import { TOTPSetupResponse, TOTPVerifyResponse } from "@/types/auth/otp";
 
 interface DialogState {
   password: boolean;
@@ -37,7 +37,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
     regenerateConfirm: false,
   });
   const [verificationError, setVerificationError] = useState("");
-  const [setupData, setSetupData] = useState<TOTPSetupResponse | null>(null);
+  const [setupData, setSetupData] = useState<TotpSetupResponse | null>(null);
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [showRegenerateBackupCodes, setShowRegenerateBackupCodes] =
     useState(false);
@@ -74,7 +74,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
 
   const { mutate: setupTOTP, isPending: isSettingUp } = useMutation({
     mutationFn: mutate(authApi.totp.setup),
-    onSuccess: (data: TOTPSetupResponse) => {
+    onSuccess: (data: TotpSetupResponse) => {
       setSetupData(data);
       closePasswordDialog();
       openSetupDialog();
@@ -93,7 +93,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
 
   const { mutate: verifyTOTP, isPending: isVerifying } = useMutation({
     mutationFn: mutate(authApi.totp.verify),
-    onSuccess: (data: TOTPVerifyResponse) => {
+    onSuccess: (data: BackupCodesResponse) => {
       if (data.backup_codes && Array.isArray(data.backup_codes)) {
         setBackupCodes(data.backup_codes);
         closeSetupDialog();
@@ -130,7 +130,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
   const { mutate: regenerateBackupCodes, isPending: isRegenerating } =
     useMutation({
       mutationFn: mutate(authApi.totp.regenerateBackupCodes),
-      onSuccess: (data: { backup_codes: string[] }) => {
+      onSuccess: (data: BackupCodesResponse) => {
         setBackupCodes(data.backup_codes);
         closeRegenerateConfirm();
         setShowRegenerateBackupCodes(true);
@@ -234,7 +234,10 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
       {/* Password Dialog for Setup */}
       <PasswordDialog
         open={showPasswordDialog}
-        onOpenChange={closePasswordDialog}
+        onOpenChange={(open) => {
+          closePasswordDialog();
+          if (!open) setSetupPasswordError("");
+        }}
         onSubmit={(password) => setupTOTP({ password })}
         title={t("confirm_password")}
         description={t("please_enter_current_password")}
@@ -248,7 +251,13 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
       {setupData && (
         <TOTPSetupDialog
           open={showSetupDialog}
-          onOpenChange={closeSetupDialog}
+          onOpenChange={(open) => {
+            closeSetupDialog();
+            if (!open) {
+              setVerificationError("");
+              setSetupData(null);
+            }
+          }}
           setupData={setupData}
           onVerify={(code) => verifyTOTP({ code })}
           verificationError={verificationError}
@@ -272,7 +281,10 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
       {/* Password Dialog for Disable */}
       <PasswordDialog
         open={showDisableDialog}
-        onOpenChange={closeDisableDialog}
+        onOpenChange={(open) => {
+          closeDisableDialog();
+          if (!open) setDisableError("");
+        }}
         onSubmit={(password) => disableTOTP({ password })}
         title={t("disable_two_factor_authentication")}
         description={t("disable_2fa_confirmation")}
@@ -291,7 +303,10 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
       {/* Password Dialog for Regenerate */}
       <PasswordDialog
         open={showRegenerateConfirm}
-        onOpenChange={closeRegenerateConfirm}
+        onOpenChange={(open) => {
+          closeRegenerateConfirm();
+          if (!open) setRegeneratePasswordError("");
+        }}
         onSubmit={(password) => regenerateBackupCodes({ password })}
         title={t("regenerate_backup_codes")}
         description={t("regenerate_backup_codes_warning")}
