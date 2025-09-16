@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Edit, MoreVertical, Pencil, Plus, Square, X } from "lucide-react";
+import { MoreVertical, Pencil, Plus, Settings, Square, X } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -41,7 +41,10 @@ import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 import { TokenQueueRead } from "@/types/tokens/tokenQueue/tokenQueue";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
-import { TokenSubQueueRead } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
+import {
+  TokenSubQueueRead,
+  TokenSubQueueStatus,
+} from "@/types/tokens/tokenSubQueue/tokenSubQueue";
 import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -49,6 +52,7 @@ import { dateQueryString } from "@/Utils/utils";
 import { startOfDay } from "date-fns";
 import dayjs from "dayjs";
 import { Link } from "raviger";
+import ManageServicePointSheet from "./ManageServicePointSheet";
 import QueueFormSheet from "./QueueFormSheet";
 import SubQueueFormSheet from "./SubQueueFormSheet";
 
@@ -153,21 +157,13 @@ function QueueRow({
 
 interface SubQueueCardProps {
   subQueue: TokenSubQueueRead;
-  facilityId: string;
-  resourceType: SchedulableResourceType;
-  resourceId: string;
 }
 
-function SubQueueCard({
-  subQueue,
-  facilityId,
-  resourceType,
-  resourceId,
-}: SubQueueCardProps) {
+function SubQueueCard({ subQueue }: SubQueueCardProps) {
   const { t } = useTranslation();
 
   return (
-    <Card className="hover:shadow-md transition-all bg-gray-50 duration-200 border-gray-200 shadow-none rounded-sm border-gray-200">
+    <Card className="hover:shadow-md transition-all bg-gray-50 duration-200 border-gray-200 shadow-none rounded-sm">
       <CardContent className="py-1 px-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 flex-1">
@@ -178,18 +174,16 @@ function SubQueueCard({
             </div>
           </div>
 
-          <SubQueueFormSheet
-            facilityId={facilityId}
-            resourceType={resourceType}
-            resourceId={resourceId}
-            subQueueId={subQueue.id}
-            trigger={
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <span className="sr-only">{t("edit")}</span>
-                <Edit className="h-4 w-4" />
-              </Button>
+          <Badge
+            variant={
+              subQueue.status === TokenSubQueueStatus.ACTIVE
+                ? "primary"
+                : "outline"
             }
-          />
+            className="text-xs"
+          >
+            {t(subQueue.status)}
+          </Badge>
         </div>
       </CardContent>
     </Card>
@@ -417,9 +411,18 @@ export default function QueuesIndex({
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Edit className="h-4 w-4" />
-                </Button>
+                <ManageServicePointSheet
+                  facilityId={facilityId}
+                  resourceType={resourceType}
+                  resourceId={effectiveResourceId}
+                  subQueuesResponse={subQueues}
+                  subQueuesLoading={subQueuesLoading}
+                  trigger={
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Settings className="size-4" />
+                    </Button>
+                  }
+                />
                 <SubQueueFormSheet
                   facilityId={facilityId}
                   resourceType={resourceType}
@@ -459,13 +462,7 @@ export default function QueuesIndex({
             ) : (
               <div className="space-y-3">
                 {subQueues.map((subQueue) => (
-                  <SubQueueCard
-                    key={subQueue.id}
-                    subQueue={subQueue}
-                    facilityId={facilityId}
-                    resourceType={resourceType}
-                    resourceId={effectiveResourceId}
-                  />
+                  <SubQueueCard key={subQueue.id} subQueue={subQueue} />
                 ))}
               </div>
             )}
