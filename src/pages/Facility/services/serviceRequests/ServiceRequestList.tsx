@@ -292,6 +292,7 @@ export default function ServiceRequestList({
           </div>
           <div className="w-full mb-4">
             <FilterTabs
+              key={`sr-status-${maxVisibleTabs}`}
               value={qParams.status || Status.active}
               onValueChange={(value) => updateQuery({ status: value })}
               options={Object.values(Status)}
