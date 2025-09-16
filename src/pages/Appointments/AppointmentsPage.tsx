@@ -1051,8 +1051,6 @@ function AppointmentRow(props: {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
 
-  console.log("practitioners", props.practitioners);
-
   const { data, isLoading } = useQuery({
     queryKey: [
       "appointments",
