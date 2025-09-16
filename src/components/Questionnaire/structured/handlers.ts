@@ -67,6 +67,7 @@ export const structuredHandlers: {
               note: sanitizeNote(medication.note),
               encounter: encounterId,
               patient: patientId,
+              requester: medication.requester?.id,
             })),
           },
           reference_id: "medication_request",
@@ -236,6 +237,10 @@ export const structuredHandlers: {
         method: "POST",
         body: {
           ...serviceRequest,
+          service_request: {
+            ...serviceRequest.service_request,
+            requester: serviceRequest.service_request.requester.id,
+          },
         },
         reference_id: "service_request",
       }));

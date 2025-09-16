@@ -17,6 +17,7 @@ export interface InventoryRead extends InventoryBase {
   id: string;
   net_content: number;
   product: ProductRead;
+  location: LocationList;
 }
 
 export interface InventoryRetrieve extends InventoryRead {

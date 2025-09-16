@@ -2,7 +2,12 @@ import { Redirect, useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
+import { ScheduleHome } from "@/components/Schedule/ScheduleHome";
+import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
+import PrintAppointments from "@/pages/Appointments/components/PrintAppointments";
 import BedsList from "@/pages/Facility/locations/BedsList";
+import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
+import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
 import { InventoryList } from "@/pages/Facility/services/inventory/InventoryList";
 import { ReceiveStock } from "@/pages/Facility/services/inventory/ReceiveStock";
 import SupplyRequestForm from "@/pages/Facility/services/inventory/SupplyRequestForm";
@@ -10,6 +15,7 @@ import { IncomingDeliveries } from "@/pages/Facility/services/inventory/external
 import { PurchaseOrders } from "@/pages/Facility/services/inventory/externalSupply/PurchaseOrders";
 import PurchaseOrdersBySupplier from "@/pages/Facility/services/inventory/externalSupply/PurchaseOrdersBySupplier";
 import ReceiveItem from "@/pages/Facility/services/inventory/internalTransfer/ReceiveItem";
+import SupplyDeliveryCreate from "@/pages/Facility/services/inventory/internalTransfer/SupplyDeliveryCreate";
 import SupplyRequestDetail from "@/pages/Facility/services/inventory/internalTransfer/SupplyRequestDetail";
 import SupplyRequestDispatch from "@/pages/Facility/services/inventory/internalTransfer/SupplyRequestDispatch";
 import ToDispatch from "@/pages/Facility/services/inventory/internalTransfer/ToDispatch";
@@ -25,6 +31,7 @@ import { PrintPharmacyPrescription } from "@/pages/Facility/services/pharmacy/Pr
 import ServiceRequestList from "@/pages/Facility/services/serviceRequests/ServiceRequestList";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
 import { MedicationDispenseStatus } from "@/types/emr/medicationDispense/medicationDispense";
+import { SchedulableResourceType } from "@/types/scheduling/schedule";
 
 interface LocationLayoutProps {
   facilityId: string;
@@ -93,6 +100,16 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     <ToDispatch facilityId={facilityId} locationId={locationId} />
   ),
 
+  "/internal_transfers/create_delivery": () => (
+    <SupplyDeliveryCreate facilityId={facilityId} locationId={locationId} />
+  ),
+  "/internal_transfers/to_dispatch/delivery/:id": ({ id }: { id: string }) => (
+    <SupplyRequestDispatch
+      facilityId={facilityId}
+      locationId={locationId}
+      supplyDeliveryId={id}
+    />
+  ),
   "/internal_transfers/to_dispatch/:id": ({ id }: { id: string }) => (
     <SupplyRequestDispatch
       facilityId={facilityId}
@@ -183,15 +200,18 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     />
   ),
 
-  "/medication_requests/patient/:patientId/pending": ({
+  "/medication_requests/patient/:patientId/prescription/:prescriptionId": ({
     patientId,
+    prescriptionId,
   }: {
     patientId: string;
+    prescriptionId: string;
   }) => (
     <PrescriptionsView
       facilityId={facilityId}
       patientId={patientId}
       tab={PharmacyMedicationTab.PENDING}
+      prescriptionId={prescriptionId}
     />
   ),
   "/medication_requests/patient/:patientId/print": ({
@@ -200,17 +220,6 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     patientId: string;
   }) => (
     <PrintPharmacyPrescription facilityId={facilityId} patientId={patientId} />
-  ),
-  "/medication_requests/patient/:patientId/partial": ({
-    patientId,
-  }: {
-    patientId: string;
-  }) => (
-    <PrescriptionsView
-      facilityId={facilityId}
-      patientId={patientId}
-      tab={PharmacyMedicationTab.PARTIAL}
-    />
   ),
 
   "/medication_dispense/patient/:patientId/:status": ({
@@ -232,6 +241,58 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   }: {
     patientId: string;
   }) => <MedicationBillForm patientId={patientId} />,
+
+  // Schedule
+  "/schedule": () => (
+    <ScheduleHome
+      facilityId={facilityId}
+      resourceType={SchedulableResourceType.Location}
+      resourceId={locationId}
+    />
+  ),
+
+  // Appointments
+  "/appointments": () => (
+    <AppointmentsPage
+      resourceType={SchedulableResourceType.Location}
+      resourceId={locationId}
+    />
+  ),
+  "/appointments/print": () => (
+    <PrintAppointments
+      facilityId={facilityId}
+      resourceType={SchedulableResourceType.Location}
+      resourceId={locationId}
+    />
+  ),
+
+  // Queues
+  "/queues": () => (
+    <QueuesIndex
+      facilityId={facilityId}
+      resourceType={SchedulableResourceType.Location}
+      resourceId={locationId}
+    />
+  ),
+  "/queues/:queueId/ongoing": ({ queueId }: { queueId: string }) => (
+    <ManageQueuePage
+      facilityId={facilityId}
+      resourceType={SchedulableResourceType.Location}
+      resourceId={locationId}
+      queueId={queueId}
+      tab="ongoing"
+    />
+  ),
+
+  "/queues/:queueId/completed": ({ queueId }: { queueId: string }) => (
+    <ManageQueuePage
+      facilityId={facilityId}
+      resourceType={SchedulableResourceType.Location}
+      resourceId={locationId}
+      queueId={queueId}
+      tab="completed"
+    />
+  ),
 
   "*": () => <ErrorPage />,
 });

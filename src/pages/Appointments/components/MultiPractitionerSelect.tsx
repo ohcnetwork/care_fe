@@ -28,16 +28,16 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 import { UserReadMinimal } from "@/types/user/user";
+import query from "@/Utils/request/query";
+import { NonEmptyArray } from "@/Utils/types";
+import { formatName } from "@/Utils/utils";
 
 interface MultiPractitionerSelectorProps {
-  selected: UserReadMinimal[] | null;
-  onSelect: (users: UserReadMinimal[] | null) => void;
+  selected: NonEmptyArray<UserReadMinimal>;
+  onSelect: (users: NonEmptyArray<UserReadMinimal>) => void;
   facilityId: string;
-  clearSelection?: string;
 }
 
 const MULTI_SELECT_SHOW_LIMIT = 5;
@@ -46,7 +46,6 @@ export const MultiPractitionerSelector = ({
   facilityId,
   selected,
   onSelect,
-  clearSelection,
 }: MultiPractitionerSelectorProps) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -68,6 +67,8 @@ export const MultiPractitionerSelector = ({
   const getItemValue = (user: UserReadMinimal) => {
     return `${formatName(user)} ${user.username}`;
   };
+
+  const hasMultiple = selected && selected.length > 1;
 
   return (
     <div className="flex items-center gap-2">
@@ -125,20 +126,6 @@ export const MultiPractitionerSelector = ({
                 {isFetching ? t("searching") : t("no_results")}
               </CommandEmpty>
               <CommandGroup>
-                {clearSelection && (
-                  <CommandItem
-                    value="all"
-                    onSelect={() => {
-                      onSelect(null);
-                    }}
-                    className="cursor-pointer w-full"
-                  >
-                    <div className="w-full flex items-start">
-                      <span>{clearSelection}</span>
-                      {!selected && <CheckIcon className="ml-auto" />}
-                    </div>
-                  </CommandItem>
-                )}
                 {selected && selected.length > 0 && (
                   <h3 className="mt-1 mx-2 text-sm font-medium">
                     {t("selected")}
@@ -149,7 +136,13 @@ export const MultiPractitionerSelector = ({
                     key={user.id}
                     value={getItemValue(user)}
                     onSelect={() => {
-                      onSelect(selected.filter((s) => s.id !== user.id));
+                      if (hasMultiple) {
+                        onSelect(
+                          selected.filter(
+                            (s) => s.id !== user.id,
+                          ) as NonEmptyArray<UserReadMinimal>,
+                        );
+                      }
                     }}
                     className="cursor-pointer w-full"
                   >
@@ -170,7 +163,7 @@ export const MultiPractitionerSelector = ({
                           {user.username}
                         </span>
                       </div>
-                      <XIcon className="ml-auto" />
+                      {hasMultiple && <XIcon className="ml-auto" />}
                     </div>
                   </CommandItem>
                 ))}
