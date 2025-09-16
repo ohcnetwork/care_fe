@@ -151,7 +151,7 @@ export default function ToReceiveSupplyRequestTable({
                   >
                     <Check
                       className={cn(
-                        "mr-2 h-4 w-4",
+                        "mr-2 size-4",
                         effectiveStatus === status
                           ? "opacity-100"
                           : "opacity-0",
@@ -204,7 +204,7 @@ export default function ToReceiveSupplyRequestTable({
                   >
                     <Check
                       className={cn(
-                        "mr-2 h-4 w-4",
+                        "mr-2 size-4",
                         qParams.priority === priority
                           ? "opacity-100"
                           : "opacity-0",
