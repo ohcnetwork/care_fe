@@ -5,7 +5,7 @@ import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/cha
 import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import { EncounterEdit } from "@/types/emr/encounter/encounter";
-import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
+import { MedicationRequestCreate } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
 import { FileUploadQuestion } from "@/types/files/file";
@@ -29,7 +29,7 @@ export type ResponseValue =
   | RV<"date", Date | undefined>
   | RV<"quantity", number | undefined>
   | RV<"allergy_intolerance", AllergyIntoleranceRequest[]>
-  | RV<"medication_request", MedicationRequest[]>
+  | RV<"medication_request", MedicationRequestCreate[]>
   | RV<"medication_statement", MedicationStatementRequest[]>
   | RV<"symptom", SymptomRequest[]>
   | RV<"diagnosis", DiagnosisRequest[]>
