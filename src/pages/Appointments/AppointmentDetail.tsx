@@ -88,7 +88,7 @@ import {
   AppointmentFinalStatuses,
   AppointmentRead,
   AppointmentUpdateRequest,
-  nameFromAppointment,
+  formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import mutate from "@/Utils/request/mutate";
@@ -661,7 +661,9 @@ const AppointmentDetails = ({
         <CardContent className="space-y-4">
           <div className="grid gap-2">
             <div className="text-sm">
-              <p className="font-medium">{nameFromAppointment(appointment)}</p>
+              <p className="font-medium">
+                {formatScheduleResourceName(appointment)}
+              </p>
             </div>
             <Separator />
             <div className="text-sm">

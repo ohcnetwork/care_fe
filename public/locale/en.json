@@ -4878,7 +4878,7 @@
   "this_file_has_been_archived": "This file has been archived and cannot be unarchived.",
   "this_month": "This Month",
   "this_week": "This Week",
-  "this_will_permanently_cancel_the_appointment_and_cannot_be_undone": "This will permanently cancel the appointment scheduled for {{date}} with {{practitioner}} at {{facility}} and cannot be undone",
+  "this_will_permanently_cancel_the_appointment_and_cannot_be_undone": "This will permanently cancel the appointment scheduled for {{date}} with {{resource}} at {{facility}} and cannot be undone",
   "this_will_permanently_remove_the_exception_and_cannot_be_undone": "This will permanently remove the exception and cannot be undone",
   "this_will_permanently_remove_the_scheduled_template_and_cannot_be_undone": "This will permanently remove the scheduled template and cannot be undone",
   "this_will_permanently_remove_the_session_and_cannot_be_undone": "This will permanently remove the session and cannot be undone",

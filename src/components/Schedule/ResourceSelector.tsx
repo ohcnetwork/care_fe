@@ -30,10 +30,9 @@ export const ResourceSelector = ({
   selectedResource,
   setSelectedResource,
 }: ResourceSelectorProps) => {
-  return (
-    <>
-      {selectedResource.resource_type ===
-        SchedulableResourceType.Practitioner && (
+  switch (selectedResource.resource_type) {
+    case SchedulableResourceType.Practitioner:
+      return (
         <PractitionerSelector
           facilityId={facilityId}
           selected={selectedResource.resource}
@@ -44,9 +43,10 @@ export const ResourceSelector = ({
             });
           }}
         />
-      )}
+      );
 
-      {selectedResource.resource_type === SchedulableResourceType.Location && (
+    case SchedulableResourceType.Location:
+      return (
         <LocationSearch
           facilityId={facilityId}
           onSelect={(location) => {
@@ -57,10 +57,10 @@ export const ResourceSelector = ({
           }}
           value={selectedResource.resource}
         />
-      )}
+      );
 
-      {selectedResource.resource_type ===
-        SchedulableResourceType.HealthcareService && (
+    case SchedulableResourceType.HealthcareService:
+      return (
         <HealthcareServiceSelector
           facilityId={facilityId}
           selected={selectedResource.resource}
@@ -71,7 +71,9 @@ export const ResourceSelector = ({
             });
           }}
         />
-      )}
-    </>
-  );
+      );
+
+    default:
+      return null;
+  }
 };

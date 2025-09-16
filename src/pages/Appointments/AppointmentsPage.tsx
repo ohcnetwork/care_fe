@@ -97,7 +97,7 @@ import {
   APPOINTMENT_STATUS_COLORS,
   AppointmentRead,
   AppointmentStatus,
-  nameFromAppointment,
+  formatScheduleResourceName,
   SchedulableResourceType,
   TokenSlot,
 } from "@/types/scheduling/schedule";
@@ -994,7 +994,7 @@ function AppointmentCard({
               </TooltipTrigger>
               <TooltipContent className="flex flex-col gap-0">
                 <span className="text-sm font-medium">
-                  {nameFromAppointment(appointment)}
+                  {formatScheduleResourceName(appointment)}
                 </span>
               </TooltipContent>
             </Tooltip>
@@ -1203,7 +1203,7 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
       </TableCell>
       {/* TODO: Replace with relevant information */}
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        {nameFromAppointment(appointment)}
+        {formatScheduleResourceName(appointment)}
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
         {t(appointment.status)}

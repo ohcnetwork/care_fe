@@ -277,7 +277,7 @@ export const storeUserInLocalStorage = (user: UserReadMinimal) => {
   localStorage.setItem("user", JSON.stringify(user));
 };
 
-export const nameFromAppointment = (appointment: ScheduleResource) => {
+export const formatScheduleResourceName = (appointment: ScheduleResource) => {
   switch (appointment.resource_type) {
     case SchedulableResourceType.Practitioner:
       return formatName(appointment.resource);

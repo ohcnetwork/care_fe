@@ -28,7 +28,7 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import {
   APPOINTMENT_STATUS_COLORS,
-  nameFromAppointment,
+  formatScheduleResourceName,
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -183,7 +183,7 @@ export function PrintAppointments({
                       </div>
                     </TableCell>
                     <TableCell className="p-2 align-top break-words whitespace-normal">
-                      {nameFromAppointment(appointment)}
+                      {formatScheduleResourceName(appointment)}
                     </TableCell>
                     <TableCell className="p-2 align-top">
                       {formatDateTime(

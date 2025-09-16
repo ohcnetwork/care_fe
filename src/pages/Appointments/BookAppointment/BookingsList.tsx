@@ -19,7 +19,7 @@ import {
   Appointment,
   AppointmentCancelledStatuses,
   AppointmentStatus,
-  nameFromAppointment,
+  formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
@@ -164,7 +164,7 @@ const AppointmentCard = ({
               <ScheduleResourceIcon resource={appointment} />
               <div className="flex items-center justify-center gap-2">
                 <span className="text-sm font-medium text-gray-950">
-                  {nameFromAppointment(appointment)}
+                  {formatScheduleResourceName(appointment)}
                 </span>
               </div>
             </div>
@@ -265,7 +265,7 @@ const AppointmentTable = ({
                     <ScheduleResourceIcon resource={appointment} />
                     <div className="flex items-center justify-center gap-2">
                       <span className="text-sm font-medium text-gray-950">
-                        {nameFromAppointment(appointment)}
+                        {formatScheduleResourceName(appointment)}
                       </span>
                     </div>
                   </div>

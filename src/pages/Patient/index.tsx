@@ -19,7 +19,7 @@ import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   APPOINTMENT_STATUS_COLORS,
   Appointment,
-  nameFromAppointment,
+  formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 
 import AppointmentDialog from "./components/AppointmentDialog";
@@ -94,7 +94,7 @@ function PatientIndex() {
                 {t(appointment.resource_type, { count: 1 })}:{" "}
               </span>
               <span className="text-sm">
-                {nameFromAppointment(appointment)}
+                {formatScheduleResourceName(appointment)}
               </span>
             </div>
           </CardTitle>

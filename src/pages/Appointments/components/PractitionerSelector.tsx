@@ -25,7 +25,7 @@ import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import {
-  nameFromAppointment,
+  formatScheduleResourceName,
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
@@ -75,7 +75,7 @@ export const PractitionerSelector = ({
                 className="size-6 rounded-full"
               />
               <span>
-                {nameFromAppointment({
+                {formatScheduleResourceName({
                   resource_type: SchedulableResourceType.Practitioner,
                   resource: selected,
                 })}
