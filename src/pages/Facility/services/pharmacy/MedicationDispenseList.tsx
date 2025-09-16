@@ -47,7 +47,6 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 
-import useBreakpoints from "@/hooks/useBreakpoints";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatName } from "@/Utils/utils";
@@ -275,7 +274,6 @@ export default function MedicationDispenseList({
     },
   });
 
-  const maxVisibleTabs = useBreakpoints({ default: 2, md: 4 });
   if (!prescription || isLoading) {
     return <TableSkeleton count={5} />;
   }
@@ -332,20 +330,6 @@ export default function MedicationDispenseList({
     <div>
       <div className="mb-4 flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <FilterTabs
-            value={qParams.status || "active"}
-            onValueChange={(value) => updateQuery({ status: value })}
-            options={Object.values(MEDICATION_REQUEST_STATUS)}
-            showMoreDropdown={true}
-            showAllOption={false}
-            maxVisibleTabs={maxVisibleTabs}
-            defaultVisibleOptions={[
-              "active",
-              "completed",
-              "cancelled",
-              "draft",
-            ]}
-          />
           <div className="flex flex-col lg:flex-row items-stretch gap-2 w-full">
             <div className="w-full lg:w-64">
               <Input
@@ -380,7 +364,7 @@ export default function MedicationDispenseList({
               />
             </div>
           </div>
-          <div className="ml-auto flex gap-2 flex-col sm:flex-row w-full sm:w-auto">
+          <div className="ml-auto flex gap-2">
             <Button
               variant="outline"
               asChild
