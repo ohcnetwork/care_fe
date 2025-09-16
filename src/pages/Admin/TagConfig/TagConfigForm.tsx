@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import RoleOrgSelector from "@/components/Common/RoleOrgSelector";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,7 @@ export default function TagConfigForm({
       required_error: t("field_required"),
     }),
     facility_organization: z.string().optional(),
+    organization: z.string().optional(),
   });
 
   type TagConfigFormValues = z.infer<typeof tagConfigSchema>;
@@ -94,6 +96,7 @@ export default function TagConfigForm({
       status: TagStatus.ACTIVE,
       resource: parentTag?.resource || TagResource.PATIENT,
       facility_organization: undefined,
+      organization: undefined,
     },
   });
 
@@ -117,6 +120,8 @@ export default function TagConfigForm({
         priority: existingConfig.priority,
         status: existingConfig.status,
         resource: existingConfig.resource,
+        facility_organization: existingConfig.facility_organization?.id,
+        organization: existingConfig.organization?.id,
       });
     }
   }, [existingConfig, isEditing, form]);
@@ -131,6 +136,8 @@ export default function TagConfigForm({
         priority: parentTag.priority,
         status: TagStatus.ACTIVE,
         resource: parentTag.resource,
+        facility_organization: undefined,
+        organization: undefined,
       });
     }
   }, [parentTag, isCreatingChild, form]);
@@ -175,6 +182,9 @@ export default function TagConfigForm({
       ...(facilityId && { facility: facilityId }),
       ...(data.facility_organization && {
         facility_organization: data.facility_organization,
+      }),
+      ...(data.organization && {
+        organization: data.organization,
       }),
     };
 
@@ -343,7 +353,7 @@ export default function TagConfigForm({
           )}
         />
 
-        {facilityId && (
+        {facilityId ? (
           <FormField
             control={form.control}
             name="facility_organization"
@@ -353,6 +363,27 @@ export default function TagConfigForm({
                 <FormControl>
                   <FacilityOrganizationSelector
                     facilityId={facilityId}
+                    value={field.value ? [field.value] : null}
+                    onChange={(value: string[] | null) => {
+                      field.onChange(value?.[0] || null);
+                    }}
+                    singleSelection={true}
+                    optional={true}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : (
+          <FormField
+            control={form.control}
+            name="organization"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Organization</FormLabel>
+                <FormControl>
+                  <RoleOrgSelector
                     value={field.value ? [field.value] : null}
                     onChange={(value: string[] | null) => {
                       field.onChange(value?.[0] || null);

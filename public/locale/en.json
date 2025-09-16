@@ -4407,6 +4407,7 @@
   "select_or_create_specimen_requirements": "Select or create specimen",
   "select_or_type": "Select or type",
   "select_organization": "Select Organization",
+  "select_organization_description": "Choose an organization from the list",
   "select_organization_placeholder": "Select Organization",
   "select_organization_type": "Select organization type",
   "select_organizations": "Select Organizations",
