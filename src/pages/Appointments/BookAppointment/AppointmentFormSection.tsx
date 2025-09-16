@@ -5,44 +5,72 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
-import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
+import {
+  ResourceSelector,
+  ScheduleResourceFormState,
+} from "@/components/Schedule/ResourceSelector";
+import RadioInput from "@/components/ui/RadioInput";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
-import { UserReadMinimal } from "@/types/user/user";
+import { SchedulableResourceType } from "@/types/scheduling/schedule";
 
 interface AppointmentFormSectionProps {
   facilityId: string;
-  resource: UserReadMinimal | undefined;
   selectedTags: TagConfig[];
   setSelectedTags: (tags: TagConfig[]) => void;
   reason: string;
   setReason: (reason: string) => void;
-  setResourceId: (resourceId: string) => void;
+  setSelectedResourceType: (resourceType: SchedulableResourceType) => void;
+  selectedResourceType: SchedulableResourceType;
+  selectedResource: ScheduleResourceFormState;
+  setSelectedResource: (resource: ScheduleResourceFormState) => void;
 }
 export const AppointmentFormSection = ({
   facilityId,
-  setResourceId,
-  resource,
   selectedTags,
   setSelectedTags,
   reason,
   setReason,
+  setSelectedResourceType,
+  selectedResourceType,
+  selectedResource,
+  setSelectedResource,
 }: AppointmentFormSectionProps) => {
   const { t } = useTranslation();
 
   return (
     <div className="flex flex-col gap-8 p-4 w-114 bg-white shadow rounded-lg">
-      <div className="w-full">
+      <div className="flex flex-col">
         <Label className="mb-2 text-sm font-medium text-gray-950">
-          {t("select_practitioner")}
+          {t("select_resource_type")}
         </Label>
-        <PractitionerSelector
-          facilityId={facilityId}
-          selected={resource ?? null}
-          onSelect={(user) => user && setResourceId(user.id)}
+        <RadioInput
+          options={Object.values(SchedulableResourceType).map((type) => ({
+            label: t(`resource_type__${type}`),
+            value: type,
+          }))}
+          value={selectedResourceType}
+          onValueChange={(value: SchedulableResourceType) => {
+            setSelectedResourceType(value);
+            setSelectedResource({
+              resource: null,
+              resource_type: value,
+            });
+          }}
         />
       </div>
+      <div className="flex flex-col">
+        <Label className="mb-2 text-sm font-medium text-gray-950">
+          {t(`schedulable_resource__${selectedResourceType}`)}
+        </Label>
+        <ResourceSelector
+          facilityId={facilityId}
+          setSelectedResource={setSelectedResource}
+          selectedResource={selectedResource}
+        />
+      </div>
+
       <div className="max-w-md">
-        <Label className="mb-2">{t("tags")}</Label>
+        <Label className="mb-2">{t("tags", { count: 1 })}</Label>
         <TagSelectorPopover
           selected={selectedTags}
           onChange={setSelectedTags}

@@ -153,6 +153,9 @@ export function useFacilityShortcuts(subContext?: string) {
         "generate-token",
         "schedule-appointment",
         "add-charge-items-invoice",
+        "dispense-button",
+        "navigate-to-source",
+        "billing-action",
       ]),
 
       // Generic action handlers

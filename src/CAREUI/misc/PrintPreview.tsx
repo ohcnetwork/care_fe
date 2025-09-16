@@ -35,7 +35,11 @@ export default function PrintPreview(props: Props) {
         options={
           <div className="flex items-center gap-2">
             {props.showBackButton !== false && (
-              <Button variant="outline" onClick={() => goBack()}>
+              <Button
+                variant="outline"
+                onClick={() => goBack()}
+                data-shortcut-id="go-back"
+              >
                 <CareIcon icon="l-arrow-left" className="text-lg" />
                 {t("back")}
               </Button>

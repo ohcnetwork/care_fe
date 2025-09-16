@@ -267,11 +267,6 @@ export interface MedicationRequestRead {
   prescription?: PrescriptionRead;
 }
 
-export interface MedicationRequestSummary {
-  prescription: PrescriptionRead;
-  count: number;
-}
-
 export const MEDICATION_REQUEST_TIMING_OPTIONS: Record<
   string,
   {

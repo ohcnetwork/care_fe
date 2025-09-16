@@ -7,7 +7,10 @@ import { Label } from "@/components/ui/label";
 import { formatPatientAge } from "@/Utils/utils";
 import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import { FacilityRead } from "@/types/facility/facility";
-import { Appointment, nameFromAppointment } from "@/types/scheduling/schedule";
+import {
+  Appointment,
+  formatScheduleResourceName,
+} from "@/types/scheduling/schedule";
 import { TokenRead, renderTokenNumber } from "@/types/tokens/token/token";
 
 interface Props {
@@ -77,9 +80,11 @@ const TokenCard = ({ id, token, facility, appointment }: Props) => {
             {appointment && (
               <>
                 <div>
-                  <Label>{t("practitioner", { count: 1 })}:</Label>
+                  <Label>
+                    {t(`schedulable_resource__${appointment.resource_type}`)}:
+                  </Label>
                   <p className="text-sm font-semibold break-words">
-                    {nameFromAppointment(appointment)}
+                    {formatScheduleResourceName(appointment)}
                   </p>
                 </div>
                 <div>

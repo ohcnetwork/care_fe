@@ -37,7 +37,7 @@ import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
   AppointmentFinalStatuses,
-  nameFromAppointment,
+  formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 
 function AppointmentDialog({
@@ -89,9 +89,11 @@ function AppointmentDialog({
             </DialogDescription>
             <div className="flex flex-row justify-between">
               <div className="space-y-1">
-                <Label className="text-xs">{t("practitioner")}</Label>
+                <Label className="text-xs">
+                  {t(`schedulable_resource__${appointment.resource_type}`)}
+                </Label>
                 <p className="text-base font-semibold">
-                  {nameFromAppointment(appointment)}
+                  {formatScheduleResourceName(appointment)}
                 </p>
                 <p className="text-sm font-semibold text-gray-600">
                   {formatAppointmentSlotTime(appointment)}
@@ -103,7 +105,7 @@ function AppointmentDialog({
                   {appointment.patient.name}
                 </p>
                 <p className="text-sm text-gray-600 font-medium">
-                  {formatPatientAge(appointment.patient as any, true)},{" "}
+                  {formatPatientAge(appointment.patient, true)},{" "}
                   {t(`GENDER__${appointment.patient.gender}`)}
                 </p>
               </div>
@@ -140,7 +142,8 @@ function AppointmentDialog({
                               "this_will_permanently_cancel_the_appointment_and_cannot_be_undone",
                               {
                                 date: formatAppointmentSlotTime(appointment),
-                                practitioner: nameFromAppointment(appointment),
+                                resource:
+                                  formatScheduleResourceName(appointment),
                                 facility: appointment.facility.name,
                               },
                             )}

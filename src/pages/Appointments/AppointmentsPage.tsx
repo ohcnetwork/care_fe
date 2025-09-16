@@ -61,13 +61,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
-import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import {
@@ -91,13 +85,13 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import {
-  APPOINTMENT_STATUS_COLORS,
   Appointment,
+  APPOINTMENT_STATUS_COLORS,
   AppointmentRead,
   AppointmentStatus,
+  formatScheduleResourceName,
   SchedulableResourceType,
   TokenSlot,
-  nameFromAppointment,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserReadMinimal } from "@/types/user/user";
@@ -106,10 +100,10 @@ import { useView } from "@/Utils/useView";
 import {
   dateQueryString,
   formatDateTime,
-  formatName,
   formatPatientAge,
 } from "@/Utils/utils";
 
+import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import {
   dateFilter,
   tagFilter,
@@ -120,6 +114,11 @@ import {
   FilterDateRange,
   shortDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { NonEmptyArray } from "@/Utils/types";
@@ -1056,19 +1055,18 @@ function AppointmentCard({
         <div className="flex">
           <div className="flex items-center justify-center">
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger>
                 {appointment.resource_type ===
                   SchedulableResourceType.Practitioner && (
-                  <Avatar
-                    name={formatName(appointment.resource)}
-                    imageUrl={appointment.resource.profile_picture_url}
+                  <ScheduleResourceIcon
+                    resource={appointment}
                     className="size-14 rounded-r-none"
                   />
                 )}
               </TooltipTrigger>
               <TooltipContent className="flex flex-col gap-0">
                 <span className="text-sm font-medium">
-                  {nameFromAppointment(appointment)}
+                  {formatScheduleResourceName(appointment)}
                 </span>
               </TooltipContent>
             </Tooltip>
@@ -1222,9 +1220,13 @@ function AppointmentRow(props: {
                   <TableHead className="pl-8 font-semibold text-black text-xs">
                     {t("patient")}
                   </TableHead>
-                  <TableHead className="font-semibold text-black text-xs">
-                    {t("practitioner", { count: 1 })}
-                  </TableHead>
+                  {props.resourceType ===
+                    SchedulableResourceType.Practitioner && (
+                    <TableHead className="font-semibold text-black text-xs">
+                      {t("practitioner", { count: 1 })}
+                    </TableHead>
+                  )}
+
                   <TableHead className="font-semibold text-black text-xs">
                     {t("current_status")}
                   </TableHead>
@@ -1279,9 +1281,11 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
         </span>
       </TableCell>
       {/* TODO: Replace with relevant information */}
-      <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        {nameFromAppointment(appointment)}
-      </TableCell>
+      {appointment.resource_type === SchedulableResourceType.Practitioner && (
+        <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
+          {formatScheduleResourceName(appointment)}
+        </TableCell>
+      )}
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
         {t(appointment.status)}
       </TableCell>

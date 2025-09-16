@@ -32,6 +32,7 @@ export enum TagResource {
   SERVICE_REQUEST = "service_request",
   CHARGE_ITEM = "charge_item",
   PATIENT = "patient",
+  PRESCRIPTION = "medication_request_prescription",
 }
 
 export interface TagConfigParent {

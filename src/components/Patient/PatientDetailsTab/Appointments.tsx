@@ -41,11 +41,12 @@ export const Appointments = (props: PatientProps) => {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["patient-appointments", patientId, qParams],
+    queryKey: ["patient-appointments", patientId, qParams, facilityId],
     queryFn: query(scheduleApi.appointments.getAppointments, {
       pathParams: { patientId },
       queryParams: {
         limit: resultsPerPage,
+        facility: facilityId,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
       },
     }),

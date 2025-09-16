@@ -7,6 +7,7 @@ import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticRep
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { ObservationRead } from "@/types/emr/observation/observation";
 import { SpecimenRead } from "@/types/emr/specimen/specimen";
+import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { LocationList } from "@/types/location/location";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -111,6 +112,7 @@ export interface ServiceRequestReadSpec extends BaseServiceRequestSpec {
   created_date: string;
   updated_at: string;
   requester?: UserReadMinimal;
+  tags: TagConfig[];
 }
 
 /**

@@ -17,6 +17,7 @@ const productKnowledgeMapper = (
 ): BaseCategoryPickerDefinition => ({
   ...item,
   title: item.name,
+  slug_value: item.slug_config?.slug_value,
 });
 
 interface ProductKnowledgeSelectProps {

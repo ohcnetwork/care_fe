@@ -102,8 +102,6 @@ export default function SupplyDeliveryCreate({
   const [searchInventoryItem, setSearchInventoryItem] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
 
-  // Removed in favor of ProductKnowledgeSelect
-
   const { data: inventoryItems, isLoading: isLoadingInventoryItems } = useQuery(
     {
       queryKey: ["inventoryItems", facilityId, locationId, searchInventoryItem],

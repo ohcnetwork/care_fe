@@ -46,6 +46,7 @@ import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 import { dateQueryString } from "@/Utils/utils";
+import { startOfDay } from "date-fns";
 import dayjs from "dayjs";
 import { Link } from "raviger";
 import QueueFormSheet from "./QueueFormSheet";
@@ -67,7 +68,7 @@ function QueueRow({
   index,
 }: QueueRowProps) {
   const { t } = useTranslation();
-  const link =
+  const queueLink =
     resourceType === SchedulableResourceType.Practitioner
       ? `/facility/${facilityId}/queues/${queue.id}/${resourceType}/${resourceId}/ongoing`
       : `/queues/${queue.id}/ongoing`;
@@ -80,7 +81,7 @@ function QueueRow({
       <TableCell className="border-r border-gray-200 bg-white">
         <div className="flex items-center gap-2 justify-between">
           <div className="flex items-center gap-2">
-            <Link href={link} className="font-medium underline">
+            <Link href={queueLink} className="font-medium underline">
               {queue.name}
             </Link>
             {queue.is_primary && (
@@ -98,7 +99,7 @@ function QueueRow({
             className="h-7 px-3 text-xs border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
             asChild
           >
-            <Link href={link}>{t("open")}</Link>
+            <Link href={queueLink}>{t("open")}</Link>
           </Button>
         </div>
       </TableCell>
@@ -122,14 +123,7 @@ function QueueRow({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="border border-gray-200">
             <DropdownMenuItem asChild>
-              <Link
-                href={
-                  resourceType === SchedulableResourceType.Practitioner
-                    ? `/facility/${facilityId}/queues/${queue.id}/${resourceType}/${resourceId}/ongoing`
-                    : `/queues/${queue.id}/ongoing`
-                }
-                className="flex items-center gap-2"
-              >
+              <Link href={queueLink} className="flex items-center gap-2">
                 <Square className="h-4 w-4" />
                 {t("open_queue_board")}
               </Link>
@@ -337,7 +331,7 @@ export default function QueuesIndex({
               facilityId={facilityId}
               resourceType={resourceType}
               resourceId={effectiveResourceId}
-              initialDate={qParams.date}
+              initialDate={startOfDay(qParams.date)}
               trigger={
                 <Button size="sm" className="font-bold" disabled={isPast}>
                   <Plus className="h-4 w-4 mr-2" />
@@ -366,7 +360,7 @@ export default function QueuesIndex({
                     facilityId={facilityId}
                     resourceType={resourceType}
                     resourceId={effectiveResourceId}
-                    initialDate={qParams.date}
+                    initialDate={startOfDay(qParams.date)}
                     trigger={
                       <Button disabled={isPast}>
                         <Plus className="h-4 w-4 mr-2" />

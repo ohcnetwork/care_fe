@@ -29,10 +29,6 @@ import {
 } from "@/components/ui/sheet";
 
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
-import {
-  TokenQueueCreate,
-  TokenQueueUpdate,
-} from "@/types/tokens/tokenQueue/tokenQueue";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -136,9 +132,6 @@ export default function QueueFormSheet({
         queryKey: ["tokenQueues", facilityId],
       });
     },
-    onError: (error) => {
-      toast.error(error?.message || t("failed_to_create_queue"));
-    },
   });
 
   const { mutate: updateQueue, isPending: isUpdating } = useMutation({
@@ -156,26 +149,19 @@ export default function QueueFormSheet({
         queryKey: ["tokenQueue", facilityId, queueId],
       });
     },
-    onError: (error) => {
-      toast.error(error?.message || t("failed_to_update_queue"));
-    },
   });
 
   const onSubmit = (data: QueueFormData) => {
     if (isEditMode) {
-      const queueData: TokenQueueUpdate = {
-        name: data.name,
-      };
-      updateQueue(queueData);
+      updateQueue({ name: data.name });
     } else {
-      const queueData: TokenQueueCreate = {
+      createQueue({
         name: data.name,
-        date: dateQueryString(data.date), // Use the utility function for consistent date formatting
+        date: dateQueryString(data.date),
         resource_type: resourceType,
         resource_id: resourceId,
         set_is_primary: data.set_is_primary ?? false,
-      };
-      createQueue(queueData);
+      });
     }
   };
 

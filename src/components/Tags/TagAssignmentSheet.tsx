@@ -44,18 +44,27 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
+import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
+import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 // Define the entity types that support tags
-export type TagEntityType = "patient" | "encounter" | "appointment";
+export type TagEntityType =
+  | "patient"
+  | "encounter"
+  | "appointment"
+  | "prescription"
+  | "service_request";
 
 // Mapping from entity types to tag resources
 const ENTITY_TO_RESOURCE_MAP = {
   patient: TagResource.PATIENT,
   encounter: TagResource.ENCOUNTER,
   appointment: TagResource.APPOINTMENT,
+  prescription: TagResource.PRESCRIPTION,
+  service_request: TagResource.SERVICE_REQUEST,
 } as const;
 
 // Configuration for different entity types using their respective API files
@@ -76,12 +85,18 @@ const ENTITY_CONFIG = {
     removeTagsApi: scheduleApis.appointments.removeTags,
     displayName: "appointment",
   },
+  prescription: {
+    setTagsApi: prescriptionApi.setTags,
+    removeTagsApi: prescriptionApi.removeTags,
+    displayName: "prescription",
+  },
+  service_request: {
+    setTagsApi: serviceRequestApi.setTags,
+    removeTagsApi: serviceRequestApi.removeTags,
+    displayName: "service_request",
+  },
   // TODO: Add more entity configurations here
-  // service_request: {
-  //   setTagsApi: serviceRequestApi.setTags,
-  //   removeTagsApi: serviceRequestApi.removeTags,
-  //   displayName: "service_request",
-  // },
+
   // charge_item: {
   //   setTagsApi: chargeItemApi.setTags,
   //   removeTagsApi: chargeItemApi.removeTags,
@@ -100,6 +115,7 @@ interface TagAssignmentSheetProps {
   facilityId?: string;
   currentTags: TagConfig[];
   onUpdate: () => void;
+  patientId?: string;
   trigger?: React.ReactNode;
   canWrite?: boolean;
 }
@@ -355,7 +371,10 @@ export function TagSelectorPopover({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[320px] p-0" align="start">
+        <PopoverContent
+          className="w-[var(--radix-popover-trigger-width)] p-0"
+          align="start"
+        >
           <Command>
             <CommandInput
               className="border-none focus-visible:ring-0"
@@ -387,6 +406,7 @@ export default function TagAssignmentSheet({
   currentTags,
   onUpdate,
   trigger,
+  patientId,
   canWrite = true,
 }: TagAssignmentSheetProps) {
   const { t } = useTranslation();
@@ -401,6 +421,7 @@ export default function TagAssignmentSheet({
       pathParams: {
         external_id: entityId,
         facilityId: facilityId || "",
+        patientId: patientId || "",
       },
     }),
     onSuccess: () => {
@@ -419,6 +440,7 @@ export default function TagAssignmentSheet({
       pathParams: {
         external_id: entityId,
         facilityId: facilityId || "",
+        patientId: patientId || "",
       },
     }),
     onSuccess: () => {

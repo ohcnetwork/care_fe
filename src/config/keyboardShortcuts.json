@@ -244,6 +244,26 @@
       "description": "Print Invoice",
       "when": "always",
       "subContext": "invoice-show"
+    },
+    {
+      "key": "s",
+      "action": "navigate-to-source",
+      "description": "Navigate to Source",
+      "when": "always",
+      "subContext": "invoice-show"
+    },
+    {
+      "key": "d",
+      "action": "dispense-button",
+      "description": "Dispense Medication",
+      "when": "always"
+    },
+    {
+      "key": "b",
+      "action": "billing-action",
+      "description": "Any Billing related action",
+      "when": "always",
+      "subContext": "general"
     }
   ],
   "encounter": [

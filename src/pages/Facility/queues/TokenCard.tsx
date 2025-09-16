@@ -4,10 +4,12 @@ import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
-import { formatName, formatPatientAge } from "@/Utils/utils";
+import { formatPatientAge } from "@/Utils/utils";
 import { FacilityRead } from "@/types/facility/facility";
-import { buildLocationHierarchy } from "@/types/location/utils";
-import { SchedulableResourceType } from "@/types/scheduling/schedule";
+import {
+  formatScheduleResourceName,
+  SchedulableResourceType,
+} from "@/types/scheduling/schedule";
 import { renderTokenNumber, TokenRetrieve } from "@/types/tokens/token/token";
 
 interface Props {
@@ -68,44 +70,27 @@ const TokenCard = ({ id, token, facility }: Props) => {
         </div>
         <div className="mt-4 flex justify-between items-start gap-4">
           <div className="space-y-2 flex-1 min-w-0">
-            {token.resource_type === SchedulableResourceType.Practitioner && (
-              <div>
-                <Label>{t("practitioner", { count: 1 })}:</Label>
-                <p className="text-sm font-semibold break-words">
-                  {formatName(token.resource)}
-                </p>
-              </div>
-            )}
-
-            {token.resource_type === SchedulableResourceType.Location && (
-              <div>
-                <Label>{t("location")}:</Label>
-                <p className="text-sm font-semibold break-words">
-                  {buildLocationHierarchy(token.resource, " > ")}
-                </p>
-                {token.resource.description && (
+            <div>
+              <Label>
+                {t(`schedulable_resource__${token.resource_type}`)}:
+              </Label>
+              <p className="text-sm font-semibold break-words">
+                {formatScheduleResourceName(token)}
+              </p>
+              {token.resource_type === SchedulableResourceType.Location &&
+                token.resource.description && (
                   <p className="text-xs text-gray-600 break-words">
                     {token.resource.description}
                   </p>
                 )}
-              </div>
-            )}
-
-            {token.resource_type ===
-              SchedulableResourceType.HealthcareService && (
-              <div>
-                <Label>{t("service")}:</Label>
-                <p className="text-sm font-semibold break-words">
-                  {token.resource.name}
-                </p>
-                {token.resource.extra_details && (
+              {token.resource_type ===
+                SchedulableResourceType.HealthcareService &&
+                token.resource.extra_details && (
                   <p className="text-xs text-gray-600 break-words">
                     {token.resource.extra_details}
                   </p>
                 )}
-              </div>
-            )}
-
+            </div>
             <div>
               <p className="text-sm font-semibold text-gray-600">
                 {token.queue.date}

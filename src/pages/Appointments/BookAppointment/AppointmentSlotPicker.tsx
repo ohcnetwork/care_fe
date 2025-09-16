@@ -222,8 +222,6 @@ export const TokenSlotButton = ({
     end: slot.end_datetime,
   });
 
-  console.log(selectedSlotId, "dhsjdfh");
-
   return (
     <Button
       key={slot.id}

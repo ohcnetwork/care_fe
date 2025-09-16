@@ -73,7 +73,6 @@ import useAppHistory from "@/hooks/useAppHistory";
 import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
-import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { TokenGenerationSheet } from "@/pages/Appointments/components/TokenGenerationSheet";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
@@ -89,8 +88,7 @@ import {
   AppointmentFinalStatuses,
   AppointmentRead,
   AppointmentUpdateRequest,
-  SchedulableResourceType,
-  nameFromAppointment,
+  formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import mutate from "@/Utils/request/mutate";
@@ -102,6 +100,10 @@ import {
 } from "@/Utils/utils";
 
 import { formatPatientAddress } from "@/components/Patient/utils";
+import {
+  ResourceSelector,
+  ScheduleResourceFormState,
+} from "@/components/Schedule/ResourceSelector";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
@@ -213,8 +215,6 @@ export default function AppointmentDetail(props: Props) {
                 </div>
                 <div className="pt-3 mx-4 flex gap-2 justify-end">
                   <Button variant="outline" asChild>
-                    {/* TODO: Re-verify if this is a correct link */}
-
                     <Link
                       href={`/facility/${facility.id}/queues/${appointment.token?.queue.id}/practitioner/${appointment.resource.id}`}
                     >
@@ -243,6 +243,7 @@ export default function AppointmentDetail(props: Props) {
                 <div className="mt-4">
                   <TokenGenerationSheet
                     facilityId={facility.id}
+                    resourceType={appointment.resource_type}
                     appointmentId={appointment.id}
                     trigger={
                       <Button variant="outline" size="lg" className="px-6">
@@ -626,6 +627,7 @@ const AppointmentDetails = ({
         </CardContent>
       </Card>
       <TokenGenerationSheet
+        resourceType={appointment.resource_type}
         facilityId={facility.id}
         appointmentId={appointment.id}
         trigger={
@@ -647,7 +649,7 @@ const AppointmentDetails = ({
 
       <ChargeItemsSection
         facilityId={facility.id}
-        resourceId={appointment.id}
+        resourceId={appointment.resource.id}
         patientId={appointment.patient.id}
         serviceResourceType={ChargeItemServiceResource.appointment}
         sourceUrl={`/facility/${facility.id}/patient/${appointment.patient.id}/appointments/${appointment.id}`}
@@ -656,12 +658,14 @@ const AppointmentDetails = ({
       />
       <Card>
         <CardHeader>
-          <CardTitle>{t("practitioner_information")}</CardTitle>
+          <CardTitle>{t("resource_information")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-2">
             <div className="text-sm">
-              <p className="font-medium">{nameFromAppointment(appointment)}</p>
+              <p className="font-medium">
+                {formatScheduleResourceName(appointment)}
+              </p>
             </div>
             <Separator />
             <div className="text-sm">
@@ -695,18 +699,15 @@ const AppointmentActions = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
+  const [selectedResource, setSelectedResource] =
+    useState<ScheduleResourceFormState>(appointment);
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const [isRescheduleReasonOpen, setIsRescheduleReasonOpen] = useState(false);
   const [newNote, setNewVisitReason] = useState(appointment.note);
   const [oldNote, setRescheduleReason] = useState(appointment.note);
-  // TODO: We should also allow rescheduling to a location or healthcare service
-  const initalPractitioner =
-    appointment.resource_type === SchedulableResourceType.Practitioner
-      ? appointment.resource
-      : null;
-  const [selectedPractitioner, setSelectedPractitioner] =
-    useState(initalPractitioner);
+
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
+
   const currentStatus = appointment.status;
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -970,19 +971,25 @@ const AppointmentActions = ({
                     value={newNote}
                     onChange={(e) => setNewVisitReason(e.target.value)}
                   />
-                  <div className="my-4">
-                    <Label className="mb-2">{t("select_practitioner")}</Label>
-                    <PractitionerSelector
-                      facilityId={facilityId}
-                      selected={selectedPractitioner}
-                      onSelect={(user) => user && setSelectedPractitioner(user)}
-                    />
+                  <div className="my-4 space-y-4">
+                    <div className="flex flex-col">
+                      <Label className="mb-2 text-sm font-medium text-gray-950">
+                        {t(
+                          `schedulable_resource__${selectedResource.resource_type}`,
+                        )}
+                      </Label>
+                      <ResourceSelector
+                        selectedResource={selectedResource}
+                        facilityId={facilityId}
+                        setSelectedResource={setSelectedResource}
+                      />
+                    </div>
                   </div>
                   <div className="space-y-4">
                     <AppointmentDateSelection
                       facilityId={facilityId}
-                      resourceId={selectedPractitioner?.id}
-                      resourceType={SchedulableResourceType.Practitioner}
+                      resourceId={selectedResource.resource?.id}
+                      resourceType={selectedResource.resource_type}
                       currentAppointment={appointment}
                       setSelectedDate={setSelectedDate}
                       selectedDate={selectedDate}
@@ -990,8 +997,8 @@ const AppointmentActions = ({
                     <AppointmentSlotPicker
                       selectedDate={selectedDate}
                       facilityId={facilityId}
-                      resourceId={selectedPractitioner?.id}
-                      resourceType={SchedulableResourceType.Practitioner}
+                      resourceId={selectedResource.resource?.id}
+                      resourceType={selectedResource.resource_type}
                       selectedSlotId={selectedSlotId}
                       onSlotSelect={setSelectedSlotId}
                       currentAppointment={appointment}

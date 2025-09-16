@@ -390,6 +390,7 @@ export default function DispenseDrawer({
             item: selectedInventory.id,
             quantity: lot.quantity,
             days_supply: 1,
+            fully_dispensed: true,
           };
 
           requests.push({

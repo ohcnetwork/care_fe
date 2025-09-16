@@ -195,6 +195,26 @@ export type AppointmentCancelledStatus =
 
 export type AppointmentStatus = (typeof AppointmentStatuses)[number];
 
+type LocationResource = {
+  resource: LocationList;
+  resource_type: SchedulableResourceType.Location;
+};
+
+type UserResource = {
+  resource: UserReadMinimal;
+  resource_type: SchedulableResourceType.Practitioner;
+};
+
+type HealthcareServiceResource = {
+  resource: HealthcareServiceReadSpec;
+  resource_type: SchedulableResourceType.HealthcareService;
+};
+
+export type ScheduleResource =
+  | UserResource
+  | LocationResource
+  | HealthcareServiceResource;
+
 export type Appointment = {
   id: string;
   token_slot: TokenSlot;
@@ -205,20 +225,7 @@ export type Appointment = {
   booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
   facility: FacilityBareMinimum;
   token: TokenRead | null;
-} & (
-  | {
-      resource_type: SchedulableResourceType.Practitioner;
-      resource: UserReadMinimal;
-    }
-  | {
-      resource_type: SchedulableResourceType.Location;
-      resource: LocationList;
-    }
-  | {
-      resource_type: SchedulableResourceType.HealthcareService;
-      resource: HealthcareServiceReadSpec;
-    }
-);
+} & ScheduleResource;
 
 export type AppointmentRead = Appointment & {
   tags: TagConfig[];
@@ -270,12 +277,12 @@ export const storeUserInLocalStorage = (user: UserReadMinimal) => {
   localStorage.setItem("user", JSON.stringify(user));
 };
 
-export const nameFromAppointment = (appointment: Appointment) => {
+export const formatScheduleResourceName = (appointment: ScheduleResource) => {
   switch (appointment.resource_type) {
     case SchedulableResourceType.Practitioner:
       return formatName(appointment.resource);
     case SchedulableResourceType.Location:
-      return buildLocationHierarchy(appointment.resource, " > ");
+      return buildLocationHierarchy(appointment.resource).join(" > ");
     case SchedulableResourceType.HealthcareService:
       return appointment.resource.name;
     default:

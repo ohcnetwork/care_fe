@@ -19,8 +19,7 @@ import {
   Appointment,
   AppointmentCancelledStatuses,
   AppointmentStatus,
-  nameFromAppointment,
-  SchedulableResourceType,
+  formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
@@ -40,9 +39,8 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { Avatar } from "@/components/Common/Avatar";
-
-import { dateQueryString, formatName } from "@/Utils/utils";
+import { dateQueryString } from "@/Utils/utils";
+import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import { AppointmentNonCancelledStatuses } from "@/types/scheduling/schedule";
 
 interface BookingsListProps {
@@ -163,17 +161,10 @@ const AppointmentCard = ({
         <div className="px-2 py-1 rounded-sm bg-gray-50">
           <div className="flex flex-col gap-2">
             <div className="flex flex-row gap-2">
-              {appointment.resource_type ===
-                SchedulableResourceType.Practitioner && (
-                <Avatar
-                  className="size-8 rounded-full border border-white shadow-sm"
-                  name={formatName(appointment.resource, true)}
-                  imageUrl={appointment.resource.profile_picture_url}
-                />
-              )}
+              <ScheduleResourceIcon resource={appointment} />
               <div className="flex items-center justify-center gap-2">
                 <span className="text-sm font-medium text-gray-950">
-                  {nameFromAppointment(appointment)}
+                  {formatScheduleResourceName(appointment)}
                 </span>
               </div>
             </div>
@@ -217,7 +208,7 @@ const AppointmentTable = ({
             {t("time")}
           </TableHead>
           <TableHead className="w-30 border-y bg-gray-100 text-gray-700 text-sm">
-            {t("practitioner")}
+            {t("resource")}
           </TableHead>
           <TableHead className="w-14 border-y bg-gray-100 hidden xl:table-cell text-gray-700 text-sm">
             {t("status")}
@@ -271,17 +262,10 @@ const AppointmentTable = ({
               <div className="px-2 py-1">
                 <div className="flex flex-col gap-2">
                   <div className="flex flex-row gap-2">
-                    {appointment.resource_type ===
-                      SchedulableResourceType.Practitioner && (
-                      <Avatar
-                        className="size-8 rounded-full border border-white shadow-sm"
-                        name={formatName(appointment.resource)}
-                        imageUrl={appointment.resource.profile_picture_url}
-                      />
-                    )}
+                    <ScheduleResourceIcon resource={appointment} />
                     <div className="flex items-center justify-center gap-2">
                       <span className="text-sm font-medium text-gray-950">
-                        {nameFromAppointment(appointment)}
+                        {formatScheduleResourceName(appointment)}
                       </span>
                     </div>
                   </div>
@@ -328,12 +312,13 @@ const BookingListContent = ({
 }) => {
   const { t } = useTranslation();
   const { data: appointments, isLoading } = useQuery({
-    queryKey: ["patient-appointments", patientId, dateFrom, dateTo],
+    queryKey: ["patient-appointments", patientId, dateFrom, dateTo, facilityId],
     queryFn: query(scheduleApi.appointments.getAppointments, {
       pathParams: { patientId },
       queryParams: {
         limit: 100,
         date_after: dateFrom,
+        facility: facilityId,
         date_before: dateTo,
         status: status?.join(","),
       },

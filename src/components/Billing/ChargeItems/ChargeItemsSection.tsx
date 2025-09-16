@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -84,10 +84,6 @@ export function ChargeItemsSection({
     }),
     enabled: Boolean(patientId),
   });
-
-  useEffect(() => {
-    console.log("account", account, patientId);
-  }, [account, patientId]);
 
   return (
     <>

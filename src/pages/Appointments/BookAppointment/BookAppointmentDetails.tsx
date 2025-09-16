@@ -1,7 +1,7 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -9,12 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
+import { ScheduleResourceFormState } from "@/components/Schedule/ResourceSelector";
 import {
   Appointment,
   SchedulableResourceType,
@@ -30,16 +30,8 @@ export const BookAppointmentDetails = ({
   onSuccess?: () => void;
 }) => {
   const { t } = useTranslation();
-  const [resourceId, setResourceId] = useState<string>();
 
   const { facilityId } = useCurrentFacility();
-  const resourcesQuery = useQuery({
-    queryKey: ["practitioners", facilityId],
-    queryFn: query(scheduleApi.appointments.availableUsers, {
-      pathParams: { facilityId },
-    }),
-  });
-  const resource = resourcesQuery.data?.users.find((r) => r.id === resourceId);
 
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
   const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
@@ -47,6 +39,13 @@ export const BookAppointmentDetails = ({
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
+  const [selectedResource, setSelectedResource] =
+    useState<ScheduleResourceFormState>({
+      resource: null,
+      resource_type: SchedulableResourceType.Practitioner,
+    });
+  const [selectedResourceType, setSelectedResourceType] =
+    useState<SchedulableResourceType>(SchedulableResourceType.Practitioner);
   const { mutateAsync: createAppointment } = useMutation({
     mutationFn: mutate(scheduleApi.slots.createAppointment, {
       pathParams: { facilityId, slotId: selectedSlotId ?? "" },
@@ -64,12 +63,7 @@ export const BookAppointmentDetails = ({
   });
 
   const handleSubmit = async () => {
-    if (!resourceId) {
-      toast.error(t("please_select_practitioner"));
-      return;
-    }
-    if (!selectedSlotId) {
-      toast.error(t("please_select_slot"));
+    if (!selectedResource || !selectedSlotId) {
       return;
     }
 
@@ -80,26 +74,14 @@ export const BookAppointmentDetails = ({
     });
   };
 
-  useEffect(() => {
-    const users = resourcesQuery.data?.users;
-    if (!users) {
-      return;
-    }
-
-    if (users.length === 1) {
-      setResourceId(users[0].id);
-    }
-
-    if (users.length === 0) {
-      toast.error(t("no_practitioners_found"));
-    }
-  }, [resourcesQuery.data?.users]);
-
   const handleIsOpen = (open: boolean) => {
     setIsOpen(open);
     if (!open) {
       setCurrentStep(1);
-      setResourceId(undefined);
+      setSelectedResource({
+        resource: null,
+        resource_type: SchedulableResourceType.Practitioner,
+      });
       setSelectedSlotId(undefined);
     }
   };
@@ -109,25 +91,27 @@ export const BookAppointmentDetails = ({
       <div className="flex flex-row gap-4 justify-center">
         <AppointmentFormSection
           facilityId={facilityId}
-          resource={resource}
           selectedTags={selectedTags}
           setSelectedTags={setSelectedTags}
           reason={reason}
           setReason={setReason}
-          setResourceId={setResourceId}
+          selectedResource={selectedResource}
+          setSelectedResource={setSelectedResource}
+          setSelectedResourceType={setSelectedResourceType}
+          selectedResourceType={selectedResourceType}
         />
         <div className="hidden sm:flex sm:flex-col lg:flex-row gap-6 bg-white shadow rounded-lg p-4 w-full sm:max-h-full">
           <AppointmentDateSelection
             facilityId={facilityId}
-            resourceId={resourceId}
-            resourceType={SchedulableResourceType.Practitioner}
+            resourceId={selectedResource.resource?.id}
+            resourceType={selectedResourceType}
             setSelectedDate={setSelectedDate}
             selectedDate={selectedDate}
           />
           <AppointmentSlotPicker
             facilityId={facilityId}
-            resourceId={resourceId}
-            resourceType={SchedulableResourceType.Practitioner}
+            resourceId={selectedResource.resource?.id}
+            resourceType={selectedResourceType}
             selectedSlotId={selectedSlotId}
             onSlotSelect={setSelectedSlotId}
             selectedDate={selectedDate}
@@ -162,7 +146,7 @@ export const BookAppointmentDetails = ({
         <DrawerTrigger asChild>
           <Button
             className="sm:hidden w-full"
-            disabled={!resourceId}
+            disabled={!selectedResource.resource?.id}
             onClick={() => {
               setIsOpen(true);
               setCurrentStep(1);
@@ -177,8 +161,8 @@ export const BookAppointmentDetails = ({
             <>
               <AppointmentDateSelection
                 facilityId={facilityId}
-                resourceId={resourceId ?? ""}
-                resourceType={SchedulableResourceType.Practitioner}
+                resourceId={selectedResource.resource?.id}
+                resourceType={selectedResourceType}
                 setSelectedDate={setSelectedDate}
                 selectedDate={selectedDate}
               />
@@ -196,8 +180,8 @@ export const BookAppointmentDetails = ({
             <>
               <AppointmentSlotPicker
                 facilityId={facilityId}
-                resourceId={resourceId}
-                resourceType={SchedulableResourceType.Practitioner}
+                resourceId={selectedResource.resource?.id}
+                resourceType={selectedResourceType}
                 selectedSlotId={selectedSlotId}
                 onSlotSelect={setSelectedSlotId}
                 selectedDate={selectedDate}

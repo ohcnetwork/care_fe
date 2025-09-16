@@ -1,3 +1,5 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { Hash } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -13,6 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import {
   SERVICE_REQUEST_PRIORITY_COLORS,
@@ -34,6 +38,7 @@ export default function ServiceRequestTable({
   showPatientInfo = true,
 }: ServiceRequestTableProps) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   const handleViewDetails = (request: ServiceRequestReadSpec) => {
     const baseUrl = locationId
@@ -51,6 +56,7 @@ export default function ServiceRequestTable({
             <TableHead>{t("service_type")}</TableHead>
             <TableHead>{t("status")}</TableHead>
             <TableHead>{t("priority")}</TableHead>
+            <TableHead>{t("tags", { count: 2 })}</TableHead>
             <TableHead>{t("actions")}</TableHead>
           </TableRow>
         </TableHeader>
@@ -88,6 +94,63 @@ export default function ServiceRequestTable({
                 >
                   {t(request.priority)}
                 </Badge>
+              </TableCell>
+              <TableCell>
+                <div className="flex flex-wrap gap-1">
+                  {request.tags && request.tags.length > 0 && (
+                    <>
+                      {request.tags.map((tag) => (
+                        <Badge
+                          key={tag.id}
+                          variant="secondary"
+                          className="text-xs"
+                        >
+                          {tag.display}
+                        </Badge>
+                      ))}
+                      <TagAssignmentSheet
+                        entityType="service_request"
+                        entityId={request.id}
+                        facilityId={facilityId}
+                        currentTags={request.tags}
+                        onUpdate={() => {
+                          queryClient.invalidateQueries({
+                            queryKey: [
+                              "serviceRequests",
+                              facilityId,
+                              locationId,
+                            ],
+                          });
+                        }}
+                        patientId={request.encounter.patient.id}
+                        trigger={
+                          <Button variant="outline" size="xs">
+                            <Hash className="size-3" /> {t("tags")}
+                          </Button>
+                        }
+                      />
+                    </>
+                  )}
+                  {(!request.tags || request.tags.length === 0) && (
+                    <TagAssignmentSheet
+                      entityType="service_request"
+                      entityId={request.id}
+                      facilityId={facilityId}
+                      currentTags={[]}
+                      onUpdate={() => {
+                        queryClient.invalidateQueries({
+                          queryKey: ["serviceRequests", facilityId, locationId],
+                        });
+                      }}
+                      patientId={request.encounter.patient.id}
+                      trigger={
+                        <Button variant="outline" size="xs">
+                          <Hash className="size-3" /> {t("add_tags")}
+                        </Button>
+                      }
+                    />
+                  )}
+                </div>
               </TableCell>
               <TableCell className="text-left">
                 <Button
