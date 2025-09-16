@@ -9,7 +9,7 @@ export default {
     TRes: Type<QuestionnaireResponse>(),
   },
   list: {
-    path: "/api/v1/questionnaire_response/",
+    path: "/api/v1/patient/{patientId}/questionnaire_response/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<QuestionnaireResponse>>(),
   },

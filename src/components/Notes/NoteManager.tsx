@@ -60,7 +60,6 @@ import { formatDateTime, isTouchDevice } from "@/Utils/utils";
 import { NoteRead } from "@/types/notes/messages";
 import { ThreadRead, threadTemplates } from "@/types/notes/thread";
 import threadApi from "@/types/notes/threadApi";
-import { t } from "i18next";
 
 const MESSAGES_LIMIT = 20;
 
@@ -281,11 +280,13 @@ const MobileNav = ({
   onOpenThreads,
   onNewThread,
   canWrite,
+  t,
 }: {
   threadsCount: number;
   onOpenThreads: () => void;
   onNewThread: () => void;
   canWrite: boolean;
+  t: (key: string) => string;
 }) => (
   <div className="lg:hidden fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-2 flex items-center justify-around z-50 divide-x">
     <Button
@@ -295,7 +296,9 @@ const MobileNav = ({
       className="flex-1 flex flex-col items-center gap-1 h-auto py-2 rounded-none"
     >
       <MessageCircle className="size-5" />
-      <span className="text-xs">Threads ({threadsCount})</span>
+      <span className="text-xs">
+        {t("threads")} ({threadsCount})
+      </span>
     </Button>
     {canWrite && (
       <Button
@@ -767,6 +770,7 @@ export function NoteManager({
         onOpenThreads={() => setIsThreadsExpanded(true)}
         onNewThread={() => setShowNewThreadDialog(true)}
         canWrite={canWrite}
+        t={t}
       />
 
       <NewThreadDialog
