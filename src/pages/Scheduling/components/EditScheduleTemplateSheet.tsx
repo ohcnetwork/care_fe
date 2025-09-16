@@ -4,8 +4,7 @@ import dayjs from "dayjs";
 import { Loader2, SaveIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { Trans } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -29,6 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -181,10 +181,7 @@ const ScheduleTemplateEditor = ({
 
   const { mutate: updateTemplate, isPending: isUpdating } = useMutation({
     mutationFn: mutate(scheduleApis.templates.update, {
-      pathParams: {
-        facility_id: facilityId,
-        id: template.id,
-      },
+      pathParams: { facilityId, id: template.id },
     }),
     onSuccess: () => {
       toast.success("Schedule template updated successfully");
@@ -196,10 +193,7 @@ const ScheduleTemplateEditor = ({
 
   const { mutate: deleteTemplate, isPending: isDeleting } = useMutation({
     mutationFn: mutate(scheduleApis.templates.delete, {
-      pathParams: {
-        facility_id: facilityId,
-        id: template.id,
-      },
+      pathParams: { facilityId, id: template.id },
     }),
     onSuccess: () => {
       toast.success(t("template_deleted"));
@@ -359,11 +353,7 @@ const AvailabilityEditor = ({
 
   const { mutate: deleteAvailability, isPending: isDeleting } = useMutation({
     mutationFn: mutate(scheduleApis.templates.availabilities.delete, {
-      pathParams: {
-        facility_id: facilityId,
-        schedule_id: scheduleId,
-        id: availability.id,
-      },
+      pathParams: { facilityId, scheduleId, id: availability.id },
     }),
     onSuccess: () => {
       toast.success(t("schedule_availability_deleted_successfully"));
@@ -413,9 +403,9 @@ const AvailabilityEditor = ({
         <div className="flex items-center gap-3">
           <CareIcon icon="l-clock" className="text-lg text-blue-600" />
           <span className="font-semibold">{availability.name}</span>
-          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+          <Badge variant="blue" className="rounded-full text-xs">
             {t(`SCHEDULE_AVAILABILITY_TYPE__${availability.slot_type}`)}
-          </span>
+          </Badge>
         </div>
 
         <AlertDialog
@@ -569,15 +559,15 @@ const NewAvailabilityCard = ({
     .object({
       name: z.string().min(1, t("field_required")),
       slot_type: z.enum(["appointment", "open", "closed"]),
-      start_time: z
-        .string()
-        .min(1, t("field_required")) as unknown as z.ZodType<Time>,
-      end_time: z
-        .string()
-        .min(1, t("field_required")) as unknown as z.ZodType<Time>,
+      start_time: z.string().min(1, t("field_required")) as z.ZodType<
+        Time | undefined
+      >,
+      end_time: z.string().min(1, t("field_required")) as z.ZodType<
+        Time | undefined
+      >,
       slot_size_in_minutes: z.number().nullable(),
       tokens_per_slot: z.number().nullable(),
-      reason: z.string(),
+      reason: z.string().trim(),
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek>)
         .min(1, t("schedule_weekdays_min_error")),
@@ -616,10 +606,7 @@ const NewAvailabilityCard = ({
 
   const { mutate: createAvailability, isPending } = useMutation({
     mutationFn: mutate(scheduleApis.templates.availabilities.create, {
-      pathParams: {
-        facility_id: facilityId,
-        schedule_id: scheduleId,
-      },
+      pathParams: { facilityId, scheduleId },
     }),
     onSuccess: () => {
       toast.success(t("schedule_availability_created_successfully"));
@@ -704,11 +691,11 @@ const NewAvailabilityCard = ({
   const updateSlotDuration = () => {
     const isAutoFill = form.watch("is_auto_fill");
     if (isAutoFill) {
-      const duration = calculateSlotDuration(
-        form.watch("start_time"),
-        form.watch("end_time"),
-        form.watch("num_of_slots"),
-      );
+      const start = form.watch("start_time");
+      const end = form.watch("end_time");
+      const numOfSlots = form.watch("num_of_slots");
+      if (!start || !end) return;
+      const duration = calculateSlotDuration(start, end, numOfSlots);
       form.setValue("slot_size_in_minutes", duration);
     }
   };

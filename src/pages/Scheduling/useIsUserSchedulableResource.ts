@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import query from "@/Utils/request/query";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export const useIsUserSchedulableResource = (
   facilityId: string,
@@ -11,9 +11,9 @@ export const useIsUserSchedulableResource = (
   return useQuery({
     queryKey: ["is_schedulable_resource", facilityId, userId],
     queryFn: query(scheduleApis.appointments.availableUsers, {
-      pathParams: { facility_id: facilityId },
+      pathParams: { facilityId },
     }),
-    select: (data: { users: UserBase[] }) =>
+    select: (data: { users: UserReadMinimal[] }) =>
       data.users.some(({ id }) => id === userId),
   });
 };

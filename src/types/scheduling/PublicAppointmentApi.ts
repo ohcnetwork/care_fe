@@ -1,7 +1,7 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import {
   Appointment,
-  AppointmentCreateRequest,
+  AppointmentCreatePublicRequest,
   TokenSlot,
 } from "@/types/scheduling/schedule";
 
@@ -21,7 +21,7 @@ export default {
     path: "/api/v1/otp/slots/{id}/create_appointment/",
     method: HttpMethod.POST,
     TRes: Type<Appointment>(),
-    TBody: Type<AppointmentCreateRequest>(),
+    TBody: Type<AppointmentCreatePublicRequest>(),
   },
   cancelAppointment: {
     path: "/api/v1/otp/slots/cancel_appointment/",

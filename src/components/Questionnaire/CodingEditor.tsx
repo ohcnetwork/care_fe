@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 
 import mutate from "@/Utils/request/mutate";
-import { Code } from "@/types/questionnaire/code";
+import { Code } from "@/types/base/code/code";
 import {
   TERMINOLOGY_SYSTEMS,
   ValuesetLookupResponse,

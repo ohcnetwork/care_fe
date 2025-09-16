@@ -53,7 +53,7 @@ export function TimeQuestion({
           ? (questionnaireResponse.values[index].value as string).slice(0, 5)
           : ""
       }
-      className={cn(classes)}
+      className={cn(classes, "h-9 text-sm sm:text-base")}
       onChange={handleTimeChange}
       disabled={disabled}
     />

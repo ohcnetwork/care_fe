@@ -14,10 +14,11 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { Code } from "@/types/base/code/code";
 import { ObservationWithUser } from "@/types/emr/observation";
-import { Code } from "@/types/questionnaire/code";
+import patientApi from "@/types/emr/patient/patientApi";
+import { useTranslation } from "react-i18next";
 
 interface PaginatedResponse<T> {
   count: number;
@@ -50,13 +51,19 @@ export const ObservationHistoryTable = ({
   codes,
 }: ObservationHistoryTableProps) => {
   const { ref, inView } = useInView();
+  const { t } = useTranslation();
 
   const { data, isLoading, hasNextPage, fetchNextPage } = useInfiniteQuery<
     PaginatedResponse<ObservationWithUser>
   >({
-    queryKey: ["observations", patientId, codes.map((c) => c.code).join(",")],
+    queryKey: [
+      "infinite-observations",
+      patientId,
+      encounterId,
+      codes.map((c) => c.code),
+    ],
     queryFn: async ({ pageParam = 0 }) => {
-      const response = await query(routes.listObservations, {
+      const response = await query(patientApi.listObservations, {
         pathParams: { patientId },
         queryParams: {
           encounter: encounterId,
@@ -93,7 +100,7 @@ export const ObservationHistoryTable = ({
   if (!data?.pages[0]?.results.length) {
     return (
       <div className="flex h-[200px] items-center justify-center text-gray-500">
-        No data available
+        {t("no_data_available")}
       </div>
     );
   }
@@ -103,11 +110,11 @@ export const ObservationHistoryTable = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Time</TableHead>
-            <TableHead>Code</TableHead>
-            <TableHead>Value</TableHead>
-            <TableHead>Entered By</TableHead>
-            <TableHead>Notes</TableHead>
+            <TableHead>{t("time")}</TableHead>
+            <TableHead>{t("code")}</TableHead>
+            <TableHead>{t("value")}</TableHead>
+            <TableHead>{t("entered_by")}</TableHead>
+            <TableHead>{t("notes")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

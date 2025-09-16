@@ -1,9 +1,23 @@
 import { t } from "i18next";
 
-import { PaginatedResponse } from "@/Utils/request/types";
-import { UserBase } from "@/types/user/user";
+import { RoleRead } from "@/types/emr/role/role";
+import { UserReadMinimal } from "@/types/user/user";
 
-type org_type = "team" | "govt" | "role" | "other";
+type org_type =
+  | "team"
+  | "govt"
+  | "role"
+  | "product_supplier"
+  | "other"
+  | "product_supplier";
+
+export enum OrgType {
+  TEAM = "team",
+  GOVT = "govt",
+  ROLE = "role",
+  PRODUCT_SUPPLIER = "product_supplier",
+  OTHER = "other",
+}
 
 export type Metadata = {
   govt_org_children_type?: string;
@@ -20,6 +34,12 @@ export interface OrganizationParent {
   parent?: OrganizationParent;
 }
 
+export interface OrganizationUpdate {
+  name?: string;
+  description?: string;
+  org_type?: OrgType;
+  parent_id?: string;
+}
 export interface Organization {
   id: string;
   name: string;
@@ -35,26 +55,18 @@ export interface Organization {
   permissions: string[];
 }
 
-export interface OrganizationUserRole {
-  id: string;
-  user: UserBase;
-  role: {
-    id: string;
-    name: string;
-  };
-}
-
-export interface Role {
-  id: string;
+export interface OrganizationCreate {
   name: string;
   description?: string;
-  created_at: string;
-  updated_at: string;
+  org_type: OrgType;
+  parent_id?: string;
 }
 
-export type OrganizationUserRoleResponse =
-  PaginatedResponse<OrganizationUserRole>;
-export type RoleResponse = PaginatedResponse<Role>;
+export interface OrganizationUserRole {
+  id: string;
+  user: UserReadMinimal;
+  role: RoleRead;
+}
 
 export const getOrgLabel = (org_type: org_type, metadata: Metadata | null) => {
   if (org_type === "govt") {

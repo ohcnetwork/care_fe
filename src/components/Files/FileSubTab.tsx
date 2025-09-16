@@ -33,29 +33,30 @@ import Loading from "@/components/Common/Loading";
 import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
 import AudioPlayerDialog from "@/components/Files/AudioPlayerDialog";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
-import { FileUploadModel } from "@/components/Patient/models";
 
 import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
 import useFilters from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
-import {
-  BACKEND_ALLOWED_EXTENSIONS,
-  FILE_EXTENSIONS,
-} from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import { Encounter } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/patient";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
+import { PatientRead } from "@/types/emr/patient/patient";
+import {
+  BACKEND_ALLOWED_EXTENSIONS,
+  FILE_EXTENSIONS,
+  FileReadMinimal,
+  FileType,
+} from "@/types/files/file";
+import fileApi from "@/types/files/fileApi";
 
 interface FilesTabProps {
-  type: "encounter" | "patient";
-  encounter?: Encounter;
-  patient?: Patient;
+  type: FileType.ENCOUNTER | FileType.PATIENT;
+  encounter?: EncounterRead;
+  patient?: PatientRead;
   associatingId: string;
   canEdit: boolean | undefined;
 }
@@ -70,13 +71,14 @@ export const FilesPage = ({
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [openArchivedFileDialog, setOpenArchivedFileDialog] = useState(false);
   const [selectedArchivedFile, setSelectedArchivedFile] =
-    useState<FileUploadModel | null>(null);
+    useState<FileReadMinimal | null>(null);
   const [selectedAudioFile, setSelectedAudioFile] =
-    useState<FileUploadModel | null>(null);
+    useState<FileReadMinimal | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
   const { hasPermission } = usePermissions();
   const { qParams, updateQuery, Pagination } = useFilters({
     limit: 15,
+    disableCache: true,
   });
   // const queryClient = useQueryClient();
   const { canViewClinicalData } = getPermissions(
@@ -98,7 +100,7 @@ export const FilesPage = ({
     refetch,
   } = useQuery({
     queryKey: ["files", type, associatingId, qParams],
-    queryFn: query.debounced(routes.viewUpload, {
+    queryFn: query.debounced(fileApi.list, {
       queryParams: {
         file_type: type,
         associating_id: associatingId,
@@ -161,7 +163,7 @@ export const FilesPage = ({
     }
   }, [openUploadDialog]);
 
-  const getFileType = (file: FileUploadModel) => {
+  const getFileType = (file: FileReadMinimal) => {
     return fileManager.getFileType(file);
   };
 
@@ -174,7 +176,7 @@ export const FilesPage = ({
     DOCUMENT: "l-file-medical",
   };
 
-  const getArchivedMessage = (file: FileUploadModel) => {
+  const getArchivedMessage = (file: FileReadMinimal) => {
     return (
       <div className="flex flex-row gap-2 justify-end">
         <span className="text-gray-200/90 self-center uppercase font-bold">
@@ -196,7 +198,7 @@ export const FilesPage = ({
     );
   };
 
-  const DetailButtons = ({ file }: { file: FileUploadModel }) => {
+  const DetailButtons = ({ file }: { file: FileReadMinimal }) => {
     const filetype = getFileType(file);
     return (
       <>
@@ -366,39 +368,34 @@ export const FilesPage = ({
             onSelect={(e) => {
               e.preventDefault();
             }}
+            aria-label={t("choose_file")}
           >
             <Label
               htmlFor={`file_upload_${type}`}
-              className="py-1 flex flex-row items-center cursor-pointer text-primary-900  w-full"
               data-cy="choose-file-option"
+              className="flex items-center w-full text-primary-900 hover:text-black py-1 font-medium"
             >
-              <CareIcon icon="l-file-upload-alt" className="mr-1" />
+              <CareIcon icon="l-file-upload-alt" />
               <span>{t("choose_file")}</span>
             </Label>
             {fileUpload.Input({ className: "hidden" })}
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => fileUpload.handleCameraCapture()}
-              className="flex flex-row justify-stretch items-center w-full text-primary-900"
-            >
-              <CareIcon icon="l-camera" />
-              <span>{t("open_camera")}</span>
-            </Button>
+          <DropdownMenuItem
+            onSelect={() => fileUpload.handleCameraCapture()}
+            className="flex items-center text-primary-900 font-medium"
+            aria-label={t("open_camera")}
+          >
+            <CareIcon icon="l-camera" />
+            <span>{t("open_camera")}</span>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => fileUpload.handleAudioCapture()}
-              className="flex flex-row justify-stretch items-center w-full text-primary-900"
-              data-cy="record-audio-button"
-            >
-              <CareIcon icon="l-microphone" />
-              <span>{t("record")}</span>
-            </Button>
+          <DropdownMenuItem
+            onSelect={() => fileUpload.handleAudioCapture()}
+            className="flex items-center text-primary-900 font-medium"
+            data-cy="record-audio-button"
+            aria-label={t("record")}
+          >
+            <CareIcon icon="l-microphone" />
+            <span>{t("record")}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

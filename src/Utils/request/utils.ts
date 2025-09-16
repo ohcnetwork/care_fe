@@ -1,5 +1,3 @@
-import { Dispatch, SetStateAction } from "react";
-
 import { LocalStorageKeys } from "@/common/constants";
 
 import { QueryParams } from "@/Utils/request/types";
@@ -17,7 +15,10 @@ export function makeUrl(
   }
 
   if (query) {
-    path += `?${makeQueryParams(query)}`;
+    const queryString = makeQueryParams(query);
+    if (queryString) {
+      path += `?${queryString}`;
+    }
   }
 
   return path;
@@ -40,10 +41,17 @@ const makeQueryParams = (query: QueryParams) => {
   return qParams.toString();
 };
 
-export function makeHeaders(noAuth: boolean, additionalHeaders?: HeadersInit) {
+export function makeHeaders(
+  noAuth: boolean,
+  additionalHeaders?: HeadersInit,
+  isFormData?: boolean,
+) {
   const headers = new Headers(additionalHeaders);
 
-  headers.set("Content-Type", "application/json");
+  // Don't set Content-Type for FormData - let browser set it with boundary
+  if (!isFormData) {
+    headers.set("Content-Type", "application/json");
+  }
   headers.append("Accept", "application/json");
 
   const authorizationHeader = getAuthorizationHeader();
@@ -84,16 +92,6 @@ export async function getResponseBody<TData>(res: Response): Promise<TData> {
     return await res.json();
   } catch {
     return (await res.text()) as TData;
-  }
-}
-
-export function handleUploadPercentage(
-  event: ProgressEvent,
-  setUploadPercent: Dispatch<SetStateAction<number>>,
-) {
-  if (event.lengthComputable) {
-    const percentComplete = Math.round((event.loaded / event.total) * 100);
-    setUploadPercent(percentComplete);
   }
 }
 

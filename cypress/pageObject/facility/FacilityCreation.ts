@@ -36,7 +36,7 @@ export class FacilityCreation {
   }
 
   selectFacilityType(facilityType: string) {
-    cy.clickAndSelectOption('[data-cy="facility-type"]', facilityType);
+    cy.typeAndSelectOptionV2("Facility Type", facilityType);
     return this;
   }
 
@@ -127,7 +127,7 @@ export class FacilityCreation {
         label: "Phone Number",
         message: "This field is required",
       },
-      { label: "Pincode", message: "Invalid Pincode" },
+      { label: "Pincode", message: "Required" },
     ]);
     return this;
   }

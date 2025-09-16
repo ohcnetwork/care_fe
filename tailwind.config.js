@@ -20,9 +20,6 @@ module.exports = {
         sans: ["Figtree", "sans-serif"],
       },
       colors: {
-        green: "colors.emerald",
-        yellow: "colors.amber",
-        purple: "colors.violet",
         primary: {
           100: "#def7ec",
           200: "#bcf0da",
@@ -36,10 +33,6 @@ module.exports = {
           DEFAULT: "#0d9f6e",
         },
         secondary: secondary,
-        danger: "colors.red",
-        warning: "colors.amber",
-        alert: "colors.violet",
-        gray: "colors.gray",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -78,9 +71,19 @@ module.exports = {
           "0%,70%,100%": { opacity: "1" },
           "20%,50%": { opacity: "0" },
         },
+        "collapsible-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-collapsible-content-height)" },
+        },
+        "collapsible-up": {
+          from: { height: "var(--radix-collapsible-content-height)" },
+          to: { height: "0" },
+        },
       },
       animation: {
         "caret-blink": "caret-blink 1.25s ease-out infinite",
+        "collapsible-down": "collapsible-down 0.2s ease-out",
+        "collapsible-up": "collapsible-up 0.2s ease-out",
       },
     },
   },

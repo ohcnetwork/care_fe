@@ -25,8 +25,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
-import { Code } from "@/types/questionnaire/code";
+import { Code } from "@/types/base/code/code";
+import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 
+import MedicationValueSetSelect from "./MedicationValueSetSelect";
 import ValueSetSelect from "./ValueSetSelect";
 
 interface EntitySelectionSheetProps {
@@ -67,6 +69,11 @@ interface EntitySelectionSheetProps {
    */
   onEntitySelected: (code: Code) => void;
   /**
+   * Callback when a product entity is selected from the ValueSet
+   * @param product The selected product
+   */
+  onProductEntitySelected?: (product: ProductKnowledgeBase) => void;
+  /**
    * Content to display when an entity is selected (the form for entity details)
    * This is provided as children for better React composition
    */
@@ -80,6 +87,11 @@ interface EntitySelectionSheetProps {
    * This is called when the user clicks the "Add" button
    */
   onConfirm: () => void;
+  /**
+   * If `true`, renders the `MedicationValueSetSelect`.
+   * Defaults to `false`.
+   */
+  enableProduct?: boolean;
 }
 
 export function EntitySelectionSheet({
@@ -90,9 +102,11 @@ export function EntitySelectionSheet({
   searchPostFix = "",
   disabled = false,
   onEntitySelected,
+  onProductEntitySelected,
   onConfirm,
   children,
   placeholder,
+  enableProduct = false,
 }: EntitySelectionSheetProps) {
   const { t } = useTranslation();
   const [selectedEntity, setSelectedEntity] = useState<Code | null>(null);
@@ -100,6 +114,16 @@ export function EntitySelectionSheet({
   const handleSelect = (code: Code) => {
     setSelectedEntity(code);
     onEntitySelected(code);
+  };
+
+  const handleProductSelect = (product: ProductKnowledgeBase) => {
+    const code: Code = {
+      display: product.name,
+      code: String(product.id),
+      system: "product",
+    };
+    setSelectedEntity(code);
+    onProductEntitySelected?.(product);
   };
 
   const handleBack = () => {
@@ -115,14 +139,25 @@ export function EntitySelectionSheet({
 
   return (
     <>
-      <ValueSetSelect
-        system={system}
-        placeholder={placeholder}
-        onSelect={handleSelect}
-        disabled={disabled}
-        searchPostFix={searchPostFix}
-        title={t(`select_${entityType}`)}
-      />
+      {enableProduct ? (
+        <MedicationValueSetSelect
+          onSelect={handleSelect}
+          onProductSelect={handleProductSelect}
+          disabled={disabled}
+          placeholder={placeholder || t(`select_${entityType}`)}
+          title={t(`select_${entityType}`)}
+          value={selectedEntity || undefined}
+        />
+      ) : (
+        <ValueSetSelect
+          system={system}
+          placeholder={placeholder}
+          onSelect={handleSelect}
+          disabled={disabled}
+          searchPostFix={searchPostFix}
+          title={t(`select_${entityType}`)}
+        />
+      )}
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
           className="px-0 pt-2 pb-0 rounded-t-3xl sm:max-w-md sm:mx-auto [&>button:first-child]:hidden"
@@ -153,6 +188,14 @@ export function EntitySelectionSheet({
               </SheetHeader>
               <div className="flex-1 overflow-y-auto pb-safe">{children}</div>
             </div>
+          ) : enableProduct ? (
+            <MedicationValueSetSelect
+              onSelect={handleSelect}
+              onProductSelect={handleProductSelect}
+              disabled={disabled}
+              hideTrigger={true}
+              title={t(`select_${entityType}`)}
+            />
           ) : (
             <ValueSetSelect
               system={system}

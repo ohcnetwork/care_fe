@@ -18,11 +18,11 @@ interface ImportMetaEnv {
   readonly REACT_CUSTOM_LOGO?: string;
   readonly REACT_CUSTOM_LOGO_ALT?: string;
   readonly REACT_CUSTOM_DESCRIPTION?: string;
-  readonly REACT_GMAPS_API_KEY?: string;
   readonly REACT_RECAPTCHA_SITE_KEY?: string;
   readonly REACT_JWT_TOKEN_REFRESH_INTERVAL?: string;
   readonly REACT_MIN_ENCOUNTER_DATE?: string;
   readonly REACT_DEFAULT_ENCOUNTER_TYPE?: string;
+  readonly REACT_ALLOWED_ENCOUNTER_CLASSES?: string;
   readonly REACT_ALLOWED_LOCALES?: string;
   readonly REACT_ENABLED_APPS?: string;
   readonly REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB?: string;

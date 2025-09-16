@@ -12,6 +12,7 @@ import { tzAwareDateTime } from "@/lib/validators";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import RadioInput from "@/components/ui/RadioInput";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -41,11 +42,11 @@ import {
 } from "@/components/ui/sheet";
 
 import { DateTimeInput } from "@/components/Common/DateTimeInput";
-import RadioInput from "@/components/Questionnaire/RadioInput";
 
 import useFileUpload from "@/hooks/useFileUpload";
 
 import mutate from "@/Utils/request/mutate";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   CONSENT_CATEGORIES,
   CONSENT_DECISIONS,
@@ -54,6 +55,7 @@ import {
   CreateConsentRequest,
 } from "@/types/consent/consent";
 import consentApi from "@/types/consent/consentApi";
+import { FileCategory, FileType } from "@/types/files/file";
 
 interface FileEntry {
   file: File;
@@ -71,7 +73,7 @@ const consentFormSchema = (isEdit: boolean) =>
         start: tzAwareDateTime.optional(),
         end: tzAwareDateTime.optional(),
       }),
-      note: z.string().optional(),
+      note: z.string().trim().optional(),
       fileEntries: z
         .array(
           z.object({
@@ -110,26 +112,27 @@ const consentFormSchema = (isEdit: boolean) =>
 type ConsentFormValues = z.infer<ReturnType<typeof consentFormSchema>>;
 
 interface ConsentFormSheetProps {
-  patientId: string;
-  encounterId: string;
   existingConsent?: ConsentModel;
 }
 
 export default function ConsentFormSheet({
-  patientId,
-  encounterId,
   existingConsent,
 }: ConsentFormSheetProps) {
   const { t } = useTranslation();
   const isEdit = !!existingConsent;
+  const {
+    selectedEncounterId: encounterId,
+    canWriteSelectedEncounter,
+    patientId,
+  } = useEncounter();
 
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fileUpload = useFileUpload({
-    type: "consent",
-    category: "consent_attachment",
+    type: FileType.CONSENT,
+    category: FileCategory.CONSENT_ATTACHMENT,
     multiple: true,
     allowedExtensions: ["jpg", "jpeg", "png", "pdf"],
     allowNameFallback: false,
@@ -138,7 +141,6 @@ export default function ConsentFormSheet({
 
   const form = useForm({
     resolver: zodResolver(consentFormSchema(isEdit)),
-    mode: "onChange",
     defaultValues: {
       decision: "permit",
       category: "treatment",
@@ -159,7 +161,8 @@ export default function ConsentFormSheet({
       name: fileUpload.fileNames[index] || "",
     }));
     form.setValue("fileEntries", fileEntries, {
-      shouldValidate: fileEntries.length > 0,
+      shouldValidate: false,
+      shouldDirty: true,
     });
   }, [fileUpload.files, fileUpload.fileNames, form]);
 
@@ -282,6 +285,10 @@ export default function ConsentFormSheet({
     }
   };
 
+  if (!canWriteSelectedEncounter) {
+    return null;
+  }
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
@@ -302,9 +309,7 @@ export default function ConsentFormSheet({
       <SheetContent className="overflow-y-auto sm:max-w-lg">
         <SheetHeader className="mb-6">
           <SheetTitle>
-            {isEdit
-              ? t("edit") + " " + t("consent")
-              : t("add") + " " + t("consent")}
+            {isEdit ? t("edit_consent") : t("add_consent")}
           </SheetTitle>
           <SheetDescription>
             {isEdit

@@ -1,8 +1,8 @@
-import { UserBareMinimum } from "@/components/Users/models";
-
-import { DosageQuantity } from "@/types/emr/medicationRequest";
-import { Code } from "@/types/questionnaire/code";
+import { Code } from "@/types/base/code/code";
+import { DosageQuantity } from "@/types/emr/medicationRequest/medicationRequest";
+import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { Quantity } from "@/types/questionnaire/quantity";
+import { UserReadMinimal } from "@/types/user/user";
 
 export const MEDICATION_ADMINISTRATION_STATUS = [
   "completed",
@@ -23,7 +23,8 @@ export interface MedicationAdministration {
   status_reason?: Code;
   category?: "inpatient" | "outpatient" | "community";
 
-  medication: Code;
+  medication?: Code;
+  administered_product?: string;
 
   authored_on?: string; // datetime
   occurrence_period_start: string; // datetime
@@ -48,8 +49,8 @@ export interface MedicationAdministration {
 
   note?: string;
 
-  created_by?: UserBareMinimum;
-  updated_by?: UserBareMinimum;
+  created_by?: UserReadMinimal;
+  updated_by?: UserReadMinimal;
 }
 
 export interface MedicationAdministrationRequest {
@@ -58,7 +59,8 @@ export interface MedicationAdministrationRequest {
   request: string;
   status: MedicationAdministrationStatus;
   status_reason?: Code;
-  medication: Code;
+  medication?: Code;
+  administered_product?: string;
   occurrence_period_start: string;
   occurrence_period_end?: string;
   recorded?: string;
@@ -77,7 +79,8 @@ export interface MedicationAdministrationRead {
   id: string;
   status: MedicationAdministrationStatus;
   status_reason?: Code;
-  medication: Code;
+  medication?: Code;
+  administered_product?: ProductKnowledgeBase;
   occurrence_period_start: string;
   occurrence_period_end?: string;
   recorded?: string;
@@ -92,6 +95,6 @@ export interface MedicationAdministrationRead {
     dose?: DosageQuantity;
     rate?: Quantity;
   };
-  created_by: UserBareMinimum;
-  updated_by: UserBareMinimum;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
 }

@@ -283,7 +283,7 @@ export function LocationTable({
                             <AlertDialogContent>
                               <AlertDialogHeader>
                                 <AlertDialogTitle>
-                                  {t("remove_location", {
+                                  {t("remove_name", {
                                     name: location.name,
                                   })}
                                 </AlertDialogTitle>

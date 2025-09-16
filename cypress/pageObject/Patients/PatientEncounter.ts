@@ -1,8 +1,8 @@
 export class PatientEncounter {
   // Navigation
   navigateToEncounters() {
-    cy.verifyAndClickElement('[data-cy="nav-patients"]', "Patients");
-    cy.verifyAndClickElement('[data-cy="nav-encounters"]', "Encounters");
+    cy.get('[data-sidebar="menu"]').contains("Patients").click();
+    cy.get('[data-sidebar="menu"]').contains("All Encounters").click();
     return this;
   }
 
@@ -22,15 +22,12 @@ export class PatientEncounter {
   }
 
   clickUpdateEncounter() {
-    cy.verifyAndClickElement(
-      '[data-cy="update-encounter-option"]',
-      "Update Encounter",
-    );
+    cy.get("a:contains('Update Encounter')").filter(":visible").click();
     return this;
   }
 
   verifyEncounterPatientInfo(contents: string[]) {
-    cy.verifyContentPresence("#patient-infobadges", contents);
+    cy.verifyContentPresence("#root", contents);
     return this;
   }
 
@@ -60,15 +57,15 @@ export class PatientEncounter {
   }
 
   verifyOverviewValues(expectedValues: string[]) {
-    cy.verifyContentPresence('[data-cy="encounter-overview"]', expectedValues);
+    cy.verifyContentPresence("#root", expectedValues);
     return this;
   }
 
   clickPatientDetailsButton() {
-    cy.get('[data-cy="patient-details-button"]')
+    cy.get("[data-slot='patient-info-hover-card-trigger']")
       .filter(":visible")
-      .first()
       .click();
+    cy.get("a").contains("View Profile").click();
     return this;
   }
 
@@ -78,19 +75,19 @@ export class PatientEncounter {
   }
 
   clickEncounterMarkAsComplete() {
-    cy.verifyAndClickElement(
-      '[data-cy="mark-encounter-complete"]',
-      "Mark as Complete",
-    );
+    cy.get("button[data-slot='tabs-trigger']")
+      .filter(":visible")
+      .contains("Actions")
+      .click();
+    cy.get("button").contains("Mark as completed").click();
     return this;
   }
 
   clickConfirmEncounterAsComplete() {
     cy.intercept("GET", "**/api/v1/encounter/**").as("getEncounter");
-    cy.verifyAndClickElement(
-      '[data-cy="confirm-encounter-complete"]',
-      "Mark as Complete",
-    );
+    cy.get("div[data-slot='alert-dialog-footer']")
+      .contains("Mark as complete")
+      .click();
     cy.wait("@getEncounter").then((interception) => {
       expect(interception.response?.statusCode).to.eq(200); // Verify status code
       expect(interception.response?.body).to.have.property(
@@ -108,7 +105,10 @@ export class PatientEncounter {
 
   clickInProgressEncounterFilter() {
     cy.intercept("GET", "**/api/v1/encounter/**").as("getEncounters");
-    cy.verifyAndClickElement('[data-cy="in-progress-filter"]', "In Progress");
+    cy.get("button").contains("Filter").click();
+    cy.get('[role="menuitem"]').contains("Status").click();
+    cy.get("div").contains("In Progress").click();
+    cy.get("body").type("{esc}");
     cy.wait("@getEncounters").its("response.statusCode").should("eq", 200);
     return this;
   }

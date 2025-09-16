@@ -1,5 +1,5 @@
 import { DashboardIcon } from "@radix-ui/react-icons";
-import { Link, useLocationChange, usePathParams } from "raviger";
+import { Link, useLocationChange } from "raviger";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -15,8 +15,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { AdminNav } from "@/components/ui/sidebar/admin-nav";
-import { FacilityNav } from "@/components/ui/sidebar/facility-nav";
-import { FacilitySwitcher } from "@/components/ui/sidebar/facility-switcher";
+import { FacilityNav } from "@/components/ui/sidebar/facility/facility-nav";
+import { FacilitySwitcher } from "@/components/ui/sidebar/facility/facility-switcher";
+import { LocationNav } from "@/components/ui/sidebar/facility/location/location-nav";
+import { LocationSwitcher } from "@/components/ui/sidebar/facility/location/location-switcher";
 import {
   FacilityNavUser,
   PatientNavUser,
@@ -25,10 +27,13 @@ import { OrgNav } from "@/components/ui/sidebar/org-nav";
 import { OrganizationSwitcher } from "@/components/ui/sidebar/organization-switcher";
 import { PatientNav } from "@/components/ui/sidebar/patient-nav";
 
-import { AuthUserModel, UserFacilityModel } from "@/components/Users/models";
+import { useRouteParams } from "@/hooks/useRouteParams";
+
+import { FacilityBareMinimum } from "@/types/facility/facility";
+import { CurrentUserRead } from "@/types/user/user";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  user?: AuthUserModel;
+  user?: CurrentUserRead;
   facilitySidebar?: boolean;
   sidebarFor?: SidebarFor;
 }
@@ -45,20 +50,22 @@ export function AppSidebar({
   ...props
 }: AppSidebarProps) {
   const { t } = useTranslation();
-  const exactMatch = usePathParams("/facility/:facilityId");
-  const subpathMatch = usePathParams("/facility/:facilityId/*");
-  const facilityId = exactMatch?.facilityId || subpathMatch?.facilityId;
 
-  const orgMatch = usePathParams("/organization/:id");
-  const orgSubpathMatch = usePathParams("/organization/:id/*");
-  const organizationId = orgMatch?.id || orgSubpathMatch?.id;
+  const { facilityId } = useRouteParams("/facility/:facilityId");
+  const { locationId } = useRouteParams("/facility/:_/locations/:locationId");
+  const { organizationId } = useRouteParams("/organization/:organizationId");
 
-  const facilitySidebar = sidebarFor === SidebarFor.FACILITY;
+  const facilitySidebar =
+    !!facilityId && !locationId && sidebarFor === SidebarFor.FACILITY;
+  const facilityLocationSidebar =
+    !!facilityId && !!locationId && sidebarFor === SidebarFor.FACILITY;
+
   const patientSidebar = sidebarFor === SidebarFor.PATIENT;
   const adminSidebar = sidebarFor === SidebarFor.ADMIN;
+
   const { isMobile, setOpenMobile } = useSidebar();
   const [selectedFacility, setSelectedFacility] =
-    React.useState<UserFacilityModel | null>(null);
+    React.useState<FacilityBareMinimum | null>(null);
 
   const selectedOrganization = React.useMemo(() => {
     if (!user?.organizations || !organizationId) return undefined;
@@ -104,7 +111,8 @@ export function AppSidebar({
             selectedFacility={selectedFacility}
           />
         )}
-        {!selectedFacility && !selectedOrganization && (
+        {locationId && <LocationSwitcher />}
+        {!locationId && !selectedFacility && !selectedOrganization && (
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
@@ -129,9 +137,12 @@ export function AppSidebar({
       </SidebarHeader>
 
       <SidebarContent>
-        {facilitySidebar && !selectedOrganization && (
-          <FacilityNav selectedFacility={selectedFacility} />
-        )}
+        {facilityLocationSidebar && <LocationNav />}
+        {facilitySidebar &&
+          !facilityLocationSidebar &&
+          !selectedOrganization && (
+            <FacilityNav selectedFacility={selectedFacility} />
+          )}
         {selectedOrganization && (
           <OrgNav organizations={user?.organizations || []} />
         )}

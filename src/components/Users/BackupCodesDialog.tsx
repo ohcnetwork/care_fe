@@ -143,7 +143,7 @@ export function BackupCodesDialog({
             </Button>
           </div>
           <p className="text-sm text-red-500">
-            {showRegenerateBackupCodes ? t("backup_codes_warning") : t("")}
+            {showRegenerateBackupCodes && t("backup_codes_warning")}
           </p>
         </div>
         <DialogFooter>

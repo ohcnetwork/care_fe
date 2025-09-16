@@ -32,7 +32,7 @@ public/build-meta.json
 !.vscode/launch.json
 src/supportedBrowsers.ts
 
-# Reason React  
+# Reason React
 /lib/bs/**
 .merlin
 *.bs.js
@@ -68,3 +68,5 @@ src/pluginMap.ts
 /.__mf__temp
 public/sbom/*
 public/_headers
+
+namespaceMapping.json

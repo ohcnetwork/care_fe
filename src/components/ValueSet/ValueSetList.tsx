@@ -17,6 +17,11 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  ExpandableText,
+  ExpandableTextContent,
+  ExpandableTextExpandButton,
+} from "@/components/ui/expandable-text";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -74,7 +79,7 @@ const RenderCard = ({
   const navigate = useNavigate();
 
   return (
-    <div className="lg:hidden space-y-4 px-4">
+    <div className="md:hidden space-y-4 px-4">
       {isLoading ? (
         <CardGridSkeleton count={5} />
       ) : valuesets.length === 0 ? (
@@ -143,9 +148,16 @@ const RenderCard = ({
                   <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                     {t("description")}
                   </h3>
-                  <p className="text-sm text-gray-900 line-clamp-2">
-                    {valueset.description}
-                  </p>
+                  <div className="max-w-md text-sm text-gray-900 break-words whitespace-normal">
+                    <ExpandableText>
+                      <ExpandableTextContent>
+                        {valueset.description}
+                      </ExpandableTextContent>
+                      <ExpandableTextExpandButton>
+                        {t("read_more")}
+                      </ExpandableTextExpandButton>
+                    </ExpandableText>
+                  </div>
                 </div>
 
                 <div className="mt-4 flex justify-end">
@@ -189,7 +201,7 @@ const RenderTable = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   return (
-    <div className="hidden lg:block overflow-hidden rounded-lg bg-white shadow-sm">
+    <div className="hidden md:block overflow-hidden rounded-lg bg-white shadow-sm">
       {isLoading ? (
         <TableSkeleton count={5} />
       ) : valuesets.length === 0 ? (
@@ -249,10 +261,15 @@ const RenderTable = ({
                     {t(valueset.status)}
                   </Badge>
                 </TableCell>
-                <TableCell className="px-6 py-4">
-                  <div className="max-w-md truncate text-sm text-gray-900 break-words whitespace-normal">
-                    {valueset.description}
-                  </div>
+                <TableCell className="max-w-md text-sm text-gray-900 break-words whitespace-normal">
+                  <ExpandableText>
+                    <ExpandableTextContent>
+                      {valueset.description}
+                    </ExpandableTextContent>
+                    <ExpandableTextExpandButton>
+                      {t("read_more")}
+                    </ExpandableTextExpandButton>
+                  </ExpandableText>
                 </TableCell>
                 <TableCell className="whitespace-nowrap px-6 py-4 text-sm">
                   <Button

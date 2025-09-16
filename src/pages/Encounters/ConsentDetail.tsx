@@ -1,12 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import {
-  AlertCircle,
-  ArrowLeft,
-  ChevronLeft,
-  Download,
-  FileText,
-} from "lucide-react";
+import { AlertCircle, ChevronLeft, Download, FileText } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -18,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
+import BackButton from "@/components/Common/BackButton";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import ConsentFormSheet from "@/components/Consent/ConsentFormSheet";
@@ -29,21 +24,23 @@ import useFileUpload from "@/hooks/useFileUpload";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import consentApi from "@/types/consent/consentApi";
+import { FileCategory, FileType } from "@/types/files/file";
+
+import { useEncounter } from "./utils/EncounterProvider";
 
 interface ConsentDetailPageProps {
-  facilityId: string;
-  patientId: string;
-  encounterId: string;
   consentId: string;
 }
 
-export function ConsentDetailPage({
-  facilityId,
-  patientId,
-  encounterId,
-  consentId,
-}: ConsentDetailPageProps) {
+export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
   const { t } = useTranslation();
+
+  const {
+    selectedEncounterId: encounterId,
+    canWriteSelectedEncounter: canWrite,
+    patientId,
+    facilityId,
+  } = useEncounter();
 
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const queryClient = useQueryClient();
@@ -58,8 +55,8 @@ export function ConsentDetailPage({
   });
 
   const fileUpload = useFileUpload({
-    type: "consent",
-    category: "consent_attachment",
+    type: FileType.CONSENT,
+    category: FileCategory.CONSENT_ATTACHMENT,
     multiple: false,
     allowedExtensions: ["jpg", "jpeg", "png", "pdf"],
     allowNameFallback: false,
@@ -73,7 +70,7 @@ export function ConsentDetailPage({
   });
 
   const fileManager = useFileManager({
-    type: "consent",
+    type: FileType.CONSENT,
     uploadedFiles: consent?.source_attachments || [],
     onArchive: () => {},
     onEdit: () => {},
@@ -136,13 +133,7 @@ export function ConsentDetailPage({
 
   return (
     <div>
-      <Link
-        href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/consents`}
-        className="flex items-center hover:underline md:px-6"
-      >
-        <ArrowLeft className="size-4" />
-        {t("back")}
-      </Link>
+      <BackButton />
       <Page title="">
         <div className="container mx-auto py-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -152,21 +143,23 @@ export function ConsentDetailPage({
                   <h3 className="text-lg font-semibold">
                     {t("supporting_documents")}
                   </h3>
-                  <Button
-                    variant="outline"
-                    className="flex flex-row items-center"
-                    data-cy="add-files-button"
-                    asChild
-                  >
-                    <Label className="flex flex-row items-center cursor-pointer w-fit">
-                      <CareIcon icon="l-file-upload" className="mr-1" />
-                      <span>{t("add_files")}</span>
-                      {fileUpload.Input({
-                        className: "hidden",
-                        ref: fileInputRef,
-                      })}
-                    </Label>
-                  </Button>
+                  {canWrite && (
+                    <Button
+                      variant="outline"
+                      className="flex flex-row items-center"
+                      data-cy="add-files-button"
+                      asChild
+                    >
+                      <Label className="flex flex-row items-center cursor-pointer w-fit">
+                        <CareIcon icon="l-file-upload" className="mr-1" />
+                        <span>{t("add_files")}</span>
+                        {fileUpload.Input({
+                          className: "hidden",
+                          ref: fileInputRef,
+                        })}
+                      </Label>
+                    </Button>
+                  )}
                 </div>
 
                 <Card className="p-5 shadow-none">
@@ -268,11 +261,7 @@ export function ConsentDetailPage({
                 <h2 className="text-lg font-semibold">
                   {t("consent_details")}
                 </h2>
-                <ConsentFormSheet
-                  patientId={patientId}
-                  encounterId={encounterId}
-                  existingConsent={consent}
-                />
+                <ConsentFormSheet existingConsent={consent} />
               </div>
               <Card className="p-5 shadow-none">
                 <div className="space-y-4">
@@ -343,7 +332,7 @@ export function ConsentDetailPage({
         onOpenChange={handleUploadDialogClose}
         fileUpload={fileUpload}
         associatingId={associatingId}
-        type="consent"
+        type={FileType.CONSENT}
       />
     </div>
   );

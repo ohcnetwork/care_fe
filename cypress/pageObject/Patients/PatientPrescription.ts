@@ -8,12 +8,12 @@ interface MedicationDetails {
 
 export class PatientPrescription {
   clickMedicinesTab() {
-    cy.verifyAndClickElement('[data-cy="tab-medicines"]', "Medicines");
+    cy.get("[role='tablist']").contains("Medicines").click();
     return this;
   }
   clickEditPrescription() {
     cy.intercept("GET", "**/medication/request/**").as("getMedications");
-    cy.verifyAndClickElement('[data-cy="edit-prescription"]', "Edit");
+    cy.verifyAndClickElement('[data-cy="edit-prescription"]', /Add|Edit/);
     cy.wait("@getMedications").its("response.statusCode").should("eq", 200);
     return this;
   }
@@ -29,8 +29,10 @@ export class PatientPrescription {
     const { medicineName, dosage, frequency, instructions, notes } = details;
 
     if (medicineName) {
+      cy.get("button").contains("Add Medication").click();
+      cy.get("button").contains("Medication List").click();
       cy.typeAndSelectOption(
-        '[data-cy="add-medication-request"]',
+        "input[data-slot='command-input']",
         medicineName,
         false,
       );

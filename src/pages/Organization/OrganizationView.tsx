@@ -72,6 +72,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                       type: "text",
                       placeholder: t("search_by_name"),
                       value: qParams.name || "",
+                      display: t("name"),
                     },
                   ]}
                   onSearch={(key, value) =>

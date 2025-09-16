@@ -12,11 +12,9 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 
-import { Encounter } from "@/types/emr/encounter";
-import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
-import { Code } from "@/types/questionnaire/code";
-
-export type AvailabilityStatus = "available" | "unavailable";
+import { Code } from "@/types/base/code/code";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 
 export type Status = "active" | "inactive" | "unknown";
 
@@ -34,12 +32,11 @@ export interface LocationBase {
   location_type?: Code;
   form: LocationForm;
   mode: LocationMode;
-  availability_status: AvailabilityStatus;
 }
 
 export interface LocationDetail extends LocationBase {
   id: string;
-  organizations: FacilityOrganization[];
+  organizations: FacilityOrganizationRead[];
   sort_index: number;
 }
 
@@ -47,7 +44,7 @@ export interface LocationList extends LocationBase {
   id: string;
   has_children: boolean;
   parent?: LocationList;
-  current_encounter?: Encounter;
+  current_encounter?: EncounterRead;
   sort_index: number;
 }
 
@@ -99,11 +96,11 @@ export const LOCATION_TYPE_BADGE_COLORS = {
   wa: "teal", // ward
   lvl: "green", // level/floor
   bu: "yellow", // building
-  si: "destructive", // site
+  si: "orange", // site
   wi: "indigo", // wing
   co: "pink", // corridor
   ro: "blue", // room
-  ve: "cyan", // vehicle
+  ve: "secondary", // vehicle
   ho: "primary", // house
   ca: "indigo", // carpark
   rd: "yellow", // road

@@ -15,6 +15,7 @@ export interface ApiRoute<TData, TBody = unknown> {
   path: string;
   TRes: TData;
   noAuth?: boolean;
+  defaultQueryParams?: QueryParams;
 }
 
 type ExtractRouteParams<T extends string> =
@@ -59,12 +60,6 @@ export class HTTPError extends Error {
     this.status = status;
     this.silent = silent;
     this.cause = cause;
-  }
-}
-
-declare module "@tanstack/react-query" {
-  interface Register {
-    defaultError: HTTPError;
   }
 }
 

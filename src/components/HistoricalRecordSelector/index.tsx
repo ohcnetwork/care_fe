@@ -427,7 +427,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                             <TableRow className="divide-x">
                               <TableHead className="w-fit"></TableHead>
                               {activeTypeConfig?.displayFields.map((field) => (
-                                <TableHead key={String(field.key)}>
+                                <TableHead key={String(field.label)}>
                                   {field.label}
                                 </TableHead>
                               ))}
@@ -465,7 +465,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
           {isLoadingRecords && <Skeleton className="h-8 w-full" />}
         </div>
 
-        <div className="flex flex-col gap-2 p-4 border-t">
+        <div className="sticky bottom-0 bg-white flex flex-col gap-2 p-4 border-t">
           {state.dateGroupedRecords.length > 0 &&
             (isLoadingRecords ? (
               <div className="flex justify-center p-4">

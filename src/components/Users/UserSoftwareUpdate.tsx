@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 
 import UpdatableApp, { checkForUpdate } from "@/components/Common/UpdatableApp";
 
+import { clearQueryPersistenceCache } from "@/Utils/request/queryClient";
+
 export default function UserSoftwareUpdate() {
   const [updateStatus, setUpdateStatus] = useState({
     isChecking: false,
@@ -16,6 +18,7 @@ export default function UserSoftwareUpdate() {
   const { t } = useTranslation();
 
   const checkUpdates = async () => {
+    clearQueryPersistenceCache();
     setUpdateStatus({ ...updateStatus, isChecking: true });
     await new Promise((resolve) => setTimeout(resolve, 500));
     if ((await checkForUpdate()) != null) {
@@ -36,12 +39,14 @@ export default function UserSoftwareUpdate() {
     <>
       {updateStatus.isChecking ? (
         // While checking for updates
-        <Button disabled>
-          <div className="flex items-center gap-4">
-            <CareIcon icon="l-sync" className="text-2xl animate-spin" />
-            {t("checking_for_update")}
-          </div>
-        </Button>
+        <div className="flex justify-center sm:justify-start overflow-hidden rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:p-6">
+          <Button variant="primary" disabled aria-busy="true">
+            <div className="flex items-center gap-4">
+              <CareIcon icon="l-sync" className="text-2xl animate-spin" />
+              {t("checking_for_update")}
+            </div>
+          </Button>
+        </div>
       ) : updateStatus.isUpdateAvailable ? (
         // When an update is available
         <UpdatableApp
@@ -65,12 +70,14 @@ export default function UserSoftwareUpdate() {
         </UpdatableApp>
       ) : (
         // Default state to check for updates
-        <Button variant="primary" onClick={checkUpdates}>
-          <div className="flex items-center gap-4">
-            <CareIcon icon="l-sync" className="text-xl" />
-            {t("check_for_update")}
-          </div>
-        </Button>
+        <div className="flex justify-center sm:justify-start overflow-hidden rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:p-6">
+          <Button variant="primary" onClick={checkUpdates}>
+            <div className="flex items-center gap-4">
+              <CareIcon icon="l-sync" className="text-xl" />
+              {t("check_for_update")}
+            </div>
+          </Button>
+        </div>
       )}
     </>
   );

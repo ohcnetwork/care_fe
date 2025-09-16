@@ -90,7 +90,9 @@ function PatientIndex() {
         <CardHeader className="px-6 pb-3 bg-secondary-200 flex flex-col md:flex-row justify-between">
           <CardTitle>
             <div className="flex flex-col">
-              <span className="text-xs font-medium">{t("practitioner")}: </span>
+              <span className="text-xs font-medium">
+                {t("practitioner", { count: 1 })}:{" "}
+              </span>
               <span className="text-sm">
                 {appointment?.user
                   ? formatName(appointment.user)

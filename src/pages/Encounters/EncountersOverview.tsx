@@ -5,17 +5,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { EncounterList } from "@/pages/Encounters/EncounterList";
 import LocationList from "@/pages/Facility/locations/LocationList";
+import { EncounterClass } from "@/types/emr/encounter/encounter";
 
 interface EncountersOverviewProps {
   facilityId: string;
   tab?: string;
   locationId?: string;
+  encounterClass?: EncounterClass;
 }
 
 export default function EncountersOverview({
   facilityId,
   tab = "patients",
   locationId,
+  encounterClass,
 }: EncountersOverviewProps) {
   const { t } = useTranslation();
 
@@ -46,7 +49,10 @@ export default function EncountersOverview({
         </div>
 
         <TabsContent value="patients" className="mt-4">
-          <EncounterList facilityId={facilityId} />
+          <EncounterList
+            facilityId={facilityId}
+            encounterClass={encounterClass}
+          />
         </TabsContent>
 
         <TabsContent value="locations" className="mt-4">

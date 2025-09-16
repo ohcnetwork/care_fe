@@ -4,10 +4,12 @@ import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
 
 import { HasPermissionFn, getPermissions } from "@/common/Permissions";
 
-import { Patient } from "@/types/emr/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 
+import { Accounts } from "./Accounts";
 import { Appointments } from "./Appointments";
 import { PatientFilesTab } from "./PatientFiles";
+import { PatientNotesTab } from "./PatientNotes";
 import { PatientUsers } from "./PatientUsers";
 import { ResourceRequests } from "./ResourceRequests";
 import { Updates } from "./patientUpdates";
@@ -15,7 +17,7 @@ import { Updates } from "./patientUpdates";
 export interface PatientProps {
   facilityId?: string;
   patientId: string;
-  patientData: Patient;
+  patientData: PatientRead;
 }
 
 export interface Tab {
@@ -58,8 +60,16 @@ export const BASE_PATIENT_TABS: Tab[] = [
     component: PatientUsers,
   },
   {
+    route: "notes",
+    component: PatientNotesTab,
+  },
+  {
     route: "files",
     component: PatientFilesTab,
+  },
+  {
+    route: "accounts",
+    component: Accounts,
   },
 ];
 

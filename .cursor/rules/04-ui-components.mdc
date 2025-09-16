@@ -1,0 +1,114 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# UI Component Guidelines
+
+## Component Library Usage
+- Use Shadcn UI components as the primary component library
+- NEVER modify the shadcn component files directly in `components/ui/*`
+- Follow the component documentation for proper usage
+- Customize components using Tailwind CSS
+- Maintain consistent styling across components
+
+## Routing with Raviger
+
+### Route Definition
+```typescript
+// src/Routers/routes/FacilityRoutes.tsx
+const FacilityRoutes: AppRoutes = {
+  "/facility/:facilityId/overview": ({ facilityId }) => (
+    <FacilityOverview facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/services/:serviceId": ({ facilityId, serviceId }) => (
+    <HealthcareServiceShow facilityId={facilityId} serviceId={serviceId} />
+  )
+};
+
+// Type-safe route parameters
+type RouteParams<T extends string> =
+  T extends `${string}:${infer Param}/${infer Rest}`
+    ? { [_ in Param | keyof RouteParams<Rest>]: string }
+    : T extends `${string}:${infer Param}`
+      ? { [_ in Param]: string }
+      : Record<string, never>;
+```
+
+### Navigation and Hooks
+```typescript
+// Navigation
+import { navigate, useRedirect } from "raviger";
+
+// Redirect from old to new route
+useRedirect("/user", "/users");
+
+// Programmatic navigation
+navigate(`/facility/${facilityId}/services`);
+
+// Route matching
+const routes = useRoutes(Routes);
+```
+
+### Route Organization
+- Define routes in dedicated files under `src/Routers/routes/`
+- Group related routes in feature-specific files (e.g., `FacilityRoutes.tsx`)
+- Combine routes in `AppRouter.tsx`
+- Use proper typing with `AppRoutes` type
+- Support plugin routes through `usePluginRoutes` hook
+
+### Layout and Navigation
+```typescript
+// Conditional sidebar rendering
+const PATHS_WITHOUT_SIDEBAR = [
+  "/",
+  "/session-expired",
+  /^\/facility\/[^/]+\/services_requests\/[^/]+$/,
+];
+
+// Route wrapper with error boundary
+<ErrorBoundary fallback={<ErrorPage />}>
+  {routes}
+</ErrorBoundary>
+```
+
+## Responsive Design
+- Use Tailwind's responsive classes
+- Follow mobile-first approach
+- Test components across different screen sizes
+- Use proper breakpoints as defined in `tailwind.config.js`
+
+## Accessibility
+- Implement proper ARIA attributes
+- Ensure keyboard navigation works
+- Maintain proper color contrast
+- Support screen readers
+- Test with accessibility tools
+
+## Component Structure
+```typescript
+// Example component structure
+interface ComponentProps {
+  title: string;
+  onAction: () => void;
+}
+
+export function Component({ title, onAction }: ComponentProps) {
+  const [state, setState] = useState(false);
+  
+  return (
+    <div className="p-4 space-y-4">
+      <h2 className="text-xl font-bold">{title}</h2>
+      <Button onClick={onAction}>
+        Action
+      </Button>
+    </div>
+  );
+}
+```
+
+## Internationalization
+- Use translation keys from `src/Locale/`
+- Support RTL languages
+- Use proper date/time formatting
+- Support multiple languages

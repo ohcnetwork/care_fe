@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Building, Loader2, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -14,27 +14,30 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import { BatchRequestBody } from "@/types/base/batch/batch";
+import batchApi from "@/types/base/batch/batchApi";
 import deviceApi from "@/types/device/deviceApi";
-import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import encounterApi from "@/types/emr/encounter/encounterApi";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import locationApi from "@/types/location/locationApi";
-import type { BatchRequestBody } from "@/types/questionnaire/batch";
 
 interface Props {
   entityType: "encounter" | "location" | "device";
   entityId: string;
-  currentOrganizations: FacilityOrganization[];
+  currentOrganizations: FacilityOrganizationRead[];
   facilityId: string;
   trigger?: React.ReactNode;
   onUpdate?: () => void;
   orgType?: "organization" | "managing_organization";
+  open?: boolean;
+  setOpen?: (open: boolean) => void;
 }
 
 type MutationRoute =
-  | typeof routes.encounter.addOrganization
-  | typeof routes.encounter.removeOrganization
+  | typeof encounterApi.addOrganization
+  | typeof encounterApi.removeOrganization
   | typeof locationApi.addOrganization
   | typeof locationApi.removeOrganization
   | typeof deviceApi.addOrganization
@@ -71,8 +74,8 @@ function getMutationParams(
   if (entityType === "encounter") {
     return {
       route: isAdd
-        ? routes.encounter.addOrganization
-        : routes.encounter.removeOrganization,
+        ? encounterApi.addOrganization
+        : encounterApi.removeOrganization,
       pathParams: { encounterId: entityId } as EncounterPathParams,
       queryKey: ["encounter", entityId],
     };
@@ -184,15 +187,27 @@ export default function LinkDepartmentsSheet({
   facilityId,
   trigger,
   onUpdate,
+  ...props
 }: Props) {
   const { t } = useTranslation();
 
-  const [open, setOpen] = useState(false);
+  const [open, _setOpen] = useState(false);
   const [selectedOrgs, setSelectedOrgs] = useState<string[] | null>(null);
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    if (props.open != null) {
+      _setOpen(props.open);
+    }
+  }, [props.open]);
+
+  const setOpen = (open: boolean) => {
+    _setOpen(open);
+    props.setOpen?.(open);
+  };
+
   const { mutate: submitBatch, isPending: isAdding } = useMutation({
-    mutationFn: mutate(routes.batchRequest, { silent: true }),
+    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
       queryClient.invalidateQueries({ queryKey: invalidateQueries });
