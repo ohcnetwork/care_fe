@@ -21,11 +21,10 @@ import ServiceRequestTable from "@/components/ServiceRequest/ServiceRequestTable
 
 import useFilters from "@/hooks/useFilters";
 
-import query from "@/Utils/request/query";
 import PatientEncounterOrIdentifierFilter from "@/components/Patient/PatientEncounterOrIdentifierFilter";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
-import { tagFilter } from "@/components/ui/multi-filter/filter-list";
-import MultiFilter from "@/components/ui/multi-filter/multi-filter";
+import { tagFilter } from "@/components/ui/multi-filter/filterConfigs";
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import { createFilterConfig } from "@/components/ui/multi-filter/utils/utils";
 import {
@@ -38,6 +37,7 @@ import {
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import locationApi from "@/types/location/locationApi";
+import query from "@/Utils/request/query";
 
 function EmptyState() {
   const { t } = useTranslation();
