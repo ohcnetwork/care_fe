@@ -80,7 +80,9 @@ const TokenCard = ({ id, token, facility, appointment }: Props) => {
             {appointment && (
               <>
                 <div>
-                  <Label>{t("practitioner", { count: 1 })}:</Label>
+                  <Label>
+                    {t(`schedulable_resource__${appointment.resource_type}`)}:
+                  </Label>
                   <p className="text-sm font-semibold break-words">
                     {formatScheduleResourceName(appointment)}
                   </p>

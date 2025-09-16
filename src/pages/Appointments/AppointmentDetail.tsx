@@ -243,6 +243,7 @@ export default function AppointmentDetail(props: Props) {
                 <div className="mt-4">
                   <TokenGenerationSheet
                     facilityId={facility.id}
+                    resourceType={appointment.resource_type}
                     appointmentId={appointment.id}
                     trigger={
                       <Button variant="outline" size="lg" className="px-6">
@@ -626,6 +627,7 @@ const AppointmentDetails = ({
         </CardContent>
       </Card>
       <TokenGenerationSheet
+        resourceType={appointment.resource_type}
         facilityId={facility.id}
         appointmentId={appointment.id}
         trigger={
