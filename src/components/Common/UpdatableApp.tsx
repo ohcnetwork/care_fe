@@ -24,7 +24,7 @@ export const checkForUpdate = async () => {
       },
     });
 
-    if (res.status !== 200) {
+    if (!res.ok) {
       console.error(
         `Skipped checking for updates. Failed to fetch '${META_URL}'.`,
       );
