@@ -55,6 +55,7 @@ import {
   CreateConsentRequest,
 } from "@/types/consent/consent";
 import consentApi from "@/types/consent/consentApi";
+import { FileCategory, FileType } from "@/types/files/file";
 
 interface FileEntry {
   file: File;
@@ -130,8 +131,8 @@ export default function ConsentFormSheet({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fileUpload = useFileUpload({
-    type: "consent",
-    category: "consent_attachment",
+    type: FileType.CONSENT,
+    category: FileCategory.CONSENT_ATTACHMENT,
     multiple: true,
     allowedExtensions: ["jpg", "jpeg", "png", "pdf"],
     allowNameFallback: false,

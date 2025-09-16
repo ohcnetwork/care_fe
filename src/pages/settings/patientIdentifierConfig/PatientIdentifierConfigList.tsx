@@ -27,8 +27,10 @@ import {
 } from "@/components/ui/table";
 
 import Page from "@/components/Common/Page";
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import {
+  CardGridSkeleton,
+  TableSkeleton,
+} from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -107,7 +109,7 @@ export default function PatientIdentifierConfigList({
           ...(facilityId && { facility: facilityId }),
           limit: resultsPerPage,
           offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-          search: qParams.search,
+          display: qParams.display,
           status: qParams.status,
           ordering: "-created_date",
         },
@@ -208,9 +210,9 @@ export default function PatientIdentifierConfigList({
                 </span>
                 <Input
                   placeholder={t("search_configs")}
-                  value={qParams.search || ""}
+                  value={qParams.display || ""}
                   onChange={(e) =>
-                    updateQuery({ search: e.target.value || undefined })
+                    updateQuery({ display: e.target.value || undefined })
                   }
                   className="w-full md:w-[300px] pl-10"
                 />

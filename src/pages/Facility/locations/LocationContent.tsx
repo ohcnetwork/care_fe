@@ -123,19 +123,6 @@ function LocationCard({ location, onClick }: LocationCardProps) {
               {t(`location_form__${location.form}`)}
             </span>
           </div>
-
-          <div className="flex items-center">
-            <span
-              className={cn(
-                "capitalize",
-                location.availability_status === "available"
-                  ? "text-green-600"
-                  : "text-gray-600",
-              )}
-            >
-              {location.availability_status}
-            </span>
-          </div>
         </div>
       </div>
     </div>

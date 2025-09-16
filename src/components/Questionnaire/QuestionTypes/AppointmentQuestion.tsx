@@ -17,7 +17,8 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
-import { AppointmentSlotPicker } from "@/pages/Appointments/components/AppointmentSlotPicker";
+import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/AppointmentDateSelection";
+import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
@@ -34,6 +35,7 @@ import {
 } from "@/types/questionnaire/validation";
 import {
   CreateAppointmentQuestion,
+  SchedulableResourceType,
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import { UserReadMinimal } from "@/types/user/user";
@@ -99,6 +101,8 @@ export function AppointmentQuestion({
   const [resource, setResource] = useState<UserReadMinimal>();
   const [open, setOpen] = useState(false);
   const { hasError } = useFieldError(question.id, errors);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
   const values =
     (questionnaireResponse.values?.[0]?.value as CreateAppointmentQuestion[]) ||
@@ -147,7 +151,7 @@ export function AppointmentQuestion({
     <div className="space-y-4">
       <div>
         <div className="mb-4 mt-2">
-          <Label className="mb-2">{t("tags")}</Label>
+          <Label className="mb-2">{t("tags", { count: 2 })}</Label>
           <TagSelectorPopover
             selected={selectedTags}
             onChange={(tags) => {
@@ -261,16 +265,43 @@ export function AppointmentQuestion({
               <SheetHeader>
                 <SheetTitle>{t("select_appointment_slot")}</SheetTitle>
               </SheetHeader>
-              <div className="mt-6">
-                {resource && (
-                  <AppointmentSlotPicker
-                    facilityId={facilityId}
-                    resourceId={resource.id}
-                    onSlotSelect={handleSlotSelect}
-                    selectedSlotId={value.slot_id}
-                    onSlotDetailsChange={setSelectedSlot}
-                  />
-                )}
+              <div className="space-y-4">
+                <AppointmentDateSelection
+                  facilityId={facilityId}
+                  resourceId={resource?.id || undefined}
+                  resourceType={SchedulableResourceType.Practitioner}
+                  setSelectedDate={setSelectedDate}
+                  selectedDate={selectedDate}
+                />
+                <AppointmentSlotPicker
+                  selectedDate={selectedDate}
+                  facilityId={facilityId}
+                  resourceId={resource?.id || undefined}
+                  resourceType={SchedulableResourceType.Practitioner}
+                  selectedSlotId={selectedSlotId}
+                  onSlotDetailsChange={setSelectedSlot}
+                  onSlotSelect={setSelectedSlotId}
+                />
+                <div className="flex justify-end gap-2 mt-6">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setOpen(false);
+                      setSelectedSlot(undefined);
+                    }}
+                  >
+                    {t("cancel")}
+                  </Button>
+                  <Button
+                    variant="default"
+                    disabled={!selectedSlotId}
+                    onClick={() => {
+                      handleSlotSelect(selectedSlotId);
+                    }}
+                  >
+                    {t("submit")}
+                  </Button>
+                </div>
               </div>
             </SheetContent>
           </Sheet>

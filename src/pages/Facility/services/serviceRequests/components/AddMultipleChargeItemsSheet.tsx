@@ -34,17 +34,22 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
+import {
+  ApplyChargeItemDefinitionRequest,
+  ChargeItemServiceResource,
+} from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
-import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 
 interface AddMultipleChargeItemsSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   facilityId: string;
-  serviceRequestId: string;
+  serviceResourceId: string;
+  serviceResourceType: ChargeItemServiceResource;
+  encounterId?: string;
+  patientId?: string;
   onChargeItemsAdded: () => void;
   disabled?: boolean;
 }
@@ -58,7 +63,10 @@ export default function AddMultipleChargeItemsSheet({
   open,
   onOpenChange,
   facilityId,
-  serviceRequestId,
+  serviceResourceType,
+  serviceResourceId,
+  encounterId,
+  patientId,
   onChargeItemsAdded,
   disabled,
 }: AddMultipleChargeItemsSheetProps) {
@@ -81,17 +89,7 @@ export default function AddMultipleChargeItemsSheet({
     enabled: open,
   });
 
-  const { data: request } = useQuery({
-    queryKey: ["serviceRequest", serviceRequestId],
-    queryFn: query(serviceRequestApi.retrieveServiceRequest, {
-      pathParams: {
-        facilityId: facilityId,
-        serviceRequestId: serviceRequestId,
-      },
-    }),
-    enabled: open,
-  });
-
+  // Unified request data
   const { mutate: applyChargeItems, isPending } = useMutation({
     mutationFn: mutate(chargeItemApi.applyChargeItemDefinitions, {
       pathParams: { facilityId },
@@ -105,12 +103,12 @@ export default function AddMultipleChargeItemsSheet({
   });
 
   const handleSelectChargeItem = (value: string) => {
-    if (!value || !request) return;
+    if (!value) return;
     setSelectedDefinitionId(value);
   };
 
   useEffect(() => {
-    if (selectedDefinitionId && request) {
+    if (selectedDefinitionId) {
       const selectedCID = chargeItemDefinitions?.results.find(
         (cid) => cid.id === selectedDefinitionId,
       );
@@ -120,16 +118,22 @@ export default function AddMultipleChargeItemsSheet({
         ...selectedItems,
         {
           quantity: "1",
-          encounter: request.encounter.id,
-          charge_item_definition: selectedCID.id,
+          encounter: encounterId,
+          patient: patientId,
+          charge_item_definition: selectedCID.slug,
           charge_item_definition_object: selectedCID,
-          service_resource: "service_request",
-          service_resource_id: serviceRequestId,
+          service_resource: serviceResourceType as ChargeItemServiceResource,
+          service_resource_id: serviceResourceId,
         },
       ]);
       setSelectedDefinitionId(null);
     }
-  }, [selectedDefinitionId, chargeItemDefinitions, request]);
+  }, [
+    selectedDefinitionId,
+    chargeItemDefinitions,
+    serviceResourceType,
+    encounterId,
+  ]);
 
   const handleRemoveItem = (index: number) => {
     setSelectedItems(selectedItems.filter((_, i) => i !== index));

@@ -37,32 +37,34 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { FileListTable } from "@/components/Files/FileListTable";
-import { FileUploadModel } from "@/components/Patient/models";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
-import { DIAGNOSTIC_REPORT_STATUS_COLORS } from "@/types/emr/diagnosticReport/diagnosticReport";
 import {
+  DIAGNOSTIC_REPORT_STATUS_COLORS,
   DiagnosticReportRead,
   DiagnosticReportStatus,
 } from "@/types/emr/diagnosticReport/diagnosticReport";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import { ObservationStatus } from "@/types/emr/observation/observation";
+import { FileReadMinimal } from "@/types/files/file";
+import fileApi from "@/types/files/fileApi";
 
 interface DiagnosticReportReviewProps {
   facilityId: string;
   patientId: string;
   serviceRequestId: string;
   diagnosticReports: DiagnosticReportRead[];
+  disableEdit: boolean;
 }
 
 export function DiagnosticReportReview({
   facilityId,
   patientId,
   diagnosticReports,
+  disableEdit,
 }: DiagnosticReportReviewProps) {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(true);
@@ -89,9 +91,9 @@ export function DiagnosticReportReview({
   }, [fullReport]);
 
   const { data: files = { results: [], count: 0 }, refetch: refetchFiles } =
-    useQuery<PaginatedResponse<FileUploadModel>>({
+    useQuery<PaginatedResponse<FileReadMinimal>>({
       queryKey: ["files", "diagnostic_report", fullReport?.id],
-      queryFn: query(routes.viewUpload, {
+      queryFn: query(fileApi.list, {
         queryParams: {
           file_type: "diagnostic_report",
           associating_id: fullReport?.id,
@@ -270,10 +272,11 @@ export function DiagnosticReportReview({
                     ) : (
                       <textarea
                         id="conclusion"
-                        className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-lg"
+                        className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-lg disabled:cursor-not-allowed"
                         placeholder={t("enter_conclusion")}
                         value={conclusion || fullReport?.conclusion || ""}
                         onChange={(e) => setConclusion(e.target.value)}
+                        disabled={disableEdit}
                       />
                     )}
                   </CardContent>
@@ -322,25 +325,26 @@ export function DiagnosticReportReview({
                       <AlertDialogTrigger asChild>
                         <Button
                           variant="primary"
-                          disabled={isUpdatingReport}
+                          disabled={isUpdatingReport || disableEdit}
                           className="gap-2"
                         >
                           <CheckCircle2 className="h-4 w-4" />
-                          Approve Results
+                          {t("approve_results")}
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Confirm Approval</AlertDialogTitle>
+                          <AlertDialogTitle>{t("confirm")}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to approve these diagnostic
-                            results? This action cannot be undone.
+                            {t(
+                              "are_you_sure_want_to_approve_diagnostic_report",
+                            )}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                           <AlertDialogAction onClick={handleApprove}>
-                            Approve
+                            {t("approve")}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>

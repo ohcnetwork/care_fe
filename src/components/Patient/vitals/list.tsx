@@ -95,7 +95,8 @@ export const VitalsList = ({
     queryKey: [
       "infinite-observations",
       patientId,
-      filteredVitalCodes.map((c) => c.code).join(","),
+      encounterId,
+      filteredVitalCodes.map((c) => c.code),
     ],
     queryFn: async ({ pageParam = 0 }) => {
       const response = await query(patientApi.listObservations, {
@@ -138,9 +139,7 @@ export const VitalsList = ({
       readOnly={true}
       className={className}
     >
-      <div>
-        <VitalsTable vitals={vitals} vitalCodes={filteredVitalCodes} />
-      </div>
+      <VitalsTable vitals={vitals} vitalCodes={filteredVitalCodes} />
       {hasNextPage && (
         <div className="flex justify-center">
           <Button variant="ghost" size="xs" onClick={() => fetchNextPage()}>

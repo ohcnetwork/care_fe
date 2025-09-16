@@ -3,8 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
-import React, { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -53,7 +52,7 @@ import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import {
   MEDICATION_REQUEST_TIMING_OPTIONS,
-  MedicationRequest,
+  MedicationRequestCreate,
   MedicationRequestRead,
   displayMedicationName,
 } from "@/types/emr/medicationRequest/medicationRequest";
@@ -61,14 +60,16 @@ import medicationRequestApi from "@/types/emr/medicationRequest/medicationReques
 import {
   MEDICATION_STATEMENT_STATUS,
   MedicationStatementInformationSourceType,
+  MedicationStatementRead,
   MedicationStatementRequest,
   MedicationStatementStatus,
 } from "@/types/emr/medicationStatement";
-import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
-import { ResponseValue } from "@/types/questionnaire/form";
+import {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import {
   FieldDefinitions,
@@ -233,7 +234,7 @@ export function MedicationStatementQuestion({
     const newMedications = selected.map((record) => {
       if ("dosage_instruction" in record) {
         // Convert MedicationRequest to MedicationStatementRequest
-        const request = record as MedicationRequest;
+        const request = record as MedicationRequestCreate;
         return {
           ...MEDICATION_STATEMENT_INITIAL_VALUE,
           medication: request.medication,
@@ -962,7 +963,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
 
 // Helper function to find the frequency option from timing
 const reverseFrequencyOption = (
-  timing?: MedicationRequest["dosage_instruction"][0]["timing"],
+  timing?: MedicationRequestCreate["dosage_instruction"][0]["timing"],
 ) => {
   if (!timing?.code?.code) return undefined;
   return Object.entries(MEDICATION_REQUEST_TIMING_OPTIONS).find(

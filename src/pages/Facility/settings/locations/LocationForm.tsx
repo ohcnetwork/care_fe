@@ -30,6 +30,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import type { BatchRequestResponse } from "@/types/base/batch/batch";
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import batchApi from "@/types/base/batch/batchApi";
 import {
@@ -39,7 +40,6 @@ import {
   type Status,
 } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
-import type { BatchSubmissionResult } from "@/types/questionnaire/batch";
 
 interface Props {
   facilityId: string;
@@ -71,7 +71,6 @@ export default function LocationForm({
     numberOfBeds: z.string().optional(),
     customizeNames: z.boolean().default(false),
     organizations: z.array(z.string()).default([]),
-    availability_status: z.enum(["available", "unavailable"] as const),
     bedNames: z
       .array(
         z.object({
@@ -94,7 +93,6 @@ export default function LocationForm({
     numberOfBeds: "2",
     customizeNames: false,
     organizations: [],
-    availability_status: "available",
     bedNames: [],
   };
 
@@ -180,7 +178,6 @@ export default function LocationForm({
         form: location.form,
         parent: parentId || null,
         organizations: [],
-        availability_status: location.availability_status || "available",
         customizeNames: false,
         bedNames: [],
       });
@@ -204,7 +201,7 @@ export default function LocationForm({
 
   const { mutate: submitBatch } = useMutation({
     mutationFn: mutate(batchApi.batchRequest),
-    onSuccess: (data: { results: BatchSubmissionResult[] }) => {
+    onSuccess: (data: BatchRequestResponse) => {
       toast.success(
         t("bed_created_notification", { count: data.results.length }),
       );
@@ -300,6 +297,7 @@ export default function LocationForm({
                   <SelectTrigger
                     className="w-full"
                     data-cy="location-form-options"
+                    ref={field.ref}
                   >
                     <SelectValue />
                   </SelectTrigger>
@@ -351,7 +349,7 @@ export default function LocationForm({
                 <FormLabel>{t("number_of_beds")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger data-cy="bed-counts-select">
+                    <SelectTrigger data-cy="bed-counts-select" ref={field.ref}>
                       <SelectValue placeholder={t("select_number_of_beds")} />
                     </SelectTrigger>
                   </FormControl>
@@ -510,7 +508,7 @@ export default function LocationForm({
                 <FormLabel>{t("status")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger data-cy="location-status">
+                    <SelectTrigger data-cy="location-status" ref={field.ref}>
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>
@@ -535,7 +533,7 @@ export default function LocationForm({
                 <FormLabel>{t("operational_status")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger data-cy="operational-status">
+                    <SelectTrigger data-cy="operational-status" ref={field.ref}>
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>

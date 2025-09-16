@@ -1,5 +1,7 @@
 import { Code } from "@/types/base/code/code";
 import { Duration } from "@/types/base/duration/duration";
+import { ResourceCategoryRead } from "@/types/base/resourceCategory/resourceCategory";
+import { SlugConfig } from "@/types/base/slug/slugConfig";
 
 export enum ProductKnowledgeType {
   medication = "medication",
@@ -78,13 +80,38 @@ export interface ProductKnowledgeBase {
   names: ProductName[];
   storage_guidelines: StorageGuideline[];
   definitional?: ProductDefinition;
+  base_unit: Code;
+  category: ResourceCategoryRead;
+  slug_config: SlugConfig;
 }
 
 export interface ProductKnowledgeCreate
-  extends Omit<ProductKnowledgeBase, "id"> {
+  extends Omit<
+    ProductKnowledgeBase,
+    "id" | "category" | "slug_config" | "slug"
+  > {
+  slug_value: string;
   facility: string;
+  category: string;
 }
 
-export interface ProductKnowledgeUpdate extends ProductKnowledgeBase {
+export interface ProductKnowledgeUpdate
+  extends Omit<
+    ProductKnowledgeBase,
+    "id" | "category" | "slug_config" | "slug"
+  > {
+  slug_value: string;
   facility: string;
+  category: string;
 }
+
+export const UCUM_TIME_UNITS_CODES = [
+  // { code: "ms", display: "milliseconds", system: "http://unitsofmeasure.org" },
+  // { code: "s", display: "seconds", system: "http://unitsofmeasure.org" },
+  { code: "min", display: "minutes", system: "http://unitsofmeasure.org" },
+  { code: "h", display: "hours", system: "http://unitsofmeasure.org" },
+  { code: "d", display: "days", system: "http://unitsofmeasure.org" },
+  { code: "wk", display: "weeks", system: "http://unitsofmeasure.org" },
+  { code: "mo", display: "months", system: "http://unitsofmeasure.org" },
+  { code: "a", display: "years", system: "http://unitsofmeasure.org" },
+];

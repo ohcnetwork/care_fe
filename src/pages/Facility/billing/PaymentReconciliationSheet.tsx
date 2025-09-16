@@ -43,7 +43,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
-import mutate from "@/Utils/request/mutate";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
   PaymentReconciliationCreate,
@@ -55,6 +55,8 @@ import {
   PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import mutate from "@/Utils/request/mutate";
 
 interface PaymentReconciliationSheetProps {
   open: boolean;
@@ -63,49 +65,48 @@ interface PaymentReconciliationSheetProps {
   invoice?: InvoiceRead;
   accountId: string;
   onSuccess?: () => void;
+  isCreditNote?: boolean;
 }
 
 // Add schema before the component
-const formSchema = z.object({
-  reconciliation_type: z.nativeEnum(PaymentReconciliationType),
-  status: z.nativeEnum(PaymentReconciliationStatus),
-  kind: z.nativeEnum(PaymentReconciliationKind),
-  issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
-  outcome: z.nativeEnum(PaymentReconciliationOutcome),
-  method: z.nativeEnum(PaymentReconciliationPaymentMethod),
-  payment_datetime: z.string(),
-  amount: z.string().refine(
-    (val) => {
-      const num = Number(val);
-      return !isNaN(num) && num > 0 && /^\d+(\.\d{0,2})?$/.test(val);
-    },
-    { message: t("enter_valid_amount") },
-  ),
-  tendered_amount: z.string().refine(
-    (val) => {
-      const num = Number(val);
-      return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
-    },
-    {
-      message: t("enter_valid_amount"),
-    },
-  ),
-  returned_amount: z.string().refine(
-    (val) => {
-      const num = Number(val);
-      return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
-    },
-    {
-      message: t("enter_valid_amount"),
-    },
-  ),
-  target_invoice: z.string().optional(),
-  reference_number: z.string().optional(),
-  authorization: z.string().optional(),
-  disposition: z.string().optional(),
-  note: z.string().optional(),
-  account: z.string(),
-});
+const formSchema = z
+  .object({
+    reconciliation_type: z.nativeEnum(PaymentReconciliationType),
+    status: z.nativeEnum(PaymentReconciliationStatus),
+    kind: z.nativeEnum(PaymentReconciliationKind),
+    issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
+    outcome: z.nativeEnum(PaymentReconciliationOutcome),
+    method: z.nativeEnum(PaymentReconciliationPaymentMethod),
+    payment_datetime: z.string(),
+    amount: z.string().refine(
+      (val) => {
+        const num = Number(val);
+        return !isNaN(num) && num > 0 && /^\d+(\.\d{0,2})?$/.test(val);
+      },
+      { message: t("enter_valid_amount") },
+    ),
+    tendered_amount: z.string().refine(
+      (val) => {
+        const num = Number(val);
+        return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
+      },
+      {
+        message: t("enter_valid_amount"),
+      },
+    ),
+    returned_amount: z.string().optional(),
+    target_invoice: z.string().optional(),
+    reference_number: z.string().optional(),
+    authorization: z.string().optional(),
+    disposition: z.string().optional(),
+    note: z.string().optional(),
+    account: z.string(),
+    is_credit_note: z.boolean().optional(),
+  })
+  .refine((data) => Number(data.tendered_amount) >= Number(data.amount), {
+    message: t("tender_amount_cannot_be_less_than_payment_amount"),
+    path: ["tendered_amount"],
+  });
 
 export function PaymentReconciliationSheet({
   open,
@@ -114,11 +115,13 @@ export function PaymentReconciliationSheet({
   invoice,
   accountId,
   onSuccess,
+  isCreditNote = false,
 }: PaymentReconciliationSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [tenderAmount, setTenderAmount] = useState<string>("0");
   const [returnedAmount, setReturnedAmount] = useState<string>("0");
+  useFacilityShortcuts("payment-reconciliation-sheet");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -139,6 +142,7 @@ export function PaymentReconciliationSheet({
       disposition: "",
       note: "",
       account: accountId,
+      is_credit_note: isCreditNote,
     },
   });
 
@@ -219,6 +223,7 @@ export function PaymentReconciliationSheet({
       amount: Number(data.amount).toFixed(2),
       tendered_amount: Number(data.tendered_amount).toFixed(2),
       returned_amount: Number(data.returned_amount).toFixed(2),
+      is_credit_note: isCreditNote,
     };
     submitPayment(submissionData);
   });
@@ -230,7 +235,9 @@ export function PaymentReconciliationSheet({
           <SheetTitle>{t("record_payment")}</SheetTitle>
           <SheetDescription>
             {invoice
-              ? t("recording_payment_for_invoice", { id: invoice.id })
+              ? t("recording_payment_for_invoice", {
+                  id: invoice.number,
+                })
               : t("recording_payment")}
           </SheetDescription>
         </SheetHeader>
@@ -265,7 +272,7 @@ export function PaymentReconciliationSheet({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger ref={field.ref}>
                           <SelectValue
                             placeholder={t("select_payment_method")}
                           />
@@ -315,7 +322,7 @@ export function PaymentReconciliationSheet({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger ref={field.ref}>
                           <SelectValue
                             placeholder={t("select_reconciliation_type")}
                           />
@@ -350,7 +357,12 @@ export function PaymentReconciliationSheet({
                       <MonetaryAmountInput
                         {...field}
                         value={field.value || ""}
-                        onChange={(e) => field.onChange(e.target.value)}
+                        onChange={(e) => {
+                          field.onChange(e.target.value);
+                          if (isCreditNote) {
+                            setTenderAmount(e.target.value);
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -358,7 +370,7 @@ export function PaymentReconciliationSheet({
                 )}
               />
 
-              {isCashPayment && (
+              {isCashPayment && !isCreditNote && (
                 <>
                   <FormField
                     control={form.control}
@@ -395,13 +407,13 @@ export function PaymentReconciliationSheet({
                   />
 
                   {Number(returnedAmount) > 0 && (
-                    <div className="rounded-md bg-muted p-3">
+                    <div className="rounded-md bg-green-50 border border-green-200 p-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">
+                        <span className="text-sm font-medium text-green-800">
                           {t("change_to_return")}
                         </span>
                         <MonetaryDisplay
-                          className="font-semibold"
+                          className="font-semibold text-green-800"
                           amount={returnedAmount}
                         />
                       </div>
@@ -465,7 +477,11 @@ export function PaymentReconciliationSheet({
             </div>
 
             <SheetFooter>
-              <Button type="submit" disabled={isPending}>
+              <Button
+                type="submit"
+                disabled={isPending}
+                data-shortcut-id="submit-action"
+              >
                 {isPending ? (
                   <>
                     <CareIcon
@@ -477,6 +493,7 @@ export function PaymentReconciliationSheet({
                 ) : (
                   t("record_payment")
                 )}
+                <ShortcutBadge actionId="submit-action" className="bg-white" />
               </Button>
             </SheetFooter>
           </form>
