@@ -4555,6 +4555,7 @@
   "set_as_primary": "Set as Primary",
   "set_as_primary_description": "Mark this queue as the primary queue for the resource",
   "set_average_weekly_working_hours_for": "Set Average weekly working hours for",
+  "set_category": "Set Category",
   "set_home_facility": "Set as home facility",
   "set_password_now": "Set password now",
   "set_password_now_description": "Create the user with a password you define. The user can log in immediately.",

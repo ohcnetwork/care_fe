@@ -16,6 +16,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePreferredServicePointCategory } from "@/pages/Facility/queues/usePreferredServicePointCategory";
@@ -492,31 +493,35 @@ function InServiceColumnOptions({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-[200px]">
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger>{t("category")}</DropdownMenuSubTrigger>
+            <DropdownMenuSubTrigger>{t("set_category")}</DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
-              <DropdownMenuItem
-                onClick={() => setPreferredServicePointCategory(null)}
-                className={
-                  !preferredServicePointCategory?.id
-                    ? "bg-gray-100 dark:bg-gray-800"
-                    : ""
+              <RadioGroup
+                value={preferredServicePointCategory?.id || "all"}
+                onValueChange={(value) =>
+                  setPreferredServicePointCategory(
+                    value === "all" ? null : value,
+                  )
                 }
+                className="space-y-2 p-2"
               >
-                {t("all")}
-              </DropdownMenuItem>
-              {tokenCategories?.results.map((category) => (
-                <DropdownMenuItem
-                  key={category.id}
-                  onClick={() => setPreferredServicePointCategory(category.id)}
-                  className={
-                    preferredServicePointCategory?.id === category.id
-                      ? "bg-gray-100 dark:bg-gray-800"
-                      : ""
-                  }
-                >
-                  {category.name}
-                </DropdownMenuItem>
-              ))}
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="all" id="all" />
+                  <Label htmlFor="all" className="cursor-pointer">
+                    {t("all")}
+                  </Label>
+                </div>
+                {tokenCategories?.results.map((category) => (
+                  <div
+                    key={category.id}
+                    className="flex items-center space-x-2"
+                  >
+                    <RadioGroupItem value={category.id} id={category.id} />
+                    <Label htmlFor={category.id} className="cursor-pointer">
+                      {category.name}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
           <DropdownMenuItem onClick={() => setShowCompleteAllDialog(true)}>
