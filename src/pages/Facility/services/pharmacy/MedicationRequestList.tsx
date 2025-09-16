@@ -92,7 +92,7 @@ export default function MedicationRequestList({
       tagFilter("tags", TagResource.PRESCRIPTION, "multi", "tags"),
       createFilterConfig(
         "status",
-        "status",
+        t("status"),
         "command",
         Object.values(PrescriptionStatus).map((status) => ({
           value: status,

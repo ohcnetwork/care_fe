@@ -190,11 +190,11 @@ export default function ServiceRequestList({
       tagFilter("tags", TagResource.SERVICE_REQUEST, "multi", "tags"),
       createFilterConfig(
         "priority",
-        "priority",
+        t("priority"),
         "command",
         Object.values(Priority).map((p) => ({
           value: p,
-          label: p,
+          label: t(p),
           color: SERVICE_REQUEST_PRIORITY_COLORS[p],
         })),
       ),
