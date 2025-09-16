@@ -14,28 +14,34 @@ import {
 
 import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPriceDisplay";
 
-import { useCurrentLocationSilently } from "@/pages/Facility/locations/utils/useCurrentLocation";
+import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   CHARGE_ITEM_STATUS_COLORS,
   ChargeItemRead,
+  ChargeItemServiceResource,
 } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceStatus } from "@/types/billing/invoice/invoice";
 
 interface ChargeItemCardProps {
   chargeItem: ChargeItemRead;
-  serviceRequestId: string;
+  serviceResourceId: string;
+  serviceResourceType: ChargeItemServiceResource;
+  locationId?: string;
+  patientId?: string;
 }
 
 export function ChargeItemCard({
   chargeItem,
-  serviceRequestId,
+  serviceResourceId,
+  serviceResourceType,
+  locationId,
+  patientId,
 }: ChargeItemCardProps) {
   const isPaid = chargeItem.paid_invoice?.status === InvoiceStatus.balanced;
   const { facilityId } = useCurrentFacility();
-  const { locationId } = useCurrentLocationSilently();
   const invoiceUrl = chargeItem.paid_invoice
-    ? `/facility/${facilityId}/billing/invoices/${chargeItem.paid_invoice.id}?sourceUrl=/facility/${facilityId}/${locationId ? `locations/${locationId}/` : ""}services_requests/${serviceRequestId}`
+    ? `/facility/${facilityId}/billing/invoices/${chargeItem.paid_invoice.id}?sourceUrl=/facility/${facilityId}/${locationId ? `locations/${locationId}/` : ""}${patientId ? `patient/${patientId}/` : ""}${serviceResourceType === ChargeItemServiceResource.service_request ? "service_requests/" : "appointments/"}${serviceResourceId}`
     : null;
 
   return (
@@ -58,7 +64,9 @@ export function ChargeItemCard({
             </div>
           </div>
           <div className="font-semibold flex items-center mt-1">
-            <span>₹{chargeItem.total_price}</span>
+            <span>
+              <MonetaryDisplay amount={chargeItem.total_price} />
+            </span>
             {chargeItem.total_price_components?.length > 0 && (
               <Popover>
                 <PopoverTrigger>

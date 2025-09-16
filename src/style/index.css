@@ -190,22 +190,261 @@
     }
   }
 
+  /* Print utility classes for better content control */
+  .print-page-break-before {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  .print-page-break-after {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .print-avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .print-landscape {
+    page: landscape;
+  }
+
+  .print-portrait {
+    page: portrait;
+  }
+
+  .print-a4 {
+    page: a4;
+  }
+
+  .print-letter {
+    page: letter;
+  }
+
+  /* Responsive print font sizes */
+  .print-text-small {
+    font-size: 10pt !important;
+  }
+
+  .print-text-medium {
+    font-size: 12pt !important;
+  }
+
+  .print-text-large {
+    font-size: 14pt !important;
+  }
+
+  /* Print-specific scaling utilities */
+  .print-scale-sm {
+    transform: scale(0.85);
+    transform-origin: top left;
+  }
+
+  .print-scale-md {
+    transform: scale(0.95);
+    transform-origin: top left;
+  }
+
+  .print-scale-lg {
+    transform: scale(1.1);
+    transform-origin: top left;
+  }
+
+  /* Print-specific logo sizing */
+  .print-logo-small {
+    max-width: 80px !important;
+    max-height: 24px !important;
+  }
+
+  .print-logo-medium {
+    max-width: 120px !important;
+    max-height: 32px !important;
+  }
+
+  .print-logo-large {
+    max-width: 150px !important;
+    max-height: 40px !important;
+  }
+
   @media print {
+    /* Base page settings with auto size for responsive scaling */
     @page {
-      margin-top: 0;
+      size: auto; /* Auto size allows content to adapt to paper size */
+      margin: 0.5in; /* Consistent margins for all orientations */
     }
+
+    /* Portrait orientation specific settings */
+    @page portrait {
+      size: auto portrait;
+      margin: 0.75in 0.5in; /* More vertical margin for portrait */
+    }
+
+    /* Landscape orientation specific settings */
+    @page landscape {
+      size: auto landscape;
+      margin: 0.5in 0.75in; /* More horizontal margin for landscape */
+    }
+
+    /* Standard paper sizes with responsive scaling */
+    @page letter {
+      size: letter;
+      margin: 0.75in;
+    }
+
+    @page a4 {
+      size: A4;
+      margin: 20mm;
+    }
+
+    /* Content scaling and layout adjustments */
     body * {
       visibility: hidden;
     }
+
     #section-to-print,
     #section-to-print * {
       visibility: visible;
       -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
+
     #section-to-print {
       position: absolute;
       left: 0;
       top: 0;
+      width: 100%;
+      height: auto;
+      /* Allow content to scale and wrap naturally */
+      max-width: 100%;
+      box-sizing: border-box;
+      /* Ensure content fits within printable area */
+      overflow: visible;
+      /* Scale content to fit page width */
+      transform-origin: top left;
+      /* Responsive font scaling for print */
+      font-size: clamp(10pt, 2.5vw, 14pt);
+    }
+
+    /* Break handling for better content flow */
+    #section-to-print {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    /* Ensure tables and large elements scale properly */
+    #section-to-print table {
+      max-width: 100%;
+      width: 100%;
+      table-layout: auto;
+      font-size: inherit;
+      border-collapse: collapse;
+    }
+
+    #section-to-print img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* Specific styling for logos and small images in print */
+    #section-to-print img[alt*="Logo" i],
+    #section-to-print img[alt*="logo" i],
+    #section-to-print .logo img,
+    #section-to-print img.logo {
+      max-width: 150px !important;
+      max-height: 40px !important;
+      width: auto !important;
+      height: auto !important;
+      object-fit: contain !important;
+    }
+
+    /* Ensure header logos don't take too much space */
+    #section-to-print header img,
+    #section-to-print .header img {
+      max-width: 120px !important;
+      max-height: 35px !important;
+    }
+
+    /* Flexible content containers */
+    #section-to-print .container,
+    #section-to-print .content {
+      width: 100%;
+      max-width: none;
+      padding: 0.25in;
+      margin: 0;
+    }
+
+    /* Responsive text scaling based on content width */
+    @media print and (max-width: 8.5in) {
+      #section-to-print {
+        font-size: 11pt;
+        transform: scale(0.95);
+      }
+    }
+
+    @media print and (max-width: 6in) {
+      #section-to-print {
+        font-size: 10pt;
+        transform: scale(0.9);
+      }
+    }
+
+    /* Ensure content doesn't overflow page boundaries */
+    #section-to-print * {
+      max-width: 100%;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    /* Hide elements that shouldn't be printed */
+    .no-print,
+    button:not(.print-button),
+    .navbar,
+    .sidebar {
+      display: none !important;
+    }
+
+    /* Apply print utility classes */
+    .print-page-break-before {
+      page-break-before: always;
+      break-before: page;
+    }
+
+    .print-page-break-after {
+      page-break-after: always;
+      break-after: page;
+    }
+
+    .print-avoid-break {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .print-text-small {
+      font-size: 10pt !important;
+    }
+
+    .print-text-medium {
+      font-size: 12pt !important;
+    }
+
+    .print-text-large {
+      font-size: 14pt !important;
+    }
+
+    .print-scale-sm {
+      transform: scale(0.85) !important;
+      transform-origin: top left;
+    }
+
+    .print-scale-md {
+      transform: scale(0.95) !important;
+      transform-origin: top left;
+    }
+
+    .print-scale-lg {
+      transform: scale(1.1) !important;
+      transform-origin: top left;
     }
   }
 

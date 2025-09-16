@@ -20,9 +20,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
+  mapPriceComponent,
   MonetaryAmountInput,
   MonetaryDisplay,
-  mapPriceComponent,
 } from "@/components/ui/monetary-display";
 import {
   Select,
@@ -33,16 +33,24 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import { CompactConditionEditor } from "@/components/Billing/CompactConditionEditor";
 import Loading from "@/components/Common/Loading";
+import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
 import {
+  Condition,
+  conditionSchema,
+  Metrics,
+} from "@/types/base/condition/condition";
+import {
   MonetaryComponent,
   MonetaryComponentRead,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
+import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { MRP_CODE } from "@/types/billing/chargeItem/chargeItem";
 import {
   ChargeItemDefinitionCreate,
@@ -69,11 +77,13 @@ const priceComponentSchema = z.object({
       message: "Amount must be greater than 0",
     })
     .optional(),
+  conditions: z.array(conditionSchema),
 });
 
 interface ChargeItemDefinitionFormProps {
   facilityId: string;
   initialData?: ChargeItemDefinitionRead;
+  categorySlug?: string;
   isUpdate?: boolean;
   onSuccess?: (chargeItemDefinition: ChargeItemDefinitionRead) => void;
   onCancel?: () => void;
@@ -96,8 +106,10 @@ function MonetaryComponentSelectionSection({
   selectedComponents,
   onComponentToggle,
   onValueChange,
+  onConditionsChange,
   type,
   errors,
+  availableMetrics,
 }: {
   title: string;
   description: string;
@@ -105,8 +117,13 @@ function MonetaryComponentSelectionSection({
   selectedComponents: MonetaryComponent[];
   onComponentToggle: (component: MonetaryComponent, selected: boolean) => void;
   onValueChange: (component: MonetaryComponent, value: number) => void;
+  onConditionsChange: (
+    component: MonetaryComponent,
+    conditions: Condition[],
+  ) => void;
   type: MonetaryComponentType;
   errors: FieldErrors<z.infer<typeof priceComponentSchema>>[];
+  availableMetrics: Metrics[];
 }) {
   const { t } = useTranslation();
 
@@ -197,6 +214,21 @@ function MonetaryComponentSelectionSection({
                   {errors[idx].amount?.message || errors[idx].factor?.message}
                 </p>
               )}
+
+              {/* Condition editor for discount components only */}
+              {type === MonetaryComponentType.discount && (
+                <CompactConditionEditor
+                  conditions={component.conditions || []}
+                  availableMetrics={availableMetrics}
+                  onChange={(conditions) =>
+                    onConditionsChange(
+                      { ...component, monetary_component_type: type },
+                      conditions,
+                    )
+                  }
+                  className="mt-2"
+                />
+              )}
             </div>
           );
         })}
@@ -222,8 +254,15 @@ export function ChargeItemDefinitionForm({
   facilityId,
   initialData,
   isUpdate = false,
+  categorySlug,
   onSuccess = () => {
-    navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
+    if (categorySlug) {
+      navigate(
+        `/facility/${facilityId}/settings/charge_item_definitions/categories/${categorySlug}`,
+      );
+    } else {
+      navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
+    }
   },
   onCancel = () => {
     navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
@@ -240,10 +279,16 @@ export function ChargeItemDefinitionForm({
     }),
   });
 
+  // Fetch available metrics for conditions
+  const { data: availableMetrics = [] } = useQuery({
+    queryKey: ["metrics"],
+    queryFn: query(chargeItemDefinitionApi.listMetrics),
+  });
+
   // Main form schema
   const formSchema = z.object({
     title: z.string().min(1, { message: t("field_required") }),
-    slug: z
+    slug_value: z
       .string()
       .min(1, { message: t("field_required") })
       .regex(/^[a-z0-9-]+$/, {
@@ -253,6 +298,7 @@ export function ChargeItemDefinitionForm({
     description: z.string().optional(),
     purpose: z.string().optional(),
     derived_from_uri: z.string().url().optional(),
+    category: z.string(),
     price_components: z.array(priceComponentSchema).refine(
       (components) => {
         // Ensure there is exactly one base price component and it's the first one
@@ -281,17 +327,20 @@ export function ChargeItemDefinitionForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: initialData?.title || "",
-      slug: initialData?.slug || "",
+      slug_value: initialData?.slug_config.slug_value || "",
       status: initialData?.status || ChargeItemDefinitionStatus.active,
       description: initialData?.description,
       purpose: initialData?.purpose,
       derived_from_uri: initialData?.derived_from_uri,
-      price_components: initialData?.price_components.map(
-        mapPriceComponent,
-      ) || [
+      category: isUpdate ? initialData?.category.slug : categorySlug,
+      price_components: initialData?.price_components.map((component) => ({
+        ...mapPriceComponent(component),
+        conditions: component.conditions || [],
+      })) || [
         {
           monetary_component_type: MonetaryComponentType.base,
           amount: "0",
+          conditions: [],
         },
       ],
     },
@@ -302,7 +351,7 @@ export function ChargeItemDefinitionForm({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug", generateSlug(value.title || ""), {
+        form.setValue("slug_value", generateSlug(value.title || ""), {
           shouldValidate: true,
         });
       }
@@ -322,7 +371,7 @@ export function ChargeItemDefinitionForm({
   const { mutate: upsert, isPending } = useMutation({
     mutationFn: isUpdate
       ? mutate(chargeItemDefinitionApi.updateChargeItemDefinition, {
-          pathParams: { facilityId, id: initialData!.id },
+          pathParams: { facilityId, slug: initialData!.slug },
         })
       : mutate(chargeItemDefinitionApi.createChargeItemDefinition, {
           pathParams: { facilityId },
@@ -331,11 +380,19 @@ export function ChargeItemDefinitionForm({
       queryClient.invalidateQueries({ queryKey: ["chargeItemDefinitions"] });
       onSuccess?.(chargeItemDefinition);
     },
+    onError: (error) => {
+      console.error("Mutation failed:", error);
+    },
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const submissionData: ChargeItemDefinitionCreate = {
       ...values,
+      category: values.category,
+      price_components: values.price_components.map((component) => ({
+        ...component,
+        conditions: component.conditions,
+      })),
     };
     upsert(submissionData);
   };
@@ -376,7 +433,7 @@ export function ChargeItemDefinitionForm({
     type: MonetaryComponentType = MonetaryComponentType.tax,
   ) => {
     const currentComponents = form.getValues("price_components");
-    let newComponents: MonetaryComponent[];
+    let newComponents: z.infer<typeof priceComponentSchema>[];
 
     if (selected) {
       newComponents = [
@@ -387,6 +444,7 @@ export function ChargeItemDefinitionForm({
           factor: component.factor != null ? component.factor : undefined,
           amount:
             component.factor != null ? undefined : String(component.amount),
+          conditions: component.conditions || [],
         },
       ];
     } else {
@@ -413,9 +471,30 @@ export function ChargeItemDefinitionForm({
 
     const newComponents = [...currentComponents];
     newComponents[componentIndex] = {
-      ...component,
+      ...newComponents[componentIndex],
       factor: component.factor != null ? value : undefined,
       amount: component.factor != null ? undefined : String(value),
+    };
+
+    form.setValue("price_components", newComponents, { shouldValidate: true });
+  };
+
+  // Handle component conditions change
+  const handleComponentConditionsChange = (
+    component: MonetaryComponent,
+    conditions: Condition[],
+  ) => {
+    const currentComponents = form.getValues("price_components");
+    const componentIndex = currentComponents.findIndex((c) =>
+      monetaryComponentIsEqual(c, component),
+    );
+
+    if (componentIndex === -1) return;
+
+    const newComponents = [...currentComponents];
+    newComponents[componentIndex] = {
+      ...newComponents[componentIndex],
+      conditions,
     };
 
     form.setValue("price_components", newComponents, { shouldValidate: true });
@@ -432,6 +511,7 @@ export function ChargeItemDefinitionForm({
       updatedComponents[mrpIndex] = {
         ...updatedComponents[mrpIndex],
         amount: value,
+        // Todo: We should replace MRP code implementation with a generic informational code implementation
         code: mrpCode,
       };
       form.setValue("price_components", updatedComponents);
@@ -440,6 +520,7 @@ export function ChargeItemDefinitionForm({
         monetary_component_type: MonetaryComponentType.informational,
         amount: value,
         code: mrpCode,
+        conditions: [],
       };
       form.setValue("price_components", [...currentComponents, newComponent]);
     }
@@ -451,7 +532,7 @@ export function ChargeItemDefinitionForm({
         onSubmit={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          form.handleSubmit(onSubmit)();
+          form.handleSubmit(onSubmit as any)();
         }}
         className="space-y-6"
       >
@@ -478,7 +559,7 @@ export function ChargeItemDefinitionForm({
 
               <FormField
                 control={form.control}
-                name="slug"
+                name="slug_value"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel aria-required>{t("slug")}</FormLabel>
@@ -498,6 +579,29 @@ export function ChargeItemDefinitionForm({
                     <p className="text-sm text-gray-500 mt-1">
                       {t("slug_format_message")}
                     </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel aria-required>{t("category")}</FormLabel>
+                    <FormControl>
+                      <ResourceCategoryPicker
+                        facilityId={facilityId}
+                        resourceType={
+                          ResourceCategoryResourceType.charge_item_definition
+                        }
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        placeholder={t("select_category")}
+                        className="w-full"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -545,7 +649,7 @@ export function ChargeItemDefinitionForm({
           </CardHeader>
           <CardContent className="space-y-4">
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="description"
               render={({ field }) => (
                 <FormItem>
@@ -563,7 +667,7 @@ export function ChargeItemDefinitionForm({
             />
 
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="purpose"
               render={({ field }) => (
                 <FormItem>
@@ -581,7 +685,7 @@ export function ChargeItemDefinitionForm({
             />
 
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="derived_from_uri"
               render={({ field }) => (
                 <FormItem>
@@ -656,8 +760,10 @@ export function ChargeItemDefinitionForm({
                 )
               }
               onValueChange={handleComponentValueChange}
+              onConditionsChange={handleComponentConditionsChange}
               type={MonetaryComponentType.discount}
               errors={getSelectedComponentError(MonetaryComponentType.discount)}
+              availableMetrics={availableMetrics}
             />
 
             {/* Taxes */}
@@ -676,8 +782,10 @@ export function ChargeItemDefinitionForm({
                 )
               }
               onValueChange={handleComponentValueChange}
+              onConditionsChange={handleComponentConditionsChange}
               type={MonetaryComponentType.tax}
               errors={getSelectedComponentError(MonetaryComponentType.tax)}
+              availableMetrics={availableMetrics}
             />
 
             {/* MRP */}
@@ -732,7 +840,7 @@ export function ChargeItemDefinitionForm({
           >
             {t("cancel")}
           </Button>
-          <Button disabled={isPending}>
+          <Button type="submit" disabled={isPending}>
             {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

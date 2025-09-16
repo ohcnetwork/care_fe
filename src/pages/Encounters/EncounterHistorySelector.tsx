@@ -16,11 +16,11 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import {
+  dateFilter,
   encounterStatusFilter,
-  startedDateFilter,
   tagFilter,
-} from "@/components/ui/multi-filter/filter-list";
-import MultiFilter from "@/components/ui/multi-filter/multi-filter";
+} from "@/components/ui/multi-filter/filterConfigs";
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -34,9 +34,6 @@ import {
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
-import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { dateTimeQueryString } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   ENCOUNTER_STATUS_COLORS,
@@ -49,6 +46,9 @@ import {
   TagResource,
   getTagHierarchyDisplay,
 } from "@/types/emr/tagConfig/tagConfig";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { dateTimeQueryString } from "@/Utils/utils";
 
 interface EncounterCardProps {
   encounter: EncounterRead;
@@ -163,6 +163,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
 
   const [status, setStatus] = useState<string>();
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [tagsBehavior, setTagsBehavior] = useState<string>("any");
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
 
@@ -193,6 +194,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
       patientId,
       status,
       selectedTagIds,
+      tagsBehavior,
       dateFrom,
       dateTo,
     ],
@@ -205,7 +207,10 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             ? { patient_filter: patientId, facility: facilityId }
             : { patient: patientId }),
           ...(status && { status }),
-          ...(selectedTagIds.length > 0 && { tags: selectedTagIds.join(",") }),
+          ...(selectedTagIds.length > 0 && {
+            tags: selectedTagIds.join(","),
+            tags_behavior: tagsBehavior,
+          }),
           ...(dateFrom && {
             created_date_after: dateTimeQueryString(dateFrom),
           }),
@@ -237,37 +242,41 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
   }, [inView, hasNextPage, fetchNextPage]);
 
   const onFilterUpdate = (query: Record<string, unknown>) => {
-    const [key, value] = Object.entries(query)[0];
-    const filterValue = value as
-      | string
-      | TagConfig[]
-      | { from: Date; to: Date };
-    switch (key) {
-      case "status":
-        setStatus(filterValue as string);
-        break;
-      case "tags":
-        setSelectedTagIds(
-          (filterValue as TagConfig[])?.map((tag) => tag.id) ?? [],
-        );
-        break;
-      case "created_date":
-        if (
-          typeof filterValue === "object" &&
-          "from" in filterValue &&
-          "to" in filterValue
-        ) {
-          setDateFrom(filterValue.from as Date);
-          setDateTo(filterValue.to as Date);
-        }
-        break;
+    for (const [key, value] of Object.entries(query)) {
+      const filterValue = value as
+        | string
+        | TagConfig[]
+        | { from: Date; to: Date };
+      switch (key) {
+        case "status":
+          setStatus(filterValue as string);
+          break;
+        case "tags":
+          setSelectedTagIds(
+            (filterValue as TagConfig[])?.map((tag) => tag.id) ?? [],
+          );
+          break;
+        case "tags_behavior":
+          setTagsBehavior(filterValue as string);
+          break;
+        case "created_date":
+          if (
+            typeof filterValue === "object" &&
+            "from" in filterValue &&
+            "to" in filterValue
+          ) {
+            setDateFrom(filterValue.from as Date);
+            setDateTo(filterValue.to as Date);
+          }
+          break;
+      }
     }
   };
 
   const filters = [
     encounterStatusFilter("status"),
     tagFilter("tags", TagResource.ENCOUNTER),
-    startedDateFilter("created_date"),
+    dateFilter("created_date"),
   ];
   const {
     selectedFilters,

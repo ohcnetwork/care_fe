@@ -52,7 +52,7 @@ import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import {
   MEDICATION_REQUEST_TIMING_OPTIONS,
-  MedicationRequest,
+  MedicationRequestCreate,
   MedicationRequestRead,
   displayMedicationName,
 } from "@/types/emr/medicationRequest/medicationRequest";
@@ -234,7 +234,7 @@ export function MedicationStatementQuestion({
     const newMedications = selected.map((record) => {
       if ("dosage_instruction" in record) {
         // Convert MedicationRequest to MedicationStatementRequest
-        const request = record as MedicationRequest;
+        const request = record as MedicationRequestCreate;
         return {
           ...MEDICATION_STATEMENT_INITIAL_VALUE,
           medication: request.medication,
@@ -963,7 +963,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
 
 // Helper function to find the frequency option from timing
 const reverseFrequencyOption = (
-  timing?: MedicationRequest["dosage_instruction"][0]["timing"],
+  timing?: MedicationRequestCreate["dosage_instruction"][0]["timing"],
 ) => {
   if (!timing?.code?.code) return undefined;
   return Object.entries(MEDICATION_REQUEST_TIMING_OPTIONS).find(
