@@ -234,7 +234,10 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
       {/* Password Dialog for Setup */}
       <PasswordDialog
         open={showPasswordDialog}
-        onOpenChange={closePasswordDialog}
+        onOpenChange={(open) => {
+          closePasswordDialog();
+          if (!open) setSetupPasswordError("");
+        }}
         onSubmit={(password) => setupTOTP({ password })}
         title={t("confirm_password")}
         description={t("please_enter_current_password")}
@@ -248,7 +251,13 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
       {setupData && (
         <TOTPSetupDialog
           open={showSetupDialog}
-          onOpenChange={closeSetupDialog}
+          onOpenChange={(open) => {
+            closeSetupDialog();
+            if (!open) {
+              setVerificationError("");
+              setSetupData(null);
+            }
+          }}
           setupData={setupData}
           onVerify={(code) => verifyTOTP({ code })}
           verificationError={verificationError}
@@ -272,7 +281,10 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
       {/* Password Dialog for Disable */}
       <PasswordDialog
         open={showDisableDialog}
-        onOpenChange={closeDisableDialog}
+        onOpenChange={(open) => {
+          closeDisableDialog();
+          if (!open) setDisableError("");
+        }}
         onSubmit={(password) => disableTOTP({ password })}
         title={t("disable_two_factor_authentication")}
         description={t("disable_2fa_confirmation")}
@@ -291,7 +303,10 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
       {/* Password Dialog for Regenerate */}
       <PasswordDialog
         open={showRegenerateConfirm}
-        onOpenChange={closeRegenerateConfirm}
+        onOpenChange={(open) => {
+          closeRegenerateConfirm();
+          if (!open) setRegeneratePasswordError("");
+        }}
         onSubmit={(password) => regenerateBackupCodes({ password })}
         title={t("regenerate_backup_codes")}
         description={t("regenerate_backup_codes_warning")}

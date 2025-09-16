@@ -8,7 +8,6 @@ import { ValueSetList } from "@/components/ValueSet/ValueSetList";
 import { AppRoutes } from "@/Routers/AppRouter";
 import { PermissionsIndex } from "@/pages/Admin/Permissions/PermissionsIndex";
 import RolesIndex from "@/pages/Admin/Roles/RolesIndex";
-import TagConfigForm from "@/pages/Admin/TagConfig/TagConfigForm";
 import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
 import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
 import AdminOrganizationList from "@/pages/Admin/organizations/AdminOrganizationList";
@@ -33,9 +32,7 @@ const AdminRoutes: AppRoutes = {
     <PatientIdentifierConfigForm configId={id} />
   ),
   "/admin/tag_config": () => <TagConfigList />,
-  "/admin/tag_config/new": () => <TagConfigForm />,
   "/admin/tag_config/:id": ({ id }) => <TagConfigView tagId={id} />,
-  "/admin/tag_config/:id/edit": ({ id }) => <TagConfigForm configId={id} />,
   "/admin/rbac/permissions": () => <PermissionsIndex />,
   "/admin/rbac/roles": () => <RolesIndex />,
   ...["govt", "product_supplier", "role"].reduce((acc: AppRoutes, type) => {

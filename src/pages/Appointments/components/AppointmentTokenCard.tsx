@@ -4,26 +4,32 @@ import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
-import { formatName, formatPatientAge } from "@/Utils/utils";
+import { formatPatientAge } from "@/Utils/utils";
 import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
-import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
 import { FacilityRead } from "@/types/facility/facility";
-import { Appointment } from "@/types/scheduling/schedule";
+import {
+  Appointment,
+  formatScheduleResourceName,
+} from "@/types/scheduling/schedule";
+import { TokenRead, renderTokenNumber } from "@/types/tokens/token/token";
 
 interface Props {
   id?: string;
-  appointment: Appointment;
+  token: TokenRead;
   facility: FacilityRead;
+  appointment?: Appointment;
 }
 
-const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
-  const { patient } = appointment;
+const TokenCard = ({ id, token, facility, appointment }: Props) => {
   const { t } = useTranslation();
+
+  // Get patient from token or appointment
+  const patient = token.patient || appointment?.patient;
 
   return (
     <Card
       id={id}
-      className="p-6 lg:w-[25rem] border border-gray-300 relative hover:scale-105 hover:rotate-1 hover:shadow-xl transition-all duration-300 ease-in-out print:scale-100 print:rotate-0 print:shadow-none print:hover:scale-100 print:hover:rotate-0 print:hover:shadow-none"
+      className="p-6 border border-gray-300 relative transition-all duration-300 ease-in-out print:scale-100 print:rotate-0 print:shadow-none print:hover:scale-100 print:hover:rotate-0 print:hover:shadow-none"
     >
       <div className="absolute inset-0 opacity-[0.1] pointer-events-none bg-[url('/images/care_logo_gray.svg')] bg-center bg-no-repeat bg-[length:40%_auto] lg:bg-[length:60%_auto]" />
 
@@ -49,11 +55,13 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
         <div className="mt-4 flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <Label>{t("name")}</Label>
-            <p className="font-semibold break-words">{patient.name}</p>
-            <p className="text-sm text-gray-600 font-medium">
-              {formatPatientAge(patient, true)},{" "}
-              {t(`GENDER__${patient.gender}`)}
-            </p>
+            <p className="font-semibold break-words">{patient?.name || "--"}</p>
+            {patient && (
+              <p className="text-sm text-gray-600 font-medium">
+                {formatPatientAge(patient, true)},{" "}
+                {t(`GENDER__${patient.gender}`)}
+              </p>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -61,30 +69,35 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
               <Label className="text-black font-semibold text-sm/none whitespace-nowrap">
                 {t("token_no")}
               </Label>
-              <p className="text-5xl font-bold leading-none">
-                {/* TODO: get token number from backend */}
-                {getFakeTokenNumber(appointment)}
+              <p className="text-2xl font-bold leading-none">
+                {renderTokenNumber(token)}
               </p>
             </div>
           </div>
         </div>
         <div className="mt-4 flex justify-between items-start gap-4">
           <div className="space-y-2 flex-1 min-w-0">
-            <div>
-              <Label>{t("practitioner", { count: 1 })}:</Label>
-              <p className="text-sm font-semibold break-words">
-                {formatName(appointment.user)}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-600">
-                {formatAppointmentSlotTime(appointment)}
-              </p>
-            </div>
+            {appointment && (
+              <>
+                <div>
+                  <Label>
+                    {t(`schedulable_resource__${appointment.resource_type}`)}:
+                  </Label>
+                  <p className="text-sm font-semibold break-words">
+                    {formatScheduleResourceName(appointment)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-600">
+                    {formatAppointmentSlotTime(appointment)}
+                  </p>
+                </div>
+              </>
+            )}
           </div>
 
           <div>
-            <QRCodeSVG size={64} value={patient.id} />
+            <QRCodeSVG size={64} value={patient?.id || ""} />
           </div>
         </div>
       </div>
@@ -92,4 +105,4 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
   );
 };
 
-export { AppointmentTokenCard };
+export { TokenCard };
