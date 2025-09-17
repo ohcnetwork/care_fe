@@ -18,6 +18,7 @@ import {
   CheckCircle2Icon,
   EyeIcon,
   Loader2,
+  PlusSquare,
   ReceiptText,
   SquareActivity,
   X,
@@ -91,6 +92,7 @@ import {
   APPOINTMENT_STATUS_COLORS,
   AppointmentFinalStatuses,
   AppointmentRead,
+  AppointmentStatus,
   AppointmentUpdateRequest,
   formatScheduleResourceName,
   SchedulableResourceType,
@@ -131,6 +133,7 @@ export default function AppointmentDetail(props: Props) {
   const { goBack } = useAppHistory();
   const [params, setQueryParams] = useQueryParams();
   const { showSuccess } = params;
+
   useFacilityShortcuts();
   const { canViewAppointments, canWriteAppointment } = getPermissions(
     hasPermission,
@@ -188,6 +191,12 @@ export default function AppointmentDetail(props: Props) {
   if (!facility || !appointment) {
     return <Loading />;
   }
+  const currentStatus = appointment.status;
+
+  const canCheckIn = isBefore(
+    appointment.token_slot.start_datetime,
+    addDays(new Date(), 1),
+  );
 
   return (
     <Page title={t("appointment_details")}>
@@ -260,6 +269,8 @@ export default function AppointmentDetail(props: Props) {
                     updateAppointment={updateAppointment}
                     canWriteAppointment={canWriteAppointment}
                     isUpdating={isUpdating}
+                    canCheckIn={canCheckIn}
+                    currentStatus={currentStatus}
                   />
                 </div>
               )
@@ -275,10 +286,6 @@ export default function AppointmentDetail(props: Props) {
           <AppointmentDetailsContent
             appointment={appointment}
             facility={facility}
-            canWriteAppointment={canWriteAppointment}
-            updateAppointment={updateAppointment}
-            isUpdating={isUpdating}
-            facilityId={facilityId}
           />
           <div className="mt-6 ml-0 md:ml-4 flex-1">
             <h3 className="text-base font-semibold">{t("token")}</h3>
@@ -438,12 +445,56 @@ export default function AppointmentDetail(props: Props) {
                   {t("quick_actions")}
                 </h3>
                 <div className="grid gap-1 grid-cols-1 md:grid-cols-2 mt-1">
+                  {/* Start Consultation - For booked and checked in appointments */}
+                  {canCheckIn &&
+                    ["booked", "checked_in"].includes(currentStatus) &&
+                    (appointment.associated_encounter?.id ? (
+                      // When encounter exists: set status to in_consultation and redirect
+                      <div
+                        onClick={() => {
+                          updateAppointment({
+                            status: "in_consultation",
+                            note: appointment.note,
+                          });
+                          navigate(
+                            `/facility/${facilityId}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
+                          );
+                        }}
+                      >
+                        <QuickAction
+                          icon={<PlusSquare className="text-primary-500" />}
+                          title={t("start_consultation")}
+                        />
+                      </div>
+                    ) : (
+                      // When no encounter exists: create encounter and set status to in_consultation
+                      <CreateEncounterForm
+                        patientId={appointment.patient.id}
+                        facilityId={facilityId}
+                        patientName={appointment.patient.name}
+                        appointment={appointment.id}
+                        disableRedirectOnSuccess={true}
+                        trigger={
+                          <QuickAction
+                            icon={<PlusSquare className="text-primary-500" />}
+                            title={t("start_consultation")}
+                          />
+                        }
+                        onSuccess={() => {
+                          updateAppointment({
+                            status: "in_consultation",
+                            note: appointment.note,
+                          });
+                        }}
+                      />
+                    ))}
                   {!appointment.associated_encounter?.id && (
                     <CreateEncounterForm
                       patientId={appointment.patient.id}
                       facilityId={facilityId}
                       patientName={appointment.patient.name}
                       appointment={appointment.id}
+                      disableRedirectOnSuccess={true}
                       trigger={
                         <QuickAction
                           icon={<SquareActivity className="text-orange-500" />}
@@ -469,10 +520,6 @@ const AppointmentDetailsContent = ({
 }: {
   appointment: AppointmentRead;
   facility: FacilityRead;
-  canWriteAppointment: boolean;
-  updateAppointment: (data: AppointmentUpdateRequest) => void;
-  isUpdating: boolean;
-  facilityId: string;
 }) => {
   const { t } = useTranslation();
 
@@ -709,6 +756,8 @@ interface AppointmentActionsProps {
   updateAppointment: (data: AppointmentUpdateRequest) => void;
   canWriteAppointment: boolean;
   isUpdating: boolean;
+  canCheckIn: boolean;
+  currentStatus: AppointmentStatus;
 }
 
 const AppointmentActions = ({
@@ -717,6 +766,8 @@ const AppointmentActions = ({
   updateAppointment,
   canWriteAppointment,
   isUpdating,
+  canCheckIn,
+  currentStatus,
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -730,14 +781,7 @@ const AppointmentActions = ({
 
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
-  const currentStatus = appointment.status;
   const [selectedDate, setSelectedDate] = useState(new Date());
-
-  // Allow check-in/start consultation as long as the appointment is before 24 hours ahead of slot's start time
-  const canCheckIn = isBefore(
-    appointment.token_slot.start_datetime,
-    addDays(new Date(), 1),
-  );
 
   const [note, setNote] = useState(appointment.note);
 
@@ -781,7 +825,7 @@ const AppointmentActions = ({
       {/* Primary Actions */}
       <div className="flex items-center justify-between gap-2">
         {/* Check In - Only for booked appointments */}
-        {currentStatus === "booked" && (
+        {currentStatus && currentStatus === "booked" && (
           <Button
             disabled={!canCheckIn}
             variant="primary"
