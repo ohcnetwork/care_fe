@@ -70,7 +70,12 @@ export const CodingField = ({
     form.setValue(`${name}.display`, "", { shouldValidate: true });
   };
   return (
-    <div className={cn("flex gap-4 items-start", className)}>
+    <div
+      className={cn(
+        "flex flex-col sm:flex-row gap-4 sm:items-start",
+        className,
+      )}
+    >
       <FormField
         control={form.control}
         name={`${name}.code`}
@@ -113,11 +118,12 @@ export const CodingField = ({
         size="icon"
         onClick={isVerified ? undefined : handleVerify}
         disabled={isLookupPending || isVerified}
-        className={
+        className={cn(
+          "self-end sm:self-auto",
           isVerified
             ? "bg-transparent border-none shadow-none hover:bg-transparent hover:border-none hover:shadow-none"
-            : "hover:border-gray-400 hover:bg-gray-100"
-        }
+            : "hover:border-gray-400 hover:bg-gray-100",
+        )}
       >
         {isVerified ? (
           <CheckIcon className="size-4 text-green-600 transition-colors duration-300" />
