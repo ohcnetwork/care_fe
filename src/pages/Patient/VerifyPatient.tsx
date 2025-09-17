@@ -1,9 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   Download,
   Printer,
-  SettingsIcon,
   SquareActivity,
   Stethoscope,
 } from "lucide-react";
@@ -14,7 +13,6 @@ import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
@@ -33,29 +31,24 @@ import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 
-import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
 import { useEncounterShortcutDisplays } from "@/hooks/useEncounterShortcuts";
 import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
-import { PatientHoverCard } from "@/pages/Facility/services/serviceRequests/PatientHoverCard";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import patientApi from "@/types/emr/patient/patientApi";
-import {
-  getTagHierarchyDisplay,
-  TagResource,
-} from "@/types/emr/tagConfig/tagConfig";
 import { renderTokenNumber } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import query from "@/Utils/request/query";
 import { saveElementAsImage } from "@/Utils/utils";
-import { useQueryClient } from "@tanstack/react-query";
 
 export default function VerifyPatient() {
   const getShortcutDisplay = useEncounterShortcutDisplays();
-  const queryClient = useQueryClient();
   useFacilityShortcuts("patient-home");
   const { t } = useTranslation();
   const [qParams] = useQueryParams();
+  const queryClient = useQueryClient();
+
   const { phone_number, year_of_birth, partial_id, queue_id, token_id } =
     qParams;
   const { goBack } = useAppHistory();
@@ -116,56 +109,23 @@ export default function VerifyPatient() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="space-y-6 lg:col-span-2">
               <div className="">
-                <Card className="bg-white shadow-sm">
-                  <CardHeader className="pb-4">
-                    <div className="space-y-4">
-                      <PatientHoverCard
-                        patient={patientData}
-                        facilityId={facilityId || ""}
-                      />
-                    </div>
-                  </CardHeader>
-                </Card>
-                <Card className="bg-white shadow-sm mx-2 md:mx-10 rounded-t-none">
-                  <CardHeader className="p-2">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        {patientData.instance_tags.map((t) => (
-                          <Badge key={t.id} variant="outline">
-                            {getTagHierarchyDisplay(t)}
-                          </Badge>
-                        ))}
-                      </div>
-                      <TagAssignmentSheet
-                        entityType={TagResource.PATIENT}
-                        entityId={patientData.id}
-                        currentTags={patientData.instance_tags}
-                        onUpdate={() => {
-                          queryClient.invalidateQueries({
-                            queryKey: [
-                              "patient-verify",
-                              phone_number,
-                              year_of_birth,
-                              partial_id,
-                            ],
-                          });
-                        }}
-                        canWrite={true}
-                        trigger={
-                          <Button variant="ghost">
-                            <SettingsIcon
-                              className=" text-gray-950"
-                              strokeWidth={1.5}
-                            />
-                            <span className="font-semibold underline">
-                              {t("manage_tags")}
-                            </span>
-                          </Button>
-                        }
-                      />
-                    </div>
-                  </CardHeader>
-                </Card>
+                <PatientInfoCard
+                  tags={patientData.instance_tags}
+                  tagEntityType="patient"
+                  tagEntityId={patientData.id}
+                  patient={patientData}
+                  facilityId={facilityId}
+                  onTagsUpdate={() => {
+                    queryClient.invalidateQueries({
+                      queryKey: [
+                        "patient-verify",
+                        phone_number,
+                        year_of_birth,
+                        partial_id,
+                      ],
+                    });
+                  }}
+                />
               </div>
 
               <div className="grid gap-4 grid-cols-2  lg:grid-cols-3">

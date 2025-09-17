@@ -89,8 +89,8 @@ export function ChargeItemsSection({
 
   return (
     <>
-      <Card>
-        <CardHeader>
+      <Card className="bg-white shadow-sm rounded-md p-1">
+        <CardHeader className="p-2 bg-gray-50">
           <div className="flex items-center justify-between">
             <CardTitle>{t("charge_items")}</CardTitle>
             <div className="flex items-center gap-2">
@@ -130,7 +130,7 @@ export function ChargeItemsSection({
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-2 px-1">
           {chargeItems?.results.map((chargeItem) => (
             <ChargeItemCard
               key={chargeItem.id}
