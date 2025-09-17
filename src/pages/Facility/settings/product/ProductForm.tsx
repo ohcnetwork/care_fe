@@ -360,9 +360,9 @@ export function ProductFormContent({
                     <FormControl>
                       <ProductKnowledgeSelect
                         value={productKnowledgeData?.find(
-                          (pk) => pk.id === field.value,
+                          (pk) => pk.slug === field.value,
                         )}
-                        onChange={(selected) => field.onChange(selected.id)}
+                        onChange={(selected) => field.onChange(selected.slug)}
                         className="border-gray-300 font-normal text-gray-700"
                         enableFavorites
                       />
