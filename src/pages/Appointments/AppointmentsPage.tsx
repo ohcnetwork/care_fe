@@ -678,7 +678,12 @@ function AppointmentColumn(props: {
                 ref={index === appointments.length - 1 ? ref : undefined}
               >
                 <Link
-                  href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`}
+                  href={
+                    appointment.resource_type ===
+                    SchedulableResourceType.Practitioner
+                      ? `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`
+                      : `appointments/${appointment.id}`
+                  }
                   className="text-inherit"
                 >
                   <AppointmentCard
