@@ -7,12 +7,14 @@ import {
   parse,
 } from "date-fns";
 
-import { Time } from "@/Utils/types";
 import {
-  Appointment,
+  AvailabilityDateTime,
+  AvailabilitySlotType,
   ScheduleAvailability,
   ScheduleException,
 } from "@/types/scheduling/schedule";
+import { Time } from "@/Utils/types";
+import { formatTimeShort } from "@/Utils/utils";
 
 export const isDateInRange = (
   date: Date,
@@ -51,7 +53,9 @@ type VirtualSlot = {
 };
 
 export function computeAppointmentSlots(
-  availability: ScheduleAvailability & { slot_type: "appointment" },
+  availability: ScheduleAvailability & {
+    slot_type: AvailabilitySlotType.Appointment;
+  },
   exceptions: ScheduleException[],
   referenceDate: Date = new Date(),
 ) {
@@ -149,20 +153,6 @@ export const filterAvailabilitiesByDayOfWeek = (
   );
 };
 
-/**
- * TODO: Remove this once we have token number generation system.
- * This is a temporary function to generate a fake token number for an appointment.
- */
-export const getFakeTokenNumber = (appointment: Appointment) => {
-  // Convert UUID to a number by summing char codes
-  const hash = appointment.id
-    .split("")
-    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-
-  // Get a number between 10-99
-  return (hash % 90) + 10;
-};
-
 export const calculateSlotDuration = (
   startTime: Time,
   endTime: Time,
@@ -172,4 +162,13 @@ export const calculateSlotDuration = (
   const end = parse(endTime, "HH:mm", new Date());
   const result = differenceInMinutes(end, start) / numOfSlots;
   return +result.toFixed(2);
+};
+
+// TODO: remove this in favour of supporting flexible day of week availability
+export const formatAvailabilityTime = (
+  availability: AvailabilityDateTime[],
+) => {
+  const startTime = availability[0].start_time;
+  const endTime = availability[0].end_time;
+  return `${formatTimeShort(startTime)} - ${formatTimeShort(endTime)}`;
 };
