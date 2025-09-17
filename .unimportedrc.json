@@ -4,17 +4,22 @@
     "**/*.d.ts"
   ],
   "ignoreUnimported": [
+    "src/CAREUI/misc/SectionNavigator.tsx",
     "src/Locale/update_locale.js",
     "src/PluginRegistry.ts",
-    "src/pages/Encounters/ReportBuilder/ReportBuilderSheet.tsx",
-    "src/pluginTypes.ts",
-    "src/service-worker.ts",
+    "src/components/Patient/PatientIdentifierFilter.tsx",
+    "src/components/ui/context-menu.tsx",
     "src/components/ui/definition-list.tsx",
-    "src/pages/Admin/organizations/components/AdminOrganizationSelector.tsx"
+    "src/pages/Admin/organizations/components/AdminOrganizationSelector.tsx",
+    "src/pages/Encounters/ReportBuilder/ReportBuilderSheet.tsx",
+    "src/pages/Facility/billing/invoice/EditInvoiceSheet.tsx",
+    "src/pluginTypes.ts",
+    "src/service-worker.ts"
   ],
   "ignoreUnused": [
     "@fontsource/figtree",
     "@originjs/vite-plugin-federation",
+    "@radix-ui/react-context-menu",
     "@tailwindcss/vite",
     "@vitejs/plugin-react",
     "browserslist-useragent-regexp",
@@ -42,9 +47,22 @@
       ]
     ],
     [
+      "tailwindcss/colors",
+      [
+        "node_modules\\@tailwindcss\\forms\\src\\index.js",
+        "node_modules\\@tailwindcss\\typography\\src\\styles.js"
+      ]
+    ],
+    [
       "tailwindcss/defaultTheme",
       [
         "node_modules/@tailwindcss/forms/src/index.js"
+      ]
+    ],
+    [
+      "tailwindcss/defaultTheme",
+      [
+        "node_modules\\@tailwindcss\\forms\\src\\index.js"
       ]
     ],
     [
@@ -56,15 +74,35 @@
       ]
     ],
     [
+      "tailwindcss/plugin",
+      [
+        "node_modules\\@tailwindcss\\forms\\src\\index.js",
+        "node_modules\\@tailwindcss\\typography\\src\\index.js",
+        "node_modules\\@tailwindcss\\container-queries\\dist\\index.js"
+      ]
+    ],
+    [
       "tsx/cjs",
       [
         "node_modules/find-cypress-specs/src/index.js"
       ]
     ],
     [
+      "tsx/cjs",
+      [
+        "node_modules\\find-cypress-specs\\src\\index.js"
+      ]
+    ],
+    [
       "virtual:pwa-register",
       [
         "src/index.tsx"
+      ]
+    ],
+    [
+      "virtual:pwa-register",
+      [
+        "src\\index.tsx"
       ]
     ]
   ],
