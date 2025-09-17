@@ -18,6 +18,11 @@ export const SummaryPanelDetailTab = () => {
   return (
     <div>
       <SummaryPanelEncounterDetails />
+      {canEdit && (
+        <div className="xl:hidden mt-4 md:flex block">
+          <Forms />
+        </div>
+      )}
       <div className="hidden xl:flex flex-col gap-4">
         <EncounterDetails />
         <EncounterTags />

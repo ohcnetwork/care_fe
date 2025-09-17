@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { FilterConfig, FilterState, FilterValues } from "./utils";
+import { FilterConfig, FilterState, FilterValues } from "./Utils";
 
 export default function useMultiFilterState(
   filters: FilterConfig[],

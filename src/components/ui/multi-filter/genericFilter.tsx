@@ -17,7 +17,7 @@ import {
   FilterOption,
   FilterValues,
   getColorForOption,
-} from "./utils/utils";
+} from "./utils/Utils";
 
 export default function GenericFilter({
   filter,

@@ -26,7 +26,7 @@ import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { tagFilter } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
-import { createFilterConfig } from "@/components/ui/multi-filter/utils/utils";
+import { createFilterConfig } from "@/components/ui/multi-filter/utils/Utils";
 import {
   Priority,
   SERVICE_REQUEST_PRIORITY_COLORS,
@@ -36,6 +36,7 @@ import {
 } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import locationApi from "@/types/location/locationApi";
 import query from "@/Utils/request/query";
 
@@ -184,6 +185,12 @@ export default function ServiceRequestList({
   });
   const [isBarcodeOpen, setBarcodeOpen] = useState(false);
 
+  const tagIds = qParams.tags?.split(",") || [];
+  const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
+  const selectedTags = tagQueries
+    .map((query) => query.data)
+    .filter(Boolean) as TagConfig[];
+
   // Create filter configurations
   const filters = useMemo(
     () => [
@@ -204,19 +211,14 @@ export default function ServiceRequestList({
 
   // Handle filter updates
   const onFilterUpdate = (query: Record<string, unknown>) => {
-    // Update the query parameters based on filter changes
-    const updates: Record<string, unknown> = {};
-
-    if (query.tags) {
-      const tags = query.tags as TagConfig[];
-      updates.tags = tags.length > 0 ? tags.map((tag) => tag.id) : undefined;
+    for (const [key, value] of Object.entries(query)) {
+      switch (key) {
+        case "tags":
+          query.tags = (value as TagConfig[])?.map((tag) => tag.id);
+          break;
+      }
     }
-
-    if (query.priority) {
-      updates.priority = query.priority;
-    }
-
-    updateQuery(updates);
+    updateQuery(query);
   };
 
   // Use the multi-filter state hook
@@ -226,7 +228,10 @@ export default function ServiceRequestList({
     handleOperationChange,
     handleClearAll,
     handleClearFilter,
-  } = useMultiFilterState(filters, onFilterUpdate);
+  } = useMultiFilterState(filters, onFilterUpdate, {
+    ...qParams,
+    tags: selectedTags,
+  });
 
   const { data: location } = useQuery({
     queryKey: ["location", facilityId, locationId],
@@ -249,6 +254,7 @@ export default function ServiceRequestList({
         tags: qParams.tags,
         ordering: "-created_date",
         patient: qParams.patient,
+        tags_behavior: qParams.tags_behavior,
       },
     }),
   });
@@ -312,6 +318,7 @@ export default function ServiceRequestList({
                 className="flex sm:flex-row flex-wrap sm:items-center"
                 triggerButtonClassName="self-start sm:self-center"
                 clearAllButtonClassName="self-center"
+                facilityId={facilityId}
               />
             </div>
             <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full sm:w-auto">

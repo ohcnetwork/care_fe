@@ -178,18 +178,21 @@ export function ResourceDefinitionCategoryPicker<T>({
 
   const { data: favoritesResponse } = useQuery({
     queryKey: ["favorites", resourceType, facilityId],
-    queryFn: query(favoritesConfig!.listFavorites.queryFn, {
-      queryParams: {
-        facility: facilityId,
-        favorite_list: "default",
-      },
-    }),
-    enabled: enableFavorites,
+    queryFn: favoritesConfig
+      ? query(favoritesConfig.listFavorites.queryFn, {
+          queryParams: {
+            facility: facilityId,
+            favorite_list: "default",
+          },
+        })
+      : () => Promise.resolve([]),
+    enabled: enableFavorites && !!favoritesConfig,
   });
 
   const addFavoriteMutation = useMutation({
     mutationFn: async (slug: string) => {
-      const mutateFn = mutate(favoritesConfig!.addFavorite.queryFn, {
+      if (!favoritesConfig) throw new Error("Favorites config not provided");
+      const mutateFn = mutate(favoritesConfig.addFavorite.queryFn, {
         pathParams: { slug },
         queryParams: { facility: facilityId },
       });
@@ -204,7 +207,8 @@ export function ResourceDefinitionCategoryPicker<T>({
 
   const removeFavoriteMutation = useMutation({
     mutationFn: async (slug: string) => {
-      const mutateFn = mutate(favoritesConfig!.removeFavorite.queryFn, {
+      if (!favoritesConfig) throw new Error("Favorites config not provided");
+      const mutateFn = mutate(favoritesConfig.removeFavorite.queryFn, {
         pathParams: { slug },
         queryParams: { facility: facilityId },
       });

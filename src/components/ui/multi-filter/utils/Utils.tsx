@@ -1,5 +1,6 @@
 import React from "react";
 
+import { GenericSelectedBadge } from "@/components/ui/multi-filter/genericFilter";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { addDays, subDays, subMonths, subWeeks, subYears } from "date-fns";
 
@@ -103,6 +104,24 @@ export type Operation = {
   label: string;
 };
 
+function defaultRenderSelected(selected: FilterValues) {
+  const selectedValues = selected as string[];
+  if (typeof selectedValues[0] === "string") {
+    const option = selectedValues[0];
+    return (
+      <GenericSelectedBadge
+        selectedValue={option}
+        selectedLength={selectedValues.length}
+      />
+    );
+  }
+  return <></>;
+}
+
+function defaultGetOperations(_selected: FilterValues) {
+  return [{ label: "is" }];
+}
+
 export function createFilterConfig(
   key: string,
   label: string,
@@ -124,9 +143,9 @@ export function createFilterConfig(
     key,
     label,
     options,
-    renderSelected,
-    getOperations,
-    mode,
+    renderSelected: renderSelected || defaultRenderSelected,
+    getOperations: getOperations || defaultGetOperations,
+    mode: mode || "single",
     icon,
     operationKey,
   };

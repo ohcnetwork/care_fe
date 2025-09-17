@@ -202,7 +202,7 @@ const charge_item_questionnaire: QuestionnaireDetail = {
 
 const appointment_questionnaire: QuestionnaireDetail = {
   id: "appointment",
-  slug: "charge_item",
+  slug: "appointment",
   version: "0.0.1",
   title: "Appointment",
   status: "active",

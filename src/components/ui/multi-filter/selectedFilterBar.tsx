@@ -13,7 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import FilterRenderer from "./filterRenderer";
 import useMultiFilter from "./utils/useMultiFilter";
-import { FilterState, FilterValues, Operation } from "./utils/utils";
+import { FilterState, FilterValues, Operation } from "./utils/Utils";
 
 function SubMenuFilter({
   selectedOption,
@@ -63,6 +63,7 @@ export function SelectedFilterBar({
   onFilterChange,
   onOperationChange,
   selectedBarClassName,
+  facilityId,
 }: {
   selectedFilterKey: string;
   selectedFilters: Record<string, FilterState>;
@@ -73,6 +74,7 @@ export function SelectedFilterBar({
   onFilterChange: (filterKey: string, values: FilterValues) => void;
   onOperationChange: (filterKey: string, operation: string) => void;
   selectedBarClassName?: string;
+  facilityId?: string;
 }) {
   const { t } = useTranslation();
   const { filter, selected, selectedOperation, availableOperations } =
@@ -123,6 +125,7 @@ export function SelectedFilterBar({
           activeFilter={filter.key}
           selectedFilters={selectedFilters}
           onFilterChange={onFilterChange}
+          facilityId={facilityId}
         />
       </DropdownMenuContent>
     </DropdownMenu>

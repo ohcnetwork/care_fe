@@ -1,5 +1,5 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
-import { Building, ChevronDown, ChevronRight, Loader2, X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Building, ChevronDown, Loader2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -23,98 +23,66 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
-import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
+import { Organization } from "@/types/organization/organization";
+import organizationApi from "@/types/organization/organizationApi";
 
-interface FacilityOrganizationSelectorProps {
+interface RoleOrgSelectorProps {
   value?: string[] | null;
   onChange: (value: string[] | null) => void;
-  facilityId: string;
-  currentOrganizations?: FacilityOrganizationRead[];
+  currentOrganizations?: Organization[];
   singleSelection?: boolean;
   optional?: boolean;
 }
 
-export default function FacilityOrganizationSelector(
-  props: FacilityOrganizationSelectorProps,
-) {
+export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
   const { t } = useTranslation();
-  const {
-    onChange,
-    facilityId,
-    currentOrganizations,
-    singleSelection = false,
-  } = props;
+  const { onChange, currentOrganizations, singleSelection = false } = props;
 
   const [selectedOrganizations, setSelectedOrganizations] = useState<
-    FacilityOrganizationRead[]
+    Organization[]
   >([]);
-  const [currentSelection, setCurrentSelection] =
-    useState<FacilityOrganizationRead | null>(null);
-  const [navigationLevels, setNavigationLevels] = useState<
-    FacilityOrganizationRead[]
-  >([]);
-  const [facilityOrgSearch, setFacilityOrgSearch] = useState("");
-  const [showAllOrgs, setShowAllOrgs] = useState(false);
+  const [currentSelection, setCurrentSelection] = useState<Organization | null>(
+    null,
+  );
+  const [orgSearchQuery, setOrgSearchQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [alreadySelected, setAlreadySelected] = useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
-  const { data: rootOrganizations, isLoading: isLoadingRoot } = useQuery({
-    queryKey: ["facilityOrganization", facilityOrgSearch, showAllOrgs],
-    queryFn: query.debounced(
-      showAllOrgs
-        ? facilityOrganizationApi.list
-        : facilityOrganizationApi.listMine,
-      {
-        pathParams: { facilityId },
-        queryParams: {
-          parent: "",
-          name: facilityOrgSearch,
-        },
+
+  const {
+    data: availableOrganizations,
+    isLoading: isLoadingAvailableOrganizations,
+  } = useQuery({
+    queryKey: ["organizations", orgSearchQuery],
+    queryFn: query(organizationApi.list, {
+      queryParams: {
+        org_type: "role",
+        name: orgSearchQuery || undefined,
       },
-    ),
+    }),
   });
 
-  const organizationQueries = useQueries({
-    queries: navigationLevels.map((level) => ({
-      queryKey: ["organizations", level.id, facilityOrgSearch],
-      queryFn: query.debounced(facilityOrganizationApi.list, {
-        pathParams: { facilityId },
-        queryParams: {
-          parent: level.id,
-          name: facilityOrgSearch,
-        },
-      }),
-      enabled: !!level.id,
-    })),
-  });
-
-  const handleSelect = (org: FacilityOrganizationRead) => {
+  const handleSelect = (org: Organization) => {
     const isAlreadySelected = !!currentOrganizations?.find(
       (o) => o.id === org.id,
     );
     if (isAlreadySelected) {
       setAlreadySelected(true);
       setCurrentSelection(org);
-      setFacilityOrgSearch("");
+      setOrgSearchQuery("");
       return;
     }
-    if (org.has_children) {
-      setNavigationLevels([...navigationLevels, org]);
-    } else {
-      handleConfirmSelection(org);
-    }
+    handleConfirmSelection(org);
     setCurrentSelection(org);
-    setFacilityOrgSearch("");
+    setOrgSearchQuery("");
   };
 
   const handleConfirmSelection = useCallback(
-    (org: FacilityOrganizationRead) => {
+    (org: Organization) => {
       if (!selectedOrganizations.includes(org)) {
         const newSelection = [...selectedOrganizations, org];
         setSelectedOrganizations(newSelection);
@@ -122,7 +90,6 @@ export default function FacilityOrganizationSelector(
         setAlreadySelected(true);
       }
       setCurrentSelection(null);
-      setNavigationLevels([]);
       setOpen(false);
     },
     [selectedOrganizations, onChange],
@@ -136,48 +103,29 @@ export default function FacilityOrganizationSelector(
     );
   };
 
-  const handleOrganizationViewChange = (value: string) => {
-    setShowAllOrgs(value === "all");
-    setSelectedOrganizations([]);
-    setCurrentSelection(null);
-    setNavigationLevels([]);
-    onChange(null);
-  };
-
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
     if (!isOpen) {
-      setNavigationLevels([]);
-      setFacilityOrgSearch("");
+      setOrgSearchQuery("");
     }
   };
 
-  const getCurrentLevelOrganizations = useCallback(() => {
-    if (navigationLevels.length === 0) {
-      return rootOrganizations?.results || [];
-    }
-    const lastQuery = organizationQueries[navigationLevels.length - 1];
-    return lastQuery?.data?.results || [];
-  }, [navigationLevels, rootOrganizations, organizationQueries]);
-
   // Auto-select when there's only one organization available
   useEffect(() => {
-    const availableOrganizations = getCurrentLevelOrganizations();
+    const availableOrgs = availableOrganizations?.results || [];
 
     // Only auto-select if:
-    // 1. We're at the root level (no navigation levels)
-    // 2. There's exactly one organization
-    // 3. No search is active
-    // 4. No organizations are currently selected
-    // 5. Not loading
+    // 1. There's exactly one organization
+    // 2. No search is active
+    // 3. No organizations are currently selected
+    // 4. Not loading
     if (
-      navigationLevels.length === 0 &&
-      availableOrganizations.length === 1 &&
-      !facilityOrgSearch &&
+      availableOrgs.length === 1 &&
+      !orgSearchQuery &&
       selectedOrganizations.length === 0 &&
-      !isLoadingRoot
+      !isLoadingAvailableOrganizations
     ) {
-      const singleOrg = availableOrganizations[0];
+      const singleOrg = availableOrgs[0];
 
       // Check if this organization is already selected in currentOrganizations prop
       const isAlreadyInCurrent = currentOrganizations?.find(
@@ -189,71 +137,31 @@ export default function FacilityOrganizationSelector(
       }
     }
   }, [
-    getCurrentLevelOrganizations,
+    availableOrganizations,
     handleConfirmSelection,
-    navigationLevels,
-    facilityOrgSearch,
+    orgSearchQuery,
     selectedOrganizations,
-    isLoadingRoot,
+    isLoadingAvailableOrganizations,
     currentOrganizations,
     props.optional,
   ]);
-
-  const renderNavigationPath = () => {
-    return (
-      <div className="flex items-center gap-2 flex-wrap">
-        {/* Clear button */}
-        <button
-          type="button"
-          onClick={() => setNavigationLevels([])}
-          className="text-sm font-medium text-gray-700 hover:text-primary-600 cursor-pointer"
-        >
-          <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
-        </button>
-        {navigationLevels.map((org, index) => (
-          <div key={org.id} className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setNavigationLevels(navigationLevels.slice(0, index + 1));
-                setFacilityOrgSearch("");
-              }}
-              className="text-sm font-medium text-gray-700 hover:text-primary-600 cursor-pointer"
-            >
-              {org.name}
-            </button>
-            <ChevronRight className="h-3 w-3 text-gray-400 flex-shrink-0" />
-          </div>
-        ))}
-      </div>
-    );
-  };
 
   const renderOrganizationPopover = (className?: string) => {
     return (
       <Command className={className}>
         <div className="flex flex-col px-3 py-2 border-b sticky top-0 bg-white z-10">
           <span className="font-semibold text-base text-gray-900">
-            {t("select_department")}
+            {t("select_organization")}
           </span>
           <span className="text-sm text-gray-500 mt-0.5">
-            {t("select_department_description")}
+            {t("select_organization_description")}
           </span>
         </div>
-        <div className="flex items-center px-3 py-2 border-b sticky top-[48px] bg-white z-10">
-          {navigationLevels.length > 0 ? (
-            renderNavigationPath()
-          ) : (
-            <span className="text-sm text-gray-500">
-              {t("select_from_list")}
-            </span>
-          )}
-        </div>
-        <div className="flex items-center border-b px-3 sticky top-[96px] bg-white z-10">
+        <div className="flex items-center border-b px-3 sticky top-[48px] bg-white z-10">
           <CommandInput
             placeholder={t("search_organizations")}
-            onValueChange={setFacilityOrgSearch}
-            value={facilityOrgSearch}
+            onValueChange={setOrgSearchQuery}
+            value={orgSearchQuery}
             className="border-none focus:ring-0"
           />
         </div>
@@ -262,8 +170,7 @@ export default function FacilityOrganizationSelector(
           onWheel={(e) => e.stopPropagation()}
         >
           <CommandEmpty>
-            {isLoadingRoot ||
-            organizationQueries[navigationLevels.length - 1]?.isLoading ? (
+            {isLoadingAvailableOrganizations ? (
               <div className="flex items-center justify-center py-6">
                 <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
                 <span className="ml-2 text-sm text-gray-500">
@@ -275,11 +182,8 @@ export default function FacilityOrganizationSelector(
             )}
           </CommandEmpty>
           <CommandGroup>
-            {!(
-              isLoadingRoot ||
-              organizationQueries[navigationLevels.length - 1]?.isLoading
-            ) &&
-              getCurrentLevelOrganizations().map((org) => {
+            {!isLoadingAvailableOrganizations &&
+              (availableOrganizations?.results || []).map((org) => {
                 const isSelected = currentSelection?.id === org.id;
                 return (
                   <CommandItem
@@ -300,16 +204,13 @@ export default function FacilityOrganizationSelector(
                         />
                       )}
                     </div>
-                    {org.has_children && (
-                      <ChevronRight className="h-4 w-4 opacity-50" />
-                    )}
                   </CommandItem>
                 );
               })}
           </CommandGroup>
         </CommandList>
         {currentSelection && (
-          <div className="md:m-0 m-2 flex items-center justify-between px-3 py-2  bg-sky-50/50 border-sky-200 rounded-md ">
+          <div className="md:m-0 m-2 flex items-center justify-between px-3 py-2 bg-sky-50/50 border-sky-200 rounded-md">
             <div className="flex flex-col">
               <span className="text-xs text-gray-500 mb-0.5">
                 {t("selected")}
@@ -318,7 +219,7 @@ export default function FacilityOrganizationSelector(
                 {currentSelection.name}
               </span>
             </div>
-            {alreadySelected && !currentSelection.has_children && (
+            {alreadySelected ? (
               <Button
                 variant="ghost"
                 size="sm"
@@ -329,8 +230,7 @@ export default function FacilityOrganizationSelector(
                 <span>{t("already_selected")}</span>
                 <CareIcon icon="l-multiply" className="h-4 w-4" />
               </Button>
-            )}
-            {currentSelection.has_children && (
+            ) : (
               <Button
                 variant="ghost"
                 size="sm"
@@ -339,17 +239,8 @@ export default function FacilityOrganizationSelector(
                 disabled={isDisabled}
                 data-cy="confirm-organization"
               >
-                {isDisabled ? (
-                  <>
-                    <span>{t("already_selected")}</span>
-                    <CareIcon icon="l-multiply" className="h-4 w-4" />
-                  </>
-                ) : (
-                  <>
-                    <span>{t("confirm")}</span>
-                    <CareIcon icon="l-check" className="h-4 w-4" />
-                  </>
-                )}
+                <span>{t("confirm")}</span>
+                <CareIcon icon="l-check" className="h-4 w-4" />
               </Button>
             )}
           </div>
@@ -371,26 +262,11 @@ export default function FacilityOrganizationSelector(
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-1">
           <Label>
-            {t("select_department")}
+            {t("select_organization")}
             {!props.optional && <span className="text-red-500 ml-0.5">*</span>}
           </Label>
         </div>
       </div>
-
-      <Tabs
-        value={showAllOrgs ? "all" : "mine"}
-        onValueChange={handleOrganizationViewChange}
-        className="w-full sm:w-auto"
-      >
-        <TabsList className="grid w-full grid-cols-2 sm:w-[300px]">
-          <TabsTrigger value="mine" data-cy="my-organizations-tab">
-            {t("my_organizations")}
-          </TabsTrigger>
-          <TabsTrigger value="all" data-cy="all-organizations-tab">
-            {t("all_organizations")}
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
 
       <div className="space-y-3">
         <div className="space-y-3">
@@ -428,14 +304,14 @@ export default function FacilityOrganizationSelector(
                         role="combobox"
                         aria-expanded={open}
                         className="w-full justify-between border-dashed"
-                        data-cy="facility-organization"
+                        data-cy="role-organization"
                         onClick={() => setOpen(true)}
                         type="button" // Prevents unintended form submission
                       >
                         <span className="truncate text-gray-500">
                           {currentSelection
                             ? currentSelection.name
-                            : t("select_department")}
+                            : t("select_organization")}
                         </span>
                         <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
@@ -453,12 +329,12 @@ export default function FacilityOrganizationSelector(
                       role="combobox"
                       aria-expanded={open}
                       className="w-full justify-between border-dashed"
-                      data-cy="facility-organization"
+                      data-cy="role-organization"
                     >
                       <span className="truncate text-gray-500">
                         {currentSelection
                           ? currentSelection.name
-                          : t("select_department")}
+                          : t("select_organization")}
                       </span>
                       <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>

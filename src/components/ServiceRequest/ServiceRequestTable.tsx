@@ -97,59 +97,34 @@ export default function ServiceRequestTable({
               </TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">
-                  {request.tags && request.tags.length > 0 && (
-                    <>
-                      {request.tags.map((tag) => (
-                        <Badge
-                          key={tag.id}
-                          variant="secondary"
-                          className="text-xs"
-                        >
-                          {tag.display}
-                        </Badge>
-                      ))}
-                      <TagAssignmentSheet
-                        entityType="service_request"
-                        entityId={request.id}
-                        facilityId={facilityId}
-                        currentTags={request.tags}
-                        onUpdate={() => {
-                          queryClient.invalidateQueries({
-                            queryKey: [
-                              "serviceRequests",
-                              facilityId,
-                              locationId,
-                            ],
-                          });
-                        }}
-                        patientId={request.encounter.patient.id}
-                        trigger={
-                          <Button variant="outline" size="xs">
-                            <Hash className="size-3" /> {t("tags")}
-                          </Button>
-                        }
-                      />
-                    </>
-                  )}
-                  {(!request.tags || request.tags.length === 0) && (
-                    <TagAssignmentSheet
-                      entityType="service_request"
-                      entityId={request.id}
-                      facilityId={facilityId}
-                      currentTags={[]}
-                      onUpdate={() => {
-                        queryClient.invalidateQueries({
-                          queryKey: ["serviceRequests", facilityId, locationId],
-                        });
-                      }}
-                      patientId={request.encounter.patient.id}
-                      trigger={
+                  {request.tags.map((tag) => (
+                    <Badge key={tag.id} variant="secondary" className="text-xs">
+                      {tag.display}
+                    </Badge>
+                  ))}
+                  <TagAssignmentSheet
+                    entityType="service_request"
+                    entityId={request.id}
+                    facilityId={facilityId}
+                    currentTags={request.tags ?? []}
+                    onUpdate={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: ["serviceRequests", facilityId, locationId],
+                      });
+                    }}
+                    patientId={request.encounter.patient.id}
+                    trigger={
+                      request.tags && request.tags.length > 0 ? (
+                        <Button variant="outline" size="xs">
+                          <Hash className="size-3" /> {t("tags")}
+                        </Button>
+                      ) : (
                         <Button variant="outline" size="xs">
                           <Hash className="size-3" /> {t("add_tags")}
                         </Button>
-                      }
-                    />
-                  )}
+                      )
+                    }
+                  />
                 </div>
               </TableCell>
               <TableCell className="text-left">

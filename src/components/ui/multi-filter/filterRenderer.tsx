@@ -4,16 +4,18 @@ import RenderDateFilter from "./dateFilter";
 import GenericFilter from "./genericFilter";
 import RenderTagFilter from "./tagFilter";
 import NavigationHelper from "./utils/navigation-helper";
-import { FilterDateRange, FilterState, FilterValues } from "./utils/utils";
+import { FilterDateRange, FilterState, FilterValues } from "./utils/Utils";
 
 export default function FilterRenderer({
   activeFilter,
   selectedFilters,
+  facilityId,
   onFilterChange,
   handleBack,
 }: {
   activeFilter: string;
   selectedFilters: Record<string, FilterState>;
+  facilityId?: string;
   onFilterChange: (filterKey: string, values: FilterValues) => void;
   handleBack?: () => void;
 }) {
@@ -24,6 +26,7 @@ export default function FilterRenderer({
   const selected = selectedFilters[filter.key].selected || [];
   const commonProps = {
     filter,
+    facilityId,
     handleBack,
     onFilterChange,
   };

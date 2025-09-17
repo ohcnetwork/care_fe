@@ -106,14 +106,10 @@ export default function TagAssignmentSheet({
     mutationFn: mutate(entityConfig.setTagsApi, {
       pathParams: {
         external_id: entityId,
-        facilityId: facilityId || "",
-        patientId: patientId || "",
+        ...(facilityId ? { facilityId } : {}),
+        ...(patientId ? { patientId } : {}),
       },
     }),
-    onSuccess: () => {
-      onUpdate();
-      toast.success(t("tags_updated_successfully"));
-    },
     onError: (error: unknown) => {
       const errorMessage =
         error instanceof Error ? error.message : t("failed_to_update_tags");
@@ -130,9 +126,6 @@ export default function TagAssignmentSheet({
         patientId: patientId || "",
       },
     }),
-    onSuccess: () => {
-      onUpdate();
-    },
     onError: (error: unknown) => {
       const errorMessage =
         error instanceof Error ? error.message : t("failed_to_remove_tags");
@@ -152,14 +145,14 @@ export default function TagAssignmentSheet({
 
   // Handle tag changes with sequential API calls
   const handleTagChange = async (newTags: TagConfig[]) => {
-    const currentTagIds = new Set(currentTags.map((tag: TagConfig) => tag.id));
+    const prevTagIds = new Set(selectedTags.map((tag: TagConfig) => tag.id));
     const newTagIds = new Set(newTags.map((tag: TagConfig) => tag.id));
 
     // Find tags to add and remove
     const tagsToAdd = newTags.filter(
-      (tag: TagConfig) => !currentTagIds.has(tag.id),
+      (tag: TagConfig) => !prevTagIds.has(tag.id),
     );
-    const tagsToRemove = currentTags.filter(
+    const tagsToRemove = selectedTags.filter(
       (tag: TagConfig) => !newTagIds.has(tag.id),
     );
 
@@ -177,6 +170,9 @@ export default function TagAssignmentSheet({
       if (tagsToAdd.length > 0) {
         await setTags({ tags: tagsToAdd.map((tag: TagConfig) => tag.id!) });
       }
+
+      onUpdate();
+      toast.success(t("tags_updated_successfully"));
     } catch (error) {
       console.error("Tag operation failed:", error);
       // Revert local state on error
@@ -195,6 +191,7 @@ export default function TagAssignmentSheet({
         <MultiFilterStyleTagSelector
           selected={selectedTags}
           onChange={handleTagChange}
+          facilityId={facilityId}
           resource={ENTITY_TO_RESOURCE_MAP[entityType]}
           disabled={isLoadingTags}
           isLoading={isLoadingTags}

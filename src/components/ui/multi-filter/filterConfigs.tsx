@@ -21,14 +21,13 @@ import {
   FilterValues,
   Operation,
   createFilterConfig,
-} from "./utils/utils";
+} from "./utils/Utils";
 
 import {
   ENCOUNTER_CLASS_FILTER_COLORS,
   ENCOUNTER_PRIORITY_FILTER_COLORS,
   ENCOUNTER_STATUS_FILTER_COLORS,
 } from "@/types/emr/encounter/encounter";
-
 export const encounterStatusFilter = (
   key: string = "encounter_status",
   mode: FilterMode = "single",

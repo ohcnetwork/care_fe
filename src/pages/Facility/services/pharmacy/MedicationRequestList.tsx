@@ -33,7 +33,7 @@ import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { tagFilter } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
-import { createFilterConfig } from "@/components/ui/multi-filter/utils/utils";
+import { createFilterConfig } from "@/components/ui/multi-filter/utils/Utils";
 import {
   ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_CLASSES_COLORS,
@@ -50,6 +50,7 @@ import {
   TagConfig,
   TagResource,
 } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime, formatName } from "@/Utils/utils";
@@ -67,6 +68,11 @@ export default function MedicationRequestList({
     limit: 14,
     disableCache: true,
   });
+  const tagIds = qParams.tags?.split(",") || [];
+  const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
+  const selectedTags = tagQueries
+    .map((query) => query.data)
+    .filter(Boolean) as TagConfig[];
 
   // State for visible tabs and dropdown items
   const [visibleTabs, setVisibleTabs] = useState<("all" | EncounterClass)[]>([
@@ -102,18 +108,14 @@ export default function MedicationRequestList({
   // Handle filter updates
   const onFilterUpdate = (query: Record<string, unknown>) => {
     // Update the query parameters based on filter changes
-    const updates: Record<string, unknown> = {};
-
-    if (query.tags) {
-      const tags = query.tags as TagConfig[];
-      updates.tags = tags.length > 0 ? tags.map((tag) => tag.id) : undefined;
+    for (const [key, value] of Object.entries(query)) {
+      switch (key) {
+        case "tags":
+          query.tags = (value as TagConfig[])?.map((tag) => tag.id);
+          break;
+      }
     }
-
-    if (query.status) {
-      updates.status = query.status;
-    }
-
-    updateQuery(updates);
+    updateQuery(query);
   };
 
   // Use the multi-filter state hook
@@ -123,7 +125,10 @@ export default function MedicationRequestList({
     handleOperationChange,
     handleClearAll,
     handleClearFilter,
-  } = useMultiFilterState(filters, onFilterUpdate);
+  } = useMultiFilterState(filters, onFilterUpdate, {
+    ...qParams,
+    tags: selectedTags,
+  });
 
   // Handle tab selection
   const handleTabSelect = (value: string) => {
@@ -159,6 +164,7 @@ export default function MedicationRequestList({
         patient_external_id: qParams.patient_external_id,
         encounter_class: qParams.encounter_class,
         tags: qParams.tags,
+        tags_behavior: qParams.tags_behavior,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
       },
@@ -277,6 +283,7 @@ export default function MedicationRequestList({
         className="flex sm:flex-row flex-wrap sm:items-center mb-4"
         triggerButtonClassName="self-start sm:self-center"
         clearAllButtonClassName="self-center"
+        facilityId={facilityId}
       />
       {/* Table section */}
       <div>
