@@ -1,3 +1,6 @@
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
+import { Organization } from "@/types/organization/organization";
+
 export interface TagConfigMeta {
   [key: string]: unknown;
 }
@@ -32,12 +35,12 @@ export enum TagResource {
   SERVICE_REQUEST = "service_request",
   CHARGE_ITEM = "charge_item",
   PATIENT = "patient",
+  PRESCRIPTION = "medication_request_prescription",
 }
 
-export interface TagConfigParent {
+export interface TagConfigBase {
   id: string;
-  slug: string;
-  parent?: TagConfigParent;
+  parent?: TagConfigBase;
   display: string;
   category: TagCategory;
   description: string;
@@ -45,24 +48,22 @@ export interface TagConfigParent {
   cache_expiry: string;
 }
 
-export interface TagConfig {
+export interface TagConfig extends TagConfigBase {
   meta: TagConfigMeta;
-  id: string;
-  slug: string;
-  display: string;
-  category: TagCategory;
-  description: string;
   priority: number;
   status: TagStatus;
-  level_cache: number;
   system_generated: boolean;
   has_children: boolean;
-  parent?: TagConfigParent;
   resource: TagResource;
+  facility?: string;
+}
+
+export interface TagConfigRead extends TagConfig {
+  facility_organization?: FacilityOrganizationRead;
+  organization?: Organization;
 }
 
 export interface TagConfigRequest {
-  slug: string;
   display: string;
   category: TagCategory;
   description?: string;
@@ -70,7 +71,9 @@ export interface TagConfigRequest {
   status: TagStatus;
   parent?: string | null;
   resource: TagResource;
+  organization?: string;
   facility?: string;
+  facility_organization?: string;
 }
 
 export function getTagHierarchyDisplay(
@@ -78,7 +81,7 @@ export function getTagHierarchyDisplay(
   separator: string = ": ",
 ): string {
   // Build hierarchy iteratively to avoid stack overflow
-  let currentTag: TagConfigParent | undefined = tag.parent;
+  let currentTag: TagConfigBase | undefined = tag.parent;
   const tempHierarchy: string[] = [];
 
   while (currentTag) {

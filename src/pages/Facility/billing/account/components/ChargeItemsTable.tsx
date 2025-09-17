@@ -1,14 +1,18 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ChevronDown,
   ChevronUp,
   ExternalLinkIcon,
   MoreHorizontal,
   PencilIcon,
+  PlusIcon,
+  PrinterIcon,
 } from "lucide-react";
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -42,7 +46,6 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
-import query from "@/Utils/request/query";
 import {
   MonetaryComponent,
   MonetaryComponentType,
@@ -50,11 +53,15 @@ import {
 import {
   CHARGE_ITEM_STATUS_COLORS,
   ChargeItemRead,
+  ChargeItemServiceResource,
   ChargeItemStatus,
   MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import query from "@/Utils/request/query";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import AddChargeItemsBillingSheet from "./AddChargeItemsBillingSheet";
 import EditChargeItemSheet from "./EditChargeItemSheet";
 
 interface PriceComponentRowProps {
@@ -91,23 +98,29 @@ function PriceComponentRow({ label, components }: PriceComponentRowProps) {
 export interface ChargeItemsTableProps {
   facilityId: string;
   accountId: string;
+  patientId: string;
 }
-
 export function ChargeItemsTable({
   facilityId,
   accountId,
+  patientId,
 }: ChargeItemsTableProps) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
     {},
   );
+  const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = useState(false);
+
+  // Register shortcuts for this table
+  useFacilityShortcuts("charge-items-table");
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
   });
 
   const { data: chargeItems, isLoading } = useQuery({
-    queryKey: ["chargeItems", qParams, accountId],
+    queryKey: ["chargeItems", accountId, qParams],
     queryFn: query(chargeItemApi.listChargeItem, {
       pathParams: { facilityId },
       queryParams: {
@@ -121,6 +134,12 @@ export function ChargeItemsTable({
   }) as {
     data: { results: ChargeItemRead[]; count: number } | undefined;
     isLoading: boolean;
+  };
+
+  const handleChargeItemsAdded = () => {
+    queryClient.invalidateQueries({
+      queryKey: ["chargeItems", accountId, qParams],
+    });
   };
 
   const toggleItemExpand = (itemId: string) => {
@@ -147,9 +166,21 @@ export function ChargeItemsTable({
     );
   };
 
+  const getLinkedResource = (item: ChargeItemRead) => {
+    if (!item.service_resource || !item.service_resource_id) return "";
+    switch (item.service_resource) {
+      case ChargeItemServiceResource.service_request:
+        return `/facility/${facilityId}/services_requests/${item.service_resource_id}`;
+      case ChargeItemServiceResource.appointment:
+        return `/facility/${facilityId}/patient/${patientId}/appointments/${item.service_resource_id}`;
+      default:
+        return "";
+    }
+  };
+
   return (
     <div>
-      <div className="mb-4">
+      <div className="mb-4 flex flex-col sm:flex-row justify-between items-center gap-2">
         {/* Desktop Tabs */}
         <Tabs
           value={qParams.charge_item_status ?? "all"}
@@ -158,9 +189,9 @@ export function ChargeItemsTable({
               charge_item_status: value === "all" ? undefined : value,
             })
           }
-          className="max-sm:hidden"
+          className="max-sm:hidden w-2/3 md:w-full overflow-x-auto"
         >
-          <TabsList>
+          <TabsList className="overflow-x-auto">
             <TabsTrigger value="all">{t("all")}</TabsTrigger>
             {Object.values(ChargeItemStatus).map((status) => (
               <TabsTrigger key={status} value={status}>
@@ -190,6 +221,29 @@ export function ChargeItemsTable({
             ))}
           </SelectContent>
         </Select>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => navigate(`../${accountId}/charge_items/print`)}
+            className="w-full sm:w-auto"
+            data-shortcut-id="print-button"
+          >
+            <PrinterIcon className="size-4 mr-2" />
+            {t("print_charge_items")}
+            <ShortcutBadge actionId="print-button" />
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setIsAddChargeItemsOpen(true)}
+            className="w-full sm:w-auto"
+            data-shortcut-id="add-charge-item"
+          >
+            <PlusIcon className="size-4 mr-2" />
+            {t("add_charge_items")}
+            <ShortcutBadge actionId="add-charge-item" />
+          </Button>
+        </div>
       </div>
       {isLoading ? (
         <TableSkeleton count={3} />
@@ -237,6 +291,8 @@ export function ChargeItemsTable({
                   const isExpanded = expandedItems[item.id] || false;
                   const baseComponent = getBaseComponent(item);
                   const baseAmount = String(baseComponent?.amount || "0");
+                  const linkedResource = getLinkedResource(item);
+
                   const mrpAmount = item.unit_price_components.find(
                     (c) =>
                       c.monetary_component_type ===
@@ -262,7 +318,7 @@ export function ChargeItemsTable({
                           )}
                         </Button>
                       </TableCell>
-                      <TableCell className="border-x p-3 text-gray-950 font-medium">
+                      <TableCell className="bor-medium">
                         {item.title}
                         {item.description && (
                           <p className="text-xs text-gray-500 whitespace-pre-wrap">
@@ -271,16 +327,19 @@ export function ChargeItemsTable({
                         )}
                       </TableCell>
                       <TableCell className="border-x p-3 text-gray-950">
-                        {item.service_resource === "service_request" &&
-                          item.service_resource_id && (
-                            <Link
-                              href={`/facility/${facilityId}/services_requests/${item.service_resource_id}`}
-                              className="flex items-center gap-0.5 underline text-gray-600"
-                            >
-                              {t("service_request")}
-                              <ExternalLinkIcon className="size-3" />
-                            </Link>
-                          )}
+                        {linkedResource !== "" ? (
+                          <Link
+                            href={linkedResource}
+                            className="flex items-center gap-0.5 underline text-gray-600"
+                          >
+                            {t(item.service_resource)}
+                            <ExternalLinkIcon className="size-3" />
+                          </Link>
+                        ) : (
+                          <span className="text-gray-500">
+                            {t(item.service_resource)}
+                          </span>
+                        )}
                       </TableCell>
                       <TableCell className="border-x p-3 text-gray-950">
                         <MonetaryDisplay amount={mrpAmount} />
@@ -295,12 +354,21 @@ export function ChargeItemsTable({
                         <MonetaryDisplay amount={item.total_price} />
                       </TableCell>
                       <TableCell className="border-x p-3 text-gray-950">
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center gap-1">
                           <Badge
                             variant={CHARGE_ITEM_STATUS_COLORS[item.status]}
                           >
                             {t(item.status)}
                           </Badge>
+                          {item.paid_invoice && (
+                            <Link
+                              href={`/facility/${facilityId}/billing/invoices/${item.paid_invoice.id}`}
+                              className="flex items-center gap-0.5 underline text-gray-600"
+                              title={t("view_invoice")}
+                            >
+                              <ExternalLinkIcon className="size-3.5" />
+                            </Link>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell className="border-x p-3 text-gray-950">
@@ -343,6 +411,7 @@ export function ChargeItemsTable({
                           <EditChargeItemSheet
                             facilityId={facilityId}
                             item={item}
+                            accountId={accountId}
                             trigger={
                               <Button
                                 id={`edit-charge-item-${item.id}`}
@@ -414,6 +483,14 @@ export function ChargeItemsTable({
         </div>
       )}
       <Pagination totalCount={chargeItems?.count || 0} />
+
+      <AddChargeItemsBillingSheet
+        open={isAddChargeItemsOpen}
+        onOpenChange={setIsAddChargeItemsOpen}
+        facilityId={facilityId}
+        patientId={patientId}
+        onChargeItemsAdded={handleChargeItemsAdded}
+      />
     </div>
   );
 }

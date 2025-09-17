@@ -74,8 +74,10 @@ export function PrintPaymentReconciliation({
   }
 
   return (
-    <PrintPreview title={`${t("payment_receipt")} #${payment.id}`}>
-      <div className="min-h-screen md:p-2 max-w-4xl mx-auto">
+    <PrintPreview
+      title={`${t(payment.is_credit_note ? "refund_receipt" : "payment_receipt")}`}
+    >
+      <div className="min-h-screen md:p-2 max-w-4xl mx-auto md:min-w-2xl">
         <div>
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
@@ -85,9 +87,12 @@ export function PrintPaymentReconciliation({
               className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2"
             />
             <div className="text-center sm:text-left sm:order-1">
-              <h1 className="text-3xl font-semibold">{t("payment_receipt")}</h1>
+              <h1 className="text-3xl font-semibold">
+                {t(
+                  payment.is_credit_note ? "refund_receipt" : "payment_receipt",
+                )}
+              </h1>
               <h2 className="text-gray-500 uppercase text-sm tracking-wide mt-1 font-semibold">
-                {t("payment")} #{payment.id}
                 <span className="ml-2">
                   <Badge
                     variant={
