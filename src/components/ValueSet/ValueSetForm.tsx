@@ -387,14 +387,23 @@ export function ValueSetForm({
   useEffect(() => {
     if (initialData) return;
 
+    const MAX_SLUG_LENGTH = 25;
     const subscription = form.watch((value, { name }) => {
-      if (name === "name") {
-        const slug = generateSlug(value.name || "");
-        if (slug.length < 25) {
-          form.setValue("slug", slug, {
-            shouldValidate: true,
-          });
-        }
+      if (name !== "name") return;
+      if (
+        form.formState?.dirtyFields?.slug ||
+        form.formState?.touchedFields?.slug
+      )
+        return;
+      const current = form.getValues("slug") ?? "";
+      if (current.length >= MAX_SLUG_LENGTH) return;
+
+      const slug = generateSlug(value.name ?? "", MAX_SLUG_LENGTH);
+      if (slug.length <= MAX_SLUG_LENGTH) {
+        form.setValue("slug", slug, {
+          shouldValidate: true,
+          shouldDirty: false,
+        });
       }
     });
 

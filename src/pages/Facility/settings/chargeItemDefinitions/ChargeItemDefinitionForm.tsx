@@ -349,22 +349,10 @@ export function ChargeItemDefinitionForm({
   useEffect(() => {
     if (isUpdate) return;
 
-    const MAX_SLUG_LENGTH = 25;
     const subscription = form.watch((value, { name }) => {
-      if (name !== "title") return;
-      if (
-        form.formState?.dirtyFields?.slug_value ||
-        form.formState?.touchedFields?.slug_value
-      )
-        return;
-      const current = form.getValues("slug_value") ?? "";
-      if (current.length >= MAX_SLUG_LENGTH) return;
-
-      const slug = generateSlug(value.title ?? "", MAX_SLUG_LENGTH);
-      if (slug.length <= MAX_SLUG_LENGTH) {
-        form.setValue("slug_value", slug, {
+      if (name === "title") {
+        form.setValue("slug_value", generateSlug(value.title || ""), {
           shouldValidate: true,
-          shouldDirty: false,
         });
       }
     });
