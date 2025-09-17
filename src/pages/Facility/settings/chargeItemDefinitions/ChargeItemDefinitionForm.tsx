@@ -351,18 +351,18 @@ export function ChargeItemDefinitionForm({
 
     const MAX_SLUG_LENGTH = 25;
     const subscription = form.watch((value, { name }) => {
-      if (name !== "name") return;
+      if (name !== "title") return;
       if (
-        form.formState?.dirtyFields?.slug ||
-        form.formState?.touchedFields?.slug
+        form.formState?.dirtyFields?.slug_value ||
+        form.formState?.touchedFields?.slug_value
       )
         return;
-      const current = form.getValues("slug") ?? "";
+      const current = form.getValues("slug_value") ?? "";
       if (current.length >= MAX_SLUG_LENGTH) return;
 
-      const slug = generateSlug(value.name ?? "", MAX_SLUG_LENGTH);
+      const slug = generateSlug(value.title ?? "", MAX_SLUG_LENGTH);
       if (slug.length <= MAX_SLUG_LENGTH) {
-        form.setValue("slug", slug, {
+        form.setValue("slug_value", slug, {
           shouldValidate: true,
           shouldDirty: false,
         });
