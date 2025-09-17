@@ -1,3 +1,4 @@
+import Loading from "@/components/Common/Loading";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -6,43 +7,40 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import {
-  TokenSubQueueRead,
-  TokenSubQueueStatus,
-} from "@/types/tokens/tokenSubQueue/tokenSubQueue";
 import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
 import { ChevronDownIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useInServicePoints } from "./useInServicePoints";
+import { useQueueServicePoints } from "./useQueueServicePoints";
 
-export const ServicePointsDropDown = ({
-  subQueues,
-}: {
-  subQueues: TokenSubQueueRead[];
-}) => {
+export const ServicePointsDropDown = () => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const { servicePointIds, setServicePointIds } = useInServicePoints();
+  const { assignedServicePointIds, allServicePoints, toggleServicePoint } =
+    useQueueServicePoints();
   const defaultServicePoints = useBreakpoints({ default: 2, sm: 6 });
 
-  const activeServicePointCount = subQueues
-    .filter((subQueue) => servicePointIds.includes(subQueue.id))
-    .filter(
-      (subQueue) => subQueue.status === TokenSubQueueStatus.ACTIVE,
-    ).length;
+  if (!allServicePoints) {
+    return <Loading />;
+  }
+
+  const activeServicePointCount = allServicePoints.filter((subQueue) =>
+    assignedServicePointIds.includes(subQueue.id),
+  ).length;
 
   return (
     <div className="flex">
-      <div className="flex gap-1 rounded-r-none border border-r-0 border-gray-300 rounded-l-md p-1.5  w-fit bg-white items-center justify-center">
-        {servicePointIds.length === 0 ? (
+      <div className="flex gap-1 rounded-r-none border border-r-0 border-gray-300 rounded-l-md p-1.5 bg-white items-center justify-center">
+        {assignedServicePointIds.length === 0 ? (
           <span className="text-sm font-medium">
             {t("assign_service_points")}
           </span>
         ) : (
           <div className="flex gap-1 items-center justify-center">
-            {subQueues
-              .filter((subQueue) => servicePointIds.includes(subQueue.id))
+            {allServicePoints
+              .filter((subQueue) =>
+                assignedServicePointIds.includes(subQueue.id),
+              )
               .slice(0, defaultServicePoints)
               .map((subQueue) => {
                 return (
@@ -59,6 +57,7 @@ export const ServicePointsDropDown = ({
               })}
             {activeServicePointCount > defaultServicePoints && (
               <span className="text-sm text-gray-950 font-medium">
+                {"+"}
                 {t("count_more", {
                   count: activeServicePointCount - defaultServicePoints,
                 })}
@@ -86,8 +85,10 @@ export const ServicePointsDropDown = ({
                 {t("assigned_service_points")}
               </DropdownMenuLabel>
               <div>
-                {subQueues.map((subQueue) => {
-                  const isSelected = servicePointIds.includes(subQueue.id);
+                {allServicePoints.map((subQueue) => {
+                  const isSelected = assignedServicePointIds.includes(
+                    subQueue.id,
+                  );
                   return (
                     <div
                       key={subQueue.id}
@@ -97,7 +98,7 @@ export const ServicePointsDropDown = ({
                         <Checkbox
                           checked={isSelected}
                           onCheckedChange={(checked) =>
-                            setServicePointIds(subQueue.id, checked as boolean)
+                            toggleServicePoint(subQueue.id, checked as boolean)
                           }
                         />
                         <span className="text-sm font-medium">

@@ -35,7 +35,7 @@ import {
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ServicePointsDropDown } from "./ServicePointsDropDown";
-import { useInServicePoints } from "./useInServicePoints";
+import { useQueueServicePoints } from "./useQueueServicePoints";
 
 interface Props {
   facilityId: string;
@@ -45,7 +45,7 @@ interface Props {
 export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   const { t } = useTranslation();
 
-  const { subQueues, activeSubQueues } = useInServicePoints();
+  const { assignedServicePoints } = useQueueServicePoints();
 
   const { data: summary } = useQuery({
     queryKey: ["token-queue-summary", facilityId, queueId],
@@ -56,11 +56,11 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-2 w-fit mt-4">
+      <div className="flex flex-col gap-2 mt-4">
         <Label className="text-gray-950 text-sm font-medium">
           {t("service_points")}
         </Label>
-        <ServicePointsDropDown subQueues={subQueues} />
+        <ServicePointsDropDown />
       </div>
       <div className="flex space-x-4 overflow-x-auto w-full">
         {/* Waiting tokens list */}
@@ -101,7 +101,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
           }
         >
           <div className="flex flex-col gap-4">
-            {activeSubQueues.map((subQueue, index) => (
+            {assignedServicePoints.map((subQueue, index) => (
               <>
                 {index > 0 && (
                   <hr className="h-px w-full border border-gray-300 border-dashed" />

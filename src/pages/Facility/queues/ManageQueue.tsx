@@ -24,7 +24,7 @@ import { NavTabs } from "@/components/ui/nav-tabs";
 import { ManageQueueFinishedTab } from "@/pages/Facility/queues/ManageQueueFinishedTab";
 import { ManageQueueOngoingTab } from "@/pages/Facility/queues/ManageQueueOngoingTab";
 import QueueFormSheet from "@/pages/Facility/queues/QueueFormSheet";
-import { useInServicePoints } from "@/pages/Facility/queues/useInServicePoints";
+import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
 import {
   formatScheduleResourceName,
   SchedulableResourceType,
@@ -189,9 +189,12 @@ function ManageServicePointsDialog({
 } & React.ComponentProps<typeof Dialog>) {
   const { t } = useTranslation();
 
-  const { subQueues } = useInServicePoints();
+  const { allServicePoints, assignedServicePointIds, toggleServicePoint } =
+    useQueueServicePoints();
 
-  const { servicePointIds, setServicePointIds } = useInServicePoints();
+  if (!allServicePoints) {
+    return <Loading />;
+  }
 
   return (
     <Dialog {...props}>
@@ -201,8 +204,8 @@ function ManageServicePointsDialog({
           <DialogTitle>{t("assigned_service_points")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          {subQueues.map((subQueue) => {
-            const isSelected = servicePointIds.includes(subQueue.id);
+          {allServicePoints.map((subQueue) => {
+            const isSelected = assignedServicePointIds.includes(subQueue.id);
             return (
               <div
                 key={subQueue.id}
@@ -212,7 +215,7 @@ function ManageServicePointsDialog({
                   <Checkbox
                     checked={isSelected}
                     onCheckedChange={(checked) =>
-                      setServicePointIds(subQueue.id, checked as boolean)
+                      toggleServicePoint(subQueue.id, checked as boolean)
                     }
                   />
                   <span className="text-sm font-medium">{subQueue.name}</span>

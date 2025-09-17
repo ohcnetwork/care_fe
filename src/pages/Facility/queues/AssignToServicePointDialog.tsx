@@ -20,7 +20,7 @@ import { UserCheck } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { useInServicePoints } from "./useInServicePoints";
+import { useQueueServicePoints } from "./useQueueServicePoints";
 
 export function AssignToServicePointDialog({
   open,
@@ -34,7 +34,7 @@ export function AssignToServicePointDialog({
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacility();
   const [selectedSubQueueId, setSelectedSubQueueId] = useState<string>("");
-  const { activeSubQueues } = useInServicePoints();
+  const { assignedServicePoints } = useQueueServicePoints();
 
   const { mutate: updateToken, isPending } = useMutation({
     mutationFn: mutate(tokenApi.update, {
@@ -77,7 +77,7 @@ export function AssignToServicePointDialog({
           value={selectedSubQueueId}
           onValueChange={setSelectedSubQueueId}
         >
-          {activeSubQueues.map((subQueue) => (
+          {assignedServicePoints.map((subQueue) => (
             <div
               key={subQueue.id}
               className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
@@ -91,7 +91,7 @@ export function AssignToServicePointDialog({
               </label>
             </div>
           ))}
-          {activeSubQueues.length === 0 && (
+          {assignedServicePoints.length === 0 && (
             <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
               <RadioGroupItem value="none" id="none" />
               <label

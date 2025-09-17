@@ -14,9 +14,9 @@ const atom = atomWithStorage<Record<string, string[] | undefined>>(
   { getOnInit: true },
 );
 
-export function useInServicePoints() {
+export function useQueueServicePoints() {
   const { resourceType, resourceId } = useScheduleResourceFromPath();
-  const [assignedServicePoints, setAssignedServicePoints] = useAtom(atom);
+  const [assignedServicePoints, toggleServicePoint] = useAtom(atom);
   const servicPointKey = `service_point_${resourceId}_${resourceType}`;
   const servicePointIds = assignedServicePoints[servicPointKey];
   const { facilityId } = useCurrentFacility();
@@ -35,9 +35,9 @@ export function useInServicePoints() {
   });
 
   return {
-    subQueues: subQueues?.results || [],
-    servicePointIds: servicePointIds || [],
-    activeSubQueues:
+    allServicePoints: subQueues?.results,
+    assignedServicePointIds: servicePointIds || [],
+    assignedServicePoints:
       servicePointIds &&
       subQueues &&
       servicePointIds.length > 0 &&
@@ -47,7 +47,7 @@ export function useInServicePoints() {
           )
         : [],
 
-    setServicePointIds: (subQueueId: string, checked: boolean) => {
+    toggleServicePoint: (subQueueId: string, checked: boolean) => {
       let updated = checked
         ? [...(servicePointIds || []), subQueueId]
         : servicePointIds?.filter((id) => id !== subQueueId);
@@ -63,12 +63,12 @@ export function useInServicePoints() {
         updated.length > 0 &&
         updated.length !== servicePointIds?.length
       ) {
-        setAssignedServicePoints({
+        toggleServicePoint({
           ...assignedServicePoints,
           [servicPointKey]: updated,
         });
       } else {
-        setAssignedServicePoints({
+        toggleServicePoint({
           ...assignedServicePoints,
           [servicPointKey]: undefined,
         });
