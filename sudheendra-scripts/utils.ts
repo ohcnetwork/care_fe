@@ -790,10 +790,12 @@ export async function writeOutputCsv(
 }
 
 // Function to remove duplicates based on slug
-export function removeDuplicates<T extends { slug: string }>(items: T[]): T[] {
+export function removeDuplicates<T extends { slug_value: string }>(
+  items: T[],
+): T[] {
   return items.filter(
     (item, index, self) =>
-      index === self.findIndex((t) => t.slug === item.slug),
+      index === self.findIndex((t) => t.slug_value === item.slug_value),
   );
 }
 

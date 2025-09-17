@@ -7,6 +7,7 @@ import {
   type BaseConfig,
   colorize,
   createScriptConfig,
+  createSlug,
   ensureAuthentication,
   getAuthHeaders,
   getLogger,
@@ -19,6 +20,7 @@ import {
 } from "./utils.js";
 
 import { Code } from "@/types/base/code/code";
+import { QualifiedRange } from "@/types/base/qualifiedRange/qualifiedRange.js";
 import {
   OBSERVATION_DEFINITION_STATUS,
   ObservationDefinitionCreateSpec,
@@ -33,6 +35,7 @@ interface ObservationDefinitionComponentSpec {
   code: Code;
   permitted_data_type: QuestionType;
   permitted_unit: Code;
+  qualified_ranges: QualifiedRange[];
 }
 
 interface CSVRow {
@@ -56,11 +59,11 @@ interface CSVRow {
   permitted_unit_code?: string;
   permitted_unit_display?: string;
   derived_from_uri?: string;
-  qualified_value?: string;
+  qualified_ranges?: string;
 }
 
 interface ParsedObservationDefinition {
-  slug: string;
+  slug_value: string;
   title: string;
   status: ObservationDefinitionStatus;
   description: string;
@@ -73,10 +76,11 @@ interface ParsedObservationDefinition {
   permitted_unit?: Code | null;
   derived_from_uri?: string;
   facility: string;
+  qualified_ranges: QualifiedRange[];
 }
 
 interface ProcessedRow {
-  Slug: string;
+  Slug_value: string;
   Title: string;
   Status: string;
   Errors?: string;
@@ -194,6 +198,7 @@ function parseComponents(
           code: comp.code || { system: "", code: "", display: "" },
           permitted_data_type: comp.permitted_data_type || "",
           permitted_unit: comp.permitted_unit || undefined,
+          qualified_ranges: comp.qualified_ranges || [],
         }));
     }
   } catch {
@@ -233,7 +238,7 @@ function csvRowToObservationDefinition(
   const category = row.category || "laboratory";
 
   return {
-    slug: row.slug,
+    slug_value: createSlug(row.title),
     title: row.title,
     status,
     description: row.description,
@@ -247,6 +252,7 @@ function csvRowToObservationDefinition(
     permitted_unit: permittedUnit,
     derived_from_uri: row.derived_from_uri || undefined,
     facility: facilityId,
+    qualified_ranges: [],
   };
 }
 
@@ -254,7 +260,7 @@ function validateObservationDefinition(
   definition: ParsedObservationDefinition,
 ): string[] {
   const errors: string[] = [];
-  if (!definition.slug) errors.push("Slug is required");
+  if (!definition.slug_value) errors.push("Slug is required");
   if (!definition.title) errors.push("Title is required");
   if (!definition.description) errors.push("Description is required");
   if (!definition.category) errors.push("Category is required");
@@ -409,7 +415,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
       `/api/v1/observation_definition/upsert/`,
       validDefinitions.map(
         (def): ObservationDefinitionCreateSpec => ({
-          slug: def.slug,
+          slug_value: def.slug_value,
           title: def.title,
           status: def.status,
           description: def.description,
@@ -422,6 +428,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
           permitted_unit: def.permitted_unit || null,
           derived_from_uri: def.derived_from_uri,
           facility: def.facility,
+          qualified_ranges: def.qualified_ranges,
         }),
       ),
       finalConfig,
@@ -433,7 +440,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
     // Add invalid rows
     invalidRows.forEach(({ row, errors }) => {
       processedRows.push({
-        Slug: row.slug || "UNKNOWN",
+        Slug_value: row.slug || createSlug(row.title),
         Title: row.title || "UNKNOWN",
         Status: "Validation Failed",
         Errors: errors.join("; "),
@@ -443,7 +450,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
     // Add results from batch processing
     results.forEach((result) => {
       processedRows.push({
-        Slug: result.item.slug,
+        Slug_value: result.item.slug_value,
         Title: result.item.title,
         Status: result.success ? "Success" : "Failed",
         Errors: result.error?.errorText || result.error?.message || "",
@@ -454,7 +461,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
       "Slug,Title,Status,Errors",
       ...processedRows.map(
         (r: ProcessedRow) =>
-          `"${r.Slug}","${r.Title}","${r.Status}","${r.Errors || ""}"`,
+          `"${r.Slug_value}","${r.Title}","${r.Status}","${r.Errors || ""}"`,
       ),
     ].join("\n");
     fs.writeFileSync(finalConfig.outputFile, csvOutput, "utf-8");
@@ -487,8 +494,10 @@ async function main(configOverride?: Partial<BaseConfig>) {
 
     // Return results for use by other scripts
     return {
-      successful: results.filter((r) => r.success).map((r) => r.item.slug),
-      failed: results.filter((r) => !r.success).map((r) => r.item.slug),
+      successful: results
+        .filter((r) => r.success)
+        .map((r) => r.item.slug_value),
+      failed: results.filter((r) => !r.success).map((r) => r.item.slug_value),
       results,
     };
   } catch (err) {

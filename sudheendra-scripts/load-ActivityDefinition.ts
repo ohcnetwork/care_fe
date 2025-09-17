@@ -45,7 +45,7 @@ const logger = getLogger();
 
 interface ActivityData {
   title: string;
-  slug: string;
+  slug_value: string;
   description: string;
   usage: string;
   status: Status;
@@ -187,7 +187,7 @@ async function processCsvData(
 
     results.push({
       title: row.title,
-      slug: row.slug,
+      slug_value: createSlug(row.title),
       description: row.description,
       usage: row.usage || "",
       status: (row.status as Status) || Status.active,
@@ -277,7 +277,7 @@ async function upsertActivityDefinition(
 ): Promise<any> {
   const activityData: ActivityDefinitionCreateSpec = {
     title: data.title,
-    slug: data.slug,
+    slug_value: data.slug_value,
     description: data.description,
     usage: data.usage,
     status: data.status,
@@ -293,6 +293,7 @@ async function upsertActivityDefinition(
     code: data.code!,
     body_site: data.body_site || null,
     derived_from_uri: data.derived_from_uri || null,
+    healthcare_service: null,
   };
 
   return await makeApiCall(
@@ -403,7 +404,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
     // Create output data for CSV
     let outputData: ProcessedRow[] = processedData.map((item) => ({
       Title: item.title,
-      Slug: item.slug,
+      Slug_value: item.slug_value,
       Status: "Pending",
     }));
 
@@ -441,7 +442,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
           item,
         ): ActivityDefinitionCreateSpec & { healthcare_service: null } => ({
           title: item.title,
-          slug: item.slug,
+          slug_value: item.slug_value,
           description: item.description,
           usage: item.usage,
           status: item.status,
@@ -475,7 +476,9 @@ async function main(configOverride?: Partial<BaseConfig>) {
 
     // Update output data with status
     outputData = outputData.map((row) => {
-      const result = allResults.find((r) => r.item.slug === row.Slug);
+      const result = allResults.find(
+        (r) => r.item.slug_value === row.Slug_value,
+      );
       return {
         ...row,
         Status: result?.success ? "Success" : "Failed",

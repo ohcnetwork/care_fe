@@ -39,7 +39,7 @@ const logger = getLogger();
 interface ChargeItemData {
   title: string;
   basePrice: number;
-  slug: string;
+  slug_value: string;
   taxRate?: string;
   category: string;
   description?: string;
@@ -75,7 +75,12 @@ const TAX_COMPONENTS = {
 // Function to get tax components based on tax rate
 function getTaxComponents(taxRate?: string) {
   if (taxRate && taxRate in TAX_COMPONENTS) {
-    return TAX_COMPONENTS[taxRate as keyof typeof TAX_COMPONENTS];
+    return TAX_COMPONENTS[taxRate as keyof typeof TAX_COMPONENTS].map(
+      (component) => ({
+        ...component,
+        conditions: [],
+      }),
+    );
   }
   if (taxRate) {
     logger(`Unknown tax rate: ${taxRate}`);
@@ -87,13 +92,13 @@ function getTaxComponents(taxRate?: string) {
 function processCsvData(rows: Record<string, string>[]): ChargeItemData[] {
   return rows.map((row) => {
     const basePrice = parseFloat(row["Base Price"].replace(/[^\d.-]/g, ""));
-    const slug = createSlug(row.Service);
+    const slug_value = createSlug(row.Service);
     const taxRate = row["Tax Rate"] || row["RATE"] || row["Tax"] || undefined;
 
     return {
       title: row.Service,
       basePrice: isNaN(basePrice) ? 0 : basePrice,
-      slug: slug,
+      slug_value: slug_value,
       taxRate: taxRate,
       category: createSlug(row.category || "service"),
       description: row.description || `Service: ${row.Service}`,
@@ -111,7 +116,7 @@ async function upsertChargeItemDefinition(
 ): Promise<any> {
   const chargeItemData: ChargeItemDefinitionCreate = {
     title: data.title,
-    slug: data.slug,
+    slug_value: data.slug_value,
     status: data.status,
     description: data.description,
     category: data.category,
@@ -119,6 +124,7 @@ async function upsertChargeItemDefinition(
       {
         monetary_component_type: MonetaryComponentType.base,
         amount: data.basePrice.toString(),
+        conditions: [],
       },
       ...getTaxComponents(data.taxRate),
     ],
@@ -186,7 +192,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
       Service: normalizeTitle(item.title),
       "Base Price": item.basePrice.toString(),
       "Tax Rate": item.taxRate || "N/A",
-      Slug: item.slug,
+      Slug_value: item.slug_value,
       Status: "Pending",
     }));
 
@@ -198,7 +204,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
         const normalizedTitle = normalizeTitle(item.title);
         return {
           title: normalizedTitle,
-          slug: item.slug,
+          slug_value: item.slug_value,
           status: item.status,
           description: item.description,
           category: item.category,
@@ -206,6 +212,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
             {
               monetary_component_type: MonetaryComponentType.base,
               amount: item.basePrice.toString(),
+              conditions: [],
             },
             ...getTaxComponents(item.taxRate),
           ],
@@ -216,7 +223,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
 
     // Update output data with status
     outputData = outputData.map((row) => {
-      const result = results.find((r) => r.item.slug === row.Slug);
+      const result = results.find((r) => r.item.slug_value === row.Slug_value);
       return {
         ...row,
         Status: result?.success ? "Success" : "Failed",

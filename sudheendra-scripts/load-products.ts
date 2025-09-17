@@ -79,25 +79,25 @@ async function ensureResourceCategories() {
   const datapoints = [
     {
       title: "Medicines",
-      slug: "pk-medicines",
+      slug_value: "pk-medicines",
       resource_type: ResourceCategoryResourceType.product_knowledge,
       resource_sub_type: ResourceCategorySubType.other,
     },
     {
       title: "Consumables",
-      slug: "pk-consumables",
+      slug_value: "pk-consumables",
       resource_type: ResourceCategoryResourceType.product_knowledge,
       resource_sub_type: ResourceCategorySubType.other,
     },
     {
       title: "Medications",
-      slug: "cid-medications",
+      slug_value: "cid-medications",
       resource_type: ResourceCategoryResourceType.charge_item_definition,
       resource_sub_type: ResourceCategorySubType.other,
     },
     {
       title: "Consumables",
-      slug: "cid-consumables",
+      slug_value: "cid-consumables",
       resource_type: ResourceCategoryResourceType.charge_item_definition,
       resource_sub_type: ResourceCategorySubType.other,
     },
@@ -133,7 +133,7 @@ async function buildProductKnowledges(datapoints: Datapoints) {
     ([item, { name, hsnCode, baseUnit }]) =>
       ({
         name,
-        slug: createSlug(item),
+        slug_value: createSlug(item),
         alternate_identifier: hsnCode,
         facility: FACILITY_ID!,
         product_type: ProductKnowledgeType.medication,
@@ -197,10 +197,15 @@ const TAX_COMPONENTS = {
 
 function getTaxComponents(datapoint: Datapoints[number]) {
   if (datapoint.taxRate in TAX_COMPONENTS) {
-    return TAX_COMPONENTS[datapoint.taxRate as keyof typeof TAX_COMPONENTS];
+    return TAX_COMPONENTS[datapoint.taxRate as keyof typeof TAX_COMPONENTS].map(
+      (component) => ({
+        ...component,
+        conditions: [],
+      }),
+    );
   }
   logger(
-    `Unknown tax rate: ${datapoint.taxRate} for (slug: ${createSlug(`${datapoint.item}-${datapoint.batchNumber}`)})`,
+    `Unknown tax rate: ${datapoint.taxRate} for (slug_value: ${createSlug(`${datapoint.item}-${datapoint.batchNumber}`)})`,
   );
   return [];
 }
@@ -209,17 +214,20 @@ async function buildChargeItemDefinitions(datapoints: Datapoints) {
   const chargeItemDefinitions = Object.values(
     Object.fromEntries(
       datapoints.map((datapoint) => {
-        const slug = createSlug(`${datapoint.item}-${datapoint.batchNumber}`);
+        const slug_value = createSlug(
+          `${datapoint.item}-${datapoint.batchNumber}`,
+        );
         return [
-          slug,
+          slug_value,
           {
             title: datapoint.item,
-            slug,
+            slug_value: slug_value,
             status: ChargeItemDefinitionStatus.active,
             price_components: [
               {
                 monetary_component_type: MonetaryComponentType.base,
                 amount: datapoint.sellingPrice,
+                conditions: [],
               },
               ...getTaxComponents(datapoint),
             ],
@@ -312,7 +320,7 @@ async function buildInventoryItems(
       ...datapoint,
       product: products.find(
         (product) =>
-          product.charge_item_definition.slug ===
+          product.charge_item_definition.slug_config.slug_value ===
           createSlug(`${datapoint.item}-${datapoint.batchNumber}`),
       ),
     })),
