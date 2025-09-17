@@ -3,6 +3,7 @@ import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,13 +16,27 @@ import {
   TokenStatus,
 } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { ExternalLink, MoreHorizontal, TicketCheck, X } from "lucide-react";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import {
+  BringToFront,
+  Check,
+  ExternalLink,
+  MoreHorizontal,
+  OctagonX,
+  RedoDot,
+  TicketCheck,
+} from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
+import { toast } from "sonner";
 
 export function OngoingQueueTokenCard({
   facilityId,
@@ -34,10 +49,34 @@ export function OngoingQueueTokenCard({
 }) {
   const { t } = useTranslation();
   const contextMenuTriggerRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
 
   const [showAssignToServicePointDialog, setShowAssignToServicePointDialog] =
     useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+
+  const { mutate: updateToken } = useMutation({
+    mutationFn: mutate(tokenApi.update, {
+      pathParams: {
+        facility_id: facilityId,
+        queue_id: token?.queue.id ?? "",
+        id: token?.id ?? "",
+      },
+    }),
+    onSuccess: (data: TokenRead) => {
+      queryClient.invalidateQueries({
+        queryKey: ["infinite-tokens", facilityId, token?.queue.id ?? ""],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["token-queue-summary", facilityId, token?.queue.id ?? ""],
+      });
+
+      if (data.status === TokenStatus.FULFILLED) {
+        toast.success(t("token_has_been_completed"));
+        return;
+      }
+    },
+  });
 
   return (
     <ContextMenu>
@@ -140,6 +179,45 @@ export function OngoingQueueTokenCard({
               </ContextMenuItem>
             )}
 
+            {token.status === TokenStatus.IN_PROGRESS && (
+              <>
+                <ContextMenuItem
+                  onClick={() =>
+                    updateToken({
+                      status: TokenStatus.FULFILLED,
+                      note: token.note,
+                      sub_queue: token.sub_queue?.id,
+                    })
+                  }
+                >
+                  <Check className="size-4 mr-2" />
+                  {t("mark_as_complete")}
+                </ContextMenuItem>
+                <ContextMenuItem
+                  onClick={() =>
+                    updateToken({
+                      status: TokenStatus.UNFULFILLED,
+                      note: token.note,
+                      sub_queue: null,
+                    })
+                  }
+                >
+                  <BringToFront className="size-4 mr-2" />
+                  {t("move_to_awaiting_recall")}
+                </ContextMenuItem>
+              </>
+            )}
+
+            {token.sub_queue && (
+              <ContextMenuItem
+                onClick={() => setShowAssignToServicePointDialog(true)}
+              >
+                <RedoDot className="size-4 mr-2" />
+                {t("reassign_service_point")}
+              </ContextMenuItem>
+            )}
+
+            <ContextMenuSeparator />
             {/* Cancel Token */}
             {![
               TokenStatus.CANCELLED,
@@ -147,8 +225,25 @@ export function OngoingQueueTokenCard({
               TokenStatus.FULFILLED,
             ].includes(token.status) && (
               <ContextMenuItem onClick={() => setShowCancelDialog(true)}>
-                <X className="size-4 mr-2 text-danger-500" />
-                <span className="text-danger-500">{t("cancel_token")}</span>
+                <OctagonX className="size-4 mr-2 text-danger-700" />
+                <span className="text-danger-700">{t("cancel_token")}</span>
+              </ContextMenuItem>
+            )}
+
+            {token.status !== TokenStatus.ENTERED_IN_ERROR && (
+              <ContextMenuItem
+                onClick={() =>
+                  updateToken({
+                    status: TokenStatus.ENTERED_IN_ERROR,
+                    note: token.note,
+                    sub_queue: null,
+                  })
+                }
+              >
+                <OctagonX className="size-4 mr-2 text-danger-700" />
+                <span className="text-danger-700">
+                  {t("mark_as_entered_in_error")}
+                </span>
               </ContextMenuItem>
             )}
           </ContextMenuContent>

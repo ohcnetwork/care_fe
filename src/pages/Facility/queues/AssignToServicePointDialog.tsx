@@ -6,6 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   renderTokenNumber,
@@ -15,7 +16,7 @@ import {
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
 import { DialogDescription } from "@radix-ui/react-dialog";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserCheck } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -33,6 +34,7 @@ export function AssignToServicePointDialog({
 }) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacility();
+  const queryClient = useQueryClient();
   const [selectedSubQueueId, setSelectedSubQueueId] = useState<string>("");
   const { assignedServicePoints } = useQueueServicePoints();
 
@@ -45,6 +47,12 @@ export function AssignToServicePointDialog({
       },
     }),
     onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["infinite-tokens", facilityId, token.queue.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["token-queue-summary", facilityId, token.queue.id],
+      });
       toast.success(t("token_assigned_to_service_point"));
       onOpenChange(false);
     },
@@ -80,7 +88,10 @@ export function AssignToServicePointDialog({
           {assignedServicePoints.map((subQueue) => (
             <div
               key={subQueue.id}
-              className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+              className={cn(
+                "flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors",
+                subQueue.id === token.sub_queue?.id && "hidden",
+              )}
             >
               <RadioGroupItem value={subQueue.id} id={subQueue.id} />
               <label
@@ -93,7 +104,7 @@ export function AssignToServicePointDialog({
           ))}
           {assignedServicePoints.length === 0 && (
             <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-              <RadioGroupItem value="none" id="none" />
+              <RadioGroupItem value="none" id="none" disabled />
               <label
                 htmlFor="none"
                 className="flex-1 text-sm font-medium cursor-pointer"
