@@ -1,7 +1,7 @@
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { ChevronDown, MoreVertical } from "lucide-react";
+import { Link, navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -38,6 +38,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import InvoicesData from "@/pages/Facility/billing/invoice/InvoicesData";
 import PaymentsData from "@/pages/Facility/billing/paymentReconciliation/PaymentsData";
@@ -51,8 +52,10 @@ import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
-import { PatientHeader } from "@/pages/Facility/services/serviceRequests/PatientHeader";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { PatientHeader } from "@/components/Patient/PatientHeader";
 import AccountSheet from "./AccountSheet";
+import BedChargeItemsTable from "./components/BedChargeItemsTable";
 import ChargeItemsTable from "./components/ChargeItemsTable";
 
 function formatDate(date?: string) {
@@ -64,7 +67,7 @@ function formatDate(date?: string) {
   });
 }
 
-type tab = "charge_items" | "invoices" | "payments";
+type tab = "charge_items" | "invoices" | "payments" | "bed_charge_items";
 
 const closedStatusText = {
   [AccountBillingStatus.closed_baddebt]: "close_account_help_closed_baddebt",
@@ -85,12 +88,18 @@ export function AccountShow({
 }) {
   const { t } = useTranslation();
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [isPaymentSheetOpen, setIsPaymentSheetOpen] = useState(false);
+  const [paymentSheet, setPaymentSheet] = useState<{
+    isOpen: boolean;
+    isCreditNote: boolean;
+  }>({ isOpen: false, isCreditNote: false });
   const queryClient = useQueryClient();
   const [closeAccountStatus, setCloseAccountStatus] = useState<{
     sheetOpen: boolean;
     reason: AccountBillingStatus;
   }>({ sheetOpen: false, reason: AccountBillingStatus.closed_baddebt });
+  const [{ encounterId }] = useQueryParams();
+
+  useFacilityShortcuts("account-show");
 
   const { data: account, isLoading } = useQuery({
     queryKey: ["account", accountId],
@@ -129,7 +138,7 @@ export function AccountShow({
           : AccountBillingStatus.closed_baddebt,
       });
     }
-  }, [account]);
+  }, [account, isAccountBillingClosed]);
 
   const rebalanceMutation = useMutation({
     mutationFn: mutate(accountApi.rebalanceAccount, {
@@ -218,17 +227,24 @@ export function AccountShow({
               {account.status === AccountStatus.active &&
                 !isAccountBillingClosed && (
                   <Button
-                    variant="link"
-                    className="text-gray-950 underline gap-0"
+                    variant="ghost"
+                    className="text-gray-950 gap-1 flex flex-row items-center justify-between"
                     onClick={() =>
                       setCloseAccountStatus({
                         ...closeAccountStatus,
                         sheetOpen: true,
                       })
                     }
+                    data-shortcut-id={
+                      account.status === AccountStatus.active &&
+                      !isAccountBillingClosed
+                        ? "settle-close-account"
+                        : undefined
+                    }
                   >
                     <CareIcon icon="l-check" className="size-5" />
-                    {t("settle_close")}
+                    <span className="underline">{t("settle_close")}</span>
+                    <ShortcutBadge actionId="settle-close-account" />
                   </Button>
                 )}
               {account.status === AccountStatus.active &&
@@ -242,18 +258,66 @@ export function AccountShow({
                           `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
                         )
                       }
+                      data-shortcut-id={
+                        account.status === AccountStatus.active &&
+                        !isAccountBillingClosed
+                          ? "create-invoice"
+                          : undefined
+                      }
                     >
                       <CareIcon icon="l-plus" className="mr-2 size-4" />
                       {t("create_invoice")}
+                      <ShortcutBadge actionId="create-invoice" />
                     </Button>
 
-                    <Button
-                      variant="primary"
-                      onClick={() => setIsPaymentSheetOpen(true)}
-                    >
-                      <CareIcon icon="l-plus" className="size-4" />
-                      {t("record_payment")}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="primary"
+                        onClick={() =>
+                          setPaymentSheet({
+                            isOpen: true,
+                            isCreditNote: false,
+                          })
+                        }
+                        data-shortcut-id={
+                          account.status === AccountStatus.active &&
+                          !isAccountBillingClosed
+                            ? "record-payment-account"
+                            : undefined
+                        }
+                      >
+                        <CareIcon icon="l-plus" className="size-4" />
+                        {t("record_payment")}
+                        <ShortcutBadge
+                          actionId="record-payment-account"
+                          className="bg-white"
+                        />
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="border-gray-400"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() =>
+                              setPaymentSheet({
+                                isOpen: true,
+                                isCreditNote: true,
+                              })
+                            }
+                          >
+                            <CareIcon icon="l-plus" className="mr-2 size-4" />
+                            {t("record_credit_note")}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </>
                 )}
             </div>
@@ -281,6 +345,12 @@ export function AccountShow({
                                 sheetOpen: true,
                               })
                             }
+                            data-shortcut-id={
+                              account.status === AccountStatus.active &&
+                              !isAccountBillingClosed
+                                ? "settle-close-account"
+                                : undefined
+                            }
                           >
                             <CareIcon icon="l-check" className="mr-2 size-5" />
                             {t("settle_close")}
@@ -292,15 +362,43 @@ export function AccountShow({
                             `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
                           )
                         }
+                        data-shortcut-id={
+                          account.status === AccountStatus.active &&
+                          !isAccountBillingClosed
+                            ? "create-invoice"
+                            : undefined
+                        }
                       >
                         <CareIcon icon="l-plus" className="mr-2 size-4" />
                         {t("create_invoice")}
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => setIsPaymentSheetOpen(true)}
+                        onClick={() =>
+                          setPaymentSheet({
+                            isOpen: true,
+                            isCreditNote: false,
+                          })
+                        }
+                        data-shortcut-id={
+                          account.status === AccountStatus.active &&
+                          !isAccountBillingClosed
+                            ? "record-payment-account"
+                            : undefined
+                        }
                       >
                         <CareIcon icon="l-plus" className="mr-2 size-4" />
                         {t("record_payment")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          setPaymentSheet({
+                            isOpen: true,
+                            isCreditNote: true,
+                          })
+                        }
+                      >
+                        <CareIcon icon="l-minus" className="mr-2 size-4" />
+                        {t("record_credit_note")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -359,12 +457,14 @@ export function AccountShow({
               variant="outline"
               className="border-gray-400 gap-1"
               onClick={() => setSheetOpen(true)}
+              data-shortcut-id="edit-account"
             >
               <CareIcon
                 icon="l-edit"
                 className="size-5 stroke-gray-450 stroke-1"
               />
               {t("edit")}
+              <ShortcutBadge actionId="edit-account" />
             </Button>
           </div>
         </div>
@@ -450,36 +550,100 @@ export function AccountShow({
         value={tab}
         onValueChange={(value) =>
           navigate(
-            `/facility/${facilityId}/billing/account/${accountId}/${value}`,
+            `/facility/${facilityId}/billing/account/${accountId}/${value}` +
+              (encounterId !== undefined ? `?encounterId=${encounterId}` : ""),
           )
         }
         className="mt-8"
       >
         <div className="flex flex-row justify-between items-center">
-          <TabsList className="border-b border-gray-300 w-full flex justify-start gap-0 rounded-none bg-transparent p-0">
+          <TabsList className="border-b border-gray-300 w-full flex justify-start gap-0 rounded-none bg-transparent p-0 overflow-x-auto">
             <TabsTrigger
               value="invoices"
               className="border-b-2 px-6 py-2 text-sm font-medium data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 rounded-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent data-[state=active]:font-semibold text-gray-600"
             >
               {t("invoices")}
+              <ShortcutBadge actionId="switch-to-invoices-tab" />
             </TabsTrigger>
             <TabsTrigger
               value="charge_items"
               className="border-b-2 px-6 py-2 text-sm font-medium data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 rounded-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent data-[state=active]:font-semibold text-gray-600"
             >
               {t("charge_items")}
+              <ShortcutBadge actionId="switch-to-charge-items-tab" />
             </TabsTrigger>
             <TabsTrigger
               value="payments"
               className="border-b-2 px-6 py-2 text-sm font-medium data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 rounded-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent text-gray-600"
             >
               {t("payments")}
+              <ShortcutBadge actionId="switch-to-payments-tab" />
             </TabsTrigger>
+            {encounterId && (
+              <TabsTrigger
+                value="bed_charge_items"
+                className="border-b-2 px-6 py-2 text-sm font-medium data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 rounded-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent text-gray-600"
+              >
+                {t("bed_charge_items")}
+                <ShortcutBadge actionId="switch-to-bed-associations-tab" />
+              </TabsTrigger>
+            )}
           </TabsList>
         </div>
 
+        {/* Hidden buttons for tab shortcuts */}
+        <div className="hidden">
+          <Button
+            data-shortcut-id="switch-to-invoices-tab"
+            onClick={() =>
+              navigate(
+                `/facility/${facilityId}/billing/account/${accountId}/invoices` +
+                  (encounterId !== undefined
+                    ? `?encounterId=${encounterId}`
+                    : ""),
+              )
+            }
+          />
+          <Button
+            data-shortcut-id="switch-to-charge-items-tab"
+            onClick={() =>
+              navigate(
+                `/facility/${facilityId}/billing/account/${accountId}/charge_items` +
+                  (encounterId !== undefined
+                    ? `?encounterId=${encounterId}`
+                    : ""),
+              )
+            }
+          />
+          <Button
+            data-shortcut-id="switch-to-payments-tab"
+            onClick={() =>
+              navigate(
+                `/facility/${facilityId}/billing/account/${accountId}/payments` +
+                  (encounterId !== undefined
+                    ? `?encounterId=${encounterId}`
+                    : ""),
+              )
+            }
+          />
+          {encounterId && (
+            <Button
+              data-shortcut-id="switch-to-bed-associations-tab"
+              onClick={() =>
+                navigate(
+                  `/facility/${facilityId}/billing/account/${accountId}/bed_charge_items?encounterId=${encounterId}`,
+                )
+              }
+            />
+          )}
+        </div>
+
         <TabsContent value="charge_items" className="mt-4">
-          <ChargeItemsTable facilityId={facilityId} accountId={accountId} />
+          <ChargeItemsTable
+            facilityId={facilityId}
+            accountId={accountId}
+            patientId={account.patient.id}
+          />
         </TabsContent>
 
         <TabsContent value="invoices" className="mt-4">
@@ -489,6 +653,14 @@ export function AccountShow({
         <TabsContent value="payments">
           <PaymentsData facilityId={facilityId} accountId={accountId} />
         </TabsContent>
+        {
+          <TabsContent value="bed_charge_items" className="mt-4">
+            <BedChargeItemsTable
+              facilityId={facilityId}
+              accountId={accountId}
+            />
+          </TabsContent>
+        }
       </Tabs>
 
       <AccountSheet
@@ -500,10 +672,11 @@ export function AccountShow({
       />
 
       <PaymentReconciliationSheet
-        open={isPaymentSheetOpen}
-        onOpenChange={setIsPaymentSheetOpen}
+        open={paymentSheet.isOpen}
+        onOpenChange={(isOpen) => setPaymentSheet({ ...paymentSheet, isOpen })}
         facilityId={facilityId}
         accountId={accountId}
+        isCreditNote={paymentSheet.isCreditNote}
       />
 
       <Dialog

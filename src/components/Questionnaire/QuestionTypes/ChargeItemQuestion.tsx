@@ -192,7 +192,7 @@ export function ChargeItemQuestion({
       const newChargeItem: ApplyChargeItemDefinitionRequestWithObject = {
         quantity: "1",
         encounter: encounterId,
-        charge_item_definition: selectedChargeItemDefinition.id,
+        charge_item_definition: selectedChargeItemDefinition.slug,
         charge_item_definition_object: selectedChargeItemDefinition,
       };
 

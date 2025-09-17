@@ -9,6 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceTypeIcon";
 import {
@@ -34,17 +40,27 @@ export default function DeviceCard({ device, encounter }: Props) {
       <Card className="hover:shadow-md transition-shadow h-full">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between">
-            <div className="flex items-start gap-2">
+            <div className="flex items-start gap-2 min-w-0">
               <div className="mt-1">
                 <DeviceTypeIcon
                   className="size-5 text-gray-500"
                   type={device.care_type}
                 />
               </div>
-              <div>
-                <CardTitle className="text-lg font-semibold line-clamp-1">
-                  {device.registered_name}
-                </CardTitle>
+              <div className="min-w-0 max-w-full">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <CardTitle className="text-lg font-semibold truncate">
+                        {device.registered_name}
+                      </CardTitle>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-sm sm:max-w-md break-words">
+                      <p>{device.registered_name}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
                 {device.user_friendly_name && (
                   <CardDescription className="line-clamp-1">
                     {device.user_friendly_name}
