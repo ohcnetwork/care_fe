@@ -2,12 +2,6 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -18,49 +12,33 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import { OngoingQueueTokenCardsList } from "@/pages/Facility/queues/OngoingQueueTokenCard";
 import { usePreferredServicePointCategory } from "@/pages/Facility/queues/usePreferredServicePointCategory";
 import { getTokenQueueStatusCount } from "@/pages/Facility/queues/utils";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
-import {
-  renderTokenNumber,
-  TokenRead,
-  TokenStatus,
-} from "@/types/tokens/token/token";
+import { TokenRead, TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import tokenCategoryApi from "@/types/tokens/tokenCategory/tokenCategoryApi";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import { TokenSubQueueRead } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Check,
   DoorOpenIcon,
-  ExternalLink,
   Megaphone,
   MoreHorizontal,
   RotateCcw,
   SettingsIcon,
-  UserCheck,
-  X,
 } from "lucide-react";
-import { Link } from "raviger";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 
 interface Props {
   facilityId: string;
   queueId: string;
   resourceType: SchedulableResourceType;
-  resourceId: string;
   subQueues: TokenSubQueueRead[];
 }
 
@@ -69,24 +47,112 @@ export function ManageQueueOngoingTab({
   queueId,
   subQueues,
   resourceType,
-  resourceId,
 }: Props) {
+  const { t } = useTranslation();
+  const { data: summary } = useQuery({
+    queryKey: ["token-queue-summary", facilityId, queueId],
+    queryFn: query(tokenQueueApi.summary, {
+      pathParams: { facility_id: facilityId, id: queueId },
+    }),
+  });
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex space-x-4 overflow-x-auto w-full">
-        <WaitingTokensColumn
-          facilityId={facilityId}
-          queueId={queueId}
-          resourceType={resourceType}
-          resourceId={resourceId}
-          subQueues={subQueues}
-        />
-        <InServiceTokensColumn
-          facilityId={facilityId}
-          queueId={queueId}
-          resourceType={resourceType}
-          subQueues={subQueues}
-        />
+        {/* Waiting tokens list */}
+        <QueueColumn
+          title={t("waiting")}
+          count={
+            summary && (
+              <Badge size="sm">
+                {getTokenQueueStatusCount(summary, TokenStatus.CREATED)}
+              </Badge>
+            )
+          }
+        >
+          <OngoingQueueTokenCardsList
+            facilityId={facilityId}
+            queueId={queueId}
+            status={TokenStatus.CREATED}
+            emptyState={
+              <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-10 border border-gray-100">
+                <DoorOpenIcon className="size-6 text-gray-700" />
+                <span className="text-sm font-semibold text-gray-700">
+                  {t("no_patient_is_waiting")}
+                </span>
+              </div>
+            }
+          />
+        </QueueColumn>
+
+        {/* Called + Now Serving tokens list */}
+        <QueueColumn
+          title={t("called_plus_now_serving")}
+          count={
+            summary && (
+              <Badge size="sm">
+                {getTokenQueueStatusCount(
+                  summary,
+                  TokenStatus.CREATED,
+                  TokenStatus.IN_PROGRESS,
+                )}
+              </Badge>
+            )
+          }
+        >
+          <div className="flex flex-col gap-4">
+            {subQueues.map((subQueue, index) => (
+              <>
+                {index > 0 && (
+                  <hr className="h-px w-full border border-gray-300 border-dashed" />
+                )}
+                <SubQueueColumn
+                  key={subQueue.id}
+                  resourceType={resourceType}
+                  subQueue={subQueue}
+                  facilityId={facilityId}
+                  queueId={queueId}
+                  status={TokenStatus.IN_PROGRESS}
+                  emptyState={
+                    <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-3 border border-gray-100">
+                      <DoorOpenIcon className="size-6 text-gray-700" />
+                      <span className="text-sm font-semibold text-gray-700">
+                        {t("no_patient_is_being_called")}
+                      </span>
+                      <CallNextPatientButton
+                        subQueueId={subQueue.id}
+                        facilityId={facilityId}
+                        resourceType={resourceType}
+                        queueId={queueId}
+                        variant="outline"
+                        size="lg"
+                      >
+                        <Megaphone />
+                        {t("call_next_patient")}
+                      </CallNextPatientButton>
+                    </div>
+                  }
+                  options={(tokens) => (
+                    <InServiceColumnOptions
+                      facilityId={facilityId}
+                      resourceType={resourceType}
+                      queueId={queueId}
+                      subQueueId={subQueue.id}
+                      tokens={tokens}
+                    />
+                  )}
+                  tokenOptions={(token) => (
+                    <InServiceTokenOptions
+                      token={token}
+                      facilityId={facilityId}
+                      queueId={queueId}
+                    />
+                  )}
+                />
+              </>
+            ))}
+          </div>
+        </QueueColumn>
       </div>
     </div>
   );
@@ -116,8 +182,6 @@ export function QueueColumn({
   );
 }
 
-const PAGE_SIZE = 50;
-
 function SubQueueColumn({
   facilityId,
   queueId,
@@ -126,7 +190,6 @@ function SubQueueColumn({
   status,
   emptyState,
   options,
-  tokenOptions,
 }: {
   facilityId: string;
   queueId: string;
@@ -138,47 +201,11 @@ function SubQueueColumn({
   tokenOptions?: (token: TokenRead) => React.ReactNode;
 }) {
   const { t } = useTranslation();
-  const { ref, inView } = useInView();
   const { preferredServicePointCategory } = usePreferredServicePointCategory({
     facilityId,
     subQueueId: subQueue.id,
     resourceType,
   });
-
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: [
-        "infinite-tokens",
-        facilityId,
-        queueId,
-        { sub_queue: subQueue.id, status },
-      ],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(tokenApi.list, {
-          pathParams: { facility_id: facilityId, queue_id: queueId },
-          queryParams: {
-            sub_queue: subQueue.id,
-            status,
-            limit: PAGE_SIZE,
-            offset: pageParam,
-          },
-        })({ signal });
-        return response;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * PAGE_SIZE;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
-    });
-
-  useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, fetchNextPage]);
-
-  const tokens = data?.pages.flatMap((page) => page.results) ?? [];
 
   return (
     <div className="flex flex-col p-1 rounded-lg bg-gray-200">
@@ -189,216 +216,16 @@ function SubQueueColumn({
             {t("category")}: {preferredServicePointCategory?.name ?? t("all")}
           </span>
         </div>
-        {options?.(tokens)}
+        {options?.([])}
       </div>
-      <div className="flex flex-col gap-3">
-        {tokens.length > 0
-          ? tokens.map((token, index) => (
-              <div
-                key={token.id}
-                ref={index === tokens.length - 1 ? ref : undefined}
-              >
-                <TokenCard
-                  facilityId={facilityId}
-                  token={token}
-                  options={tokenOptions?.(token)}
-                />
-              </div>
-            ))
-          : emptyState}
-        {isFetchingNextPage && <TokenCardSkeleton count={5} />}
-      </div>
+      <OngoingQueueTokenCardsList
+        facilityId={facilityId}
+        queueId={queueId}
+        subQueueId={subQueue.id}
+        status={status}
+        emptyState={emptyState}
+      />
     </div>
-  );
-}
-
-function WaitingTokensColumn({
-  facilityId,
-  queueId,
-  resourceType,
-  resourceId,
-  subQueues,
-}: {
-  facilityId: string;
-  queueId: string;
-  resourceType: SchedulableResourceType;
-  resourceId: string;
-  subQueues: TokenSubQueueRead[];
-}) {
-  const { ref, inView } = useInView();
-
-  const { data: summary } = useQuery({
-    queryKey: ["token-queue-summary", facilityId, queueId],
-    queryFn: query(tokenQueueApi.summary, {
-      pathParams: { facility_id: facilityId, id: queueId },
-    }),
-  });
-
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: [
-        "infinite-tokens",
-        facilityId,
-        queueId,
-        { status: TokenStatus.CREATED },
-      ],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(tokenApi.list, {
-          pathParams: { facility_id: facilityId, queue_id: queueId },
-          queryParams: {
-            status: TokenStatus.CREATED,
-            limit: PAGE_SIZE,
-            offset: pageParam,
-          },
-        })({ signal });
-        return response;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * PAGE_SIZE;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
-    });
-
-  useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, fetchNextPage]);
-
-  const tokens = data?.pages.flatMap((page) => page.results) ?? [];
-  const { t } = useTranslation();
-  return (
-    <QueueColumn
-      title={t("waiting")}
-      count={
-        summary && (
-          <Badge size="sm">
-            {getTokenQueueStatusCount(summary, TokenStatus.CREATED)}
-          </Badge>
-        )
-      }
-    >
-      <div className="flex flex-col gap-4">
-        {tokens.length > 0 ? (
-          tokens.map((token, index) => (
-            <div
-              key={token.id}
-              ref={index === tokens.length - 1 ? ref : undefined}
-            >
-              <TokenCard
-                facilityId={facilityId}
-                token={token}
-                options={
-                  <WaitingTokenOptions
-                    token={token}
-                    facilityId={facilityId}
-                    queueId={queueId}
-                    _resourceType={resourceType}
-                    _resourceId={resourceId}
-                    subQueues={subQueues}
-                  />
-                }
-              />
-            </div>
-          ))
-        ) : (
-          <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-10 border border-gray-100">
-            <DoorOpenIcon className="size-6 text-gray-700" />
-            <span className="text-sm font-semibold text-gray-700">
-              {t("no_patient_is_waiting")}
-            </span>
-          </div>
-        )}
-        {isFetchingNextPage && <TokenCardSkeleton count={5} />}
-      </div>
-    </QueueColumn>
-  );
-}
-function InServiceTokensColumn({
-  facilityId,
-  queueId,
-  resourceType,
-  subQueues,
-}: {
-  facilityId: string;
-  queueId: string;
-  resourceType: SchedulableResourceType;
-  subQueues: TokenSubQueueRead[];
-}) {
-  const { t } = useTranslation();
-
-  const { data: summary } = useQuery({
-    queryKey: ["token-queue-summary", facilityId, queueId],
-    queryFn: query(tokenQueueApi.summary, {
-      pathParams: { facility_id: facilityId, id: queueId },
-    }),
-  });
-
-  return (
-    <QueueColumn
-      title={t("called_plus_now_serving")}
-      count={
-        summary && (
-          <Badge size="sm">
-            {getTokenQueueStatusCount(summary, TokenStatus.IN_PROGRESS)}
-          </Badge>
-        )
-      }
-    >
-      <div className="flex flex-col gap-4">
-        {subQueues.map((subQueue, index) => (
-          <>
-            {index > 0 && (
-              <hr className="h-px w-full border border-gray-300 border-dashed" />
-            )}
-            <SubQueueColumn
-              key={subQueue.id}
-              resourceType={resourceType}
-              subQueue={subQueue}
-              facilityId={facilityId}
-              queueId={queueId}
-              status={TokenStatus.IN_PROGRESS}
-              emptyState={
-                <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-3 border border-gray-100">
-                  <DoorOpenIcon className="size-6 text-gray-700" />
-                  <span className="text-sm font-semibold text-gray-700">
-                    {t("no_patient_is_being_called")}
-                  </span>
-                  <CallNextPatientButton
-                    subQueueId={subQueue.id}
-                    facilityId={facilityId}
-                    resourceType={resourceType}
-                    queueId={queueId}
-                    variant="outline"
-                    size="lg"
-                  >
-                    <Megaphone />
-                    {t("call_next_patient")}
-                  </CallNextPatientButton>
-                </div>
-              }
-              options={(tokens) => (
-                <InServiceColumnOptions
-                  facilityId={facilityId}
-                  resourceType={resourceType}
-                  queueId={queueId}
-                  subQueueId={subQueue.id}
-                  tokens={tokens}
-                />
-              )}
-              tokenOptions={(token) => (
-                <InServiceTokenOptions
-                  token={token}
-                  facilityId={facilityId}
-                  queueId={queueId}
-                />
-              )}
-            />
-          </>
-        ))}
-      </div>
-    </QueueColumn>
   );
 }
 
@@ -547,39 +374,6 @@ function InServiceColumnOptions({
   );
 }
 
-function TokenCancelConfirmDialog({
-  open,
-  onOpenChange,
-  token,
-  onConfirm,
-  isLoading,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  token: TokenRead;
-  onConfirm: () => void;
-  isLoading: boolean;
-}) {
-  const { t } = useTranslation();
-
-  return (
-    <ConfirmActionDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title={t("cancel_token")}
-      description={t("cancel_token_confirmation", {
-        patientName: token.patient?.name,
-        tokenNumber: renderTokenNumber(token),
-      })}
-      onConfirm={onConfirm}
-      cancelText={t("cancel")}
-      confirmText={t("cancel_token")}
-      variant="destructive"
-      disabled={isLoading}
-    />
-  );
-}
-
 function TokenCompleteConfirmDialog({
   open,
   onOpenChange,
@@ -613,203 +407,6 @@ function TokenCompleteConfirmDialog({
   );
 }
 
-function AssignToServicePointDialog({
-  open,
-  onOpenChange,
-  token,
-  subQueues,
-  onConfirm,
-  isLoading,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  token: TokenRead;
-  subQueues: TokenSubQueueRead[];
-  onConfirm: (subQueueId: string) => void;
-  isLoading: boolean;
-}) {
-  const { t } = useTranslation();
-  const [selectedSubQueueId, setSelectedSubQueueId] = useState<string>("");
-
-  const handleConfirm = () => {
-    if (selectedSubQueueId) {
-      onConfirm(selectedSubQueueId);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle>{t("select_service_point")}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <p className="text-sm text-gray-600">
-            {t("choose_service_point_to_call_patient", {
-              patientName: token.patient?.name,
-              tokenNumber: renderTokenNumber(token),
-            })}
-          </p>
-          <RadioGroup
-            value={selectedSubQueueId}
-            onValueChange={setSelectedSubQueueId}
-            className="space-y-3"
-          >
-            {subQueues.map((subQueue) => (
-              <div
-                key={subQueue.id}
-                className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-              >
-                <RadioGroupItem value={subQueue.id} id={subQueue.id} />
-                <label
-                  htmlFor={subQueue.id}
-                  className="flex-1 text-sm font-medium cursor-pointer"
-                >
-                  {subQueue.name}
-                </label>
-              </div>
-            ))}
-          </RadioGroup>
-        </div>
-        <div className="flex">
-          <Button
-            onClick={handleConfirm}
-            className="w-full"
-            disabled={!selectedSubQueueId || isLoading}
-          >
-            <UserCheck className="size-4 mr-2" />
-            {t("call_patient")}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function WaitingTokenOptions({
-  token,
-  facilityId,
-  queueId,
-  _resourceType,
-  _resourceId,
-  subQueues,
-}: {
-  token: TokenRead;
-  facilityId: string;
-  queueId: string;
-  _resourceType: SchedulableResourceType;
-  _resourceId: string;
-  subQueues: TokenSubQueueRead[];
-}) {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [showAssignDialog, setShowAssignDialog] = useState(false);
-
-  const { mutate: updateToken, isPending: isUpdating } = useMutation({
-    mutationFn: mutate(tokenApi.update, {
-      pathParams: {
-        facility_id: facilityId,
-        queue_id: queueId,
-        id: token.id,
-      },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [
-          "infinite-tokens",
-          facilityId,
-          queueId,
-          { status: TokenStatus.CREATED },
-        ],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [
-          "infinite-tokens",
-          facilityId,
-          queueId,
-          { status: TokenStatus.CANCELLED },
-        ],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["token-queue-summary", facilityId, queueId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [
-          "infinite-tokens",
-          facilityId,
-          queueId,
-          { status: TokenStatus.IN_PROGRESS },
-        ],
-      });
-      setShowCancelDialog(false);
-      setShowAssignDialog(false);
-    },
-  });
-
-  const handleCancelToken = () => {
-    updateToken({
-      status: TokenStatus.CANCELLED,
-      note: token.note,
-    });
-  };
-
-  const handleAssignToServicePoint = (subQueueId: string) => {
-    updateToken({
-      status: TokenStatus.IN_PROGRESS,
-      note: token.note,
-      sub_queue: subQueueId,
-    });
-  };
-
-  return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          disabled={isUpdating}
-          className="p-2 hover:bg-gray-100 rounded-md transition-colors"
-        >
-          <MoreHorizontal className="size-4" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={() => setShowAssignDialog(true)}
-            disabled={isUpdating}
-          >
-            <UserCheck className="size-4" />
-            {t("assign_to_service_point")}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            variant="destructive"
-            onClick={() => setShowCancelDialog(true)}
-            disabled={isUpdating}
-          >
-            <X className="size-4 text-danger-500" />
-            {t("cancel_token")}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <TokenCancelConfirmDialog
-        open={showCancelDialog}
-        onOpenChange={setShowCancelDialog}
-        token={token}
-        onConfirm={handleCancelToken}
-        isLoading={isUpdating}
-      />
-
-      <AssignToServicePointDialog
-        open={showAssignDialog}
-        onOpenChange={setShowAssignDialog}
-        token={token}
-        subQueues={subQueues}
-        onConfirm={handleAssignToServicePoint}
-        isLoading={isUpdating}
-      />
-    </>
-  );
-}
-
 function InServiceTokenOptions({
   token,
   facilityId,
@@ -821,7 +418,6 @@ function InServiceTokenOptions({
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
 
   const { mutate: updateToken, isPending: isUpdating } = useMutation({
@@ -868,17 +464,9 @@ function InServiceTokenOptions({
       queryClient.invalidateQueries({
         queryKey: ["token-queue-summary", facilityId, queueId],
       });
-      setShowCancelDialog(false);
       setShowCompleteDialog(false);
     },
   });
-
-  const handleCancelToken = () => {
-    updateToken({
-      status: TokenStatus.CANCELLED,
-      note: token.note,
-    });
-  };
 
   const handleCompleteToken = () => {
     updateToken({
@@ -926,25 +514,9 @@ function InServiceTokenOptions({
               <RotateCcw className="size-4" />
               {t("move_back_to_waiting")}
             </DropdownMenuItem>
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => setShowCancelDialog(true)}
-              disabled={isUpdating}
-            >
-              <X className="size-4 text-danger-500" />
-              {t("cancel_token")}
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
-      <TokenCancelConfirmDialog
-        open={showCancelDialog}
-        onOpenChange={setShowCancelDialog}
-        token={token}
-        onConfirm={handleCancelToken}
-        isLoading={isUpdating}
-      />
 
       <TokenCompleteConfirmDialog
         open={showCompleteDialog}
@@ -955,84 +527,6 @@ function InServiceTokenOptions({
       />
     </>
   );
-}
-
-export function TokenCard({
-  facilityId,
-  token,
-  options,
-}: {
-  facilityId: string;
-  token: TokenRead | null;
-  options?: React.ReactNode;
-}) {
-  const { t } = useTranslation();
-
-  return (
-    <div
-      className={cn(
-        "relative flex gap-3 items-center justify-between p-3 bg-gray-50 rounded-lg shadow",
-        token?.status === TokenStatus.IN_PROGRESS &&
-          "border border-primary-500",
-      )}
-    >
-      {token?.status === TokenStatus.IN_PROGRESS && (
-        <div className="absolute top-1/2 -translate-y-1/2 left-0 w-1 h-8 rounded-r-sm bg-primary-500" />
-      )}
-      <div className="flex flex-col">
-        {token ? (
-          <Link
-            href={
-              token.patient
-                ? `/facility/${facilityId}/patients/verify?${new URLSearchParams(
-                    {
-                      phone_number: token.patient.phone_number,
-                      year_of_birth: token.patient.year_of_birth.toString(),
-                      partial_id: token.patient.id.slice(0, 5),
-                      queue_id: token.queue.id,
-                      token_id: token.id,
-                    },
-                  ).toString()}`
-                : "#"
-            }
-            className="font-semibold hover:underline transition-colors"
-          >
-            <span className="font-semibold flex items-center gap-1">
-              {token.patient ? token.patient.name : renderTokenNumber(token)}
-              <ExternalLink className="size-4" />
-            </span>
-          </Link>
-        ) : (
-          <Skeleton className="h-4 w-36 my-2" />
-        )}
-        {/* TODO: do we show tags here? or something else? */}
-      </div>
-      <div className="flex items-center gap-3">
-        {token ? (
-          <div className="flex gap-2 items-center justify-center p-2 bg-gray-100 border border-gray-200 rounded-lg">
-            {token.status === TokenStatus.IN_PROGRESS && (
-              <div className="flex gap-1 items-center">
-                <div className="size-2 border border-primary-500 rounded-full bg-primary-200" />
-                <span className="text-sm font-medium">{t("now_serving")}:</span>
-              </div>
-            )}
-            <span className="text-lg font-bold text-black">
-              {renderTokenNumber(token)}
-            </span>
-          </div>
-        ) : (
-          <Skeleton className="h-12 w-20" />
-        )}
-        {options}
-      </div>
-    </div>
-  );
-}
-
-export function TokenCardSkeleton({ count = 5 }: { count?: number }) {
-  return Array.from({ length: count }, (_, index) => (
-    <TokenCard key={index} token={null} facilityId={""} />
-  ));
 }
 
 function CallNextPatientButton({
