@@ -318,6 +318,7 @@ export default function ServiceRequestList({
                 className="flex sm:flex-row flex-wrap sm:items-center"
                 triggerButtonClassName="self-start sm:self-center"
                 clearAllButtonClassName="self-center"
+                facilityId={facilityId}
               />
             </div>
             <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full sm:w-auto">

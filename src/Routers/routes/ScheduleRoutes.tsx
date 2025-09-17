@@ -29,17 +29,17 @@ const ScheduleRoutes: AppRoutes = {
     />
   ),
 
-  "/facility/:facilityId/queues/:queueId/practitioner/:practitionerId": ({
+  "/facility/:facilityId/practitioner/:practitionerId/queues/:queueId": ({
     facilityId,
     practitionerId,
     queueId,
   }) => (
     <Redirect
-      to={`/facility/${facilityId}/queues/${queueId}/practitioner/${practitionerId}/ongoing`}
+      to={`/facility/${facilityId}/practitioner/${practitionerId}/queues/${queueId}/ongoing`}
     />
   ),
 
-  "/facility/:facilityId/queues/:queueId/practitioner/:practitionerId/ongoing":
+  "/facility/:facilityId/practitioner/:practitionerId/queues/:queueId/ongoing":
     ({ facilityId, practitionerId, queueId }) => (
       <ManageQueuePage
         facilityId={facilityId}
@@ -49,7 +49,7 @@ const ScheduleRoutes: AppRoutes = {
         tab="ongoing"
       />
     ),
-  "/facility/:facilityId/queues/:queueId/practitioner/:practitionerId/completed":
+  "/facility/:facilityId/practitioner/:practitionerId/queues/:queueId/completed":
     ({ facilityId, practitionerId, queueId }) => (
       <ManageQueuePage
         facilityId={facilityId}

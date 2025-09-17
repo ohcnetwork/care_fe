@@ -55,6 +55,7 @@ export function OngoingQueueTokenCard({
           <div className="flex flex-col">
             {token ? (
               <Link
+                basePath="/"
                 href={
                   token.patient
                     ? `/facility/${facilityId}/patients/verify?${new URLSearchParams(
@@ -155,7 +156,6 @@ export function OngoingQueueTokenCard({
             open={showAssignToServicePointDialog}
             onOpenChange={setShowAssignToServicePointDialog}
             token={token}
-            subQueues={[]}
           />
           <CancelTokenDialog
             open={showCancelDialog}

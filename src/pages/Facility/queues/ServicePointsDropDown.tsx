@@ -7,10 +7,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import {
-  SchedulableResourceType,
-  ScheduleResource,
-} from "@/types/scheduling/schedule";
-import {
   TokenSubQueueRead,
   TokenSubQueueStatus,
 } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
@@ -22,17 +18,12 @@ import { useInServicePoints } from "./useInServicePoints";
 
 export const ServicePointsDropDown = ({
   subQueues,
-  resource,
 }: {
   subQueues: TokenSubQueueRead[];
-  resource: ScheduleResource | undefined;
 }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const { servicePointIds, setServicePointIds } = useInServicePoints({
-    resource: resource as ScheduleResource,
-    resourceType: resource?.resource_type as SchedulableResourceType,
-  });
+  const { servicePointIds, setServicePointIds } = useInServicePoints();
   const defaultServicePoints = useBreakpoints({ default: 2, sm: 6 });
 
   const activeServicePointCount = subQueues

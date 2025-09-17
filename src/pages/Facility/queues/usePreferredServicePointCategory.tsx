@@ -1,4 +1,4 @@
-import { SchedulableResourceType } from "@/types/scheduling/schedule";
+import { useScheduleResourceFromPath } from "@/components/Schedule/useScheduleResource";
 import tokenCategoryApi from "@/types/tokens/tokenCategory/tokenCategoryApi";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
@@ -15,12 +15,11 @@ const atom = atomWithStorage<Record<string, string | undefined>>(
 function usePreferredServicePointCategory({
   facilityId,
   subQueueId,
-  resourceType,
 }: {
   facilityId: string;
   subQueueId: string;
-  resourceType: SchedulableResourceType;
 }) {
+  const { resourceType } = useScheduleResourceFromPath();
   const [preferredServicePointCategory, setPreferredServicePointCategory] =
     useAtom(atom);
 

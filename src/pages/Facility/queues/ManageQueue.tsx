@@ -28,7 +28,6 @@ import { useInServicePoints } from "@/pages/Facility/queues/useInServicePoints";
 import {
   formatScheduleResourceName,
   SchedulableResourceType,
-  ScheduleResource,
 } from "@/types/scheduling/schedule";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import query from "@/Utils/request/query";
@@ -40,8 +39,8 @@ import { useTranslation } from "react-i18next";
 
 interface ManageQueuePageProps {
   facilityId: string;
-  resourceType: SchedulableResourceType;
   resourceId: string;
+  resourceType: SchedulableResourceType;
   queueId: string;
   tab: "ongoing" | "completed";
 }
@@ -56,11 +55,7 @@ export function ManageQueuePage({
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const resource = useScheduleResource({
-    resourceType,
-    resourceId,
-    facilityId,
-  });
+  const resource = useScheduleResource();
 
   const { data: queue, isLoading: isQueueLoading } = useQuery({
     queryKey: ["queue", facilityId, queueId],
@@ -127,8 +122,6 @@ export function ManageQueuePage({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <ManageServicePointsDialog
-                  resource={resource}
-                  resourceType={resourceType}
                   trigger={
                     <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                       <SettingsIcon className="mr-2 size-4" />
@@ -166,8 +159,6 @@ export function ManageQueuePage({
                 <ManageQueueOngoingTab
                   facilityId={facilityId}
                   queueId={queueId}
-                  resourceType={resourceType}
-                  resourceId={resourceId}
                 />
               ),
             },
@@ -192,25 +183,15 @@ export function ManageQueuePage({
 
 function ManageServicePointsDialog({
   trigger,
-  resource,
-  resourceType,
   ...props
 }: {
   trigger: React.ReactNode;
-  resource: ScheduleResource | undefined;
-  resourceType: SchedulableResourceType;
 } & React.ComponentProps<typeof Dialog>) {
   const { t } = useTranslation();
 
-  const { subQueues } = useInServicePoints({
-    resource: resource as ScheduleResource,
-    resourceType,
-  });
+  const { subQueues } = useInServicePoints();
 
-  const { servicePointIds, setServicePointIds } = useInServicePoints({
-    resource: resource as ScheduleResource,
-    resourceType,
-  });
+  const { servicePointIds, setServicePointIds } = useInServicePoints();
 
   return (
     <Dialog {...props}>

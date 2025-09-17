@@ -74,7 +74,7 @@ function QueueRow({
   const { t } = useTranslation();
   const queueLink =
     resourceType === SchedulableResourceType.Practitioner
-      ? `/facility/${facilityId}/queues/${queue.id}/${resourceType}/${resourceId}/ongoing`
+      ? `/facility/${facilityId}/practitioner/${resourceId}/queues/${queue.id}/ongoing`
       : `/queues/${queue.id}/ongoing`;
 
   return (

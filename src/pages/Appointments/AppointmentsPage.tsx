@@ -1,19 +1,9 @@
 import careConfig from "@careConfig";
 import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import {
-  addDays,
-  differenceInDays,
-  format,
-  formatDate,
-  isToday,
-  isTomorrow,
-  isYesterday,
-  subDays,
-} from "date-fns";
-import dayjs from "dayjs";
+import { addDays, differenceInDays, format } from "date-fns";
 import { TFunction } from "i18next";
-import { Edit3Icon, FilterIcon } from "lucide-react";
+import { FilterIcon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -27,7 +17,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
 import {
   Command,
   CommandEmpty,
@@ -124,11 +113,6 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { NonEmptyArray } from "@/Utils/types";
 import { MultiPractitionerSelector } from "./components/MultiPractitionerSelect";
 
-interface DateRangeDisplayProps {
-  dateFrom: string | null;
-  dateTo: string | null;
-}
-
 type AppointmentStatusGroup = {
   label: string;
   statuses: AppointmentStatus[];
@@ -171,148 +155,6 @@ function AppointmentsEmptyState() {
         {t("adjust_appointments_filters")}
       </p>
     </Card>
-  );
-}
-
-function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
-  const { t } = useTranslation();
-
-  if (!dateFrom && !dateTo) {
-    return (
-      <span className="text-gray-500">{t("showing_all_appointments")}</span>
-    );
-  }
-
-  const today = new Date();
-
-  // Case 1: Today only or Yesterday only
-  if (
-    (dateFrom === dateQueryString(today) &&
-      dateTo === dateQueryString(today)) ||
-    (dateFrom === dateQueryString(subDays(today, 1)) &&
-      dateTo === dateQueryString(subDays(today, 1)))
-  ) {
-    <>
-      {dateFrom === dateQueryString(today) ? (
-        <>
-          <span className="text-black">{t("today")}</span>
-          <span className="pl-1 text-gray-500">
-            ({formatDate(dateFrom, "dd MMM yyyy")})
-          </span>
-        </>
-      ) : (
-        <>
-          <span className="text-black">{t("yesterday")}</span>
-          <span className="pl-1 text-gray-500">
-            ({formatDate(dateFrom, "dd MMM yyyy")})
-          </span>
-        </>
-      )}
-    </>;
-  }
-
-  // Case 2: Pre-defined ranges
-  const ranges = [
-    {
-      label: t("last_week_short"),
-      from: subDays(today, 7),
-      to: today,
-    },
-    {
-      label: t("next_week_short"),
-      from: today,
-      to: addDays(today, 7),
-    },
-    {
-      label: t("next_month"),
-      from: today,
-      to: addDays(today, 30),
-    },
-  ];
-
-  const matchingRange = ranges.find(
-    (range) =>
-      dateFrom &&
-      dateTo &&
-      dateQueryString(range.from) === dateFrom &&
-      dateQueryString(range.to) === dateTo,
-  );
-
-  if (matchingRange && dateFrom && dateTo) {
-    return (
-      <>
-        <span className="text-black">{matchingRange.label}</span>
-        <span className="pl-1 text-gray-500">
-          ({formatDate(dateFrom, "dd MMM yyyy")} -{" "}
-          {formatDate(dateTo, "dd MMM yyyy")})
-        </span>
-      </>
-    );
-  }
-
-  // Case 3: Same date with relative labels
-  if (dateFrom && dateFrom === dateTo) {
-    const date = new Date(dateFrom);
-    let relativeDay = null;
-
-    if (isToday(date)) {
-      relativeDay = t("today");
-    } else if (isTomorrow(date)) {
-      relativeDay = t("tomorrow");
-    } else if (isYesterday(date)) {
-      relativeDay = t("yesterday");
-    }
-
-    if (relativeDay) {
-      return (
-        <>
-          <span className="text-black">{relativeDay}</span>
-          <span className="pl-1 text-gray-500">
-            ({formatDate(dateFrom, "dd MMM yyyy")})
-          </span>
-        </>
-      );
-    }
-
-    return (
-      <>
-        <span className="capitalize text-gray-500">{t("on")} </span>
-        <span className="pl-1 text-black ">
-          {formatDate(dateFrom, "dd MMM yyyy")}
-        </span>
-      </>
-    );
-  }
-
-  // Case 4: Single date (before or after)
-  if (dateFrom && !dateTo) {
-    return (
-      <>
-        <span className="capitalize text-gray-500">{t("after")} </span>
-        <span className="pl-1 text-black">
-          {formatDate(dateFrom, "dd MMM yyyy")}
-        </span>
-      </>
-    );
-  }
-
-  if (!dateFrom && dateTo) {
-    return (
-      <>
-        <span className=" capitalize text-gray-500">{t("before")} </span>
-        <span className="pl-1 text-black">
-          {formatDate(dateTo, "dd MMM yyyy")}
-        </span>
-      </>
-    );
-  }
-
-  // Case 5: Date range
-  return (
-    <span className="text-black">
-      {formatDate(dateFrom!, "dd MMM yyyy")} -{" "}
-      {formatDate(dateTo!, "dd MMM yyyy")}
-    </span>
   );
 }
 
@@ -519,17 +361,10 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 facilityId={facilityId}
                 selected={practitioners}
                 onSelect={(users) => {
-                  if (users) {
-                    updateQuery({
-                      practitioners: users.map((user) => user.id),
-                      slot: null,
-                    });
-                  } else {
-                    updateQuery({
-                      practitioners: [],
-                      slot: null,
-                    });
-                  }
+                  updateQuery({
+                    practitioners: users.map((user) => user.id),
+                    slot: null,
+                  });
                 }}
               />
             </div>
@@ -548,178 +383,10 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
               triggerButtonClassName="self-start sm:self-center h-9"
               clearAllButtonClassName="self-center"
               selectedBarClassName="h-9"
+              facilityId={facilityId}
             />
           </div>
           <div>
-            <div className="flex items-center gap-1 -mt-2">
-              <Popover modal>
-                <PopoverTrigger asChild>
-                  <Button variant="ghost">
-                    <Label>
-                      <DateRangeDisplay
-                        dateFrom={qParams.date_from}
-                        dateTo={qParams.date_to}
-                      />
-                    </Label>
-                    <Edit3Icon />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto" align="start">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex justify-between">
-                      <Button
-                        variant="link"
-                        size="xs"
-                        onClick={() => {
-                          const today = new Date();
-                          updateQuery({
-                            date_from: dateQueryString(subDays(today, 7)),
-                            date_to: dateQueryString(today),
-                            slot: null,
-                          });
-                        }}
-                      >
-                        {t("last_week_short")}
-                      </Button>
-
-                      <Button
-                        variant="link"
-                        size="xs"
-                        onClick={() => {
-                          const today = new Date();
-                          updateQuery({
-                            date_from: dateQueryString(subDays(today, 1)),
-                            date_to: dateQueryString(subDays(today, 1)),
-                            slot: null,
-                          });
-                        }}
-                      >
-                        {t("yesterday")}
-                      </Button>
-
-                      <Button
-                        variant="link"
-                        size="xs"
-                        onClick={() => {
-                          const today = new Date();
-                          updateQuery({
-                            date_from: dateQueryString(today),
-                            date_to: dateQueryString(today),
-                            slot: null,
-                          });
-                        }}
-                      >
-                        {t("today")}
-                      </Button>
-                      {/* Tomorrow */}
-                      <Button
-                        variant="link"
-                        size="xs"
-                        onClick={() => {
-                          const today = new Date();
-                          updateQuery({
-                            date_from: dateQueryString(addDays(today, 1)),
-                            date_to: dateQueryString(addDays(today, 1)),
-                            slot: null,
-                          });
-                        }}
-                      >
-                        {t("tomorrow")}
-                      </Button>
-
-                      <Button
-                        variant="link"
-                        size="xs"
-                        onClick={() => {
-                          const today = new Date();
-                          updateQuery({
-                            date_from: dateQueryString(today),
-                            date_to: dateQueryString(addDays(today, 7)),
-                            slot: null,
-                          });
-                        }}
-                      >
-                        {t("next_week_short")}
-                      </Button>
-
-                      <Button
-                        variant="link"
-                        size="xs"
-                        onClick={() => {
-                          const today = new Date();
-                          updateQuery({
-                            date_from: dateQueryString(today),
-                            date_to: dateQueryString(addDays(today, 30)),
-                            slot: null,
-                          });
-                        }}
-                      >
-                        {t("next_month")}
-                      </Button>
-                    </div>
-
-                    <div className="flex flex-col gap-2">
-                      <Label className="text-sm font-medium">
-                        {t("start_date")}
-                      </Label>
-                      <CombinedDatePicker
-                        value={
-                          qParams.date_from
-                            ? new Date(qParams.date_from)
-                            : undefined
-                        }
-                        onChange={(date) => {
-                          if (qParams.date_to && date) {
-                            if (
-                              dayjs(date).isAfter(dayjs(qParams.date_to), "day")
-                            ) {
-                              updateQuery({
-                                date_from: date ? dateQueryString(date) : null,
-                                date_to: null,
-                                slot: null,
-                              });
-                              return;
-                            }
-                          }
-                          updateQuery({
-                            date_from: date ? dateQueryString(date) : null,
-                            slot: null,
-                          });
-                        }}
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-2">
-                      <Label className="text-sm font-medium">
-                        {t("end_date")}
-                      </Label>
-                      <CombinedDatePicker
-                        value={
-                          qParams.date_to
-                            ? new Date(qParams.date_to)
-                            : undefined
-                        }
-                        onChange={(date) => {
-                          updateQuery({
-                            date_to: date ? dateQueryString(date) : null,
-                            slot: null,
-                          });
-                        }}
-                        blockDate={(date) =>
-                          qParams.date_from
-                            ? dayjs(date).isBefore(
-                                dayjs(qParams.date_from),
-                                "day",
-                              )
-                            : false
-                        }
-                      />
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-
             {slotsFilterEnabled && !!slots?.length && (
               <SlotFilter
                 slots={slots}
@@ -1004,7 +671,12 @@ function AppointmentColumn(props: {
                 ref={index === appointments.length - 1 ? ref : undefined}
               >
                 <Link
-                  href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`}
+                  href={
+                    appointment.resource_type ===
+                    SchedulableResourceType.Practitioner
+                      ? `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`
+                      : `appointments/${appointment.id}`
+                  }
                   className="text-inherit"
                 >
                   <AppointmentCard

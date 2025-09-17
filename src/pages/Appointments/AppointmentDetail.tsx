@@ -216,7 +216,7 @@ export default function AppointmentDetail(props: Props) {
                 <div className="pt-3 mx-4 flex gap-2 justify-end">
                   <Button variant="outline" asChild>
                     <Link
-                      href={`/facility/${facility.id}/queues/${appointment.token?.queue.id}/practitioner/${appointment.resource.id}`}
+                      href={`/facility/${facility.id}/practitioner/${appointment.resource.id}/queues/${appointment.token?.queue.id}`}
                     >
                       {t("open")} <ExternalLinkIcon className="size-4" />
                     </Link>
@@ -649,7 +649,7 @@ const AppointmentDetails = ({
 
       <ChargeItemsSection
         facilityId={facility.id}
-        resourceId={appointment.resource.id}
+        resourceId={appointment.id}
         patientId={appointment.patient.id}
         serviceResourceType={ChargeItemServiceResource.appointment}
         sourceUrl={`/facility/${facility.id}/patient/${appointment.patient.id}/appointments/${appointment.id}`}

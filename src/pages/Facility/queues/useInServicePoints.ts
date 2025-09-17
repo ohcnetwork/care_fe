@@ -1,9 +1,6 @@
 import query from "@/Utils/request/query";
+import { useScheduleResourceFromPath } from "@/components/Schedule/useScheduleResource";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import {
-  SchedulableResourceType,
-  ScheduleResource,
-} from "@/types/scheduling/schedule";
 import { TokenSubQueueStatus } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
 import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import { useQuery } from "@tanstack/react-query";
@@ -17,15 +14,10 @@ const atom = atomWithStorage<Record<string, string[] | undefined>>(
   { getOnInit: true },
 );
 
-export function useInServicePoints({
-  resource,
-  resourceType,
-}: {
-  resource: ScheduleResource;
-  resourceType: SchedulableResourceType;
-}) {
+export function useInServicePoints() {
+  const { resourceType, resourceId } = useScheduleResourceFromPath();
   const [assignedServicePoints, setAssignedServicePoints] = useAtom(atom);
-  const servicPointKey = `service_point_${resource?.resource.id}_${resourceType}`;
+  const servicPointKey = `service_point_${resourceId}_${resourceType}`;
   const servicePointIds = assignedServicePoints[servicPointKey];
   const { facilityId } = useCurrentFacility();
 
@@ -35,7 +27,7 @@ export function useInServicePoints({
       pathParams: { facility_id: facilityId },
       queryParams: {
         resource_type: resourceType,
-        resource_id: resource.resource.id,
+        resource_id: resourceId,
         limit: 100, // We are assuming that a resource will not have more than 100 sub-queues
         status: TokenSubQueueStatus.ACTIVE,
       },
