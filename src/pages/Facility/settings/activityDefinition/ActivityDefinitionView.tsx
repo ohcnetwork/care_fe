@@ -25,12 +25,15 @@ import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading"
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { Code } from "@/types/base/code/code";
-import { ACTIVITY_DEFINITION_STATUS_COLORS } from "@/types/emr/activityDefinition/activityDefinition";
+import {
+  ACTIVITY_DEFINITION_STATUS_COLORS,
+  Status,
+} from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 
 interface Props {
   facilityId: string;
-  activityDefinitionId: string;
+  activityDefinitionSlug: string;
 }
 
 function CodeDisplay({ code }: { code: Code | null }) {
@@ -46,7 +49,7 @@ function CodeDisplay({ code }: { code: Code | null }) {
 
 export default function ActivityDefinitionView({
   facilityId,
-  activityDefinitionId,
+  activityDefinitionSlug,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -57,22 +60,22 @@ export default function ActivityDefinitionView({
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["activityDefinition", activityDefinitionId],
+    queryKey: ["activityDefinition", activityDefinitionSlug],
     queryFn: query(activityDefinitionApi.retrieveActivityDefinition, {
-      pathParams: { activityDefinitionId, facilityId },
+      pathParams: { activityDefinitionSlug, facilityId },
     }),
   });
 
   const { mutate: updateActivityDefinition, isPending: isDeleting } =
     useMutation({
       mutationFn: mutate(activityDefinitionApi.updateActivityDefinition, {
-        pathParams: { activityDefinitionId, facilityId },
+        pathParams: { activityDefinitionSlug, facilityId },
       }),
       onSuccess: () => {
         toast.success(t("definition_deleted_successfully"));
         queryClient.invalidateQueries({ queryKey: ["activityDefinition"] });
         queryClient.invalidateQueries({
-          queryKey: ["activityDefinition", activityDefinitionId],
+          queryKey: ["activityDefinition", activityDefinitionSlug],
         });
         navigate(`/facility/${facilityId}/settings/activity_definitions`);
       },
@@ -83,17 +86,22 @@ export default function ActivityDefinitionView({
     updateActivityDefinition({
       ...definition,
       specimen_requirements:
-        definition.specimen_requirements.map((specimen) => specimen.id) || [],
+        definition.specimen_requirements.map((specimen) => specimen.slug) || [],
       observation_result_requirements:
         definition.observation_result_requirements.map(
-          (observation) => observation.id,
+          (observation) => observation.slug,
         ) || [],
       charge_item_definitions:
-        definition.charge_item_definitions.map((chargeItem) => chargeItem.id) ||
-        [],
+        definition.charge_item_definitions.map(
+          (chargeItemDefinition) => chargeItemDefinition.slug,
+        ) || [],
       locations: definition.locations.map((location) => location.id) || [],
-      status: "retired",
+      status: Status.retired,
       diagnostic_report_codes: definition.diagnostic_report_codes || [],
+      facility: facilityId,
+      category: definition.category.slug,
+      healthcare_service: definition.healthcare_service?.id || null,
+      slug_value: definition.slug_config.slug_value,
     });
   };
 
@@ -169,7 +177,7 @@ export default function ActivityDefinitionView({
               variant="outline"
               onClick={() =>
                 navigate(
-                  `/facility/${facilityId}/settings/activity_definitions/${definition.id}/edit`,
+                  `/facility/${facilityId}/settings/activity_definitions/${definition.slug}/edit`,
                 )
               }
             >
@@ -207,7 +215,7 @@ export default function ActivityDefinitionView({
           <CardContent className="space-y-4">
             <div>
               <p className="text-sm text-gray-500">{t("category")}</p>
-              <p className="font-medium">{t(definition.category)}</p>
+              <p className="font-medium">{definition.category.title}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">{t("description")}</p>
@@ -323,7 +331,7 @@ export default function ActivityDefinitionView({
               <div className="space-y-4">
                 {definition.charge_item_definitions.map((chargeItem) => (
                   <div
-                    key={chargeItem.id}
+                    key={chargeItem.slug}
                     className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50"
                   >
                     <div className="space-y-2">

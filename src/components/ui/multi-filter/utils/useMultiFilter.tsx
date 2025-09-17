@@ -1,4 +1,4 @@
-import { FilterState } from "./utils";
+import { FilterState } from "./Utils";
 
 export default function useMultiFilter(
   key: string,
