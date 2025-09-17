@@ -1,12 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
-import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import { generateSlug } from "@/Utils/utils";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +34,7 @@ import {
   ValuesetFormType,
 } from "@/types/valueset/valueset";
 
+import { useAutoSlug } from "@/hooks/useAutoSlug";
 import { CodingField } from "./CodingField";
 import { ValueSetPreview } from "./ValueSetPreview";
 
@@ -383,32 +382,7 @@ export function ValueSetForm({
       },
     },
   });
-
-  useEffect(() => {
-    if (initialData) return;
-
-    const MAX_SLUG_LENGTH = 25;
-    const subscription = form.watch((value, { name }) => {
-      if (name !== "name") return;
-      if (
-        form.formState?.dirtyFields?.slug ||
-        form.formState?.touchedFields?.slug
-      )
-        return;
-      const current = form.getValues("slug") ?? "";
-      if (current.length >= MAX_SLUG_LENGTH) return;
-
-      const slug = generateSlug(value.name ?? "", MAX_SLUG_LENGTH);
-      if (slug.length <= MAX_SLUG_LENGTH) {
-        form.setValue("slug", slug, {
-          shouldValidate: true,
-          shouldDirty: false,
-        });
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [form, initialData?.id]);
+  useAutoSlug(form, initialData);
 
   return (
     <Form {...form}>

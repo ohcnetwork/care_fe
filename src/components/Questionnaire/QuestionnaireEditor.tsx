@@ -101,6 +101,7 @@ import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 
+import { useAutoSlug } from "@/hooks/useAutoSlug";
 import { CodingEditor } from "./CodingEditor";
 import { QuestionActions } from "./QuestionActions";
 import { QuestionnaireForm } from "./QuestionnaireForm";
@@ -483,6 +484,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     },
     mode: "onChange",
   });
+
+  useAutoSlug(form, initialQuestionnaire);
 
   const { isDirty } = form.formState;
 
