@@ -68,8 +68,9 @@ export const ServicePointsDropDown = ({
               })}
             {activeServicePointCount > defaultServicePoints && (
               <span className="text-sm text-gray-950 font-medium">
-                {`+${activeServicePointCount - defaultServicePoints}`}{" "}
-                {t("more")}
+                {t("count_more", {
+                  count: activeServicePointCount - defaultServicePoints,
+                })}
               </span>
             )}
           </div>

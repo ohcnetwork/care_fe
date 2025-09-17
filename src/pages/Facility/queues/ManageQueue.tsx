@@ -31,11 +31,6 @@ import {
   ScheduleResource,
 } from "@/types/scheduling/schedule";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
-import {
-  TokenSubQueueRead,
-  TokenSubQueueStatus,
-} from "@/types/tokens/tokenSubQueue/tokenSubQueue";
-import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
@@ -74,20 +69,7 @@ export function ManageQueuePage({
     }),
   });
 
-  const { data: subQueues } = useQuery({
-    queryKey: ["servicePoints", facilityId],
-    queryFn: query(tokenSubQueueApi.list, {
-      pathParams: { facility_id: facilityId },
-      queryParams: {
-        resource_type: resourceType,
-        resource_id: resourceId,
-        limit: 100, // We are assuming that a resource will not have more than 100 sub-queues
-        status: TokenSubQueueStatus.ACTIVE,
-      },
-    }),
-  });
-
-  if (isQueueLoading || !queue || !subQueues) {
+  if (isQueueLoading || !queue) {
     // TODO: build appropriate loading skeleton...
     return <Loading />;
   }
@@ -145,7 +127,6 @@ export function ManageQueuePage({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <ManageServicePointsDialog
-                  subQueues={subQueues.results}
                   resource={resource}
                   resourceType={resourceType}
                   trigger={
@@ -187,7 +168,6 @@ export function ManageQueuePage({
                   queueId={queueId}
                   resourceType={resourceType}
                   resourceId={resourceId}
-                  subQueues={subQueues.results}
                 />
               ),
             },
@@ -212,27 +192,25 @@ export function ManageQueuePage({
 
 function ManageServicePointsDialog({
   trigger,
-  subQueues,
   resource,
   resourceType,
   ...props
 }: {
   trigger: React.ReactNode;
-  subQueues: TokenSubQueueRead[];
   resource: ScheduleResource | undefined;
   resourceType: SchedulableResourceType;
 } & React.ComponentProps<typeof Dialog>) {
   const { t } = useTranslation();
 
-  const { servicePointIds, setServicePointIds } = useInServicePoints({
+  const { subQueues } = useInServicePoints({
     resource: resource as ScheduleResource,
     resourceType,
   });
 
-  const selectedServicePointIds =
-    servicePointIds.length > 0
-      ? servicePointIds
-      : subQueues.map((subQueue) => subQueue.id);
+  const { servicePointIds, setServicePointIds } = useInServicePoints({
+    resource: resource as ScheduleResource,
+    resourceType,
+  });
 
   return (
     <Dialog {...props}>
@@ -243,7 +221,7 @@ function ManageServicePointsDialog({
         </DialogHeader>
         <div className="space-y-4">
           {subQueues.map((subQueue) => {
-            const isSelected = selectedServicePointIds.includes(subQueue.id);
+            const isSelected = servicePointIds.includes(subQueue.id);
             return (
               <div
                 key={subQueue.id}

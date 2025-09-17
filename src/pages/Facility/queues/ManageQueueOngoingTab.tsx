@@ -67,13 +67,11 @@ interface Props {
   queueId: string;
   resourceType: SchedulableResourceType;
   resourceId: string;
-  subQueues: TokenSubQueueRead[];
 }
 
 export function ManageQueueOngoingTab({
   facilityId,
   queueId,
-  subQueues,
   resourceType,
   resourceId,
 }: Props) {
@@ -84,13 +82,18 @@ export function ManageQueueOngoingTab({
     facilityId,
   });
 
+  const { subQueues } = useInServicePoints({
+    resource: resource as ScheduleResource,
+    resourceType,
+  });
+
   const { servicePointIds } = useInServicePoints({
     resource: resource as ScheduleResource,
     resourceType,
   });
 
   const activeSubQueues =
-    servicePointIds.length > 0 && subQueues
+    servicePointIds.length > 0 && subQueues.length > 0
       ? subQueues.filter((subQueue) => servicePointIds.includes(subQueue.id))
       : [];
 
