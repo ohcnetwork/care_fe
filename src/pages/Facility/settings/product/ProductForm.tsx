@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useImperativeHandle, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -146,24 +146,26 @@ export function ProductFormContent({
   facilityId,
   productId,
   existingData,
-  productKnowledgeId,
+  slug,
   containerClassName,
   onSuccess = () => navigate(`/facility/${facilityId}/settings/product`),
   onCancel = () => navigate(`/facility/${facilityId}/settings/product`),
   disableButtons = false,
-  externalSubmitRef,
   enabled = true,
+  ref,
 }: {
   facilityId: string;
   productId?: string;
   existingData?: ProductRead;
-  productKnowledgeId?: string;
+  slug?: string;
   containerClassName?: string;
   onSuccess?: (product: ProductRead) => void;
   onCancel?: () => void;
   disableButtons?: boolean;
-  externalSubmitRef?: React.RefObject<(() => void) | null>;
   enabled?: boolean;
+  ref?: React.RefObject<{
+    createNewProduct: () => void;
+  }>;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -185,13 +187,16 @@ export function ProductFormContent({
   });
 
   const { data: existingProductKnowledge } = useQuery({
-    queryKey: ["productKnowledge", productKnowledgeId],
+    queryKey: ["productKnowledge", slug],
     queryFn: query(productKnowledgeApi.retrieveProductKnowledge, {
       pathParams: {
-        productKnowledgeId: productKnowledgeId!,
+        slug: slug!,
+      },
+      queryParams: {
+        facility: facilityId,
       },
     }),
-    enabled: !!productKnowledgeId && enabled,
+    enabled: !!slug && enabled,
   });
 
   // Add selected product knowledge to the product knowledge list if it's not already there
@@ -231,8 +236,8 @@ export function ProductFormContent({
       isEditMode && existingData
         ? {
             status: existingData.status,
-            product_knowledge: existingData.product_knowledge.id,
-            charge_item_definition: existingData.charge_item_definition?.id,
+            product_knowledge: existingData.product_knowledge.slug,
+            charge_item_definition: existingData.charge_item_definition?.slug,
             batch: existingData.batch || undefined,
             expiration_date: existingData.expiration_date
               ? new Date(existingData.expiration_date)
@@ -240,7 +245,7 @@ export function ProductFormContent({
           }
         : {
             status: ProductStatusOptions.active,
-            product_knowledge: productKnowledgeId,
+            product_knowledge: slug,
           },
   });
 
@@ -271,6 +276,12 @@ export function ProductFormContent({
       navigate(`/facility/${facilityId}/settings/product`);
     },
   });
+
+  useImperativeHandle(ref, () => ({
+    createNewProduct: () => {
+      form.handleSubmit(onSubmit)();
+    },
+  }));
 
   const isPending = isCreating || isUpdating;
   function onSubmit(data: z.infer<typeof formSchema>) {
@@ -303,15 +314,6 @@ export function ProductFormContent({
       createProduct(createPayload);
     }
   }
-
-  useEffect(() => {
-    if (externalSubmitRef) {
-      externalSubmitRef.current = () => {
-        form.handleSubmit(onSubmit)();
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [externalSubmitRef]);
 
   return (
     <Form {...form}>
@@ -351,7 +353,7 @@ export function ProductFormContent({
                 control={form.control}
                 name="product_knowledge"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel aria-required>
                       {t("product_knowledge")}
                     </FormLabel>
@@ -362,6 +364,7 @@ export function ProductFormContent({
                         )}
                         onChange={(selected) => field.onChange(selected.id)}
                         className="border-gray-200 font-normal text-gray-700"
+                        enableFavorites
                       />
                     </FormControl>
                     <FormDescription>
@@ -437,13 +440,13 @@ export function ProductFormContent({
                         options={mergeAutocompleteOptions(
                           chargeItemDefinitionOptions.map((cid) => ({
                             label: cid.title,
-                            value: cid.id,
+                            value: cid.slug,
                           })),
                           field.value
                             ? {
                                 label:
                                   chargeItemDefinitionOptions.find(
-                                    (cid) => cid.id === field.value,
+                                    (cid) => cid.slug === field.value,
                                   )?.title || "",
                                 value: field.value,
                               }
@@ -489,7 +492,7 @@ export function ProductFormContent({
                               setCreateCidOpen(false);
                               form.setValue(
                                 "charge_item_definition",
-                                chargeItemDefinition.id,
+                                chargeItemDefinition.slug,
                               );
                             }}
                             onCancel={() => setCreateCidOpen(false)}
