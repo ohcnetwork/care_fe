@@ -156,7 +156,6 @@ export function OngoingQueueTokenCard({
             open={showAssignToServicePointDialog}
             onOpenChange={setShowAssignToServicePointDialog}
             token={token}
-            subQueues={[]}
           />
           <CancelTokenDialog
             open={showCancelDialog}

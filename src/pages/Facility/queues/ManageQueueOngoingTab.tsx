@@ -34,19 +34,19 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ServicePointsDropDown } from "./ServicePointsDropDown";
+import { useQueueServicePoints } from "./useQueueServicePoints";
 
 interface Props {
   facilityId: string;
   queueId: string;
-  subQueues: TokenSubQueueRead[];
 }
 
-export function ManageQueueOngoingTab({
-  facilityId,
-  queueId,
-  subQueues,
-}: Props) {
+export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   const { t } = useTranslation();
+
+  const { assignedServicePoints } = useQueueServicePoints();
+
   const { data: summary } = useQuery({
     queryKey: ["token-queue-summary", facilityId, queueId],
     queryFn: query(tokenQueueApi.summary, {
@@ -56,6 +56,12 @@ export function ManageQueueOngoingTab({
 
   return (
     <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2 mt-4">
+        <Label className="text-gray-950 text-sm font-medium">
+          {t("service_points")}
+        </Label>
+        <ServicePointsDropDown />
+      </div>
       <div className="flex space-x-4 overflow-x-auto w-full">
         {/* Waiting tokens list */}
         <QueueColumn
@@ -95,7 +101,7 @@ export function ManageQueueOngoingTab({
           }
         >
           <div className="flex flex-col gap-4">
-            {subQueues.map((subQueue, index) => (
+            {assignedServicePoints.map((subQueue, index) => (
               <>
                 {index > 0 && (
                   <hr className="h-px w-full border border-gray-300 border-dashed" />

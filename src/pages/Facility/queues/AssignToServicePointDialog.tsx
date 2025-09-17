@@ -13,28 +13,28 @@ import {
   TokenStatus,
 } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
-import { TokenSubQueueRead } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
 import mutate from "@/Utils/request/mutate";
+import { DialogDescription } from "@radix-ui/react-dialog";
 import { useMutation } from "@tanstack/react-query";
 import { UserCheck } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { useQueueServicePoints } from "./useQueueServicePoints";
 
 export function AssignToServicePointDialog({
   open,
   onOpenChange,
   token,
-  subQueues,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   token: TokenRead;
-  subQueues: TokenSubQueueRead[];
 }) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacility();
   const [selectedSubQueueId, setSelectedSubQueueId] = useState<string>("");
+  const { assignedServicePoints } = useQueueServicePoints();
 
   const { mutate: updateToken, isPending } = useMutation({
     mutationFn: mutate(tokenApi.update, {
@@ -65,46 +65,44 @@ export function AssignToServicePointDialog({
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle>{t("select_service_point")}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <p className="text-sm text-gray-600">
+          <DialogDescription className="text-sm text-gray-600">
             {t("choose_service_point_to_call_patient", {
               patientName: token.patient?.name,
               tokenNumber: renderTokenNumber(token),
             })}
-          </p>
-          <RadioGroup
-            value={selectedSubQueueId}
-            onValueChange={setSelectedSubQueueId}
-            className="space-y-3"
-          >
-            {subQueues.map((subQueue) => (
-              <div
-                key={subQueue.id}
-                className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+          </DialogDescription>
+        </DialogHeader>
+
+        <RadioGroup
+          value={selectedSubQueueId}
+          onValueChange={setSelectedSubQueueId}
+        >
+          {assignedServicePoints.map((subQueue) => (
+            <div
+              key={subQueue.id}
+              className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+            >
+              <RadioGroupItem value={subQueue.id} id={subQueue.id} />
+              <label
+                htmlFor={subQueue.id}
+                className="flex-1 text-sm font-medium cursor-pointer"
               >
-                <RadioGroupItem value={subQueue.id} id={subQueue.id} />
-                <label
-                  htmlFor={subQueue.id}
-                  className="flex-1 text-sm font-medium cursor-pointer"
-                >
-                  {subQueue.name}
-                </label>
-              </div>
-            ))}
-            {subQueues.length === 0 && (
-              <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                <RadioGroupItem value="none" id="none" />
-                <label
-                  htmlFor="none"
-                  className="flex-1 text-sm font-medium cursor-pointer"
-                >
-                  {t("no_service_points_available")}
-                </label>
-              </div>
-            )}
-          </RadioGroup>
-        </div>
+                {subQueue.name}
+              </label>
+            </div>
+          ))}
+          {assignedServicePoints.length === 0 && (
+            <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+              <RadioGroupItem value="none" id="none" />
+              <label
+                htmlFor="none"
+                className="flex-1 text-sm font-medium cursor-pointer"
+              >
+                {t("no_service_points_available")}
+              </label>
+            </div>
+          )}
+        </RadioGroup>
         <div className="flex">
           <Button
             onClick={handleConfirm}
