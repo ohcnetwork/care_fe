@@ -1,7 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import {
   addDays,
-  compareAsc,
   differenceInMinutes,
   endOfDay,
   format,
@@ -23,10 +21,6 @@ import {
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
-import {
-  CardGridSkeleton,
-  TableSkeleton,
-} from "@/components/Common/SkeletonLoading";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,8 +34,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { dateQueryString } from "@/Utils/utils";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import { AppointmentNonCancelledStatuses } from "@/types/scheduling/schedule";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useInView } from "react-intersection-observer";
 
 interface BookingsListProps {
   patientId: string;
@@ -307,22 +305,57 @@ export const BookingListContent = ({
   status?: readonly AppointmentStatus[];
 }) => {
   const { t } = useTranslation();
-  const { data: appointments, isLoading } = useQuery({
-    queryKey: ["patient-appointments", patientId, dateFrom, dateTo, facilityId],
-    queryFn: query(scheduleApi.appointments.getAppointments, {
-      pathParams: { patientId },
-      queryParams: {
-        limit: 100,
-        date_after: dateFrom,
-        facility: facilityId,
-        date_before: dateTo,
-        status: status?.join(","),
-      },
-    }),
+  const { ref, inView } = useInView();
+
+  const {
+    data: appointmentsData,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery({
+    queryKey: [
+      "infinite-appointments",
+      patientId,
+      dateFrom,
+      dateTo,
+      facilityId,
+    ],
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(scheduleApi.appointments.getAppointments, {
+        pathParams: { patientId },
+        queryParams: {
+          offset: pageParam,
+          limit: 15,
+          date_after: dateFrom,
+          facility: facilityId,
+          date_before: dateTo,
+          status: status?.join(","),
+        },
+      })({ signal });
+      return response;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * 15;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
   });
 
+  const appointments =
+    appointmentsData?.pages.flatMap((page) => page.results) ?? [];
+
+  useEffect(() => {
+    console.log(inView);
+  }, [inView]);
+
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, fetchNextPage]);
+
   const filteredAppointments =
-    appointments?.results
+    appointments
       .filter((appointment) => status?.includes(appointment.status) ?? true)
       .filter((appointment) =>
         dateFrom
@@ -333,23 +366,7 @@ export const BookingListContent = ({
         dateTo
           ? isBefore(appointment.token_slot.start_datetime, endOfDay(dateTo))
           : true,
-      )
-      .sort((a, b) =>
-        compareAsc(a.token_slot.start_datetime, b.token_slot.start_datetime),
       ) ?? [];
-
-  if (isLoading) {
-    return (
-      <div className="w-full">
-        <div className="hidden sm:block">
-          <TableSkeleton count={10} />
-        </div>
-        <div className="sm:hidden">
-          <CardGridSkeleton count={10} />
-        </div>
-      </div>
-    );
-  }
 
   if (filteredAppointments.length === 0) {
     return (
@@ -370,13 +387,18 @@ export const BookingListContent = ({
       <div className="sm:hidden space-y-4">
         {filteredAppointments.map((appointment) => (
           <AppointmentCard
-            key={appointment.id}
+            key={`card-${appointment.id}`}
             appointment={appointment}
             patientId={patientId}
             appointmentId={appointment.id}
           />
         ))}
       </div>
+      <div ref={ref} />
+      {isFetchingNextPage && <CardListSkeleton count={2} />}
+      {!hasNextPage && !isFetchingNextPage && (
+        <div className="border-b border-gray-300 pb-2" />
+      )}
     </div>
   );
 };
