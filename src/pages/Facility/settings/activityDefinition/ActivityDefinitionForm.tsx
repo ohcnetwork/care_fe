@@ -35,8 +35,7 @@ import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDe
 import LocationMultiSelect from "@/components/Location/LocationMultiSelect";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
-import { ChargeItemDefinitionForm } from "../chargeItemDefinitions/ChargeItemDefinitionForm";
+import { ChargeItemDefinitionForm } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionForm";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
