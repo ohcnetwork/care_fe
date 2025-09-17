@@ -361,17 +361,10 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 facilityId={facilityId}
                 selected={practitioners}
                 onSelect={(users) => {
-                  if (users) {
-                    updateQuery({
-                      practitioners: users.map((user) => user.id),
-                      slot: null,
-                    });
-                  } else {
-                    updateQuery({
-                      practitioners: [],
-                      slot: null,
-                    });
-                  }
+                  updateQuery({
+                    practitioners: users.map((user) => user.id),
+                    slot: null,
+                  });
                 }}
               />
             </div>
