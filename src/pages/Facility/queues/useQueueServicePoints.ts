@@ -1,6 +1,5 @@
 import query from "@/Utils/request/query";
 import { useScheduleResourceFromPath } from "@/components/Schedule/useScheduleResource";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { TokenSubQueueStatus } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
 import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import { useQuery } from "@tanstack/react-query";
@@ -15,11 +14,11 @@ const atom = atomWithStorage<Record<string, string[] | undefined>>(
 );
 
 export function useQueueServicePoints() {
-  const { resourceType, resourceId } = useScheduleResourceFromPath();
+  const { resourceType, resourceId, facilityId } =
+    useScheduleResourceFromPath();
   const [assignedServicePoints, toggleServicePoint] = useAtom(atom);
   const servicPointKey = `service_point_${resourceId}_${resourceType}`;
   const servicePointIds = assignedServicePoints[servicPointKey];
-  const { facilityId } = useCurrentFacility();
 
   const { data: subQueues } = useQuery({
     queryKey: ["servicePoints", facilityId],
