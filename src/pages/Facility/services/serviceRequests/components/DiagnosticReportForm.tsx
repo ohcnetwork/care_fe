@@ -618,7 +618,7 @@ export function DiagnosticReportForm({
               // For regular observations, skip if no value is entered
               // For component-based observations, check component values
               // But always include observations marked for deletion
-              if (!isMarkedForDeletion && !obsData.id) {
+              if (!isMarkedForDeletion) {
                 if (!hasComponents && !obsData.value.trim()) {
                   return null;
                 }
@@ -1031,7 +1031,6 @@ export function DiagnosticReportForm({
                                         {t("marked_for_deletion")}
                                       </span>
                                     ) : (
-                                      observationsList.length > 1 &&
                                       !disableEdit && (
                                         <Button
                                           type="button"
@@ -1044,7 +1043,10 @@ export function DiagnosticReportForm({
                                               index,
                                             )
                                           }
-                                          disabled={isErrored}
+                                          disabled={
+                                            isErrored ||
+                                            (index === 0 && !observationData.id)
+                                          }
                                         >
                                           <Trash2 className="size-4" />
                                         </Button>
