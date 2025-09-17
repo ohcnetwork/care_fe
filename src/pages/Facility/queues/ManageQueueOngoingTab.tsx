@@ -1,4 +1,5 @@
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
+import { useScheduleResource } from "@/components/Schedule/useScheduleResource";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,7 +23,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { usePreferredServicePointCategory } from "@/pages/Facility/queues/usePreferredServicePointCategory";
 import { getTokenQueueStatusCount } from "@/pages/Facility/queues/utils";
-import { SchedulableResourceType } from "@/types/scheduling/schedule";
+import {
+  SchedulableResourceType,
+  ScheduleResource,
+} from "@/types/scheduling/schedule";
 import {
   renderTokenNumber,
   TokenRead,
@@ -55,6 +59,8 @@ import { Link } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
+import { ServicePointsDropDown } from "./ServicePointsDropDown";
+import { useInServicePoints } from "./useInServicePoints";
 
 interface Props {
   facilityId: string;
@@ -71,8 +77,31 @@ export function ManageQueueOngoingTab({
   resourceType,
   resourceId,
 }: Props) {
+  const { t } = useTranslation();
+  const resource = useScheduleResource({
+    resourceType,
+    resourceId,
+    facilityId,
+  });
+
+  const { servicePointIds } = useInServicePoints({
+    resource: resource as ScheduleResource,
+    resourceType,
+  });
+
+  const activeSubQueues =
+    servicePointIds.length > 0 && subQueues
+      ? subQueues.filter((subQueue) => servicePointIds.includes(subQueue.id))
+      : [];
+
   return (
     <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2 w-fit mt-4">
+        <Label className="text-gray-950 text-sm font-medium">
+          {t("service_points")}
+        </Label>
+        <ServicePointsDropDown resource={resource} subQueues={subQueues} />
+      </div>
       <div className="flex space-x-4 overflow-x-auto w-full">
         <WaitingTokensColumn
           facilityId={facilityId}
@@ -85,7 +114,7 @@ export function ManageQueueOngoingTab({
           facilityId={facilityId}
           queueId={queueId}
           resourceType={resourceType}
-          subQueues={subQueues}
+          subQueues={activeSubQueues}
         />
       </div>
     </div>
@@ -268,6 +297,7 @@ function WaitingTokensColumn({
 
   const tokens = data?.pages.flatMap((page) => page.results) ?? [];
   const { t } = useTranslation();
+
   return (
     <QueueColumn
       title={t("waiting")}
