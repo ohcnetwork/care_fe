@@ -62,7 +62,7 @@ export function AssignToServicePointDialog({
     if (selectedSubQueueId) {
       updateToken({
         sub_queue: selectedSubQueueId,
-        status: TokenStatus.IN_PROGRESS,
+        status: TokenStatus.CREATED,
         note: token.note,
       });
     }

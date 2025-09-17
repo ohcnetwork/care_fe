@@ -3,6 +3,12 @@ import { useScheduleResourceFromPath } from "@/components/Schedule/useScheduleRe
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -24,14 +30,7 @@ import { TokenSubQueueRead } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Check,
-  DoorOpenIcon,
-  Megaphone,
-  MoreHorizontal,
-  RotateCcw,
-  SettingsIcon,
-} from "lucide-react";
+import { DoorOpenIcon, EyeIcon, Megaphone, SettingsIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ServicePointsDropDown } from "./ServicePointsDropDown";
@@ -44,7 +43,6 @@ interface Props {
 
 export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   const { t } = useTranslation();
-
   const { assignedServicePoints } = useQueueServicePoints();
 
   const { data: summary } = useQuery({
@@ -99,6 +97,18 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
               </Badge>
             )
           }
+          options={
+            summary && (
+              <AwaitingRecallTrigger
+                queueId={queueId}
+                facilityId={facilityId}
+                count={getTokenQueueStatusCount(
+                  summary,
+                  TokenStatus.UNFULFILLED,
+                )}
+              />
+            )
+          }
         >
           <div className="flex flex-col gap-4">
             {assignedServicePoints.map((subQueue, index) => (
@@ -138,13 +148,6 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
                       tokens={tokens}
                     />
                   )}
-                  tokenOptions={(token) => (
-                    <InServiceTokenOptions
-                      token={token}
-                      facilityId={facilityId}
-                      queueId={queueId}
-                    />
-                  )}
                 />
               </>
             ))}
@@ -159,10 +162,12 @@ export function QueueColumn({
   title,
   count,
   children,
+  options,
 }: {
   title: React.ReactNode;
   count: React.ReactNode;
   children: React.ReactNode;
+  options?: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-3 p-3 rounded-lg bg-gray-100 border border-gray-200 min-w-xs flex-1">
@@ -171,8 +176,9 @@ export function QueueColumn({
           <span className="text-sm font-semibold">{title}</span>
           {count}
         </div>
+        {options}
       </div>
-      <div className="h-[calc(100vh-15rem)] overflow-y-auto pb-2">
+      <div className="h-[calc(100vh-21.5rem)] overflow-y-auto pb-2">
         {children}
       </div>
     </div>
@@ -193,7 +199,6 @@ function SubQueueColumn({
   status: TokenStatus;
   emptyState: React.ReactNode;
   options?: (tokens: TokenRead[]) => React.ReactNode;
-  tokenOptions?: (token: TokenRead) => React.ReactNode;
 }) {
   const { t } = useTranslation();
   const { preferredServicePointCategory } = usePreferredServicePointCategory({
@@ -366,156 +371,41 @@ function InServiceColumnOptions({
   );
 }
 
-function TokenCompleteConfirmDialog({
-  open,
-  onOpenChange,
-  token,
-  onConfirm,
-  isLoading,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  token: TokenRead;
-  onConfirm: () => void;
-  isLoading: boolean;
-}) {
-  const { t } = useTranslation();
-
-  return (
-    <ConfirmActionDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title={t("complete_token")}
-      description={t("complete_token_confirmation", {
-        patientName: token.patient?.name,
-        tokenNumber: `${token.category.shorthand}-${token.number.toString().padStart(3, "0")}`,
-      })}
-      onConfirm={onConfirm}
-      cancelText={t("cancel")}
-      confirmText={t("complete_token")}
-      variant="primary"
-      disabled={isLoading}
-    />
-  );
-}
-
-function InServiceTokenOptions({
-  token,
-  facilityId,
+function AwaitingRecallTrigger({
+  count,
   queueId,
+  facilityId,
 }: {
-  token: TokenRead;
-  facilityId: string;
+  count: number;
   queueId: string;
+  facilityId: string;
 }) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const [showCompleteDialog, setShowCompleteDialog] = useState(false);
-
-  const { mutate: updateToken, isPending: isUpdating } = useMutation({
-    mutationFn: mutate(tokenApi.update, {
-      pathParams: {
-        facility_id: facilityId,
-        queue_id: queueId,
-        id: token.id,
-      },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [
-          "infinite-tokens",
-          facilityId,
-          queueId,
-          { sub_queue: token.sub_queue?.id, status: TokenStatus.IN_PROGRESS },
-        ],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [
-          "infinite-tokens",
-          facilityId,
-          queueId,
-          { status: TokenStatus.FULFILLED },
-        ],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [
-          "infinite-tokens",
-          facilityId,
-          queueId,
-          { status: TokenStatus.CANCELLED },
-        ],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [
-          "infinite-tokens",
-          facilityId,
-          queueId,
-          { status: TokenStatus.CREATED },
-        ],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["token-queue-summary", facilityId, queueId],
-      });
-      setShowCompleteDialog(false);
-    },
-  });
-
-  const handleCompleteToken = () => {
-    updateToken({
-      status: TokenStatus.FULFILLED,
-      note: token.note,
-      sub_queue: undefined,
-    });
-  };
-
-  const handleMoveBackToWaiting = () => {
-    updateToken({
-      status: TokenStatus.CREATED,
-      note: token.note,
-      sub_queue: undefined,
-    });
-  };
+  const [showAwaitingRecallDialog, setShowAwaitingRecallDialog] =
+    useState(false);
 
   return (
     <>
-      <div className="flex items-center gap-1">
-        {/* Complete button */}
+      <div className="flex items-center">
         <Button
-          variant="outline_primary"
-          size="icon"
-          onClick={() => setShowCompleteDialog(true)}
-          disabled={isUpdating}
-          title={t("complete_token")}
+          variant="link"
+          size="lg"
+          className="underline font-semibold"
+          disabled={count === 0}
+          onClick={() => setShowAwaitingRecallDialog(true)}
         >
-          <Check />
+          <EyeIcon />
+          <span>{t("awaiting_recall")}</span>
         </Button>
-
-        {/* Dropdown menu */}
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            disabled={isUpdating}
-            className="p-2 hover:bg-gray-100 rounded-md transition-colors"
-          >
-            <MoreHorizontal className="size-4" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={handleMoveBackToWaiting}
-              disabled={isUpdating}
-            >
-              <RotateCcw className="size-4" />
-              {t("move_back_to_waiting")}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div>
+          <Badge size="sm">{count}</Badge>
+        </div>
       </div>
-
-      <TokenCompleteConfirmDialog
-        open={showCompleteDialog}
-        onOpenChange={setShowCompleteDialog}
-        token={token}
-        onConfirm={handleCompleteToken}
-        isLoading={isUpdating}
+      <AwaitingRecallDialog
+        open={showAwaitingRecallDialog}
+        onOpenChange={setShowAwaitingRecallDialog}
+        facilityId={facilityId}
+        queueId={queueId}
       />
     </>
   );
@@ -579,5 +469,44 @@ function CallNextPatientButton({
         });
       }}
     />
+  );
+}
+
+function AwaitingRecallDialog({
+  open,
+  onOpenChange,
+  facilityId,
+  queueId,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  facilityId: string;
+  queueId: string;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle>{t("awaiting_recall")}</DialogTitle>
+        </DialogHeader>
+        <div className="flex-1 overflow-y-auto">
+          <OngoingQueueTokenCardsList
+            facilityId={facilityId}
+            queueId={queueId}
+            status={TokenStatus.UNFULFILLED}
+            emptyState={
+              <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-10 border border-gray-100">
+                <EyeIcon className="size-6 text-gray-700" />
+                <span className="text-sm font-semibold text-gray-700">
+                  {t("no_tokens_awaiting_recall")}
+                </span>
+              </div>
+            }
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

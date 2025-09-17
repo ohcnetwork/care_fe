@@ -30,6 +30,7 @@ import {
   MoreHorizontal,
   OctagonX,
   RedoDot,
+  RotateCcw,
   TicketCheck,
 } from "lucide-react";
 import { Link } from "raviger";
@@ -125,14 +126,28 @@ export function OngoingQueueTokenCard({
           <div className="flex items-center gap-3">
             {token ? (
               <div className="flex gap-2 items-center justify-center p-2 bg-gray-100 border border-gray-200 rounded-lg">
-                {token.status === TokenStatus.IN_PROGRESS && (
-                  <div className="flex gap-1 items-center">
-                    <div className="size-2 border border-primary-500 rounded-full bg-primary-200" />
-                    <span className="text-sm font-medium">
-                      {t("now_serving")}:
-                    </span>
-                  </div>
-                )}
+                {!!token.sub_queue &&
+                  [TokenStatus.CREATED, TokenStatus.IN_PROGRESS].includes(
+                    token.status,
+                  ) && (
+                    <div className="flex gap-1 items-center">
+                      <div
+                        className={cn(
+                          "size-2 border rounded-full",
+                          token.status === TokenStatus.CREATED &&
+                            "border-indigo-500 bg-indigo-200",
+                          token.status === TokenStatus.IN_PROGRESS &&
+                            "border-primary-500 bg-primary-200",
+                        )}
+                      />
+                      <span className="text-sm font-medium">
+                        {token.status === TokenStatus.CREATED && t("called")}
+                        {token.status === TokenStatus.IN_PROGRESS &&
+                          t("now_serving")}
+                        :
+                      </span>
+                    </div>
+                  )}
                 <span className="text-lg font-bold text-black">
                   {renderTokenNumber(token)}
                 </span>
@@ -181,6 +196,18 @@ export function OngoingQueueTokenCard({
 
             {token.status === TokenStatus.IN_PROGRESS && (
               <>
+                <ContextMenuItem
+                  onClick={() =>
+                    updateToken({
+                      status: TokenStatus.CREATED,
+                      note: token.note,
+                      sub_queue: undefined,
+                    })
+                  }
+                >
+                  <RotateCcw className="size-4 mr-2" />
+                  {t("move_back_to_waiting")}
+                </ContextMenuItem>
                 <ContextMenuItem
                   onClick={() =>
                     updateToken({
