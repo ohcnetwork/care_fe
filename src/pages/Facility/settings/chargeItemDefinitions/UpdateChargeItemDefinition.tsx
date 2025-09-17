@@ -103,7 +103,9 @@ export function UpdateChargeItemDefinition({
           categorySlug={chargeItemDefinition.category.slug}
           initialData={chargeItemDefinition}
           isUpdate={true}
-         onSuccess={(chargeItemDefinition) => handleSuccess(chargeItemDefinition.slug)}
+         onSuccess={(chargeItemDefinition) =>
+           handleSuccess(chargeItemDefinition.slug)
+         }
           onCancel={() =>
             navigate(
               `/facility/${facilityId}/settings/charge_item_definitions/${chargeItemDefinitionId}`,
