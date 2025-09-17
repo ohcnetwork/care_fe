@@ -385,12 +385,11 @@ export function ValueSetForm({
   });
 
   useEffect(() => {
-    if (initialData?.id) return; // Only auto-generate for new valuesets
+    if (initialData) return;
 
     const subscription = form.watch((value, { name }) => {
       if (name === "name") {
         const slug = generateSlug(value.name || "");
-        // Only autofill if slug is less than 25 characters
         if (slug.length < 25) {
           form.setValue("slug", slug, {
             shouldValidate: true,
