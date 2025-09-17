@@ -133,7 +133,7 @@ export function ResourceDefinitionCategoryPicker<T>({
   translations,
   allowMultiple = false,
   mapper = (item: T) => item as BaseCategoryPickerDefinition,
-  enableFavorites = true,
+  enableFavorites = false,
   favoritesConfig,
 }: ResourceDefinitionCategoryPickerProps<T>) {
   const { t } = useTranslation();
