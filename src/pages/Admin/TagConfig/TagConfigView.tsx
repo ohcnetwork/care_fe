@@ -253,7 +253,9 @@ export default function TagConfigView({
                 <div className="mt-1 text-sm">
                   {tagConfig.facility_organization
                     ? tagConfig.facility_organization.name
-                    : t("none")}
+                    : tagConfig.organization
+                      ? tagConfig.organization.name
+                      : t("none")}
                 </div>
               </div>
             </div>

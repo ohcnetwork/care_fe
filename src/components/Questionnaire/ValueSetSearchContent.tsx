@@ -220,7 +220,7 @@ export default function ValueSetSearchContent({
         <CommandInput
           ref={inputRef}
           placeholder={placeholder}
-          className="outline-hidden border-none ring-0 shadow-none"
+          className="outline-hidden border-none ring-0 shadow-none text-base md:text-sm"
           onValueChange={onSearchChange}
           value={search}
           autoFocus
