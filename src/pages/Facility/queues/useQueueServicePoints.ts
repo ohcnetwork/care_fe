@@ -7,7 +7,7 @@ import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
 const atom = atomWithStorage<Record<string, string[] | undefined>>(
-  "care_queues_service_points",
+  "care_queue_service_points",
   {},
   undefined,
   { getOnInit: true },
@@ -16,9 +16,8 @@ const atom = atomWithStorage<Record<string, string[] | undefined>>(
 export function useQueueServicePoints() {
   const { resourceType, resourceId, facilityId } =
     useScheduleResourceFromPath();
-  const [assignedServicePoints, toggleServicePoint] = useAtom(atom);
-  const servicPointKey = `service_point_${resourceId}_${resourceType}`;
-  const servicePointIds = assignedServicePoints[servicPointKey];
+  const [assignedServicePoints, setAssignedServicePoints] = useAtom(atom);
+  const servicPointKey = `${resourceType}:${resourceId}`;
 
   const { data: subQueues } = useQuery({
     queryKey: ["servicePoints", facilityId],
@@ -33,45 +32,30 @@ export function useQueueServicePoints() {
     }),
   });
 
+  const allServicePoints = subQueues?.results;
+
+  const assignedServicePointIds =
+    assignedServicePoints[servicPointKey] ??
+    allServicePoints?.map((subQueue) => subQueue.id) ??
+    [];
+
   return {
-    allServicePoints: subQueues?.results,
-    assignedServicePointIds: servicePointIds || [],
+    allServicePoints,
+    assignedServicePointIds,
     assignedServicePoints:
-      servicePointIds &&
-      subQueues &&
-      servicePointIds.length > 0 &&
-      subQueues.results.length > 0
-        ? subQueues.results.filter((subQueue) =>
-            servicePointIds.includes(subQueue.id),
-          )
-        : [],
+      allServicePoints?.filter(({ id }) =>
+        assignedServicePointIds.includes(id),
+      ) ?? [],
 
     toggleServicePoint: (subQueueId: string, checked: boolean) => {
-      let updated = checked
-        ? [...(servicePointIds || []), subQueueId]
-        : servicePointIds?.filter((id) => id !== subQueueId);
+      const updated = new Set([...assignedServicePointIds]);
+      updated[checked ? "add" : "delete"](subQueueId);
 
-      if (checked) {
-        updated = [...new Set([...(servicePointIds || []), subQueueId])];
-      } else {
-        updated = servicePointIds?.filter((id) => id !== subQueueId);
-      }
-
-      if (
-        updated &&
-        updated.length > 0 &&
-        updated.length !== servicePointIds?.length
-      ) {
-        toggleServicePoint({
-          ...assignedServicePoints,
-          [servicPointKey]: updated,
-        });
-      } else {
-        toggleServicePoint({
-          ...assignedServicePoints,
-          [servicPointKey]: undefined,
-        });
-      }
+      setAssignedServicePoints({
+        ...assignedServicePoints,
+        [servicPointKey]:
+          updated.size !== allServicePoints?.length ? [...updated] : undefined,
+      });
     },
   } as const;
 }
