@@ -363,7 +363,7 @@ export function ProductFormContent({
                           (pk) => pk.id === field.value,
                         )}
                         onChange={(selected) => field.onChange(selected.id)}
-                        className="border-gray-200 font-normal text-gray-700"
+                        className="border-gray-300 font-normal text-gray-700"
                         enableFavorites
                       />
                     </FormControl>
