@@ -323,6 +323,7 @@ interface AllergyItemProps {
   disabled?: boolean;
   onUpdate?: (allergy: Partial<AllergyIntoleranceRequest>) => void;
   onRemove?: () => void;
+  isTableContext?: boolean;
 }
 
 const AllergyItem = ({
@@ -330,11 +331,13 @@ const AllergyItem = ({
   disabled,
   onUpdate,
   onRemove,
+  isTableContext = false,
 }: AllergyItemProps) => {
   const { t } = useTranslation();
   const [showNotes, setShowNotes] = useState(allergy.note !== undefined);
-  const desktopLayout = useBreakpoints({ lg: true, default: false });
-  if (desktopLayout) {
+
+  // Only use table layout when explicitly in table context
+  if (isTableContext) {
     return (
       <>
         <TableRow
@@ -706,6 +709,7 @@ export function AllergyQuestion({
                     }
                     onUpdate={(updates) => handleUpdateAllergy(index, updates)}
                     onRemove={() => handleRemoveAllergy(index)}
+                    isTableContext={true}
                   />
                 ))}
               </TableBody>
@@ -830,6 +834,7 @@ export function AllergyQuestion({
                           handleUpdateAllergy(index, updates)
                         }
                         onRemove={() => handleRemoveAllergy(index)}
+                        isTableContext={false}
                       />
                     </CardContent>
                   </CollapsibleContent>
@@ -871,6 +876,7 @@ export function AllergyQuestion({
                   );
                 }}
                 onRemove={() => {}}
+                isTableContext={false}
               />
             )}
           </div>
