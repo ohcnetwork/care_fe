@@ -649,7 +649,7 @@ const AppointmentDetails = ({
 
       <ChargeItemsSection
         facilityId={facility.id}
-        resourceId={appointment.resource.id}
+        resourceId={appointment.id}
         patientId={appointment.patient.id}
         serviceResourceType={ChargeItemServiceResource.appointment}
         sourceUrl={`/facility/${facility.id}/patient/${appointment.patient.id}/appointments/${appointment.id}`}

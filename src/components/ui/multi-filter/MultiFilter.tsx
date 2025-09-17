@@ -30,6 +30,7 @@ interface MultiFilterProps {
   triggerButtonClassName?: string;
   clearAllButtonClassName?: string;
   selectedBarClassName?: string;
+  facilityId?: string;
   disabled?: boolean;
 }
 export default function MultiFilter({
@@ -43,6 +44,7 @@ export default function MultiFilter({
   triggerButtonClassName,
   clearAllButtonClassName,
   selectedBarClassName,
+  facilityId,
   disabled = false,
 }: MultiFilterProps) {
   const [open, setOpen] = useState(false);
@@ -126,6 +128,7 @@ export default function MultiFilter({
               selectedFilters={selectedFilters}
               handleBack={handleBack}
               onFilterChange={onFilterChange}
+              facilityId={facilityId}
             />
           ) : (
             <FilterList

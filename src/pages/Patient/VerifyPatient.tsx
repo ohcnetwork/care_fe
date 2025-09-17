@@ -126,9 +126,9 @@ export default function VerifyPatient() {
                     </div>
                   </CardHeader>
                 </Card>
-                <Card className="bg-white shadow-sm mx-10 rounded-t-none">
+                <Card className="bg-white shadow-sm mx-2 md:mx-10 rounded-t-none">
                   <CardHeader className="p-2">
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-2">
                       <div className="flex flex-wrap items-center gap-2">
                         {patientData.instance_tags.map((t) => (
                           <Badge key={t.id} variant="outline">

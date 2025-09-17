@@ -47,6 +47,7 @@ function TreeViewItem({
   resource,
   getColorForTag,
   level = 0,
+  facilityId,
 }: {
   tag: TagConfig;
   selectedTags: TagConfig[];
@@ -54,6 +55,7 @@ function TreeViewItem({
   resource: TagResource;
   getColorForTag: (tagId: string, index: number) => string;
   level?: number;
+  facilityId?: string;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
@@ -65,6 +67,7 @@ function TreeViewItem({
         parent: tag.id,
         status: "active",
         ordering: "priority",
+        facility: facilityId,
       },
     }),
     enabled: tag.has_children && expanded,
@@ -136,6 +139,7 @@ function TreeViewItem({
                   resource={resource}
                   getColorForTag={getColorForTag}
                   level={level + 1}
+                  facilityId={facilityId}
                 />
               );
             }
@@ -151,6 +155,7 @@ function TagFilterDropdown({
   onTagsChange,
   resource,
   placeholder: _placeholder,
+  facilityId,
   handleBack,
 }: {
   selectedTags: TagConfig[];
@@ -158,6 +163,7 @@ function TagFilterDropdown({
   resource: TagResource;
   placeholder?: string;
   handleBack?: () => void;
+  facilityId?: string;
 }) {
   const [search, setSearch] = useState("");
   const { t } = useTranslation();
@@ -175,6 +181,7 @@ function TagFilterDropdown({
         parent_is_null: true,
         status: "active",
         ordering: "priority",
+        ...(facilityId ? { facility: facilityId } : {}),
         ...(search ? { search } : {}),
       },
     }),
@@ -291,6 +298,7 @@ function TagFilterDropdown({
                     onTagToggle={handleTagToggle}
                     resource={resource}
                     getColorForTag={getColorForTag}
+                    facilityId={facilityId}
                   />
                 ))
               : // Desktop submenu view
@@ -302,6 +310,7 @@ function TagFilterDropdown({
                     onTagToggle={handleTagToggle}
                     resource={resource}
                     getColorForTag={getColorForTag}
+                    facilityId={facilityId}
                     onSubMenuOpen={(open) => {
                       setHasOpenSubmenu(open);
                     }}
@@ -363,6 +372,7 @@ function GroupSubmenu({
   onTagToggle,
   resource,
   getColorForTag,
+  facilityId,
   onSubMenuOpen,
 }: {
   group: TagConfig;
@@ -370,6 +380,7 @@ function GroupSubmenu({
   onTagToggle: (tag: TagConfig) => void;
   resource: TagResource;
   getColorForTag: (tagId: string, index: number) => string;
+  facilityId?: string;
   onSubMenuOpen: (isOpen: boolean) => void;
 }) {
   const { t } = useTranslation();
@@ -382,6 +393,7 @@ function GroupSubmenu({
         parent: group.id,
         status: "active",
         ordering: "priority",
+        ...(facilityId ? { facility: facilityId } : {}),
       },
     }),
     enabled: true,
@@ -472,6 +484,7 @@ export default function RenderTagFilter({
   selectedTags,
   onFilterChange,
   handleBack,
+  facilityId,
 }: {
   filter: FilterConfig;
   selectedTags: TagConfig[];
@@ -480,6 +493,7 @@ export default function RenderTagFilter({
     values: string[] | TagConfig[] | FilterDateRange,
   ) => void;
   handleBack?: () => void;
+  facilityId?: string;
 }) {
   return (
     <div className="p-0">
@@ -492,6 +506,7 @@ export default function RenderTagFilter({
         resource={(filter.meta as TagFilterMeta).resource}
         placeholder={filter.placeholder}
         handleBack={handleBack}
+        facilityId={facilityId}
       />
     </div>
   );

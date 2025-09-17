@@ -6,7 +6,7 @@ import { NavMain } from "@/components/ui/sidebar/nav-main";
 
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Logs } from "lucide-react";
 
 export function LocationNav() {
   const { t } = useTranslation();
@@ -88,12 +88,12 @@ export function LocationNav() {
         {
           name: t("appointments"),
           url: `${baseUrl}/appointments`,
-          icon: <CalendarIcon />,
+          icon: <CareIcon icon="d-calendar" />,
         },
         {
           name: t("queues"),
           url: `${baseUrl}/queues`,
-          icon: <CalendarIcon />,
+          icon: <Logs />,
         },
       ]}
     />
