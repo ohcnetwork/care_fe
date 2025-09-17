@@ -21,12 +21,14 @@ export interface KeyboardShortcut {
   action: string;
   description: string;
   when: string;
+  subContext?: string;
 }
 
 export function useKeyboardShortcuts(
   contexts: ShortcutContext[],
   conditions: ShortcutConditions,
   handlers: ShortcutHandlers,
+  activeSubContext?: string,
 ) {
   const shortcuts = useMemo(() => {
     const allShortcuts: KeyboardShortcut[] = [];
@@ -84,6 +86,15 @@ export function useKeyboardShortcuts(
         return;
       }
 
+      if (
+        (activeSubContext &&
+          shortcut.subContext &&
+          shortcut.subContext !== activeSubContext) ||
+        (shortcut.subContext && !activeSubContext)
+      ) {
+        return;
+      }
+
       const key = shortcut.key.toLowerCase();
 
       if (key.includes(" ")) {
@@ -116,7 +127,26 @@ export function useKeyboardShortcuts(
       const key = parts[parts.length - 1].toLowerCase();
       const modifiers = parts.slice(0, -1);
 
-      if (event.key.toLowerCase() !== key) return false;
+      // Handle numeric keys with shift modifier
+      let expectedKey = key;
+      if (modifiers.includes("shift") && /^\d$/.test(key)) {
+        // Map numeric keys to their shifted equivalents
+        const shiftMap: Record<string, string> = {
+          "1": "!",
+          "2": "@",
+          "3": "#",
+          "4": "$",
+          "5": "%",
+          "6": "^",
+          "7": "&",
+          "8": "*",
+          "9": "(",
+          "0": ")",
+        };
+        expectedKey = shiftMap[key] || key;
+      }
+
+      if (event.key.toLowerCase() !== expectedKey.toLowerCase()) return false;
 
       const requiredModifiers = {
         shift: false,
@@ -155,6 +185,7 @@ export function useKeyboardShortcuts(
 
   const prefixActiveRef = useRef<string | null>(null);
   const [activePrefix, setActivePrefix] = useState<string | null>(null);
+  const [isOptionPressed, setIsOptionPressed] = useState<boolean>(false);
 
   // Reset prefix states after timeout
   useEffect(() => {
@@ -169,6 +200,11 @@ export function useKeyboardShortcuts(
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
+      // Track Option/Alt key state
+      if (event.altKey !== isOptionPressed) {
+        setIsOptionPressed(event.altKey);
+      }
+
       // Skip if typing in input fields (unless explicitly allowed)
       const target = event.target as HTMLElement;
       const isInputField =
@@ -247,18 +283,40 @@ export function useKeyboardShortcuts(
         }
       }
     },
-    [categorizedShortcuts, handlers, matchesKeyCombo],
+    [categorizedShortcuts, handlers, matchesKeyCombo, isOptionPressed],
   );
+
+  const handleKeyUp = useCallback(
+    (event: KeyboardEvent) => {
+      // Track Option/Alt key state
+      if (event.altKey !== isOptionPressed) {
+        setIsOptionPressed(event.altKey);
+      }
+    },
+    [isOptionPressed],
+  );
+
+  const handleWindowBlur = useCallback(() => {
+    // Reset Option key state when window loses focus
+    setIsOptionPressed(false);
+  }, []);
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
+    document.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("blur", handleWindowBlur);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("blur", handleWindowBlur);
+    };
+  }, [handleKeyDown, handleKeyUp, handleWindowBlur]);
 
   return {
     shortcuts: shortcuts.filter((shortcut) =>
       evaluateWhenCondition(shortcut.when),
     ),
     activePrefix,
+    isOptionPressed,
   };
 }

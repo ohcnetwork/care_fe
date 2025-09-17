@@ -25,6 +25,7 @@ import { GeneralSettings } from "./general/general";
 import HealthcareServiceForm from "./healthcareService/HealthcareServiceForm";
 import HealthcareServiceList from "./healthcareService/HealthcareServiceList";
 import HealthcareServiceShow from "./healthcareService/HealthcareServiceShow";
+import LocationImport from "./locations/LocationImport";
 import LocationSettings from "./locations/LocationSettings";
 import ObservationDefinitionForm from "./observationDefinition/ObservationDefinitionForm";
 import ObservationDefinitionList from "./observationDefinition/ObservationDefinitionList";
@@ -40,6 +41,9 @@ import { CreateSpecimenDefinition } from "./specimen-definitions/CreateSpecimenD
 import { SpecimenDefinitionDetail } from "./specimen-definitions/SpecimenDefinitionDetail";
 import { SpecimenDefinitionsList } from "./specimen-definitions/SpecimenDefinitionsList";
 import { UpdateSpecimenDefinition } from "./specimen-definitions/UpdateSpecimenDefinition";
+import TokenCategoryForm from "./tokenCategory/TokenCategoryForm";
+import TokenCategoryList from "./tokenCategory/TokenCategoryList";
+import TokenCategoryView from "./tokenCategory/TokenCategoryView";
 
 interface SettingsLayoutProps {
   facilityId: string;
@@ -52,6 +56,7 @@ const getRoutes = (facilityId: string) => ({
     <FacilityOrganizationList organizationId={id} currentTab={tab} />
   ),
   "/locations": () => <LocationSettings facilityId={facilityId} />,
+  "/locations/import": () => <LocationImport facilityId={facilityId} />,
   "/locations/:id": ({ id }: { id: string }) => (
     <LocationSettings facilityId={facilityId} locationId={id} />
   ),
@@ -72,16 +77,24 @@ const getRoutes = (facilityId: string) => ({
   "/specimen_definitions/new": () => (
     <CreateSpecimenDefinition facilityId={facilityId} />
   ),
-  "/specimen_definitions/:id": ({ id }: { id: string }) => (
+  "/specimen_definitions/:specimenSlug": ({
+    specimenSlug,
+  }: {
+    specimenSlug: string;
+  }) => (
     <SpecimenDefinitionDetail
       facilityId={facilityId}
-      specimenDefinitionId={id}
+      specimenSlug={specimenSlug}
     />
   ),
-  "/specimen_definitions/:id/edit": ({ id }: { id: string }) => (
+  "/specimen_definitions/:specimenSlug/edit": ({
+    specimenSlug,
+  }: {
+    specimenSlug: string;
+  }) => (
     <UpdateSpecimenDefinition
       facilityId={facilityId}
-      specimenDefinitionId={id}
+      specimenSlug={specimenSlug}
     />
   ),
   "/observation_definitions": () => (
@@ -90,29 +103,71 @@ const getRoutes = (facilityId: string) => ({
   "/observation_definitions/new": () => (
     <ObservationDefinitionForm facilityId={facilityId} />
   ),
-  "/observation_definitions/:id/edit": ({ id }: { id: string }) => (
+  "/observation_definitions/:observationSlug/edit": ({
+    observationSlug,
+  }: {
+    observationSlug: string;
+  }) => (
     <ObservationDefinitionForm
       facilityId={facilityId}
-      observationDefinitionId={id}
+      observationSlug={observationSlug}
     />
   ),
-  "/observation_definitions/:id": ({ id }: { id: string }) => (
+  "/observation_definitions/:observationSlug": ({
+    observationSlug,
+  }: {
+    observationSlug: string;
+  }) => (
     <ObservationDefinitionView
       facilityId={facilityId}
-      observationDefinitionId={id}
+      observationSlug={observationSlug}
     />
   ),
   "/activity_definitions": () => (
     <ActivityDefinitionList facilityId={facilityId} />
   ),
+  "/activity_definitions/categories/:categorySlug": ({
+    categorySlug,
+  }: {
+    categorySlug: string;
+  }) => (
+    <ActivityDefinitionList
+      facilityId={facilityId}
+      categorySlug={categorySlug}
+    />
+  ),
+  "/activity_definitions/categories/:categorySlug/new": ({
+    categorySlug,
+  }: {
+    categorySlug: string;
+  }) => (
+    <ActivityDefinitionForm
+      facilityId={facilityId}
+      categorySlug={categorySlug}
+    />
+  ),
   "/activity_definitions/new": () => (
     <ActivityDefinitionForm facilityId={facilityId} />
   ),
-  "/activity_definitions/:id": ({ id }: { id: string }) => (
-    <ActivityDefinitionView facilityId={facilityId} activityDefinitionId={id} />
+  "/activity_definitions/:activityDefinitionSlug": ({
+    activityDefinitionSlug,
+  }: {
+    activityDefinitionSlug: string;
+  }) => (
+    <ActivityDefinitionView
+      facilityId={facilityId}
+      activityDefinitionSlug={activityDefinitionSlug}
+    />
   ),
-  "/activity_definitions/:id/edit": ({ id }: { id: string }) => (
-    <ActivityDefinitionForm facilityId={facilityId} activityDefinitionId={id} />
+  "/activity_definitions/:activityDefinitionSlug/edit": ({
+    activityDefinitionSlug,
+  }: {
+    activityDefinitionSlug: string;
+  }) => (
+    <ActivityDefinitionForm
+      facilityId={facilityId}
+      activityDefinitionSlug={activityDefinitionSlug}
+    />
   ),
   "/healthcare_services": () => (
     <HealthcareServiceList facilityId={facilityId} />
@@ -130,30 +185,42 @@ const getRoutes = (facilityId: string) => ({
   "/charge_item_definitions": () => (
     <ChargeItemDefinitionsList facilityId={facilityId} />
   ),
-  "/charge_item_definitions/new": () => (
-    <CreateChargeItemDefinition facilityId={facilityId} />
+  "/charge_item_definitions/categories/:slug": ({ slug }: { slug: string }) => (
+    <ChargeItemDefinitionsList facilityId={facilityId} categorySlug={slug} />
   ),
-  "/charge_item_definitions/:id": ({ id }: { id: string }) => (
-    <ChargeItemDefinitionDetail
-      facilityId={facilityId}
-      chargeItemDefinitionId={id}
-    />
+  "/charge_item_definitions/categories/:slug/new": ({
+    slug,
+  }: {
+    slug: string;
+  }) => (
+    <CreateChargeItemDefinition facilityId={facilityId} categorySlug={slug} />
   ),
-  "/charge_item_definitions/:id/edit": ({ id }: { id: string }) => (
-    <UpdateChargeItemDefinition
-      facilityId={facilityId}
-      chargeItemDefinitionId={id}
-    />
+  "/charge_item_definitions/:slug": ({ slug }: { slug: string }) => (
+    <ChargeItemDefinitionDetail facilityId={facilityId} slug={slug} />
+  ),
+  "/charge_item_definitions/:slug/edit": ({ slug }: { slug: string }) => (
+    <UpdateChargeItemDefinition facilityId={facilityId} slug={slug} />
   ),
   "/product_knowledge": () => <ProductKnowledgeList facilityId={facilityId} />,
-  "/product_knowledge/new": () => (
-    <ProductKnowledgeForm facilityId={facilityId} />
+  "/product_knowledge/categories/:categorySlug": ({
+    categorySlug,
+  }: {
+    categorySlug: string;
+  }) => (
+    <ProductKnowledgeList facilityId={facilityId} categorySlug={categorySlug} />
   ),
-  "/product_knowledge/:id": ({ id }: { id: string }) => (
-    <ProductKnowledgeView facilityId={facilityId} productKnowledgeId={id} />
+  "/product_knowledge/categories/:categorySlug/new": ({
+    categorySlug,
+  }: {
+    categorySlug: string;
+  }) => (
+    <ProductKnowledgeForm facilityId={facilityId} categorySlug={categorySlug} />
   ),
-  "/product_knowledge/:id/edit": ({ id }: { id: string }) => (
-    <ProductKnowledgeForm facilityId={facilityId} productKnowledgeId={id} />
+  "/product_knowledge/:slug": ({ slug }: { slug: string }) => (
+    <ProductKnowledgeView facilityId={facilityId} slug={slug} />
+  ),
+  "/product_knowledge/:slug/edit": ({ slug }: { slug: string }) => (
+    <ProductKnowledgeForm facilityId={facilityId} slug={slug} />
   ),
   "/product": () => <ProductList facilityId={facilityId} />,
   "/product/new": () => <ProductForm facilityId={facilityId} />,
@@ -162,6 +229,14 @@ const getRoutes = (facilityId: string) => ({
   ),
   "/product/:id/edit": ({ id }: { id: string }) => (
     <ProductForm facilityId={facilityId} productId={id} />
+  ),
+  "/token_category": () => <TokenCategoryList facilityId={facilityId} />,
+  "/token_category/new": () => <TokenCategoryForm facilityId={facilityId} />,
+  "/token_category/:id": ({ id }: { id: string }) => (
+    <TokenCategoryView facilityId={facilityId} tokenCategoryId={id} />
+  ),
+  "/token_category/:id/edit": ({ id }: { id: string }) => (
+    <TokenCategoryForm facilityId={facilityId} tokenCategoryId={id} />
   ),
 
   "/reportbuilder": () => <ReportBuilderList facilityId={facilityId} />,

@@ -66,7 +66,7 @@ export default function EditInvoiceSheet({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      payment_terms: "",
+      payment_terms: import.meta.env.REACT_DEFAULT_PAYMENT_TERMS || "",
       note: "",
     },
   });
@@ -74,7 +74,10 @@ export default function EditInvoiceSheet({
   useEffect(() => {
     if (invoice) {
       form.reset({
-        payment_terms: invoice.payment_terms || "",
+        payment_terms:
+          invoice.payment_terms ||
+          import.meta.env.REACT_DEFAULT_PAYMENT_TERMS ||
+          "",
         note: invoice.note || "",
       });
     }
