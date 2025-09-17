@@ -60,11 +60,7 @@ export function ManageQueuePage({
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const resource = useScheduleResource({
-    resourceType,
-    resourceId,
-    facilityId,
-  });
+  const resource = useScheduleResource();
 
   const { data: queue, isLoading: isQueueLoading } = useQuery({
     queryKey: ["queue", facilityId, queueId],
@@ -190,8 +186,6 @@ export function ManageQueuePage({
                 <ManageQueueOngoingTab
                   facilityId={facilityId}
                   queueId={queueId}
-                  resourceType={resourceType}
-                  resourceId={resourceId}
                   subQueues={activeSubQueues}
                 />
               ),

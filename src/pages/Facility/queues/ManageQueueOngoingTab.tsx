@@ -1,4 +1,5 @@
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
+import { useScheduleResourceFromPath } from "@/components/Schedule/useScheduleResource";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +16,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { OngoingQueueTokenCardsList } from "@/pages/Facility/queues/OngoingQueueTokenCard";
 import { usePreferredServicePointCategory } from "@/pages/Facility/queues/usePreferredServicePointCategory";
 import { getTokenQueueStatusCount } from "@/pages/Facility/queues/utils";
-import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { TokenRead, TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import tokenCategoryApi from "@/types/tokens/tokenCategory/tokenCategoryApi";
@@ -38,7 +38,6 @@ import { useTranslation } from "react-i18next";
 interface Props {
   facilityId: string;
   queueId: string;
-  resourceType: SchedulableResourceType;
   subQueues: TokenSubQueueRead[];
 }
 
@@ -46,7 +45,6 @@ export function ManageQueueOngoingTab({
   facilityId,
   queueId,
   subQueues,
-  resourceType,
 }: Props) {
   const { t } = useTranslation();
   const { data: summary } = useQuery({
@@ -91,11 +89,7 @@ export function ManageQueueOngoingTab({
           count={
             summary && (
               <Badge size="sm">
-                {getTokenQueueStatusCount(
-                  summary,
-                  TokenStatus.CREATED,
-                  TokenStatus.IN_PROGRESS,
-                )}
+                {getTokenQueueStatusCount(summary, TokenStatus.IN_PROGRESS)}
               </Badge>
             )
           }
@@ -108,7 +102,6 @@ export function ManageQueueOngoingTab({
                 )}
                 <SubQueueColumn
                   key={subQueue.id}
-                  resourceType={resourceType}
                   subQueue={subQueue}
                   facilityId={facilityId}
                   queueId={queueId}
@@ -122,7 +115,6 @@ export function ManageQueueOngoingTab({
                       <CallNextPatientButton
                         subQueueId={subQueue.id}
                         facilityId={facilityId}
-                        resourceType={resourceType}
                         queueId={queueId}
                         variant="outline"
                         size="lg"
@@ -135,7 +127,6 @@ export function ManageQueueOngoingTab({
                   options={(tokens) => (
                     <InServiceColumnOptions
                       facilityId={facilityId}
-                      resourceType={resourceType}
                       queueId={queueId}
                       subQueueId={subQueue.id}
                       tokens={tokens}
@@ -186,7 +177,6 @@ function SubQueueColumn({
   facilityId,
   queueId,
   subQueue,
-  resourceType,
   status,
   emptyState,
   options,
@@ -194,7 +184,6 @@ function SubQueueColumn({
   facilityId: string;
   queueId: string;
   subQueue: TokenSubQueueRead;
-  resourceType: SchedulableResourceType;
   status: TokenStatus;
   emptyState: React.ReactNode;
   options?: (tokens: TokenRead[]) => React.ReactNode;
@@ -204,7 +193,6 @@ function SubQueueColumn({
   const { preferredServicePointCategory } = usePreferredServicePointCategory({
     facilityId,
     subQueueId: subQueue.id,
-    resourceType,
   });
 
   return (
@@ -231,13 +219,11 @@ function SubQueueColumn({
 
 function InServiceColumnOptions({
   facilityId,
-  resourceType,
   queueId,
   subQueueId,
   tokens,
 }: {
   facilityId: string;
-  resourceType: SchedulableResourceType;
   queueId: string;
   subQueueId: string;
   tokens: TokenRead[];
@@ -248,7 +234,8 @@ function InServiceColumnOptions({
   const queryClient = useQueryClient();
 
   const { preferredServicePointCategory, setPreferredServicePointCategory } =
-    usePreferredServicePointCategory({ facilityId, subQueueId, resourceType });
+    usePreferredServicePointCategory({ facilityId, subQueueId });
+  const { resourceType } = useScheduleResourceFromPath();
 
   const { data: tokenCategories } = useQuery({
     queryKey: ["tokenCategories", facilityId, resourceType],
@@ -305,7 +292,6 @@ function InServiceColumnOptions({
       <CallNextPatientButton
         subQueueId={subQueueId}
         facilityId={facilityId}
-        resourceType={resourceType}
         queueId={queueId}
         variant="ghost"
         size="icon"
@@ -533,18 +519,15 @@ function CallNextPatientButton({
   subQueueId,
   facilityId,
   queueId,
-  resourceType,
   ...props
 }: {
   subQueueId: string;
   facilityId: string;
-  resourceType: SchedulableResourceType;
   queueId: string;
 } & React.ComponentProps<typeof Button>) {
   const { preferredServicePointCategory } = usePreferredServicePointCategory({
     facilityId,
     subQueueId,
-    resourceType,
   });
 
   const queryClient = useQueryClient();
