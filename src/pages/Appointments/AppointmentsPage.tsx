@@ -361,17 +361,10 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 facilityId={facilityId}
                 selected={practitioners}
                 onSelect={(users) => {
-                  if (users) {
-                    updateQuery({
-                      practitioners: users.map((user) => user.id),
-                      slot: null,
-                    });
-                  } else {
-                    updateQuery({
-                      practitioners: [],
-                      slot: null,
-                    });
-                  }
+                  updateQuery({
+                    practitioners: users.map((user) => user.id),
+                    slot: null,
+                  });
                 }}
               />
             </div>
@@ -678,7 +671,12 @@ function AppointmentColumn(props: {
                 ref={index === appointments.length - 1 ? ref : undefined}
               >
                 <Link
-                  href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`}
+                  href={
+                    appointment.resource_type ===
+                    SchedulableResourceType.Practitioner
+                      ? `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`
+                      : `appointments/${appointment.id}`
+                  }
                   className="text-inherit"
                 >
                   <AppointmentCard
