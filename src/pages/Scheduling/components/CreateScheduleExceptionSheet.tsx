@@ -34,12 +34,13 @@ import {
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
-import { useIsUserSchedulableResource } from "@/pages/Scheduling/useIsUserSchedulableResource";
+import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface Props {
   facilityId: string;
-  userId: string;
+  resourceType: SchedulableResourceType;
+  resourceId: string;
   trigger?: React.ReactNode;
 }
 
@@ -51,7 +52,8 @@ type QueryParams = {
 
 export default function CreateScheduleExceptionSheet({
   facilityId,
-  userId,
+  resourceType,
+  resourceId,
   trigger,
 }: Props) {
   const { t } = useTranslation();
@@ -151,15 +153,14 @@ export default function CreateScheduleExceptionSheet({
       setQParams({ sheet: null, valid_from: null, valid_to: null });
       form.reset();
       queryClient.invalidateQueries({
-        queryKey: ["user-schedule-exceptions", { facilityId, userId }],
+        queryKey: [
+          "scheduleExceptions",
+          facilityId,
+          { resourceType, resourceId },
+        ],
       });
     },
   });
-
-  const { data: isSchedulableResource } = useIsUserSchedulableResource(
-    facilityId,
-    userId,
-  );
 
   const unavailableAllDay = form.watch("unavailable_all_day");
 
@@ -181,7 +182,8 @@ export default function CreateScheduleExceptionSheet({
       valid_to: dateQueryString(data.valid_to),
       start_time: data.start_time,
       end_time: data.end_time,
-      user: userId,
+      resource_type: resourceType,
+      resource_id: resourceId,
     });
   }
 
@@ -198,10 +200,7 @@ export default function CreateScheduleExceptionSheet({
     >
       <SheetTrigger asChild>
         {trigger ?? (
-          <Button
-            variant="primary"
-            disabled={isPending || !isSchedulableResource}
-          >
+          <Button variant="primary" disabled={isPending}>
             {t("add_exception")}
           </Button>
         )}

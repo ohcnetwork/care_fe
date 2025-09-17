@@ -36,6 +36,7 @@ export interface LocationBase {
 
 export interface LocationDetail extends LocationBase {
   id: string;
+  has_children: boolean;
   organizations: FacilityOrganizationRead[];
   sort_index: number;
 }
@@ -53,6 +54,12 @@ export interface LocationWrite extends LocationBase {
   parent?: string;
   organizations: string[];
   mode: LocationMode;
+}
+
+export interface LocationImport extends LocationBase {
+  id?: string;
+  mode: LocationMode;
+  children: LocationImport[];
 }
 
 export const LocationFormOptions = [

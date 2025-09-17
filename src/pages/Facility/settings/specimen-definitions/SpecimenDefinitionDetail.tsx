@@ -35,27 +35,27 @@ import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefini
 
 interface SpecimenDefinitionDetailProps {
   facilityId: string;
-  specimenDefinitionId: string;
+  specimenSlug: string;
 }
 
 export function SpecimenDefinitionDetail({
   facilityId,
-  specimenDefinitionId,
+  specimenSlug,
 }: SpecimenDefinitionDetailProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const { data: specimenDefinition, isLoading } = useQuery({
-    queryKey: ["specimenDefinitions", facilityId, specimenDefinitionId],
+    queryKey: ["specimenDefinitions", facilityId, specimenSlug],
     queryFn: query(specimenDefinitionApi.retrieveSpecimenDefinition, {
-      pathParams: { facilityId, specimenDefinitionId },
+      pathParams: { facilityId, specimenSlug },
     }),
   });
 
   const { mutate: updateSpecimenDefinition, isPending: isDeleting } =
     useMutation({
       mutationFn: mutate(specimenDefinitionApi.updateSpecimenDefinition, {
-        pathParams: { facilityId, specimenDefinitionId },
+        pathParams: { facilityId, specimenSlug },
       }),
       onSuccess: () => {
         toast.success(t("specimen_definition_retired_successfully"));
@@ -72,6 +72,7 @@ export function SpecimenDefinitionDetail({
     updateSpecimenDefinition({
       ...specimenDefinition,
       status: SpecimenDefinitionStatus.retired,
+      slug_value: specimenDefinition.slug_config.slug_value,
     });
   };
 
@@ -159,7 +160,7 @@ export function SpecimenDefinitionDetail({
                 </AlertDialogContent>
               </AlertDialog>
             )}
-            <Link href={`/specimen_definitions/${specimenDefinitionId}/edit`}>
+            <Link href={`/specimen_definitions/${specimenSlug}/edit`}>
               <Button variant="outline" size="sm">
                 <Pencil className="h-4 w-4 mr-2" />
                 {t("edit")}
@@ -183,10 +184,6 @@ export function SpecimenDefinitionDetail({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <p className="text-sm font-medium text-gray-400">{t("slug")}</p>
-              <p>{specimenDefinition.slug}</p>
-            </div>
             {specimenDefinition.derived_from_uri && (
               <div>
                 <p className="text-sm font-medium text-gray-400">
