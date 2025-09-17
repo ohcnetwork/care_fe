@@ -26,7 +26,7 @@ export function useInServicePoints({
   return {
     servicePointIds: servicePointIds || [],
 
-    setServicePointToggle: (subQueueId: string, checked: boolean) => {
+    setServicePointIds: (subQueueId: string, checked: boolean) => {
       let updated = checked
         ? [...(servicePointIds || []), subQueueId]
         : servicePointIds?.filter((id) => id !== subQueueId);

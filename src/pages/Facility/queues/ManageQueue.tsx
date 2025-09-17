@@ -224,12 +224,11 @@ function ManageServicePointsDialog({
 } & React.ComponentProps<typeof Dialog>) {
   const { t } = useTranslation();
 
-  const { servicePointIds, setServicePointToggle } = useInServicePoints({
+  const { servicePointIds, setServicePointIds } = useInServicePoints({
     resource: resource as ScheduleResource,
     resourceType,
   });
 
-  // Default to all sub-queues if no specific selection
   const selectedServicePointIds =
     servicePointIds.length > 0
       ? servicePointIds
@@ -254,7 +253,7 @@ function ManageServicePointsDialog({
                   <Checkbox
                     checked={isSelected}
                     onCheckedChange={(checked) =>
-                      setServicePointToggle(subQueue.id, checked as boolean)
+                      setServicePointIds(subQueue.id, checked as boolean)
                     }
                   />
                   <span className="text-sm font-medium">{subQueue.name}</span>

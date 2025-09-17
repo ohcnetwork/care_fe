@@ -29,13 +29,13 @@ export const ServicePointsDropDown = ({
 }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const { servicePointIds, setServicePointToggle } = useInServicePoints({
+  const { servicePointIds, setServicePointIds } = useInServicePoints({
     resource: resource as ScheduleResource,
     resourceType: resource?.resource_type as SchedulableResourceType,
   });
   const defaultServicePoints = useBreakpoints({ default: 2, sm: 6 });
 
-  const activeSerPointCount = subQueues
+  const activeServicePointCount = subQueues
     .filter((subQueue) => servicePointIds.includes(subQueue.id))
     .filter(
       (subQueue) => subQueue.status === TokenSubQueueStatus.ACTIVE,
@@ -66,9 +66,10 @@ export const ServicePointsDropDown = ({
                   </div>
                 );
               })}
-            {activeSerPointCount > defaultServicePoints && (
+            {activeServicePointCount > defaultServicePoints && (
               <span className="text-sm text-gray-950 font-medium">
-                {`+${activeSerPointCount - defaultServicePoints}`} {t("more")}
+                {`+${activeServicePointCount - defaultServicePoints}`}{" "}
+                {t("more")}
               </span>
             )}
           </div>
@@ -104,10 +105,7 @@ export const ServicePointsDropDown = ({
                         <Checkbox
                           checked={isSelected}
                           onCheckedChange={(checked) =>
-                            setServicePointToggle(
-                              subQueue.id,
-                              checked as boolean,
-                            )
+                            setServicePointIds(subQueue.id, checked as boolean)
                           }
                         />
                         <span className="text-sm font-medium">
