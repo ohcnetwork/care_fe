@@ -1,9 +1,10 @@
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { PlusIcon } from "lucide-react";
 import { useNavigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Page from "@/components/Common/Page";
 
@@ -38,6 +39,16 @@ export default function ToReceive({ facilityId, locationId }: Props) {
     });
   };
 
+  const tabOptions: Tab[] = [
+    "requests_raised",
+    "receive_items",
+    "received",
+    "abandoned",
+    "entered_in_error",
+  ];
+
+  const maxVisibleTabs = useBreakpoints({ default: 2, md: 4 });
+
   return (
     <Page title={t("to_receive")} hideTitleOnPage>
       <div className="space-y-4">
@@ -67,83 +78,68 @@ export default function ToReceive({ facilityId, locationId }: Props) {
           </div>
         </div>
 
-        <Tabs value={currentTab} onValueChange={handleTabChange}>
-          <TabsList className="w-full justify-start border-b border-gray-200 bg-transparent p-0 h-auto rounded-none">
-            <TabsTrigger
-              value="requests_raised"
-              className="border-0 border-b-2 border-transparent px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800 data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-            >
-              {t("requests_raised")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="receive_items"
-              className="border-0 border-b-2 border-transparent px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800 data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-            >
-              {t("receive_items")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="received"
-              className="border-0 border-b-2 border-transparent px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800 data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-            >
-              {t("received")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="abandoned"
-              className="border-0 border-b-2 border-transparent px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800 data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-            >
-              {t("abandoned")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="entered_in_error"
-              className="border-0 border-b-2 border-transparent px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800 data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-            >
-              {t("entered_in_error")}
-            </TabsTrigger>
-          </TabsList>
+        <div className="w-full mb-4 overflow-x-auto">
+          <FilterTabs
+            value={currentTab}
+            onValueChange={handleTabChange}
+            options={tabOptions}
+            variant="underline"
+            showMoreDropdown
+            maxVisibleTabs={maxVisibleTabs}
+            defaultVisibleOptions={[
+              "requests_raised",
+              "receive_items",
+              "received",
+              "abandoned",
+            ]}
+            showAllOption={false}
+          />
+        </div>
 
-          <TabsContent value="requests_raised" className="mt-4 space-y-4">
+        <div className="mt-4">
+          {currentTab === "requests_raised" && (
             <ToReceiveSupplyRequestTable
               facilityId={facilityId}
               locationId={locationId}
             />
-          </TabsContent>
+          )}
 
-          <TabsContent value="receive_items" className="mt-4">
+          {currentTab === "receive_items" && (
             <SupplyDeliveryTable
               facilityId={facilityId}
               locationId={locationId}
               defaultStatus={SupplyDeliveryStatus.in_progress}
               mode="receive"
             />
-          </TabsContent>
+          )}
 
-          <TabsContent value="received" className="mt-4">
+          {currentTab === "received" && (
             <SupplyDeliveryTable
               facilityId={facilityId}
               locationId={locationId}
               defaultStatus={SupplyDeliveryStatus.completed}
               mode="receive"
             />
-          </TabsContent>
+          )}
 
-          <TabsContent value="abandoned" className="mt-4">
+          {currentTab === "abandoned" && (
             <SupplyDeliveryTable
               facilityId={facilityId}
               locationId={locationId}
               defaultStatus={SupplyDeliveryStatus.abandoned}
               mode="receive"
             />
-          </TabsContent>
+          )}
 
-          <TabsContent value="entered_in_error" className="mt-4">
+          {currentTab === "entered_in_error" && (
             <SupplyDeliveryTable
               facilityId={facilityId}
               locationId={locationId}
               defaultStatus={SupplyDeliveryStatus.entered_in_error}
               mode="receive"
             />
-          </TabsContent>
-        </Tabs>
+          )}
+        </div>
       </div>
     </Page>
   );

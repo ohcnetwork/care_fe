@@ -1,9 +1,10 @@
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Page from "@/components/Common/Page";
 
@@ -47,6 +48,16 @@ export default function ToDispatch({ facilityId, locationId }: Props) {
     });
   };
 
+  const tabOptions: Tab[] = [
+    "requests_to_dispatch",
+    "in_progress",
+    "completed",
+    "abandoned",
+    "entered_in_error",
+  ];
+
+  const maxVisibleTabs = useBreakpoints({ default: 2, md: 4 });
+
   return (
     <Page title={t("to_dispatch")} hideTitleOnPage>
       <div className="space-y-4">
@@ -87,79 +98,63 @@ export default function ToDispatch({ facilityId, locationId }: Props) {
           </div>
         </div>
 
-        <Tabs value={currentTab} onValueChange={handleTabChange}>
-          <TabsList className="w-full justify-start border-b border-gray-200 bg-transparent p-0 h-auto rounded-none overflow-x-auto">
-            <TabsTrigger
-              value="requests_to_dispatch"
-              className="border-0 border-b-2 border-transparent px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800 data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-            >
-              {t("requests_to_dispatch")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="in_progress"
-              className="border-0 border-b-2 border-transparent px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800 data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-            >
-              {t("in_progress")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="completed"
-              className="border-0 border-b-2 border-transparent px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800 data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-            >
-              {t("completed")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="abandoned"
-              className="border-0 border-b-2 border-transparent px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800 data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-            >
-              {t("abandoned")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="entered_in_error"
-              className="border-0 border-b-2 border-transparent px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800 data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-            >
-              {t("entered_in_error")}
-            </TabsTrigger>
-          </TabsList>
+        <div className="w-full mb-4 overflow-x-auto">
+          <FilterTabs
+            value={currentTab}
+            onValueChange={handleTabChange}
+            options={tabOptions}
+            variant="underline"
+            showMoreDropdown
+            maxVisibleTabs={maxVisibleTabs}
+            defaultVisibleOptions={[
+              "requests_to_dispatch",
+              "in_progress",
+              "completed",
+            ]}
+            showAllOption={false}
+          />
+        </div>
 
-          <TabsContent value="requests_to_dispatch" className="mt-4 space-y-4">
+        <div className="mt-4">
+          {currentTab === "requests_to_dispatch" && (
             <ToDispatchSupplyRequestTable
               facilityId={facilityId}
               locationId={locationId}
             />
-          </TabsContent>
+          )}
 
-          <TabsContent value="in_progress" className="mt-4">
+          {currentTab === "in_progress" && (
             <SupplyDeliveryTable
               facilityId={facilityId}
               locationId={locationId}
               defaultStatus={SupplyDeliveryStatus.in_progress}
             />
-          </TabsContent>
+          )}
 
-          <TabsContent value="completed" className="mt-4">
+          {currentTab === "completed" && (
             <SupplyDeliveryTable
               facilityId={facilityId}
               locationId={locationId}
               defaultStatus={SupplyDeliveryStatus.completed}
             />
-          </TabsContent>
+          )}
 
-          <TabsContent value="abandoned" className="mt-4">
+          {currentTab === "abandoned" && (
             <SupplyDeliveryTable
               facilityId={facilityId}
               locationId={locationId}
               defaultStatus={SupplyDeliveryStatus.abandoned}
             />
-          </TabsContent>
+          )}
 
-          <TabsContent value="entered_in_error" className="mt-4">
+          {currentTab === "entered_in_error" && (
             <SupplyDeliveryTable
               facilityId={facilityId}
               locationId={locationId}
               defaultStatus={SupplyDeliveryStatus.entered_in_error}
             />
-          </TabsContent>
-        </Tabs>
+          )}
+        </div>
       </div>
     </Page>
   );
