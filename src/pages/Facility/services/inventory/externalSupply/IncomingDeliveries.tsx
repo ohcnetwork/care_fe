@@ -92,9 +92,9 @@ export function IncomingDeliveries({ facilityId, locationId }: Props) {
               <Button variant="outline" size="sm" asChild>
                 <Link
                   href="/external_supply/inward_entry/receive"
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-1.5"
                 >
-                  <TruckIcon />
+                  <TruckIcon className="size-4 shrink-0" />
                   {t("receive_stock")}
                 </Link>
               </Button>
