@@ -1,0 +1,121 @@
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import {
+  renderTokenNumber,
+  TokenRead,
+  TokenStatus,
+} from "@/types/tokens/token/token";
+import tokenApi from "@/types/tokens/token/tokenApi";
+import { TokenSubQueueRead } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
+import mutate from "@/Utils/request/mutate";
+import { useMutation } from "@tanstack/react-query";
+import { UserCheck } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+
+export function AssignToServicePointDialog({
+  open,
+  onOpenChange,
+  token,
+  subQueues,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  token: TokenRead;
+  subQueues: TokenSubQueueRead[];
+}) {
+  const { t } = useTranslation();
+  const { facilityId } = useCurrentFacility();
+  const [selectedSubQueueId, setSelectedSubQueueId] = useState<string>("");
+
+  const { mutate: updateToken, isPending } = useMutation({
+    mutationFn: mutate(tokenApi.update, {
+      pathParams: {
+        facility_id: facilityId,
+        queue_id: token.queue.id,
+        id: token.id,
+      },
+    }),
+    onSuccess: () => {
+      toast.success(t("token_assigned_to_service_point"));
+      onOpenChange(false);
+    },
+  });
+
+  const handleConfirm = () => {
+    if (selectedSubQueueId) {
+      updateToken({
+        sub_queue: selectedSubQueueId,
+        status: TokenStatus.IN_PROGRESS,
+        note: token.note,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>{t("select_service_point")}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            {t("choose_service_point_to_call_patient", {
+              patientName: token.patient?.name,
+              tokenNumber: renderTokenNumber(token),
+            })}
+          </p>
+          <RadioGroup
+            value={selectedSubQueueId}
+            onValueChange={setSelectedSubQueueId}
+            className="space-y-3"
+          >
+            {subQueues.map((subQueue) => (
+              <div
+                key={subQueue.id}
+                className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+              >
+                <RadioGroupItem value={subQueue.id} id={subQueue.id} />
+                <label
+                  htmlFor={subQueue.id}
+                  className="flex-1 text-sm font-medium cursor-pointer"
+                >
+                  {subQueue.name}
+                </label>
+              </div>
+            ))}
+            {subQueues.length === 0 && (
+              <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                <RadioGroupItem value="none" id="none" />
+                <label
+                  htmlFor="none"
+                  className="flex-1 text-sm font-medium cursor-pointer"
+                >
+                  {t("no_service_points_available")}
+                </label>
+              </div>
+            )}
+          </RadioGroup>
+        </div>
+        <div className="flex">
+          <Button
+            onClick={handleConfirm}
+            className="w-full"
+            disabled={!selectedSubQueueId || isPending}
+          >
+            <UserCheck className="size-4 mr-2" />
+            {t("call_patient")}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

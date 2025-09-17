@@ -45,6 +45,15 @@ export function useInServicePoints({
   return {
     subQueues: subQueues?.results || [],
     servicePointIds: servicePointIds || [],
+    activeSubQueues:
+      servicePointIds &&
+      subQueues &&
+      servicePointIds.length > 0 &&
+      subQueues.results.length > 0
+        ? subQueues.results.filter((subQueue) =>
+            servicePointIds.includes(subQueue.id),
+          )
+        : [],
 
     setServicePointIds: (subQueueId: string, checked: boolean) => {
       let updated = checked

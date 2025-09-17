@@ -101,8 +101,8 @@ import {
 
 import { formatPatientAddress } from "@/components/Patient/utils";
 import {
-  ResourceSelector,
   ScheduleResourceFormState,
+  ScheduleResourceSelector,
 } from "@/components/Schedule/ResourceSelector";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
@@ -978,7 +978,7 @@ const AppointmentActions = ({
                           `schedulable_resource__${selectedResource.resource_type}`,
                         )}
                       </Label>
-                      <ResourceSelector
+                      <ScheduleResourceSelector
                         selectedResource={selectedResource}
                         facilityId={facilityId}
                         setSelectedResource={setSelectedResource}
