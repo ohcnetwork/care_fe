@@ -121,12 +121,10 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
 const AppointmentCard = ({
   appointment,
   patientId,
-  facilityId,
   appointmentId,
 }: {
   appointment: Appointment;
   patientId: string;
-  facilityId: string;
   appointmentId: string;
 }) => {
   const { t } = useTranslation();
@@ -176,7 +174,7 @@ const AppointmentCard = ({
           asChild
         >
           <Link
-            href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointmentId}`}
+            href={`/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointmentId}`}
           >
             {t("see_details")}
           </Link>
@@ -188,11 +186,9 @@ const AppointmentCard = ({
 
 const AppointmentTable = ({
   appointments,
-  facilityId,
   patientId,
 }: {
   appointments: Appointment[];
-  facilityId: string;
   patientId: string;
 }) => {
   const { t } = useTranslation();
@@ -284,7 +280,7 @@ const AppointmentTable = ({
             <TableCell>
               <Button variant="outline" className="text-gray-950">
                 <Link
-                  href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
+                  href={`/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointment.id}`}
                 >
                   {t("see_details")}
                 </Link>
@@ -297,7 +293,7 @@ const AppointmentTable = ({
   );
 };
 
-const BookingListContent = ({
+export const BookingListContent = ({
   patientId,
   facilityId,
   dateFrom,
@@ -305,7 +301,7 @@ const BookingListContent = ({
   status,
 }: {
   patientId: string;
-  facilityId: string;
+  facilityId?: string;
   dateFrom?: string;
   dateTo?: string;
   status?: readonly AppointmentStatus[];
@@ -368,17 +364,15 @@ const BookingListContent = ({
       <div className="hidden sm:block">
         <AppointmentTable
           appointments={filteredAppointments}
-          facilityId={facilityId}
           patientId={patientId}
         />
       </div>
-      <div className="sm:hidden">
+      <div className="sm:hidden space-y-4">
         {filteredAppointments.map((appointment) => (
           <AppointmentCard
             key={appointment.id}
             appointment={appointment}
             patientId={patientId}
-            facilityId={facilityId}
             appointmentId={appointment.id}
           />
         ))}
