@@ -18,6 +18,7 @@ import {
   CheckCircle2Icon,
   EyeIcon,
   Loader2,
+  ReceiptText,
   SquareActivity,
   X,
 } from "lucide-react";
@@ -190,7 +191,7 @@ export default function AppointmentDetail(props: Props) {
 
   return (
     <Page title={t("appointment_details")}>
-      <div className="container mx-auto p-6 max-w-7xl">
+      <div className="container mx-auto max-w-7xl mt-4">
         {showSuccess && (
           <div className="mb-4 flex flex-col gap-2">
             <Alert className="bg-green-50 border-green-400 items-center">
@@ -207,31 +208,33 @@ export default function AppointmentDetail(props: Props) {
                   <X className="h-4 w-4" />
                 </Button>
               </AlertTitle>
-              <AlertDescription className="flex text-green-800">
-                <Trans
-                  i18nKey="appointment_created_successfully_description"
-                  components={{
-                    strong: <strong className="font-semibold" />,
-                  }}
-                  values={{
-                    name:
-                      (appointment &&
-                        formatScheduleResourceName(appointment)) ||
-                      "",
-                    date: format(
-                      appointment.token_slot.start_datetime,
-                      "do MMMM",
-                    ),
-                    time: format(
-                      appointment.token_slot.start_datetime,
-                      "h:mm a",
-                    ),
-                    duration: getReadableDuration(
-                      appointment.token_slot.start_datetime,
-                      appointment.token_slot.end_datetime,
-                    ),
-                  }}
-                />
+              <AlertDescription className="text-green-800">
+                <p>
+                  <Trans
+                    i18nKey="appointment_created_successfully_description"
+                    components={{
+                      strong: <strong className="font-semibold" />,
+                    }}
+                    values={{
+                      name:
+                        (appointment &&
+                          formatScheduleResourceName(appointment)) ||
+                        "",
+                      date: format(
+                        appointment.token_slot.start_datetime,
+                        "do MMMM",
+                      ),
+                      time: format(
+                        appointment.token_slot.start_datetime,
+                        "h:mm a",
+                      ),
+                      duration: getReadableDuration(
+                        appointment.token_slot.start_datetime,
+                        appointment.token_slot.end_datetime,
+                      ),
+                    }}
+                  />
+                </p>
               </AlertDescription>
             </Alert>
           </div>
@@ -277,12 +280,13 @@ export default function AppointmentDetail(props: Props) {
             isUpdating={isUpdating}
             facilityId={facilityId}
           />
-          <div className="mt-6">
+          <div className="mt-6 ml-0 md:ml-4 flex-1">
+            <h3 className="text-base font-semibold">{t("token")}</h3>
             {appointment.token?.number ? (
               <>
                 <div
                   id="section-to-print"
-                  className="print:w-[400px] print:pt-4 mx-4"
+                  className="print:w-[400px] print:pt-4"
                 >
                   <TokenCard
                     appointment={appointment}
@@ -293,20 +297,23 @@ export default function AppointmentDetail(props: Props) {
               </>
             ) : (
               !["fulfilled"].includes(appointment.status) && (
-                <div className="h-56 md:mx-4 border-2 border-dashed border-gray-300 bg-gray-50 rounded flex flex-col items-center justify-center text-center">
-                  <span className="text-6xl text-gray-400 font-bold leading-none">
-                    --
-                  </span>
-                  <p className="mt-2 text-sm text-gray-600">
-                    {t("token_number_not_generated")}
-                  </p>
-                  <div className="mt-4">
+                <div className="bg-gray-100 border border-gray-200 rounded flex flex-col items-center justify-center text-center">
+                  <ReceiptText className="size-8 text-gray-500 mt-4" />
+                  <div className="mt-2">
+                    <h6 className="text-gray-900 text-sm font-semibold">
+                      {t("token_not_generated")}
+                    </h6>
+                    <p className="text-gray-900 text-sm">
+                      {t("token_not_generated_description")}
+                    </p>
+                  </div>
+                  <div className="mt-2 mb-4">
                     <TokenGenerationSheet
                       facilityId={facility.id}
                       resourceType={appointment.resource_type}
                       appointmentId={appointment.id}
                       trigger={
-                        <Button variant="outline" size="lg" className="px-6">
+                        <Button variant="outline" className="px-6">
                           <PlusCircledIcon className="size-4 mr-2" />
                           {t("generate_token")}
                         </Button>
@@ -325,9 +332,9 @@ export default function AppointmentDetail(props: Props) {
             {![...AppointmentFinalStatuses, "noshow"].includes(
               appointment.status,
             ) && (
-              <div className="md:mx-4 mt-4">
+              <div>
                 {appointment.associated_encounter?.id && (
-                  <Card className="bg-white shadow-sm rounded-md p-1">
+                  <Card className="bg-white shadow-sm rounded-md p-1 mt-2">
                     <CardHeader className="p-2 bg-gray-50">
                       <CardTitle className="flex items-center gap-2 text-lg">
                         <AvatarIcon className="size-5 text-primary" />
@@ -395,7 +402,7 @@ export default function AppointmentDetail(props: Props) {
                           </div>
                         )}
 
-                      {/* Action Buttons */}
+                      {/* Encounter Action Buttons */}
                       <div className="flex md:flex-row flex-col gap-2 mt-4">
                         <Button
                           variant="outline"
@@ -427,12 +434,16 @@ export default function AppointmentDetail(props: Props) {
                     </CardContent>
                   </Card>
                 )}
-                <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 mt-4">
+                <h3 className="text-base font-semibold mt-4">
+                  {t("quick_actions")}
+                </h3>
+                <div className="grid gap-1 grid-cols-1 md:grid-cols-2 mt-1">
                   {!appointment.associated_encounter?.id && (
                     <CreateEncounterForm
                       patientId={appointment.patient.id}
                       facilityId={facilityId}
                       patientName={appointment.patient.name}
+                      appointment={appointment.id}
                       trigger={
                         <QuickAction
                           icon={<SquareActivity className="text-orange-500" />}
@@ -466,7 +477,7 @@ const AppointmentDetailsContent = ({
   const { t } = useTranslation();
 
   return (
-    <div className="container md:p-6 max-w-3xl space-y-6 p">
+    <div className="container max-w-3xl space-y-6 mt-6">
       <ChargeItemsSection
         facilityId={facility.id}
         resourceId={appointment.id}
@@ -489,8 +500,8 @@ const AppointmentDetailsContent = ({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 p-2">
-            <div className="flex items-center space-x-4 text-sm">
-              <CalendarIcon className="size-5 text-gray-600" />
+            <div className="flex space-x-2 text-sm">
+              <CalendarIcon className="size-4 text-gray-600" />
               <div>
                 <p className="font-medium">
                   {format(
@@ -503,8 +514,8 @@ const AppointmentDetailsContent = ({
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-4 text-sm">
-              <ClockIcon className="size-5 text-gray-600" />
+            <div className="flex space-x-2 text-sm">
+              <ClockIcon className="size-4 text-gray-500" />
               <div>
                 <p className="font-medium">
                   {format(appointment.token_slot.start_datetime, "h:mm a")} -{" "}
@@ -519,8 +530,8 @@ const AppointmentDetailsContent = ({
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-4 text-sm">
-              <AvatarIcon className="size-5 text-gray-600" />
+            <div className="flex space-x-2 text-sm">
+              <AvatarIcon className="size-4 text-gray-500" />
               <div className="text-sm">
                 <p className="font-medium">{t("booked_by")}</p>
                 <p className="text-gray-600 flex w-fit items-center gap-2 bg-gray-100 p-1 rounded-sm">
@@ -539,8 +550,8 @@ const AppointmentDetailsContent = ({
                 {format(appointment.booked_on, "MMMM d, yyyy 'at' h:mm a")}
               </div>
             </div>
-            <div className="flex items-center space-x-4 text-sm">
-              <AvatarIcon className="size-5 text-gray-600" />
+            <div className="flex space-x-2 text-sm">
+              <AvatarIcon className="size-4 text-gray-500" />
               <div className="text-sm">
                 <p className="font-medium">{t("last_updated_by")}</p>
                 <p className="text-gray-600 flex w-fit items-center gap-2 bg-gray-100 p-1 rounded-sm">
@@ -569,8 +580,8 @@ const AppointmentDetailsContent = ({
             <CardTitle>{t("patient_information")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 p-2">
-            <div className="flex items-center space-x-4 text-sm">
-              <PersonIcon className="size-5 text-gray-600" />
+            <div className="flex space-x-2 text-sm">
+              <PersonIcon className="size-4 text-gray-500" />
               <div>
                 <p className="font-medium">{appointment.patient.name}</p>
                 <p className="text-gray-600">
@@ -600,10 +611,11 @@ const AppointmentDetailsContent = ({
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-4 text-sm">
-              <MobileIcon className="size-5 text-gray-600" />
+            <div className="flex space-x-2 text-sm">
+              <MobileIcon className="size-4 text-gray-500" />
               <div>
-                <p className="font-medium">
+                <p className="text-gray-600">
+                  {t("phone")}:{" "}
                   <a
                     href={`tel:${appointment.patient.phone_number}`}
                     className="text-primary hover:underline"
@@ -611,9 +623,9 @@ const AppointmentDetailsContent = ({
                     {formatPhoneNumberIntl(appointment.patient.phone_number)}
                   </a>
                 </p>
-                <p className="text-gray-600">
-                  {t("emergency")}:{" "}
-                  {appointment.patient.emergency_phone_number && (
+                {appointment.patient.emergency_phone_number && (
+                  <p className="text-gray-600">
+                    {t("emergency")}:{" "}
                     <a
                       href={`tel:${appointment.patient.emergency_phone_number}`}
                       className="text-primary hover:underline"
@@ -622,12 +634,12 @@ const AppointmentDetailsContent = ({
                         appointment.patient.emergency_phone_number,
                       )}
                     </a>
-                  )}
-                </p>
+                  </p>
+                )}
               </div>
             </div>
-            <div className="flex flex-row items-start gap-4 text-sm">
-              <DrawingPinIcon className="size-5 text-gray-600 mt-1" />
+            <div className="flex flex-row items-start gap-2 text-sm">
+              <DrawingPinIcon className="size-4 text-gray-500 mt-1" />
               <div className="flex flex-col xl:flex-row xl:justify-between xl:items-end gap-2 w-full">
                 <div>
                   <p className="text-gray-600 break-words">
@@ -879,7 +891,7 @@ const AppointmentActions = ({
                           <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
                         </SheetHeader>
 
-                        <div className="mt-6">
+                        <div className="mt-6 flex-1">
                           <div className="text-sm">
                             <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
                               <Label className="font-medium">

@@ -4946,6 +4946,8 @@
   "token_information": "Token Information",
   "token_no": "Token No.",
   "token_not_found": "Token not found",
+  "token_not_generated": "Token not generated",
+  "token_not_generated_description": "Click below to generate a token",
   "token_number": "Token Number",
   "token_number_not_generated": "Token number not generated",
   "token_queue": "Token Queue",

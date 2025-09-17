@@ -38,7 +38,7 @@ const TokenCard = ({ id, token, facility, appointment }: Props) => {
       id={id}
       className="p-2 border border-gray-200 relative transition-all duration-300 ease-in-out print:scale-100 print:rotate-0 print:shadow-none print:hover:scale-100 print:hover:rotate-0 print:hover:shadow-none bg-gray-100"
     >
-      <div className="text-lg leading-none flex flex-col gap-2 p-2">
+      <div className="flex flex-col px-1">
         <p className="font-semibold">{renderTokenNumber(token)}</p>
         {appointment && (
           <p className="text-gray-700">
@@ -46,7 +46,7 @@ const TokenCard = ({ id, token, facility, appointment }: Props) => {
           </p>
         )}
       </div>
-      <div className="flex flex-col gap-2 bg-white rounded-md p-4 shadow-md ">
+      <div className="flex flex-col gap-2 bg-white rounded-md p-4 shadow-md mt-2 ">
         <div className="flex flex-row justify-between">
           <div className=" flex flex-col items-start justify-between">
             <div>
