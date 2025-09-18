@@ -485,7 +485,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     mode: "onChange",
   });
 
-  useAutoSlug(form, initialQuestionnaire);
+  useAutoSlug(form, id ? { id } : undefined);
 
   const { isDirty } = form.formState;
 
