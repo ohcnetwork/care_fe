@@ -10,16 +10,16 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 
 import query from "@/Utils/request/query";
 import { stringifyNestedObject } from "@/Utils/utils";
@@ -92,28 +92,26 @@ export function LocationSearch({
   if (isMobile) {
     return (
       <div className="w-full">
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
+        <Drawer open={open} onOpenChange={setOpen} direction="bottom">
+          <DrawerTrigger asChild>
             <div
               className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm flex items-center justify-between cursor-pointer"
-              role="combobox"
-              aria-expanded={open}
               data-cy="location-search-trigger"
             >
               {stringifyNestedObject(value || { name: "" }) ||
                 "Select location..."}
             </div>
-          </SheetTrigger>
-          <SheetContent
-            side="bottom"
+          </DrawerTrigger>
+          <DrawerContent
             aria-describedby={undefined}
             className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
           >
-            <SheetTitle className="sr-only">{t("select_location")}</SheetTitle>
-            <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
+            <DrawerTitle className="sr-only">
+              {t("select_location")}
+            </DrawerTitle>
             <div className="mt-6 h-full">{commandContent}</div>
-          </SheetContent>
-        </Sheet>
+          </DrawerContent>
+        </Drawer>
       </div>
     );
   }
@@ -125,11 +123,7 @@ export function LocationSearch({
         disabled={disabled}
         data-cy="location-search-trigger"
       >
-        <div
-          className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm flex items-center justify-between cursor-pointer"
-          role="combobox"
-          aria-expanded={open}
-        >
+        <div className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm flex items-center justify-between cursor-pointer">
           {stringifyNestedObject(value || { name: "" }) || "Select location..."}
         </div>
       </PopoverTrigger>
