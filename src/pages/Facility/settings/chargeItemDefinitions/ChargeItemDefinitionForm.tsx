@@ -329,9 +329,9 @@ export function ChargeItemDefinitionForm({
       title: initialData?.title || "",
       slug_value: initialData?.slug_config.slug_value || "",
       status: initialData?.status || ChargeItemDefinitionStatus.active,
-      description: initialData?.description,
-      purpose: initialData?.purpose,
-      derived_from_uri: initialData?.derived_from_uri,
+      description: initialData?.description || undefined,
+      purpose: initialData?.purpose || undefined,
+      derived_from_uri: initialData?.derived_from_uri || undefined,
       category: isUpdate ? initialData?.category.slug : categorySlug,
       price_components: initialData?.price_components.map((component) => ({
         ...mapPriceComponent(component),
@@ -658,7 +658,11 @@ export function ChargeItemDefinitionForm({
                     <Textarea
                       {...field}
                       value={field.value || ""}
-                      onChange={(e) => field.onChange(e.target.value)}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value === "" ? undefined : e.target.value,
+                        )
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -676,7 +680,11 @@ export function ChargeItemDefinitionForm({
                     <Textarea
                       {...field}
                       value={field.value || ""}
-                      onChange={(e) => field.onChange(e.target.value)}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value === "" ? undefined : e.target.value,
+                        )
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -694,7 +702,11 @@ export function ChargeItemDefinitionForm({
                     <Input
                       {...field}
                       value={field.value || ""}
-                      onChange={(e) => field.onChange(e.target.value)}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value === "" ? undefined : e.target.value,
+                        )
+                      }
                     />
                   </FormControl>
                   <FormMessage />
