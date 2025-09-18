@@ -58,9 +58,8 @@ export function useAutoSlug<T extends FieldValues>(
       if (!changed || !sourceFields.includes(changed)) return;
 
       // Stop autofill if slug was manually edited or touched
-      const dirtySlug = (form.formState.dirtyFields as any)?.[slugField];
-      const touchedSlug = (form.formState.touchedFields as any)?.[slugField];
-      if (dirtySlug || touchedSlug) return;
+      const { isDirty, isTouched } = form.getFieldState(slugField);
+      if (isDirty || isTouched) return;
 
       const current = form.getValues(slugField) as unknown as
         | string
@@ -69,9 +68,9 @@ export function useAutoSlug<T extends FieldValues>(
         return;
 
       const base = getBase();
-      const slug = generateSlug(base).slice(0, MAX_SLUG_LENGTH);
+      const next = generateSlug(base, MAX_SLUG_LENGTH);
 
-      form.setValue(slugField, slug as any, {
+      form.setValue(slugField, next as any, {
         shouldValidate: true,
         shouldDirty: false,
       });
