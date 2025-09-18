@@ -142,7 +142,7 @@ export const BookAppointmentDetails = ({
       <Drawer open={isOpen} onOpenChange={handleIsOpen}>
         <DrawerTrigger asChild>
           <Button
-            className="sm:hidden w-full"
+            className="sm:hidden w-full mt-3"
             disabled={!selectedResource.resource?.id}
             onClick={() => {
               setIsOpen(true);
