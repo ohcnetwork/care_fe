@@ -295,9 +295,18 @@ export function ChargeItemDefinitionForm({
         message: t("slug_format_message"),
       }),
     status: z.nativeEnum(ChargeItemDefinitionStatus),
-    description: z.string().optional(),
-    purpose: z.string().optional(),
-    derived_from_uri: z.string().url().optional(),
+    description: z.string().optional().nullable().transform(val => val ?? undefined),
+    purpose: z.string().optional().nullable().transform(val => val ?? undefined),
+    derived_from_uri: z
+      .union([
+        z.string().url(),
+        z.literal(""),
+        z.null(),
+        z.undefined()
+      ])
+      .optional()
+      .nullable()
+      .transform(val => val === "" || val === null ? undefined : val),
     category: z.string(),
     price_components: z.array(priceComponentSchema).refine(
       (components) => {
@@ -658,11 +667,7 @@ export function ChargeItemDefinitionForm({
                     <Textarea
                       {...field}
                       value={field.value || ""}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value === "" ? undefined : e.target.value,
-                        )
-                      }
+                      onChange={(e) => field.onChange(e.target.value)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -680,11 +685,7 @@ export function ChargeItemDefinitionForm({
                     <Textarea
                       {...field}
                       value={field.value || ""}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value === "" ? undefined : e.target.value,
-                        )
-                      }
+                      onChange={(e) => field.onChange(e.target.value)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -702,11 +703,7 @@ export function ChargeItemDefinitionForm({
                     <Input
                       {...field}
                       value={field.value || ""}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value === "" ? undefined : e.target.value,
-                        )
-                      }
+                      onChange={(e) => field.onChange(e.target.value)}
                     />
                   </FormControl>
                   <FormMessage />
