@@ -14,9 +14,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 import query from "@/Utils/request/query";
 import { stringifyNestedObject } from "@/Utils/utils";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import {
   LocationForm,
   LocationList,
@@ -45,6 +52,7 @@ export function LocationSearch({
 
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
   const { data: locations } = useQuery({
     queryKey: ["locations", facilityId, mode, search],
@@ -54,6 +62,62 @@ export function LocationSearch({
     }),
     enabled: facilityId !== "preview",
   });
+  const commandContent = (
+    <Command className="pt-1">
+      <CommandInput
+        placeholder="Search locations..."
+        value={search}
+        className="outline-hidden border-none ring-0 shadow-none"
+        onValueChange={setSearch}
+        autoFocus
+      />
+      <CommandEmpty>{t("no_locations_found")}</CommandEmpty>
+      <CommandGroup>
+        {locations?.results.map((location) => (
+          <CommandItem
+            key={location.id}
+            value={location.name}
+            onSelect={() => {
+              onSelect(location);
+              setOpen(false);
+            }}
+          >
+            {stringifyNestedObject(location)}
+          </CommandItem>
+        ))}
+      </CommandGroup>
+    </Command>
+  );
+
+  if (isMobile) {
+    return (
+      <div className="w-full">
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <div
+              className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm flex items-center justify-between cursor-pointer"
+              role="combobox"
+              aria-expanded={open}
+              data-cy="location-search-trigger"
+            >
+              {stringifyNestedObject(value || { name: "" }) ||
+                "Select location..."}
+            </div>
+          </SheetTrigger>
+          <SheetContent
+            side="bottom"
+            aria-describedby={undefined}
+            className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
+          >
+            <SheetTitle className="sr-only">{t("select_location")}</SheetTitle>
+            <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
+            <div className="mt-6 h-full">{commandContent}</div>
+          </SheetContent>
+        </Sheet>
+      </div>
+    );
+  }
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
@@ -70,29 +134,7 @@ export function LocationSearch({
         </div>
       </PopoverTrigger>
       <PopoverContent className="p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]">
-        <Command className="pt-1">
-          <CommandInput
-            placeholder="Search locations..."
-            value={search}
-            className="outline-hidden border-none ring-0 shadow-none"
-            onValueChange={setSearch}
-          />
-          <CommandEmpty>{t("no_locations_found")}</CommandEmpty>
-          <CommandGroup>
-            {locations?.results.map((location) => (
-              <CommandItem
-                key={location.id}
-                value={location.name}
-                onSelect={() => {
-                  onSelect(location);
-                  setOpen(false);
-                }}
-              >
-                {stringifyNestedObject(location)}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </Command>
+        {commandContent}
       </PopoverContent>
     </Popover>
   );
