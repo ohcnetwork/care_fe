@@ -66,16 +66,16 @@ export default function BedAvailabilityDashboard({
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
   const [filtersOpen, setFiltersOpen] = useState(false);
-  
+
   // Use query parameters for filters to enable URL sharing and navigation
   const { qParams, updateQuery } = useFilters({
     limit: 0, // Disable pagination as we want to show all wards
     cacheBlacklist: ["refresh"], // Don't cache refresh parameter
   });
 
-  const searchQuery = qParams.search as string || "";
-  const selectedWard = qParams.ward as string || "all";
-  const selectedStatus = qParams.status as string || "all";
+  const searchQuery = (qParams.search as string) || "";
+  const selectedWard = (qParams.ward as string) || "all";
+  const selectedStatus = (qParams.status as string) || "all";
 
   // Fetch all locations for the facility
   const {
@@ -247,7 +247,11 @@ export default function BedAvailabilityDashboard({
                     <Label htmlFor="ward-filter">{t("ward_unit")}</Label>
                     <Select
                       value={selectedWard}
-                      onValueChange={(value) => updateQuery({ ward: value === "all" ? undefined : value })}
+                      onValueChange={(value) =>
+                        updateQuery({
+                          ward: value === "all" ? undefined : value,
+                        })
+                      }
                     >
                       <SelectTrigger id="ward-filter">
                         <SelectValue placeholder={t("select_ward")} />
@@ -268,7 +272,11 @@ export default function BedAvailabilityDashboard({
                     </Label>
                     <Select
                       value={selectedStatus}
-                      onValueChange={(value) => updateQuery({ status: value === "all" ? undefined : value })}
+                      onValueChange={(value) =>
+                        updateQuery({
+                          status: value === "all" ? undefined : value,
+                        })
+                      }
                     >
                       <SelectTrigger id="status-filter">
                         <SelectValue placeholder={t("select_status")} />
@@ -300,7 +308,9 @@ export default function BedAvailabilityDashboard({
             type="text"
             placeholder={t("search_wards_units")}
             value={searchQuery}
-            onChange={(e) => updateQuery({ search: e.target.value || undefined })}
+            onChange={(e) =>
+              updateQuery({ search: e.target.value || undefined })
+            }
             className="pl-10"
           />
         </div>
