@@ -27,7 +27,6 @@ import { tagFilter } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import { createFilterConfig } from "@/components/ui/multi-filter/utils/Utils";
-import useBreakpoints from "@/hooks/useBreakpoints";
 import {
   Priority,
   SERVICE_REQUEST_PRIORITY_COLORS,
@@ -261,7 +260,6 @@ export default function ServiceRequestList({
   });
 
   const serviceRequests = response?.results || [];
-  const maxVisibleTabs = useBreakpoints({ default: 3, md: 4 });
 
   return (
     <Page title={t("service_requests")} hideTitleOnPage>
@@ -290,15 +288,14 @@ export default function ServiceRequestList({
               </Button>
             </div>
           </div>
-          <div className="w-full mb-4">
+          <div className="w-full mb-4 overflow-x-auto">
             <FilterTabs
-              key={`sr-status-${maxVisibleTabs}`}
               value={qParams.status || Status.active}
               onValueChange={(value) => updateQuery({ status: value })}
               options={Object.values(Status)}
               variant="underline"
               showMoreDropdown={true}
-              maxVisibleTabs={maxVisibleTabs}
+              maxVisibleTabs={4}
               defaultVisibleOptions={[
                 Status.active,
                 Status.on_hold,
