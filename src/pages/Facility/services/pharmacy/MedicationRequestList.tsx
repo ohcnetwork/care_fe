@@ -1,19 +1,13 @@
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpRightSquare, ChevronDown, NotepadText } from "lucide-react";
+import { ArrowUpRightSquare } from "lucide-react";
 import { navigate } from "raviger";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -35,7 +29,6 @@ import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import { createFilterConfig } from "@/components/ui/multi-filter/utils/Utils";
 import {
-  ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_CLASSES_COLORS,
   EncounterClass,
 } from "@/types/emr/encounter/encounter";
@@ -75,17 +68,13 @@ export default function MedicationRequestList({
     .filter(Boolean) as TagConfig[];
 
   // State for visible tabs and dropdown items
-  const [visibleTabs, setVisibleTabs] = useState<("all" | EncounterClass)[]>([
+  const [visibleTabs] = useState<("all" | EncounterClass)[]>([
     "all",
     "imp",
     "amb",
     "emer",
   ]);
-  const [dropdownItems, setDropdownItems] = useState<EncounterClass[]>([
-    "obsenc",
-    "vr",
-    "hh",
-  ]);
+  const [dropdownItems] = useState<EncounterClass[]>(["obsenc", "vr", "hh"]);
 
   // Create filter configurations
   const filters = useMemo(
@@ -137,21 +126,6 @@ export default function MedicationRequestList({
     });
   };
 
-  // Handle dropdown item selection
-  const handleDropdownSelect = (value: EncounterClass) => {
-    // Swap the selected dropdown item with the last visible tab
-    const lastVisibleTab = visibleTabs[visibleTabs.length - 1];
-    const newVisibleTabs = [...visibleTabs.slice(0, -1), value];
-    const newDropdownItems = [
-      ...dropdownItems.filter((item) => item !== value),
-      lastVisibleTab as EncounterClass,
-    ];
-
-    setVisibleTabs(newVisibleTabs);
-    setDropdownItems(newDropdownItems);
-    handleTabSelect(value);
-  };
-
   const { data: prescriptionQueue, isLoading } = useQuery<
     PaginatedResponse<PrescriptionSummary>
   >({
@@ -171,96 +145,58 @@ export default function MedicationRequestList({
     }),
   });
 
+  const encounterClassTabs: (EncounterClass | "all")[] = [
+    "all",
+    ...visibleTabs.slice(1),
+    ...dropdownItems,
+  ];
+  const allTabs = encounterClassTabs.map((tab) =>
+    tab === "all" ? t("all_prescriptions") : t(`encounter_class__${tab}`),
+  );
+
+  const maxVisibleTabs = useBreakpoints({ default: 3, md: 4 });
+
   return (
     <Page title={t("prescription_queue")}>
       {/* Priority tabs with original styling */}
       <div className="mb-4 pt-6">
-        <Tabs
-          value={qParams.status || "active"}
+        <FilterTabs
+          value={qParams.status || PrescriptionStatus.active}
           onValueChange={(value) => updateQuery({ status: value })}
-          className="w-full"
-        >
-          <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
-            {[
-              PrescriptionStatus.active,
-              PrescriptionStatus.completed,
-              PrescriptionStatus.cancelled,
-            ].map((key) => (
-              <TabsTrigger
-                key={key}
-                value={key}
-                className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-              >
-                {t(`prescription_status__${key}`)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+          options={[
+            PrescriptionStatus.active,
+            PrescriptionStatus.completed,
+            PrescriptionStatus.cancelled,
+          ]}
+          variant="underline"
+          defaultVisibleOptions={[
+            PrescriptionStatus.active,
+            PrescriptionStatus.completed,
+            PrescriptionStatus.cancelled,
+          ]}
+          showAllOption={false}
+          className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent h-auto overflow-x-auto"
+        />
       </div>
       {/* Category tabs and search */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center justify-between lg:gap-6 mb-2">
         <div className="flex flex-wrap gap-2">
           {/* Encounter Class Tabs */}
-          <Tabs
+          <FilterTabs
             value={qParams.encounter_class || "all"}
             onValueChange={handleTabSelect}
-            className="overflow-y-auto text-gray-950"
-          >
-            <TabsList className="flex items-center">
-              <TabsTrigger value="all">
-                <span className="text-gray-950 font-medium text-sm flex items-center gap-1">
-                  <NotepadText className="size-4 text-gray-500" />
-                  {t("all_prescriptions")}
-                </span>
-              </TabsTrigger>
-              {visibleTabs.slice(1).map((key) => (
-                <TabsTrigger key={key} value={key}>
-                  <span className="text-gray-950 font-medium text-sm flex items-center gap-1">
-                    {React.createElement(
-                      ENCOUNTER_CLASS_ICONS[key as EncounterClass],
-                      {
-                        className: "size-4 text-gray-500",
-                      },
-                    )}
-                    {t(`encounter_class__${key as EncounterClass}`)}
-                  </span>
-                </TabsTrigger>
-              ))}
-              {dropdownItems.length > 0 && (
-                <>
-                  <Separator
-                    orientation="vertical"
-                    className="bg-gray-300 ml-2"
-                  />
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="text-gray-950 font-medium text-sm px-3 flex items-center"
-                      >
-                        {t("more")}
-                        <ChevronDown />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40">
-                      {dropdownItems.map((key) => (
-                        <DropdownMenuItem
-                          key={key}
-                          onClick={() => handleDropdownSelect(key)}
-                          className="text-gray-950 font-medium text-sm flex items-center gap-1"
-                        >
-                          {React.createElement(ENCOUNTER_CLASS_ICONS[key], {
-                            className: "size-4",
-                          })}
-                          {t(`encounter_class__${key}`)}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </>
-              )}
-            </TabsList>
-          </Tabs>
+            options={allTabs}
+            variant="underline"
+            showMoreDropdown
+            maxVisibleTabs={maxVisibleTabs}
+            defaultVisibleOptions={[
+              t("all_prescriptions"),
+              t("encounter_class__imp"),
+              t("encounter_class__amb"),
+              t("encounter_class__emer"),
+            ]}
+            showAllOption={false}
+          />
         </div>
         <div className="flex items-center gap-2">
           <PatientEncounterOrIdentifierFilter
