@@ -33,6 +33,7 @@ import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 
+import { resourceTypeToResourcePathSlug } from "@/components/Schedule/useScheduleResource";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { useEncounterShortcutDisplays } from "@/hooks/useEncounterShortcuts";
 import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
@@ -247,10 +248,12 @@ export default function VerifyPatient() {
                   <CardContent className="p-2">
                     <div className="flex items-center justify-between gap-2">
                       <Link
-                        href={`/facility/${facilityId}/queues/${tokenData.queue.id}`}
+                        href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[tokenData.resource_type]}/${tokenData.resource.id}/queues/${tokenData.queue.id}/ongoing`}
                         className="font-semibold text-lg underline"
                       >
-                        {tokenData.queue.name}
+                        {tokenData.queue.name === "System Generated"
+                          ? t("primary_queue")
+                          : tokenData.queue.name}
                       </Link>
 
                       <span className="text-lg text-gray-700 p-2">

@@ -15,6 +15,12 @@ const resourceTypePathSlugToResourceType = {
   services: SchedulableResourceType.HealthcareService,
 };
 
+export const resourceTypeToResourcePathSlug = {
+  [SchedulableResourceType.Practitioner]: "practitioner",
+  [SchedulableResourceType.Location]: "locations",
+  [SchedulableResourceType.HealthcareService]: "services",
+};
+
 const extractPathParams = (path: string) => {
   const segments = path.split("/");
 
