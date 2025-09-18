@@ -291,6 +291,7 @@ export function ChargeItemDefinitionForm({
     slug_value: z
       .string()
       .min(1, { message: t("field_required") })
+      .max(25, { message: "Slug should not exceed 25 characters" })
       .regex(/^[a-z0-9-]+$/, {
         message: t("slug_format_message"),
       }),
@@ -351,7 +352,7 @@ export function ChargeItemDefinitionForm({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || ""), {
+        form.setValue("slug_value", generateSlug(value.title || "", 25), {
           shouldValidate: true,
         });
       }

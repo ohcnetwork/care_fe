@@ -53,7 +53,10 @@ import { ObservationInterpretation } from "./ObservationInterpretation";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  slug_value: z.string().min(1, "Slug is required"),
+  slug_value: z
+    .string()
+    .min(1, "Slug is required")
+    .max(25, "Slug should not exceed 25 characters"),
   description: z.string().min(1, "Description is required"),
   status: z.enum(OBSERVATION_DEFINITION_STATUS),
   category: z.enum(OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]]),
@@ -233,7 +236,7 @@ function ObservationDefinitionFormContent({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || ""), {
+        form.setValue("slug_value", generateSlug(value.title || "", 25), {
           shouldValidate: true,
         });
       }

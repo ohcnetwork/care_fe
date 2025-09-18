@@ -59,7 +59,10 @@ const codeSchema = z.object({
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  slug_value: z.string().min(1, "Slug is required"),
+  slug_value: z
+    .string()
+    .min(1, "Slug is required")
+    .max(25, "Slug should not exceed 25 characters"),
   product_type: z.nativeEnum(ProductKnowledgeType),
   status: z.nativeEnum(ProductKnowledgeStatus),
   alternate_identifier: z.string().trim().optional(),
@@ -220,7 +223,7 @@ function ProductKnowledgeFormContent({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "name") {
-        form.setValue("slug_value", generateSlug(value.name || ""), {
+        form.setValue("slug_value", generateSlug(value.name || "", 25), {
           shouldValidate: true,
         });
       }
@@ -354,7 +357,7 @@ function ProductKnowledgeFormContent({
                               if (!isEditMode) {
                                 form.setValue(
                                   "slug_value",
-                                  generateSlug(e.target.value || ""),
+                                  generateSlug(e.target.value || "", 25),
                                   {
                                     shouldValidate: true,
                                   },

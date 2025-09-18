@@ -90,7 +90,10 @@ const typeTestedSchema = z.object({
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  slug_value: z.string().min(1, "Slug is required"),
+  slug_value: z
+    .string()
+    .min(1, "Slug is required")
+    .max(25, "Slug should not exceed 25 characters"),
   status: z.nativeEnum(SpecimenDefinitionStatus),
   description: z.string().min(1, t("field_required")),
   derived_from_uri: z
@@ -158,7 +161,7 @@ export function SpecimenDefinitionForm({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || ""), {
+        form.setValue("slug_value", generateSlug(value.title || "", 25), {
           shouldValidate: true,
         });
       }
