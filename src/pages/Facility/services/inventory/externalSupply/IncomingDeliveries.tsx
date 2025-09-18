@@ -1,10 +1,11 @@
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { useQuery } from "@tanstack/react-query";
 import { TruckIcon } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { OrgSelect } from "@/components/Common/OrgSelect";
 import Page from "@/components/Common/Page";
@@ -79,6 +80,8 @@ export function IncomingDeliveries({ facilityId, locationId }: Props) {
 
   const deliveries = response?.results || [];
 
+  const maxVisibleTabs = useBreakpoints({ default: 2, md: 4 });
+
   return (
     <Page title={t("inward_entry")} hideTitleOnPage>
       <div className="container mx-auto">
@@ -102,20 +105,22 @@ export function IncomingDeliveries({ facilityId, locationId }: Props) {
           </div>
         </div>
 
-        <div className="mb-4 flex flex-col gap-4">
-          <Tabs value={currentTab} onValueChange={handleTabChange}>
-            <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
-              {TABS_CONFIG.map((tab) => (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className="border-b-3 px-2.5 py-1 font-semibold text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-                >
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+        <div className="w-full mb-4 overflow-x-auto">
+          <FilterTabs
+            value={currentTab}
+            onValueChange={handleTabChange}
+            options={TABS_CONFIG.map((tab) => tab.value)}
+            variant="underline"
+            showMoreDropdown
+            maxVisibleTabs={maxVisibleTabs}
+            defaultVisibleOptions={[
+              "in_progress",
+              "abandoned",
+              "entered_in_error",
+              "completed",
+            ]}
+            showAllOption={false}
+          />
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex-1">
               <OrgSelect

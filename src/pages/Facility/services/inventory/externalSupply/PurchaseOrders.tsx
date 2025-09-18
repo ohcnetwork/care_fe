@@ -1,3 +1,4 @@
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { useQuery } from "@tanstack/react-query";
 import { BarChart3, Check } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
@@ -11,12 +12,12 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { OrgSelect } from "@/components/Common/OrgSelect";
 import Page from "@/components/Common/Page";
@@ -190,6 +191,8 @@ export function PurchaseOrders({ facilityId, locationId }: Props) {
     </div>
   );
 
+  const maxVisibleTabs = useBreakpoints({ default: 2, md: 4 });
+
   return (
     <Page title={t("purchase_orders")} hideTitleOnPage>
       <div className="space-y-4">
@@ -222,40 +225,37 @@ export function PurchaseOrders({ facilityId, locationId }: Props) {
           </Button>
         </div>
 
-        <Tabs value={currentTab} onValueChange={handleTabChange}>
-          <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
-            {TABS_CONFIG.map((tab) => (
-              <TabsTrigger
-                key={tab.value}
-                value={tab.value}
-                className="border-b-3 px-2.5 py-1 font-semibold text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-              >
-                {t(tab.label)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        <div className="w-full mb-4 overflow-x-auto">
+          <FilterTabs
+            value={currentTab}
+            onValueChange={handleTabChange}
+            options={TABS_CONFIG.map((tab) => tab.value)}
+            variant="underline"
+            showMoreDropdown
+            maxVisibleTabs={maxVisibleTabs}
+            defaultVisibleOptions={[
+              "pending_pos",
+              "draft",
+              "processed",
+              "completed",
+            ]}
+            showAllOption={false}
+          />
+        </div>
 
-          {TABS_CONFIG.map((tab) => (
-            <TabsContent
-              key={tab.value}
-              value={tab.value}
-              className="mt-2 space-y-4"
-            >
-              {renderFilters()}
-              <PurchaseOrderTable
-                requests={orders}
-                isLoading={isLoading}
-                facilityId={facilityId}
-                locationId={locationId}
-                emptyTitle={t("no_purchase_orders_found")}
-                emptyDescription={t("no_purchase_orders_found_description")}
-              />
-              <div className="mt-4">
-                <Pagination totalCount={response?.count || 0} />
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+        <div className="mt-4" />
+        {renderFilters()}
+        <PurchaseOrderTable
+          requests={orders}
+          isLoading={isLoading}
+          facilityId={facilityId}
+          locationId={locationId}
+          emptyTitle={t("no_purchase_orders_found")}
+          emptyDescription={t("no_purchase_orders_found_description")}
+        />
+        <div className="mt-4">
+          <Pagination totalCount={response?.count || 0} />
+        </div>
       </div>
     </Page>
   );
