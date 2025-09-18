@@ -295,16 +295,32 @@ export function ChargeItemDefinitionForm({
         message: t("slug_format_message"),
       }),
     status: z.nativeEnum(ChargeItemDefinitionStatus),
-    description: z.string().optional().nullable().transform(val => val ?? undefined),
-    purpose: z.string().optional().nullable().transform(val => val ?? undefined),
+    description: z
+      .string()
+      .optional()
+      .nullable()
+      .transform((val) => {
+        return val ?? undefined;
+      }),
+    purpose: z
+      .string()
+      .optional()
+      .nullable()
+      .transform((val) => {
+        return val ?? undefined;
+      }),
     derived_from_uri: z
       .string()
       .optional()
       .nullable()
-      .transform(val => val ?? undefined)
+      .transform((val) => {
+        return val ?? undefined;
+      })
       .refine(
-        (val) => !val || /^https?:\/\/.+/.test(val),
-        { message: "Please enter a valid URL" }
+        (val) => {
+          return !val || /^https?:\/\/.+/.test(val);
+        },
+        { message: "Please enter a valid URL" },
       ),
     category: z.string(),
     price_components: z.array(priceComponentSchema).refine(
