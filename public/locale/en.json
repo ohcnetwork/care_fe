@@ -5385,5 +5385,6 @@
   "occupancy_rate": "Occupancy Rate",
   "bed_layout": "Bed Layout",
   "no_wards_match_filters": "No wards match the current filters",
-  "no_wards_found": "No wards found"
+  "no_wards_found": "No wards found",
+  "view_real_time_bed_status": "View real-time bed status across all wards"
 }
