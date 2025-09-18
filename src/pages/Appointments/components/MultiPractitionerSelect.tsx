@@ -55,7 +55,7 @@ const getColorForTag = (uuid: string) => {
 };
 
 interface MultiPractitionerSelectorProps {
-  selected: NonEmptyArray<UserReadMinimal>;
+  selected: UserReadMinimal[];
   onSelect: (users: UserReadMinimal[]) => void;
   facilityId: string;
 }
@@ -146,8 +146,6 @@ export const MultiPractitionerSelector = ({
   const getItemValue = (user: UserReadMinimal) => {
     return `${formatName(user)} ${user.username}`;
   };
-
-  const hasMultiple = selected && selected.length > 1;
 
   const handleOrganizationClick = (organization: FacilityOrganizationRead) => {
     if (organization.has_children) {
@@ -325,13 +323,9 @@ export const MultiPractitionerSelector = ({
                               key={user.id}
                               value={getItemValue(user)}
                               onSelect={() => {
-                                if (hasMultiple) {
-                                  onSelect(
-                                    selected.filter(
-                                      (s) => s.id !== user.id,
-                                    ) as NonEmptyArray<UserReadMinimal>,
-                                  );
-                                }
+                                onSelect(
+                                  selected.filter((s) => s.id !== user.id),
+                                );
                               }}
                               className="flex items-center gap-2 px-3 py-3 cursor-pointer hover:bg-gray-50"
                             >
@@ -348,7 +342,7 @@ export const MultiPractitionerSelector = ({
                                   {formatName(user)}
                                 </span>
                               </div>
-                              {hasMultiple && <XIcon className="ml-auto" />}
+                              <XIcon className="ml-auto" />
                             </CommandItem>
                           ))}
                           <div className="bg-gray-200 -mx-1 my-1 h-px"></div>
