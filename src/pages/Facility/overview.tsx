@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Users, Bed } from "lucide-react";
+import { Bed, Calendar, Users } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
