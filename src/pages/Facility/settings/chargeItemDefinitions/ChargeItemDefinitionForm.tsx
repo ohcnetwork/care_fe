@@ -295,27 +295,11 @@ export function ChargeItemDefinitionForm({
         message: t("slug_format_message"),
       }),
     status: z.nativeEnum(ChargeItemDefinitionStatus),
-    description: z
-      .string()
-      .optional()
-      .nullable()
-      .transform((val) => {
-        return val ?? undefined;
-      }),
-    purpose: z
-      .string()
-      .optional()
-      .nullable()
-      .transform((val) => {
-        return val ?? undefined;
-      }),
+    description: z.string().optional(),
+    purpose: z.string().optional(),
     derived_from_uri: z
       .string()
       .optional()
-      .nullable()
-      .transform((val) => {
-        return val ?? undefined;
-      })
       .refine(
         (val) => {
           return !val || /^https?:\/\/.+/.test(val);
@@ -353,8 +337,8 @@ export function ChargeItemDefinitionForm({
       title: initialData?.title || "",
       slug_value: initialData?.slug_config.slug_value || "",
       status: initialData?.status || ChargeItemDefinitionStatus.active,
-      description: initialData?.description || undefined,
-      purpose: initialData?.purpose || undefined,
+      description: initialData?.description || "",
+      purpose: initialData?.purpose || "",
       derived_from_uri: initialData?.derived_from_uri || undefined,
       category: isUpdate ? initialData?.category.slug : categorySlug,
       price_components: initialData?.price_components.map((component) => ({
