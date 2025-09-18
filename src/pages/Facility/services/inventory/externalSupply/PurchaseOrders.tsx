@@ -191,7 +191,11 @@ export function PurchaseOrders({ facilityId, locationId }: Props) {
     </div>
   );
 
-  const maxVisibleTabs = useBreakpoints({ default: 2, md: 4 });
+  const maxVisibleTabs = useBreakpoints({
+    default: 2,
+    xs: 4,
+    sm: 7,
+  });
 
   return (
     <Page title={t("purchase_orders")} hideTitleOnPage>
@@ -225,7 +229,7 @@ export function PurchaseOrders({ facilityId, locationId }: Props) {
           </Button>
         </div>
 
-        <div className="w-full mb-4 overflow-x-auto">
+        <div className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
           <FilterTabs
             value={currentTab}
             onValueChange={handleTabChange}
@@ -233,12 +237,7 @@ export function PurchaseOrders({ facilityId, locationId }: Props) {
             variant="underline"
             showMoreDropdown
             maxVisibleTabs={maxVisibleTabs}
-            defaultVisibleOptions={[
-              "pending_pos",
-              "draft",
-              "processed",
-              "completed",
-            ]}
+            defaultVisibleOptions={TABS_CONFIG.map((tab) => tab.value)}
             showAllOption={false}
           />
         </div>

@@ -80,7 +80,7 @@ export function IncomingDeliveries({ facilityId, locationId }: Props) {
 
   const deliveries = response?.results || [];
 
-  const maxVisibleTabs = useBreakpoints({ default: 2, md: 4 });
+  const maxVisibleTabs = useBreakpoints({ default: 2, xs: 4 });
 
   return (
     <Page title={t("inward_entry")} hideTitleOnPage>
@@ -105,7 +105,7 @@ export function IncomingDeliveries({ facilityId, locationId }: Props) {
           </div>
         </div>
 
-        <div className="w-full mb-4 overflow-x-auto">
+        <div className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
           <FilterTabs
             value={currentTab}
             onValueChange={handleTabChange}
@@ -113,12 +113,7 @@ export function IncomingDeliveries({ facilityId, locationId }: Props) {
             variant="underline"
             showMoreDropdown
             maxVisibleTabs={maxVisibleTabs}
-            defaultVisibleOptions={[
-              "in_progress",
-              "abandoned",
-              "entered_in_error",
-              "completed",
-            ]}
+            defaultVisibleOptions={TABS_CONFIG.map((tab) => tab.value)}
             showAllOption={false}
           />
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">

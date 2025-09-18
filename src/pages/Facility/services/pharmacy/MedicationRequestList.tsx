@@ -154,7 +154,7 @@ export default function MedicationRequestList({
     tab === "all" ? t("all_prescriptions") : t(`encounter_class__${tab}`),
   );
 
-  const maxVisibleTabs = useBreakpoints({ default: 3, md: 4 });
+  const maxVisibleTabs = useBreakpoints({ default: 3, xs: 4, sm: 6, md: 7 });
 
   return (
     <Page title={t("prescription_queue")}>
@@ -186,15 +186,10 @@ export default function MedicationRequestList({
             value={qParams.encounter_class || "all"}
             onValueChange={handleTabSelect}
             options={allTabs}
-            variant="underline"
+            variant="background"
             showMoreDropdown
             maxVisibleTabs={maxVisibleTabs}
-            defaultVisibleOptions={[
-              t("all_prescriptions"),
-              t("encounter_class__imp"),
-              t("encounter_class__amb"),
-              t("encounter_class__emer"),
-            ]}
+            defaultVisibleOptions={allTabs}
             showAllOption={false}
           />
         </div>

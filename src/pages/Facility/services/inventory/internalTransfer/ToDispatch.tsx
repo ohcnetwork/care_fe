@@ -56,7 +56,11 @@ export default function ToDispatch({ facilityId, locationId }: Props) {
     "entered_in_error",
   ];
 
-  const maxVisibleTabs = useBreakpoints({ default: 2, md: 4 });
+  const maxVisibleTabs = useBreakpoints({
+    default: 2,
+    xs: 3,
+    sm: 5,
+  });
 
   return (
     <Page title={t("to_dispatch")} hideTitleOnPage>
@@ -98,7 +102,7 @@ export default function ToDispatch({ facilityId, locationId }: Props) {
           </div>
         </div>
 
-        <div className="w-full mb-4 overflow-x-auto">
+        <div className="w-full justify-start border-b border-gray-200 bg-transparent p-0 h-auto rounded-none overflow-x-auto">
           <FilterTabs
             value={currentTab}
             onValueChange={handleTabChange}
@@ -106,11 +110,7 @@ export default function ToDispatch({ facilityId, locationId }: Props) {
             variant="underline"
             showMoreDropdown
             maxVisibleTabs={maxVisibleTabs}
-            defaultVisibleOptions={[
-              "requests_to_dispatch",
-              "in_progress",
-              "completed",
-            ]}
+            defaultVisibleOptions={tabOptions}
             showAllOption={false}
           />
         </div>
