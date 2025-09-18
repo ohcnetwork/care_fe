@@ -585,8 +585,7 @@ export function DiagnosticReportForm({
         !hasObservationValue &&
         Object.values(observations).some((obsList) =>
           obsList.some(
-            (obs) =>
-              obs.status === ObservationStatus.ENTERED_IN_ERROR && obs.id,
+            (obs) => obs.status === ObservationStatus.ENTERED_IN_ERROR,
           ),
         );
 
