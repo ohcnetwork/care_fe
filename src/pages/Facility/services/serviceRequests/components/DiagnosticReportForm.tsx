@@ -581,11 +581,14 @@ export function DiagnosticReportForm({
       );
 
       // Check if any observations are marked for deletion
-      const hasDeletions = Object.values(observations).some((obsList) =>
-        obsList.some(
-          (obs) => obs.status === ObservationStatus.ENTERED_IN_ERROR && obs.id,
-        ),
-      );
+      const hasDeletions =
+        !hasObservationValue &&
+        Object.values(observations).some((obsList) =>
+          obsList.some(
+            (obs) =>
+              obs.status === ObservationStatus.ENTERED_IN_ERROR && obs.id,
+          ),
+        );
 
       // If there's a conclusion, we must have results first
       if (conclusion.trim() && !hasObservationValue) {
