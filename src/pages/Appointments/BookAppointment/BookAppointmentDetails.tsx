@@ -44,8 +44,7 @@ export const BookAppointmentDetails = ({
       resource: null,
       resource_type: SchedulableResourceType.Practitioner,
     });
-  const [selectedResourceType, setSelectedResourceType] =
-    useState<SchedulableResourceType>(SchedulableResourceType.Practitioner);
+
   const { mutateAsync: createAppointment } = useMutation({
     mutationFn: mutate(scheduleApi.slots.createAppointment, {
       pathParams: { facilityId, slotId: selectedSlotId ?? "" },
@@ -78,10 +77,6 @@ export const BookAppointmentDetails = ({
     setIsOpen(open);
     if (!open) {
       setCurrentStep(1);
-      setSelectedResource({
-        resource: null,
-        resource_type: SchedulableResourceType.Practitioner,
-      });
       setSelectedSlotId(undefined);
     }
   };
@@ -89,33 +84,35 @@ export const BookAppointmentDetails = ({
   return (
     <div className="w-full">
       <div className="flex flex-row gap-4 justify-center">
-        <AppointmentFormSection
-          facilityId={facilityId}
-          selectedTags={selectedTags}
-          setSelectedTags={setSelectedTags}
-          reason={reason}
-          setReason={setReason}
-          selectedResource={selectedResource}
-          setSelectedResource={setSelectedResource}
-          setSelectedResourceType={setSelectedResourceType}
-          selectedResourceType={selectedResourceType}
-        />
+        <div className="flex flex-col gap-8 p-4 w-114 bg-white shadow rounded-lg">
+          <AppointmentFormSection
+            facilityId={facilityId}
+            selectedTags={selectedTags}
+            setSelectedTags={setSelectedTags}
+            reason={reason}
+            setReason={setReason}
+            selectedResource={selectedResource}
+            setSelectedResource={setSelectedResource}
+          />
+        </div>
         <div className="hidden sm:flex sm:flex-col lg:flex-row gap-6 bg-white shadow rounded-lg p-4 w-full sm:max-h-full">
           <AppointmentDateSelection
             facilityId={facilityId}
             resourceId={selectedResource.resource?.id}
-            resourceType={selectedResourceType}
+            resourceType={selectedResource.resource_type}
             setSelectedDate={setSelectedDate}
             selectedDate={selectedDate}
           />
-          <AppointmentSlotPicker
-            facilityId={facilityId}
-            resourceId={selectedResource.resource?.id}
-            resourceType={selectedResourceType}
-            selectedSlotId={selectedSlotId}
-            onSlotSelect={setSelectedSlotId}
-            selectedDate={selectedDate}
-          />
+          <div className="w-full overflow-y-auto max-h-[calc(100vh-17rem)]">
+            <AppointmentSlotPicker
+              facilityId={facilityId}
+              resourceId={selectedResource.resource?.id}
+              resourceType={selectedResource.resource_type}
+              selectedSlotId={selectedSlotId}
+              onSlotSelect={setSelectedSlotId}
+              selectedDate={selectedDate}
+            />
+          </div>
         </div>
       </div>
       {selectedSlotId && (
@@ -145,7 +142,7 @@ export const BookAppointmentDetails = ({
       <Drawer open={isOpen} onOpenChange={handleIsOpen}>
         <DrawerTrigger asChild>
           <Button
-            className="sm:hidden w-full"
+            className="sm:hidden w-full mt-3"
             disabled={!selectedResource.resource?.id}
             onClick={() => {
               setIsOpen(true);
@@ -157,31 +154,34 @@ export const BookAppointmentDetails = ({
           </Button>
         </DrawerTrigger>
         <DrawerContent className="w-full p-4 space-y-4">
-          {currentStep === 1 && (
-            <>
-              <AppointmentDateSelection
-                facilityId={facilityId}
-                resourceId={selectedResource.resource?.id}
-                resourceType={selectedResourceType}
-                setSelectedDate={setSelectedDate}
-                selectedDate={selectedDate}
-              />
-              <Button
-                className="w-full"
-                disabled={!selectedDate}
-                onClick={() => setCurrentStep(2)}
-              >
-                {t("select_slot")}
-                <ArrowRight size={16} />
-              </Button>
-            </>
-          )}
+          <div className="flex flex-col gap-3 overflow-y-auto -mx-2">
+            {currentStep === 1 && (
+              <>
+                <AppointmentDateSelection
+                  facilityId={facilityId}
+                  resourceId={selectedResource.resource?.id}
+                  resourceType={selectedResource.resource_type}
+                  setSelectedDate={setSelectedDate}
+                  selectedDate={selectedDate}
+                />
+                <Button
+                  className="w-full"
+                  disabled={!selectedDate}
+                  onClick={() => setCurrentStep(2)}
+                >
+                  {t("select_slot")}
+                  <ArrowRight size={16} />
+                </Button>
+              </>
+            )}
+          </div>
+
           {currentStep === 2 && (
             <>
               <AppointmentSlotPicker
                 facilityId={facilityId}
                 resourceId={selectedResource.resource?.id}
-                resourceType={selectedResourceType}
+                resourceType={selectedResource.resource_type}
                 selectedSlotId={selectedSlotId}
                 onSlotSelect={setSelectedSlotId}
                 selectedDate={selectedDate}
