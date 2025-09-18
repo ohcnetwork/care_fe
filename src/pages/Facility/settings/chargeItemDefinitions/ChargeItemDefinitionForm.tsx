@@ -298,15 +298,14 @@ export function ChargeItemDefinitionForm({
     description: z.string().optional().nullable().transform(val => val ?? undefined),
     purpose: z.string().optional().nullable().transform(val => val ?? undefined),
     derived_from_uri: z
-      .union([
-        z.string().url(),
-        z.literal(""),
-        z.null(),
-        z.undefined()
-      ])
+      .string()
       .optional()
       .nullable()
-      .transform(val => val === "" || val === null ? undefined : val),
+      .transform(val => val ?? undefined)
+      .refine(
+        (val) => !val || /^https?:\/\/.+/.test(val),
+        { message: "Please enter a valid URL" }
+      ),
     category: z.string(),
     price_components: z.array(priceComponentSchema).refine(
       (components) => {
