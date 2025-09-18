@@ -1,25 +1,18 @@
-import careConfig from "@careConfig";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { InfoIcon } from "lucide-react";
-import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
-import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { isValidPhoneNumber } from "react-phone-number-input";
-import { toast } from "sonner";
-import { z } from "zod";
-
-import { tzAwareDateTime } from "@/lib/validators";
-
-import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
-
-import RadioInput from "@/components/ui/RadioInput";
-import Autocomplete from "@/components/ui/autocomplete";
+import { BLOOD_GROUP_CHOICES, GENDER_TYPES, GENDERS } from "@/common/constants";
+import BackButton from "@/components/Common/BackButton";
+import { DateTimeInput } from "@/components/Common/DateTimeInput";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import DateField from "@/components/ui/date-field";
 import {
   Form,
   FormControl,
@@ -31,6 +24,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
+import RadioInput from "@/components/ui/RadioInput";
 import {
   Select,
   SelectContent,
@@ -38,26 +32,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-
-import { DateTimeInput } from "@/components/Common/DateTimeInput";
-import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/Page";
-import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
-import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
-
 import useAppHistory from "@/hooks/useAppHistory";
-
-import { BLOOD_GROUP_CHOICES, GENDER_TYPES, GENDERS } from "@/common/constants";
-import countryList from "@/common/static/countries.json";
-
-import { PLUGIN_Component } from "@/PluginEngine";
-import dayjs from "@/Utils/dayjs";
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
-import validators from "@/Utils/validators";
+import { tzAwareDateTime } from "@/lib/validators";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import {
@@ -68,194 +46,172 @@ import {
 import patientApi from "@/types/emr/patient/patientApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
+import { FacilityRead } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
+import organizationApi from "@/types/organization/organizationApi";
+import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import validators from "@/Utils/validators";
+import careConfig from "@careConfig";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { format, isBefore, isFuture, subYears } from "date-fns";
+import { TFunction } from "i18next";
+import { isValidPhoneNumber } from "libphonenumber-js";
+import { ArrowLeft, CheckIcon } from "lucide-react";
+import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
+import { useEffect, useState } from "react";
+import { useForm, UseFormReturn } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+import { z } from "zod";
 
-interface PatientRegistrationPageProps {
-  facilityId?: string;
-  patientId?: string;
-}
-
-export const BLOOD_GROUPS = BLOOD_GROUP_CHOICES.map((bg) => bg.id) as [
-  (typeof BLOOD_GROUP_CHOICES)[number]["id"],
-];
-
-export default function PatientRegistration(
-  props: PatientRegistrationPageProps,
-) {
-  const {
-    patientRegistration: {
-      minGeoOrganizationLevelsRequired,
-      minimalPatientRegistration,
-    },
-  } = careConfig;
-  const [{ phone_number }] = useQueryParams();
-  const { patientId, facilityId } = props;
+export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
-  const defaultCountry = careConfig.defaultCountry.name;
-  const { facility } = useCurrentFacility();
+  const { facility, facilityId } = useCurrentFacility();
+  const [{ phone_number }] = useQueryParams();
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
 
-  const formSchema = useMemo(
-    () =>
-      z
-        .object({
-          name: z.string().trim().nonempty(t("name_is_required")),
-          phone_number: validators().phoneNumber.required,
-          same_phone_number: z.boolean(),
-          emergency_phone_number: validators().phoneNumber.required,
-          gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
-          blood_group: z.nativeEnum(BloodGroupChoices, {
-            required_error: t("blood_group_is_required"),
-          }),
-          age_or_dob: z.enum(["dob", "age"]),
-          date_of_birth: z
-            .string()
-            .nonempty(t("date_of_birth_must_be_present"))
-            .regex(/^\d{4}-\d{2}-\d{2}$/, t("date_of_birth_format"))
-            .refine((date) => {
-              const parsedDate = dayjs(date);
-              return parsedDate.isValid() && !parsedDate.isAfter(dayjs());
-            }, t("enter_valid_dob"))
-            .optional(),
-          deceased_datetime: tzAwareDateTime.optional().nullable(),
-          age: z
-            .number()
-            .int()
-            .positive()
-            .min(1, t("age_must_be_positive"))
-            .max(120, t("age_must_be_below_120"))
-            .optional(),
-          address: minimalPatientRegistration
-            ? z.string().trim().optional()
-            : z.string().trim().nonempty(t("address_is_required")),
-          same_address: z.boolean(),
-          permanent_address: minimalPatientRegistration
-            ? z.string().trim().optional()
-            : z.string().trim().nonempty(t("field_required")),
-          pincode: minimalPatientRegistration
-            ? validators().pincode.optional()
-            : validators().pincode,
-          nationality: z.string().nonempty(t("nationality_is_required")),
-          geo_organization: z.string().uuid({
-            message: minGeoOrganizationLevelsRequired
-              ? t("govt_organization_required_depth_validation", {
-                  depth: minGeoOrganizationLevelsRequired,
-                })
-              : t("geo_organization_is_required"),
-          }),
-          _selected_levels: z.array(z.custom<Organization>()),
-          _is_deceased: z.boolean(),
-          identifiers: z.array(
-            z.object({
-              config: z.string().uuid(),
-              value: z.string().optional(),
-            }),
-          ),
-          tags: z.array(z.string()),
-        })
-        .superRefine((data, ctx) => {
-          if (data.age_or_dob === "dob" && !data.date_of_birth) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: t("date_of_birth_must_be_present"),
-              path: ["date_of_birth"],
-            });
-          }
-          if (data.age_or_dob === "age" && !data.age) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: t("age_must_be_present"),
-              path: ["age"],
-            });
-          }
-
-          if (data.nationality === defaultCountry && !data.geo_organization) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: t("geo_organization_required"),
-              path: ["geo_organization"],
-            });
-          }
-          if (data._is_deceased) {
-            const deathDate = dayjs(data.deceased_datetime);
-            if (!deathDate?.isValid()) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: t("invalid_date_format", {
-                  format: "DD-MM-YYYY HH:mm",
-                }),
-                path: ["deceased_datetime"],
-              });
-            } else {
-              const dob = data.date_of_birth
-                ? dayjs(data.date_of_birth)
-                : dayjs().subtract(data.age || 0, "years");
-              const valid = data.date_of_birth
-                ? dob.isBefore(deathDate)
-                : dob.year() < deathDate.year();
-              if (!valid) {
-                ctx.addIssue({
-                  code: z.ZodIssueCode.custom,
-                  message: t("death_date_must_be_after_dob"),
-                  path: ["deceased_datetime"],
-                });
-              }
-            }
-          }
-
-          const identifierConfigs =
-            facility?.patient_instance_identifier_configs || [];
-          const identifiers = data.identifiers || [];
-          identifiers.forEach((identifier, index) => {
-            const config = identifierConfigs.find(
-              (c) => c.id === identifier.config,
-            );
-            const isAutogenerated = !!config?.config.default_value;
-            if (
-              config?.config.required &&
-              !identifier.value &&
-              !isAutogenerated
-            ) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: config?.config.display + " " + t("is_required"),
-                path: ["identifiers", index, "value"],
-              });
-            }
-          });
-        }),
-    [facility], // eslint-disable-line react-hooks/exhaustive-deps
-  );
+  const quickRegistration =
+    careConfig.patientRegistration.minimalPatientRegistration;
 
   const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      nationality: defaultCountry,
-      phone_number: phone_number || "",
-      emergency_phone_number: "",
-      deceased_datetime: null,
-      age_or_dob: "dob",
-      date_of_birth: "",
-      same_phone_number: false,
-      same_address: true,
-      _selected_levels: [],
-      _is_deceased: false,
-      tags: [],
-    },
+    resolver: zodResolver(getFormSchema(t)),
     mode: "onSubmit",
+    defaultValues: {
+      is_deceased: false,
+      deceased_datetime: null,
+      phone_number: phone_number || "",
+      emergency_phone_number: phone_number || "",
+      emergency_phone_number_same_as_phone_number: true,
+      age_or_dob: "dob",
+      permanent_address_same_as_address: true,
+      required_identifiers: [],
+      optional_identifiers: [],
+      autogenerated_identifiers: [],
+      tags: [],
+      _selected_levels: [],
+    },
   });
 
-  const tagIds = form.watch("tags");
-  const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
-  const selectedTags = tagQueries
-    .map((query) => query.data)
-    .filter(Boolean) as TagConfig[];
+  const patientQuery = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: query(patientApi.getPatient, {
+      pathParams: { id: patientId || "" },
+    }),
+    enabled: !!patientId,
+  });
+
+  const defaultGeoOrgId = careConfig.patientRegistration.defaultGeoOrganization;
+
+  const { data: defaultGeoOrg } = useQuery({
+    queryKey: ["organization", defaultGeoOrgId],
+    queryFn: query(organizationApi.get, {
+      pathParams: { id: defaultGeoOrgId },
+    }),
+    enabled: !!defaultGeoOrgId,
+  });
+
+  useEffect(() => {
+    if (!facility) {
+      return;
+    }
+
+    if (!patientId && defaultGeoOrgId && !defaultGeoOrg) {
+      return;
+    }
+
+    const data = patientQuery.data;
+
+    // Default values for new patient
+    if (!data) {
+      const getValue = ({ id }: { id: string }) => ({ config: id, value: "" });
+      form.setValue(
+        "required_identifiers",
+        getRequiredIdentifierConfigs(facility).map(getValue),
+      );
+      form.setValue(
+        "optional_identifiers",
+        getOptionalIdentifierConfigs(facility).map(getValue),
+      );
+      form.setValue(
+        "autogenerated_identifiers",
+        getAutogeneratedIdentifierConfigs(facility).map(getValue),
+      );
+      form.setValue("geo_organization", defaultGeoOrgId);
+      form.setValue("_selected_levels", [defaultGeoOrg!]);
+      return;
+    }
+
+    const getIdentifier = ({ id }: PatientIdentifierConfig) => {
+      const identifier = data.instance_identifiers.find(
+        (i) => i.config.id === id,
+      );
+      return {
+        config: id,
+        value: identifier?.value,
+      };
+    };
+
+    // Reset the form with the patient data
+    form.reset({
+      name: data.name || "",
+      phone_number: data.phone_number || "",
+      emergency_phone_number: data.emergency_phone_number || "",
+      emergency_phone_number_same_as_phone_number:
+        data.phone_number === data.emergency_phone_number,
+      gender: data.gender as (typeof GENDERS)[number],
+      age_or_dob: data.date_of_birth ? "dob" : "age",
+      date_of_birth: data.date_of_birth || undefined,
+      age:
+        !data.date_of_birth && data.year_of_birth
+          ? new Date().getFullYear() - data.year_of_birth
+          : undefined,
+      blood_group: data.blood_group,
+      tags: [], // This is only used for create patient
+
+      address: data.address || "",
+      permanent_address: data.permanent_address || "",
+      permanent_address_same_as_address:
+        data.address === data.permanent_address,
+      geo_organization: data.geo_organization.id,
+      pincode: data.pincode || undefined,
+
+      is_deceased: !!data.deceased_datetime,
+      deceased_datetime: data.deceased_datetime || null,
+
+      required_identifiers:
+        getRequiredIdentifierConfigs(facility).map(getIdentifier),
+      optional_identifiers:
+        getOptionalIdentifierConfigs(facility).map(getIdentifier),
+      autogenerated_identifiers:
+        getAutogeneratedIdentifierConfigs(facility).map(getIdentifier),
+
+      _selected_levels: [data.geo_organization],
+    });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patientQuery.data, facility, defaultGeoOrg]);
+
+  const phoneNumber = form.watch("phone_number");
+  const patientPhoneSearch = useQuery({
+    queryKey: ["patients", "phone-number", phoneNumber],
+    queryFn: query.debounced(patientApi.searchPatient, {
+      body: { phone_number: phoneNumber },
+    }),
+    enabled: isValidPhoneNumber(phoneNumber),
+  });
+
+  const duplicatePatients = patientPhoneSearch.data?.results.filter(
+    (p) => p.id !== patientId,
+  );
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
-    mutationKey: ["create_patient"],
     mutationFn: mutate(patientApi.addPatient),
     onSuccess: (resp: PatientRead) => {
       toast.success(t("patient_registration_success"));
@@ -268,16 +224,9 @@ export default function PatientRegistration(
         },
       });
     },
-    onError: () => {
-      toast.error(t("patient_registration_error"));
-    },
   });
 
-  const {
-    mutate: updatePatient,
-    isPending: isUpdatingPatient,
-    isSuccess: isUpdateSuccess,
-  } = useMutation({
+  const { mutate: updatePatient, isPending: isUpdatingPatient } = useMutation({
     mutationFn: mutate(patientApi.updatePatient, {
       pathParams: { id: patientId || "" },
     }),
@@ -285,152 +234,9 @@ export default function PatientRegistration(
       toast.success(t("patient_update_success"));
       goBack();
     },
-    onError: () => {
-      toast.error(t("patient_update_error"));
-    },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const editableIdentifiers = values.identifiers.filter((identifier) => {
-      const config = facility?.patient_instance_identifier_configs.find(
-        (c) => c.id === identifier.config,
-      );
-      return !config?.config.default_value && !!identifier.value;
-    }) as PatientIdentifierCreate[];
-
-    if (patientId) {
-      updatePatient({
-        ...values,
-        age: values.age_or_dob === "age" ? values.age : undefined,
-        date_of_birth:
-          values.age_or_dob === "dob" ? values.date_of_birth : undefined,
-        emergency_phone_number: values.same_phone_number
-          ? values.phone_number
-          : values.emergency_phone_number,
-        permanent_address: values.same_address
-          ? values.address
-          : values.permanent_address,
-        pincode: values.pincode || undefined,
-        identifiers: editableIdentifiers,
-      });
-      return;
-    } else if (facilityId) {
-      createPatient({
-        ...values,
-        emergency_phone_number: values.same_phone_number
-          ? values.phone_number
-          : values.emergency_phone_number,
-        permanent_address: values.same_address
-          ? values.address
-          : values.permanent_address,
-        facility: facilityId,
-        pincode: values.pincode || undefined,
-        tags: values.tags,
-        identifiers: editableIdentifiers,
-      });
-    }
-  }
-
-  const sidebarItems = [
-    { label: t("patient__general-info"), id: "general-info" },
-  ];
-
-  const title = !patientId
-    ? t("add_details_of_patient")
-    : t("update_patient_details");
-
-  const handleDialogClose = (action: string) => {
-    if (action === "transfer") {
-      navigate(`/facility/${facilityId}/patients`, {
-        query: {
-          phone_number: form.getValues("phone_number"),
-        },
-      });
-    } else {
-      setSuppressDuplicateWarning(true);
-    }
-  };
-
-  const phoneNumber = form.watch("phone_number");
-
-  const patientPhoneSearch = useQuery({
-    queryKey: ["patients", "phone-number", phoneNumber],
-    queryFn: query.debounced(patientApi.searchPatient, {
-      body: {
-        phone_number: phoneNumber,
-      },
-    }),
-    enabled: isValidPhoneNumber(phoneNumber),
-  });
-
-  const duplicatePatients = useMemo(() => {
-    return patientPhoneSearch.data?.results.filter((p) => p.id !== patientId);
-  }, [patientPhoneSearch.data, patientId]);
-
-  const patientQuery = useQuery({
-    queryKey: ["patient", patientId],
-    queryFn: query(patientApi.getPatient, {
-      pathParams: { id: patientId || "" },
-    }),
-    enabled: !!patientId,
-  });
-
-  useEffect(() => {
-    if (patientQuery.data && facility) {
-      form.reset({
-        _selected_levels: [
-          patientQuery.data.geo_organization as unknown as Organization,
-        ],
-        _is_deceased: !!patientQuery.data.deceased_datetime,
-        name: patientQuery.data.name || "",
-        phone_number: patientQuery.data.phone_number || "",
-        emergency_phone_number: patientQuery.data.emergency_phone_number || "",
-        same_phone_number:
-          patientQuery.data.phone_number ===
-          patientQuery.data.emergency_phone_number,
-        same_address:
-          patientQuery.data.address === patientQuery.data.permanent_address,
-        gender: patientQuery.data.gender as (typeof GENDERS)[number],
-        blood_group: patientQuery.data.blood_group,
-        age_or_dob: patientQuery.data.date_of_birth ? "dob" : "age",
-        date_of_birth: patientQuery.data.date_of_birth || undefined,
-        age:
-          !patientQuery.data.date_of_birth && patientQuery.data.year_of_birth
-            ? new Date().getFullYear() - patientQuery.data.year_of_birth
-            : undefined,
-        address: patientQuery.data.address || "",
-        permanent_address: patientQuery.data.permanent_address || "",
-        pincode: patientQuery.data.pincode || undefined,
-        nationality: patientQuery.data.nationality || defaultCountry,
-        geo_organization: (
-          patientQuery.data.geo_organization as unknown as Organization
-        )?.id,
-        deceased_datetime: null,
-        tags: [], // This is only used for create patient
-        identifiers: facility.patient_instance_identifier_configs.map(
-          (identifierConfig) => {
-            const identifier = patientQuery.data.instance_identifiers?.find(
-              (i) => i.config.id === identifierConfig.id,
-            );
-            return {
-              config: identifierConfig.id,
-              value: identifier?.value,
-            };
-          },
-        ),
-      } as unknown as z.infer<typeof formSchema>);
-    } else if (facility) {
-      form.setValue(
-        "identifiers",
-        facility.patient_instance_identifier_configs.map(
-          (identifierConfig) => ({
-            config: identifierConfig.id,
-            value: "",
-          }),
-        ),
-      );
-    }
-  }, [patientQuery.data, facility]);
+  const isPending = isCreatingPatient || isUpdatingPatient;
 
   const showDuplicate =
     !patientPhoneSearch.isLoading &&
@@ -438,13 +244,8 @@ export default function PatientRegistration(
     !!isValidPhoneNumber(phoneNumber) &&
     !suppressDuplicateWarning;
 
-  // TODO: Use useBlocker hook after switching to tanstack router
-  // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
   useNavigationPrompt(
-    form.formState.isDirty &&
-      !isCreatingPatient &&
-      !(isUpdatingPatient || isUpdateSuccess) &&
-      !showDuplicate,
+    form.formState.isDirty && !isPending && !showDuplicate,
     t("unsaved_changes"),
   );
 
@@ -452,263 +253,316 @@ export default function PatientRegistration(
     return <Loading />;
   }
 
+  function onSubmit(values: z.infer<ReturnType<typeof getFormSchema>>) {
+    if (!facility) {
+      return;
+    }
+
+    const basePayload = {
+      ...values,
+
+      age: values.age_or_dob === "dob" ? undefined : values.age,
+      date_of_birth:
+        values.age_or_dob === "dob" ? values.date_of_birth : undefined,
+
+      emergency_phone_number: values.emergency_phone_number_same_as_phone_number
+        ? values.phone_number
+        : values.emergency_phone_number,
+
+      permanent_address: values.permanent_address_same_as_address
+        ? values.address
+        : values.permanent_address,
+      pincode: values.pincode,
+
+      deceased_datetime: values.is_deceased ? values.deceased_datetime : null,
+
+      identifiers: getEditableIdentifiers(
+        [
+          ...values.required_identifiers,
+          ...values.optional_identifiers,
+          ...values.autogenerated_identifiers,
+        ],
+        facility,
+      ),
+    };
+
+    if (!patientId) {
+      createPatient({
+        ...basePayload,
+        facility: facilityId,
+        tags: values.tags,
+      });
+    } else {
+      updatePatient(basePayload);
+    }
+  }
+
+  const pageTitle = !patientId
+    ? t("register_new_patient")
+    : t("update_patient_details");
+
   return (
-    <Page title={title}>
-      <hr className="mt-4 border-gray-200" />
-      <div className="relative mt-4 flex flex-col md:flex-row gap-4">
-        <SectionNavigator sections={sidebarItems} className="hidden md:flex" />
+    <Page title={pageTitle} hideTitleOnPage>
+      <div className="flex flex-col gap-4 max-w-2xl mx-auto">
+        <div>
+          <BackButton>
+            <ArrowLeft />
+            {t("back")}
+          </BackButton>
+        </div>
+        <div className="pb-4 mb-2 border-b border-gray-200">
+          <div className="flex flex-col">
+            <h4 className="font-semibold">{pageTitle}</h4>
+            {!patientId && (
+              <span className="text-sm text-gray-700">
+                {t("patient_create_description")}
+              </span>
+            )}
+          </div>
+        </div>
 
         <Form {...form}>
-          <form
-            className="md:w-[500px] space-y-10"
-            onSubmit={form.handleSubmit(onSubmit, (errors) => {
-              console.log("errors", errors);
-            })}
-          >
-            <PLUGIN_Component
-              __name="PatientRegistrationForm"
-              form={form}
-              facilityId={facilityId}
-              patientId={patientId}
-            />
-
-            <div id="general-info" className="space-y-6">
-              <div>
-                <h2 className="text-lg font-semibold">
-                  {t("patient__general-info")}
-                </h2>
-                <div className="text-sm">{t("general_info_detail")}</div>
-              </div>
-
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel aria-required>{t("name")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t("type_patient_name")}
-                        {...field}
-                        data-cy="patient-name-input"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="phone_number"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel aria-required>{t("phone_number")}</FormLabel>
-                    <FormControl>
-                      <PhoneInput
-                        {...field}
-                        onChange={(value) => {
-                          field.onChange(value);
-                          if (form.getValues("same_phone_number")) {
-                            form.setValue(
-                              "emergency_phone_number",
-                              value || "",
-                              { shouldDirty: true, shouldValidate: true },
-                            );
-                          }
-                        }}
-                        data-cy="patient-phone-input"
-                      />
-                    </FormControl>
-                    <FormField
-                      control={form.control}
-                      name="same_phone_number"
-                      render={({ field }) => (
-                        <FormItem className="flex items-center gap-2">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={(v) => {
-                                field.onChange(v);
-                                if (v) {
-                                  form.setValue(
-                                    "emergency_phone_number",
-                                    form.watch("phone_number"),
-                                    { shouldValidate: true },
-                                  );
-                                } else {
-                                  form.setValue("emergency_phone_number", "", {
-                                    shouldValidate: true,
-                                  });
-                                }
-                              }}
-                              data-cy="same-phone-number-checkbox"
-                            />
-                          </FormControl>
-                          <FormLabel>
-                            {t("use_phone_number_for_emergency")}
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="emergency_phone_number"
-                disabled={form.watch("same_phone_number")}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel aria-required>
-                      {t("emergency_phone_number")}
-                    </FormLabel>
-                    <FormControl>
-                      <PhoneInput
-                        {...field}
-                        data-cy="patient-emergency-phone-input"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="gender"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel aria-required>{t("sex")}</FormLabel>
-                    <FormControl>
-                      <RadioInput
-                        {...field}
-                        onValueChange={field.onChange}
-                        value={field.value ?? undefined}
-                        options={GENDER_TYPES.map((g) => ({
-                          value: g.id,
-                          label: t(`GENDER__${g.id}`),
-                        }))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="blood_group"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel aria-required>{t("blood_group")}</FormLabel>
-                    <Select
-                      {...field}
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger
-                          data-cy="blood-group-select"
-                          ref={field.ref}
-                        >
-                          <SelectValue
-                            placeholder={t("please_select_blood_group")}
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {BLOOD_GROUP_CHOICES.map((bg) => (
-                          <SelectItem key={bg.id} value={bg.id}>
-                            {bg.text}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Tag Selector (only for create) */}
-              {!patientId && (
-                <FormField
-                  control={form.control}
-                  name="tags"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("tags", { count: 2 })}</FormLabel>
-                      <FormControl>
-                        <TagSelectorPopover
-                          selected={selectedTags}
-                          onChange={(tags) => {
-                            field.onChange(tags.map((tag) => tag.id));
-                          }}
-                          resource={TagResource.PATIENT}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-
-              <Tabs
-                value={form.watch("age_or_dob")}
-                onValueChange={(v) => {
-                  form.setValue("age_or_dob", v as "dob" | "age");
-                  if (v === "age") {
-                    form.setValue("date_of_birth", undefined);
-                  } else {
-                    form.setValue("age", undefined);
-                  }
-                }}
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <Accordion
+              type="multiple"
+              className="flex flex-col gap-6"
+              defaultValue={
+                quickRegistration
+                  ? ["patient-basics"]
+                  : ["patient-basics", "additional-details"]
+              }
+            >
+              <AccordionItem
+                value="patient-basics"
+                className="bg-white flex flex-col gap-4 p-6 shadow rounded-md"
               >
-                <TabsList className="mb-2" defaultValue="dob">
-                  <TabsTrigger value="dob" data-cy="dob-tab">
-                    {t("date_of_birth")}
-                  </TabsTrigger>
-                  <TabsTrigger value="age" data-cy="age-tab">
-                    {t("age")}
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="dob">
+                <AccordionTrigger className="flex justify-between">
+                  <div className="flex gap-3 items-center w-full">
+                    <h5 className="text-lg font-semibold">
+                      1: {t("patient_basics")}
+                    </h5>
+                    {/* TODO: add progress bar */}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-1 flex flex-col gap-6">
+                  <PatientBasicsContent form={form} isCreate={!patientId} />
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem
+                value="additional-details"
+                className="bg-white flex flex-col gap-4 p-6 shadow rounded-md"
+              >
+                <AccordionTrigger className="flex justify-between">
+                  <div className="flex gap-3 items-center w-full">
+                    <h5 className="text-lg font-semibold">
+                      2: {t("additional_details")}{" "}
+                      {quickRegistration && `(${t("optional")})`}
+                    </h5>
+                    {/* TODO: add progress bar */}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-1 flex flex-col gap-6">
+                  <AdditionalDetailsContent form={form} />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+            <div className="w-full border-t border-gray-200 py-6 mt-6">
+              <div className="max-w-2xl mx-auto flex justify-end">
+                <Button
+                  variant="primary_gradient"
+                  data-shortcut-id="submit-action"
+                  // TODO: disable button if basic info not fille
+                >
+                  <CheckIcon />
+                  {patientId ? t("update") : t("register_patient")}
+                  <ShortcutBadge
+                    actionId="submit-action"
+                    className="bg-gray-200"
+                  />
+                </Button>
+              </div>
+            </div>
+          </form>
+        </Form>
+      </div>
+
+      {showDuplicate && (
+        <DuplicatePatientDialog
+          open={showDuplicate}
+          patientList={duplicatePatients}
+          onTransfer={() =>
+            navigate(`/facility/${facilityId}/patients`, {
+              query: { phone_number: form.getValues("phone_number") },
+            })
+          }
+          onOpenChange={(open) => {
+            if (!open) {
+              setSuppressDuplicateWarning(true);
+            }
+          }}
+        />
+      )}
+    </Page>
+  );
+};
+
+const PatientBasicsContent = ({
+  form,
+  isCreate,
+}: {
+  form: UseFormReturn<z.infer<ReturnType<typeof getFormSchema>>>;
+  isCreate: boolean;
+}) => {
+  const { t } = useTranslation();
+  const { facilityId, facility } = useCurrentFacility();
+
+  const tagIds = form.watch("tags") || [];
+  const selectedTags = useTagConfigs({ ids: tagIds, facilityId })
+    .map(({ data }) => data)
+    .filter(Boolean) as TagConfig[];
+
+  return (
+    <>
+      <FormField
+        control={form.control}
+        name="name"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel aria-required>{t("name")}</FormLabel>
+            <FormControl>
+              <Input
+                autoFocus
+                tabIndex={0}
+                placeholder={t("type_name")}
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <div className="flex flex-col gap-4">
+        <FormField
+          control={form.control}
+          name="phone_number"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel aria-required>{t("phone_number")}</FormLabel>
+              <FormControl>
+                <PhoneInput
+                  {...field}
+                  placeholder={t("enter_phone_number")}
+                  onChange={(value) => {
+                    field.onChange(value);
+                    if (
+                      form.getValues(
+                        "emergency_phone_number_same_as_phone_number",
+                      )
+                    ) {
+                      form.setValue("emergency_phone_number", value || "", {
+                        shouldDirty: true,
+                      });
+                    }
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="emergency_phone_number_same_as_phone_number"
+          render={({ field }) => (
+            <FormItem className="flex items-center gap-2">
+              <FormControl>
+                <Checkbox
+                  checked={!field.value}
+                  onCheckedChange={(value) => field.onChange(!value)}
+                />
+              </FormControl>
+              <FormLabel>
+                {t("use_different_emergency_contact_number")}
+              </FormLabel>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      {!form.watch("emergency_phone_number_same_as_phone_number") && (
+        <FormField
+          control={form.control}
+          name="emergency_phone_number"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel aria-required>{t("emergency_phone_number")}</FormLabel>
+              <FormControl>
+                <PhoneInput {...field} placeholder={t("enter_phone_number")} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+
+      <FormField
+        control={form.control}
+        name="gender"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel aria-required>{t("sex")}</FormLabel>
+            <FormControl>
+              <RadioInput
+                {...field}
+                onValueChange={field.onChange}
+                value={field.value ?? undefined}
+                options={GENDER_TYPES.map((g) => ({
+                  value: g.id,
+                  label: t(`GENDER__${g.id}`),
+                }))}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FormField
+          control={form.control}
+          name="age_or_dob"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel aria-required>{t("date_of_birth_or_age")}</FormLabel>
+              <div className="flex gap-1 items-start">
+                <Tabs value={field.value} onValueChange={field.onChange}>
+                  <TabsList className="mt-0.25">
+                    <TabsTrigger value="dob">{t("date")}</TabsTrigger>
+                    <TabsTrigger value="age">{t("age")}</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                {field.value === "dob" && (
                   <FormField
                     control={form.control}
                     name="date_of_birth"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="w-full">
                         <FormControl>
-                          <DateField
-                            date={
-                              field.value ? new Date(field.value) : undefined
-                            }
-                            onChange={(date) =>
-                              field.onChange(dateQueryString(date))
-                            }
-                            id="dob"
-                          />
+                          <Input {...field} type="date" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </TabsContent>
-                <TabsContent value="age">
-                  <div className="bg-yellow-500/10 border border-yellow-500 rounded-md p-4 text-sm text-yellow-800 mb-4">
-                    {t("age_input_warning")}
-                    <br />
-                    <b>{t("age_input_warning_bold")}</b>
-                  </div>
-
+                )}
+                {field.value === "age" && (
                   <FormField
                     control={form.control}
                     name="age"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel aria-required>{t("age")}</FormLabel>
+                      <FormItem className="w-full">
                         <FormControl>
                           <Input
                             type="number"
@@ -727,253 +581,6 @@ export default function PatientRegistration(
                                 { shouldDirty: true },
                               )
                             }
-                            data-cy="age-input"
-                          />
-                        </FormControl>
-
-                        <FormMessage />
-                        {form.getValues("age") && (
-                          <div className="text-sm font-bold">
-                            {Number(form.getValues("age")) <= 0 ? (
-                              <span className="text-red-600">
-                                {t("invalid_age")}
-                              </span>
-                            ) : (
-                              <span
-                                className="text-violet-600"
-                                data-cy="year-of-birth"
-                              >
-                                {t("year_of_birth")}:{" "}
-                                {new Date().getFullYear() -
-                                  Number(form.getValues("age"))}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </FormItem>
-                    )}
-                  />
-                </TabsContent>
-              </Tabs>
-
-              <div className="space-y-4 rounded-lg bg-white p-4 border border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-sm font-semibold">
-                      {t("deceased_status")}
-                    </h2>
-                    <span
-                      className="text-sm text-gray-500
-"
-                    >
-                      ({t("only_mark_if_applicable")})
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="is-deceased"
-                      checked={form.watch("_is_deceased")}
-                      onCheckedChange={(checked) => {
-                        form.setValue("_is_deceased", checked as boolean);
-                        form.setValue(
-                          "deceased_datetime",
-                          checked ? form.getValues("deceased_datetime") : null,
-                        );
-                      }}
-                      data-cy="is-deceased-checkbox"
-                    />
-                    <label
-                      htmlFor="is-deceased"
-                      className="text-sm font-medium"
-                    >
-                      {t("patient_is_deceased")}
-                    </label>
-                  </div>
-                </div>
-
-                {(form.watch("_is_deceased") ||
-                  form.watch("deceased_datetime")) && (
-                  <div className="mt-4">
-                    <div className="flex items-center gap-2 mb-4 text-gray-500">
-                      <InfoIcon className="size-4" />
-                      <p className="text-sm text-gray-500">
-                        {t("deceased_disclaimer")}
-                      </p>
-                    </div>
-
-                    <FormField
-                      control={form.control}
-                      name="deceased_datetime"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("date_and_time_of_death")}</FormLabel>
-                          <FormControl>
-                            <DateTimeInput
-                              id="death-datetime"
-                              data-cy="death-datetime-input"
-                              value={field.value ?? ""}
-                              onDateChange={(val) => {
-                                field.onChange(val);
-                                form.setValue("_is_deceased", !!val);
-                              }}
-                              max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                )}
-              </div>
-
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel aria-required={!minimalPatientRegistration}>
-                      {t("current_address")}
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          if (form.getValues("same_address")) {
-                            form.setValue("permanent_address", e.target.value, {
-                              shouldDirty: true,
-                              shouldValidate: true,
-                            });
-                          }
-                        }}
-                        data-cy="current-address-input"
-                      />
-                    </FormControl>
-                    <FormField
-                      control={form.control}
-                      name="same_address"
-                      render={({ field }) => (
-                        <FormItem className="flex items-center gap-2">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={(v) => {
-                                field.onChange(v);
-                                if (v) {
-                                  form.setValue(
-                                    "permanent_address",
-                                    form.getValues("address"),
-                                    { shouldValidate: true },
-                                  );
-                                }
-                              }}
-                              data-cy="same-address-checkbox"
-                            />
-                          </FormControl>
-                          <FormLabel>{t("use_address_as_permanent")}</FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="permanent_address"
-                disabled={form.watch("same_address")}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel aria-required={!minimalPatientRegistration}>
-                      {t("permanent_address")}
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea {...field} data-cy="permanent-address-input" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="pincode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel aria-required={!minimalPatientRegistration}>
-                      {t("pincode")}
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        {...field}
-                        onChange={(e) => {
-                          const value = e.target.value
-                            ? Number(e.target.value)
-                            : undefined;
-                          field.onChange(value);
-                        }}
-                        value={field.value || undefined}
-                        data-cy="pincode-input"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 gap-4">
-                <FormField
-                  control={form.control}
-                  name="nationality"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel aria-required>{t("nationality")}</FormLabel>
-                      <FormControl>
-                        <Autocomplete
-                          options={countryList.map((c) => ({
-                            label: c,
-                            value: c,
-                          }))}
-                          {...field}
-                          onChange={(value) =>
-                            form.setValue("nationality", value, {
-                              shouldDirty: true,
-                            })
-                          }
-                          data-cy="nationality-input"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {form.watch("nationality") === defaultCountry && (
-                  <FormField
-                    control={form.control}
-                    name="geo_organization"
-                    render={({ field }) => (
-                      <FormItem className="contents">
-                        <FormControl>
-                          <GovtOrganizationSelector
-                            {...field}
-                            required={minGeoOrganizationLevelsRequired == null}
-                            requiredDepth={minGeoOrganizationLevelsRequired}
-                            selected={form.watch("_selected_levels")}
-                            value={form.watch("geo_organization")}
-                            onChange={(value) =>
-                              form.setValue("geo_organization", value, {
-                                shouldDirty: true,
-                                shouldValidate: form.formState.isSubmitted,
-                              })
-                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -982,102 +589,451 @@ export default function PatientRegistration(
                   />
                 )}
               </div>
-            </div>
-
-            {/* TODO: Move Patient Identifier edit out to Patient display page */}
-            {/* Patient Identifiers */}
-            {facility && facility.patient_instance_identifier_configs && (
-              <div className="space-y-4">
-                <h2 className="text-lg font-semibold">{t("identifiers")}</h2>
-                {facility.patient_instance_identifier_configs.map((c, idx) => {
-                  const identifiers = form.watch("identifiers") || [];
-                  const identifierValue = identifiers[idx]?.value || "";
-                  const isAutogenerated = !!c.config.default_value;
-                  const isRequired = c.config.required && !isAutogenerated;
-                  return (
-                    <FormField
-                      key={c.id}
-                      control={form.control}
-                      name={`identifiers.${idx}.value` as const}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel aria-required={isRequired}>
-                            {c.config.display}
-                          </FormLabel>
-                          <FormDescription>
-                            {c.config.description}
-                          </FormDescription>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              value={identifierValue}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                const identifiers = [
-                                  ...(form.getValues("identifiers") || []),
-                                ];
-                                identifiers[idx] = {
-                                  config: c.id || "",
-                                  value,
-                                };
-                                form.setValue("identifiers", identifiers, {
-                                  shouldDirty: true,
-                                  shouldValidate: form.formState.isSubmitted,
-                                });
-                              }}
-                              placeholder={
-                                isAutogenerated
-                                  ? t("identifier_value_autogenerated")
-                                  : t("enter_identifier_value")
-                              }
-                              disabled={isAutogenerated}
-                              data-cy={`identifier-input-${c.id || ""}`}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  );
-                })}
-              </div>
-            )}
-
-            <div className="flex justify-end gap-4">
-              <Button
-                variant={"secondary"}
-                type="button"
-                onClick={() => goBack(`/facility/${facilityId}/patients`)}
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="blood_group"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("blood_group")}</FormLabel>
+              <Select
+                {...field}
+                onValueChange={field.onChange}
+                defaultValue={field.value}
               >
-                {t("cancel")}
-              </Button>
-              <Button
-                type="submit"
-                variant="primary"
-                disabled={
-                  isCreatingPatient ||
-                  isUpdatingPatient ||
-                  !form.formState.isDirty
-                }
-              >
-                {patientId ? t("save") : t("save_and_continue")}
-              </Button>
-            </div>
-          </form>
-        </Form>
+                <FormControl>
+                  <SelectTrigger ref={field.ref}>
+                    <SelectValue placeholder={t("select_blood_group")} />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {BLOOD_GROUP_CHOICES.map((bg) => (
+                    <SelectItem key={bg.id} value={bg.id}>
+                      {bg.text}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
-      {showDuplicate && (
-        <DuplicatePatientDialog
-          open={showDuplicate}
-          patientList={duplicatePatients}
-          handleOk={handleDialogClose}
-          onOpenChange={(open) => {
-            if (!open) {
-              handleDialogClose("close");
-            }
-          }}
+
+      {facility &&
+        getRequiredIdentifierConfigs(facility).map(({ id, config }, idx) => (
+          <FormField
+            key={id}
+            control={form.control}
+            name={`required_identifiers.${idx}.value`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel aria-required>{config.display}</FormLabel>
+                <FormDescription>{config.description}</FormDescription>
+                <FormControl>
+                  <Input {...field} placeholder={t("enter_identifier_value")} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ))}
+
+      {/* Tag Selector (only for create) */}
+      {isCreate && (
+        <FormField
+          control={form.control}
+          name="tags"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                {t("patient_tags")}{" "}
+                <span className="text-gray-500 text-sm italic">
+                  ({t("optional")})
+                </span>
+              </FormLabel>
+              <FormControl>
+                <TagSelectorPopover
+                  selected={selectedTags}
+                  onChange={(tags) => {
+                    field.onChange(tags.map((tag) => tag.id));
+                  }}
+                  resource={TagResource.PATIENT}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
       )}
-    </Page>
+    </>
   );
-}
+};
+
+const AdditionalDetailsContent = ({
+  form,
+}: {
+  form: UseFormReturn<z.infer<ReturnType<typeof getFormSchema>>>;
+}) => {
+  const { t } = useTranslation();
+  const { facility } = useCurrentFacility();
+  const {
+    patientRegistration: { minGeoOrganizationLevelsRequired },
+  } = careConfig;
+  const quickRegistration =
+    careConfig.patientRegistration.minimalPatientRegistration;
+
+  return (
+    <>
+      <div className="flex flex-col gap-4">
+        <FormField
+          control={form.control}
+          name="address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel aria-required={!quickRegistration}>
+                {t("address")}
+              </FormLabel>
+              <FormControl>
+                <Textarea
+                  {...field}
+                  placeholder={t("type_address")}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    if (form.getValues("permanent_address_same_as_address")) {
+                      form.setValue("permanent_address", e.target.value, {
+                        shouldDirty: true,
+                      });
+                    }
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="permanent_address_same_as_address"
+          render={({ field }) => (
+            <FormItem className="flex items-center gap-2">
+              <FormControl>
+                <Checkbox
+                  checked={!field.value}
+                  onCheckedChange={(value) => field.onChange(!value)}
+                />
+              </FormControl>
+              <FormLabel>{t("permanent_address_is_different")}</FormLabel>
+            </FormItem>
+          )}
+        />
+      </div>
+
+      {!form.watch("permanent_address_same_as_address") && (
+        <FormField
+          control={form.control}
+          name="permanent_address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel aria-required={!quickRegistration}>
+                {t("permanent_address")}
+              </FormLabel>
+              <FormControl>
+                <Textarea {...field} placeholder={t("type_address")} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+
+      <FormField
+        control={form.control}
+        name="pincode"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel aria-required={!quickRegistration}>
+              {t("pincode")}
+            </FormLabel>
+            <FormControl>
+              <Input
+                {...field}
+                placeholder={t("enter_pincode")}
+                onChange={(e) => {
+                  const value = e.target.value
+                    ? Number(e.target.value)
+                    : undefined;
+                  field.onChange(value);
+                }}
+                type="number"
+                inputMode="numeric"
+                pattern="[0-9]*"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="geo_organization"
+          render={({ field }) => (
+            <FormItem className="contents">
+              <FormControl>
+                <GovtOrganizationSelector
+                  {...field}
+                  required={minGeoOrganizationLevelsRequired == null}
+                  requiredDepth={minGeoOrganizationLevelsRequired}
+                  selected={form.watch("_selected_levels")}
+                  value={form.watch("geo_organization")}
+                  onChange={field.onChange}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      {facility &&
+        getOptionalIdentifierConfigs(facility).map(({ id, config }, idx) => (
+          <FormField
+            key={id}
+            control={form.control}
+            name={`optional_identifiers.${idx}.value`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{config.display}</FormLabel>
+                <FormDescription>{config.description}</FormDescription>
+                <FormControl>
+                  <Input {...field} placeholder={t("enter_identifier_value")} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ))}
+
+      <div className="flex items-center mb-4 bg-red-50 p-4 rounded-md border border-red-200">
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-medium text-black">
+            {t("deceased_status")}
+          </p>
+          <div className="flex items-start gap-2">
+            <Checkbox
+              className="mt-2"
+              checked={form.watch("is_deceased")}
+              onCheckedChange={(checked) => {
+                form.setValue("is_deceased", !!checked);
+              }}
+            />
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-black">
+                {t("mark_as_deceased")}
+              </span>
+              <p className="text-sm text-gray-700">
+                {t("use_only_if_patient_has_passed_away_before_registration")}
+              </p>
+            </div>
+          </div>
+          {form.watch("is_deceased") && (
+            <FormField
+              control={form.control}
+              name="deceased_datetime"
+              render={({ field }) => (
+                <FormItem className="w-full mt-2">
+                  <FormLabel>{t("date_and_time_of_death")}</FormLabel>
+                  <FormControl>
+                    <DateTimeInput
+                      id="death-datetime"
+                      data-cy="death-datetime-input"
+                      value={field.value ?? ""}
+                      onDateChange={field.onChange}
+                      max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </div>
+      </div>
+
+      {facility &&
+        getAutogeneratedIdentifierConfigs(facility).map(
+          ({ id, config }, idx) => (
+            <FormField
+              key={id}
+              control={form.control}
+              name={`autogenerated_identifiers.${idx}.config`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{config.display}</FormLabel>
+                  <FormDescription>{config.description}</FormDescription>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder={t("identifier_value_autogenerated")}
+                      disabled
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ),
+        )}
+    </>
+  );
+};
+
+const getRequiredIdentifierConfigs = (facility: FacilityRead) => {
+  const configs = facility.patient_instance_identifier_configs;
+  return configs.filter(({ config }) => {
+    const isAutogenerated = !!config.default_value;
+    const isRequired = config.required && !isAutogenerated;
+    return isRequired;
+  });
+};
+
+const getOptionalIdentifierConfigs = (facility: FacilityRead) => {
+  const configs = facility.patient_instance_identifier_configs;
+  return configs.filter(({ config }) => {
+    const isAutogenerated = !!config.default_value;
+    const isOptional = !config.required && !isAutogenerated;
+    return isOptional;
+  });
+};
+
+const getAutogeneratedIdentifierConfigs = (facility: FacilityRead) => {
+  const configs = facility.patient_instance_identifier_configs;
+  return configs.filter(({ config }) => {
+    const isAutogenerated = !!config.default_value;
+    return isAutogenerated;
+  });
+};
+
+const geoOrgValidator = (t: TFunction) => {
+  const requiredLevels =
+    careConfig.patientRegistration.minGeoOrganizationLevelsRequired;
+
+  if (!requiredLevels) {
+    return z.string().uuid({ message: t("geo_organization_is_required") });
+  }
+
+  return z.string().uuid({
+    message: t("govt_organization_required_depth_validation", {
+      depth: requiredLevels,
+    }),
+  });
+};
+
+const getFormSchema = (t: TFunction) => {
+  const isQuick = careConfig.patientRegistration.minimalPatientRegistration;
+
+  return z
+    .object({
+      // Patient Basics
+      name: z.string().trim().nonempty(t("field_required")),
+      phone_number: validators().phoneNumber.required,
+      emergency_phone_number: validators().phoneNumber.optional,
+      emergency_phone_number_same_as_phone_number: z.boolean(),
+      gender: z.enum(GENDERS, { required_error: t("field_required") }),
+      age_or_dob: z.enum(["dob", "age"]),
+      date_of_birth: z
+        .string()
+        .date()
+        .refine((date) => !isFuture(date), t("date_cannot_be_future"))
+        .optional(),
+      age: validators().age.optional(),
+      blood_group: z.nativeEnum(BloodGroupChoices).optional(),
+      tags: z.array(z.string()),
+
+      // Fields that would be required only if quick registration is not enabled
+      address: isQuick
+        ? z.string().trim().optional()
+        : z.string().trim().nonempty(t("field_required")),
+      permanent_address: isQuick
+        ? z.string().trim().optional()
+        : z.string().trim().nonempty(t("field_required")),
+      permanent_address_same_as_address: z.boolean(),
+      geo_organization: geoOrgValidator(t),
+      pincode: isQuick ? validators().pincode.optional() : validators().pincode,
+
+      is_deceased: z.boolean(),
+      deceased_datetime: tzAwareDateTime.optional().nullable(),
+
+      // Identifier related fields
+      required_identifiers: z.array(
+        z.object({
+          config: z.string().uuid(),
+          value: z.string().nonempty(t("field_required")),
+        }),
+      ),
+      optional_identifiers: z.array(
+        z.object({
+          config: z.string().uuid(),
+          value: z.string().optional(),
+        }),
+      ),
+      autogenerated_identifiers: z.array(
+        z.object({ config: z.string().uuid() }),
+      ),
+
+      // Meta fields used for internal state management
+      _selected_levels: z.array(z.custom<Organization>()),
+    })
+    .superRefine((data, ctx) => {
+      // Validate the date of birth / age.
+      if (data.age_or_dob === "dob" && !data.date_of_birth) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("field_required"),
+          path: ["date_of_birth"],
+        });
+      }
+      if (data.age_or_dob === "age" && !data.age) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("field_required"),
+          path: ["age"],
+        });
+      }
+
+      // Validate deceased datetime.
+      if (data.deceased_datetime && (data.date_of_birth || data.age)) {
+        if (
+          isBefore(
+            data.deceased_datetime ?? "",
+            data.date_of_birth || subYears(new Date(), data.age || 0),
+          )
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t("death_date_must_be_after_dob"),
+            path: ["deceased_datetime"],
+          });
+        }
+      }
+    });
+};
+
+const getEditableIdentifiers = (
+  identifiers: { config: string; value?: string | undefined }[],
+  facility: FacilityRead,
+) => {
+  return identifiers.filter((identifier) => {
+    if (!identifier.value) {
+      return false;
+    }
+    const config = facility.patient_instance_identifier_configs.find(
+      (c) => c.id === identifier.config,
+    );
+    return !config?.config.default_value;
+  }) as PatientIdentifierCreate[];
+};

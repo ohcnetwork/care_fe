@@ -40,7 +40,7 @@ import {
 
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
-import mutate from "@/Utils/request/mutate";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
   ENCOUNTER_CLASS_ICONS,
@@ -51,6 +51,8 @@ import {
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import mutate from "@/Utils/request/mutate";
 
 interface Props {
   patientId: string;
@@ -74,6 +76,7 @@ export default function CreateEncounterForm({
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  useFacilityShortcuts();
 
   const encounterFormSchema = z.object({
     status: z.enum(["planned", "in_progress", "on_hold"] as const),
@@ -360,15 +363,23 @@ export default function CreateEncounterForm({
                   form.reset();
                 }}
                 className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
+                data-shortcut-id={isOpen ? "cancel-action" : undefined}
               >
                 {t("cancel")}
+                <ShortcutBadge actionId="cancel-action" alwaysShow />
               </Button>
               <Button
                 data-cy="create-encounter-button"
                 type="submit"
                 disabled={isPending || !form.watch("organizations").length}
+                data-shortcut-id={isOpen ? "submit-action" : undefined}
               >
                 {isPending ? t("creating") : t("create_encounter")}
+                <ShortcutBadge
+                  actionId="submit-action"
+                  alwaysShow
+                  className="bg-white"
+                />
               </Button>
             </div>
           </form>
