@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
+import useFilters from "@/hooks/useFilters";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,10 +65,17 @@ export default function BedAvailabilityDashboard({
 }: BedAvailabilityDashboardProps) {
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedWard, setSelectedWard] = useState<string>("all");
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  
+  // Use query parameters for filters to enable URL sharing and navigation
+  const { qParams, updateQuery } = useFilters({
+    limit: 0, // Disable pagination as we want to show all wards
+    cacheBlacklist: ["refresh"], // Don't cache refresh parameter
+  });
+
+  const searchQuery = qParams.search as string || "";
+  const selectedWard = qParams.ward as string || "all";
+  const selectedStatus = qParams.status as string || "all";
 
   // Fetch all locations for the facility
   const {
@@ -74,7 +83,7 @@ export default function BedAvailabilityDashboard({
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["facility-locations-all", facilityId],
+    queryKey: ["facility-locations-all", facilityId, qParams.refresh],
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: { limit: 1000 }, // Get all locations
@@ -177,6 +186,8 @@ export default function BedAvailabilityDashboard({
   }, [wards, searchQuery, selectedWard, selectedStatus]);
 
   const handleRefresh = () => {
+    // Update query params to trigger refetch and allow URL sharing of refresh state
+    updateQuery({ refresh: Date.now().toString() });
     refetch();
   };
 
@@ -236,7 +247,7 @@ export default function BedAvailabilityDashboard({
                     <Label htmlFor="ward-filter">{t("ward_unit")}</Label>
                     <Select
                       value={selectedWard}
-                      onValueChange={setSelectedWard}
+                      onValueChange={(value) => updateQuery({ ward: value === "all" ? undefined : value })}
                     >
                       <SelectTrigger id="ward-filter">
                         <SelectValue placeholder={t("select_ward")} />
@@ -257,7 +268,7 @@ export default function BedAvailabilityDashboard({
                     </Label>
                     <Select
                       value={selectedStatus}
-                      onValueChange={setSelectedStatus}
+                      onValueChange={(value) => updateQuery({ status: value === "all" ? undefined : value })}
                     >
                       <SelectTrigger id="status-filter">
                         <SelectValue placeholder={t("select_status")} />
@@ -289,7 +300,7 @@ export default function BedAvailabilityDashboard({
             type="text"
             placeholder={t("search_wards_units")}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => updateQuery({ search: e.target.value || undefined })}
             className="pl-10"
           />
         </div>
