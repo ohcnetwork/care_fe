@@ -1,7 +1,6 @@
 import { t } from "i18next";
-import { useQueryParams } from "raviger";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { DischargeTab } from "@/components/Files/DischargeSummarySubTab";
 import { DrawingPage } from "@/components/Files/DrawingSubTab";
@@ -16,6 +15,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { FileType } from "@/types/files/file";
+import { useState } from "react";
 
 interface FilesTabsProps {
   type: FileType.ENCOUNTER | FileType.PATIENT;
@@ -23,10 +23,6 @@ interface FilesTabsProps {
   patient?: PatientRead;
   readOnly?: boolean;
 }
-
-type QueryParams = {
-  file: "all" | "discharge_summary" | "drawings";
-};
 
 const allowedTabs = ["all", "discharge_summary", "drawings"] as const;
 type TabType = (typeof allowedTabs)[number];
@@ -37,8 +33,6 @@ export const FilesTab = ({
   encounter,
   readOnly,
 }: FilesTabsProps) => {
-  const [qParams, setQParams] = useQueryParams<QueryParams>();
-
   const { hasPermission } = usePermissions();
   const { canWritePatient } = getPermissions(
     hasPermission,
@@ -49,9 +43,7 @@ export const FilesTab = ({
     encounter?.permissions ?? [],
   );
 
-  const tabValue: TabType = allowedTabs.includes(qParams.file)
-    ? qParams.file
-    : "all";
+  const [activeTab, setActiveTab] = useState("search");
 
   const canWriteCurrentEncounter =
     canWriteEncounter &&
@@ -68,70 +60,56 @@ export const FilesTab = ({
       encounter: encounter?.id,
     }[type] || "";
 
+  const tabOptions: { value: TabType; label: string }[] = [
+    { value: "all", label: t("files") },
+    ...(type === FileType.ENCOUNTER && encounter
+      ? [
+          {
+            value: "discharge_summary" as TabType,
+            label: t("discharge_summary"),
+          },
+        ]
+      : []),
+    { value: "drawings", label: t("drawings") },
+  ];
+
   return (
     <div className="space-y-4">
-      <Tabs
-        value={tabValue}
-        onValueChange={(value) => {
-          setQParams({ file: value as TabType }, { overwrite: false });
-        }}
-      >
-        <TabsList className={type != "encounter" ? "mt-2" : ""}>
-          <TabsTrigger
-            value="all"
-            className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-          >
-            {t("files")}
-          </TabsTrigger>
-          {type === "encounter" && encounter && (
-            <TabsTrigger
-              value="discharge_summary"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
-              {t("discharge_summary")}
-            </TabsTrigger>
-          )}
-          <TabsTrigger
-            value="drawings"
-            className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-          >
-            {t("drawings")}
-          </TabsTrigger>
-        </TabsList>
+      <FilterTabs
+        value={allowedTabs.includes(activeTab as TabType) ? activeTab : "all"}
+        onValueChange={setActiveTab}
+        options={tabOptions.map((tab) => tab.value)}
+        variant="background"
+        showAllOption={false}
+        maxVisibleTabs={3}
+        showMoreDropdown={false}
+      />
 
-        <TabsContent value="all">
-          <FilesPage
+      {(activeTab === "all" || !allowedTabs.includes(activeTab as TabType)) && (
+        <FilesPage
+          type={type}
+          encounter={encounter}
+          patient={patient}
+          associatingId={associatingId}
+          canEdit={canEdit}
+        />
+      )}
+
+      {activeTab === "discharge_summary" && encounter && (
+        <DischargeTab type={type} encounter={encounter} canEdit={canEdit} />
+      )}
+
+      {activeTab === "drawings" && (
+        <div>
+          <DrawingPage
             type={type}
-            encounter={encounter}
-            patient={patient}
-            associatingId={associatingId}
-            canEdit={canEdit}
+            {...(type === FileType.PATIENT
+              ? { patientId: patient?.id }
+              : { encounter: encounter })}
+            readOnly={readOnly}
           />
-        </TabsContent>
-
-        {type === "encounter" && encounter && (
-          <TabsContent value="discharge_summary">
-            <DischargeTab
-              type={type}
-              encounter={encounter}
-              canEdit={canEdit}
-              // facilityId={facilityId || ""}
-            />
-          </TabsContent>
-        )}
-
-        <TabsContent value="drawings">
-          <div>
-            <DrawingPage
-              type={type}
-              {...(type === FileType.PATIENT
-                ? { patientId: patient?.id }
-                : { encounter: encounter })}
-              readOnly={readOnly}
-            />
-          </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
     </div>
   );
 };
