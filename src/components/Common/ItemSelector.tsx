@@ -50,6 +50,7 @@ export interface ItemSelectorProps<T = any> {
   searchPlaceholder?: string;
   noResultsMessage?: string;
   triggerButton?: React.ReactNode;
+  mobileTrigger?: React.ReactNode;
   className?: string;
   popoverClassName?: string;
   popoverAlign?: "start" | "center" | "end";
@@ -92,6 +93,7 @@ export function ItemSelector<T = any>({
   searchPlaceholder = "Search...",
   noResultsMessage = "No results found",
   triggerButton,
+  mobileTrigger,
   className,
   popoverClassName,
   popoverAlign = "start",
@@ -226,7 +228,7 @@ export function ItemSelector<T = any>({
       <CommandInput
         placeholder={searchPlaceholder}
         onValueChange={onSearch}
-        className="outline-hidden border-none ring-0 shadow-none"
+        className="outline-hidden border-none ring-0 shadow-none text-base"
         autoFocus
       />
       <CommandList className="max-h-[300px] overflow-y-auto">
@@ -285,7 +287,9 @@ export function ItemSelector<T = any>({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={setOpen} direction="bottom">
-        <DrawerTrigger asChild>{triggerButton || defaultTrigger}</DrawerTrigger>
+        <DrawerTrigger asChild>
+          {mobileTrigger || triggerButton || defaultTrigger}
+        </DrawerTrigger>
         <DrawerContent
           aria-describedby={undefined}
           className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"

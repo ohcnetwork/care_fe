@@ -1,3 +1,4 @@
+import { CaretSortIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { navigate } from "raviger";
@@ -47,7 +48,25 @@ export function QuestionnaireSearch({
     enabled: true,
   });
 
-  // Default trigger to maintain consistent style
+  const mobileTrigger = (
+    <Button
+      data-cy="add-questionnaire-button"
+      variant="outline"
+      role="combobox"
+      disabled={disabled || isLoading}
+    >
+      {isLoading ? (
+        <>
+          <CareIcon icon="l-spinner" className="mr-2 size-4 animate-spin" />
+          {t("loading")}
+        </>
+      ) : (
+        <span>{placeholder || t("add_questionnaire")}</span>
+      )}
+      <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+    </Button>
+  );
+
   const defaultTrigger = (
     <Button
       size={size}
@@ -85,6 +104,7 @@ export function QuestionnaireSearch({
         icon: <CareIcon icon="l-file-export" className="mr-2 size-4" />,
       }))}
       triggerButton={trigger || defaultTrigger}
+      mobileTrigger={mobileTrigger}
       onSearch={setSearch}
       disabled={disabled}
       renderOption={(option) => (
