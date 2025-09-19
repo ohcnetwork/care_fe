@@ -116,7 +116,7 @@ export function IncomingDeliveries({ facilityId, locationId }: Props) {
             defaultVisibleOptions={TABS_CONFIG.map((tab) => tab.value)}
             showAllOption={false}
           />
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex-1">
               <OrgSelect
                 value={qParams.supplier}
@@ -130,6 +130,7 @@ export function IncomingDeliveries({ facilityId, locationId }: Props) {
           </div>
         </div>
 
+        <div className="mt-4" />
         <SupplyDeliveryTable
           deliveries={deliveries}
           isLoading={isLoading}

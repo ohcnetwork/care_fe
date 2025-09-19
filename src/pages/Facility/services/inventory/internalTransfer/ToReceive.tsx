@@ -17,12 +17,13 @@ interface Props {
   locationId: string;
 }
 
-type Tab =
-  | "requests_raised"
-  | "receive_items"
-  | "received"
-  | "abandoned"
-  | "entered_in_error";
+enum Tab {
+  REQUESTS_RAISED = "requests_raised",
+  RECEIVE_ITEMS = "receive_items",
+  RECEIVED = "received",
+  ABANDONED = "abandoned",
+  ENTERED_IN_ERROR = "entered_in_error",
+}
 
 export default function ToReceive({ facilityId, locationId }: Props) {
   const { t } = useTranslation();
@@ -39,13 +40,7 @@ export default function ToReceive({ facilityId, locationId }: Props) {
     });
   };
 
-  const tabOptions: Tab[] = [
-    "requests_raised",
-    "receive_items",
-    "received",
-    "abandoned",
-    "entered_in_error",
-  ];
+  const tabOptions = Object.values(Tab);
 
   const maxVisibleTabs = useBreakpoints({
     default: 2,

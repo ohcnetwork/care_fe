@@ -20,12 +20,13 @@ interface Props {
   locationId: string;
 }
 
-type Tab =
-  | "requests_to_dispatch"
-  | "in_progress"
-  | "completed"
-  | "abandoned"
-  | "entered_in_error";
+enum Tab {
+  REQUESTS_TO_DISPATCH = "requests_to_dispatch",
+  IN_PROGRESS = "in_progress",
+  COMPLETED = "completed",
+  ABANDONED = "abandoned",
+  ENTERED_IN_ERROR = "entered_in_error",
+}
 
 export default function ToDispatch({ facilityId, locationId }: Props) {
   const { t } = useTranslation();
@@ -48,13 +49,7 @@ export default function ToDispatch({ facilityId, locationId }: Props) {
     });
   };
 
-  const tabOptions: Tab[] = [
-    "requests_to_dispatch",
-    "in_progress",
-    "completed",
-    "abandoned",
-    "entered_in_error",
-  ];
+  const tabOptions = Object.values(Tab);
 
   const maxVisibleTabs = useBreakpoints({
     default: 2,
